@@ -5,7 +5,7 @@
 #include "vfs_fat_internal.h"
 #include <fcntl.h>
 
-#include "native_fs.h"
+#include "esp_littlefs.h"
 
 LOG_TAG("fs")
 
@@ -24,7 +24,7 @@ JSValue js_fs_writeFileSync(JSContext *ctx, JSValueConst this_val, int argc, JSV
     }
     
     char * path = JS_ToCString(ctx, argv[0]) ;
-	int fd = open(path, "w", S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH);
+	int fd = fopen(path, "w");
     if(fd<0) {
         JS_FreeCString(ctx, path) ;
         JS_ThrowReferenceError(ctx, "Failed to open file: %s", path);
@@ -63,7 +63,6 @@ JSValue js_fs_writeFileSync(JSContext *ctx, JSValueConst this_val, int argc, JSV
         // free buff
     }
 
-
     return JS_NewInt32(ctx, rc) ;
 }
 
@@ -94,6 +93,34 @@ JSValue js_fs_readdirSync(JSContext *ctx, JSValueConst this_val, int argc, JSVal
 
     return array ;
 }
+
+void fs_init() {
+    const esp_vfs_littlefs_conf_t conf_etc = {
+        .base_path = "/etc",
+        .partition_label = "etc",
+        .format_if_mount_failed = true
+    };
+    if(esp_vfs_littlefs_register(&conf_etc)==ESP_OK){
+        printf("/etc has mounted\n") ;
+    }
+    else {
+        printf("Failed to mount /etc\n") ;
+    }
+
+    const esp_vfs_littlefs_conf_t conf_home = {
+        .base_path = "/home",
+        .partition_label = "home",
+        .format_if_mount_failed = true
+    };
+    if(esp_vfs_littlefs_register(&conf_home)==ESP_OK){
+        printf("/home has mounted\n") ;
+    }
+    else {
+        printf("Failed to mount /home\n") ;
+    }
+
+}
+
 
 void require_module_fs(JSContext *ctx) {
 

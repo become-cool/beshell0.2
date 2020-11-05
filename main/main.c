@@ -28,7 +28,6 @@
 
 #include "quickjs-libc.h"
 #include "telnet.h"
-#include "native_fs.h"
 #include "module_wifi.h"
 #include "module_fs.h"
 #include "module_utils.h"
@@ -99,8 +98,6 @@ static JSContext *JS_NewCustomContext(JSRuntime *rt)
 
     return ctx;
 }
-
-
 
 
 void app_main(void)

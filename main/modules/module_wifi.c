@@ -22,6 +22,7 @@ bool wifi_state_connected = false ;
 /**
  * Convert a Wifi reason code to a string representation.
  */
+/*
 static char *wifiReasonToString(uint8_t reason) {
   switch(reason) {
   case WIFI_REASON_4WAY_HANDSHAKE_TIMEOUT:
@@ -82,7 +83,8 @@ static char *wifiReasonToString(uint8_t reason) {
     return "REASON_UNSUPP_RSN_IE_VERSION";
   }
   return "Unknown reason";
-} // End of wifiReasonToString
+}
+*/
 
 /**
  * An ESP32 WiFi event handler.
@@ -125,7 +127,7 @@ static void esp32_wifi_eventHandler(void* arg, esp_event_base_t event_base, int3
 			
 			wifi_state_connected = false ;
 			printf("wifi_state_connected=false, pending=%d\n", sta_connect_pending) ;
-			printf("%s\n",wifiReasonToString(((wifi_event_sta_disconnected_t*) event_data)->reason)) ;
+			printf("%d\n",((wifi_event_sta_disconnected_t*) event_data)->reason) ;
 
 			// connect() 失败
 			if(sta_connect_pending) {

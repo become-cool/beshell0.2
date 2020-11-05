@@ -1,0 +1,7 @@
+build
+esp-idf
+.gdbinit.ci
+make
+GPATH
+GRTAGS
+GTAGS

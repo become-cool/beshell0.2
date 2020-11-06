@@ -7,6 +7,7 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <unistd.h>
+#include "utils.h"
 
 LOG_TAG("fs")
 
@@ -53,10 +54,7 @@ char * js_arg_to_vfspath(JSContext *ctx, JSValueConst argv) {
 
 
 JSValue js_fs_statSync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
-    if(argc<1) {
-        JS_ThrowReferenceError(ctx, "Missing param path");
-        return JS_EXCEPTION ;
-    }
+    CHECK_ARGC(2)
     JS2VSFPath(path, argv[0]) ;
     struct stat statbuf;
     if(stat(path,&statbuf)<0) {
@@ -155,10 +153,7 @@ JSValue js_fs_readFileSync(JSContext *ctx, JSValueConst this_val, int argc, JSVa
 }
 
 JSValue js_fs_writeFileSync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
-    if(argc<2) {
-        JS_ThrowReferenceError(ctx, "Missing param path");
-        return JS_EXCEPTION ;
-    }
+    CHECK_ARGC(2)
     
     JS2VSFPath(path, argv[0])
     CHECK_NOT_DIR(path)
@@ -210,10 +205,7 @@ JSValue js_fs_writeFileSync(JSContext *ctx, JSValueConst this_val, int argc, JSV
 }
 
 JSValue js_fs_readdirSync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
-    if(argc<1) {
-        JS_ThrowReferenceError(ctx, "Missing param path");
-        return JS_EXCEPTION ;
-    }
+    CHECK_ARGC(1)
 
     JS2VSFPath(path, argv[0]) ;
     DIR* dir = opendir(path);

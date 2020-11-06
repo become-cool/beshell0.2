@@ -28,9 +28,11 @@
 
 #include "quickjs-libc.h"
 #include "telnet.h"
+#include "eventloop.h"
 #include "module_wifi.h"
 #include "module_fs.h"
 #include "module_utils.h"
+#include "module_gpio.h"
 
 
 // #include "esp_vfs.h"
@@ -95,6 +97,7 @@ static JSContext *JS_NewCustomContext(JSRuntime *rt)
     require_module_utils(ctx) ;
     require_module_fs(ctx) ;
     require_module_wifi(ctx) ;
+    require_module_gpio(ctx) ;
 
     return ctx;
 }
@@ -102,16 +105,12 @@ static JSContext *JS_NewCustomContext(JSRuntime *rt)
 
 void app_main(void)
 {
-	printf("Free heap at start: %dKB\n", esp_get_free_heap_size()/1024);
-    
     ESP_ERROR_CHECK(esp_event_loop_create_default());
     nvs_flash_init();
 
     fs_init() ;
     wifi_init() ;
     telnet_init() ;
-
-	printf("Free heap before quickjs: %dKB\n", esp_get_free_heap_size()/1024);
 
     JSRuntime *rt;
     JSContext *ctx;
@@ -120,11 +119,11 @@ void app_main(void)
     js_std_init_handlers(rt);
     ctx = JS_NewCustomContext(rt);
 
-	printf("Free heap before loop: %dKB\n", esp_get_free_heap_size()/1024);
-
     while(1) {
-        js_std_loop(ctx);
-        telnet_loop(ctx);
+        js_std_loop(ctx) ;
+        telnet_loop(ctx) ;
+        eventloop_punp(ctx) ;
+
         vTaskDelay(1) ;
     }
 }

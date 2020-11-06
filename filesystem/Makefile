@@ -1,6 +1,6 @@
 all:
-	 ../bin/mkfatfs -c source -s 2621440 img/fs-4MB.img -d 2
-	 ../bin/mkfatfs -c source -s 15204352 img/fs-16MB.img -d 2
+	 ../bin/mklittlefs -c source -s 2621440 img/fs-4MB.img -d 2
+	 ../bin/mklittlefs -c source -s 15204352 img/fs-16MB.img -d 2
 	
 	python2 ../esp-idf/components/partition_table/gen_esp32part.py partitions-4MB.csv img/partitions-4MB.bin
 	python2 ../esp-idf/components/partition_table/gen_esp32part.py partitions-16MB.csv img/partitions-16MB.bin

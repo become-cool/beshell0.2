@@ -2,8 +2,9 @@
 #define _MODULE_FS_H
 
 #include "quickjs-libc.h"
+#include "esp_vfs.h"
 
-void fs_init() ;
+bool fs_init() ;
 
 void require_module_fs(JSContext *ctx) ;
 

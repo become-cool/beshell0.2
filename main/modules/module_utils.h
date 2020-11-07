@@ -3,6 +3,8 @@
 
 #include "quickjs-libc.h"
 
+void evalScript(JSContext *ctx, const char * path) ;
+
 void require_module_utils(JSContext *ctx) ;
 
 #endif

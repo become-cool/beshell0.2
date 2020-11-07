@@ -27,6 +27,7 @@
 
 
 #include "quickjs-libc.h"
+#include "utils.h"
 #include "telnet.h"
 #include "eventloop.h"
 #include "module_wifi.h"
@@ -94,18 +95,16 @@ static JSContext *JS_NewCustomContext(JSRuntime *rt)
     // for `console.log`
     js_std_add_helpers(ctx, 0, NULL);
 
-    require_module_utils(ctx) ;
     require_module_fs(ctx) ;
+    require_module_utils(ctx) ;
     require_module_wifi(ctx) ;
     require_module_gpio(ctx) ;
 
     return ctx;
 }
 
+void task_js_main(){
 
-void app_main(void)
-{
-    ESP_ERROR_CHECK(esp_event_loop_create_default());
     nvs_flash_init();
 
     fs_init() ;
@@ -119,13 +118,28 @@ void app_main(void)
     js_std_init_handlers(rt);
     ctx = JS_NewCustomContext(rt);
 
+    evalScript(ctx, "/fs/lib/base/require.js") ;
+
+    dm("after require.js")
+
     while(1) {
+
         js_std_loop(ctx) ;
         telnet_loop(ctx) ;
         eventloop_punp(ctx) ;
 
+        js_std_loop(ctx) ;
+        
         vTaskDelay(1) ;
     }
+}
+
+
+void app_main(void)
+{
+    ESP_ERROR_CHECK(esp_event_loop_create_default());
+
+	xTaskCreatePinnedToCore(&task_js_main, "task_js_main", 16*1024, NULL, 5, NULL, 0);
 }
 
 

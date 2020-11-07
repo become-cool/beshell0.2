@@ -26,7 +26,15 @@
 #define ARGV_TO_UINT32(i,var)  ARGV_TO_INT(i, va, uint8_t, JS_ToUint32)
 
 
-#define dd printf("@%d\n", __LINE__)
+#define EVALSTR(str, filename)                                                      \
+    JSValue ret = JS_Eval(ctx, str, strlen(str), filename, JS_EVAL_TYPE_GLOBAL) ;   \
+	if(JS_IsException(ret)) {                                                       \
+		js_std_dump_error(ctx) ;                                                    \
+	}                                                                               \
+	JS_FreeValue(ctx, ret) ;
+
+
+#define dd printf("@%d\n", __LINE__) ;
 #define dm(msg) printf("%s: %dKB\n", msg, esp_get_free_heap_size()/1024);
 
 uint64_t gettime() ;

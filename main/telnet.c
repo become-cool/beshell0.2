@@ -77,6 +77,8 @@ void telnet_loop(JSContext *ctx) {
 					JS_FreeCString(ctx, retstr);
 				}
 
+				JS_FreeValue(ctx, ret) ;
+
 				LOGD("free: %dByte\n", esp_get_free_heap_size()) ;
 
 

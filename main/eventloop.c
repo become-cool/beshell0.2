@@ -37,8 +37,9 @@ void eventloop_out(JSContext *ctx, struct eventloop_callback_t * prev, struct ev
 }
 
 void eventloop_punp(JSContext *ctx) {
-    if(!_callback_stack_top)
+    if(!_callback_stack_top) {
         return ;
+    }
 
     uint64_t now = gettime() ;
     

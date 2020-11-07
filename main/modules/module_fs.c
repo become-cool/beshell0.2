@@ -28,30 +28,6 @@ char * js_arg_to_vfspath(JSContext *ctx, JSValueConst argv) {
     JS_FreeCString(ctx, jspath) ;
     return path ;
 }
-#define JS2VSFPath(path, arg)                                                       \
-    char * path = js_arg_to_vfspath(ctx, arg) ;                                     \
-    if(!path) {                                                                     \
-        JS_ThrowReferenceError(ctx, "cound not malloc for path, memory low ?");     \
-        return JS_EXCEPTION ;                                                       \
-    }
-
-#define STAT_PATH(path)                                                             \
-    struct stat statbuf;                                                            \
-    if(stat(path,&statbuf)<0) {                                                     \
-        free(path) ;                                                                \
-        JS_ThrowReferenceError(ctx, "Failed to stat file.");                        \
-        return JS_EXCEPTION ;                                                       \
-    }
-
-#define CHECK_NOT_DIR(path)                                                         \
-    STAT_PATH(path)                                                                 \
-    if(S_ISDIR(statbuf.st_mode)) {                                                  \
-        free(path) ;                                                                \
-        JS_ThrowReferenceError(ctx, "Path is a directory.");                        \
-        return JS_EXCEPTION ;                                                       \
-    }
-
-
 
 JSValue js_fs_statSync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(2)
@@ -76,17 +52,37 @@ JSValue js_fs_statSync(JSContext *ctx, JSValueConst this_val, int argc, JSValueC
     return obj ;
 }
 
-JSValue js_fs_idDirSync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
-    if(argc<1) {
-        JS_ThrowReferenceError(ctx, "Missing param path");
-        return JS_EXCEPTION ;
+JSValue js_fs_is_dir_sync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    CHECK_ARGC(1)
+    JS2VSFPath(path, argv[0]) 
+    struct stat statbuf;
+    if(stat(path,&statbuf)<0) {
+        free(path) ;
+        return JS_FALSE ;
     }
-    JS2VSFPath(path, argv[0]) ;
-    STAT_PATH(path)
     free(path) ;
     return S_ISDIR(statbuf.st_mode)? JS_TRUE: JS_FALSE ;
 }
+JSValue js_fs_is_file_sync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    CHECK_ARGC(1)
+    JS2VSFPath(path, argv[0]) 
+    struct stat statbuf;
+    if(stat(path,&statbuf)<0) {
+        free(path) ;
+        return JS_FALSE ;
+    }
+    free(path) ;
+    return S_ISREG(statbuf.st_mode)? JS_TRUE: JS_FALSE ;
+}
 
+JSValue js_fs_exists_sync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    CHECK_ARGC(1)
+    JS2VSFPath(path, argv[0])
+    struct stat statbuf;
+    bool exists = stat(path,&statbuf)<0 ;
+    free(path) ;
+    return exists? JS_TRUE: JS_FALSE ;
+}
 
 JSValue js_fs_mkdirSync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     if(argc<1) {
@@ -257,6 +253,9 @@ void require_module_fs(JSContext *ctx) {
     JS_SetPropertyStr(ctx, fs, "readdirSync", JS_NewCFunction(ctx, js_fs_readdirSync, "readdirSync", 1));
     JS_SetPropertyStr(ctx, fs, "mkdirSync", JS_NewCFunction(ctx, js_fs_mkdirSync, "mkdirSync", 1));
     JS_SetPropertyStr(ctx, fs, "rmdirSync", JS_NewCFunction(ctx, js_fs_rmdirSync, "rmdirSync", 1));
+    JS_SetPropertyStr(ctx, fs, "existsSync", JS_NewCFunction(ctx, js_fs_exists_sync, "existsSync", 1));
+    JS_SetPropertyStr(ctx, fs, "isDirSync", JS_NewCFunction(ctx, js_fs_is_dir_sync, "isDirSync", 1));
+    JS_SetPropertyStr(ctx, fs, "isFileSync", JS_NewCFunction(ctx, js_fs_is_file_sync, "isFileSync", 1));
     JS_SetPropertyStr(ctx, global, "fs", fs);
 
     JS_FreeValue(ctx, global);

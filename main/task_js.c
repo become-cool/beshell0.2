@@ -42,9 +42,31 @@ JSValue js_process_reboot(JSContext *ctx, JSValueConst this_val, int argc, JSVal
     return JS_UNDEFINED ;
 }
 
+JSValue js_console_log(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)
+{
+    int i;
+    const char *str;
+    size_t len;
+
+    for(i = 0; i < argc; i++) {
+        if (i != 0)
+            telnet_echo(" ",1);
+        str = JS_ToCStringLen(ctx, &len, argv[i]);
+        if (!str)
+            return JS_EXCEPTION;
+        // fwrite(str, 1, len, stdout);
+        telnet_echo(str, len) ;
+        JS_FreeCString(ctx, str);
+    }
+    telnet_echo("\n", 1);
+    return JS_UNDEFINED;
+}
+
 void require_module_process(JSContext *ctx) {
     
     JSValue global = JS_GetGlobalObject(ctx);
+
+    // process
     JSValue process = JS_NewObject(ctx) ;
     JS_SetPropertyStr(ctx, global, "process", process);
 
@@ -65,6 +87,13 @@ void require_module_process(JSContext *ctx) {
     char buff[32] ;
     sprintf(buff, "%s %s", __DATE__, __TIME__) ;
     JS_SetPropertyStr(ctx, process, "build", JS_NewString(ctx, buff));
+
+    // console
+    JSValue console = JS_NewObject(ctx) ;
+    JS_SetPropertyStr(ctx, console, "log", JS_NewCFunction(ctx, js_console_log, "log", 1));
+    JS_SetPropertyStr(ctx, console, "error", JS_NewCFunction(ctx, js_console_log, "error", 1));
+    JS_SetPropertyStr(ctx, global, "console", console);
+
 
 	JS_FreeValue(ctx, global);
 }
@@ -91,8 +120,9 @@ static JSContext *JS_NewCustomContext(JSRuntime *rt)
 #ifdef CONFIG_BIGNUM
     JS_AddIntrinsicBigInt(ctx);
 #endif
-    // for `console.log`
-    js_std_add_helpers(ctx, 0, NULL);
+
+    // js_init_module_std(ctx, "std") ;
+    // js_init_module_os(ctx, "os") ;
 
     require_module_fs(ctx) ;
     require_module_utils(ctx) ;
@@ -119,7 +149,7 @@ void init_quickjs() {
 
     // 0等级，不加载任何启动脚本，作为安全模式
     if(boot_level>0) {  
-        printf("init level: %d\n", boot_level) ;
+        echof("init level: %d\n", boot_level) ;
         char initScriptCodeBuff[ sizeof(InitScriptTpl) + 1 ] ;   // %d -> 999
         sprintf(initScriptCodeBuff, InitScriptTpl, boot_level) ;
         EVAL_STR(initScriptCodeBuff, ":init.d")
@@ -144,17 +174,6 @@ void task_js_main(){
     sniffer_init() ;
 
     init_quickjs() ;
-
-    // printf("xxxxxxxxxx\n") ;
-    // JSValue n = JS_NewInt32(ctx, 100) ;
-    // JSValue s = JS_NewString(ctx, "xxxxxxxx") ;
-    // JSValue o = JS_NewObject(ctx) ;
-    // printf("number has ref? %d\n", JS_VALUE_HAS_REF_COUNT(n)) ;
-    // printf("string has ref? %d\n", JS_VALUE_HAS_REF_COUNT(s)) ;
-    // printf("object has ref? %d\n", JS_VALUE_HAS_REF_COUNT(o)) ;
-    // printf("o ref: %d\n", VAR_REFCNT(o)) ;
-    // JS_FreeValue(ctx, o) ;
-    // printf("o ref: %d\n", VAR_REFCNT(o)) ;
 
     while(1) {
 

@@ -72,7 +72,7 @@ void telnet_init() {
 	
 	// tcp telnet ----------
     if(sock_server>-1) {
-        printf("telnet startup already.\n") ;
+        echof("telnet startup already.\n") ;
         return ;
     }
     struct sockaddr_in dest_addr;
@@ -81,30 +81,30 @@ void telnet_init() {
     dest_addr.sin_port = htons(TELNET_PORT);
     sock_server = socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
     if (sock_server < 0) {
-        printf("Unable to create socket: errno %d", errno);
+        echof("Unable to create socket: errno %d", errno);
         vTaskDelete(NULL);
         return;
     }
-    // printf("Socket created");
+    // echof("Socket created");
 
     int err = bind(sock_server, (struct sockaddr *)&dest_addr, sizeof(dest_addr));
     if (err != 0) {
-        printf("Socket unable to bind: errno %d", errno);
+        echof("Socket unable to bind: errno %d", errno);
         shutdown(sock_server, 0) ;
         close(sock_server);
         return ;
     }
-    // printf("Socket bound, port %d\n", TELNET_PORT);
+    // echof("Socket bound, port %d\n", TELNET_PORT);
 
     err = listen(sock_server, 1);
     if (err != 0) {
-        printf("Error occurred during listen: errno %d", errno);
+        echof("Error occurred during listen: errno %d", errno);
         shutdown(sock_server, 0) ;
         close(sock_server);
         return ;
     }
 
-    printf("TCP Telnet start on port %d \n\n", TELNET_PORT) ;
+    echof("TCP Telnet start on port %d \n", TELNET_PORT) ;
 }
 
 
@@ -125,7 +125,7 @@ void eval_input(JSContext *ctx, char * strcode, int len) {
 		}
 		else {
 			const char * retstr = JS_ToCString( ctx, ret );
-			printf("%s\n", retstr) ;
+			echof("%s\n", retstr) ;
 			JS_FreeCString(ctx, retstr);
 		}
 	}
@@ -187,17 +187,17 @@ void telnet_loop(JSContext *ctx) {
 		// 关闭原有连接
 		if(sock_client>-1) {
 			
-			printf("Close last telnet client for new one\n") ;
+			echo("Close last telnet client for new one\n") ;
 			shutdown(sock_client, 0);
 			close(sock_client);
 		}
 
 		sock_client = accept(sock_server, (struct sockaddr *)&source_addr, &addr_len);
 		if(sock_client<0){
-			printf("accept() error: %d.\n", errno) ;
+			echof("accept() error: %d.\n", errno) ;
 		}
 		else {
-			printf("telnet client come in\n") ;
+			echo("telnet client come in\n") ;
 		}
 	}
 
@@ -209,23 +209,34 @@ void telnet_loop(JSContext *ctx) {
 		if(len<0) {
 			char errbuf[32] ;
 			esp_err_to_name_r(errno, errbuf, sizeof(errbuf)) ;
-			printf("recv() error: %s.\n", errbuf) ;
+			echof("recv() error: %s.\n", errbuf) ;
 		}
 		// Client 断开
 		else if(len==0) {
-			printf("telnet client leave\n") ;
 
 			shutdown(sock_client, 0);
 			close(sock_client);
 
 			sock_client = -1 ;
+			
+			echo("telnet client leave\n") ;
 		}
 		// 接收到数据
 		else {
 			tcp_recv_buff[len] = 0 ;
-			printf("tcp recv: %s\n", tcp_recv_buff) ;
 			eval_input(ctx, tcp_recv_buff, len) ;
 		}
 	}
+}
 
+
+void telnet_echo(const char * sth, int len) {
+
+	// 串口输出
+	printf(sth) ;
+	
+	// tcp socket 输出
+	if(sock_client>-1) {
+    	send(sock_client, sth, len, 0) ;
+	}
 }

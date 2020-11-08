@@ -8,6 +8,7 @@
 #include "logging.h"
 #include <sys/errno.h>
 
+#include "telnet.h"
 #include "lwip/err.h"
 #include "lwip/sockets.h"
 #include "lwip/sys.h"
@@ -36,10 +37,10 @@ socklen_t sniffer_socklen = sizeof(sniffer_source_addr);
 void sniffer_init() {
     
     if(sniffer_sock>-1) {
-        printf("udp sniffer answer startup already.\n") ;
+        echo("udp sniffer answer startup already.\n") ;
         return ;
     }
-    // printf("jswrap_be_sniffer_answerer_init()\n") ;
+    // echo("jswrap_be_sniffer_answerer_init()\n") ;
 
     struct sockaddr_in dest_addr;
     dest_addr.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -49,16 +50,16 @@ void sniffer_init() {
 
     sniffer_sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
     if (sniffer_sock < 0) {
-        printf("Unable to create socket: errno %d\n", errno);
+        echof("Unable to create socket: errno %d\n", errno);
         return;
     }
-    // printf("Socket created");
+    // echo("Socket created");
 
     int err = bind(sniffer_sock, (struct sockaddr *)&dest_addr, sizeof(dest_addr));
     if (err < 0) {
-        printf("Socket unable to bind: errno %d\n", errno);
+        echof("Socket unable to bind: errno %d\n", errno);
     }
-    // printf("Socket bound, port %d", SNIFFER_PORT);
+    // echof("Socket bound, port %d", SNIFFER_PORT);
 }
 
 
@@ -78,7 +79,7 @@ void sniffer_loop() {
     }
     // 失败
     if(s<0){
-        printf("sniffer answerer select() error: %d.\n", errno) ;
+        echof("sniffer answerer select() error: %d.\n", errno) ;
         return ;
     }
 

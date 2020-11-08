@@ -1,7 +1,8 @@
 function normalize(path) {
     path = path.replace(/[\\\/]+/gm, '/')                   // 合并连续的 / 或 \
-                .replace(/\/\.\//gm, '/')                   // 移除当前目录表示: /./ 
-                .replace(/\/[^\/]+\/\.\.\//gm, '/')         // 移除上级目录表示: /../
+                .replace(/\/\.(\/|$)/gm, '/')                   // 合并当前目录表示: /./ 
+                .replace(/\/[^\/]+\/\.\.(\/|$)/gm, '/')         // 合并上级目录表示: /../
+                .replace(/\/$/, '')                         // 删除目录末尾的 /
     return path
 }
 function dirname(path) {
@@ -25,16 +26,21 @@ function resolveExtName(path) {
 
     // npm package 
     if( fs.isDirSync(path) ) {
+
         let pkgpath = path + "/package.json"
+
         if(fs.isFileSync(pkgpath)) {
             try{
                 let json = JSON.parse(fs.readFileSync(pkgpath))
-                let mainpath = path + '/' (json.main || 'index.js')
+                let mainpath = path + '/' + (json.main || 'index.js')
                 if(fs.isFileSync(mainpath))
                     return mainpath
-            }catch(e){}
+            }catch(e){
+                console.log(e)
+            }
         }
-        else if(fs.isFileSync(path+'/index.js')) {
+        
+        if(fs.isFileSync(path+'/index.js')) {
             return path+'/index.js'
         }
     }
@@ -82,7 +88,7 @@ function __mkrequire(__dirname) {
         }
 
         if(!path) {
-            throw new Error("Cound not found script file for : "+id)
+            throw new Error("Cound not found: "+id)
         }
 
         path = normalize(path)
@@ -91,9 +97,7 @@ function __mkrequire(__dirname) {
         }
 
         let scriptDir = dirname(path)
-        let script = ` let module = {exports:{}} ;
-(function(exports, require, module, __filename, __dirname) {
-${fs.readFileSync(path)}
+        let script = ` let module = {exports:{}} ; (function(exports, require, module, __filename, __dirname) { ${fs.readFileSync(path)}
 })(module.exports, Module.__mkrequire("${scriptDir}"), module, "${path}", "${scriptDir}");
 module.exports`
         Module.caches[path] = eval(script)

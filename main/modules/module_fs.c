@@ -121,6 +121,10 @@ JSValue js_fs_readFileSync(JSContext *ctx, JSValueConst this_val, int argc, JSVa
     JS2VSFPath(path, argv[0])
     CHECK_NOT_DIR(path)
 
+    if(statbuf.st_size<1){
+        return JS_NewStringLen(ctx, "", 0) ;
+    }
+
     char * buff = malloc(statbuf.st_size) ;
     if(!buff) {
         free(path) ;
@@ -154,7 +158,6 @@ JSValue js_fs_writeFileSync(JSContext *ctx, JSValueConst this_val, int argc, JSV
     JS2VSFPath(path, argv[0])
     CHECK_NOT_DIR(path)
 
-
 	int fd = fopen(path, "w");
     if(fd<0) {
         free(path) ;
@@ -183,7 +186,7 @@ JSValue js_fs_writeFileSync(JSContext *ctx, JSValueConst this_val, int argc, JSV
 
     int wroteBytes = 0 ;
     if(buff) {
-        printf("write(%d): %s\n", length, buff) ;
+        // printf("write(%d): %s\n", length, buff) ;
 	    wroteBytes = fwrite(buff, 1, length, fd);
     }
 
@@ -231,7 +234,6 @@ bool fs_init() {
         .format_if_mount_failed = true
     };
     if(esp_vfs_littlefs_register(&conf_etc)==ESP_OK){
-        printf("fs has mounted\n") ;
         return true ;
     }
     else {

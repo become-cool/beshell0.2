@@ -6,7 +6,9 @@
 #include <time.h>
 #include "eventloop.h"
 #include "utils.h"
+#include "telnet.h"
 #include "module_fs.h"
+#include "soc/soc.h"
 
 LOG_TAG("util");
 
@@ -184,25 +186,41 @@ JSValue js_fs_eval_script(JSContext *ctx, JSValueConst this_val, int argc, JSVal
 	return JS_UNDEFINED ;
 }
 
-#define JSCODE_DEF_PROCESS_OBJECT "global.process= { env:{ LOGNAME: 'become', HOME: '/home/become', PWD: '/home/become' } }"
+
+JSValue js_repl_set_input_func(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    CHECK_ARGC(1)
+    if(!JS_IsFunction(ctx, argv[0])) {
+        THROW_EXCEPTION("REPL input function must be a function type")
+    }
+    telnet_set_input_function(ctx, argv[0]) ;
+    return JS_UNDEFINED ;
+}
+
+
+JSValue js_utils_part_id(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    int value = REG_READ(0x3FF5A078) ;
+    return JS_NewInt32(ctx, value) ;
+}
 
 void require_module_utils(JSContext *ctx) {
 
     JSValue global = JS_GetGlobalObject(ctx);
     JS_SetPropertyStr(ctx, global, "global", global);
 
+    // JSValue console = JS_GetPropertyStr(ctx, global, "repl") ;
+    JS_SetPropertyStr(ctx, global, "_repl_set_input_func", JS_NewCFunction(ctx, js_repl_set_input_func, "_repl_set_input_func", 1));
+	// JS_FreeValue(ctx, console);
+
 	// utils 
     JSValue utils = JS_NewObject(ctx);
     JS_SetPropertyStr(ctx, global, "utils", utils);
     JS_SetPropertyStr(ctx, utils, "freeStacks", JS_NewCFunction(ctx, js_util_free_stacks, "freeStacks", 1));
     JS_SetPropertyStr(ctx, utils, "time", JS_NewCFunction(ctx, js_util_time, "time", 1));
-    JS_SetPropertyStr(ctx, utils, "setLogLevel", JS_NewCFunction(ctx, js_util_free_stacks, "setLogLevel", 1));
+    JS_SetPropertyStr(ctx, utils, "setLogLevel", JS_NewCFunction(ctx, js_util_set_log_level, "setLogLevel", 1));
+    JS_SetPropertyStr(ctx, utils, "partId", JS_NewCFunction(ctx, js_utils_part_id, "partId", 1));
     JS_SetPropertyStr(ctx, utils, "ptrRefCnt", JS_NewCFunction(ctx, js_util_ptr_refcount, "ptrRefCnt", 1));
     JS_SetPropertyStr(ctx, utils, "varRefCnt", JS_NewCFunction(ctx, js_util_var_refcount, "varRefCnt", 1));
     JS_SetPropertyStr(ctx, utils, "varPtr", JS_NewCFunction(ctx, js_util_var_ptr, "varPtr", 1));
-
-	// process
-	EVALSTR(JSCODE_DEF_PROCESS_OBJECT, ":eval")
 
 	// global
     JS_SetPropertyStr(ctx, global, "setTimeout", JS_NewCFunction(ctx, js_util_set_timeout, "setTimeout", 1));
@@ -211,6 +229,4 @@ void require_module_utils(JSContext *ctx) {
     JS_SetPropertyStr(ctx, global, "evalScript", JS_NewCFunction(ctx, js_fs_eval_script, "evalScript", 1));
     
 	JS_FreeValue(ctx, global);
-
-	// EVALSTR(JSCODE_EVAL_SCRIPT, ":eval")
 }

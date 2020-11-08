@@ -10,15 +10,20 @@ typedef struct eventloop_callback_t {
     uint64_t deadline ;
     uint32_t interval ;
     bool repeat ;
+    int argc ;
+    JSValueConst * argv ;
     struct eventloop_callback_t * next ;
 }  ;
 
 inline struct eventloop_callback_t * eventloop_header() ;
 
 struct eventloop_callback_t * eventloop_push(JSContext *ctx, JSValue func, int interval, bool repeat) ;
+struct eventloop_callback_t * eventloop_push_with_argv(JSContext *ctx, JSValue func, int argc, JSValueConst *argv) ;
 
 void eventloop_punp(JSContext *ctx) ;
 
 void eventloop_remove(JSContext *ctx, struct eventloop_callback_t * item) ;
+
+void eventloop_on_before_reset(JSContext *ctx) ;
 
 #endif

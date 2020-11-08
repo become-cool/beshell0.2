@@ -32,18 +32,13 @@ JSValue js_gpio_pin_mode(JSContext *ctx, JSValueConst this_val, int argc, JSValu
 JSValue js_gpio_digital_read(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(1)
     ARGV_TO_UINT8(0, pin)
-
     uint8_t value = digitalRead(pin) ;
-    
-    printf("%d:%d\n",pin, value) ;
-
     return JS_NewInt32(ctx, value) ;
 }
 JSValue js_gpio_digital_write(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(2)
     ARGV_TO_UINT8(0, pin)
     ARGV_TO_UINT8(1, value)
-    printf("%d->%d\n",pin, value) ;
     digitalWrite(pin, value) ;
     return JS_UNDEFINED ;
 }

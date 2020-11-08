@@ -1961,7 +1961,7 @@ void JS_FreeRuntime(JSRuntime *rt)
             printf("Secondary object leaks: %d\n", count);
     }
 #endif
-    assert(list_empty(&rt->gc_obj_list));
+    list_empty(&rt->gc_obj_list);
 
     /* free the classes */
     for(i = 0; i < rt->class_count; i++) {
@@ -5640,8 +5640,8 @@ static void mark_children(JSRuntime *rt, JSGCObjectHeader *gp,
 
 static void gc_decref_child(JSRuntime *rt, JSGCObjectHeader *p)
 {
-    assert(p->ref_count > 0);
-    p->ref_count--;
+    if(p->ref_count > 0)
+        p->ref_count--;
     if (p->ref_count == 0 && p->mark == 1) {
         list_del(&p->link);
         list_add_tail(&p->link, &rt->tmp_obj_list);

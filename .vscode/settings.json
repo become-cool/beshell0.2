@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "xutility": "c",
-        "xtr1common": "c"
+        "xtr1common": "c",
+        "memory": "c"
     }
 }

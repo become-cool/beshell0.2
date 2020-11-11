@@ -1,13 +1,31 @@
 let _lastPWD = process.env.HOME
-let _echoInput = false
-let _echoOutput = true
 
-_repl_set_input_func(function(code){
-    code = code.trim()
+const CMD_RUN = 1 ;
+const CMD_CALL = 2 ;
+const CMD_CALL_ASYNC = 3 ;
+const CMD_RSPN = 4 ;
+const CMD_EXCEPTION = 5 ;
+const CMD_CALLBACK = 6 ;
+const CMD_OUTPUT = 7 ;
 
-    if(_echoInput) {
-        console.log(code)
+// const CMD_FILE_PUSH_REQ = 10 ;
+// const CMD_FILE_APPEND_REQ = 11 ;
+// const CMD_FILE_PULL_REQ = 12 ;
+
+function mkresolve(pkgid) {
+    return function(ret) {
+        telnet.send(pkgid, CMD_RSPN, JSON.stringify(ret))
     }
+}
+function mkreject(pkgid) {
+    return function(ret) {
+        telnet.send(pkgid, CMD_EXCEPTION, JSON.stringify(ret))
+    }
+}
+
+_repl_set_input_func(function(pkgid, remain, pkgcmd, code){
+    
+    code = code.trim()
 
     let p = code.indexOf(' ')
     let cmd = p<0? code: code.substr(0, p)
@@ -18,26 +36,20 @@ _repl_set_input_func(function(code){
     }
 
     try{
-        let res = eval(code)
-        if(_echoOutput) {
-            if(res==global) {
-                console.log(JSON.stringify(Object.keys(res)))
-            }
-            else {
-                switch(typeof res) {
-                    case 'function':
-                        console.log(res.toString())
-                        break
-                    case 'object':
-                        console.log(JSON.stringify(res))
-                    default:
-                        console.log(res)
-                }
-            }
+        if(pkgcmd == CMD_RUN) {
+            evalAsFile(code, "REPL")
         }
+        else if(pkgcmd == CMD_CALL) {
+            let res = evalAsFile(code, "REPL")
+            telnet.send(pkgid, CMD_RSPN, JSON.stringify(res))
+        }
+        else if(pkgcmd == CMD_CALL_ASYNC) {
+            // todo
+        }
+
     } catch(e) {
-        console.log(e)
-        console.log(e.stack)
+        telnet.send(pkgid, CMD_EXCEPTION, console.valueToString(e))
+        return
     }
 })
 
@@ -114,14 +126,18 @@ let commands = {
             return
         path = resolvepath(path)
         console.log(fs.readFileSync(path))
+    } ,
+
+    rm: function(path) {
+        if(!path)
+            return
+        path = resolvepath(path)
+        if(!fs.unlinkSync(path)) {
+            console.log('Failded to rm path', path)
+        }
     }
 }
 
 global.repl = {
     commands,
-    
-    setEcho(ouput, input) {
-        _echoInput = !!input
-        _echoOutput = !!ouput
-    }
 }

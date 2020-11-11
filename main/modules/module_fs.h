@@ -22,7 +22,7 @@ char * js_arg_to_vfspath(JSContext *ctx, JSValueConst argv) ;
         return JS_EXCEPTION ;                                                       \
     }
 
-#define CHECK_NOT_DIR(path)                                                         \
+#define CHECK_ARGV0_NOT_DIR(path)                                                   \
     STAT_PATH(path)                                                                 \
     if(S_ISDIR(statbuf.st_mode)) {                                                  \
         free(path) ;                                                                \

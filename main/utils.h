@@ -2,7 +2,7 @@
 #define _UTILS_H
 
 #include "quickjs-libc.h"
-
+// #include "telnet.h"
 
 #define VAR_REFCNT(var) ((JSRefCountHeader *)JS_VALUE_GET_PTR(var))->ref_count
 #define P_VAR_REFCNT(var) printf(#var" ref count:%d @%d\n", VAR_REFCNT(var), __LINE__) ;
@@ -25,22 +25,27 @@
 
 #define ARGV_TO_UINT8(i,var)   ARGV_TO_INT(i, var, uint8_t, JS_ToUint32)
 #define ARGV_TO_UINT32(i,var)  ARGV_TO_INT(i, va, uint8_t, JS_ToUint32)
+#define ARGV_TO_STRING(i, var, len)                         \
+    size_t len = 0 ;                                        \
+    char * var = JS_ToCStringLen(ctx, &len, argv[i]) ;
 
 
-#define EVAL_STR(str, filename)                                                     \
+#define EVAL_CODE_LEN(str, len, filename)                                           \
     {                                                                               \
-    JSValue ret = JS_Eval(ctx, str, strlen(str), filename, JS_EVAL_TYPE_GLOBAL) ;   \
+    JSValue ret = JS_Eval(ctx, str, len, filename, JS_EVAL_TYPE_GLOBAL) ;           \
 	if(JS_IsException(ret)) {                                                       \
-		js_std_dump_error(ctx) ;                                                    \
+		echo_error(ctx) ;                                                           \
 	}                                                                               \
 	JS_FreeValue(ctx, ret) ;                                                        \
     }
+
+#define EVAL_CODE(str, filename) EVAL_CODE_LEN(str, strlen(str), filename)
 
 #define CALL_FUNC(func, thisobj, argc, argv)                                        \
     {                                                                               \
     JSValue ret = JS_Call(ctx, func, thisobj, argc, argv) ;                         \
     if( JS_IsException(ret) ) {                                                     \
-        js_std_dump_error(ctx) ;                                                    \
+        echo_error(ctx) ;                                                           \
     }                                                                               \
     JS_FreeValue(ctx, ret) ;                                                        \
     }

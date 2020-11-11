@@ -7,5 +7,4 @@ module.exports = function() { console.log(`
  (c) 2020 https://become.cool
 
 version BeShell: ${process.versions.beshell}; quickjs: ${process.versions.quickjs}
-build: ${process.build}
-`) }
+build: ${process.build}`) }

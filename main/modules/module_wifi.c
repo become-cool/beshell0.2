@@ -3,6 +3,7 @@
 #include "eventloop.h"
 #include "task_js.h"
 #include "utils.h"
+#include "telnet.h"
 
 #include <lwip/apps/sntp.h>
 #include <esp_err.h>

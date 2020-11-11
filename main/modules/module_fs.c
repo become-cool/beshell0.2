@@ -8,6 +8,7 @@
 #include <dirent.h>
 #include <unistd.h>
 #include "utils.h"
+#include <errno.h>
 
 LOG_TAG("fs")
 
@@ -29,8 +30,8 @@ char * js_arg_to_vfspath(JSContext *ctx, JSValueConst argv) {
     return path ;
 }
 
-JSValue js_fs_statSync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
-    CHECK_ARGC(2)
+JSValue js_fs_stat_sync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    CHECK_ARGC(1)
     JS2VSFPath(path, argv[0]) ;
     struct stat statbuf;
     if(stat(path,&statbuf)<0) {
@@ -43,11 +44,16 @@ JSValue js_fs_statSync(JSContext *ctx, JSValueConst this_val, int argc, JSValueC
     JS_SetPropertyStr(ctx, obj, "dev", JS_NewInt32(ctx, statbuf.st_dev)) ;
     JS_SetPropertyStr(ctx, obj, "ino", JS_NewInt32(ctx, statbuf.st_ino)) ;
     JS_SetPropertyStr(ctx, obj, "mode", JS_NewInt32(ctx, statbuf.st_mode)) ;
-    JS_SetPropertyStr(ctx, obj, "size", JS_NewInt32(ctx, statbuf.st_size)) ;
+    if(S_ISDIR(statbuf.st_mode)) {
+        JS_SetPropertyStr(ctx, obj, "isDir", JS_TRUE) ;
+    }
+    else {
+        JS_SetPropertyStr(ctx, obj, "size", JS_NewInt32(ctx, statbuf.st_size)) ;
+        JS_SetPropertyStr(ctx, obj, "isDir", JS_FALSE) ;
+    }
     JS_SetPropertyStr(ctx, obj, "atime", JS_NewInt64(ctx, statbuf.st_atime)) ;
     JS_SetPropertyStr(ctx, obj, "mtime", JS_NewInt64(ctx, statbuf.st_mtime)) ;
     JS_SetPropertyStr(ctx, obj, "ctime", JS_NewInt64(ctx, statbuf.st_ctime)) ;
-    JS_SetPropertyStr(ctx, obj, "isDir", S_ISDIR(statbuf.st_mode)? JS_TRUE: JS_FALSE) ;
 
     return obj ;
 }
@@ -79,22 +85,62 @@ JSValue js_fs_exists_sync(JSContext *ctx, JSValueConst this_val, int argc, JSVal
     CHECK_ARGC(1)
     JS2VSFPath(path, argv[0])
     struct stat statbuf;
-    bool exists = stat(path,&statbuf)<0 ;
+    bool exists = stat(path,&statbuf)>=0 ;
     free(path) ;
     return exists? JS_TRUE: JS_FALSE ;
 }
 
-JSValue js_fs_mkdirSync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+// 递归创建目录
+int mkdir_p(char* file_path, mode_t mode) {
+    assert(file_path && *file_path);
+    for (char* p = strchr(file_path + 1, '/'); p; p = strchr(p + 1, '/')) {
+        *p = '\0';
+        if (mkdir(file_path, mode) == -1) {
+            if (errno != EEXIST) {
+                *p = '/';
+                return -1;
+            }
+        }
+        *p = '/';
+    }
+    return 0;
+}
+
+/**
+ * argv:
+ *   path string
+ *   recursive=false bool
+ */
+JSValue js_fs_mkdir_sync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     if(argc<1) {
         JS_ThrowReferenceError(ctx, "Missing param path");
         return JS_EXCEPTION ;
     }
     JS2VSFPath(path, argv[0]) ;
-    bool ret = mkdir(path, ACCESSPERMS)>=0 ;
+    
+    struct stat statbuf;
+    if(stat(path,&statbuf)>=0) {
+        free(path) ;
+        return S_ISDIR(statbuf.st_mode)? JS_TRUE: JS_FALSE ;
+    }
+
+    bool recursive = false ;
+    if(argc>1) {
+        recursive = JS_ToBool(ctx, argv[1]) ;
+    }
+
+    bool ret ;
+    if(recursive) {
+        ret = mkdir_p(path, ACCESSPERMS)>=0 ;
+    }
+    else {
+        ret = mkdir(path, ACCESSPERMS)>=0 ;
+    }
     free(path) ;
     return ret? JS_TRUE: JS_FALSE ;
 }
-JSValue js_fs_rmdirSync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+
+JSValue js_fs_rmdir_sync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     if(argc<1) {
         JS_ThrowReferenceError(ctx, "Missing param path");
         return JS_EXCEPTION ;
@@ -105,7 +151,7 @@ JSValue js_fs_rmdirSync(JSContext *ctx, JSValueConst this_val, int argc, JSValue
     return ret? JS_TRUE: JS_FALSE ;
 }
 
-JSValue js_fs_unlinkSync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+JSValue js_fs_unlink_sync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     if(argc<1) {
         JS_ThrowReferenceError(ctx, "Missing param path");
         return JS_EXCEPTION ;
@@ -116,16 +162,35 @@ JSValue js_fs_unlinkSync(JSContext *ctx, JSValueConst this_val, int argc, JSValu
     return ret? JS_TRUE: JS_FALSE ;
 }
 
-JSValue js_fs_readFileSync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+/**
+ * argv:
+ *  path string
+ *  readlen=-1 int
+ *  offset=0 int
+ */
+JSValue js_fs_read_file_sync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     
     JS2VSFPath(path, argv[0])
-    CHECK_NOT_DIR(path)
+    CHECK_ARGV0_NOT_DIR(path)
 
-    if(statbuf.st_size<1){
+    int readlen = -1 ;
+    if(argc>1) {
+        JS_ToInt32(ctx, &readlen, argv[1]) ;
+    }
+    int offset = 0 ;
+    if(argc>2) {
+        JS_ToInt32(ctx, &offset, argv[2]) ;
+    }
+
+    if(readlen<0) {
+        readlen = statbuf.st_size ;
+    }
+
+    if(readlen<1){
         return JS_NewStringLen(ctx, "", 0) ;
     }
 
-    char * buff = malloc(statbuf.st_size) ;
+    char * buff = malloc(readlen) ;
     if(!buff) {
         free(path) ;
         JS_ThrowReferenceError(ctx, "Failed to malloc buff");
@@ -141,7 +206,10 @@ JSValue js_fs_readFileSync(JSContext *ctx, JSValueConst this_val, int argc, JSVa
         return JS_EXCEPTION ;
     }
 
-    int readedBytes = fread(buff, 1, statbuf.st_size, fd) ;
+    if(offset>0)
+        fseek(fd, offset, SEEK_SET) ;
+
+    int readedBytes = fread(buff, 1, readlen, fd) ;
     // buff[readedBytes] = 0 ;
 
     fclose(fd) ;
@@ -152,14 +220,31 @@ JSValue js_fs_readFileSync(JSContext *ctx, JSValueConst this_val, int argc, JSVa
     return str ;
 }
 
-JSValue js_fs_writeFileSync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
-    CHECK_ARGC(2)
-    
-    JS2VSFPath(path, argv[0])
-    CHECK_NOT_DIR(path)
+/**
+ * argv:
+ *  path string
+ *  data string
+ *  append=false int
+ */
+JSValue js_fs_write_file_sync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
 
-	int fd = fopen(path, "w");
-    if(fd<0) {
+    CHECK_ARGC(2)
+    JS2VSFPath(path, argv[0])
+
+    bool append = false ;
+
+    // 文件已经存在
+    struct stat statbuf;
+    if(stat(path,&statbuf)>=0) {
+        CHECK_ARGV0_NOT_DIR(path)
+        // offset
+        if(argc>2) {
+            append = JS_ToBool(ctx, argv[2]) ;
+        }
+    }
+
+	int fd = fopen(path, append? "a+": "w");
+    if(fd<=0) {
         free(path) ;
         JS_ThrowReferenceError(ctx, "Failed to open file");
         return JS_EXCEPTION ;
@@ -203,7 +288,7 @@ JSValue js_fs_writeFileSync(JSContext *ctx, JSValueConst this_val, int argc, JSV
     return JS_NewInt32(ctx, wroteBytes) ;
 }
 
-JSValue js_fs_readdirSync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+JSValue js_fs_readdir_sync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(1)
 
     JS2VSFPath(path, argv[0]) ;
@@ -248,13 +333,13 @@ void require_module_fs(JSContext *ctx) {
     JSValue global = JS_GetGlobalObject(ctx);
     JSValue fs = JS_NewObject(ctx);
     
-    JS_SetPropertyStr(ctx, fs, "statSync", JS_NewCFunction(ctx, js_fs_statSync, "statSync", 1));
-    JS_SetPropertyStr(ctx, fs, "unlinkSync", JS_NewCFunction(ctx, js_fs_unlinkSync, "unlinkSync", 1));
-    JS_SetPropertyStr(ctx, fs, "readFileSync", JS_NewCFunction(ctx, js_fs_readFileSync, "readFileSync", 1));
-    JS_SetPropertyStr(ctx, fs, "writeFileSync", JS_NewCFunction(ctx, js_fs_writeFileSync, "writeFileSync", 1));
-    JS_SetPropertyStr(ctx, fs, "readdirSync", JS_NewCFunction(ctx, js_fs_readdirSync, "readdirSync", 1));
-    JS_SetPropertyStr(ctx, fs, "mkdirSync", JS_NewCFunction(ctx, js_fs_mkdirSync, "mkdirSync", 1));
-    JS_SetPropertyStr(ctx, fs, "rmdirSync", JS_NewCFunction(ctx, js_fs_rmdirSync, "rmdirSync", 1));
+    JS_SetPropertyStr(ctx, fs, "statSync", JS_NewCFunction(ctx, js_fs_stat_sync, "statSync", 1));
+    JS_SetPropertyStr(ctx, fs, "unlinkSync", JS_NewCFunction(ctx, js_fs_unlink_sync, "unlinkSync", 1));
+    JS_SetPropertyStr(ctx, fs, "readFileSync", JS_NewCFunction(ctx, js_fs_read_file_sync, "readFileSync", 1));
+    JS_SetPropertyStr(ctx, fs, "writeFileSync", JS_NewCFunction(ctx, js_fs_write_file_sync, "writeFileSync", 1));
+    JS_SetPropertyStr(ctx, fs, "readdirSync", JS_NewCFunction(ctx, js_fs_readdir_sync, "readdirSync", 1));
+    JS_SetPropertyStr(ctx, fs, "mkdirSync", JS_NewCFunction(ctx, js_fs_mkdir_sync, "mkdirSync", 1));
+    JS_SetPropertyStr(ctx, fs, "rmdirSync", JS_NewCFunction(ctx, js_fs_rmdir_sync, "rmdirSync", 1));
     JS_SetPropertyStr(ctx, fs, "existsSync", JS_NewCFunction(ctx, js_fs_exists_sync, "existsSync", 1));
     JS_SetPropertyStr(ctx, fs, "isDirSync", JS_NewCFunction(ctx, js_fs_is_dir_sync, "isDirSync", 1));
     JS_SetPropertyStr(ctx, fs, "isFileSync", JS_NewCFunction(ctx, js_fs_is_file_sync, "isFileSync", 1));

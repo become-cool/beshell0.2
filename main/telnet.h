@@ -3,6 +3,7 @@
 #include <sys/types.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
+#include "protocol.h"
 
 #include "quickjs-libc.h"
 
@@ -14,20 +15,30 @@ void telnet_on_before_reset(JSContext *ctx) ;
 
 void telnet_set_input_function(JSContext * ctx, JSValue func) ;
 
-void telnet_echo(const char * sth, int len) ;
+void telnet_send_pkg(char reqid, char cmd, char * data, uint16_t datalen) ;
+void telnet_send_pkg_str(char reqid, char cmd, char * data) ;
 
-#define echo(sth) telnet_echo(sth, strlen(sth))
 
-#define echof(...) 									\
-	{												\
-		char * str = NULL;							\
-		int len = asprintf(&str, __VA_ARGS__) ;		\
-        if(len>0)								    \
-            telnet_echo(str, len) ;				    \
-		if(len>-1) {								\
-			free(str) ;								\
-		}											\
+void require_module_telnet(JSContext *ctx) ;
+
+void on_pkg_receive (char pkgid, char remain, char cmd, char datalen, void * ctx) ;
+
+uint8_t echo_pkgid() ;
+
+#define echo(sth) 		telnet_send_pkg_str(echo_pkgid(), CMD_OUTPUT, sth)
+#define echon(sth, len) telnet_send_pkg(echo_pkgid(), CMD_OUTPUT, sth, len)
+
+#define echof(...) 													\
+	{																\
+		char * str = NULL;											\
+		int len = asprintf(&str, __VA_ARGS__) ;						\
+        if(len>0)								    				\
+            telnet_send_pkg(echo_pkgid(), CMD_OUTPUT, str, len) ;	\
+		if(len>-1) {												\
+			free(str) ;												\
+		}															\
 	}
 	
+void echo_error(JSContext * ctx) ;
 
 #endif

@@ -39,6 +39,9 @@ WiFi.save = function() {
 }
 
 function autoConnect() {
+
+    console.log("auto connect wifi")
+
     let json = fs.readFileSync(configPath)
     json = JSON.parse(json)
 
@@ -47,7 +50,14 @@ function autoConnect() {
     // sta
     if(status.sta.status=='disconnected') {
         if(json.sta.ssid) {
-            WiFi.connect(json.sta.ssid, json.sta.password||"")
+            WiFi.connect(json.sta.ssid, json.sta.password||"", null, function(err){
+                if(err) {
+                    console.log("connect wifi error:", err)
+                }
+                else {
+                    "has connected to wifi "
+                }
+            })
         }
     }
 
@@ -55,6 +65,6 @@ function autoConnect() {
 
 }
 
-exports.autoConnect = autoConnect()
+exports.autoConnect = autoConnect
 
 autoConnect()

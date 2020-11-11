@@ -10,6 +10,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
+#include <string.h>
 #include <nvs_flash.h>
 
 #include "esp_vfs_fat.h"
@@ -42,28 +43,60 @@ JSValue js_process_reboot(JSContext *ctx, JSValueConst this_val, int argc, JSVal
     return JS_UNDEFINED ;
 }
 
-JSValue js_console_log(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)
-{
+
+JSValue js_console_print(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    CHECK_ARGC(1)
+    size_t len = 0 ;
+    char * str = JS_ToCStringLen(ctx, &len, argv[0]) ;
+    if(!str) {
+        THROW_EXCEPTION("not a avalid string.") 
+    }
+    if(len) {
+        telnet_send_pkg(echo_pkgid(), CMD_OUTPUT, str, len) ;
+    }
+    JS_FreeCString(ctx, str) ;
+    return JS_UNDEFINED ;
+}
+
+JSValue js_console_log(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    // const char *str;
+
+    char * strlst[argc] ;
+    size_t lenlst[argc] ;
+    size_t totalLen = 0 ;
+    
     int i;
-    const char *str;
-    size_t len;
+    for(i = 0; i < argc; i++) {
+        strlst[i] = JS_ToCStringLen(ctx, &lenlst[i], argv[i]);
+        if (!strlst[i])
+            return JS_EXCEPTION;
+        totalLen+= lenlst[i] + 1 ; // +1 表示间隔空格,和最后的0字节
+    }
+
+    char * buff = malloc( totalLen ) ;
+    char * writer = buff ;
+    for(i = 0; i < argc; i++) {
+        memcpy(writer, strlst[i], lenlst[i]) ;
+        writer+= lenlst[i] ;
+        if(i<argc-1) {
+            memcpy(writer, " ", 1) ;
+            writer++ ;
+        }
+    }
+    buff[totalLen-1] = 0 ;
+
+    telnet_send_pkg(echo_pkgid(), CMD_OUTPUT, buff, totalLen-1) ;
 
     for(i = 0; i < argc; i++) {
-        if (i != 0)
-            telnet_echo(" ",1);
-        str = JS_ToCStringLen(ctx, &len, argv[i]);
-        if (!str)
-            return JS_EXCEPTION;
-        // fwrite(str, 1, len, stdout);
-        telnet_echo(str, len) ;
-        JS_FreeCString(ctx, str);
+        JS_FreeCString(ctx, strlst[i]);
     }
-    telnet_echo("\n", 1);
+    free(buff) ;
+    
     return JS_UNDEFINED;
 }
 
 void require_module_process(JSContext *ctx) {
-    
+
     JSValue global = JS_GetGlobalObject(ctx);
 
     // process
@@ -90,15 +123,15 @@ void require_module_process(JSContext *ctx) {
 
     // console
     JSValue console = JS_NewObject(ctx) ;
+    JS_SetPropertyStr(ctx, console, "print", JS_NewCFunction(ctx, js_console_print, "print", 1));
     JS_SetPropertyStr(ctx, console, "log", JS_NewCFunction(ctx, js_console_log, "log", 1));
     JS_SetPropertyStr(ctx, console, "error", JS_NewCFunction(ctx, js_console_log, "error", 1));
     JS_SetPropertyStr(ctx, global, "console", console);
 
-
 	JS_FreeValue(ctx, global);
 }
 
-static JSContext *JS_NewCustomContext(JSRuntime *rt)
+static JSContext * JS_NewCustomContext(JSRuntime *rt)
 {
     JS_SetModuleLoaderFunc(rt, NULL, js_module_loader, NULL);
 
@@ -128,7 +161,8 @@ static JSContext *JS_NewCustomContext(JSRuntime *rt)
     require_module_utils(ctx) ;
     require_module_wifi(ctx) ;
     require_module_gpio(ctx) ;
-    require_module_process(ctx) ;
+    require_module_process(ctx) ;    
+    require_module_telnet(ctx) ;
 
     return ctx;
 }
@@ -144,7 +178,8 @@ void init_quickjs() {
     js_std_init_handlers(rt);
     ctx = JS_NewCustomContext(rt);
 
-    // require 函数
+    // base 函数
+    evalScript(ctx, "/fs/lib/base/console.js") ;
     evalScript(ctx, "/fs/lib/base/require.js") ;
 
     // 0等级，不加载任何启动脚本，作为安全模式
@@ -152,8 +187,10 @@ void init_quickjs() {
         echof("init level: %d\n", boot_level) ;
         char initScriptCodeBuff[ sizeof(InitScriptTpl) + 1 ] ;   // %d -> 999
         sprintf(initScriptCodeBuff, InitScriptTpl, boot_level) ;
-        EVAL_STR(initScriptCodeBuff, ":init.d")
+        EVAL_CODE(initScriptCodeBuff, ":init.d")
     }
+
+    printf("after boot_level\n") ;
 }
 
 void deinit_quickjs() {
@@ -173,7 +210,9 @@ void task_js_main(){
     telnet_init() ;
     sniffer_init() ;
 
+
     init_quickjs() ;
+
 
     while(1) {
 

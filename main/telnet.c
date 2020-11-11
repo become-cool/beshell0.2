@@ -12,11 +12,19 @@
 #include "lwip/sockets.h"
 #include "lwip/sys.h"
 #include <lwip/netdb.h>
+#include <math.h>
 
 LOG_TAG("telnet")
 
 #define TELNET_PORT 8022
 
+uint8_t uart_recv_buf[256];
+uint8_t tcp_recv_buff[256];
+
+uint8_t _echo_pkgid = 0 ;
+uint8_t echo_pkgid() {
+	return _echo_pkgid ++ ;
+}
 
 
 JSValue _func_repl_input = NULL ;
@@ -37,6 +45,7 @@ void telnet_on_before_reset(JSContext *ctx) {
 }
 
 
+
 // --------------------
 // UART
 uart_config_t uart_config = {
@@ -48,7 +57,6 @@ uart_config_t uart_config = {
 	.source_clk = UART_SCLK_APB,
 };
 int uart_fd;
-char uart_recv_buf[256];
 
 // --------------------
 // TCP
@@ -57,10 +65,10 @@ int sock_client = -1 ;
 
 struct sockaddr_in6 source_addr; // Large enough for both IPv4 or IPv6
 uint addr_len = sizeof(source_addr);
-char tcp_recv_buff[256];
-
 
 void telnet_init() {
+
+	pPkgCmdProcess = on_pkg_receive ;
 
 	// uart telnet ----------
     uart_driver_install(UART_NUM_0, 2*1024, 0, 0, NULL, 0);
@@ -108,31 +116,6 @@ void telnet_init() {
 }
 
 
-void eval_input(JSContext *ctx, char * strcode, int len) {
-	JSValue ret = NULL ;
-
-	if(_func_repl_input && JS_IsFunction(ctx, _func_repl_input)) {
-		JSValue code = JS_NewStringLen(ctx, strcode, len) ;
-		CALL_FUNC(_func_repl_input, JS_NULL, 1, &code)
-		JS_FreeValue(ctx, code) ;
-	} 
-	// 默认的解释器
-	else {
-		ret = JS_Eval(ctx, strcode, len, ":telnet", JS_EVAL_TYPE_GLOBAL) ;
-		// JSValue error = JS_GetException(ctx) ;
-		if( JS_IsException(ret) ) {
-			js_std_dump_error(ctx) ;
-		}
-		else {
-			const char * retstr = JS_ToCString( ctx, ret );
-			echof("%s\n", retstr) ;
-			JS_FreeCString(ctx, retstr);
-		}
-	}
-
-	JS_FreeValue(ctx, ret) ;
-}
-
 struct timeval telnet_tv = {
 	.tv_sec = 0,
 	.tv_usec = 0,
@@ -171,13 +154,13 @@ void telnet_loop(JSContext *ctx) {
 
 	// UART 接收
 	if (FD_ISSET(uart_fd, &telnet_rfds)) {
-		int len = read(uart_fd, uart_recv_buf, sizeof(uart_recv_buf)-1) ;
-		if ( len > 0) {
-			uart_recv_buf[len] = 0 ;
-			eval_input(ctx, uart_recv_buf, len) ;
-		} else {
-			LOGE("UART read error");
-			return;
+		int len = uart_read_bytes(0, uart_recv_buf, sizeof(uart_recv_buf), 0) ;
+		if(len<0) {
+			printf("read uart error\n") ;
+		}
+		else {
+			WriteToBuffer(uart_recv_buf, len) ;
+			PACKAGE_LOOP(ctx)
 		}
 	} 
 	
@@ -186,8 +169,7 @@ void telnet_loop(JSContext *ctx) {
 	if(FD_ISSET(sock_server, &telnet_rfds)) {
 		// 关闭原有连接
 		if(sock_client>-1) {
-			
-			echo("Close last telnet client for new one\n") ;
+			echo("Close last tcp client for new one\n") ;
 			shutdown(sock_client, 0);
 			close(sock_client);
 		}
@@ -197,7 +179,7 @@ void telnet_loop(JSContext *ctx) {
 			echof("accept() error: %d.\n", errno) ;
 		}
 		else {
-			echo("telnet client come in\n") ;
+			echo("TCP client come in\n") ;
 		}
 	}
 
@@ -219,24 +201,164 @@ void telnet_loop(JSContext *ctx) {
 
 			sock_client = -1 ;
 			
-			echo("telnet client leave\n") ;
+			echo("TCP client leave\n") ;
 		}
 		// 接收到数据
 		else {
-			tcp_recv_buff[len] = 0 ;
-			eval_input(ctx, tcp_recv_buff, len) ;
+			WriteToBuffer(tcp_recv_buff, len) ;
+			PACKAGE_LOOP(ctx)
 		}
 	}
 }
 
 
-void telnet_echo(const char * sth, int len) {
+char * send_buff [270] ;
+
+void telnet_send_one_pkg(char pkgid, char remain, char cmd, char * data, uint8_t datalen) {
+
+
+	uint16_t pkglen = PKGLEN_WITHOUT_DATA + datalen ;
+	
+	// printf("datalen=%d, pkglen=%d\n", datalen, pkglen) ;
+
+	// char * pkgbuff = malloc(pkglen) ;
+	Pack((uint8_t*)send_buff, pkgid, remain, cmd, (uint8_t*)data, datalen) ;
 
 	// 串口输出
-	printf(sth) ;
+	uart_write_bytes(0, send_buff, pkglen);
+	uart_wait_tx_done(0, 10000);
+
 	
 	// tcp socket 输出
 	if(sock_client>-1) {
-    	send(sock_client, sth, len, 0) ;
+    	send(sock_client, send_buff, pkglen, 0) ;
 	}
+	// free(pkgbuff) ;
+}
+
+void telnet_send_pkg(char pkgid, char cmd, char * data, uint16_t datalen) {
+	
+	int pkgcnt = (int) ceil( (float)datalen/(float)PKGLEN_MAX_DATA ) ;
+
+	// printf("datalen=%d, max=%d, pkgcnt=%d\n", datalen, PKGLEN_MAX_DATA, pkgcnt) ;
+	// printf("%s\n",data) ;
+
+	for(int i=pkgcnt-1; i>=1; i--) {
+		// printf("%d, len=%d\n", i, PKGLEN_MAX_DATA) ;
+		telnet_send_one_pkg(pkgid, i, cmd, data, PKGLEN_MAX_DATA) ;
+		data+= PKGLEN_MAX_DATA ;
+	}
+
+	// 最后一个包
+	telnet_send_one_pkg(pkgid, 0, cmd, data, datalen%PKGLEN_MAX_DATA) ;
+}
+
+void telnet_send_pkg_str(char pkgid, char cmd, char * data) {
+	telnet_send_pkg(pkgid, cmd, data, strlen(data)) ;
+}
+
+/**
+ * argv:
+ *   pkgid  uint8
+ *   cmd    uint8
+ *   data   string/array/ArrayBuffer
+ */
+JSValue js_telnet_send(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+	// printf("js_telnet_send_pack()\n") ;
+
+	CHECK_ARGC(3)
+	ARGV_TO_UINT8(0, pkgid)
+	ARGV_TO_UINT8(1, cmd)
+
+	// printf("pkgid=%d, cmd=%d\n", pkgid, cmd) ;
+
+	if( JS_IsString(argv[2]) ) {
+		ARGV_TO_STRING(2, data, datalen)
+		// printf("data=%s, datalen=%d\n", data, datalen) ;
+		telnet_send_pkg(pkgid, cmd, data, datalen) ;
+		JS_FreeCString(ctx, data) ;
+	}
+
+	// @todo : array/ArrayBuffer
+	return JS_UNDEFINED ;
+}
+void require_module_telnet(JSContext *ctx) {
+    JSValue global = JS_GetGlobalObject(ctx);
+    JSValue telnet = JS_NewObject(ctx) ;
+    JS_SetPropertyStr(ctx, global, "telnet", telnet);
+    JS_SetPropertyStr(ctx, telnet, "send", JS_NewCFunction(ctx, js_telnet_send, "send", 1));
+	JS_FreeValue(ctx, global);
+}
+
+
+
+void js_dump_err(JSContext *ctx, JSValueConst val) {
+    const char * str = JS_ToCString(ctx, val);
+    if (str) {
+		echo(str);
+        JS_FreeCString(ctx, str);
+    } else {
+        printf("[exception]\n");
+        echo("[exception]\n");
+    }
+}
+void echo_error(JSContext * ctx) {
+    JSValue exception_val = JS_GetException(ctx);
+    bool is_error = JS_IsError(ctx, exception_val);
+    js_dump_err(ctx, exception_val);
+    if (is_error) {
+        JSValue val = JS_GetPropertyStr(ctx, exception_val, "stack");
+        if (!JS_IsUndefined(val)) {
+            js_dump_err(ctx, val);
+        }
+        JS_FreeValue(ctx, val);
+    }
+    JS_FreeValue(ctx, exception_val);
+}
+
+void on_pkg_receive (char pkgid, char remain, char cmd, char datalen, void * ctx){
+	// echof("pack received, pkgid=%d, cmd=%d, datalen=%d\n", pkgid, cmd, datalen) ;
+
+	uint8_t * databuff = malloc(datalen+1) ;
+	if(!databuff) {
+		echo("Drop a package, memory low.") ;
+		return ;
+	}
+	MemCpy(databuff, 6, datalen) ;
+
+	// JS代码/命令
+	if(cmd==CMD_RUN || cmd==CMD_CALL || cmd==CMD_CALL_ASYNC) {
+		*(databuff+datalen) = '\0' ;
+		
+		if(_func_repl_input && JS_IsFunction(ctx, _func_repl_input)) {
+
+			JSValueConst * argv = malloc(sizeof(JSValue)*3) ;
+			argv[0] = JS_NewInt32(ctx, pkgid) ;
+			argv[1] = JS_NewInt32(ctx, remain) ;
+			argv[2] = JS_NewInt32(ctx, cmd) ;
+			argv[3] = JS_NewStringLen(ctx, (char *)databuff, datalen) ;
+
+			JSValue ret = JS_Call(ctx, _func_repl_input, JS_NULL, 4, argv) ;
+			if( JS_IsException(ret) ) {
+				echo_error(ctx) ;
+			}
+
+			JS_FreeValue(ctx, ret) ;
+			JS_FreeValue(ctx, argv[0]) ;
+			JS_FreeValue(ctx, argv[1]) ;
+			JS_FreeValue(ctx, argv[2]) ;
+			JS_FreeValue(ctx, argv[3]) ;
+			free(argv) ;
+		}
+	}
+
+	// 文件操作
+	else if(cmd==CMD_FILE_PUSH_REQ || cmd==CMD_FILE_APPEND_REQ) {
+		
+	}
+	else if(cmd==CMD_FILE_PULL_REQ) {
+		
+	}
+
+	free(databuff) ;
 }

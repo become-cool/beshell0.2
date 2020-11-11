@@ -10,6 +10,9 @@
 #include "module_fs.h"
 #include "soc/soc.h"
 
+#include "libb64/cdecode.h"
+#include "libb64/cencode.h"
+
 LOG_TAG("util");
 
 JSValue js_util_free_stacks(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
@@ -169,21 +172,28 @@ void evalScript(JSContext *ctx, const char * path) {
     fclose(fd) ;
     buff[readedBytes] = 0 ;
 
-    JSValue ret = JS_Eval(ctx, buff, readedBytes, ":eval", JS_EVAL_TYPE_GLOBAL) ;
-    if( JS_IsException(ret) ) {
-        js_std_dump_error(ctx) ;
-    }
-
-	JS_FreeValue(ctx, ret) ;
+    EVAL_CODE_LEN(buff, readedBytes, path) ;
     free(buff) ;
 }
 
 JSValue js_fs_eval_script(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     JS2VSFPath(path, argv[0])
-    CHECK_NOT_DIR(path)
+    CHECK_ARGV0_NOT_DIR(path)
     evalScript(ctx, path) ;
     free(path) ;
 	return JS_UNDEFINED ;
+}
+
+JSValue js_fs_eval_as_file(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    CHECK_ARGC(2)
+
+    size_t len = 0 ;
+    char * code = JS_ToCStringLen(ctx, &len, argv[0]) ;
+    char * path = JS_ToCString(ctx, argv[1]) ;
+
+    JSValue ret = JS_Eval(ctx, code, len, path, JS_EVAL_TYPE_GLOBAL) ;
+	JS_FreeCString(ctx, code) ;
+    return ret ;
 }
 
 
@@ -202,14 +212,58 @@ JSValue js_utils_part_id(JSContext *ctx, JSValueConst this_val, int argc, JSValu
     return JS_NewInt32(ctx, value) ;
 }
 
+JSValue js_utils_base64_encode(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    CHECK_ARGC(1)
+    size_t srclen = 0 ;
+    char * src = JS_ToCStringLen(ctx, &srclen, argv[0]) ;
+    size_t codelen = base64_encode_expected_len(srclen) ;
+    char * code = (char *) malloc(codelen+1);
+    if(!code) {
+        JS_FreeCString(ctx, src) ;
+        THROW_EXCEPTION("Cound not malloc for encode, memory low ?")
+    }
+
+    base64_encodestate _state;
+    base64_init_encodestate(&_state);
+    int len = base64_encode_block((const char *) &src[0], srclen, &code[0], &_state);
+    len = base64_encode_blockend((code + len), &_state);
+    
+    JSValue ret = JS_NewStringLen(ctx, code, codelen) ;
+
+    JS_FreeCString(ctx, src) ;
+    free(code);
+
+    return ret ;
+}
+JSValue js_utils_base64_decode(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    CHECK_ARGC(1)
+    size_t codelen = 0 ;
+    char * code = JS_ToCStringLen(ctx, &codelen, argv[0]) ;
+    size_t srclen = base64_decode_expected_len(codelen) + 1;
+    char * src = (char *) malloc(srclen);
+    if(!src) {
+        JS_FreeCString(ctx, src) ;
+        THROW_EXCEPTION("Cound not malloc for decode, memory low ?")
+    }
+    
+    base64_decodestate _state;
+    base64_init_encodestate(&_state);
+
+    base64_decode_block((const char *) &code[0], codelen, &src[0], &_state);
+
+    JSValue ret = JS_NewStringLen(ctx, src, srclen) ;
+
+    JS_FreeCString(ctx, code) ;
+    free(src);
+
+    return ret ;
+}
+
 void require_module_utils(JSContext *ctx) {
 
     JSValue global = JS_GetGlobalObject(ctx);
     JS_SetPropertyStr(ctx, global, "global", global);
-
-    // JSValue console = JS_GetPropertyStr(ctx, global, "repl") ;
     JS_SetPropertyStr(ctx, global, "_repl_set_input_func", JS_NewCFunction(ctx, js_repl_set_input_func, "_repl_set_input_func", 1));
-	// JS_FreeValue(ctx, console);
 
 	// utils 
     JSValue utils = JS_NewObject(ctx);
@@ -221,12 +275,15 @@ void require_module_utils(JSContext *ctx) {
     JS_SetPropertyStr(ctx, utils, "ptrRefCnt", JS_NewCFunction(ctx, js_util_ptr_refcount, "ptrRefCnt", 1));
     JS_SetPropertyStr(ctx, utils, "varRefCnt", JS_NewCFunction(ctx, js_util_var_refcount, "varRefCnt", 1));
     JS_SetPropertyStr(ctx, utils, "varPtr", JS_NewCFunction(ctx, js_util_var_ptr, "varPtr", 1));
+    JS_SetPropertyStr(ctx, utils, "base64Encode", JS_NewCFunction(ctx, js_utils_base64_encode, "base64Encode", 1));
+    JS_SetPropertyStr(ctx, utils, "base64Decode", JS_NewCFunction(ctx, js_utils_base64_decode, "base64Decode", 1));
 
 	// global
     JS_SetPropertyStr(ctx, global, "setTimeout", JS_NewCFunction(ctx, js_util_set_timeout, "setTimeout", 1));
     JS_SetPropertyStr(ctx, global, "setInterval", JS_NewCFunction(ctx, js_util_set_interval, "setInterval", 1));
     JS_SetPropertyStr(ctx, global, "clearTimeout", JS_NewCFunction(ctx, js_util_clear_timeout, "clearTimeout", 1));
     JS_SetPropertyStr(ctx, global, "evalScript", JS_NewCFunction(ctx, js_fs_eval_script, "evalScript", 1));
+    JS_SetPropertyStr(ctx, global, "evalAsFile", JS_NewCFunction(ctx, js_fs_eval_as_file, "evalAsFile", 1));
     
 	JS_FreeValue(ctx, global);
 }

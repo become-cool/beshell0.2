@@ -1,7 +1,7 @@
 {
     "sta": {
-        "ssid": "" ,
-        "password": "" ,
+        "ssid": "alee's home" ,
+        "password": "43215678" ,
         "useDHCP": true ,
         "gateway": "" ,
         "netmask": "" ,

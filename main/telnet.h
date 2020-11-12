@@ -3,7 +3,7 @@
 #include <sys/types.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
-#include "protocol.h"
+#include "telnet_protocal.h"
 
 #include "quickjs-libc.h"
 
@@ -20,8 +20,6 @@ void telnet_send_pkg_str(char reqid, char cmd, char * data) ;
 
 
 void require_module_telnet(JSContext *ctx) ;
-
-void on_pkg_receive (char pkgid, char remain, char cmd, char datalen, void * ctx) ;
 
 uint8_t echo_pkgid() ;
 

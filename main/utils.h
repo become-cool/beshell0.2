@@ -65,7 +65,10 @@
 
 
 #define dd printf("@%d\n", __LINE__) ;
+#define df(msg) printf("@%d %s\n", __LINE__, msg) ;
 #define dm(msg) printf("%s: %dKB\n", msg, esp_get_free_heap_size()/1024);
+#define dn(v)   printf(#v"=%d\n", v) ;
+#define dn2(v1,v2)   printf(#v1"=%d, "#v2"=\n", v1, v2) ;
 
 #define dref(var,when) printf( "[%s]" #var " ref:%d\n", when, VAR_REFCNT(var)) ;
 

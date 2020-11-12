@@ -30,6 +30,7 @@ char * js_arg_to_vfspath(JSContext *ctx, JSValueConst argv) ;
         return JS_EXCEPTION ;                                                       \
     }
 
+#define PATH_PREFIX "/fs"
 
 bool fs_init() ;
 void require_module_fs(JSContext *ctx) ;

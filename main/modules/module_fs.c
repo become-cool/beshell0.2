@@ -13,8 +13,6 @@
 LOG_TAG("fs")
 
 // esp32 vfs 不能挂在根目录，将整个系统挂载到 /fs 下，访问时自动加上
-#define PATH_PREFIX "/fs"
-
 char * js_arg_to_vfspath(JSContext *ctx, JSValueConst argv) {
     char * jspath = JS_ToCString(ctx, argv) ;
     int len = strlen(jspath) ;

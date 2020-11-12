@@ -12,12 +12,12 @@ const CMD_OUTPUT = 7 ;
 // const CMD_FILE_APPEND_REQ = 11 ;
 // const CMD_FILE_PULL_REQ = 12 ;
 
-function mkresolve(pkgid) {
+function _mkresolve(pkgid) {
     return function(ret) {
         telnet.send(pkgid, CMD_RSPN, JSON.stringify(ret))
     }
 }
-function mkreject(pkgid) {
+function _mkreject(pkgid) {
     return function(ret) {
         telnet.send(pkgid, CMD_EXCEPTION, JSON.stringify(ret))
     }
@@ -44,7 +44,7 @@ _repl_set_input_func(function(pkgid, remain, pkgcmd, code){
             telnet.send(pkgid, CMD_RSPN, JSON.stringify(res))
         }
         else if(pkgcmd == CMD_CALL_ASYNC) {
-            // todo
+            evalAsFile(`{let resolve = _mkresolve(${pkgid});let reject = _mkreject(${pkgid}); code}`, "REPL")
         }
 
     } catch(e) {
@@ -68,6 +68,7 @@ function resolvepath(path) {
 
 let commands = {
     ls: function(path) {
+        console.log("ls", path)
         path = path? resolvepath(path): process.env.PWD
         for(let filename of fs.readdirSync(path)) {
             if(fs.isDirSync(path+'/'+filename))
@@ -125,6 +126,7 @@ let commands = {
         if(!path)
             return
         path = resolvepath(path)
+        console.log("cat --",path)
         console.log(fs.readFileSync(path))
     } ,
 
@@ -139,5 +141,5 @@ let commands = {
 }
 
 global.repl = {
-    commands,
+    commands, _mkresolve, _mkreject
 }

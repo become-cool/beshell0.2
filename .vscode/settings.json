@@ -5,6 +5,7 @@
         "memory": "c",
         "iosfwd": "c",
         "initializer_list": "c",
-        "type_traits": "c"
+        "type_traits": "c",
+        "cstddef": "cpp"
     }
 }

@@ -1,4 +1,5 @@
 #include "telnet.h"
+#include "module_fs.h"
 #include "driver/uart.h"
 #include <stdio.h>
 #include <sys/fcntl.h>
@@ -18,14 +19,19 @@ LOG_TAG("telnet")
 
 #define TELNET_PORT 8022
 
-uint8_t uart_recv_buf[256];
+uint8_t uart_recv_buff[256];
 uint8_t tcp_recv_buff[256];
+
+char send_buff [270] ;
+
+struct telnet_prot_buffer uart_pkg_buff ;
+struct telnet_prot_buffer tcp_pkg_buff ;
+
 
 uint8_t _echo_pkgid = 0 ;
 uint8_t echo_pkgid() {
 	return _echo_pkgid ++ ;
 }
-
 
 JSValue _func_repl_input = NULL ;
 void telnet_set_input_function(JSContext * ctx, JSValue func) {
@@ -43,7 +49,6 @@ void telnet_on_before_reset(JSContext *ctx) {
 		_func_repl_input = NULL ;
 	}
 }
-
 
 
 // --------------------
@@ -66,9 +71,14 @@ int sock_client = -1 ;
 struct sockaddr_in6 source_addr; // Large enough for both IPv4 or IPv6
 uint addr_len = sizeof(source_addr);
 
+void on_pkg_receive (uint8_t pkgid, uint8_t remain, uint8_t cmd, uint8_t * data, uint8_t datalen, void * ctx) ;
+
 void telnet_init() {
 
-	pPkgCmdProcess = on_pkg_receive ;
+	telnet_prot_on_package = on_pkg_receive ;
+
+	uart_pkg_buff.writepos = 0 ;
+	tcp_pkg_buff.writepos = 0 ;
 
 	// uart telnet ----------
     uart_driver_install(UART_NUM_0, 2*1024, 0, 0, NULL, 0);
@@ -154,13 +164,13 @@ void telnet_loop(JSContext *ctx) {
 
 	// UART 接收
 	if (FD_ISSET(uart_fd, &telnet_rfds)) {
-		int len = uart_read_bytes(0, uart_recv_buf, sizeof(uart_recv_buf), 0) ;
+		int len = uart_read_bytes(0, uart_recv_buff, sizeof(uart_recv_buff), 0) ;
+		// printf("receive %d\n", len) ;
 		if(len<0) {
 			printf("read uart error\n") ;
 		}
 		else {
-			WriteToBuffer(uart_recv_buf, len) ;
-			PACKAGE_LOOP(ctx)
+			telnet_prot_push_bytes(&uart_pkg_buff, uart_recv_buff, len, ctx) ;
 		}
 	} 
 	
@@ -205,14 +215,12 @@ void telnet_loop(JSContext *ctx) {
 		}
 		// 接收到数据
 		else {
-			WriteToBuffer(tcp_recv_buff, len) ;
-			PACKAGE_LOOP(ctx)
+			telnet_prot_push_bytes(&tcp_pkg_buff, tcp_recv_buff, len, ctx) ;
 		}
 	}
 }
 
 
-char * send_buff [270] ;
 
 void telnet_send_one_pkg(char pkgid, char remain, char cmd, char * data, uint8_t datalen) {
 
@@ -222,13 +230,12 @@ void telnet_send_one_pkg(char pkgid, char remain, char cmd, char * data, uint8_t
 	// printf("datalen=%d, pkglen=%d\n", datalen, pkglen) ;
 
 	// char * pkgbuff = malloc(pkglen) ;
-	Pack((uint8_t*)send_buff, pkgid, remain, cmd, (uint8_t*)data, datalen) ;
+	telnet_prot_pack((uint8_t*)send_buff, pkgid, remain, cmd, (uint8_t*)data, datalen) ;
 
 	// 串口输出
 	uart_write_bytes(0, send_buff, pkglen);
-	uart_wait_tx_done(0, 10000);
+	// uart_wait_tx_done(0, 10000);
 
-	
 	// tcp socket 输出
 	if(sock_client>-1) {
     	send(sock_client, send_buff, pkglen, 0) ;
@@ -240,7 +247,7 @@ void telnet_send_pkg(char pkgid, char cmd, char * data, uint16_t datalen) {
 	
 	int pkgcnt = (int) ceil( (float)datalen/(float)PKGLEN_MAX_DATA ) ;
 
-	// printf("datalen=%d, max=%d, pkgcnt=%d\n", datalen, PKGLEN_MAX_DATA, pkgcnt) ;
+	// printf("send>datalen=%d, max=%d, pkgcnt=%d\n", datalen, PKGLEN_MAX_DATA, pkgcnt) ;
 	// printf("%s\n",data) ;
 
 	for(int i=pkgcnt-1; i>=1; i--) {
@@ -316,27 +323,52 @@ void echo_error(JSContext * ctx) {
     JS_FreeValue(ctx, exception_val);
 }
 
-void on_pkg_receive (char pkgid, char remain, char cmd, char datalen, void * ctx){
-	// echof("pack received, pkgid=%d, cmd=%d, datalen=%d\n", pkgid, cmd, datalen) ;
+void write_file(char pkgid, const char * path, const char * src, size_t len, bool append) {
 
-	uint8_t * databuff = malloc(datalen+1) ;
-	if(!databuff) {
-		echo("Drop a package, memory low.") ;
-		return ;
+	// printf("pass in path: %s\n", path) ;
+
+	// printf("fopen: %s\n", append? "a+": "w") ;
+
+	int fd = fopen(path, append? "a+": "w");
+    if(fd<=0) {
+		telnet_send_pkg_str(pkgid, CMD_EXCEPTION, "Failed to open path") ;
+        return ;
+    }
+
+	size_t wroteBytes = fwrite(src, 1, len, fd);
+	// printf("wroteBytes=%d\n", wroteBytes) ;
+	if(wroteBytes<0) {
+		telnet_send_pkg_str(pkgid, CMD_EXCEPTION, "Failed to write") ;
 	}
-	MemCpy(databuff, 6, datalen) ;
+	else{
+		uint8_t _wroteBytes = (uint8_t)(wroteBytes&0xFF) ;
+		char jsnum[4] ; // 最大 (255 - 7)
+		snprintf(jsnum, sizeof(jsnum), "%d", _wroteBytes) ;
+		telnet_send_pkg_str(pkgid, CMD_RSPN, jsnum) ;
+	}
+
+	fclose(fd) ;
+}
+
+int _file_pushing_pkgid = -1 ;
+char * _file_pushing_path = NULL ;
+void on_pkg_receive (uint8_t pkgid, uint8_t remain, uint8_t cmd, uint8_t * data, uint8_t datalen, void * ctx){
+
+	// printf("pack received, pkgid=%d, remain=%d, cmd=%d, datalen=%d\n", pkgid, remain, cmd, datalen) ;
 
 	// JS代码/命令
 	if(cmd==CMD_RUN || cmd==CMD_CALL || cmd==CMD_CALL_ASYNC) {
-		*(databuff+datalen) = '\0' ;
+		// *(data+datalen) = '\0' ;
 		
 		if(_func_repl_input && JS_IsFunction(ctx, _func_repl_input)) {
 
-			JSValueConst * argv = malloc(sizeof(JSValue)*3) ;
+			JSValueConst * argv = malloc(sizeof(JSValue)*4) ;
 			argv[0] = JS_NewInt32(ctx, pkgid) ;
 			argv[1] = JS_NewInt32(ctx, remain) ;
 			argv[2] = JS_NewInt32(ctx, cmd) ;
-			argv[3] = JS_NewStringLen(ctx, (char *)databuff, datalen) ;
+			argv[3] = JS_NewStringLen(ctx, (char *)data, datalen) ;
+
+			// printf("%s\n", data) ;
 
 			JSValue ret = JS_Call(ctx, _func_repl_input, JS_NULL, 4, argv) ;
 			if( JS_IsException(ret) ) {
@@ -352,13 +384,85 @@ void on_pkg_receive (char pkgid, char remain, char cmd, char datalen, void * ctx
 		}
 	}
 
-	// 文件操作
+	/**
+	 * 文件操作
+	 * 
+	 * 第一个包: 路径 + \0 + 文件内容
+	 * 后续包: 文件内容
+	 */
 	else if(cmd==CMD_FILE_PUSH_REQ || cmd==CMD_FILE_APPEND_REQ) {
-		
-	}
-	else if(cmd==CMD_FILE_PULL_REQ) {
-		
+		if(_file_pushing_pkgid>-1 && _file_pushing_pkgid!=pkgid) {
+			_file_pushing_pkgid = -1 ;
+			if(_file_pushing_path) {
+				free(_file_pushing_path) ;
+				_file_pushing_path = NULL ;
+			}
+		}
+
+		// 新请求
+		if(_file_pushing_pkgid<0) {
+			if(_file_pushing_path) {
+				free(_file_pushing_path) ;
+			}
+
+			int pathlen = strnlen((char *)data, datalen) ;
+			// printf("path len: %d", pathlen) ;
+			if(pathlen==datalen) {
+				telnet_send_pkg_str(pkgid, CMD_EXCEPTION, "give me file path") ;
+				return ;
+			}
+
+			char * raw = (char *)data + pathlen + 1 ;
+			size_t rawlen = datalen - pathlen - 1 ;
+			// printf("rawlen=%d\n",rawlen) ;
+
+			// 加上实际文件系统 /fs 前缀
+			int realpathlen = pathlen + sizeof(PATH_PREFIX) ;
+			char * realpath = malloc(realpathlen+1) ;
+			if(!realpath) {
+				telnet_send_pkg_str(pkgid, CMD_EXCEPTION, "Could not malloc for path, memory low?") ;
+				return ;
+			}
+			snprintf(realpath, realpathlen+1, PATH_PREFIX"%s", (char *)data) ;
+			realpath[realpathlen] = 0 ;
+			// printf("real path: %s\n", realpath) ;
+
+			write_file(pkgid, realpath, raw, rawlen, cmd==CMD_FILE_APPEND_REQ ) ;
+
+			if(remain>0) {
+				_file_pushing_pkgid = pkgid ;
+				_file_pushing_path = malloc(realpathlen+1) ;
+				strcpy(_file_pushing_path, realpath) ;
+				// printf("_file_pushing_path=%s]]]\n",_file_pushing_path) ;
+			}
+
+			free(realpath) ;
+		}
+
+		// 后续包
+		else {
+			// printf("remain=%d, path=%s, datalen=%d\n",remain,_file_pushing_path,datalen) ;
+
+			write_file(pkgid, (char *)_file_pushing_path, (char *)data, datalen, true) ;
+			// 最后一个包
+			if(remain==0) {
+				_file_pushing_pkgid = -1 ;
+				if(_file_pushing_path) {
+					free(_file_pushing_path) ;
+					_file_pushing_path = NULL ;
+				}
+			}
+		}
 	}
 
-	free(databuff) ;
+	else if(cmd==CMD_FILE_APPEND_REQ) {
+
+	}
+
+	else {
+		char msg[32] ;
+		sprintf(msg, "unknow package cmd value: %d", cmd) ;
+		telnet_send_pkg_str(pkgid, CMD_EXCEPTION, msg) ;
+	}
+
 }

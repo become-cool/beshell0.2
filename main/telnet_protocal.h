@@ -1,16 +1,24 @@
-#ifndef __H_PROTOCOL
-#define __H_PROTOCOL
+#ifndef __TELNET_PROTOCAL
+#define __TELNET_PROTOCAL
 
 #include <stdbool.h>
 #include <stdint.h>
 
 #define PKGLEN_WITHOUT_DATA         7
+#define PKG_HEADER_LEN              6
 #define PKGLEN_MAX_DATA             248
 #define BUFFLEN_RECEIVE             260     // > PKGLEN_MAX_DATA + PKGLEN_WITHOUT_DATA
 
 // 05 18
 #define PKG_HEAD1                   5
 #define PKG_HEAD2                   18
+
+#define PKGPOS_HEAD1                0
+#define PKGPOS_HEAD2                1
+#define PKGPOS_ID                   2
+#define PKGPOS_REMAIN               3
+#define PKGPOS_CMD                  4
+#define PKGPOS_DATALEN              5
 
 #define CMD_RUN	                	1		// 执行js代码，无返回值
 #define CMD_CALL	                2		// 执行js代码，有返回值
@@ -25,27 +33,18 @@
 #define CMD_FILE_PULL_REQ			12		// 拉取文件. DATA区格式：路径(0结尾字符串) + Offset(uint32) + MaxSize(uint8)
 
 
-extern bool bHasUnread ;
+typedef void (*PkgCmdProcess)(uint8_t pkgId, uint8_t remain, uint8_t pkgCmd, const uint8_t * pkgDat, uint8_t pkgDatLen, const void * ctx);
+extern PkgCmdProcess telnet_prot_on_package ;
+
+struct telnet_prot_buffer {
+    uint8_t bytes[BUFFLEN_RECEIVE] ;
+    uint16_t writepos ;
+} ;
 
 
-typedef void (*PkgCmdRespone)(uint8_t * pkg, uint8_t len) ;
-typedef void (*PkgCmdProcess)(uint8_t pkgId, uint8_t remain, uint8_t pkgCmd, uint8_t pkgDatLen, void * ctx);
+void telnet_prot_push_char(struct telnet_prot_buffer * buff, uint8_t byte, const void * ctx) ;
+void telnet_prot_push_bytes(struct telnet_prot_buffer * buff, uint8_t * dat, uint8_t length, const void * ctx) ;
+uint8_t telnet_prot_pack(uint8_t * pkg, uint8_t pkgId, uint8_t remain, uint8_t cmd, uint8_t * dat, uint8_t datalen) ;
 
-extern PkgCmdProcess pPkgCmdProcess ;
-
-
-void ClearBuffer() ;
-
-void WriteCharToBuffer(uint8_t byte)  ;
-void WriteToBuffer(uint8_t * dat, uint8_t length)  ;
-
-bool ParsePackage() ;
-
-#define PACKAGE_LOOP(ctx) while(ParsePackage(ctx)) ;
-
-uint8_t ReadData(uint8_t offset) ;
-void MemCpy(uint8_t * bufTo, uint8_t offset, uint8_t length) ;
-
-uint8_t Pack(uint8_t * pkg, uint8_t pkgId, uint8_t remain, uint8_t cmd, uint8_t * data, uint8_t datalen) ;
 
 #endif

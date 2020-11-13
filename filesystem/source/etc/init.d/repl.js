@@ -126,7 +126,6 @@ let commands = {
         if(!path)
             return
         path = resolvepath(path)
-        console.log("cat --",path)
         console.log(fs.readFileSync(path))
     } ,
 

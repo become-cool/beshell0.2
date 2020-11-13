@@ -96,11 +96,18 @@ function __mkrequire(__dirname) {
             return Module.caches[path]
         }
 
-        let scriptDir = dirname(path)
-        let script = `var _$_module$ = {exports:{}} ; (function(exports, require, module, __filename, __dirname) { ${fs.readFileSync(path)}
+        // JSON 文件
+        if(path.match(/\.json$/i)) {
+            Module.caches[path] = JSON.load(path)
+        }
+        // JS 文件
+        else {
+            let scriptDir = dirname(path)
+            let script = `var _$_module$ = {exports:{}} ; (function(exports, require, module, __filename, __dirname) { ${fs.readFileSync(path)}
 })(_$_module$.exports, Module.__mkrequire("${scriptDir}"), _$_module$, "${path}", "${scriptDir}");
 _$_module$.exports`
-        Module.caches[path] = evalAsFile(script, path)
+            Module.caches[path] = evalAsFile(script, path)
+        }
         return Module.caches[path]
     }
 }
@@ -111,6 +118,10 @@ let Module = {
         '/lib/node_modules'
     ] ,
     __mkrequire
+}
+
+JSON.load = function(path) {
+    return JSON.parse(fs.readFileSync(path))
 }
 
 global.Module  = Module

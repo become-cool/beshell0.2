@@ -17,7 +17,7 @@ void telnet_set_input_function(JSContext * ctx, JSValue func) ;
 
 void telnet_send_pkg(char reqid, char cmd, char * data, uint16_t datalen) ;
 void telnet_send_pkg_str(char reqid, char cmd, char * data) ;
-
+void telnet_send_ready() ;
 
 void require_module_telnet(JSContext *ctx) ;
 

@@ -19,8 +19,19 @@
 
 JSRuntime *rt;
 JSContext *ctx;
-int boot_level = 5 ;
+uint8_t boot_level = 5 ;
 bool requst_reset = false ;
+
+
+uint8_t task_boot_level() {
+    return boot_level ;
+}
+
+void task_reset(int level) {
+    if(level>-1 && level<256)
+        boot_level = (uint8_t)level ;
+    requst_reset = true ;
+}
 
 JSContext * task_current_context() {
     return ctx ;
@@ -28,14 +39,14 @@ JSContext * task_current_context() {
 
 JSValue js_process_reset(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     if(argc>0 && JS_IsNumber(argv[0])) {
-        int level = 0;
+        int level = 0 ;
         if(JS_ToInt32(ctx, &level, argv[0])>=0) {
-            if(level>=0 && level<1000) {
-                boot_level = level ;
-            }
+            task_reset(level) ;
+            return JS_UNDEFINED ;
         }
     }
-    requst_reset = true ;
+
+    task_reset(-1) ;
     return JS_UNDEFINED ;
 }
 JSValue js_process_reboot(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
@@ -190,7 +201,8 @@ void init_quickjs() {
         EVAL_CODE(initScriptCodeBuff, ":init.d")
     }
 
-    printf("after boot_level\n") ;
+    // ready 包
+    telnet_send_ready() ;
 }
 
 void deinit_quickjs() {

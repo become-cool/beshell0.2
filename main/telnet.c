@@ -5,6 +5,8 @@
 #include <sys/fcntl.h>
 #include "esp_vfs.h"
 #include "utils.h"
+#include "beshell.h"
+#include "task_js.h"
 #include "esp_vfs_dev.h"
 #include "logging.h"
 #include <sys/errno.h>
@@ -19,8 +21,8 @@ LOG_TAG("telnet")
 
 #define TELNET_PORT 8022
 
-uint8_t uart_recv_buff[256];
-uint8_t tcp_recv_buff[256];
+uint8_t uart_recv_buff[128];
+uint8_t tcp_recv_buff[128];
 
 char send_buff [270] ;
 
@@ -54,7 +56,7 @@ void telnet_on_before_reset(JSContext *ctx) {
 // --------------------
 // UART
 uart_config_t uart_config = {
-	.baud_rate = 115200,
+	.baud_rate = 921600,			// 921600
 	.data_bits = UART_DATA_8_BITS,
 	.parity    = UART_PARITY_DISABLE,
 	.stop_bits = UART_STOP_BITS_1,
@@ -324,21 +326,34 @@ void echo_error(JSContext * ctx) {
 }
 
 void write_file(char pkgid, const char * path, const char * src, size_t len, bool append) {
-
-	// printf("pass in path: %s\n", path) ;
-
-	// printf("fopen: %s\n", append? "a+": "w") ;
-
 	int fd = fopen(path, append? "a+": "w");
     if(fd<=0) {
-		telnet_send_pkg_str(pkgid, CMD_EXCEPTION, "Failed to open path") ;
+
+		printf("%s\n", path) ;
+
+		char * msg = mallocf("Failed to open path %s", path) ;
+		if(msg) {
+			telnet_send_pkg_str(pkgid, CMD_EXCEPTION, msg) ;
+			free(msg) ;
+		}
+		else {
+			printf("memory low ?") ;
+		}
+		
         return ;
     }
 
 	size_t wroteBytes = fwrite(src, 1, len, fd);
 	// printf("wroteBytes=%d\n", wroteBytes) ;
 	if(wroteBytes<0) {
-		telnet_send_pkg_str(pkgid, CMD_EXCEPTION, "Failed to write") ;
+		char * msg = mallocf("Failed to write file %s", path) ;
+		if( msg ) {
+			telnet_send_pkg_str(pkgid, CMD_EXCEPTION, msg) ;
+			free(msg) ;
+		}
+		else {
+			printf("memory low ?") ;
+		}
 	}
 	else{
 		uint8_t _wroteBytes = (uint8_t)(wroteBytes&0xFF) ;
@@ -459,10 +474,25 @@ void on_pkg_receive (uint8_t pkgid, uint8_t remain, uint8_t cmd, uint8_t * data,
 
 	}
 
+	// 重置
+	else if(cmd==CMD_RESET) {
+		uint8_t level = -1 ;
+		if(datalen==1) {
+			level = *data ;
+		}
+		task_reset(level) ;
+	}
+	
 	else {
 		char msg[32] ;
 		sprintf(msg, "unknow package cmd value: %d", cmd) ;
 		telnet_send_pkg_str(pkgid, CMD_EXCEPTION, msg) ;
 	}
 
+}
+
+void telnet_send_ready() {
+	char * buff = mallocf("{\"firmware\":\"beshell\",\"version\":\"%s\",\"level\":%d}", BESHELL_VERSION, task_boot_level()) ;
+    telnet_send_pkg(0,CMD_READY,buff, strlen(buff)) ;
+	free(buff) ;
 }

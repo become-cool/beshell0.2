@@ -88,9 +88,19 @@ JSValue js_fs_exists_sync(JSContext *ctx, JSValueConst this_val, int argc, JSVal
     return exists? JS_TRUE: JS_FALSE ;
 }
 
+
+bool isDir(const char * path) {
+    struct stat statbuf;
+    if(stat(path,&statbuf)>=0) {
+        return S_ISDIR(statbuf.st_mode)? true: false ;
+    }
+    return false ;
+}
+
 // 递归创建目录
 int mkdir_p(char* file_path, mode_t mode) {
-    assert(file_path && *file_path);
+    if( !file_path || !(*file_path) )
+        return -1 ;
     for (char* p = strchr(file_path + 1, '/'); p; p = strchr(p + 1, '/')) {
         *p = '\0';
         if (mkdir(file_path, mode) == -1) {
@@ -101,7 +111,12 @@ int mkdir_p(char* file_path, mode_t mode) {
         }
         *p = '/';
     }
-    return 0;
+
+    if( !isDir(file_path) ) {
+        return mkdir(file_path, mode) ;
+    }
+    else 
+        return 0 ;
 }
 
 /**

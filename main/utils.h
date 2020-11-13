@@ -74,4 +74,7 @@
 
 uint64_t gettime() ;
 
+char * mallocf(char * format, ...) ;
+
+
 #endif

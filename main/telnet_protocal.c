@@ -82,6 +82,13 @@ void telnet_prot_push_char(struct telnet_prot_buffer * buff, uint8_t byte, const
 }
 
 void telnet_prot_push_bytes(struct telnet_prot_buffer * buff, uint8_t * dat, uint8_t length, const void * ctx) {
+    
+    // printf("[") ;
+    // for(uint8_t i=0; i<length; i++) {
+    //     printf("%d,", *(dat+i)) ;
+    // }
+    // printf("]\n") ;
+
     for(uint8_t i=0; i<length; i++) {
         telnet_prot_push_char( buff, *(dat++), ctx ) ;
     }

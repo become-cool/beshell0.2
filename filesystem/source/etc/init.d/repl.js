@@ -23,9 +23,27 @@ function _mkreject(pkgid) {
     }
 }
 
+let _pending_pkg_id = -1
+let _pending_code = ''
+
 _repl_set_input_func(function(pkgid, remain, pkgcmd, code){
+
+    if(_pending_pkg_id>0 && _pending_pkg_id!=pkgid) {
+        _pending_pkg_id = -1
+        _pending_code = ''
+    }
+
+    _pending_code+= code
+
+    if(remain>0) {
+        return
+    }
     
-    code = code.trim()
+    code = _pending_code.trim()
+    _pending_pkg_id = -1
+    _pending_code = ''
+
+    console.log(">>", code)
 
     let p = code.indexOf(' ')
     let cmd = p<0? code: code.substr(0, p)

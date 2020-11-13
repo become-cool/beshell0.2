@@ -13,8 +13,11 @@ function module_list(){
         if(!fs.isFileSync(packagePath)) {
             continue
         }
-
-        let pkg = JSON.load(packagePath)
+        try{
+            var pkg = JSON.load(packagePath)
+        }catch(e){
+            continue
+        }
         if(!pkg.become) {
             continue
         }

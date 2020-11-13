@@ -29,6 +29,8 @@ char send_buff [270] ;
 struct telnet_prot_buffer uart_pkg_buff ;
 struct telnet_prot_buffer tcp_pkg_buff ;
 
+int _file_pushing_pkgid = -1 ;
+char * _file_pushing_path = NULL ;
 
 uint8_t _echo_pkgid = 0 ;
 uint8_t echo_pkgid() {
@@ -49,6 +51,12 @@ void telnet_on_before_reset(JSContext *ctx) {
 	if(_func_repl_input) {
 		JS_FreeValue(ctx, _func_repl_input) ;
 		_func_repl_input = NULL ;
+	}
+
+	_file_pushing_pkgid = -1 ;
+	if(_file_pushing_path) {
+		free(_file_pushing_path) ;
+		_file_pushing_path = NULL ;
 	}
 }
 
@@ -329,7 +337,7 @@ void write_file(char pkgid, const char * path, const char * src, size_t len, boo
 	int fd = fopen(path, append? "a+": "w");
     if(fd<=0) {
 
-		printf("%s\n", path) ;
+		// printf("%s\n", path) ;
 
 		char * msg = mallocf("Failed to open path %s", path) ;
 		if(msg) {
@@ -365,8 +373,6 @@ void write_file(char pkgid, const char * path, const char * src, size_t len, boo
 	fclose(fd) ;
 }
 
-int _file_pushing_pkgid = -1 ;
-char * _file_pushing_path = NULL ;
 void on_pkg_receive (uint8_t pkgid, uint8_t remain, uint8_t cmd, uint8_t * data, uint8_t datalen, void * ctx){
 
 	// printf("pack received, pkgid=%d, remain=%d, cmd=%d, datalen=%d\n", pkgid, remain, cmd, datalen) ;
@@ -416,12 +422,15 @@ void on_pkg_receive (uint8_t pkgid, uint8_t remain, uint8_t cmd, uint8_t * data,
 
 		// 新请求
 		if(_file_pushing_pkgid<0) {
+
+			// printf("new write\n") ;
+
 			if(_file_pushing_path) {
 				free(_file_pushing_path) ;
 			}
 
 			int pathlen = strnlen((char *)data, datalen) ;
-			// printf("path len: %d", pathlen) ;
+			// printf("path len: %d\n", pathlen) ;
 			if(pathlen==datalen) {
 				telnet_send_pkg_str(pkgid, CMD_EXCEPTION, "give me file path") ;
 				return ;
@@ -456,6 +465,7 @@ void on_pkg_receive (uint8_t pkgid, uint8_t remain, uint8_t cmd, uint8_t * data,
 
 		// 后续包
 		else {
+			// printf("append write(%d)\n", _file_pushing_pkgid) ;
 			// printf("remain=%d, path=%s, datalen=%d\n",remain,_file_pushing_path,datalen) ;
 
 			write_file(pkgid, (char *)_file_pushing_path, (char *)data, datalen, true) ;

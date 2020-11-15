@@ -289,12 +289,10 @@ JSValue js_telnet_send(JSContext *ctx, JSValueConst this_val, int argc, JSValueC
 
 	// printf("pkgid=%d, cmd=%d\n", pkgid, cmd) ;
 
-	if( JS_IsString(argv[2]) ) {
-		ARGV_TO_STRING(2, data, datalen)
-		// printf("data=%s, datalen=%d\n", data, datalen) ;
-		telnet_send_pkg(pkgid, cmd, data, datalen) ;
-		JS_FreeCString(ctx, data) ;
-	}
+	ARGV_TO_STRING(2, data, datalen)
+	// printf("send pkg data=%s, datalen=%d\n", data, datalen) ;
+	telnet_send_pkg(pkgid, cmd, data, datalen) ;
+	JS_FreeCString(ctx, data) ;
 
 	// @todo : array/ArrayBuffer
 	return JS_UNDEFINED ;
@@ -480,9 +478,71 @@ void on_pkg_receive (uint8_t pkgid, uint8_t remain, uint8_t cmd, uint8_t * data,
 		}
 	}
 
-	else if(cmd==CMD_FILE_APPEND_REQ) {
+	else if(cmd==CMD_FILE_PULL_REQ){
 
+		// printf("CMD_FILE_PULL_REQ\n") ;
+
+		int pathlen = strnlen((char *)data, datalen) ;
+		if(pathlen==datalen) {
+			telnet_send_pkg_str(pkgid, CMD_EXCEPTION, "give me file path") ;
+			return ;
+		}
+
+		if( pathlen+7 != datalen ){
+			telnet_send_pkg_str(pkgid, CMD_EXCEPTION, "missing argv") ;
+			return ;
+		}
+
+		uint32_t offset = * (uint32_t*)(data + pathlen + 1) ;
+		uint16_t bytelen = * (uint16_t*)(data + pathlen + 5) ;
+
+		// printf("offset=%d, bytelen=%d\n", offset, bytelen) ;
+
+		if((bytelen) > PKGLEN_MAX_DATA*255) {
+			telnet_send_pkg_str(pkgid, CMD_EXCEPTION, "read length too large") ;
+			return ;
+		}
+
+		char * realpath = mallocf(PATH_PREFIX"%s", (char *)data) ;
+		if(!realpath) {
+			telnet_send_pkg_str(pkgid, CMD_EXCEPTION, "failed to malloc for path, memory low?") ;
+		}
+
+		if((bytelen)==0) {
+			struct stat statbuf;
+    		if(stat(realpath,&statbuf)<0 || !S_ISREG(statbuf.st_mode)){
+				telnet_send_pkg_str(pkgid, CMD_EXCEPTION, "failed to open file") ;
+			}
+			bytelen = statbuf.st_size ;
+			// printf("file size: %d\n", bytelen) ;
+		}
+		
+		int fd = fopen(realpath, "r");
+		free(realpath) ;
+
+		if(fd<0) {
+			telnet_send_pkg_str(pkgid, CMD_EXCEPTION, "failed to open file") ;
+			return ;
+		}
+
+		char * bytes = malloc(bytelen) ;
+		if(!bytes) {
+			telnet_send_pkg_str(pkgid, CMD_EXCEPTION, "failed to malloc, memory low?") ;
+			return ;
+		}
+
+		if(offset>0) {
+        	fseek(fd, offset, SEEK_SET) ;
+		}
+
+		size_t readbytes = fread(bytes, 1, bytelen, fd) ;
+		// printf("req size: %d, readed size: %d, errno=%d\n",bytelen,readbytes,errno ) ;
+		fclose(fd) ;
+
+		telnet_send_pkg(pkgid, CMD_DATA, bytes, readbytes) ;
+		free(bytes) ;
 	}
+
 
 	// 重置
 	else if(cmd==CMD_RESET) {

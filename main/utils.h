@@ -11,6 +11,19 @@
     JS_ThrowReferenceError(ctx, msg);                       \
     return JS_EXCEPTION ;
 
+#define THROW_FORMAT(format, ...)                           \
+    {                                                       \
+        char * msg = mallocf(__VA_ARGS__) ;                 \
+        if( msg ) {                                         \
+            JS_ThrowReferenceError(ctx, msg);               \
+            free(msg) ;                                     \
+        }                                                   \
+        else {                                              \
+            JS_ThrowReferenceError(ctx, format);            \
+        }                                                   \
+        return JS_EXCEPTION ;                               \
+    }
+
 #define CHECK_ARGC(num)                                     \
     if(argc<num) {                                          \
         THROW_EXCEPTION("Missing param path")               \

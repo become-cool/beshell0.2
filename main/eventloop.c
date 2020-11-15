@@ -71,7 +71,20 @@ void eventloop_out(JSContext *ctx, struct eventloop_callback_t * prev, struct ev
 
 }
 
-void eventloop_punp(JSContext *ctx) {
+void eventloop_remove(JSContext *ctx, struct eventloop_callback_t * item) {
+    for(
+        struct eventloop_callback_t * prev = NULL, * current = _callback_stack_top;
+        current!=NULL ;
+        prev=current, current=current->next
+    ) {
+        if(current == item) {
+            eventloop_out(ctx, prev, current) ;
+            return ;
+        }
+    }
+}
+
+void eventloop_pump(JSContext *ctx) {
     if(!_callback_stack_top) {
         return ;
     }
@@ -84,7 +97,7 @@ void eventloop_punp(JSContext *ctx) {
             goto next ;
         }
 
-        JSValue ret = JS_Call(ctx, current->func, JS_UNDEFINED, 0, NULL) ;
+        JSValue ret = JS_Call(ctx, current->func, JS_UNDEFINED, current->argc, current->argv) ;
         if( JS_IsException(ret) ) {
             js_std_dump_error(ctx) ;
         }
@@ -94,7 +107,7 @@ void eventloop_punp(JSContext *ctx) {
         if(!current->repeat) {
             struct eventloop_callback_t * _current = current;
             current = current->next ;
-            eventloop_out(ctx, prev, _current) ;
+            eventloop_remove(ctx, _current) ;
             continue ;
         }
 
@@ -114,19 +127,6 @@ void eventloop_punp(JSContext *ctx) {
     next:
         prev=current ;
         current=current->next ;
-    }
-}
-
-void eventloop_remove(JSContext *ctx, struct eventloop_callback_t * item) {
-    for(
-        struct eventloop_callback_t * prev = NULL, * current = _callback_stack_top;
-        current!=NULL ;
-        prev=current, current=current->next
-    ) {
-        if(current == item) {
-            eventloop_out(ctx, prev, current) ;
-            return ;
-        }
     }
 }
 

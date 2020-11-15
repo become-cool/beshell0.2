@@ -96,6 +96,13 @@ bool isDir(const char * path) {
     }
     return false ;
 }
+bool isFile(const char * path) {
+    struct stat statbuf;
+    if(stat(path,&statbuf)>=0) {
+        return S_ISREG(statbuf.st_mode)? true: false ;
+    }
+    return false ;
+}
 
 // 递归创建目录
 int mkdir_p(char* file_path, mode_t mode) {
@@ -258,8 +265,8 @@ JSValue js_fs_write_file_sync(JSContext *ctx, JSValueConst this_val, int argc, J
 
 	int fd = fopen(path, append? "a+": "w");
     if(fd<=0) {
+        JS_ThrowReferenceError(ctx, "Failed to open file %s", path);
         free(path) ;
-        JS_ThrowReferenceError(ctx, "Failed to open file");
         return JS_EXCEPTION ;
     }
 
@@ -278,7 +285,7 @@ JSValue js_fs_write_file_sync(JSContext *ctx, JSValueConst this_val, int argc, J
     else {
         free(path) ;
         fclose(fd) ;
-        JS_ThrowReferenceError(ctx, "Invalid param type of path.");
+        JS_ThrowReferenceError(ctx, "Invalid param type of path");
         return JS_EXCEPTION ;
     }
 
@@ -306,12 +313,13 @@ JSValue js_fs_readdir_sync(JSContext *ctx, JSValueConst this_val, int argc, JSVa
 
     JS2VSFPath(path, argv[0]) ;
     DIR* dir = opendir(path);
-    free(path) ;
 
     if(!dir) {
-        JS_ThrowReferenceError(ctx, "Cound not open dir");
+        JS_ThrowReferenceError(ctx, "Cound not open dir %s", path);
+        free(path) ;
         return JS_EXCEPTION ;
     }
+    free(path) ;
     
     struct dirent *dirEnt;
     JSValue array = JS_NewArray(ctx) ;
@@ -320,9 +328,71 @@ JSValue js_fs_readdir_sync(JSContext *ctx, JSValueConst this_val, int argc, JSVa
     while((dirEnt = readdir(dir))) {
         JS_SetPropertyUint32(ctx, array, idx++, JS_NewString(ctx, dirEnt->d_name)) ;
     }
+
     closedir(dir);
+    
 
     return array ;
+}
+
+bool rm(const char * path, bool recursive) {
+
+    struct stat statbuf;
+
+    // 文件不存在
+    if(stat(path,&statbuf)<0) {
+        return true ;
+    }
+
+    // 直接删除文件
+    if(S_ISREG(statbuf.st_mode)) {
+        return unlink(path)>-1 ;
+    }
+
+    // 目录
+    else if(S_ISDIR(statbuf.st_mode)) {
+        // 递归删除文件/子目录
+        if(recursive) {
+            DIR* dir = opendir(path);
+            size_t pathlen = strlen(path) ;
+            if(dir) {
+                struct dirent *dirEnt;
+                while((dirEnt = readdir(dir))) {
+                    size_t namelen = strlen(dirEnt->d_name) ;
+                    char * childpath = malloc(pathlen+namelen+2) ;
+                    if(childpath) {
+                        memcpy(childpath, path, pathlen) ;
+                        childpath[pathlen] = '/' ;
+                        memcpy(childpath+pathlen+1, dirEnt->d_name, namelen) ;
+                        childpath[pathlen+namelen+1] = 0 ;
+                        
+                        rm(childpath, recursive) ;
+                        free(childpath) ;
+                    }
+                }
+            }
+        }
+
+        return rmdir(path) > -1 ;
+    }
+
+    // unknow type? soft link ?
+    return false ;
+}
+
+JSValue js_fs_rm_sync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    CHECK_ARGC(1)
+    JS2VSFPath(path, argv[0]) ;
+
+    bool recursive = false ;
+    if(argc>1) {
+        recursive = JS_ToBool(ctx, argv[1]) ;
+    }
+
+    bool ret = rm(path, recursive) ;
+    free(path) ;
+
+    return ret? JS_TRUE: JS_FALSE ;
 }
 
 bool fs_init() {
@@ -353,6 +423,7 @@ void require_module_fs(JSContext *ctx) {
     JS_SetPropertyStr(ctx, fs, "readdirSync", JS_NewCFunction(ctx, js_fs_readdir_sync, "readdirSync", 1));
     JS_SetPropertyStr(ctx, fs, "mkdirSync", JS_NewCFunction(ctx, js_fs_mkdir_sync, "mkdirSync", 1));
     JS_SetPropertyStr(ctx, fs, "rmdirSync", JS_NewCFunction(ctx, js_fs_rmdir_sync, "rmdirSync", 1));
+    JS_SetPropertyStr(ctx, fs, "rmSync", JS_NewCFunction(ctx, js_fs_rm_sync, "rmSync", 1));
     JS_SetPropertyStr(ctx, fs, "existsSync", JS_NewCFunction(ctx, js_fs_exists_sync, "existsSync", 1));
     JS_SetPropertyStr(ctx, fs, "isDirSync", JS_NewCFunction(ctx, js_fs_is_dir_sync, "isDirSync", 1));
     JS_SetPropertyStr(ctx, fs, "isFileSync", JS_NewCFunction(ctx, js_fs_is_file_sync, "isFileSync", 1));

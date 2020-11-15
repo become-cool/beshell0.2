@@ -69,8 +69,8 @@ const DRAM_ATTR esp32_gpioMux_t esp32_gpioMux[GPIO_PIN_COUNT]={
     {0x10, 3, 3, -1}
 };
 
-typedef void (*voidFuncPtr)(void);
-typedef void (*voidFuncPtrArg)(void*);
+typedef void (*voidFuncPtr)(uint8_t pin, uint8_t val);
+typedef void (*voidFuncPtrArg)(uint8_t pin, uint8_t val, void*);
 typedef struct {
     voidFuncPtr fn;
     void* arg;
@@ -201,6 +201,8 @@ static intr_handle_t gpio_intr_handle = NULL;
 
 static void IRAM_ATTR __onPinInterrupt()
 {
+    printf("__onPinInterrupt()\n") ;
+
     uint32_t gpio_intr_status_l=0;
     uint32_t gpio_intr_status_h=0;
 
@@ -215,9 +217,9 @@ static void IRAM_ATTR __onPinInterrupt()
             if(gpio_intr_status_l & ((uint32_t)1 << pin)) {
                 if(__pinInterruptHandlers[pin].fn) {
                     if(__pinInterruptHandlers[pin].arg){
-                        ((voidFuncPtrArg)__pinInterruptHandlers[pin].fn)(__pinInterruptHandlers[pin].arg);
+                        ((voidFuncPtrArg)__pinInterruptHandlers[pin].fn)(pin, 0, __pinInterruptHandlers[pin].arg);
                     } else {
-                        __pinInterruptHandlers[pin].fn();
+                        __pinInterruptHandlers[pin].fn(pin, 0);
                     }
                 }
             }
@@ -229,9 +231,9 @@ static void IRAM_ATTR __onPinInterrupt()
             if(gpio_intr_status_h & ((uint32_t)1 << (pin - 32))) {
                 if(__pinInterruptHandlers[pin].fn) {
                     if(__pinInterruptHandlers[pin].arg){
-                        ((voidFuncPtrArg)__pinInterruptHandlers[pin].fn)(__pinInterruptHandlers[pin].arg);
+                        ((voidFuncPtrArg)__pinInterruptHandlers[pin].fn)(pin, 1, __pinInterruptHandlers[pin].arg);
                     } else {
-                        __pinInterruptHandlers[pin].fn();
+                        __pinInterruptHandlers[pin].fn(pin, 1);
                     }
                 }
             }
@@ -239,7 +241,7 @@ static void IRAM_ATTR __onPinInterrupt()
     }
 }
 
-extern void cleanupFunctional(void* arg);
+// extern void cleanupFunctional(void* arg);
 
 extern void __attachInterruptFunctionalArg(uint8_t pin, voidFuncPtrArg userFunc, void * arg, int intr_type, bool functional)
 {
@@ -251,10 +253,10 @@ extern void __attachInterruptFunctionalArg(uint8_t pin, voidFuncPtrArg userFunc,
     }
 
     // if new attach without detach remove old info
-    if (__pinInterruptHandlers[pin].functional && __pinInterruptHandlers[pin].arg)
-    {
-    	cleanupFunctional(__pinInterruptHandlers[pin].arg);
-    }
+    // if (__pinInterruptHandlers[pin].functional && __pinInterruptHandlers[pin].arg)
+    // {
+    // 	cleanupFunctional(__pinInterruptHandlers[pin].arg);
+    // }
     __pinInterruptHandlers[pin].fn = (voidFuncPtr)userFunc;
     __pinInterruptHandlers[pin].arg = arg;
     __pinInterruptHandlers[pin].functional = functional;
@@ -281,10 +283,10 @@ extern void __attachInterrupt(uint8_t pin, voidFuncPtr userFunc, int intr_type) 
 extern void __detachInterrupt(uint8_t pin)
 {
     esp_intr_disable(gpio_intr_handle);
-    if (__pinInterruptHandlers[pin].functional && __pinInterruptHandlers[pin].arg)
-    {
-    	cleanupFunctional(__pinInterruptHandlers[pin].arg);
-    }
+    // if (__pinInterruptHandlers[pin].functional && __pinInterruptHandlers[pin].arg)
+    // {
+    // 	cleanupFunctional(__pinInterruptHandlers[pin].arg);
+    // }
     __pinInterruptHandlers[pin].fn = NULL;
     __pinInterruptHandlers[pin].arg = NULL;
     __pinInterruptHandlers[pin].functional = false;

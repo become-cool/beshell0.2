@@ -27,10 +27,11 @@
 #define CMD_EXCEPTION	            5		// CMD_RUN/CMD_CALL 的异常
 #define CMD_CALLBACK                6		// 执行本地js代码(远程发起)
 #define CMD_OUTPUT	                7		// 远程输出
+#define CMD_DATA	                8		// 数据包(用于 CMD_FILE_PULL_REQ 的回应)
 
 #define CMD_FILE_PUSH_REQ			10		// 发送文件. DATA区格式：路径(0结尾字符串) + 文件内容
 #define CMD_FILE_APPEND_REQ			11		// 发送文件后续内容. DATA区格式和 CMD_FILE_APPEND 相同
-#define CMD_FILE_PULL_REQ			12		// 拉取文件. DATA区格式：路径(0结尾字符串) + Offset(uint32) + MaxSize(uint8)
+#define CMD_FILE_PULL_REQ			12		// 拉取文件. DATA区格式：路径(0结尾字符串) + Offset(uint32) + MaxSize(uint16)
 #define CMD_RESET			        30		// 重置命令. DATA区格式：boot_level (uint8)
 #define CMD_READY           		31		// 系统准备就绪事件
 

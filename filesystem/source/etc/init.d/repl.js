@@ -43,13 +43,12 @@ _repl_set_input_func(function(pkgid, remain, pkgcmd, code){
     _pending_pkg_id = -1
     _pending_code = ''
 
-    console.log(">>", code)
-
     let p = code.indexOf(' ')
     let cmd = p<0? code: code.substr(0, p)
 
     if(commands[cmd]) {
-        commands[cmd] (p<0? '': code.substr(p+1))
+        let res = commands[cmd] (p<0? '': code.substr(p+1))
+        telnet.send(pkgid, CMD_RSPN, "<~empty rspn~>")
         return
     }
 
@@ -86,13 +85,23 @@ function resolvepath(path) {
 
 let commands = {
     ls: function(path) {
-        console.log("ls", path)
         path = path? resolvepath(path): process.env.PWD
+        let output = ''
         for(let filename of fs.readdirSync(path)) {
-            if(fs.isDirSync(path+'/'+filename))
+            let stat = fs.statSync(path+'/'+filename)
+            if(stat.isDir)
                 filename+= '/'
-            console.log(filename)
+            else {
+                let size = stat.size
+                if(size>1048576)
+                    size = (size/1048576).toFixed(1) + 'MB'
+                else if(size>1024)
+                    size = (size/1024).toFixed(1) + 'KB'
+                filename = '[' + size + "]\t" + filename
+            }
+            output+= filename + "\n"
         }
+        console.log(output)
     } ,
 
     cd: function(path) {

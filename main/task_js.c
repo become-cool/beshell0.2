@@ -221,10 +221,9 @@ void task_js_main(){
     wifi_init() ;
     telnet_init() ;
     sniffer_init() ;
-
+    gpio_init() ;
 
     init_quickjs() ;
-
 
     while(1) {
 
@@ -232,6 +231,7 @@ void task_js_main(){
 
             telnet_on_before_reset(ctx) ;
             eventloop_on_before_reset(ctx) ;
+            gpio_on_before_reset(ctx) ;
 
             deinit_quickjs() ;
             init_quickjs() ;
@@ -242,7 +242,7 @@ void task_js_main(){
         js_std_loop(ctx) ;
         telnet_loop(ctx) ;
         sniffer_loop() ;
-        eventloop_punp(ctx) ;
+        eventloop_pump(ctx) ;
 
         js_std_loop(ctx) ;
         

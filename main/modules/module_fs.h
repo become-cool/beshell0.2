@@ -17,16 +17,16 @@ char * js_arg_to_vfspath(JSContext *ctx, JSValueConst argv) ;
 #define STAT_PATH(path)                                                             \
     struct stat statbuf;                                                            \
     if(stat(path,&statbuf)<0) {                                                     \
+        JS_ThrowReferenceError(ctx, "Failed to stat file %s", path);                \
         free(path) ;                                                                \
-        JS_ThrowReferenceError(ctx, "Failed to stat file.");                        \
         return JS_EXCEPTION ;                                                       \
     }
 
 #define CHECK_ARGV0_NOT_DIR(path)                                                   \
     STAT_PATH(path)                                                                 \
     if(S_ISDIR(statbuf.st_mode)) {                                                  \
+        JS_ThrowReferenceError(ctx, "Path is a directory %s", path);                \
         free(path) ;                                                                \
-        JS_ThrowReferenceError(ctx, "Path is a directory.");                        \
         return JS_EXCEPTION ;                                                       \
     }
 

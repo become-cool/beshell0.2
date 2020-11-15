@@ -20,7 +20,7 @@ inline struct eventloop_callback_t * eventloop_header() ;
 struct eventloop_callback_t * eventloop_push(JSContext *ctx, JSValue func, int interval, bool repeat) ;
 struct eventloop_callback_t * eventloop_push_with_argv(JSContext *ctx, JSValue func, int argc, JSValueConst *argv) ;
 
-void eventloop_punp(JSContext *ctx) ;
+void eventloop_pump(JSContext *ctx) ;
 
 void eventloop_remove(JSContext *ctx, struct eventloop_callback_t * item) ;
 

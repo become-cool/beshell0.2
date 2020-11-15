@@ -6,8 +6,6 @@ try{
 
     require("./init.d/wifi.js")
 
-    require('./init.d/beconsoled.js')
-
     console.log('BeShell is ready.')
 
 }

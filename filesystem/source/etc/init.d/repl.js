@@ -5,8 +5,8 @@ const CMD_CALL = 2 ;
 const CMD_CALL_ASYNC = 3 ;
 const CMD_RSPN = 4 ;
 const CMD_EXCEPTION = 5 ;
-const CMD_CALLBACK = 6 ;
-const CMD_OUTPUT = 7 ;
+// const CMD_CALLBACK = 6 ;
+// const CMD_OUTPUT = 7 ;
 
 // const CMD_FILE_PUSH_REQ = 10 ;
 // const CMD_FILE_APPEND_REQ = 11 ;

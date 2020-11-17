@@ -358,7 +358,7 @@ JSValue js_pwm_write(JSContext *ctx, JSValueConst this_val, int argc, JSValueCon
 endloop:
 
     duty = value * pow(2,timerHolds[speedMode][ channelHolds[speedMode][channel].timer ].resolution) + 0.5 ;
-    printf("speed mode:%d, channel:%d, duty: %d\n", speedMode, channel, duty) ;
+    // printf("speed mode:%d, channel:%d, duty: %d\n", speedMode, channel, duty) ;
 
     esp_err_t ret = ledc_set_duty(speedMode, channel, duty) ;
     if(ret<0) {

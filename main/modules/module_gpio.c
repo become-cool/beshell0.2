@@ -150,7 +150,7 @@ JSValue js_pwm_config_channel(JSContext *ctx, JSValueConst this_val, int argc, J
     ARGV_TO_UINT8(3, timer)
     ARGV_TO_UINT8(4, speedMode)
     
-    printf("gpio=%d, duty=%d, channel=%d, timer=%d, speedMode=%d \n",gpio,duty,channel,timer, speedMode) ;
+    // printf("gpio=%d, duty=%d, channel=%d, timer=%d, speedMode=%d \n",gpio,duty,channel,timer, speedMode) ;
 
     if(timer<0 || timer>4) {
         THROW_EXCEPTION("pwm timer must be 0-4")
@@ -191,23 +191,23 @@ channel_hold_t channelHolds[2][8] = {
     {{255,255},{255,255},{255,255},{255,255},{255,255},{255,255},{255,255},{255,255}}
 };
 
-/**
- * gpio
- * freq
- * resolution  1-20
- * duty
- */
-JSValue js_pwm_config(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-    CHECK_ARGC(4)
-    ARGV_TO_UINT8(0, gpio)
-    ARGV_TO_UINT32(1, freq)
-    ARGV_TO_UINT8(2, resolution)
-    ARGV_TO_UINT32(3, duty)
 
-    if(resolution<1 || resolution>20) {
-        THROW_EXCEPTION("pwm resolution must be 1-20(bit)")
+// 释放没有被占用的 timer
+void free_timer(uint8_t speedMode, uint8_t timer){
+    for(uint8_t c=0; c<LEDC_CHANNEL_MAX; c++) {
+        if(channelHolds[speedMode][c].timer == timer) {
+            return ;
+        }
     }
 
+    // printf("free timer %d\n",timer) ;
+
+    timerHolds[speedMode][timer].freq = 255 ;
+    timerHolds[speedMode][timer].resolution = 255 ;
+}
+
+JSValue pwm_config(JSContext *ctx, uint8_t gpio, uint32_t freq, uint8_t resolution, uint32_t duty, int8_t * outSpeedMode, int8_t * outChannel){
+    
     uint8_t channel = 255 ;
     uint8_t timer = 255 ;
     uint8_t speedMode=0 ;
@@ -230,6 +230,14 @@ JSValue js_pwm_config(JSContext *ctx, JSValueConst this_val, int argc, JSValueCo
         // 无可用 channel , 切换 speed mode 再找
         if(channel==255) {
             continue ;
+        }
+
+        // 如果该 channal 已经被设置，其使用的timer 没有其他 channel 使用
+        // 则先释放这个timer
+        if(channelHolds[speedMode][channel].timer!=255){
+            uint8_t _t = channelHolds[speedMode][channel].timer ;
+            channelHolds[speedMode][channel].timer = 255 ;  // 解除此 channel 对 timer 的引用
+            free_timer( speedMode, _t ) ;
         }
 
         // 分配 timer
@@ -257,6 +265,11 @@ JSValue js_pwm_config(JSContext *ctx, JSValueConst this_val, int argc, JSValueCo
     if(speedMode>=LEDC_SPEED_MODE_MAX) {
         THROW_EXCEPTION("There is no free timer or channel for this gpio") ;
     }
+
+    if(outSpeedMode)
+        *outSpeedMode = speedMode ;
+    if(outChannel)
+        *outChannel = channel ;
 
     // printf("use speed mode:%d, timer:%d, channel: %d\n", speedMode, timer, channel) ;
 
@@ -294,10 +307,27 @@ JSValue js_pwm_config(JSContext *ctx, JSValueConst this_val, int argc, JSValueCo
     if(ret<0) {
         return JS_NewInt32(ctx, ret-1000) ;
     }
-
     return JS_NewInt32(ctx, 0) ;
 }
 
+/**
+ * gpio
+ * freq
+ * resolution  1-20
+ * duty
+ */
+JSValue js_pwm_config(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(4)
+    ARGV_TO_UINT8(0, gpio)
+    ARGV_TO_UINT32(1, freq)
+    ARGV_TO_UINT8(2, resolution)
+    ARGV_TO_UINT32(3, duty)
+
+    if(resolution<1 || resolution>20) {
+        THROW_EXCEPTION("pwm resolution must be 1-20(bit)")
+    }
+    return pwm_config(ctx, gpio, freq, resolution, duty, NULL, NULL) ;
+}
 
 /**
  * gpio
@@ -307,11 +337,11 @@ JSValue js_pwm_write(JSContext *ctx, JSValueConst this_val, int argc, JSValueCon
 
     CHECK_ARGC(2)
     ARGV_TO_UINT8(0, gpio)
-    ARGV_TO_UINT32(1, duty)
+    ARGV_TO_DOUBLE(1, value)
+    uint32_t duty = 0 ;
 
-    esp_err_t ret = 0 ;
-    int8_t channel = 255 ;
     int8_t speedMode = 255 ;
+    int8_t channel = 255 ;
     for(speedMode=0; speedMode<LEDC_SPEED_MODE_MAX; speedMode++) {
         for(uint8_t c=0; c<LEDC_CHANNEL_MAX; c++) {
             // 已经分给给该 gpio 的 channel
@@ -321,12 +351,16 @@ JSValue js_pwm_write(JSContext *ctx, JSValueConst this_val, int argc, JSValueCon
             }
         }
     }
-    THROW_EXCEPTION("Call pwm.config() first") ;
+    // 设置为默认的 freq/resolution
+    if( JS_IsException(pwm_config(ctx, gpio, 50, 16, 0, &speedMode, &channel)) ) {
+        return JS_EXCEPTION ;
+    }
 endloop:
 
-    // printf("speed mode:%d, channel:%d, duty: %d\n", speedMode, channel, duty) ;
+    duty = value * pow(2,timerHolds[speedMode][ channelHolds[speedMode][channel].timer ].resolution) + 0.5 ;
+    printf("speed mode:%d, channel:%d, duty: %d\n", speedMode, channel, duty) ;
 
-    ret = ledc_set_duty(speedMode, channel, duty) ;
+    esp_err_t ret = ledc_set_duty(speedMode, channel, duty) ;
     if(ret<0) {
         return JS_NewInt32(ctx, ret) ;
     }
@@ -338,6 +372,45 @@ endloop:
     return JS_NewInt32(ctx, 0) ;
 }
 
+JSValue js_pwm_stop(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+    ARGV_TO_UINT8(0, gpio)
+
+    uint8_t timer = 255 ;
+    uint8_t speedMode = 255 ;
+
+    // 找到对应的 channel
+    for(uint8_t sm=0; sm<LEDC_SPEED_MODE_MAX; sm++) {
+        // reset channels
+        for(uint8_t c=0; c<LEDC_CHANNEL_MAX; c++) {
+            if( channelHolds[sm][c].gpio == gpio){
+
+                timer = channelHolds[sm][c].timer ;
+                speedMode = sm ;
+
+                // printf("channel=%d, timer=%d, speedMode=%d\n", c, timer, speedMode) ;
+
+                ledc_stop(sm, c, 0) ;
+                gpio_set_direction(gpio, GPIO_MODE_DEF_OUTPUT);
+                channelHolds[sm][c].gpio = 255 ;
+                channelHolds[sm][c].timer = 255 ;
+
+                break ;
+            }
+        }
+    }
+
+
+    if(timer==255){
+        return JS_UNDEFINED ;
+    }
+    
+    // 如果没有其他 channel 使用 timer ，则释放 timer
+    free_timer(speedMode, timer) ;
+
+    return JS_UNDEFINED ;
+}
+
 void require_module_gpio(JSContext *ctx) {
     
     JSValue global = JS_GetGlobalObject(ctx);
@@ -347,16 +420,14 @@ void require_module_gpio(JSContext *ctx) {
     JS_SetPropertyStr(ctx, global, "digitalWrite", JS_NewCFunction(ctx, js_gpio_digital_write, "digitalWrite", 1));
     JS_SetPropertyStr(ctx, global, "analogRead", JS_NewCFunction(ctx, js_gpio_analog_read, "analogRead", 1));
     JS_SetPropertyStr(ctx, global, "analogWrite", JS_NewCFunction(ctx, js_gpio_analog_write, "analogWrite", 1));
+    JS_SetPropertyStr(ctx, global, "pwmConfigTimer", JS_NewCFunction(ctx, js_pwm_config_timer, "pwmConfigTimer", 1));
+    JS_SetPropertyStr(ctx, global, "pwmConfigChannel", JS_NewCFunction(ctx, js_pwm_config_channel, "pwmConfigChannel", 1));
+    JS_SetPropertyStr(ctx, global, "pwmConfig", JS_NewCFunction(ctx, js_pwm_config, "pwmConfig", 1));
+    JS_SetPropertyStr(ctx, global, "pwmWrite", JS_NewCFunction(ctx, js_pwm_write, "pwmWrite", 1));
+    JS_SetPropertyStr(ctx, global, "pwmStop", JS_NewCFunction(ctx, js_pwm_stop, "pwmStop", 1));
     JS_SetPropertyStr(ctx, global, "setPinISR", JS_NewCFunction(ctx, js_gpio_set_pin_isr, "setPinISR", 1));
     JS_SetPropertyStr(ctx, global, "unsetPinISR", JS_NewCFunction(ctx, js_gpio_unset_pin_isr, "unsetPinISR", 1));
     JS_SetPropertyStr(ctx, global, "setPinISRCallback", JS_NewCFunction(ctx, js_gpio_set_pin_isr_callback, "setPinISRCallback", 1));
-
-    JSValue pwm = JS_NewObject(ctx) ;
-    JS_SetPropertyStr(ctx, global, "pwm", pwm);
-    JS_SetPropertyStr(ctx, pwm, "configTimer", JS_NewCFunction(ctx, js_pwm_config_timer, "configTimer", 1));
-    JS_SetPropertyStr(ctx, pwm, "configChannel", JS_NewCFunction(ctx, js_pwm_config_channel, "configChannel", 1));
-    JS_SetPropertyStr(ctx, pwm, "config", JS_NewCFunction(ctx, js_pwm_config, "config", 1));
-    JS_SetPropertyStr(ctx, pwm, "write", JS_NewCFunction(ctx, js_pwm_write, "write", 1));
 
     JS_FreeValue(ctx, global);
 }
@@ -378,9 +449,10 @@ void gpio_on_before_reset(JSContext *ctx) {
         for(uint8_t c=0; c<LEDC_CHANNEL_MAX; c++) {
             // printf("speedMode=%d, channel=%d, timer=%d, gpio=%d\n",speedMode,c,channelHolds[speedMode][c].timer,channelHolds[speedMode][c].gpio) ;
             if(channelHolds[speedMode][c].gpio!=255) {
+                ledc_stop(speedMode, c, 0) ;
+                gpio_set_direction(channelHolds[speedMode][c].gpio, GPIO_MODE_DEF_OUTPUT);
                 channelHolds[speedMode][c].gpio = 255 ;
                 channelHolds[speedMode][c].timer = 255 ;
-                ledc_stop(speedMode, c, 0) ;
             }
         }
         // reset timers

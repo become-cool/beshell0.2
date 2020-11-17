@@ -38,6 +38,9 @@
 
 #define ARGV_TO_UINT8(i,var)   ARGV_TO_INT(i, var, uint8_t, JS_ToUint32)
 #define ARGV_TO_UINT32(i,var)  ARGV_TO_INT(i, var, uint32_t, JS_ToUint32)
+#define ARGV_TO_DOUBLE(i,var)                               \
+    double var ;                                            \
+    JS_ToFloat64(ctx, &var, argv[i]) ;
 #define ARGV_TO_STRING(i, var, len)                         \
     size_t len = 0 ;                                        \
     char * var = JS_ToCStringLen(ctx, &len, argv[i]) ;

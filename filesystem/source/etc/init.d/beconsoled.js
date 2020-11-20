@@ -1,4 +1,5 @@
 require("besdk")
+require("besdk/pin.js")
 
 const CMD_CALLBACK = 6
 
@@ -36,19 +37,26 @@ function module_list(){
     return lst
 }
 
-
-function watching_callback(val, pin){
-    telnet.send(0, CMD_CALLBACK, `EmitPinChanged('${pin.gpio}', ${val})`)
-}
-function watch(gpio) {
-    if(!pin(gpio).isListening('both', watching_callback)){
-        pin(gpio).watch(watching_callback, "both")
+telnet.callback = function(funcName, ...arglst){
+    for(let i=0; i<arglst.length; i++) {
+        arglst[i] = JSON.stringify(arglst[i])
     }
+    telnet.send(0, CMD_CALLBACK, `${funcName}(${arglst.join(',')})`)
 }
-function unwatch(gpio) {
-    pin(gpio).unwatch(watching_callback, "both")
-}
+
+
+let __debounce_timers = {}
+watchPins((gpio, val)=>{
+    if(__debounce_timers[gpio]!=undefined)
+        return
+    __debounce_timers[gpio] = setTimeout(()=>{
+        delete __debounce_timers[gpio]
+        if( digitalRead(gpio) == val ) {
+            telnet.callback('EmitPinChanged', gpio, val)
+        }
+    }, 10)
+})
 
 global.beconsoled  = {
-    module_list, watch, unwatch, watching_callback
+    module_list
 }

@@ -105,21 +105,7 @@ let commands = {
     } ,
 
     cd: function(path) {
-
-        path = path? resolvepath(path): process.env.HOME
-
-        if(!fs.isDirSync(path)) {
-            console.log(path, "is not a directory.")
-            return
-        }
-        
-        path = fs.normalize(path) || '/'
-
-        if(process.env.PWD != path) {
-            _lastPWD = process.env.PWD
-            process.env.PWD = path
-        }
-        console.log(process.env.PWD)
+        console.log(cd(path))
     } ,
 
     pwd: function() {
@@ -166,6 +152,42 @@ let commands = {
     }
 }
 
+function ls(path) {
+    path = path? resolvepath(path): process.env.PWD
+    let output = {}
+    for(let filename of fs.readdirSync(path)) {
+        let stat = fs.statSync(path+'/'+filename)
+        if(stat.isDir)
+            output[filename] = 'D'
+        else {
+            output[filename] = stat.size
+        }
+    }
+    return {parent:path,children:output}
+}
+
+function cd(path) {
+
+    path = path? resolvepath(path): process.env.HOME
+
+    if(!fs.isDirSync(path)) {
+        throw new Error("Is not a directory."+path)
+    }
+    
+    path = fs.normalize(path) || '/'
+
+    if(process.env.PWD != path) {
+        _lastPWD = process.env.PWD
+        process.env.PWD = path
+    }
+    
+    return process.env.PWD
+}
+
+
 global.repl = {
-    commands, _mkresolve, _mkreject
+    commands, _mkresolve, _mkreject, ls, cd
+}
+global.pwd = function(){
+    return process.env.PWD
 }

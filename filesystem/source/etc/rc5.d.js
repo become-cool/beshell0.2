@@ -1,4 +1,3 @@
-
 try{
     require("./init.d/repl.js")
 
@@ -6,8 +5,9 @@ try{
 
     require("./init.d/wifi.js")
 
-    console.log('BeShell is ready.')
+    require("./init.d/app.js").autoBoot()
 
+    console.log('BeShell is ready.')
 }
 catch(e) {
     console.log(e.message)

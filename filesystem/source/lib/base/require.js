@@ -1,8 +1,15 @@
 function normalize(path) {
     path = path.replace(/[\\\/]+/gm, '/')                       // 合并连续的 / 或 \
-                .replace(/\/\.(\/|$)/gm, '/')                   // 合并当前目录表示: /./ 
-                .replace(/\/[^\/]+\/\.\.(\/|$)/gm, '/')         // 合并上级目录表示: /../
                 .replace(/\/$/, '')                             // 删除目录末尾的 /
+
+    // 合并当前目录表示: /./ 
+    while(path.match(/\/\.(\/|$)/gm))
+        path = path.replace(/\/\.(\/|$)/gm, '/')
+        
+    // 合并上级目录表示: /../
+    while(path.match(/\/[^\/]+\/\.\.(\/|$)/gm))
+        path = path.replace(/\/[^\/]+\/\.\.(\/|$)/gm, '/')
+
     return path
 }
 function dirname(path) {

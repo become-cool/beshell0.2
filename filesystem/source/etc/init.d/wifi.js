@@ -2,7 +2,7 @@ const configPath = "/etc/config/wifi.json"
 
 WiFi.save = function() {
     let status = WiFi.getStatus()
-    if(!status.sta.ssid)
+    if(!status.ssid)
         return
     let json
     try{
@@ -32,8 +32,8 @@ WiFi.save = function() {
         }
     }
 
-    json.sta.ssid = status.sta.ssid
-    json.sta.password = status.sta.password
+    json.ssid = status.ssid
+    json.password = status.password
 
     fs.writeFileSync(configPath, JSON.stringify(json,null,4))
 }
@@ -48,9 +48,9 @@ function autoConnect() {
     let status = WiFi.getStatus()
 
     // sta
-    if(status.sta.status=='disconnected') {
-        if(json.sta.ssid) {
-            WiFi.connect(json.sta.ssid, json.sta.password||"", null, function(err){
+    if(status.status=='disconnected') {
+        if(json.ssid) {
+            WiFi.connect(json.ssid, json.password||"", null, function(err){
                 if(err) {
                     console.log("connect wifi error:", err)
                 }

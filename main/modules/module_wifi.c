@@ -12,6 +12,7 @@
 #include <esp_wifi.h>
 #include <lwip/dns.h>
 #include <lwip/sockets.h>
+#include <esp_netif.h>
 
 LOG_TAG("wifi");
 
@@ -25,6 +26,12 @@ JSValue __connect_callback = NULL ;
 JSValue __disconnect_callback = NULL ;
 
 uint32_t __disconnect_reason = 0 ;
+
+esp_netif_t * netif_ap = NULL ;
+
+esp_netif_t * netif_sta = NULL ;
+esp_netif_ip_info_t sta_ip_info ;
+
 
 
 /**
@@ -126,14 +133,10 @@ static char *wifiReasonToString(uint8_t reason) {
 // } 
 static void esp32_wifi_eventHandler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data)
 {
-	// printf("event: %d, wifi_state_connected=%d, sta_connect_pending=%d, has callback=%d\n", event_id, wifi_state_connected, sta_connect_pending, __connect_callback?1:0);
+	// printf("event_base: %d, event_id: %d, wifi_state_connected=%d, sta_connect_pending=%d, has callback=%d\n", (int32_t)event_base, event_id, wifi_state_connected, sta_connect_pending, __connect_callback?1:0);
 
 	// Your event handling code here...
 	switch(event_id) {
-
-		case SYSTEM_EVENT_STA_GOT_IP: {
-			break;
-		}
 		
 		case SYSTEM_EVENT_STA_CONNECTED: {
 
@@ -189,6 +192,14 @@ static void esp32_wifi_eventHandler(void* arg, esp_event_base_t event_base, int3
 			break;
 		}
 
+        case SYSTEM_EVENT_AP_START:
+            printf("SYSTEM_EVENT_AP_START\n") ;
+            break;
+
+        case SYSTEM_EVENT_AP_STOP:
+            printf("SYSTEM_EVENT_AP_STOP\n") ;
+            break;
+
 
 		case SYSTEM_EVENT_SCAN_DONE: {
 			break;
@@ -200,10 +211,20 @@ static void esp32_wifi_eventHandler(void* arg, esp_event_base_t event_base, int3
 	}
 }
 
+static void ip_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data) {
+    if (event_id==IP_EVENT_STA_GOT_IP) {
+        // printf("ip_event_handler(IP_EVENT_STA_GOT_IP)\n") ;
+        ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
+        sta_ip_info.ip.addr = event->ip_info.ip.addr ;
+        sta_ip_info.netmask.addr = event->ip_info.netmask.addr ;
+        sta_ip_info.gw.addr = event->ip_info.gw.addr ;
+    }
+}
+
 JSValue js_wifi_connect(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
 
     esp_err_t errRc;
-    tcpip_adapter_dhcpc_start(TCPIP_ADAPTER_IF_STA) ;
+    esp_netif_dhcpc_start(netif_sta) ;
 
     JSValue callback = NULL ;
     if(argc>=4 && JS_IsFunction(ctx, argv[3])) {
@@ -290,58 +311,6 @@ JSValue js_wifi_connect(JSContext *ctx, JSValueConst this_val, int argc, JSValue
     return JS_UNDEFINED ;
 }
 
-
-
-JSValue js_wifi_get_status(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-    JSValue status = JS_NewObject(ctx) ;
-
-    wifi_mode_t mode;
-    ESP_ERROR_CHECK(esp_wifi_get_mode(&mode));
-    switch(mode) {
-    case WIFI_MODE_NULL:
-        JS_SetPropertyStr(ctx, status, "mode", JS_NewString(ctx,"none")) ;
-        break;
-    case WIFI_MODE_STA:
-        JS_SetPropertyStr(ctx, status, "mode", JS_NewString(ctx,"sta")) ;
-        break;
-    case WIFI_MODE_AP:
-        JS_SetPropertyStr(ctx, status, "mode", JS_NewString(ctx,"ap")) ;
-        break;
-    case WIFI_MODE_APSTA:
-        JS_SetPropertyStr(ctx, status, "mode", JS_NewString(ctx,"apsta")) ;
-        break;
-    default:
-        JS_SetPropertyStr(ctx, status, "mode", JS_NewString(ctx,"unknow")) ;
-        break;
-    }
-
-    // STA
-    JSValue sta = JS_NewObject(ctx) ;
-    JS_SetPropertyStr(ctx, status, "sta", sta) ;
-    if(wifi_state_connected){
-        JS_SetPropertyStr(ctx, sta, "status", JS_NewString(ctx,"connected")) ;
-    }
-    else if(sta_connect_pending) {
-        JS_SetPropertyStr(ctx, sta, "status", JS_NewString(ctx,"connecting")) ;
-    }
-    else {
-        JS_SetPropertyStr(ctx, sta, "status", JS_NewString(ctx,"disconnected")) ;
-        JS_SetPropertyStr(ctx, sta, "reason",JS_NewInt32(ctx,__disconnect_reason)) ;
-    }
-
-    wifi_config_t config;
-    esp_wifi_get_config(WIFI_IF_STA, &config);
-    JS_SetPropertyStr(ctx, sta, "ssid", JS_NewString(ctx,(const char *)config.sta.ssid)) ;
-    JS_SetPropertyStr(ctx, sta, "password", JS_NewString(ctx,(const char *)config.sta.password)) ;
-
-    // AP
-    JSValue ap = JS_NewObject(ctx) ;
-    JS_SetPropertyStr(ctx, status, "ap", ap) ;
-
-
-    return status ;
-}
-
 JSValue js_wifi_disconnect(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     JSValue callback = NULL ;
     if(argc>=1 && JS_IsFunction(ctx, argv[0])) {
@@ -373,22 +342,198 @@ JSValue js_wifi_disconnect(JSContext *ctx, JSValueConst this_val, int argc, JSVa
     return JS_UNDEFINED ;
 }
 
+JSValue js_wifi_get_mode(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    wifi_mode_t mode;
+    ESP_ERROR_CHECK(esp_wifi_get_mode(&mode));
+    switch(mode) {
+    case WIFI_MODE_NULL:
+        return JS_NewString(ctx,"none") ;
+        break;
+    case WIFI_MODE_STA:
+        return JS_NewString(ctx,"sta") ;
+        break;
+    case WIFI_MODE_AP:
+        return JS_NewString(ctx,"ap") ;
+        break;
+    case WIFI_MODE_APSTA:
+        return JS_NewString(ctx,"apsta") ;
+        break;
+    default:
+        return JS_NewString(ctx,"unknow") ;
+        break;
+    }
+}
+
+JSValue js_wifi_get_status(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+
+    JSValue status = JS_NewObject(ctx) ;
+    char ip[16] ;
+    wifi_config_t config;
+
+    if(wifi_state_connected){
+        JS_SetPropertyStr(ctx, status, "status", JS_NewString(ctx,"connected")) ;
+    }
+    else if(sta_connect_pending) {
+        JS_SetPropertyStr(ctx, status, "status", JS_NewString(ctx,"connecting")) ;
+    }
+    else {
+        JS_SetPropertyStr(ctx, status, "status", JS_NewString(ctx,"disconnected")) ;
+        JS_SetPropertyStr(ctx, status, "reason",JS_NewInt32(ctx,__disconnect_reason)) ;
+    }
+    
+    sprintf(ip,IPSTR, IP2STR((&sta_ip_info.ip))) ;
+    JS_SetPropertyStr(ctx, status, "ip", JS_NewString(ctx, ip)) ;
+    sprintf(ip,IPSTR, IP2STR((&sta_ip_info.netmask))) ;
+    JS_SetPropertyStr(ctx, status, "netmask", JS_NewString(ctx, ip)) ;
+    sprintf(ip,IPSTR, IP2STR((&sta_ip_info.gw))) ;
+    JS_SetPropertyStr(ctx, status, "gw", JS_NewString(ctx, ip)) ;
+
+    esp_wifi_get_config(WIFI_IF_STA, &config);
+    JS_SetPropertyStr(ctx, status, "ssid", JS_NewString(ctx,(const char *)config.sta.ssid)) ;
+    JS_SetPropertyStr(ctx, status, "password", JS_NewString(ctx,(const char *)config.sta.password)) ;
+
+    return status ;
+}
+
+
+JSValue js_wifi_get_ap_status(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+  
+    char ip[16] ;
+    wifi_config_t config;
+    esp_wifi_get_config(WIFI_IF_AP, &config);
+    JSValue status = JS_NewObject(ctx) ;
+
+    esp_wifi_get_config(WIFI_IF_AP, &config);
+    JS_SetPropertyStr(ctx, status, "ssid", JS_NewString(ctx,(const char *)config.sta.ssid)) ;
+    JS_SetPropertyStr(ctx, status, "password", JS_NewString(ctx,(const char *)config.sta.password)) ;
+
+    esp_netif_ip_info_t ipinfo;
+    bzero(&ipinfo, sizeof(esp_netif_ip_info_t));
+
+    esp_netif_get_ip_info(netif_ap, &ipinfo);
+
+    sprintf(ip,IPSTR, IP2STR((&ipinfo.ip))) ;
+    JS_SetPropertyStr(ctx, status, "ip", JS_NewString(ctx, ip)) ;
+
+    sprintf(ip,IPSTR, IP2STR((&ipinfo.netmask))) ;
+    JS_SetPropertyStr(ctx, status, "netmask", JS_NewString(ctx, ip)) ;
+
+    sprintf(ip,IPSTR, IP2STR((&ipinfo.gw))) ;
+    JS_SetPropertyStr(ctx, status, "gw", JS_NewString(ctx, ip)) ;
+
+    return status ;
+
+}
+
+
+JSValue js_wifi_set_hostname(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+
+    CHECK_ARGC(1)
+
+    char * hostname = JS_ToCString(ctx, argv[0]) ;
+    esp_netif_set_hostname(netif_sta, hostname);
+    esp_netif_set_hostname(netif_ap, hostname);
+
+    JS_FreeCString(ctx, hostname) ;
+
+    return JS_UNDEFINED ;
+}
+
+JSValue js_wifi_start_ap(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(2)
+
+    wifi_config_t wifi_config ;
+
+    size_t ssidlen = 0 ;
+    char * ssid = JS_ToCStringLen(ctx, &ssidlen, argv[0]) ;
+    if(ssidlen>sizeof(wifi_config.ap.ssid)) {
+      ssidlen = sizeof(wifi_config.ap.ssid) - 1 ;
+      ssid[ssidlen] = 0 ;
+    }
+
+    size_t passwordlen = 0 ;
+    char * password = JS_ToCStringLen(ctx, &passwordlen, argv[1]) ;
+    if(passwordlen>sizeof(wifi_config.ap.password)) {
+        passwordlen = sizeof(wifi_config.ap.password) ;
+        password[passwordlen] = 0 ;
+    }
+
+    wifi_config.ap.ssid_len = ssidlen ;
+    memcpy(wifi_config.ap.ssid, ssid, ssidlen) ;
+    wifi_config.ap.ssid[ssidlen] = 0 ;
+    memcpy(wifi_config.ap.password, password, passwordlen) ;
+    wifi_config.ap.password[passwordlen] = 0 ;
+
+    wifi_config.ap.channel = 0 ;
+    wifi_config.ap.max_connection = 4 ;
+    wifi_config.ap.authmode = passwordlen==0? WIFI_AUTH_OPEN: WIFI_AUTH_WPA2_PSK ;
+    
+    wifi_mode_t mode;
+    ESP_ERROR_CHECK(esp_wifi_get_mode(&mode));
+    ESP_ERROR_CHECK(esp_wifi_set_mode( mode | WIFI_MODE_AP));
+
+    ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_AP, &wifi_config));
+    ESP_ERROR_CHECK(esp_wifi_start());
+
+    // DHCP Server
+    // esp_netif_ip_info_t info;
+    // bzero(&info, sizeof(esp_netif_ip_info_t)) ;
+    // inet_pton(AF_INET, "192.168.4.1", &info.ip.addr);
+    // inet_pton(AF_INET, "192.168.4.1", &info.gw.addr);
+    // inet_pton(AF_INET, "255.255.255.0", &info.netmask.addr);
+    // esp_netif_dhcps_stop(netif_ap);
+    // esp_netif_set_ip_info(netif_ap, &info);
+    // esp_netif_dhcps_start(netif_ap);
+
+    // esp_wifi_set_protocol() ;
+
+
+    JS_FreeCString(ctx, ssid) ;
+    JS_FreeCString(ctx, password) ;
+
+    return JS_UNDEFINED ;
+}
+
+
+
+
+JSValue js_wifi_stop_ap(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    
+    
+    wifi_mode_t mode;
+    ESP_ERROR_CHECK(esp_wifi_get_mode(&mode));
+    if(mode==WIFI_MODE_AP) {
+        mode = WIFI_MODE_NULL ;
+    }
+    else if(mode==WIFI_MODE_APSTA) {
+        mode = WIFI_MODE_STA ;
+    }
+    else {
+        return JS_UNDEFINED ;
+    }
+
+    ESP_ERROR_CHECK(esp_wifi_set_mode( mode | WIFI_MODE_AP));
+
+    return JS_UNDEFINED ;
+}
+
 void wifi_init() {
 
     ESP_ERROR_CHECK(esp_netif_init());
-    esp_netif_t *sta_netif = esp_netif_create_default_wifi_sta();
-    assert(sta_netif);
+
+    netif_sta = esp_netif_create_default_wifi_sta();
+    netif_ap = esp_netif_create_default_wifi_ap();
 
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
 
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_APSTA));
-	ESP_ERROR_CHECK(esp_wifi_start()) ;
+    ESP_ERROR_CHECK(esp_wifi_start()) ;
 
-    // hostname
-    tcpip_adapter_set_hostname(TCPIP_ADAPTER_IF_STA, "BeCore32xxx");
+    bzero(&sta_ip_info, sizeof(esp_netif_ip_info_t));
 
     ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &esp32_wifi_eventHandler, NULL));
+    ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &ip_event_handler, NULL));
 }
 
 void require_module_wifi(JSContext *ctx) {
@@ -398,8 +543,12 @@ void require_module_wifi(JSContext *ctx) {
     
     JS_SetPropertyStr(ctx, wifi, "connect", JS_NewCFunction(ctx, js_wifi_connect, "connect", 1));
     JS_SetPropertyStr(ctx, wifi, "disconnect", JS_NewCFunction(ctx, js_wifi_disconnect, "disconnect", 1));
+    JS_SetPropertyStr(ctx, wifi, "getMode", JS_NewCFunction(ctx, js_wifi_get_mode, "getMode", 1));
     JS_SetPropertyStr(ctx, wifi, "getStatus", JS_NewCFunction(ctx, js_wifi_get_status, "getStatus", 1));
+    JS_SetPropertyStr(ctx, wifi, "getAPStatus", JS_NewCFunction(ctx, js_wifi_get_ap_status, "getAPStatus", 1));
+    JS_SetPropertyStr(ctx, wifi, "setHostname", JS_NewCFunction(ctx, js_wifi_set_hostname, "setHostname", 1));
+    JS_SetPropertyStr(ctx, wifi, "startAP", JS_NewCFunction(ctx, js_wifi_start_ap, "startAP", 1));
+    JS_SetPropertyStr(ctx, wifi, "stopAP", JS_NewCFunction(ctx, js_wifi_stop_ap, "stopAP", 1));
     JS_SetPropertyStr(ctx, global, "WiFi", wifi);
-
     JS_FreeValue(ctx, global);
 }

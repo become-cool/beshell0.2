@@ -198,9 +198,9 @@ void init_quickjs() {
     // 0等级，不加载任何启动脚本，作为安全模式
     if(boot_level>0) {  
         echof("init level: %d\n", boot_level) ;
-        char initScriptCodeBuff[ sizeof(InitScriptTpl) + 1 ] ;   // %d -> 999
-        sprintf(initScriptCodeBuff, InitScriptTpl, boot_level) ;
+        char * initScriptCodeBuff = mallocf(InitScriptTpl, boot_level) ;
         EVAL_CODE(initScriptCodeBuff, ":init.d")
+        free(initScriptCodeBuff) ;
     }
 
     // ready 包

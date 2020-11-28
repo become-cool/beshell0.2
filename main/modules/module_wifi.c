@@ -20,7 +20,8 @@ LOG_TAG("wifi");
 
 
 bool sta_connect_pending = false ;
-bool wifi_state_connected = false ;
+bool _sta_connected = false ;
+bool _ap_connected = false ;
 
 JSValue __connect_callback = NULL ;
 JSValue __disconnect_callback = NULL ;
@@ -39,90 +40,90 @@ esp_netif_ip_info_t sta_ip_info ;
  */
 /*
 static char *wifiReasonToString(uint8_t reason) {
-  switch(reason) {
-  case WIFI_REASON_4WAY_HANDSHAKE_TIMEOUT:
+    switch(reason) {
+    case WIFI_REASON_4WAY_HANDSHAKE_TIMEOUT:
     return "4WAY_HANDSHAKE_TIMEOUT";
-  case WIFI_REASON_802_1X_AUTH_FAILED:
+    case WIFI_REASON_802_1X_AUTH_FAILED:
     return "802_1X_AUTH_FAILED";
-  case WIFI_REASON_AKMP_INVALID:
+    case WIFI_REASON_AKMP_INVALID:
     return "AKMP_INVALID";
-  case WIFI_REASON_ASSOC_EXPIRE:
+    case WIFI_REASON_ASSOC_EXPIRE:
     return "ASSOC_EXPIRE";
-  case WIFI_REASON_ASSOC_FAIL:
+    case WIFI_REASON_ASSOC_FAIL:
     return "ASSOC_FAIL";
-  case WIFI_REASON_ASSOC_LEAVE:
+    case WIFI_REASON_ASSOC_LEAVE:
     return "ASSOC_LEAVE";
-  case WIFI_REASON_ASSOC_NOT_AUTHED:
+    case WIFI_REASON_ASSOC_NOT_AUTHED:
     return "ASSOC_NOT_AUTHED";
-  case WIFI_REASON_ASSOC_TOOMANY:
+    case WIFI_REASON_ASSOC_TOOMANY:
     return "ASSOC_TOOMANY";
-  case WIFI_REASON_AUTH_EXPIRE:
+    case WIFI_REASON_AUTH_EXPIRE:
     return "AUTH_EXPIRE";
-  case WIFI_REASON_AUTH_FAIL:
+    case WIFI_REASON_AUTH_FAIL:
     return "AUTH_FAIL";
-  case WIFI_REASON_AUTH_LEAVE:
+    case WIFI_REASON_AUTH_LEAVE:
     return "AUTH_LEAVE";
-  case WIFI_REASON_BEACON_TIMEOUT:
+    case WIFI_REASON_BEACON_TIMEOUT:
     return "BEACON_TIMEOUT";
-  case WIFI_REASON_CIPHER_SUITE_REJECTED:
+    case WIFI_REASON_CIPHER_SUITE_REJECTED:
     return "CIPHER_SUITE_REJECTED";
-  case WIFI_REASON_DISASSOC_PWRCAP_BAD:
+    case WIFI_REASON_DISASSOC_PWRCAP_BAD:
     return "DISASSOC_PWRCAP_BAD";
-  case WIFI_REASON_DISASSOC_SUPCHAN_BAD:
+    case WIFI_REASON_DISASSOC_SUPCHAN_BAD:
     return "DISASSOC_SUPCHAN_BAD";
-  case WIFI_REASON_GROUP_CIPHER_INVALID:
+    case WIFI_REASON_GROUP_CIPHER_INVALID:
     return "GROUP_CIPHER_INVALID";
-  case WIFI_REASON_GROUP_KEY_UPDATE_TIMEOUT:
+    case WIFI_REASON_GROUP_KEY_UPDATE_TIMEOUT:
     return "GROUP_KEY_UPDATE_TIMEOUT";
-  case WIFI_REASON_HANDSHAKE_TIMEOUT:
+    case WIFI_REASON_HANDSHAKE_TIMEOUT:
     return "HANDSHAKE_TIMEOUT";
-  case WIFI_REASON_IE_INVALID:
+    case WIFI_REASON_IE_INVALID:
     return "IE_INVALID";
-  case WIFI_REASON_IE_IN_4WAY_DIFFERS:
+    case WIFI_REASON_IE_IN_4WAY_DIFFERS:
     return "IE_IN_4WAY_DIFFERS";
-  case WIFI_REASON_INVALID_RSN_IE_CAP:
+    case WIFI_REASON_INVALID_RSN_IE_CAP:
     return "INVALID_RSN_IE_CAP";
-  case WIFI_REASON_MIC_FAILURE:
+    case WIFI_REASON_MIC_FAILURE:
     return "MIC_FAILURE";
-  case WIFI_REASON_NOT_ASSOCED:
+    case WIFI_REASON_NOT_ASSOCED:
     return "NOT_ASSOCED";
-  case WIFI_REASON_NOT_AUTHED:
+    case WIFI_REASON_NOT_AUTHED:
     return "NOT_AUTHED";
-  case WIFI_REASON_NO_AP_FOUND:
+    case WIFI_REASON_NO_AP_FOUND:
     return "NO_AP_FOUND";
-  case WIFI_REASON_PAIRWISE_CIPHER_INVALID:
+    case WIFI_REASON_PAIRWISE_CIPHER_INVALID:
     return "PAIRWISE_CIPHER_INVALID";
-  case WIFI_REASON_UNSPECIFIED:
+    case WIFI_REASON_UNSPECIFIED:
     return "UNSPECIFIED";
-  case WIFI_REASON_UNSUPP_RSN_IE_VERSION:
+    case WIFI_REASON_UNSUPP_RSN_IE_VERSION:
     return "REASON_UNSUPP_RSN_IE_VERSION";
-  }
-  return "Unknown reason";
+    }
+    return "Unknown reason";
 }
 */
 
 
 // typedef enum {
 //     SYSTEM_EVENT_WIFI_READY = 0,           /*!< ESP32 WiFi ready */
-//     SYSTEM_EVENT_SCAN_DONE,                /*!< ESP32 finish scanning AP */
-//     SYSTEM_EVENT_STA_START,                /*!< ESP32 station start */
-//     SYSTEM_EVENT_STA_STOP,                 /*!< ESP32 station stop */
-//     SYSTEM_EVENT_STA_CONNECTED,            /*!< ESP32 station connected to AP */
-//     SYSTEM_EVENT_STA_DISCONNECTED,         /*!< ESP32 station disconnected from AP */
-//     SYSTEM_EVENT_STA_AUTHMODE_CHANGE,      /*!< the auth mode of AP connected by ESP32 station changed */
-//     SYSTEM_EVENT_STA_GOT_IP,               /*!< ESP32 station got IP from connected AP */
-//     SYSTEM_EVENT_STA_LOST_IP,              /*!< ESP32 station lost IP and the IP is reset to 0 */
-//     SYSTEM_EVENT_STA_WPS_ER_SUCCESS,       /*!< ESP32 station wps succeeds in enrollee mode */
-//     SYSTEM_EVENT_STA_WPS_ER_FAILED,        /*!< ESP32 station wps fails in enrollee mode */
-//     SYSTEM_EVENT_STA_WPS_ER_TIMEOUT,       /*!< ESP32 station wps timeout in enrollee mode */
-//     SYSTEM_EVENT_STA_WPS_ER_PIN,           /*!< ESP32 station wps pin code in enrollee mode */
-//     SYSTEM_EVENT_STA_WPS_ER_PBC_OVERLAP,   /*!< ESP32 station wps overlap in enrollee mode */
-//     SYSTEM_EVENT_AP_START,                 /*!< ESP32 soft-AP start */
-//     SYSTEM_EVENT_AP_STOP,                  /*!< ESP32 soft-AP stop */
-//     SYSTEM_EVENT_AP_STACONNECTED,          /*!< a station connected to ESP32 soft-AP */
-//     SYSTEM_EVENT_AP_STADISCONNECTED,       /*!< a station disconnected from ESP32 soft-AP */
-//     SYSTEM_EVENT_AP_STAIPASSIGNED,         /*!< ESP32 soft-AP assign an IP to a connected station */
-//     SYSTEM_EVENT_AP_PROBEREQRECVED,        /*!< Receive probe request packet in soft-AP interface */
+//     SYSTEM_EVENT_SCAN_DONE = 1,                /*!< ESP32 finish scanning AP */
+//     SYSTEM_EVENT_STA_START = 2,                /*!< ESP32 station start */
+//     SYSTEM_EVENT_STA_STOP = 3,                 /*!< ESP32 station stop */
+//     SYSTEM_EVENT_STA_CONNECTED =4,            /*!< ESP32 station connected to AP */
+//     SYSTEM_EVENT_STA_DISCONNECTED =5,         /*!< ESP32 station disconnected from AP */
+//     SYSTEM_EVENT_STA_AUTHMODE_CHANGE =6,      /*!< the auth mode of AP connected by ESP32 station changed */
+//     SYSTEM_EVENT_STA_GOT_IP=7,               /*!< ESP32 station got IP from connected AP */
+//     SYSTEM_EVENT_STA_LOST_IP =8,              /*!< ESP32 station lost IP and the IP is reset to 0 */
+//     SYSTEM_EVENT_STA_WPS_ER_SUCCESS =9,       /*!< ESP32 station wps succeeds in enrollee mode */
+//     SYSTEM_EVENT_STA_WPS_ER_FAILED = 10,        /*!< ESP32 station wps fails in enrollee mode */
+//     SYSTEM_EVENT_STA_WPS_ER_TIMEOUT =11,       /*!< ESP32 station wps timeout in enrollee mode */
+//     SYSTEM_EVENT_STA_WPS_ER_PIN =12,           /*!< ESP32 station wps pin code in enrollee mode */
+//     SYSTEM_EVENT_STA_WPS_ER_PBC_OVERLAP =13,   /*!< ESP32 station wps overlap in enrollee mode */
+//     SYSTEM_EVENT_AP_START =14,                 /*!< ESP32 soft-AP start */
+//     SYSTEM_EVENT_AP_STOP =15,                  /*!< ESP32 soft-AP stop */
+//     SYSTEM_EVENT_AP_STACONNECTED =16,          /*!< a station connected to ESP32 soft-AP */
+//     SYSTEM_EVENT_AP_STADISCONNECTED = 17,       /*!< a station disconnected from ESP32 soft-AP */
+//     SYSTEM_EVENT_AP_STAIPASSIGNED = 18,         /*!< ESP32 soft-AP assign an IP to a connected station */
+//     SYSTEM_EVENT_AP_PROBEREQRECVED =19,        /*!< Receive probe request packet in soft-AP interface */
 //     SYSTEM_EVENT_GOT_IP6,                  /*!< ESP32 station or ap or ethernet interface v6IP addr is preferred */
 //     SYSTEM_EVENT_ETH_START,                /*!< ESP32 ethernet start */
 //     SYSTEM_EVENT_ETH_STOP,                 /*!< ESP32 ethernet stop */
@@ -133,14 +134,14 @@ static char *wifiReasonToString(uint8_t reason) {
 // } 
 static void esp32_wifi_eventHandler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data)
 {
-	// printf("event_base: %d, event_id: %d, wifi_state_connected=%d, sta_connect_pending=%d, has callback=%d\n", (int32_t)event_base, event_id, wifi_state_connected, sta_connect_pending, __connect_callback?1:0);
+	// printf("event_base: %d, event_id: %d, _sta_connected=%d, sta_connect_pending=%d, has callback=%d\n", (int32_t)event_base, event_id, _sta_connected, sta_connect_pending, __connect_callback?1:0);
 
 	// Your event handling code here...
 	switch(event_id) {
 		
 		case SYSTEM_EVENT_STA_CONNECTED: {
 
-			wifi_state_connected = true ;
+			_sta_connected = true ;
 			sta_connect_pending = false ;
 
             if(__connect_callback) {
@@ -158,8 +159,8 @@ static void esp32_wifi_eventHandler(void* arg, esp_event_base_t event_base, int3
 
 		case SYSTEM_EVENT_STA_DISCONNECTED: {
 			
-			wifi_state_connected = false ;
-			// printf("wifi_state_connected=false, pending=%d\n", sta_connect_pending) ;
+			_sta_connected = false ;
+			// printf("_sta_connected=false, pending=%d\n", sta_connect_pending) ;
 			// printf("%d\n",((wifi_event_sta_disconnected_t*) event_data)->reason) ;
 
             __disconnect_reason = ((wifi_event_sta_disconnected_t*) event_data)->reason ;
@@ -193,11 +194,13 @@ static void esp32_wifi_eventHandler(void* arg, esp_event_base_t event_base, int3
 		}
 
         case SYSTEM_EVENT_AP_START:
-            printf("SYSTEM_EVENT_AP_START\n") ;
+            _ap_connected = true ;
+            // printf("SYSTEM_EVENT_AP_START\n") ;
             break;
 
         case SYSTEM_EVENT_AP_STOP:
-            printf("SYSTEM_EVENT_AP_STOP\n") ;
+            // printf("SYSTEM_EVENT_AP_STOP\n") ;
+            _ap_connected = false ;
             break;
 
 
@@ -221,13 +224,18 @@ static void ip_event_handler(void* arg, esp_event_base_t event_base, int32_t eve
     }
 }
 
+/**
+ * ssid
+ * password
+ * callback
+ */
 JSValue js_wifi_connect(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
 
     esp_err_t errRc;
     esp_netif_dhcpc_start(netif_sta) ;
 
     JSValue callback = NULL ;
-    if(argc>=4 && JS_IsFunction(ctx, argv[3])) {
+    if(argc>=3 && JS_IsFunction(ctx, argv[2])) {
         callback = argv[3] ;
         // printf("argc=%d, argv[3]is function? %d, ref: %d\n", argc, JS_IsFunction(ctx, callback), VAR_REFCNT(callback)) ;
     }
@@ -235,7 +243,7 @@ JSValue js_wifi_connect(JSContext *ctx, JSValueConst this_val, int argc, JSValue
     __disconnect_reason = 0 ;
 
     // 已经连接
-    if( wifi_state_connected ) {
+    if( _sta_connected ) {
         if(callback) {
             MAKE_ARGV1(_cbargv, JS_NULL)
             CALL_FUNC(callback, JS_NULL, 1, _cbargv)
@@ -254,7 +262,8 @@ JSValue js_wifi_connect(JSContext *ctx, JSValueConst this_val, int argc, JSValue
         CALL_FUNC(callback, JS_NULL, 1, _cbargv)
         
         free(_cbargv) ;
-		return JS_UNDEFINED ;
+		    
+        return JS_UNDEFINED ;
     }
 
     wifi_config_t wifi_config = {
@@ -317,7 +326,7 @@ JSValue js_wifi_disconnect(JSContext *ctx, JSValueConst this_val, int argc, JSVa
         callback = argv[0] ;
     }
 
-    if( !wifi_state_connected && !sta_connect_pending) {
+    if( !_sta_connected && !sta_connect_pending) {
         if(callback) {
             JSValue ret = JS_Call(ctx, callback, JS_NULL, 0, NULL) ;
             if( JS_IsException(ret) ){
@@ -370,7 +379,7 @@ JSValue js_wifi_get_status(JSContext *ctx, JSValueConst this_val, int argc, JSVa
     char ip[16] ;
     wifi_config_t config;
 
-    if(wifi_state_connected){
+    if(_sta_connected){
         JS_SetPropertyStr(ctx, status, "status", JS_NewString(ctx,"connected")) ;
     }
     else if(sta_connect_pending) {
@@ -406,6 +415,7 @@ JSValue js_wifi_get_ap_status(JSContext *ctx, JSValueConst this_val, int argc, J
     esp_wifi_get_config(WIFI_IF_AP, &config);
     JS_SetPropertyStr(ctx, status, "ssid", JS_NewString(ctx,(const char *)config.sta.ssid)) ;
     JS_SetPropertyStr(ctx, status, "password", JS_NewString(ctx,(const char *)config.sta.password)) ;
+    JS_SetPropertyStr(ctx, status, "started", _ap_connected? JS_TRUE: JS_FALSE) ;
 
     esp_netif_ip_info_t ipinfo;
     bzero(&ipinfo, sizeof(esp_netif_ip_info_t));
@@ -470,10 +480,11 @@ JSValue js_wifi_start_ap(JSContext *ctx, JSValueConst this_val, int argc, JSValu
     
     wifi_mode_t mode;
     ESP_ERROR_CHECK(esp_wifi_get_mode(&mode));
-    ESP_ERROR_CHECK(esp_wifi_set_mode( mode | WIFI_MODE_AP));
+    mode|= WIFI_MODE_AP ;
+    pf("esp_wifi_set_mode(%d)", mode)
+    ESP_ERROR_CHECK(esp_wifi_set_mode(mode));
 
     ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_AP, &wifi_config));
-    ESP_ERROR_CHECK(esp_wifi_start());
 
     // DHCP Server
     // esp_netif_ip_info_t info;
@@ -498,8 +509,7 @@ JSValue js_wifi_start_ap(JSContext *ctx, JSValueConst this_val, int argc, JSValu
 
 
 JSValue js_wifi_stop_ap(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-    
-    
+        
     wifi_mode_t mode;
     ESP_ERROR_CHECK(esp_wifi_get_mode(&mode));
     if(mode==WIFI_MODE_AP) {

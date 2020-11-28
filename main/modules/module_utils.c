@@ -10,6 +10,7 @@
 #include "module_fs.h"
 #include "soc/soc.h"
 
+#include "untar.h"
 #include "libb64/cdecode.h"
 #include "libb64/cencode.h"
 
@@ -20,6 +21,20 @@ JSValue js_util_free_stacks(JSContext *ctx, JSValueConst this_val, int argc, JSV
     (void) argv ;
     return JS_NewInt32(ctx, esp_get_free_heap_size()) ;
 }
+
+JSValue js_util_uuid(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+
+    uint8_t mac_addr[6] = {0};
+    char mac_addr_str[13] = {0};
+    esp_efuse_mac_get_default(mac_addr);
+
+    sprintf(mac_addr_str, "%02x%02x%02x%02x%02x%02x", mac_addr[0], mac_addr[1], mac_addr[2], mac_addr[3], mac_addr[4], mac_addr[5]) ;
+    mac_addr_str[12] = 0 ;
+    // printf(mac_addr_str, "[%02x%02x%02x%02x%02x%02x]\n", mac_addr[0], mac_addr[1], mac_addr[2], mac_addr[3], mac_addr[4], mac_addr[5]) ;
+
+    return JS_NewStringLen(ctx, mac_addr_str, 12) ;
+}
+
 
 typedef struct {
 	char *          levelString;
@@ -286,6 +301,67 @@ JSValue js_utils_gamma8_correct(JSContext *ctx, JSValueConst this_val, int argc,
 }
 
 
+int untar_dist_fd = NULL;
+int untar_entry_header_cb(header_translated_t *proper, int entry_index, void *context_data) {
+    if(proper->type == T_NORMAL) {
+        char * distpath = mallocf("%s/%s", (char *)context_data, proper->filename) ;
+        printf(distpath) ;
+        printf("\n") ;
+        if((untar_dist_fd = fopen(distpath, "wb")) == NULL) {
+            printf("Could not open [%s] for write.\n", distpath);
+            free(distpath) ;
+            return -1;
+        }
+        free(distpath) ;
+    }
+    else if(proper->type == T_DIRECTORY) {
+        pf("dir:%s", proper->filename)
+        char * distpath = mallocf("%s/%s", (char *)context_data, proper->filename) ;
+        if( mkdir_p(distpath, ACCESSPERMS) !=0 ){
+            free(distpath) ;
+            return -1 ;
+        }
+        free(distpath) ;
+    } else {
+        untar_dist_fd = NULL ;
+    }
+
+    return 0 ;
+}
+int untar_entry_data_cb(header_translated_t *proper, int entry_index, void *context_data, unsigned char *block, int length) {
+    if(untar_dist_fd != NULL)
+        fwrite(block, length, 1, untar_dist_fd);
+    return 0 ;
+}
+int untar_entry_end_cb(header_translated_t *proper, int entry_index, void *context_data) {
+    if(untar_dist_fd != NULL) {
+        fclose(untar_dist_fd);
+        untar_dist_fd = NULL;
+    }
+    return 0 ;
+}
+
+JSValue js_fs_untar(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    CHECK_ARGC(2)
+
+    char * srcpath = js_arg_to_vfspath(ctx, argv[0])  ;
+    char * distpath = js_arg_to_vfspath(ctx, argv[1])  ;
+
+    if( mkdir_p(distpath, ACCESSPERMS) != 0 ){
+        THROW_EXCEPTION("dist path invalid")
+    }
+
+    // untar
+    entry_callbacks_t entry_callbacks = { untar_entry_header_cb, untar_entry_data_cb, untar_entry_end_cb };
+    int res = read_tar(srcpath, &entry_callbacks, (void *)distpath)==0 ;
+
+    free(srcpath) ;
+    free(distpath) ;
+
+    return res==0? JS_TRUE: JS_FALSE ;
+}
+
+
 void require_module_utils(JSContext *ctx) {
 
     JSValue global = JS_GetGlobalObject(ctx);
@@ -299,12 +375,14 @@ void require_module_utils(JSContext *ctx) {
     JS_SetPropertyStr(ctx, utils, "time", JS_NewCFunction(ctx, js_util_time, "time", 1));
     JS_SetPropertyStr(ctx, utils, "setLogLevel", JS_NewCFunction(ctx, js_util_set_log_level, "setLogLevel", 1));
     JS_SetPropertyStr(ctx, utils, "partId", JS_NewCFunction(ctx, js_utils_part_id, "partId", 1));
+    JS_SetPropertyStr(ctx, utils, "uuid", JS_NewCFunction(ctx, js_util_uuid, "uuid", 1));
     JS_SetPropertyStr(ctx, utils, "ptrRefCnt", JS_NewCFunction(ctx, js_util_ptr_refcount, "ptrRefCnt", 1));
     JS_SetPropertyStr(ctx, utils, "varRefCnt", JS_NewCFunction(ctx, js_util_var_refcount, "varRefCnt", 1));
     JS_SetPropertyStr(ctx, utils, "varPtr", JS_NewCFunction(ctx, js_util_var_ptr, "varPtr", 1));
     JS_SetPropertyStr(ctx, utils, "base64Encode", JS_NewCFunction(ctx, js_utils_base64_encode, "base64Encode", 1));
     JS_SetPropertyStr(ctx, utils, "base64Decode", JS_NewCFunction(ctx, js_utils_base64_decode, "base64Decode", 1));
     JS_SetPropertyStr(ctx, utils, "gamma8Correct", JS_NewCFunction(ctx, js_utils_gamma8_correct, "gamma8Correct", 1));
+    JS_SetPropertyStr(ctx, utils, "untar", JS_NewCFunction(ctx, js_fs_untar, "untar", 1));
 
 	// global
     JS_SetPropertyStr(ctx, global, "setTimeout", JS_NewCFunction(ctx, js_util_set_timeout, "setTimeout", 1));
@@ -312,6 +390,8 @@ void require_module_utils(JSContext *ctx) {
     JS_SetPropertyStr(ctx, global, "clearTimeout", JS_NewCFunction(ctx, js_util_clear_timeout, "clearTimeout", 1));
     JS_SetPropertyStr(ctx, global, "evalScript", JS_NewCFunction(ctx, js_fs_eval_script, "evalScript", 1));
     JS_SetPropertyStr(ctx, global, "evalAsFile", JS_NewCFunction(ctx, js_fs_eval_as_file, "evalAsFile", 1));
+
+    
     
 	JS_FreeValue(ctx, global);
 }

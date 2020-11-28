@@ -23,11 +23,8 @@ WiFi.save = function() {
             } ,
         
             "ap": {
-                "ssid": "" ,
+                "ssid": "BECOME-${UUID}" ,
                 "password": "" ,
-                "gateway": "192.168.4.1" ,
-                "netmask": "255.255.255.0" ,
-                "ip": "192.168.4.1"
             }
         }
     }
@@ -39,9 +36,6 @@ WiFi.save = function() {
 }
 
 function autoConnect() {
-
-    console.log("auto connect wifi")
-
     let json = fs.readFileSync(configPath)
     json = JSON.parse(json)
 
@@ -49,19 +43,30 @@ function autoConnect() {
 
     // sta
     if(status.status=='disconnected') {
+
+        console.log("connect to ssid:", json.ssid, json.password)
+
         if(json.ssid) {
-            WiFi.connect(json.ssid, json.password||"", null, function(err){
+            WiFi.connect(json.ssid, json.password||""/*, null, function(err){
                 if(err) {
                     console.log("connect wifi error:", err)
                 }
                 else {
                     "has connected to wifi "
                 }
-            })
+            }*/)
         }
+    }
+    else {
+        console.log("wifi status", status.status)
     }
 
     // ap
+    let apstatus = WiFi.getAPStatus()
+    let ssid = json.ap.ssid.replace("${UUID}", utils.uuid().substr(0,4))
+    if( !apstatus.started || apstatus.ssid!=ssid ){
+        WiFi.startAP(ssid, json.ap.password)
+    }
 
 }
 

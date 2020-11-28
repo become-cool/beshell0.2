@@ -9,10 +9,7 @@
     } ,
 
     "ap": {
-        "ssid": "" ,
-        "password": "" ,
-        "gateway": "192.168.4.1" ,
-        "netmask": "255.255.255.0" ,
-        "ip": "192.168.4.1"
+        "ssid": "BECOME-${UUID}" ,
+        "password": ""
     }
 }

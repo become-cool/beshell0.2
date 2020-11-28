@@ -5,12 +5,6 @@ const CMD_CALL = 2 ;
 const CMD_CALL_ASYNC = 3 ;
 const CMD_RSPN = 4 ;
 const CMD_EXCEPTION = 5 ;
-// const CMD_CALLBACK = 6 ;
-// const CMD_OUTPUT = 7 ;
-
-// const CMD_FILE_PUSH_REQ = 10 ;
-// const CMD_FILE_APPEND_REQ = 11 ;
-// const CMD_FILE_PULL_REQ = 12 ;
 
 function _mkresolve(pkgid) {
     return function(ret) {
@@ -43,15 +37,6 @@ _repl_set_input_func(function(pkgid, remain, pkgcmd, code){
     _pending_pkg_id = -1
     _pending_code = ''
 
-    let p = code.indexOf(' ')
-    let cmd = p<0? code: code.substr(0, p)
-
-    if(commands[cmd]) {
-        let res = commands[cmd] (p<0? '': code.substr(p+1))
-        telnet.send(pkgid, CMD_RSPN, "<~empty rspn~>")
-        return
-    }
-
     try{
         if(pkgcmd == CMD_RUN) {
             evalAsFile(code, "REPL")
@@ -71,123 +56,36 @@ _repl_set_input_func(function(pkgid, remain, pkgcmd, code){
 })
 
 function resolvepath(path) {
-    if(path=='~') {
+    if(path=='~' ) {
         path = process.env.HOME
     } 
-    else if(path=='-') {
-        path = _lastPWD
-    }
+    else if(path[0]=='~' && path[1]=='/') {
+        path = process.env.HOME + path.substr(1)
+    } 
     else if(path[0]!='/') {
         path = process.env.PWD + '/' + path
     }
     return path
 }
 
-let commands = {
-    ls: function(path) {
-        path = path? resolvepath(path): process.env.PWD
-        let output = ''
-        for(let filename of fs.readdirSync(path)) {
-            let stat = fs.statSync(path+'/'+filename)
-            if(stat.isDir)
-                filename+= '/'
-            else {
-                let size = stat.size
-                if(size>1048576)
-                    size = (size/1048576).toFixed(1) + 'MB'
-                else if(size>1024)
-                    size = (size/1024).toFixed(1) + 'KB'
-                filename = '[' + size + "]\t" + filename
-            }
-            output+= filename + "\n"
-        }
-        console.log(output)
-    } ,
-
-    cd: function(path) {
-        console.log(cd(path))
-    } ,
-
-    pwd: function() {
-        console.log(process.env.PWD)
-    } ,
-
-    ".": function(path) {
-        
-        path = path? resolvepath(path): process.env.PWD
-        
-        require(path)
-    } ,
-
-    free: function(unit){
-        if(unit=='k')
-            console.log(Math.round(utils.freeStacks()/1024)+'KB')
-        else 
-            console.log(utils.freeStacks())
-    } ,
-
-    reset: function(level) {
-        level = parseInt(level.trim())
-        isNaN(level)? process.reset(): process.reset(level)
-    } ,
-
-    reboot: function() {
-        process.reboot()
-    } ,
-
-    cat: function(path) {
-        if(!path)
-            return
-        path = resolvepath(path)
-        console.log(fs.readFileSync(path))
-    } ,
-
-    rm: function(path) {
-        if(!path)
-            return
-        path = resolvepath(path)
-        if(!fs.unlinkSync(path)) {
-            console.log('Failded to rm path', path)
-        }
-    }
-}
-
-function ls(path) {
-    path = path? resolvepath(path): process.env.PWD
-    let output = {}
-    for(let filename of fs.readdirSync(path)) {
-        let stat = fs.statSync(path+'/'+filename)
-        if(stat.isDir)
-            output[filename] = 'D'
-        else {
-            output[filename] = stat.size
-        }
-    }
-    return {parent:path,children:output}
-}
-
 function cd(path) {
-
+    if(path=='-') {
+        path = _lastPWD
+    }
     path = path? resolvepath(path): process.env.HOME
-
     if(!fs.isDirSync(path)) {
         throw new Error("Is not a directory."+path)
     }
-    
     path = fs.normalize(path) || '/'
-
     if(process.env.PWD != path) {
         _lastPWD = process.env.PWD
         process.env.PWD = path
     }
-    
     return process.env.PWD
 }
 
 
 global.repl = {
-    commands, _mkresolve, _mkreject, ls, cd
+    _mkresolve, _mkreject, cd, resolvepath
 }
-global.pwd = function(){
-    return process.env.PWD
-}
+

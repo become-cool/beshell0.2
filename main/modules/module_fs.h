@@ -5,6 +5,7 @@
 #include "esp_vfs.h"
 
 
+char * vfspath(const char * jspath, size_t len) ;
 char * js_arg_to_vfspath(JSContext *ctx, JSValueConst argv) ;
 
 #define JS2VSFPath(path, arg)                                                       \
@@ -31,6 +32,9 @@ char * js_arg_to_vfspath(JSContext *ctx, JSValueConst argv) ;
     }
 
 #define PATH_PREFIX "/fs"
+
+// 递归创建目录
+int mkdir_p(char* file_path, mode_t mode) ;
 
 bool fs_init() ;
 void require_module_fs(JSContext *ctx) ;

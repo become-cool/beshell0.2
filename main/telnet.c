@@ -211,7 +211,7 @@ void telnet_loop(JSContext *ctx) {
 		if(len<0) {
 			char errbuf[32] ;
 			esp_err_to_name_r(errno, errbuf, sizeof(errbuf)) ;
-			echof("recv() error: %s.\n", errbuf) ;
+			// echof("recv() error: %s.\n", errbuf) ;
 		}
 		// Client 断开
 		else if(len==0) {

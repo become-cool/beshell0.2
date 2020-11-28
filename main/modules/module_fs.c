@@ -15,15 +15,7 @@ LOG_TAG("fs")
 // esp32 vfs 不能挂在根目录，将整个系统挂载到 /fs 下，访问时自动加上
 char * js_arg_to_vfspath(JSContext *ctx, JSValueConst argv) {
     char * jspath = JS_ToCString(ctx, argv) ;
-    int len = strlen(jspath) ;
-    len = sizeof(PATH_PREFIX) + len ;
-    char * path = malloc(len+1) ;
-    if(!path) {
-        JS_FreeCString(ctx, jspath) ;
-        return NULL ;
-    }
-    memcpy(path, PATH_PREFIX, sizeof(PATH_PREFIX)) ;
-    strcpy(path+3, jspath) ;
+    char * path = mallocf(PATH_PREFIX"%s", jspath) ;
     JS_FreeCString(ctx, jspath) ;
     return path ;
 }
@@ -314,25 +306,51 @@ JSValue js_fs_readdir_sync(JSContext *ctx, JSValueConst this_val, int argc, JSVa
     JS2VSFPath(path, argv[0]) ;
     DIR* dir = opendir(path);
 
+    bool detail = false ;
+    if(argc>1) {
+        detail = JS_ToBool(ctx, argv[1]) ;
+    }
+
     if(!dir) {
         JS_ThrowReferenceError(ctx, "Cound not open dir %s", path);
         free(path) ;
         return JS_EXCEPTION ;
     }
-    free(path) ;
     
     struct dirent *dirEnt;
-    JSValue array = JS_NewArray(ctx) ;
+    JSValue ret = NULL ;
+    
+    if(detail)
+        ret = JS_NewObject(ctx) ;
+    else
+        ret = JS_NewArray(ctx) ;
 
     int idx = 0 ;
+    struct stat statbuf;
     while((dirEnt = readdir(dir))) {
-        JS_SetPropertyUint32(ctx, array, idx++, JS_NewString(ctx, dirEnt->d_name)) ;
+        if(detail) {
+
+            char * childpath = mallocf("%s/%s",path,dirEnt->d_name) ;
+            if(!childpath){
+                pf("could not malloc for path %s/%s ?", path, dirEnt->d_name)
+                continue ;
+            }
+            if(stat(childpath,&statbuf)!=0) {
+                JS_SetPropertyStr(ctx, ret, dirEnt->d_name, JS_NewString(ctx, "unknow")) ;
+            }
+            else {
+                JS_SetPropertyStr(ctx, ret, dirEnt->d_name, JS_NewString(ctx, S_ISDIR(statbuf.st_mode)? "dir": "file")) ;
+            }
+            free(childpath) ;
+        } else
+            JS_SetPropertyUint32(ctx, ret, idx++, JS_NewString(ctx, dirEnt->d_name)) ;
     }
 
+    free(path) ;
     closedir(dir);
     
 
-    return array ;
+    return ret ;
 }
 
 bool rm(const char * path, bool recursive) {
@@ -394,6 +412,18 @@ JSValue js_fs_rm_sync(JSContext *ctx, JSValueConst this_val, int argc, JSValueCo
 
     return ret? JS_TRUE: JS_FALSE ;
 }
+JSValue js_fs_rename_sync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    CHECK_ARGC(2)
+    JS2VSFPath(oldpath, argv[0]) ;
+    JS2VSFPath(newpath, argv[1]) ;
+
+    int ret = rename(oldpath, newpath) ;
+
+    free(oldpath) ;
+    free(newpath) ;
+
+    return JS_NewInt32(ctx, ret) ;
+}
 
 bool fs_init() {
     const esp_vfs_littlefs_conf_t conf_etc = {
@@ -427,6 +457,7 @@ void require_module_fs(JSContext *ctx) {
     JS_SetPropertyStr(ctx, fs, "existsSync", JS_NewCFunction(ctx, js_fs_exists_sync, "existsSync", 1));
     JS_SetPropertyStr(ctx, fs, "isDirSync", JS_NewCFunction(ctx, js_fs_is_dir_sync, "isDirSync", 1));
     JS_SetPropertyStr(ctx, fs, "isFileSync", JS_NewCFunction(ctx, js_fs_is_file_sync, "isFileSync", 1));
+    JS_SetPropertyStr(ctx, fs, "renameSync", JS_NewCFunction(ctx, js_fs_is_file_sync, "isFileSync", 1));
     JS_SetPropertyStr(ctx, global, "fs", fs);
 
     JS_FreeValue(ctx, global);

@@ -6,6 +6,8 @@ try{
     require("./init.d/wifi.js")
 
     require("./init.d/beconsoled.js")
+    
+    require("./init.d/delay.js")
 
     require("./init.d/app.js").autoBoot()
 

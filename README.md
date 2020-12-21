@@ -1,10 +1,8 @@
-## 编译 Esp32 版本
-
-正常操作 (见README_Building)
+## 编译
 
 ```
-source esp-idf/exports.sh
-make
+source esp-idf/export.sh
+./make
 ```
 
 

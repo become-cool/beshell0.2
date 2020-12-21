@@ -8,6 +8,7 @@
 #include "module_utils.h"
 #include "module_gpio.h"
 #include "module_serial.h"
+#include "module_socks.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
@@ -176,6 +177,7 @@ static JSContext * JS_NewCustomContext(JSRuntime *rt)
     require_module_process(ctx) ;    
     require_module_telnet(ctx) ;
     require_module_serial(ctx) ;
+    require_module_socks(ctx) ;
 
     return ctx;
 }
@@ -235,6 +237,7 @@ void task_js_main(){
             eventloop_on_before_reset(ctx) ;
             gpio_on_before_reset(ctx) ;
             serial_on_before_reset(ctx) ;
+            socks_on_before_reset(ctx) ;
 
             deinit_quickjs() ;
             init_quickjs() ;
@@ -245,6 +248,7 @@ void task_js_main(){
         js_std_loop(ctx) ;
         telnet_loop(ctx) ;
         sniffer_loop() ;
+        socks_udp_loop(ctx) ;
         eventloop_pump(ctx) ;
 
         js_std_loop(ctx) ;

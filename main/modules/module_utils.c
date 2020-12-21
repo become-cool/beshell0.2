@@ -361,6 +361,114 @@ JSValue js_fs_untar(JSContext *ctx, JSValueConst this_val, int argc, JSValueCons
     return res==0? JS_TRUE: JS_FALSE ;
 }
 
+JSValue js_string_bytes(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+    ARGV_TO_STRING(0, str, len)
+
+    JS_FreeCString(ctx, str) ;
+    return JS_NewUint32(ctx, len) ;
+}
+
+JSValue js_pack_int32(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(3)
+    ARGV_TO_ARRAYBUFFER(0, buff, bufflen)
+    ARGV_TO_UINT16(1, offset)
+    if(offset+4>bufflen) {
+        THROW_EXCEPTION("out of buffer length")
+    }
+    ARGV_TO_UINT32(2, num)
+    memcpy(buff+offset, (void *)&num, 4) ;
+    return JS_NewUint32(ctx, offset+4) ;
+}
+JSValue js_unpack_int32(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(2)
+    ARGV_TO_ARRAYBUFFER(0, buff, bufflen)
+    ARGV_TO_UINT16(1, offset)
+    if(offset+4>bufflen) {
+        THROW_EXCEPTION("out of buffer length")
+    }
+    return JS_NewInt32(ctx, * (int32_t *)(buff+offset)) ;
+}
+JSValue js_pack_string(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(3)
+    ARGV_TO_ARRAYBUFFER(0, buff, bufflen)
+    ARGV_TO_UINT16(1, offset)
+    ARGV_TO_STRING(2, str, strlen)
+
+    if(strlen>255) {
+        strlen = 255 ;
+    }
+    if(offset+strlen+1>bufflen) {
+        strlen = bufflen - offset - 1 ;
+    }
+
+    *(buff+offset) = strlen ;
+
+    if(strlen>0) {
+        memcpy(buff+offset+1, str, strlen) ;
+    }
+
+    JS_FreeCString(ctx, str) ;
+    return JS_NewUint32(ctx, offset+strlen+1) ;
+}
+JSValue js_unpack_string(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(2)
+    ARGV_TO_ARRAYBUFFER(0, buff, bufflen)
+    ARGV_TO_UINT16(1, offset)
+    uint8_t strlen = *(buff+offset) ;
+    if(offset+strlen+1>bufflen) {
+        strlen = bufflen - offset - 1 ;
+    }
+    return JS_NewStringLen(ctx, buff+offset+1, strlen) ;
+}
+
+JSValue js_write_string_to_ArrayBuffer(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(2)
+    ARGV_TO_ARRAYBUFFER(0, buff, bufflen)
+    ARGV_TO_STRING(1, str, strlen)
+    size_t offset = 0 ;
+    if(argc>=3) {
+        if( JS_ToUint32(ctx, &offset, argv[2]) ) {
+            JS_FreeCString(ctx, str) ;
+            THROW_EXCEPTION("argv offset is not a number")
+        }
+    }
+    if(offset+strlen>bufflen) {
+        JS_FreeCString(ctx, str) ;
+        THROW_EXCEPTION("out of buffer length")
+    }
+    memcpy(buff+offset, str, strlen) ;
+
+    JS_FreeCString(ctx, str) ;
+    return JS_UNDEFINED ;
+}
+
+JSValue js_read_string_from_ArrayBuffer(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+    ARGV_TO_ARRAYBUFFER(0, buff, bufflen)
+
+    size_t offset = 0 ;
+    if(argc>=2) {
+        if( JS_ToUint32(ctx, &offset, argv[1]) ) {
+            THROW_EXCEPTION("argv offset is not a number")
+        }
+    }
+    size_t strlen = 0 ;
+    if(argc>=3) {
+        if( JS_ToUint32(ctx, &strlen, argv[2]) ) {
+            THROW_EXCEPTION("argv length is not a number")
+        }
+    }
+    else {
+        strlen = bufflen - offset ;
+    }
+
+    if(offset+strlen>bufflen) {
+        THROW_EXCEPTION("out of buffer length")
+    }
+
+    return JS_NewStringLen(ctx, buff+offset, strlen) ;
+}
 
 void require_module_utils(JSContext *ctx) {
 
@@ -383,6 +491,13 @@ void require_module_utils(JSContext *ctx) {
     JS_SetPropertyStr(ctx, utils, "base64Decode", JS_NewCFunction(ctx, js_utils_base64_decode, "base64Decode", 1));
     JS_SetPropertyStr(ctx, utils, "gamma8Correct", JS_NewCFunction(ctx, js_utils_gamma8_correct, "gamma8Correct", 1));
     JS_SetPropertyStr(ctx, utils, "untar", JS_NewCFunction(ctx, js_fs_untar, "untar", 1));
+    JS_SetPropertyStr(ctx, utils, "stringBytes", JS_NewCFunction(ctx, js_string_bytes, "stringBytes", 1));
+    JS_SetPropertyStr(ctx, utils, "packInt32", JS_NewCFunction(ctx, js_pack_int32, "packInt32", 1));
+    JS_SetPropertyStr(ctx, utils, "unpackInt32", JS_NewCFunction(ctx, js_unpack_int32, "unpackInt32", 1));
+    JS_SetPropertyStr(ctx, utils, "packString", JS_NewCFunction(ctx, js_pack_string, "packString", 1));
+    JS_SetPropertyStr(ctx, utils, "unpackString", JS_NewCFunction(ctx, js_unpack_string, "unpackString", 1));
+    JS_SetPropertyStr(ctx, utils, "writeStringToArrayBuffer", JS_NewCFunction(ctx, js_write_string_to_ArrayBuffer, "writeStringToArrayBuffer", 1));
+    JS_SetPropertyStr(ctx, utils, "readStringFromArrayBuffer", JS_NewCFunction(ctx, js_read_string_from_ArrayBuffer, "readStringFromArrayBuffer", 1));
 
 	// global
     JS_SetPropertyStr(ctx, global, "setTimeout", JS_NewCFunction(ctx, js_util_set_timeout, "setTimeout", 1));

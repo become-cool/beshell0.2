@@ -12,7 +12,6 @@
 #include <esp_wifi.h>
 #include <lwip/dns.h>
 #include <lwip/sockets.h>
-#include <esp_netif.h>
 
 LOG_TAG("wifi");
 
@@ -29,9 +28,16 @@ JSValue __disconnect_callback = NULL ;
 uint32_t __disconnect_reason = 0 ;
 
 esp_netif_t * netif_ap = NULL ;
+esp_netif_t * get_netif_ap() {
+    return netif_ap ;
+}
 
 esp_netif_t * netif_sta = NULL ;
 esp_netif_ip_info_t sta_ip_info ;
+esp_netif_t * get_netif_sta() {
+    return netif_sta ;
+}
+
 
 
 
@@ -406,7 +412,7 @@ JSValue js_wifi_get_status(JSContext *ctx, JSValueConst this_val, int argc, JSVa
 
 
 JSValue js_wifi_get_ap_status(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-  
+
     char ip[16] ;
     wifi_config_t config;
     esp_wifi_get_config(WIFI_IF_AP, &config);
@@ -494,7 +500,7 @@ JSValue js_wifi_start_ap(JSContext *ctx, JSValueConst this_val, int argc, JSValu
     // inet_pton(AF_INET, "255.255.255.0", &info.netmask.addr);
     // esp_netif_dhcps_stop(netif_ap);
     // esp_netif_set_ip_info(netif_ap, &info);
-    // esp_netif_dhcps_start(netif_ap);
+    esp_netif_dhcps_start(netif_ap);
 
     // esp_wifi_set_protocol() ;
 

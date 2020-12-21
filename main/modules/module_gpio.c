@@ -89,7 +89,7 @@ JSValue js_gpio_unset_pin_isr(JSContext *ctx, JSValueConst this_val, int argc, J
 JSValue js_gpio_set_pin_isr_callback(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(1)
     if(!JS_IsFunction(ctx, argv[0])) {
-        return JS_UNDEFINED;
+        THROW_EXCEPTION("Arg not a function")
     }
 
     if(_gpio_isr_js_callback)

@@ -83,7 +83,7 @@ void sniffer_loop() {
         return ;
     }
 
-    // 连接接入
+    // 无数据
     if(!FD_ISSET(sniffer_sock, &sniffer_rfds)) {
         return ;
     }

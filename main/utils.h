@@ -36,14 +36,21 @@
 	}
 
 
-#define ARGV_TO_UINT8(i,var)   ARGV_TO_INT(i, var, uint8_t, JS_ToUint32)
-#define ARGV_TO_UINT32(i,var)  ARGV_TO_INT(i, var, uint32_t, JS_ToUint32)
+#define  ARGV_TO_UINT8(i,var)   ARGV_TO_INT(i, var, uint8_t,  JS_ToUint32)
+#define ARGV_TO_UINT16(i,var)   ARGV_TO_INT(i, var, uint16_t, JS_ToUint32)
+#define ARGV_TO_UINT32(i,var)   ARGV_TO_INT(i, var, uint32_t, JS_ToUint32)
 #define ARGV_TO_DOUBLE(i,var)                               \
     double var ;                                            \
     JS_ToFloat64(ctx, &var, argv[i]) ;
 #define ARGV_TO_STRING(i, var, len)                         \
     size_t len = 0 ;                                        \
     char * var = JS_ToCStringLen(ctx, &len, argv[i]) ;
+#define ARGV_TO_ARRAYBUFFER(i, var, varlen)                                         \
+    size_t varlen = 0;                                                              \
+    char * var = (char *)JS_GetArrayBuffer(ctx, &varlen, argv[i]) ;                 \
+    if(!var) {                                                                      \
+        THROW_EXCEPTION("argv is not a ArrayBuffer")                                \
+    }
 
 
 #define EVAL_CODE_LEN(str, len, filename)                                           \

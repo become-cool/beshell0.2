@@ -74,8 +74,9 @@ void socks_udp_loop(JSContext *ctx) {
         if(_js_udp_recv_callback!=NULL) {
 
             JSValueConst * argv = malloc(sizeof(JSValue)*2) ;
-            // argv[0] = JS_NewStringLen(ctx, rx_buffer, len) ;
-            argv[0] = JS_NewArrayBuffer(ctx, (uint8_t *)rx_buffer, len, NULL, NULL, false) ;
+            char * data = malloc(len) ;
+            memcpy(data, rx_buffer, len) ;
+            argv[0] = JS_NewArrayBuffer(ctx, (uint8_t *)data, len, freeArrayBuffer, NULL, false) ;
             argv[1] = JS_NewUint32(ctx, udp_listen_ports[i]) ;
             JS_Call(ctx, _js_udp_recv_callback, JS_UNDEFINED, 2, argv) ;
 

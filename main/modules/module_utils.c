@@ -369,6 +369,52 @@ JSValue js_string_bytes(JSContext *ctx, JSValueConst this_val, int argc, JSValue
     return JS_NewUint32(ctx, len) ;
 }
 
+JSValue js_pack(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    size_t totalsize = 0 ;
+    char * str ;
+    size_t num = 0 ;
+    for(int i=0;i<argc; i++) {
+        if(JS_IsString(argv[i])) {
+            str = JS_ToCStringLen(ctx, &num, argv[i]) ;
+            JS_FreeCString(ctx, str) ;
+            str = NULL ;
+            totalsize+= num + 1 ;
+        }
+        else if(JS_IsNumber(argv[i])) {
+            totalsize+= 4 ;
+        }
+        else {
+            THROW_EXCEPTION("Invalid data type of package")
+        }
+    }
+
+    char * pkgbuff = malloc(totalsize) ;
+    JSValue pkg = JS_NewArrayBuffer(ctx, (uint8_t *)pkgbuff, totalsize, freeArrayBuffer, NULL, false) ;
+
+    size_t offset = 0 ;
+    for(int i=0;i<argc; i++) {
+        if(JS_IsString(argv[i])) {
+            str = JS_ToCStringLen(ctx, &num, argv[i]) ;
+            if(num>255)
+                num = 255 ;
+            * (pkgbuff+offset) = num ;
+            offset+= 1 ;
+            memcpy(pkgbuff+offset, str, num) ;
+            offset+= num ;
+            JS_FreeCString(ctx, str) ;
+        }
+        else if(JS_IsNumber(argv[i])) {
+            if(JS_ToInt32(ctx, (int32_t*)&num, argv[i])){
+                // dd
+            }
+            memcpy(pkgbuff+offset, (void *)&num, 4) ;
+            offset+= 4 ;
+        }
+    }
+
+    return pkg ;
+}
+
 JSValue js_pack_int32(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(3)
     ARGV_TO_ARRAYBUFFER(0, buff, bufflen)
@@ -492,6 +538,7 @@ void require_module_utils(JSContext *ctx) {
     JS_SetPropertyStr(ctx, utils, "gamma8Correct", JS_NewCFunction(ctx, js_utils_gamma8_correct, "gamma8Correct", 1));
     JS_SetPropertyStr(ctx, utils, "untar", JS_NewCFunction(ctx, js_fs_untar, "untar", 1));
     JS_SetPropertyStr(ctx, utils, "stringBytes", JS_NewCFunction(ctx, js_string_bytes, "stringBytes", 1));
+    JS_SetPropertyStr(ctx, utils, "pack", JS_NewCFunction(ctx, js_pack, "pack", 1));
     JS_SetPropertyStr(ctx, utils, "packInt32", JS_NewCFunction(ctx, js_pack_int32, "packInt32", 1));
     JS_SetPropertyStr(ctx, utils, "unpackInt32", JS_NewCFunction(ctx, js_unpack_int32, "unpackInt32", 1));
     JS_SetPropertyStr(ctx, utils, "packString", JS_NewCFunction(ctx, js_pack_string, "packString", 1));

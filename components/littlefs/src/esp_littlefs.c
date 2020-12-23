@@ -120,6 +120,14 @@ bool esp_littlefs_mounted(const char* partition_label) {
     return _efs[index]->cache_size > 0;
 }
 
+lfs_t * esp_littlefs_hanlde(const char* partition_label) {
+    int index;
+    esp_err_t err;
+    err = esp_littlefs_by_label(partition_label, &index);
+    if(err != ESP_OK) return NULL ;
+    return _efs[index]->fs ;
+}
+
 esp_err_t esp_littlefs_info(const char* partition_label, size_t *total_bytes, size_t *used_bytes){
     int index;
     esp_err_t err;

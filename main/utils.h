@@ -100,5 +100,6 @@ uint64_t gettime() ;
 
 char * mallocf(char * format, ...) ;
 
+void freeArrayBuffer(JSRuntime *rt, void *opaque, void *ptr) ;
 
 #endif

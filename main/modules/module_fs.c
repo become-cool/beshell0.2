@@ -425,19 +425,80 @@ JSValue js_fs_rename_sync(JSContext *ctx, JSValueConst this_val, int argc, JSVal
     return JS_NewInt32(ctx, ret) ;
 }
 
+JSValue js_fs_info(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    size_t total = 0 ;
+    size_t used = 0 ;
+
+    if( esp_littlefs_info("fs", &total, &used) != ESP_OK ) {
+        THROW_EXCEPTION("esp_littlefs_info() bad")
+    }
+
+    JSValue obj = JS_NewObject(ctx) ;
+    JS_SetPropertyStr(ctx, obj, "total", JS_NewUint32(ctx, total));
+    JS_SetPropertyStr(ctx, obj, "used", JS_NewUint32(ctx, used));
+
+    return obj ;
+}
+
+void extend_partition() {
+    // 检查 unextend 文件
+    struct stat statbuf;
+    if(stat("/fs/unextend",&statbuf)<0) {
+        return ;
+    }
+
+    // 分区大小
+    size_t partition_size = 0 ;
+    printf("partition size ... \n") ;
+    esp_partition_iterator_t it = esp_partition_find(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_ANY, NULL);
+    for (; it != NULL; it = esp_partition_next(it)) {
+        const esp_partition_t *part = esp_partition_get(it);
+        printf("partition '%s' at offset 0x%x with size 0x%x\n", part->label, part->address, part->size);
+        if(strcmp(part->label, "fs")==0) {
+            partition_size = part->size ;
+            break ;
+        }
+    }
+    esp_partition_iterator_release(it);
+    if(partition_size==0) {
+        printf("unknow partition size\n") ;
+        return ;
+    }
+
+    // 分区内的文件系统大小
+    size_t fstotal = 0 ;
+    size_t fsused = 0 ;
+    if( esp_littlefs_info("fs", &fstotal, &fsused) != ESP_OK ) {
+        printf("esp_littlefs_info() bad\n") ;
+        return ;
+    }
+
+    if(fstotal>=partition_size) {
+        return ;
+    }
+
+    printf("extend partition from %d to %d ...\n", fstotal, partition_size) ;
+
+    lfs_t * lfs = esp_littlefs_hanlde("fs") ;
+
+    // 删除 unextend 文件
+    // return unlink(path)>-1 ;
+}
+
 bool fs_init() {
     const esp_vfs_littlefs_conf_t conf_etc = {
         .base_path = "/fs",
         .partition_label = "fs",
         .format_if_mount_failed = true
     };
-    if(esp_vfs_littlefs_register(&conf_etc)==ESP_OK){
-        return true ;
-    }
-    else {
+    if(esp_vfs_littlefs_register(&conf_etc)!=ESP_OK){
         printf("Failed to mount fs.\n") ;
         return false ;
     }
+
+    // extend_partition() ;
+    
+    return true ;
 }
 
 
@@ -458,6 +519,7 @@ void require_module_fs(JSContext *ctx) {
     JS_SetPropertyStr(ctx, fs, "isDirSync", JS_NewCFunction(ctx, js_fs_is_dir_sync, "isDirSync", 1));
     JS_SetPropertyStr(ctx, fs, "isFileSync", JS_NewCFunction(ctx, js_fs_is_file_sync, "isFileSync", 1));
     JS_SetPropertyStr(ctx, fs, "renameSync", JS_NewCFunction(ctx, js_fs_is_file_sync, "isFileSync", 1));
+    JS_SetPropertyStr(ctx, fs, "info", JS_NewCFunction(ctx, js_fs_info, "info", 1));
     JS_SetPropertyStr(ctx, global, "fs", fs);
 
     JS_FreeValue(ctx, global);

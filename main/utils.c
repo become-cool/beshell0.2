@@ -28,3 +28,7 @@ char * mallocf(char * format, ...) {
 	return str ;
 
 }
+
+void freeArrayBuffer(JSRuntime *rt, void *opaque, void *ptr) {
+    free(ptr) ;
+}

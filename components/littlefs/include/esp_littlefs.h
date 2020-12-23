@@ -81,6 +81,8 @@ esp_err_t esp_vfs_littlefs_unregister(const char* partition_label);
  */
 bool esp_littlefs_mounted(const char* partition_label);
 
+lfs_t * esp_littlefs_hanlde(const char* partition_label);
+
 /**
  * Format the littlefs partition
  *
@@ -90,6 +92,7 @@ bool esp_littlefs_mounted(const char* partition_label);
  *          - ESP_FAIL    on error
  */
 esp_err_t esp_littlefs_format(const char* partition_label);
+
 
 /**
  * Get information for littlefs

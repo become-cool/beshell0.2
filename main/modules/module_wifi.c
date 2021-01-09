@@ -41,6 +41,66 @@ esp_netif_t * get_netif_sta() {
 
 
 
+
+/* The examples use WiFi configuration that you can set via project configuration menu.
+
+   If you'd rather not, just change the below entries to strings with
+   the config you want - ie #define EXAMPLE_WIFI_SSID "mywifissid"
+*/
+// #define EXAMPLE_ESP_WIFI_SSID      "BECOME-777788"
+// #define EXAMPLE_ESP_WIFI_PASS      "43215678"
+
+// static void wifi_event_handler(void* arg, esp_event_base_t event_base,
+//                                     int32_t event_id, void* event_data)
+// {
+//     if (event_id == WIFI_EVENT_AP_STACONNECTED) {
+//         wifi_event_ap_staconnected_t* event = (wifi_event_ap_staconnected_t*) event_data;
+//         printf("station "MACSTR" join, AID=%d\n",
+//                  MAC2STR(event->mac), event->aid);
+//     } else if (event_id == WIFI_EVENT_AP_STADISCONNECTED) {
+//         wifi_event_ap_stadisconnected_t* event = (wifi_event_ap_stadisconnected_t*) event_data;
+//         printf("station "MACSTR" leave, AID=%d\n",
+//                  MAC2STR(event->mac), event->aid);
+//     }
+// }
+
+// void wifi_init_softap(void)
+// {
+//     // ESP_ERROR_CHECK(esp_netif_init());
+//     // ESP_ERROR_CHECK(esp_event_loop_create_default());
+//     // esp_netif_create_default_wifi_ap();
+
+//     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+//     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+
+//     ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_event_handler, NULL));
+
+//     wifi_config_t wifi_config = {
+//         .ap = {
+//             .ssid = EXAMPLE_ESP_WIFI_SSID,
+//             .ssid_len = strlen(EXAMPLE_ESP_WIFI_SSID),
+//             .channel = 1,
+//             .password = EXAMPLE_ESP_WIFI_PASS,
+//             .max_connection = 4,
+//             .authmode = WIFI_AUTH_WPA_WPA2_PSK
+//         },
+//     };
+//     if (strlen(EXAMPLE_ESP_WIFI_PASS) == 0) {
+//         wifi_config.ap.authmode = WIFI_AUTH_OPEN;
+//     }
+
+//     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_APSTA));
+//     ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_AP, &wifi_config));
+//     ESP_ERROR_CHECK(esp_wifi_start());
+// }
+
+
+
+
+
+
+
+
 /**
  * Convert a Wifi reason code to a string representation.
  */
@@ -218,6 +278,25 @@ static void esp32_wifi_eventHandler(void* arg, esp_event_base_t event_base, int3
 			break;
 		}
 	}
+
+    
+    
+    // JSValue global = JS_GetGlobalObject(ctx);
+    // JSValue beshellapi = JS_GetPropertyStr(ctx, global, "beshellapi") ;
+    // JSValue wifi = JS_GetPropertyStr(ctx, beshellapi, "wifi") ;
+    // JSValue eventHandle = JS_GetPropertyStr(ctx, wifi, "eventHandle") ;
+    
+    // if( JS_IsFunction(eventHandle) ) {
+
+    //     JSValueConst * argv = malloc(sizeof(JSValue)*2) ;  // 由 eventloop_out() 函数 free
+
+
+    //     JS_FreeValue(ctx, eventHandle);
+    // }
+    
+    // JS_FreeValue(ctx, wifi);
+    // JS_FreeValue(ctx, beshellapi);
+    // JS_FreeValue(ctx, global);
 }
 
 static void ip_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data) {
@@ -379,6 +458,25 @@ JSValue js_wifi_get_mode(JSContext *ctx, JSValueConst this_val, int argc, JSValu
     }
 }
 
+JSValue js_wifi_set_mode(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    wifi_mode_t mode = WIFI_MODE_NULL ;
+    if(argc>=1) {
+        if(JS_ToBool(ctx, argv[0])) {
+            mode|= WIFI_MODE_AP ;
+        }
+    }
+    if(argc>=2) {
+            mode|= WIFI_MODE_STA ;
+    }
+    wifi_mode_t mode_ori;
+    ESP_ERROR_CHECK(esp_wifi_get_mode(&mode_ori));
+
+    if(mode_ori!=mode) {
+        ESP_ERROR_CHECK(esp_wifi_set_mode(mode));
+    }
+    return JS_UNDEFINED ;
+}
+
 JSValue js_wifi_get_status(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
 
     JSValue status = JS_NewObject(ctx) ;
@@ -455,40 +553,41 @@ JSValue js_wifi_set_hostname(JSContext *ctx, JSValueConst this_val, int argc, JS
     return JS_UNDEFINED ;
 }
 
-JSValue js_wifi_start_ap(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-    CHECK_ARGC(2)
+#define MAX_SSID_CHARLEN        31
+#define MAX_PASSWORD_CHARLEN    63
 
-    wifi_config_t wifi_config ;
+JSValue js_wifi_start_ap(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+
+    CHECK_ARGC(2)
 
     size_t ssidlen = 0 ;
     char * ssid = JS_ToCStringLen(ctx, &ssidlen, argv[0]) ;
-    if(ssidlen>sizeof(wifi_config.ap.ssid)) {
-      ssidlen = sizeof(wifi_config.ap.ssid) - 1 ;
+    if(ssidlen>MAX_SSID_CHARLEN) {
+      ssidlen = MAX_SSID_CHARLEN ;
       ssid[ssidlen] = 0 ;
     }
 
     size_t passwordlen = 0 ;
     char * password = JS_ToCStringLen(ctx, &passwordlen, argv[1]) ;
-    if(passwordlen>sizeof(wifi_config.ap.password)) {
-        passwordlen = sizeof(wifi_config.ap.password) ;
+    if(passwordlen>MAX_PASSWORD_CHARLEN) {
+        passwordlen = MAX_PASSWORD_CHARLEN ;
         password[passwordlen] = 0 ;
     }
 
-    wifi_config.ap.ssid_len = ssidlen ;
+    wifi_config_t wifi_config = {
+        .ap = {
+            .ssid_len = ssidlen,
+            .channel = 1,
+            .max_connection = 4,
+            .authmode = (passwordlen==0)? WIFI_AUTH_OPEN: WIFI_AUTH_WPA_WPA2_PSK ,
+            .ssid_hidden = 0
+        },
+    };
+
     memcpy(wifi_config.ap.ssid, ssid, ssidlen) ;
     wifi_config.ap.ssid[ssidlen] = 0 ;
     memcpy(wifi_config.ap.password, password, passwordlen) ;
     wifi_config.ap.password[passwordlen] = 0 ;
-
-    wifi_config.ap.channel = 0 ;
-    wifi_config.ap.max_connection = 4 ;
-    wifi_config.ap.authmode = passwordlen==0? WIFI_AUTH_OPEN: WIFI_AUTH_WPA2_PSK ;
-    
-    wifi_mode_t mode;
-    ESP_ERROR_CHECK(esp_wifi_get_mode(&mode));
-    mode|= WIFI_MODE_AP ;
-    pf("esp_wifi_set_mode(%d)", mode)
-    ESP_ERROR_CHECK(esp_wifi_set_mode(mode));
 
     ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_AP, &wifi_config));
 
@@ -500,7 +599,7 @@ JSValue js_wifi_start_ap(JSContext *ctx, JSValueConst this_val, int argc, JSValu
     // inet_pton(AF_INET, "255.255.255.0", &info.netmask.addr);
     // esp_netif_dhcps_stop(netif_ap);
     // esp_netif_set_ip_info(netif_ap, &info);
-    esp_netif_dhcps_start(netif_ap);
+    // esp_netif_dhcps_start(netif_ap);
 
     // esp_wifi_set_protocol() ;
 
@@ -528,12 +627,16 @@ JSValue js_wifi_stop_ap(JSContext *ctx, JSValueConst this_val, int argc, JSValue
         return JS_UNDEFINED ;
     }
 
-    ESP_ERROR_CHECK(esp_wifi_set_mode( mode | WIFI_MODE_AP));
+    ESP_ERROR_CHECK(esp_wifi_set_mode( mode | WIFI_MODE_STA));
 
     return JS_UNDEFINED ;
 }
 
+
+
 void wifi_init() {
+
+    // wifi_init_softap() ;
 
     ESP_ERROR_CHECK(esp_netif_init());
 
@@ -543,28 +646,37 @@ void wifi_init() {
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
 
+    ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &esp32_wifi_eventHandler, NULL));
+    ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &ip_event_handler, NULL));
+
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_APSTA));
     ESP_ERROR_CHECK(esp_wifi_start()) ;
 
     bzero(&sta_ip_info, sizeof(esp_netif_ip_info_t));
-
-    ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &esp32_wifi_eventHandler, NULL));
-    ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &ip_event_handler, NULL));
+    
+    // 禁止 wifi 睡眠 (增加耗电)
+    esp_wifi_set_ps(WIFI_PS_NONE);
 }
 
 void require_module_wifi(JSContext *ctx) {
 
     JSValue global = JS_GetGlobalObject(ctx);
+    JSValue beshellapi = JS_GetPropertyStr(ctx, global, "beshellapi") ;
+
     JSValue wifi = JS_NewObject(ctx);
-    
+    JS_SetPropertyStr(ctx, beshellapi, "wifi", wifi);
+
     JS_SetPropertyStr(ctx, wifi, "connect", JS_NewCFunction(ctx, js_wifi_connect, "connect", 1));
     JS_SetPropertyStr(ctx, wifi, "disconnect", JS_NewCFunction(ctx, js_wifi_disconnect, "disconnect", 1));
     JS_SetPropertyStr(ctx, wifi, "getMode", JS_NewCFunction(ctx, js_wifi_get_mode, "getMode", 1));
+    JS_SetPropertyStr(ctx, wifi, "setMode", JS_NewCFunction(ctx, js_wifi_set_mode, "setMode", 1));
     JS_SetPropertyStr(ctx, wifi, "getStatus", JS_NewCFunction(ctx, js_wifi_get_status, "getStatus", 1));
     JS_SetPropertyStr(ctx, wifi, "getAPStatus", JS_NewCFunction(ctx, js_wifi_get_ap_status, "getAPStatus", 1));
     JS_SetPropertyStr(ctx, wifi, "setHostname", JS_NewCFunction(ctx, js_wifi_set_hostname, "setHostname", 1));
     JS_SetPropertyStr(ctx, wifi, "startAP", JS_NewCFunction(ctx, js_wifi_start_ap, "startAP", 1));
     JS_SetPropertyStr(ctx, wifi, "stopAP", JS_NewCFunction(ctx, js_wifi_stop_ap, "stopAP", 1));
-    JS_SetPropertyStr(ctx, global, "WiFi", wifi);
+    // JS_SetPropertyStr(ctx, wifi, "eventHandle", JS_NULL);
+
     JS_FreeValue(ctx, global);
+    JS_FreeValue(ctx, beshellapi);
 }

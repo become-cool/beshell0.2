@@ -486,12 +486,22 @@ void extend_partition() {
 }
 
 bool fs_init() {
-    const esp_vfs_littlefs_conf_t conf_etc = {
+    const esp_vfs_littlefs_conf_t conf_root = {
         .base_path = "/fs",
-        .partition_label = "fs",
+        .partition_label = "fsroot",
         .format_if_mount_failed = true
     };
-    if(esp_vfs_littlefs_register(&conf_etc)!=ESP_OK){
+    if(esp_vfs_littlefs_register(&conf_root)!=ESP_OK){
+        printf("Failed to mount fs.\n") ;
+        return false ;
+    }
+    
+    const esp_vfs_littlefs_conf_t conf_home = {
+        .base_path = "/fs/home",
+        .partition_label = "fshome",
+        .format_if_mount_failed = true
+    };
+    if(esp_vfs_littlefs_register(&conf_home)!=ESP_OK){
         printf("Failed to mount fs.\n") ;
         return false ;
     }
@@ -518,7 +528,7 @@ void require_module_fs(JSContext *ctx) {
     JS_SetPropertyStr(ctx, fs, "existsSync", JS_NewCFunction(ctx, js_fs_exists_sync, "existsSync", 1));
     JS_SetPropertyStr(ctx, fs, "isDirSync", JS_NewCFunction(ctx, js_fs_is_dir_sync, "isDirSync", 1));
     JS_SetPropertyStr(ctx, fs, "isFileSync", JS_NewCFunction(ctx, js_fs_is_file_sync, "isFileSync", 1));
-    JS_SetPropertyStr(ctx, fs, "renameSync", JS_NewCFunction(ctx, js_fs_is_file_sync, "isFileSync", 1));
+    JS_SetPropertyStr(ctx, fs, "renameSync", JS_NewCFunction(ctx, js_fs_is_file_sync, "renameSync", 1));
     JS_SetPropertyStr(ctx, fs, "info", JS_NewCFunction(ctx, js_fs_info, "info", 1));
     JS_SetPropertyStr(ctx, global, "fs", fs);
 

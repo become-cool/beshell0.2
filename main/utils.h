@@ -26,7 +26,7 @@
 
 #define CHECK_ARGC(num)                                     \
     if(argc<num) {                                          \
-        THROW_EXCEPTION("Missing param path")               \
+        THROW_EXCEPTION("Missing param")               \
     }
 
 #define ARGV_TO_INT(i, var, ctype, api)                     \

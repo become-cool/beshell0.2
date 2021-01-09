@@ -6,6 +6,8 @@
         "iosfwd": "c",
         "initializer_list": "c",
         "type_traits": "c",
-        "cstddef": "cpp"
+        "cstddef": "cpp",
+        "vector": "c",
+        "xstring": "c"
     }
 }

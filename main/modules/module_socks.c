@@ -126,13 +126,13 @@ JSValue js_udp_listen(JSContext *ctx, JSValueConst this_val, int argc, JSValueCo
  * number port
  * string|ArrayBuffer data
  */
-JSValue js_udp_broadcase(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+JSValue js_udp_send(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
 
     JSValue ret = JS_UNDEFINED ;
     int sock = -1 ;
 
     CHECK_ARGC(3)
-    // ARGV_TO_STRING(0, addr, addrlen)
+
     ARGV_TO_UINT16(1, port)
 
     char * data = NULL ;
@@ -148,6 +148,12 @@ JSValue js_udp_broadcase(JSContext *ctx, JSValueConst this_val, int argc, JSValu
 
     if(!data || datalen==0) {
         return JS_UNDEFINED ;
+    }
+    
+    size_t addrlen = 0 ;
+    char * addr = NULL ;
+    if(JS_IsString(argv[0])) {
+        addr = JS_ToCStringLen(ctx, &addrlen, argv[0]) ;
     }
 
     struct sockaddr_in local_addr;
@@ -167,43 +173,68 @@ JSValue js_udp_broadcase(JSContext *ctx, JSValueConst this_val, int argc, JSValu
         ret = JS_EXCEPTION ;
         goto end ;
     }
-    // Assign multicast TTL (set separately from normal interface TTL)
-    uint8_t ttl = IP_MULTICAST_TTL;
-    setsockopt(sock, IPPROTO_IP, IP_MULTICAST_TTL, &ttl, sizeof(uint8_t));
-    if (err < 0) {        
-        JS_ThrowReferenceError(ctx, "Failed to set IP_MULTICAST_TTL") ;
-        ret = JS_EXCEPTION ;
-        goto end ;
+
+    // 广播模式
+    if(!addrlen) {
+        uint8_t ttl = IP_MULTICAST_TTL;
+        setsockopt(sock, IPPROTO_IP, IP_MULTICAST_TTL, &ttl, sizeof(uint8_t));
+        if (err < 0) {        
+            JS_ThrowReferenceError(ctx, "Failed to set IP_MULTICAST_TTL") ;
+            ret = JS_EXCEPTION ;
+            goto end ;
+        }
+        
+        esp_netif_ip_info_t ipinfo;
+        struct sockaddr_in dest_addr;
+        dest_addr.sin_family = AF_INET;
+        dest_addr.sin_port = htons(port);
+
+        // STA network
+        bzero(&ipinfo, sizeof(esp_netif_ip_info_t));
+        esp_netif_get_ip_info(get_netif_sta(), &ipinfo);
+        dest_addr.sin_addr.s_addr = ipinfo.ip.addr | (~ipinfo.netmask.addr) ;
+
+        // printf("sta broadcase STA addr:%d\n", (uint32_t)dest_addr.sin_addr.s_addr);
+        sendto(sock, data, datalen, 0, (struct sockaddr *)&dest_addr, sizeof(dest_addr));
+        
+        // AP network
+        bzero(&ipinfo, sizeof(esp_netif_ip_info_t));
+        esp_netif_get_ip_info(get_netif_ap(), &ipinfo);
+        dest_addr.sin_addr.s_addr = ipinfo.ip.addr | (~ipinfo.netmask.addr) ;
+
+        // printf()
+
+        // printf("ap broadcase AP addr:%d\n", (uint32_t)dest_addr.sin_addr.s_addr);
+        sendto(sock, data, datalen, 0, (struct sockaddr *)&dest_addr, sizeof(dest_addr));
     }
 
-    esp_netif_ip_info_t ipinfo;
-    struct sockaddr_in dest_addr;
-    dest_addr.sin_family = AF_INET;
-    dest_addr.sin_port = htons(port);
+    // 非广播模式
+    else {
+        
+        esp_netif_ip_info_t ipinfo;
+        bzero(&ipinfo, sizeof(esp_netif_ip_info_t));
+        esp_netif_get_ip_info(get_netif_sta(), &ipinfo);
+        
+        struct sockaddr_in dest_addr;
+        dest_addr.sin_family = AF_INET;
+        dest_addr.sin_port = htons(port);
+        inet_aton(addr, &dest_addr.sin_addr.s_addr);
 
-    // STA network
-    bzero(&ipinfo, sizeof(esp_netif_ip_info_t));
-    esp_netif_get_ip_info(get_netif_sta(), &ipinfo);
-    dest_addr.sin_addr.s_addr = ipinfo.ip.addr | (~ipinfo.netmask.addr) ;
+        sendto(sock, data, datalen, 0, (struct sockaddr *)&dest_addr, sizeof(dest_addr));
+    }
 
-    // printf("sta broadcase addr:%d\n", (uint32_t)dest_addr.sin_addr.s_addr);
-    sendto(sock, data, datalen, 0, (struct sockaddr *)&dest_addr, sizeof(dest_addr));
-    
-    // AP network
-    bzero(&ipinfo, sizeof(esp_netif_ip_info_t));
-    esp_netif_get_ip_info(get_netif_ap(), &ipinfo);
-    dest_addr.sin_addr.s_addr = ipinfo.ip.addr | (~ipinfo.netmask.addr) ;
-
-    // printf("ap broadcase addr:%d\n", (uint32_t)dest_addr.sin_addr.s_addr);
-    sendto(sock, data, datalen, 0, (struct sockaddr *)&dest_addr, sizeof(dest_addr));
 
 end :
+    if(addr)
+        JS_FreeCString(ctx, addr) ;
     if(dataIsString)
         JS_FreeCString(ctx,data) ;
     if(sock>-1)
         close(sock);
     return ret ;
 }
+
+
 
 JSValue js_udp_set_recv_callback(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(1)
@@ -220,16 +251,17 @@ JSValue js_udp_set_recv_callback(JSContext *ctx, JSValueConst this_val, int argc
 void require_module_socks(JSContext *ctx) {
     
     JSValue global = JS_GetGlobalObject(ctx);
-    JSValue socks = JS_NewObject(ctx);
-    JS_SetPropertyStr(ctx, global, "socks", socks);
-    JSValue udp = JS_NewObject(ctx);
-    JS_SetPropertyStr(ctx, socks, "udp", udp);
+    JSValue beshellapi = JS_GetPropertyStr(ctx, global, "beshellapi") ;
 
-    JS_SetPropertyStr(ctx, udp, "broadcase", JS_NewCFunction(ctx, js_udp_broadcase, "broadcase", 1));
+    JSValue udp = JS_NewObject(ctx);
+    JS_SetPropertyStr(ctx, beshellapi, "udp", udp);
+    JS_SetPropertyStr(ctx, udp, "broadcase", JS_NewCFunction(ctx, js_udp_send, "broadcase", 1));
+    JS_SetPropertyStr(ctx, udp, "send", JS_NewCFunction(ctx, js_udp_send, "send", 1));
     JS_SetPropertyStr(ctx, udp, "setRecvCallback", JS_NewCFunction(ctx, js_udp_set_recv_callback, "setRecvCallback", 1));
     JS_SetPropertyStr(ctx, udp, "listen", JS_NewCFunction(ctx, js_udp_listen, "listen", 1));
 
     JS_FreeValue(ctx, global);
+    JS_FreeValue(ctx, beshellapi);
 }
 
 

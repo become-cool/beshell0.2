@@ -170,6 +170,15 @@ static JSContext * JS_NewCustomContext(JSRuntime *rt)
     // js_init_module_std(ctx, "std") ;
     // js_init_module_os(ctx, "os") ;
 
+    // global 对象
+    JSValue global = JS_GetGlobalObject(ctx);
+    JS_SetPropertyStr(ctx, global, "global", global);
+    
+    // beshellapi 对象
+    JSValue beshellapi = JS_NewObject(ctx);
+    JS_SetPropertyStr(ctx, global, "beshellapi", beshellapi);
+    JS_FreeValue(ctx, global);
+
     require_module_fs(ctx) ;
     require_module_utils(ctx) ;
     require_module_wifi(ctx) ;

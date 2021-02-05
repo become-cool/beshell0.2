@@ -5,6 +5,7 @@
 #include "esp32-hal-gpio.h"
 #include "driver/gpio.h"
 #include "driver/ledc.h"
+#include <esp_adc_cal.h>
 
 #define SET_PIN_MODE(name, cst)  if(strcmp(mode,name)==0) {                     \
                                     pinMode(pin, cst) ;                         \
@@ -46,8 +47,99 @@ JSValue js_gpio_digital_write(JSContext *ctx, JSValueConst this_val, int argc, J
     digitalWrite(pin, value) ;
     return JS_UNDEFINED ;
 }
+
+
+
+JSValue js_adc_set_bits(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(2)
+    ARGV_TO_UINT8(0, adc)
+    ARGV_TO_UINT8(1, bits)
+    if(adc!=1) {
+        THROW_EXCEPTION("adcConfigBits() only set adc1")
+    }
+    if( bits<9 || bits>12 ) {
+        THROW_EXCEPTION("adcConfigBits() arg bits must be 9-12")
+    }
+    return (adc1_config_width(bits-9) == ESP_OK)? JS_TRUE: JS_FALSE ;
+}
+
+#define MAPCHANNEL(gpionum, channelnum, adcnum, vpin, vchannel, vadc)   \
+    if(vpin==gpionum) {                                                 \
+        vchannel = channelnum ;                                         \
+        vadc = adcnum ;                                                 \
+    }
+
+#define GPIO2ADCCHANNEL(vpin, vchannel, vadc)               \
+    adc_channel_t vchannel = 0 ;                            \
+    uint8_t vadc = 0 ;                                      \
+    MAPCHANNEL(36, 0, 1, vpin, vchannel, vadc)              \
+    else MAPCHANNEL(37, 1, 1, vpin, vchannel, vadc)         \
+    else MAPCHANNEL(38, 2, 1, vpin, vchannel, vadc)         \
+    else MAPCHANNEL(39, 3, 1, vpin, vchannel, vadc)         \
+    else MAPCHANNEL(32, 4, 1, vpin, vchannel, vadc)         \
+    else MAPCHANNEL(33, 5, 1, vpin, vchannel, vadc)         \
+    else MAPCHANNEL(34, 6, 1, vpin, vchannel, vadc)         \
+    else MAPCHANNEL(35, 7, 1, vpin, vchannel, vadc)         \
+    else MAPCHANNEL(4, 0, 2, vpin, vchannel, vadc)          \
+    else MAPCHANNEL(0, 1, 2, vpin, vchannel, vadc)          \
+    else MAPCHANNEL(2, 2, 2, vpin, vchannel, vadc)          \
+    else MAPCHANNEL(15, 3, 2, vpin, vchannel, vadc)         \
+    else MAPCHANNEL(13, 4, 2, vpin, vchannel, vadc)         \
+    else MAPCHANNEL(12, 5, 2, vpin, vchannel, vadc)         \
+    else MAPCHANNEL(14, 6, 2, vpin, vchannel, vadc)         \
+    else MAPCHANNEL(27, 7, 2, vpin, vchannel, vadc)         \
+    else MAPCHANNEL(25, 8, 2, vpin, vchannel, vadc)         \
+    else MAPCHANNEL(26, 9, 2, vpin, vchannel, vadc)         \
+    else {                                                  \
+        THROW_EXCEPTION("pin is not a valid adc pin, must be 0, 2, 4, 12-15, 25-27, 32-39.")   \
+    }
+
+JSValue js_adc_set_channel_atten(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(2)
+    ARGV_TO_UINT8(0, pin)
+    ARGV_TO_UINT8(1, atten)
+
+    if( atten<0 || atten>3 ) {
+        THROW_EXCEPTION("adcConfigBits() arg atten must be 0-3")
+    }
+
+    GPIO2ADCCHANNEL(pin, channel, adc)
+
+    esp_err_t ret = ESP_FAIL ;
+    if(adc==1) {
+        ret = adc1_config_channel_atten(channel, atten) ;
+    }
+    else if(adc==2) {
+        ret = adc2_config_channel_atten(channel, atten) ;
+    }
+    
+    return (ret==ESP_OK)? JS_TRUE: JS_FALSE ;
+}
+
+
+
 JSValue js_gpio_analog_read(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-    return JS_UNDEFINED ;
+    CHECK_ARGC(1)
+    ARGV_TO_UINT8(0, pin)
+
+    uint8_t bits = 12 ;
+    if(argc>1) {
+        if( JS_ToUint32(ctx, &bits, argv[1]) ) {
+            THROW_EXCEPTION("Invalid param type");
+        }
+	}
+    
+    GPIO2ADCCHANNEL(pin, channel, adc)
+    
+    int val = 0 ;
+    if(adc==1) {
+        adc1_config_width(bits-9) ;
+        val = adc1_get_raw(channel) ;
+    }
+    else if(adc==2) {
+        adc2_get_raw(channel, bits-9, &val) ;
+    }
+    return JS_NewInt32(ctx, val) ;
 }
 JSValue js_gpio_analog_write(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     return JS_UNDEFINED ;
@@ -418,6 +510,8 @@ void require_module_gpio(JSContext *ctx) {
     JS_SetPropertyStr(ctx, global, "pinMode", JS_NewCFunction(ctx, js_gpio_pin_mode, "pinMode", 1));
     JS_SetPropertyStr(ctx, global, "digitalRead", JS_NewCFunction(ctx, js_gpio_digital_read, "digitalRead", 1));
     JS_SetPropertyStr(ctx, global, "digitalWrite", JS_NewCFunction(ctx, js_gpio_digital_write, "digitalWrite", 1));
+    JS_SetPropertyStr(ctx, global, "adcConfigBits", JS_NewCFunction(ctx, js_adc_set_bits, "adcConfigBits", 1));
+    JS_SetPropertyStr(ctx, global, "adcConfigAtten", JS_NewCFunction(ctx, js_adc_set_channel_atten, "adcConfigAtten", 1));
     JS_SetPropertyStr(ctx, global, "analogRead", JS_NewCFunction(ctx, js_gpio_analog_read, "analogRead", 1));
     JS_SetPropertyStr(ctx, global, "analogWrite", JS_NewCFunction(ctx, js_gpio_analog_write, "analogWrite", 1));
     JS_SetPropertyStr(ctx, global, "pwmConfigTimer", JS_NewCFunction(ctx, js_pwm_config_timer, "pwmConfigTimer", 1));

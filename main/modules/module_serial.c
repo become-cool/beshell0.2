@@ -793,7 +793,6 @@ void require_module_serial(JSContext *ctx) {
 #define FREE_BUS_SPI(busnum)    if(_spi_bus_setup&(1<<(busnum))){ spi_bus_free(busnum); }
 #define FREE_BUS_I2C(busnum)    if(_i2c_bus_setup&(1<<(busnum))){ i2c_driver_delete(busnum); }
 void serial_on_before_reset(JSContext *ctx) {
-
     // 回收 SPI 资源
     for(uint8_t h=0; h<8; h++) {
         if(_spi_handle_pool1[h]!=NULL) {
@@ -806,7 +805,7 @@ void serial_on_before_reset(JSContext *ctx) {
     FREE_BUS_SPI(3)
     _spi_bus_setup = 0 ;
 
+    FREE_BUS_I2C(0) ;
     FREE_BUS_I2C(1) ;
-    FREE_BUS_I2C(2) ;
     _i2c_bus_setup = 0 ;
 }

@@ -3,6 +3,7 @@
 
 #include "quickjs-libc.h"
 
+void socks_init() ;
 void socks_udp_loop(JSContext *ctx) ;
 void socks_on_before_reset(JSContext *ctx) ;
 

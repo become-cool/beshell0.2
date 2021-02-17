@@ -17,7 +17,7 @@ struct timeval select_tv = {
 } ;
 
 
-int udp_listen_handles[UDP_POOR_SIZE] = {-1} ;
+int udp_listen_handles[UDP_POOR_SIZE] = {} ;
 uint16_t udp_listen_ports[UDP_POOR_SIZE] = {0} ;
 uint8_t udp_listen_count = 0 ;
 fd_set udp_recv_rfds;
@@ -248,6 +248,13 @@ JSValue js_udp_set_recv_callback(JSContext *ctx, JSValueConst this_val, int argc
     return JS_UNDEFINED;
 }
 
+
+void socks_init() {
+    for(int i=0;i<UDP_POOR_SIZE;i++) {
+        udp_listen_handles[i] = -1 ;
+    }
+}
+
 void require_module_socks(JSContext *ctx) {
     
     JSValue global = JS_GetGlobalObject(ctx);
@@ -275,13 +282,12 @@ void socks_on_before_reset(JSContext *ctx) {
         _js_udp_recv_callback = NULL ;
     }
     
-    printf("udp sockets : %d\n", udp_listen_count) ;
-    
     for(int i=0;i<UDP_POOR_SIZE;i++) {
+        // printf("udp_listen_handles[i]=%d\n",udp_listen_handles[i]) ;
         if(udp_listen_handles[i]<0)
             continue ;
             
-        printf("close udp socket: %d, %d\n", i, udp_listen_handles[i]) ;
+        // printf("close udp socket: %d, %d\n", i, udp_listen_handles[i]) ;
 
         close(udp_listen_handles[i]) ;
 

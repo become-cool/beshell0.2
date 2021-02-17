@@ -232,6 +232,7 @@ void task_js_main(){
 
     fs_init() ;
     wifi_init() ;
+    socks_init() ;
     telnet_init() ;
     sniffer_init() ;
     gpio_init() ;

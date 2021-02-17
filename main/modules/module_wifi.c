@@ -282,8 +282,8 @@ static void esp32_wifi_eventHandler(void* arg, esp_event_base_t event_base, int3
     
     
     // JSValue global = JS_GetGlobalObject(ctx);
-    // JSValue beshellapi = JS_GetPropertyStr(ctx, global, "beshellapi") ;
-    // JSValue wifi = JS_GetPropertyStr(ctx, beshellapi, "wifi") ;
+    // JSValue beapi = JS_GetPropertyStr(ctx, global, "beapi") ;
+    // JSValue wifi = JS_GetPropertyStr(ctx, beapi, "wifi") ;
     // JSValue eventHandle = JS_GetPropertyStr(ctx, wifi, "eventHandle") ;
     
     // if( JS_IsFunction(eventHandle) ) {
@@ -295,7 +295,7 @@ static void esp32_wifi_eventHandler(void* arg, esp_event_base_t event_base, int3
     // }
     
     // JS_FreeValue(ctx, wifi);
-    // JS_FreeValue(ctx, beshellapi);
+    // JS_FreeValue(ctx, beapi);
     // JS_FreeValue(ctx, global);
 }
 
@@ -661,10 +661,10 @@ void wifi_init() {
 void require_module_wifi(JSContext *ctx) {
 
     JSValue global = JS_GetGlobalObject(ctx);
-    JSValue beshellapi = JS_GetPropertyStr(ctx, global, "beshellapi") ;
+    JSValue beapi = JS_GetPropertyStr(ctx, global, "beapi") ;
 
     JSValue wifi = JS_NewObject(ctx);
-    JS_SetPropertyStr(ctx, beshellapi, "wifi", wifi);
+    JS_SetPropertyStr(ctx, beapi, "wifi", wifi);
 
     JS_SetPropertyStr(ctx, wifi, "connect", JS_NewCFunction(ctx, js_wifi_connect, "connect", 1));
     JS_SetPropertyStr(ctx, wifi, "disconnect", JS_NewCFunction(ctx, js_wifi_disconnect, "disconnect", 1));
@@ -678,5 +678,5 @@ void require_module_wifi(JSContext *ctx) {
     // JS_SetPropertyStr(ctx, wifi, "eventHandle", JS_NULL);
 
     JS_FreeValue(ctx, global);
-    JS_FreeValue(ctx, beshellapi);
+    JS_FreeValue(ctx, beapi);
 }

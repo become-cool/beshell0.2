@@ -519,12 +519,12 @@ JSValue js_read_string_from_ArrayBuffer(JSContext *ctx, JSValueConst this_val, i
 void require_module_utils(JSContext *ctx) {
 
     JSValue global = JS_GetGlobalObject(ctx);
-    JSValue beshellapi = JS_GetPropertyStr(ctx, global, "beshellapi") ;
-    JS_SetPropertyStr(ctx, beshellapi, "_repl_set_input_func", JS_NewCFunction(ctx, js_repl_set_input_func, "_repl_set_input_func", 1));
+    JSValue beapi = JS_GetPropertyStr(ctx, global, "beapi") ;
+    JS_SetPropertyStr(ctx, beapi, "_repl_set_input_func", JS_NewCFunction(ctx, js_repl_set_input_func, "_repl_set_input_func", 1));
 
 	// utils 
     JSValue utils = JS_NewObject(ctx);
-    JS_SetPropertyStr(ctx, beshellapi, "utils", utils);
+    JS_SetPropertyStr(ctx, beapi, "utils", utils);
     JS_SetPropertyStr(ctx, utils, "freeStacks", JS_NewCFunction(ctx, js_util_free_stacks, "freeStacks", 1));
     JS_SetPropertyStr(ctx, utils, "time", JS_NewCFunction(ctx, js_util_time, "time", 1));
     JS_SetPropertyStr(ctx, utils, "setLogLevel", JS_NewCFunction(ctx, js_util_set_log_level, "setLogLevel", 1));
@@ -554,6 +554,6 @@ void require_module_utils(JSContext *ctx) {
     JS_SetPropertyStr(ctx, global, "evalAsFile", JS_NewCFunction(ctx, js_fs_eval_as_file, "evalAsFile", 1));
 
     
-	JS_FreeValue(ctx, beshellapi);
+	JS_FreeValue(ctx, beapi);
 	JS_FreeValue(ctx, global);
 }

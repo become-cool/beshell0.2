@@ -37,6 +37,7 @@
 
 
 #define  ARGV_TO_UINT8(i,var)   ARGV_TO_INT(i, var, uint8_t,  JS_ToUint32)
+#define   ARGV_TO_INT8(i,var)   ARGV_TO_INT(i, var, int8_t,  JS_ToInt32)
 #define ARGV_TO_UINT16(i,var)   ARGV_TO_INT(i, var, uint16_t, JS_ToUint32)
 #define ARGV_TO_UINT32(i,var)   ARGV_TO_INT(i, var, uint32_t, JS_ToUint32)
 #define ARGV_TO_DOUBLE(i,var)                               \

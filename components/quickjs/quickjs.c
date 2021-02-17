@@ -22,6 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
+#define dd printf("%d\n",__LINE__) ;
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>

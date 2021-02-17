@@ -251,17 +251,17 @@ JSValue js_udp_set_recv_callback(JSContext *ctx, JSValueConst this_val, int argc
 void require_module_socks(JSContext *ctx) {
     
     JSValue global = JS_GetGlobalObject(ctx);
-    JSValue beshellapi = JS_GetPropertyStr(ctx, global, "beshellapi") ;
+    JSValue beapi = JS_GetPropertyStr(ctx, global, "beapi") ;
 
     JSValue udp = JS_NewObject(ctx);
-    JS_SetPropertyStr(ctx, beshellapi, "udp", udp);
+    JS_SetPropertyStr(ctx, beapi, "udp", udp);
     JS_SetPropertyStr(ctx, udp, "broadcase", JS_NewCFunction(ctx, js_udp_send, "broadcase", 1));
     JS_SetPropertyStr(ctx, udp, "send", JS_NewCFunction(ctx, js_udp_send, "send", 1));
     JS_SetPropertyStr(ctx, udp, "setRecvCallback", JS_NewCFunction(ctx, js_udp_set_recv_callback, "setRecvCallback", 1));
     JS_SetPropertyStr(ctx, udp, "listen", JS_NewCFunction(ctx, js_udp_listen, "listen", 1));
 
     JS_FreeValue(ctx, global);
-    JS_FreeValue(ctx, beshellapi);
+    JS_FreeValue(ctx, beapi);
 }
 
 

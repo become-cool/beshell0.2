@@ -174,9 +174,9 @@ static JSContext * JS_NewCustomContext(JSRuntime *rt)
     JSValue global = JS_GetGlobalObject(ctx);
     JS_SetPropertyStr(ctx, global, "global", global);
     
-    // beshellapi 对象
-    JSValue beshellapi = JS_NewObject(ctx);
-    JS_SetPropertyStr(ctx, global, "beshellapi", beshellapi);
+    // beapi 对象
+    JSValue beapi = JS_NewObject(ctx);
+    JS_SetPropertyStr(ctx, global, "beapi", beapi);
     JS_FreeValue(ctx, global);
 
     require_module_fs(ctx) ;

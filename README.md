@@ -60,20 +60,6 @@ make
 python gen_esp32part.py binary_partitions.bin input_partitions.csv
 ```
 
-## Esp32版本 无法连接 SD
-
-执行 `E.connectSDCard()` 函数报错：
-
-```
-Uncaught Error: Unimplemented on Linux
-```
-
-
-解决方案详见:
-
-https://github.com/espruino/Espruino/issues/1779
-
-
 
 ## eFuse
 
@@ -90,3 +76,20 @@ https://github.com/espressif/esptool/wiki/espefuse
 > API: https://github.com/espressif/esp-idf/tree/master/components/efuse
 >
 > 例子 : https://github.com/espressif/esp-idf/blob/master/examples/system/efuse
+
+
+## esp-idf SD 限制
+
+esp-idf 默认不支持 exFAT ，FAT32最大容量为 32GB, 大于 32GB windows 上格式化时只有 exFAT 选项。
+
+
+esp-idf/components/fatfs/src/ffconf.h 文件中：
+```
+#define FF_FS_EXFAT		0
+```
+
+同时需要再 sdkconfig 文件 (或 idf menuconf) 中打开 LFN (LFN>=1)
+```
+CONFIG_FATFS_LFN_STACK=y
+CONFIG_FATFS_API_ENCODING_UTF_8=y
+```

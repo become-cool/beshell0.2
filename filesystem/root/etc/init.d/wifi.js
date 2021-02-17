@@ -27,19 +27,19 @@ function readWiFiConfig() {
 }
 
 global.WiFi = {
-    connect: beshellapi.wifi.connect ,
-    disconnect: beshellapi.wifi.disconnect ,
-    getMode: beshellapi.wifi.getMode ,
-    setMode: beshellapi.wifi.setMode ,
-    getStatus: beshellapi.wifi.getStatus ,
-    getAPStatus: beshellapi.wifi.getAPStatus ,
-    setHostname: beshellapi.wifi.setHostname ,
-    startAP: beshellapi.wifi.startAP ,
-    stopAP: beshellapi.wifi.stopAP ,
+    connect: beapi.wifi.connect ,
+    disconnect: beapi.wifi.disconnect ,
+    getMode: beapi.wifi.getMode ,
+    setMode: beapi.wifi.setMode ,
+    getStatus: beapi.wifi.getStatus ,
+    getAPStatus: beapi.wifi.getAPStatus ,
+    setHostname: beapi.wifi.setHostname ,
+    startAP: beapi.wifi.startAP ,
+    stopAP: beapi.wifi.stopAP ,
 }
 
 WiFi.save = function() {
-    let status = beshellapi.wifi.getStatus()
+    let status = beapi.wifi.getStatus()
     if(!status.ssid)
         return
     try{
@@ -56,7 +56,7 @@ WiFi.save = function() {
     fs.writeFileSync(configPath, JSON.stringify(json,null,4))
 }
 WiFi.saveAP = function() {
-    let status = beshellapi.wifi.getAPStatus()
+    let status = beapi.wifi.getAPStatus()
     if(!status.ssid)
         return
     try{
@@ -74,7 +74,7 @@ WiFi.saveAP = function() {
 }
 
 function connectToAP() {
-    let status = beshellapi.wifi.getStatus()
+    let status = beapi.wifi.getStatus()
     if(status.status!='disconnected') {
         return
     }
@@ -84,7 +84,7 @@ function connectToAP() {
     }
 
     console.log("connect to ssid:", json.sta.ssid, json.sta.password)
-    beshellapi.wifi.connect(json.sta.ssid, json.sta.password||"", null, function(err){
+    beapi.wifi.connect(json.sta.ssid, json.sta.password||"", null, function(err){
         if(err) {
             console.log("connect wifi error:", err)
         }
@@ -96,7 +96,7 @@ function connectToAP() {
 
 function autoConnect() {
     let json = readWiFiConfig()
-    let status = beshellapi.wifi.getStatus()
+    let status = beapi.wifi.getStatus()
 
     // sta
     if(status.status=='disconnected') {
@@ -110,10 +110,10 @@ function autoConnect() {
     }
 
     // ap
-    let apstatus = beshellapi.wifi.getAPStatus()
-    let ssid = json.ap.ssid.replace("${UUID}", beshellapi.utils.uuid().substr(-4))
+    let apstatus = beapi.wifi.getAPStatus()
+    let ssid = json.ap.ssid.replace("${UUID}", beapi.utils.uuid().substr(-4))
     if( !apstatus.started || apstatus.ssid!=ssid ){
-        beshellapi.wifi.startAP(ssid, json.ap.password)
+        beapi.wifi.startAP(ssid, json.ap.password)
     }
 
 }

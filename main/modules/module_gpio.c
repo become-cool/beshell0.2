@@ -5,7 +5,9 @@
 #include "esp32-hal-gpio.h"
 #include "driver/gpio.h"
 #include "driver/ledc.h"
+#include <driver/dac.h>
 #include <esp_adc_cal.h>
+
 
 #define SET_PIN_MODE(name, cst)  if(strcmp(mode,name)==0) {                     \
                                     pinMode(pin, cst) ;                         \
@@ -142,6 +144,18 @@ JSValue js_gpio_analog_read(JSContext *ctx, JSValueConst this_val, int argc, JSV
     return JS_NewInt32(ctx, val) ;
 }
 JSValue js_gpio_analog_write(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(2)
+    ARGV_TO_UINT8(0, pin)
+    ARGV_TO_UINT8(1, value)
+
+    if(pin<25 || pin>26) {
+        THROW_EXCEPTION("analogWrite() arg pin must be 25 or 26")  
+    }
+    pin-= 25 ; // DAC_CHANNEL_1 or DAC_CHANNEL_2
+    
+    dac_output_enable(pin);
+    dac_output_voltage(pin, value);
+
     return JS_UNDEFINED ;
 }
 

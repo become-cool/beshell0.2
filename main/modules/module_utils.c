@@ -78,9 +78,7 @@ JSValue js_util_set_log_level(JSContext *ctx, JSValueConst this_val, int argc, J
 }
 
 JSValue js_util_time(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
-	struct timespec tm = {0, 0};
-	clock_gettime(CLOCK_REALTIME, &tm);
-	return JS_NewInt64(ctx, tm.tv_nsec/1000/1000 + tm.tv_sec*1000) ;
+	return JS_NewInt64(ctx, gettime()) ;
 }
 
 JSValue js_util_var_ptr(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){

@@ -46,7 +46,7 @@ beapi._repl_set_input_func(function(pkgid, remain, pkgcmd, code){
             telnet.send(pkgid, CMD_RSPN, JSON.stringify(res))
         }
         else if(pkgcmd == CMD_CALL_ASYNC) {
-            evalAsFile(`{let resolve = _mkresolve(${pkgid});let reject = _mkreject(${pkgid}); code}`, "REPL")
+            evalAsFile(`(async ()=>{let resolve = repl._mkresolve(${pkgid});let reject = repl._mkreject(${pkgid}); try{${code}}catch(e){reject(e)}})()`, "REPL")
         }
 
     } catch(e) {

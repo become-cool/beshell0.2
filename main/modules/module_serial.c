@@ -386,7 +386,7 @@ const unsigned char dmpcfgupddata[239] = {
     0x00, 0x60, 0x04, 0x00, 0x40, 0x00, 0x00};
 
 
-
+#define I2C_IS_SETUP(busnum) (_i2c_bus_setup & (1<<(busnum)))
 
 #define ARGV_I2C_BUSNUM(i, var)                     \
     ARGV_TO_UINT8(i, var)                           \
@@ -419,12 +419,16 @@ const unsigned char dmpcfgupddata[239] = {
 
 
 esp_err_t i2c_send(uint8_t bus, uint8_t addr, uint8_t * data, size_t len) {
+    if(!I2C_IS_SETUP(bus))
+        return ESP_ERR_INVALID_STATE ;
     I2C_BEGIN_WRITE(addr) ;
     i2c_master_write(cmd, data, len, true) ;
     I2C_COMMIT(bus) ;
     return res ;
 }
 esp_err_t i2c_write(uint8_t bus, uint8_t addr, uint8_t reg, uint8_t * data, size_t len) {
+    if(!I2C_IS_SETUP(bus))
+        return ESP_ERR_INVALID_STATE ;
     I2C_BEGIN_WRITE(addr) ;
     i2c_master_write_byte(cmd, reg, true) ;
     i2c_master_write(cmd, data, len, true) ;
@@ -432,9 +436,13 @@ esp_err_t i2c_write(uint8_t bus, uint8_t addr, uint8_t reg, uint8_t * data, size
     return res ;
 }
 esp_err_t i2c_write_byte(uint8_t bus, uint8_t addr, uint8_t reg, uint8_t data) {
+    if(!I2C_IS_SETUP(bus))
+        return ESP_ERR_INVALID_STATE ;
     return i2c_write(bus, addr, reg, &data, 1) ;
 }
 esp_err_t i2c_read(uint8_t bus, uint8_t addr, uint8_t reg, uint8_t * data, uint8_t len) {
+    if(!I2C_IS_SETUP(bus))
+        return ESP_ERR_INVALID_STATE ;
     i2c_send(bus,addr,&reg, 1) ;
     I2C_BEGIN_READ(addr)
     I2C_RECV(data,len)
@@ -453,11 +461,17 @@ JSValue js_mpu9250_load(JSContext *ctx, JSValueConst this_val, int argc, JSValue
         bank = datanum / 256;
         if (lastbank != bank)
         {
-            i2c_write_byte(0, 0x68, 0x6d, bank);
-            i2c_write_byte(0, 0x68, 0x6e, 0);
+            if(i2c_write_byte(0, 0x68, 0x6d, bank)!=ESP_OK) {
+                return JS_FALSE ;
+            }
+            if(i2c_write_byte(0, 0x68, 0x6e, 0)!=ESP_OK) {
+                return JS_FALSE ;
+            }
         }
 
-        i2c_write_byte(0, 0x68, 0x6f, dmpmemorydata[datanum]);
+        if(i2c_write_byte(0, 0x68, 0x6f, dmpmemorydata[datanum])!=ESP_OK){
+            return JS_FALSE ;
+        }
         lastbank = bank;
     };
 
@@ -476,18 +490,24 @@ JSValue js_mpu9250_load(JSContext *ctx, JSValueConst this_val, int argc, JSValue
         datacounts++;
         bytes2write = dmpcfgupddata[datacounts];
 
-        i2c_write_byte(0, 0x68, 0x6d, bank);
-        i2c_write_byte(0, 0x68, 0x6e, offset);
+        if(i2c_write_byte(0, 0x68, 0x6d, bank)!=ESP_OK){
+            return JS_FALSE ;
+        }
+        if(i2c_write_byte(0, 0x68, 0x6e, offset)!=ESP_OK){
+            return JS_FALSE ;
+        }
         for (writingcounts = 0; writingcounts < bytes2write; writingcounts++)
         {
             datacounts++;
 
-            i2c_write_byte(0, 0x68, 0x6f, dmpcfgupddata[datacounts]);
+            if(i2c_write_byte(0, 0x68, 0x6f, dmpcfgupddata[datacounts])!=ESP_OK){
+                return JS_FALSE ;
+            }
         }
         datacounts++;
     }
 
-    return JS_UNDEFINED ;
+    return JS_TRUE ;
 }
 
 
@@ -517,6 +537,12 @@ JSValue js_i2c_bus_setup(JSContext *ctx, JSValueConst this_val, int argc, JSValu
         }
     }
 
+    // 先 delete driver
+    if(I2C_IS_SETUP(busnum)){
+        i2c_driver_delete(busnum) ;
+        _i2c_bus_setup&= ~(1<<busnum) ;
+    }
+
 	i2c_config_t i2c_config = {
 		.mode = I2C_MODE_MASTER,
 		.sda_io_num = sdapin,
@@ -539,6 +565,11 @@ JSValue js_i2c_bus_setup(JSContext *ctx, JSValueConst this_val, int argc, JSValu
     return JS_TRUE ;
 }
 
+JSValue js_i2c_bus_has_setup(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    CHECK_ARGC(1)
+    ARGV_I2C_BUSNUM(0, busnum)
+    return I2C_IS_SETUP(busnum)? JS_TRUE: JS_FALSE ;
+}
 
 
 
@@ -567,6 +598,9 @@ JSValue js_i2c_bus_send(JSContext *ctx, JSValueConst this_val, int argc, JSValue
 
     CHECK_ARGC(3)
     ARGV_I2C_BUSNUM(0, busnum)
+    if(!I2C_IS_SETUP(busnum))
+        return JS_FALSE ;
+
     ARGV_TO_UINT8(1, addr)
     if(!JS_IsArray(ctx, argv[2])) {
         THROW_EXCEPTION("arg must be a array")
@@ -612,6 +646,9 @@ JSValue js_i2c_bus_recv(JSContext *ctx, JSValueConst this_val, int argc, JSValue
 
     CHECK_ARGC(3)
     ARGV_I2C_BUSNUM(0, busnum)
+    if(!I2C_IS_SETUP(busnum))
+        return JS_FALSE ;
+
     ARGV_TO_UINT8(1, addr)
     ARGV_TO_UINT8(2, readlen)
 
@@ -646,6 +683,9 @@ JSValue js_i2c_bus_recv(JSContext *ctx, JSValueConst this_val, int argc, JSValue
 JSValue js_i2c_bus_read(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(4)
     ARGV_I2C_BUSNUM(0, busnum)
+    if(!I2C_IS_SETUP(busnum))
+        return JS_FALSE ;
+
     ARGV_TO_UINT8(1, addr)
     ARGV_TO_UINT8(2, reg)
     ARGV_TO_UINT8(3, readlen)
@@ -672,6 +712,8 @@ JSValue js_i2c_bus_read(JSContext *ctx, JSValueConst this_val, int argc, JSValue
 #define I2C_READ_INT(var, type, size)                                   \
     CHECK_ARGC(3)                                                       \
     ARGV_I2C_BUSNUM(0, busnum)                                          \
+    if(!I2C_IS_SETUP(busnum))                                           \
+        return JS_NULL ;                                                \
     ARGV_TO_UINT8(1, addr)                                              \
     ARGV_TO_UINT8(2, reg)                                               \
     type var = 0 ;                                                      \
@@ -746,12 +788,13 @@ JSValue js_i2c_bus_read_uint32(JSContext *ctx, JSValueConst this_val, int argc, 
 JSValue js_i2c_bus_free(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(1)
     ARGV_I2C_BUSNUM(0, busnum)
-    if( i2c_driver_delete(busnum)!=ESP_OK ){
-        return JS_FALSE ;
+    if(I2C_IS_SETUP(busnum)){
+        if( i2c_driver_delete(busnum)!=ESP_OK ){
+            return JS_FALSE ;
+        }
+        _i2c_bus_setup&= ~(1<<busnum) ;
     }
     
-    _i2c_bus_setup&= ~(1<<busnum) ;
-
     return JS_TRUE ;
 }
 
@@ -772,6 +815,7 @@ void require_module_serial(JSContext *ctx) {
     JSValue i2c = JS_NewObject(ctx);
     JS_SetPropertyStr(ctx, beapi, "i2c", i2c);
     JS_SetPropertyStr(ctx, i2c, "setup", JS_NewCFunction(ctx, js_i2c_bus_setup, "setup", 1));
+    JS_SetPropertyStr(ctx, i2c, "hasSetup", JS_NewCFunction(ctx, js_i2c_bus_has_setup, "hasSetup", 1));
     JS_SetPropertyStr(ctx, i2c, "ping", JS_NewCFunction(ctx, js_i2c_bus_ping, "ping", 1));
     JS_SetPropertyStr(ctx, i2c, "send", JS_NewCFunction(ctx, js_i2c_bus_send, "send", 1));
     JS_SetPropertyStr(ctx, i2c, "recv", JS_NewCFunction(ctx, js_i2c_bus_recv, "recv", 1));

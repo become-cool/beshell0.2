@@ -42,9 +42,19 @@ efuses 是一次性编程，不能重复修改
 
 esp32 启动时电流较大，sgm2019 很容易支持不了，导致无限重启，可以在 3V3 和 GND 之间加一个大电容 (47uF)
 
-```
 
-```
+## esp32 程序较大时，上电启动慢，reset/reboot 不受影响
+
+esp32芯片串口上的启动输出显示 启动了两次，第一次中途僵死，等待几秒后 reset 。
+
+可能是 bootloader.bin 在启动程序时没有及时“喂狗”，导致 watchdog 重置系统。
+
+在 `esp-idf/components/esp32/cpu_start.c` 文件的 `call_start_cpu0()` 函数内， `ESP_EARLY_LOGI(TAG, "Starting app cpu, entry point is %p", call_start_cpu1);` 
+附近输出一些文本内容，重新编译 bootloader.bin 可解决（未充分证实）。
+
+
+> 编译 bootloader.bin 方法：复制 `esp-idf/components/bootloader` 到项目的 `components` 目录下，然后重新编译项目
+
 
 ## 分区
 

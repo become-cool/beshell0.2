@@ -13,5 +13,5 @@ exports.autoBoot = function() {
 exports.setAutoBootPath = function(path) {
     let json = JSON.load("/etc/config/boot.json")
     json["active-app"] = path
-    fs.writeFileSync("/etc/config/boot.json", JSON.stringify(json,null,4))
+    beapi.fs.writeFileSync("/etc/config/boot.json", JSON.stringify(json,null,4))
 }

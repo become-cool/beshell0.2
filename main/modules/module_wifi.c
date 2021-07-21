@@ -321,7 +321,7 @@ JSValue js_wifi_connect(JSContext *ctx, JSValueConst this_val, int argc, JSValue
 
     JSValue callback = NULL ;
     if(argc>=3 && JS_IsFunction(ctx, argv[2])) {
-        callback = argv[3] ;
+        callback = argv[2] ;
         // printf("argc=%d, argv[3]is function? %d, ref: %d\n", argc, JS_IsFunction(ctx, callback), VAR_REFCNT(callback)) ;
     }
 

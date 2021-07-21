@@ -2,7 +2,6 @@
 #define _UTILS_H
 
 #include "quickjs-libc.h"
-// #include "telnet.h"
 
 #define VAR_REFCNT(var) ((JSRefCountHeader *)JS_VALUE_GET_PTR(var))->ref_count
 #define P_VAR_REFCNT(var) printf(#var" ref count:%d @%d\n", VAR_REFCNT(var), __LINE__) ;
@@ -65,7 +64,7 @@
 
 #define EVAL_CODE(str, filename) EVAL_CODE_LEN(str, strlen(str), filename)
 
-#define CALL_FUNC(func, thisobj, argc, argv)                                        \
+#define CALL_FUNC_EX(ctx, func, thisobj, argc, argv)                                \
     {                                                                               \
     JSValue ret = JS_Call(ctx, func, thisobj, argc, argv) ;                         \
     if( JS_IsException(ret) ) {                                                     \
@@ -73,6 +72,9 @@
     }                                                                               \
     JS_FreeValue(ctx, ret) ;                                                        \
     }
+
+#define CALL_FUNC(func, thisobj, argc, argv)                                        \
+    CALL_FUNC_EX(ctx, func, thisobj, argc, argv)
 
 #define MAKE_ARGV1(argv, arg1)                                                      \
     JSValueConst * argv = malloc(sizeof(JSValue)) ;                                 \

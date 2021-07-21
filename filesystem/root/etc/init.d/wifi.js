@@ -16,7 +16,7 @@ function defaultConfig() {
 }
 function readWiFiConfig() {
     try{
-        var json = fs.readFileSync(configPath)
+        var json = beapi.fs.readFileSync(configPath)
         json = JSON.parse(json)
     }catch(e){
         console.log(e)
@@ -43,7 +43,7 @@ WiFi.save = function() {
     if(!status.ssid)
         return
     try{
-        var json = fs.readFileSync(configPath)
+        var json = beapi.fs.readFileSync(configPath)
         json = JSON.parse(json)
     }catch(e) {
         console.log(e)
@@ -53,14 +53,14 @@ WiFi.save = function() {
     }
     json.sta.ssid = status.ssid
     json.sta.password = status.password
-    fs.writeFileSync(configPath, JSON.stringify(json,null,4))
+    beapi.fs.writeFileSync(configPath, JSON.stringify(json,null,4))
 }
 WiFi.saveAP = function() {
     let status = beapi.wifi.getAPStatus()
     if(!status.ssid)
         return
     try{
-        var json = fs.readFileSync(configPath)
+        var json = beapi.fs.readFileSync(configPath)
         json = JSON.parse(json)
     }catch(e) {
         console.log(e)
@@ -70,7 +70,7 @@ WiFi.saveAP = function() {
     }
     json.ap.ssid = status.ssid
     json.ap.password = status.password
-    fs.writeFileSync(configPath, JSON.stringify(json,null,4))
+    beapi.fs.writeFileSync(configPath, JSON.stringify(json,null,4))
 }
 
 function connectToAP() {

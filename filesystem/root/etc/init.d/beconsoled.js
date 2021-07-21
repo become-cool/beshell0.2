@@ -9,13 +9,12 @@ telnet.callback = function(funcName, ...arglst){
 }
 
 let __debounce_timers = {}
-watchPins((gpio, val)=>{
-    if(__debounce_timers[gpio]!=undefined)
+watchPins((gpio)=>{
+    if(__debounce_timers[gpio]!=undefined) {
         return
+    }
     __debounce_timers[gpio] = setTimeout(()=>{
         delete __debounce_timers[gpio]
-        if( digitalRead(gpio) == val ) {
-            telnet.callback('EmitPinChanged', gpio, val)
-        }
-    }, 10)
+        telnet.callback('EmitPinChanged', gpio, beapi.gpio.digitalRead(gpio))
+    }, 20)
 })

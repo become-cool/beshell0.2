@@ -73,10 +73,10 @@ function cd(path) {
         path = _lastPWD
     }
     path = path? resolvepath(path): process.env.HOME
-    if(!fs.isDirSync(path)) {
+    if(!beapi.fs.isDirSync(path)) {
         throw new Error("Is not a directory."+path)
     }
-    path = fs.normalize(path) || '/'
+    path = beapi.fs.normalize(path) || '/'
     if(process.env.PWD != path) {
         _lastPWD = process.env.PWD
         process.env.PWD = path

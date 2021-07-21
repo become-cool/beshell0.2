@@ -515,7 +515,10 @@ bool fs_init() {
 void require_module_fs(JSContext *ctx) {
 
     JSValue global = JS_GetGlobalObject(ctx);
+    JSValue beapi = JS_GetPropertyStr(ctx, global, "beapi") ;
+    
     JSValue fs = JS_NewObject(ctx);
+    JS_SetPropertyStr(ctx, beapi, "fs", fs);
     
     JS_SetPropertyStr(ctx, fs, "statSync", JS_NewCFunction(ctx, js_fs_stat_sync, "statSync", 1));
     JS_SetPropertyStr(ctx, fs, "unlinkSync", JS_NewCFunction(ctx, js_fs_unlink_sync, "unlinkSync", 1));
@@ -530,7 +533,7 @@ void require_module_fs(JSContext *ctx) {
     JS_SetPropertyStr(ctx, fs, "isFileSync", JS_NewCFunction(ctx, js_fs_is_file_sync, "isFileSync", 1));
     JS_SetPropertyStr(ctx, fs, "renameSync", JS_NewCFunction(ctx, js_fs_is_file_sync, "renameSync", 1));
     JS_SetPropertyStr(ctx, fs, "info", JS_NewCFunction(ctx, js_fs_info, "info", 1));
-    JS_SetPropertyStr(ctx, global, "fs", fs);
 
     JS_FreeValue(ctx, global);
+    JS_FreeValue(ctx, beapi);
 }

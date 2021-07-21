@@ -520,24 +520,29 @@ JSValue js_pwm_stop(JSContext *ctx, JSValueConst this_val, int argc, JSValueCons
 void require_module_gpio(JSContext *ctx) {
     
     JSValue global = JS_GetGlobalObject(ctx);
+    JSValue beapi = JS_GetPropertyStr(ctx, global, "beapi") ;
+
+    JSValue gpio = JS_NewObject(ctx);
+    JS_SetPropertyStr(ctx, beapi, "gpio", gpio);
     
-    JS_SetPropertyStr(ctx, global, "pinMode", JS_NewCFunction(ctx, js_gpio_pin_mode, "pinMode", 1));
-    JS_SetPropertyStr(ctx, global, "digitalRead", JS_NewCFunction(ctx, js_gpio_digital_read, "digitalRead", 1));
-    JS_SetPropertyStr(ctx, global, "digitalWrite", JS_NewCFunction(ctx, js_gpio_digital_write, "digitalWrite", 1));
-    JS_SetPropertyStr(ctx, global, "adcConfigBits", JS_NewCFunction(ctx, js_adc_set_bits, "adcConfigBits", 1));
-    JS_SetPropertyStr(ctx, global, "adcConfigAtten", JS_NewCFunction(ctx, js_adc_set_channel_atten, "adcConfigAtten", 1));
-    JS_SetPropertyStr(ctx, global, "analogRead", JS_NewCFunction(ctx, js_gpio_analog_read, "analogRead", 1));
-    JS_SetPropertyStr(ctx, global, "analogWrite", JS_NewCFunction(ctx, js_gpio_analog_write, "analogWrite", 1));
-    JS_SetPropertyStr(ctx, global, "pwmConfigTimer", JS_NewCFunction(ctx, js_pwm_config_timer, "pwmConfigTimer", 1));
-    JS_SetPropertyStr(ctx, global, "pwmConfigChannel", JS_NewCFunction(ctx, js_pwm_config_channel, "pwmConfigChannel", 1));
-    JS_SetPropertyStr(ctx, global, "pwmConfig", JS_NewCFunction(ctx, js_pwm_config, "pwmConfig", 1));
-    JS_SetPropertyStr(ctx, global, "pwmWrite", JS_NewCFunction(ctx, js_pwm_write, "pwmWrite", 1));
-    JS_SetPropertyStr(ctx, global, "pwmStop", JS_NewCFunction(ctx, js_pwm_stop, "pwmStop", 1));
-    JS_SetPropertyStr(ctx, global, "setPinISR", JS_NewCFunction(ctx, js_gpio_set_pin_isr, "setPinISR", 1));
-    JS_SetPropertyStr(ctx, global, "unsetPinISR", JS_NewCFunction(ctx, js_gpio_unset_pin_isr, "unsetPinISR", 1));
-    JS_SetPropertyStr(ctx, global, "setPinISRCallback", JS_NewCFunction(ctx, js_gpio_set_pin_isr_callback, "setPinISRCallback", 1));
+    JS_SetPropertyStr(ctx, gpio, "pinMode", JS_NewCFunction(ctx, js_gpio_pin_mode, "pinMode", 1));
+    JS_SetPropertyStr(ctx, gpio, "digitalRead", JS_NewCFunction(ctx, js_gpio_digital_read, "digitalRead", 1));
+    JS_SetPropertyStr(ctx, gpio, "digitalWrite", JS_NewCFunction(ctx, js_gpio_digital_write, "digitalWrite", 1));
+    JS_SetPropertyStr(ctx, gpio, "adcConfigBits", JS_NewCFunction(ctx, js_adc_set_bits, "adcConfigBits", 1));
+    JS_SetPropertyStr(ctx, gpio, "adcConfigAtten", JS_NewCFunction(ctx, js_adc_set_channel_atten, "adcConfigAtten", 1));
+    JS_SetPropertyStr(ctx, gpio, "analogRead", JS_NewCFunction(ctx, js_gpio_analog_read, "analogRead", 1));
+    JS_SetPropertyStr(ctx, gpio, "analogWrite", JS_NewCFunction(ctx, js_gpio_analog_write, "analogWrite", 1));
+    JS_SetPropertyStr(ctx, gpio, "pwmConfigTimer", JS_NewCFunction(ctx, js_pwm_config_timer, "pwmConfigTimer", 1));
+    JS_SetPropertyStr(ctx, gpio, "pwmConfigChannel", JS_NewCFunction(ctx, js_pwm_config_channel, "pwmConfigChannel", 1));
+    JS_SetPropertyStr(ctx, gpio, "pwmConfig", JS_NewCFunction(ctx, js_pwm_config, "pwmConfig", 1));
+    JS_SetPropertyStr(ctx, gpio, "pwmWrite", JS_NewCFunction(ctx, js_pwm_write, "pwmWrite", 1));
+    JS_SetPropertyStr(ctx, gpio, "pwmStop", JS_NewCFunction(ctx, js_pwm_stop, "pwmStop", 1));
+    JS_SetPropertyStr(ctx, gpio, "setPinISR", JS_NewCFunction(ctx, js_gpio_set_pin_isr, "setPinISR", 1));
+    JS_SetPropertyStr(ctx, gpio, "unsetPinISR", JS_NewCFunction(ctx, js_gpio_unset_pin_isr, "unsetPinISR", 1));
+    JS_SetPropertyStr(ctx, gpio, "setPinISRCallback", JS_NewCFunction(ctx, js_gpio_set_pin_isr_callback, "setPinISRCallback", 1));
 
     JS_FreeValue(ctx, global);
+    JS_FreeValue(ctx, beapi);
 }
 
 void gpio_init() {

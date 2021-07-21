@@ -31,10 +31,10 @@ spi_device_handle_t _spi_handle(uint8_t idx) {
 }
 
 /**
- * spi bus num 0-2
+ * spi bus num 1-2
  * clk
- * miso
  * mosi
+ * miso
  */
 JSValue js_spi_bus_setup(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
 

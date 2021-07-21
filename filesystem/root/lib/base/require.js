@@ -21,33 +21,33 @@ function dirname(path) {
         return path.substr(0, idx) || null
     }
 }
-fs.normalize = normalize
-fs.dirname = dirname
+beapi.fs.normalize = normalize
+beapi.fs.dirname = dirname
 
 function resolveExtName(path) {
-    if( fs.isFileSync(path) )
+    if( beapi.fs.isFileSync(path) )
         return path
     let pathExt = path + '.js'
-    if( fs.isFileSync(pathExt) )
+    if( beapi.fs.isFileSync(pathExt) )
         return pathExt
 
     // npm package 
-    if( fs.isDirSync(path) ) {
+    if( beapi.fs.isDirSync(path) ) {
 
         let pkgpath = path + "/package.json"
 
-        if(fs.isFileSync(pkgpath)) {
+        if(beapi.fs.isFileSync(pkgpath)) {
             try{
-                let json = JSON.parse(fs.readFileSync(pkgpath))
+                let json = JSON.parse(beapi.fs.readFileSync(pkgpath))
                 let mainpath = path + '/' + (json.main || 'index.js')
-                if(fs.isFileSync(mainpath))
+                if(beapi.fs.isFileSync(mainpath))
                     return mainpath
             }catch(e){
                 console.log(e)
             }
         }
         
-        if(fs.isFileSync(path+'/index.js')) {
+        if(beapi.fs.isFileSync(path+'/index.js')) {
             return path+'/index.js'
         }
     }
@@ -110,7 +110,7 @@ function __mkrequire(__dirname) {
         // JS 文件
         else {
             let scriptDir = dirname(path)
-            let script = `var _$_module$ = {exports:{}} ; (function(exports, require, module, __filename, __dirname) { ${fs.readFileSync(path)}
+            let script = `var _$_module$ = {exports:{}} ; (function(exports, require, module, __filename, __dirname) { ${beapi.fs.readFileSync(path)}
 })(_$_module$.exports, Module.__mkrequire("${scriptDir}"), _$_module$, "${path}", "${scriptDir}");
 _$_module$.exports`
             Module.caches[path] = evalAsFile(script, path)
@@ -128,7 +128,7 @@ let Module = {
 }
 
 JSON.load = function(path) {
-    return JSON.parse(fs.readFileSync(path))
+    return JSON.parse(beapi.fs.readFileSync(path))
 }
 
 global.Module  = Module

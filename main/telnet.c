@@ -331,7 +331,7 @@ void echo_error(JSContext * ctx) {
     JS_FreeValue(ctx, exception_val);
 }
 
-void write_file(char pkgid, const char * path, const char * src, size_t len, bool append) {
+bool write_file(char pkgid, const char * path, const char * src, size_t len, bool append) {
 	int fd = fopen(path, append? "a+": "w");
     if(fd<=0) {
 
@@ -346,7 +346,7 @@ void write_file(char pkgid, const char * path, const char * src, size_t len, boo
 			printf("memory low ?") ;
 		}
 		
-        return ;
+        return false ;
     }
 
 	size_t wroteBytes = fwrite(src, 1, len, fd);
@@ -369,6 +369,7 @@ void write_file(char pkgid, const char * path, const char * src, size_t len, boo
 	}
 
 	fclose(fd) ;
+	return true ;
 }
 
 void on_pkg_receive (uint8_t pkgid, uint8_t remain, uint8_t cmd, uint8_t * data, uint8_t datalen, void * ctx){
@@ -428,8 +429,8 @@ void on_pkg_receive (uint8_t pkgid, uint8_t remain, uint8_t cmd, uint8_t * data,
 			}
 
 			int pathlen = strnlen((char *)data, datalen) ;
-			// printf("path len: %d\n", pathlen) ;
-			if(pathlen==datalen) {
+			printf("path len: %d\n", pathlen) ;
+			if(pathlen==0 || pathlen==datalen) {
 				telnet_send_pkg_str(pkgid, CMD_EXCEPTION, "give me file path") ;
 				return ;
 			}
@@ -447,7 +448,7 @@ void on_pkg_receive (uint8_t pkgid, uint8_t remain, uint8_t cmd, uint8_t * data,
 			}
 			snprintf(realpath, realpathlen+1, PATH_PREFIX"%s", (char *)data) ;
 			realpath[realpathlen] = 0 ;
-			// printf("real path: %s\n", realpath) ;
+			// printf("[new req] real path: %s\n", realpath) ;
 
 			write_file(pkgid, realpath, raw, rawlen, cmd==CMD_FILE_APPEND_REQ ) ;
 

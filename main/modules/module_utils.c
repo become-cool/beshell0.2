@@ -109,6 +109,20 @@ JSValue js_util_var_refcount(JSContext *ctx, JSValueConst this_val, int argc, JS
 }
 
 
+JSValue js_util_sleep(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    if(argc<1) {
+        JS_ThrowReferenceError(ctx, "Missing param");
+        return JS_EXCEPTION ;
+    }
+    uint32_t ms ;
+	if(JS_ToUint32(ctx, &ms, argv[0]) ) {
+        JS_ThrowReferenceError(ctx, "Invalid param type");
+        return JS_EXCEPTION ;
+	}
+    vTaskDelay(pdMS_TO_TICKS(ms));
+    return JS_UNDEFINED ;
+}
+
 JSValue __js_util_set_timer(JSContext *ctx, int argc, JSValueConst *argv, bool repeat){
     if(argc<2) {
         JS_ThrowReferenceError(ctx, "Missing param");
@@ -545,9 +559,11 @@ void require_module_utils(JSContext *ctx) {
     JS_SetPropertyStr(ctx, utils, "readStringFromArrayBuffer", JS_NewCFunction(ctx, js_read_string_from_ArrayBuffer, "readStringFromArrayBuffer", 1));
 
 	// global
+    JS_SetPropertyStr(ctx, global, "sleep", JS_NewCFunction(ctx, js_util_sleep, "sleep", 1));
     JS_SetPropertyStr(ctx, global, "setTimeout", JS_NewCFunction(ctx, js_util_set_timeout, "setTimeout", 1));
     JS_SetPropertyStr(ctx, global, "setInterval", JS_NewCFunction(ctx, js_util_set_interval, "setInterval", 1));
     JS_SetPropertyStr(ctx, global, "clearTimeout", JS_NewCFunction(ctx, js_util_clear_timeout, "clearTimeout", 1));
+    JS_SetPropertyStr(ctx, global, "clearInterval", JS_NewCFunction(ctx, js_util_clear_timeout, "clearInterval", 1));
     JS_SetPropertyStr(ctx, global, "evalScript", JS_NewCFunction(ctx, js_fs_eval_script, "evalScript", 1));
     JS_SetPropertyStr(ctx, global, "evalAsFile", JS_NewCFunction(ctx, js_fs_eval_as_file, "evalAsFile", 1));
 

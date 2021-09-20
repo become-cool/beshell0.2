@@ -2,7 +2,7 @@
 #include "utils.h"
 #include "task_js.h"
 #include "eventloop.h"
-#include "esp32-hal-gpio.h"
+#include "arduino/esp32-hal-gpio.h"
 #include "driver/gpio.h"
 #include "driver/ledc.h"
 #include <driver/dac.h>
@@ -46,7 +46,9 @@ JSValue js_gpio_digital_write(JSContext *ctx, JSValueConst this_val, int argc, J
     CHECK_ARGC(2)
     ARGV_TO_UINT8(0, pin)
     ARGV_TO_UINT8(1, value)
+    
     digitalWrite(pin, value) ;
+
     return JS_UNDEFINED ;
 }
 

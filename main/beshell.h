@@ -1,7 +1,7 @@
 #ifndef _BESHELL_H
 #define _BESHELL_H
 
-#define BESHELL_VERSION "1.1.7"
+#define BESHELL_VERSION "1.1.8"
 #define QUICKJS_VERSION "2020-09-06"
 
 #endif

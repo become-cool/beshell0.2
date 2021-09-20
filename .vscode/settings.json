@@ -8,6 +8,9 @@
         "type_traits": "c",
         "cstddef": "cpp",
         "vector": "c",
-        "xstring": "c"
+        "xstring": "c",
+        "fenv.h": "c",
+        "string.h": "c",
+        "stdint.h": "c"
     }
 }

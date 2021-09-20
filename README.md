@@ -5,6 +5,11 @@ source esp-idf/export.sh
 ./make
 ```
 
+## quickjs 连接错误:
+```
+1: undefined reference to `fesetround'
+```
+
 
 ## GPIO12 启动时上拉状态
 
@@ -102,4 +107,30 @@ esp-idf/components/fatfs/src/ffconf.h 文件中：
 ```
 CONFIG_FATFS_LFN_STACK=y
 CONFIG_FATFS_API_ENCODING_UTF_8=y
+```
+
+## S2 摄像头驱动问题
+
+配置摄像头的时候 `camera_config_t.clk_freq_hz` 必须设置为 16MHz , 否则驱动在分配 DMA 内存时，不会使用 PSRAM ，导致内存紧张。如果再启用 WiFi ，则 SRAM 不够用
+
+```
+static camera_config_t camera_config = {
+
+    ...
+
+    //XCLK 20MHz or 10MHz for OV2640 double FPS (Experimental)
+    // .xclk_freq_hz = 20000000,
+    .xclk_freq_hz = 16000000,
+    
+    ...
+}
+```
+
+
+## error: 'rtc_gpio_desc' undeclared
+
+这是从 arduino 的 esp32 库里拷贝来的代码， 4.2 以后的 esp-idf 需要在  `idf.py menuconfig` 中配置 一下：
+
+```
+Component config > driver configurations > RTCI0
 ```

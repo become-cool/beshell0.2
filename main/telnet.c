@@ -429,7 +429,7 @@ void on_pkg_receive (uint8_t pkgid, uint8_t remain, uint8_t cmd, uint8_t * data,
 			}
 
 			int pathlen = strnlen((char *)data, datalen) ;
-			printf("path len: %d\n", pathlen) ;
+			// printf("path len: %d\n", pathlen) ;
 			if(pathlen==0 || pathlen==datalen) {
 				telnet_send_pkg_str(pkgid, CMD_EXCEPTION, "give me file path") ;
 				return ;

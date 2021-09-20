@@ -573,6 +573,9 @@ JSValue js_wifi_start_ap(JSContext *ctx, JSValueConst this_val, int argc, JSValu
         passwordlen = MAX_PASSWORD_CHARLEN ;
         password[passwordlen] = 0 ;
     }
+    if(passwordlen>0 && passwordlen<8) {
+        THROW_EXCEPTION("wifi password length must be greater than 8")
+    }
 
     wifi_config_t wifi_config = {
         .ap = {
@@ -644,6 +647,7 @@ void wifi_init() {
     netif_ap = esp_netif_create_default_wifi_ap();
 
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+// return ;
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
 
     ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &esp32_wifi_eventHandler, NULL));
@@ -669,9 +673,12 @@ void require_module_wifi(JSContext *ctx) {
     JS_SetPropertyStr(ctx, wifi, "connect", JS_NewCFunction(ctx, js_wifi_connect, "connect", 1));
     JS_SetPropertyStr(ctx, wifi, "disconnect", JS_NewCFunction(ctx, js_wifi_disconnect, "disconnect", 1));
     JS_SetPropertyStr(ctx, wifi, "getMode", JS_NewCFunction(ctx, js_wifi_get_mode, "getMode", 1));
+    JS_SetPropertyStr(ctx, wifi, "mode", JS_NewCFunction(ctx, js_wifi_get_mode, "getMode", 1));
     JS_SetPropertyStr(ctx, wifi, "setMode", JS_NewCFunction(ctx, js_wifi_set_mode, "setMode", 1));
     JS_SetPropertyStr(ctx, wifi, "getStatus", JS_NewCFunction(ctx, js_wifi_get_status, "getStatus", 1));
+    JS_SetPropertyStr(ctx, wifi, "status", JS_NewCFunction(ctx, js_wifi_get_status, "getStatus", 1));
     JS_SetPropertyStr(ctx, wifi, "getAPStatus", JS_NewCFunction(ctx, js_wifi_get_ap_status, "getAPStatus", 1));
+    JS_SetPropertyStr(ctx, wifi, "apStatus", JS_NewCFunction(ctx, js_wifi_get_ap_status, "getAPStatus", 1));
     JS_SetPropertyStr(ctx, wifi, "setHostname", JS_NewCFunction(ctx, js_wifi_set_hostname, "setHostname", 1));
     JS_SetPropertyStr(ctx, wifi, "startAP", JS_NewCFunction(ctx, js_wifi_start_ap, "startAP", 1));
     JS_SetPropertyStr(ctx, wifi, "stopAP", JS_NewCFunction(ctx, js_wifi_stop_ap, "stopAP", 1));

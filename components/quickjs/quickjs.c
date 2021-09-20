@@ -11214,11 +11214,11 @@ static char *i64toa(char *buf_end, int64_t n, unsigned int base)
 static void js_ecvt1(double d, int n_digits, int *decpt, int *sign, char *buf,
                      int rounding_mode, char *buf1, int buf1_size)
 {
-    if (rounding_mode != FE_TONEAREST)
-        fesetround(rounding_mode);
+    // if (rounding_mode != FE_TONEAREST)
+    //     fesetround(rounding_mode);
     snprintf(buf1, buf1_size, "%+.*e", n_digits - 1, d);
-    if (rounding_mode != FE_TONEAREST)
-        fesetround(FE_TONEAREST);
+    // if (rounding_mode != FE_TONEAREST)
+    //     fesetround(FE_TONEAREST);
     *sign = (buf1[0] == '-');
     /* mantissa */
     buf[0] = buf1[1];
@@ -11298,11 +11298,11 @@ static int js_fcvt1(char *buf, int buf_size, double d, int n_digits,
                     int rounding_mode)
 {
     int n;
-    if (rounding_mode != FE_TONEAREST)
-        fesetround(rounding_mode);
+    // if (rounding_mode != FE_TONEAREST)
+    //     fesetround(rounding_mode);
     n = snprintf(buf, buf_size, "%.*f", n_digits, d);
-    if (rounding_mode != FE_TONEAREST)
-        fesetround(FE_TONEAREST);
+    // if (rounding_mode != FE_TONEAREST)
+    //     fesetround(FE_TONEAREST);
     assert(n < buf_size);
     return n;
 }

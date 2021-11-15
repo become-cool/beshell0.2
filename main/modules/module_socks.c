@@ -255,6 +255,33 @@ void socks_init() {
     }
 }
 
+
+
+JSValue js_tcp_listen(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    return JS_UNDEFINED ;
+}
+JSValue js_tcp_close(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    return JS_UNDEFINED ;
+}
+JSValue js_tcp_connections(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    return JS_UNDEFINED ;
+}
+JSValue js_tcp_recv(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    return JS_UNDEFINED ;
+}
+JSValue js_tcp_send(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    return JS_UNDEFINED ;
+}
+JSValue js_tcp_connect(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    return JS_UNDEFINED ;
+}
+JSValue js_tcp_disconnect(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    return JS_UNDEFINED ;
+}
+JSValue js_tcp_on(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    return JS_UNDEFINED ;
+}
+
 void require_module_socks(JSContext *ctx) {
     
     JSValue global = JS_GetGlobalObject(ctx);
@@ -266,6 +293,18 @@ void require_module_socks(JSContext *ctx) {
     JS_SetPropertyStr(ctx, udp, "send", JS_NewCFunction(ctx, js_udp_send, "send", 1));
     JS_SetPropertyStr(ctx, udp, "setRecvCallback", JS_NewCFunction(ctx, js_udp_set_recv_callback, "setRecvCallback", 1));
     JS_SetPropertyStr(ctx, udp, "listen", JS_NewCFunction(ctx, js_udp_listen, "listen", 1));
+
+
+    JSValue tcp = JS_NewObject(ctx);
+    JS_SetPropertyStr(ctx, beapi, "tcp", tcp);
+    JS_SetPropertyStr(ctx, tcp, "listen", JS_NewCFunction(ctx, js_tcp_listen, "listen", 1));
+    JS_SetPropertyStr(ctx, tcp, "close", JS_NewCFunction(ctx, js_tcp_close, "close", 1));
+    JS_SetPropertyStr(ctx, tcp, "connections", JS_NewCFunction(ctx, js_tcp_connections, "connections", 1));
+    JS_SetPropertyStr(ctx, tcp, "send", JS_NewCFunction(ctx, js_tcp_send, "send", 1));
+    JS_SetPropertyStr(ctx, tcp, "recv", JS_NewCFunction(ctx, js_tcp_recv, "recv", 1));
+    JS_SetPropertyStr(ctx, tcp, "connect", JS_NewCFunction(ctx, js_tcp_connect, "connect", 1));
+    JS_SetPropertyStr(ctx, tcp, "disconnect", JS_NewCFunction(ctx, js_tcp_disconnect, "disconnect", 1));
+    JS_SetPropertyStr(ctx, tcp, "on", JS_NewCFunction(ctx, js_tcp_on, "on", 1));
 
     JS_FreeValue(ctx, global);
     JS_FreeValue(ctx, beapi);

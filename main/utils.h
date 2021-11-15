@@ -55,7 +55,7 @@
 
 #define EVAL_CODE_LEN(str, len, filename)                                           \
     {                                                                               \
-    JSValue ret = JS_Eval(ctx, str, len, filename, JS_EVAL_TYPE_GLOBAL) ;           \
+    JSValue ret = JS_Eval(ctx, str, len, filename, JS_EVAL_TYPE_GLOBAL|JS_EVAL_FLAG_STRIP) ;           \
 	if(JS_IsException(ret)) {                                                       \
 		echo_error(ctx) ;                                                           \
 	}                                                                               \

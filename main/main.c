@@ -25,6 +25,7 @@
 #include <esp_event.h>
 #include <esp_event_loop.h>
 
+#include "psram.h"
 #include "task_js.h"
 #include "http_server.h"
 
@@ -171,14 +172,25 @@ void init_usb_cdc() {
 }
 #endif
 
+
+
+
+
 void app_main(void)
 {
-    blink() ;
+    // blink() ;
 
 #ifdef CONFIG_IDF_TARGET_ESP32S2
     init_usb_cdc() ;
-    // task_js_main() ;
+    task_js_main() ;
 #else
+
+    psram_init() ;
+    printf("Total heap: %d\n", getHeapSize());
+    printf("Free heap: %d\n", getFreeHeap());
+    printf("Total PSRAM: %d\n", getPsramSize());
+    printf("Free PSRAM: %d\n", getFreePsram());
+
     ESP_ERROR_CHECK(esp_event_loop_create_default());
     xTaskCreatePinnedToCore(&task_js_main, "task_js_main", 16*1024, NULL, 5, NULL, 0);
 #endif

@@ -7,5 +7,6 @@ void require_module_gpio(JSContext *ctx) ;
 
 void gpio_init() ;
 void gpio_on_before_reset(JSContext *ctx) ;
+void gpio_loop(JSContext *ctx) ;
 
 #endif

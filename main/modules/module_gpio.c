@@ -2,33 +2,56 @@
 #include "utils.h"
 #include "task_js.h"
 #include "eventloop.h"
-#include "arduino/esp32-hal-gpio.h"
+// #include "arduino/esp32-hal-gpio.h"
+#include "string.h"
+#include "math.h"
 #include "driver/gpio.h"
 #include "driver/ledc.h"
 #include <driver/dac.h>
 #include <esp_adc_cal.h>
 
 
-#define SET_PIN_MODE(name, cst)  if(strcmp(mode,name)==0) {                     \
-                                    pinMode(pin, cst) ;                         \
-                                }
+#define PIN_CNT 48
+
+/**
+ * bit1:   未触发的 isr
+ * bit2:   前次电平值
+ * bit3:   监听下降沿
+ * bit4:   监听上升沿
+ */
+uint32_t gpio_state[PIN_CNT] = {
+    0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,
+} ;
+
+
 JSValue js_gpio_pin_mode(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     
     CHECK_ARGC(2)
     ARGV_TO_UINT8(0, pin)
     char * mode = JS_ToCString(ctx, argv[1]) ;
 
-    SET_PIN_MODE("input", INPUT)
-    else SET_PIN_MODE("output", OUTPUT)
-    else SET_PIN_MODE("input-pullup", INPUT_PULLUP)
-    else SET_PIN_MODE("input-pulldown", INPUT_PULLDOWN)
-    else SET_PIN_MODE("analog", ANALOG)
-    else SET_PIN_MODE("pullup", PULLUP)
-    else SET_PIN_MODE("pulldown", PULLDOWN)
-    else SET_PIN_MODE("open-drain", OPEN_DRAIN)
-    else SET_PIN_MODE("output-open-drain", OUTPUT_OPEN_DRAIN)
+    if(strcmp(mode,"input")==0) {
+        gpio_set_direction(pin, GPIO_MODE_INPUT) ;
+    }
+    else if(strcmp(mode,"output")==0) {
+        gpio_set_direction(pin, GPIO_MODE_OUTPUT) ;
+    }
+    else if(strcmp(mode,"output-od")==0) {
+        gpio_set_direction(pin, GPIO_MODE_OUTPUT_OD) ;
+    }
+    else if(strcmp(mode,"input-output")==0) {
+        gpio_set_direction(pin, GPIO_MODE_INPUT_OUTPUT) ;
+    }
+    else if(strcmp(mode,"input-output-od")==0) {
+        gpio_set_direction(pin, GPIO_MODE_INPUT_OUTPUT_OD) ;
+    }
     else {
-        THROW_EXCEPTION("unknow pin mode")
+        THROW_EXCEPTION("unknow pin mode(input, output, output-od, input-output, input-output-od)")
     }
 
     JS_FreeCString(ctx, mode) ;
@@ -36,10 +59,42 @@ JSValue js_gpio_pin_mode(JSContext *ctx, JSValueConst this_val, int argc, JSValu
 }
 
 
+JSValue js_gpio_pin_pull(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    
+    CHECK_ARGC(2)
+    ARGV_TO_UINT8(0, pin)
+    char * mode = JS_ToCString(ctx, argv[1]) ;
+
+    if(strcmp(mode,"up")==0) {
+        gpio_set_pull_mode(pin, GPIO_PULLUP_ONLY) ;
+        gpio_pullup_en(pin) ;
+    }
+    else if(strcmp(mode,"down")==0) {
+        gpio_set_pull_mode(pin, GPIO_PULLDOWN_ONLY) ;
+        gpio_pulldown_en(pin) ;
+    }
+    else if(strcmp(mode,"updown")==0) {
+        gpio_set_pull_mode(pin, GPIO_PULLUP_PULLDOWN) ;
+        gpio_pulldown_en(pin) ;
+        gpio_pullup_en(pin) ;
+    }
+    else if(strcmp(mode,"floating")==0) {
+        gpio_set_pull_mode(pin, GPIO_FLOATING) ;
+        gpio_pullup_dis(pin) ;
+        gpio_pulldown_dis(pin) ;
+    }
+    else {
+        THROW_EXCEPTION("unknow pin pull mode(up/down/updown/floating)")
+    }
+
+    JS_FreeCString(ctx, mode) ;
+    return JS_UNDEFINED ;
+}
+
 JSValue js_gpio_digital_read(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(1)
     ARGV_TO_UINT8(0, pin)
-    uint8_t value = digitalRead(pin) ;
+    uint8_t value = gpio_get_level(pin) ;
     return JS_NewInt32(ctx, value) ;
 }
 JSValue js_gpio_digital_write(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
@@ -47,7 +102,8 @@ JSValue js_gpio_digital_write(JSContext *ctx, JSValueConst this_val, int argc, J
     ARGV_TO_UINT8(0, pin)
     ARGV_TO_UINT8(1, value)
     
-    digitalWrite(pin, value) ;
+    gpio_set_level(pin, value==0? 0: 1) ;
+    // digitalWrite(pin, value) ;
 
     return JS_UNDEFINED ;
 }
@@ -163,13 +219,28 @@ JSValue js_gpio_analog_write(JSContext *ctx, JSValueConst this_val, int argc, JS
 
 JSValue _gpio_isr_js_callback = NULL ;
 
+// uint8_t _gpio_mask = 0  ;
 static void IRAM_ATTR _gpio_isr_handler(void* arg) {
-    if(!_gpio_isr_js_callback)
+    uint32_t pin = (uint32_t) arg ;
+    uint8_t val = gpio_get_level(pin) ;
+    if( ((gpio_state[pin] >> 1) & 1) == val ) {
         return ;
-    JSValue * argv = malloc(sizeof(JSValue));       // 由 eventloop free
-    JSContext * ctx = task_current_context() ;
-    *argv = JS_NewInt32(ctx, (uint32_t) arg) ;
-    eventloop_push_with_argv(ctx, _gpio_isr_js_callback, 1, argv) ;
+    }
+
+    if(
+        (val && (gpio_state[pin]&8) )       // 上升沿
+        || (!val && (gpio_state[pin]&4) )   // 下降沿
+    ) {
+        gpio_state[pin] |= 1 ;
+    }
+
+    // 更新值
+    if(val) {
+        gpio_state[pin] |= 2 ;
+    }
+    else {
+        gpio_state[pin] &= (~2) ;
+    }
 }
 
 
@@ -178,11 +249,25 @@ JSValue js_gpio_set_pin_isr(JSContext *ctx, JSValueConst this_val, int argc, JSV
     ARGV_TO_UINT8(0, pin)
     ARGV_TO_UINT8(1, mode)
 
-    gpio_set_intr_type(pin, mode);
+    gpio_set_intr_type(pin, GPIO_INTR_ANYEDGE);
     gpio_isr_handler_remove(pin);
+
+    gpio_state[pin] &= (~12) ;
+    gpio_state[pin] |= (mode&3) << 2 ;
+    
+    if(gpio_get_level(pin)) {
+        gpio_state[pin] |= 2 ;
+    }
+    else {
+        gpio_state[pin] &= (~2) ;
+    }
+
+
+    // gpio_set_intr_type(pin, mode);
     if(mode>0){
         gpio_isr_handler_add(pin, _gpio_isr_handler, (void *)pin);
     }
+    gpio_intr_enable(pin) ;
 
     return JS_UNDEFINED;
 }
@@ -191,6 +276,9 @@ JSValue js_gpio_unset_pin_isr(JSContext *ctx, JSValueConst this_val, int argc, J
     ARGV_TO_UINT8(0, pin)
 
     gpio_isr_handler_remove(pin);
+    gpio_intr_disable(pin) ;
+    
+    gpio_state[pin] &= (~12) ;
 
     return JS_UNDEFINED;
 }
@@ -528,6 +616,7 @@ void require_module_gpio(JSContext *ctx) {
     JS_SetPropertyStr(ctx, beapi, "gpio", gpio);
     
     JS_SetPropertyStr(ctx, gpio, "pinMode", JS_NewCFunction(ctx, js_gpio_pin_mode, "pinMode", 1));
+    JS_SetPropertyStr(ctx, gpio, "pinPull", JS_NewCFunction(ctx, js_gpio_pin_pull, "pinPull", 1));
     JS_SetPropertyStr(ctx, gpio, "digitalRead", JS_NewCFunction(ctx, js_gpio_digital_read, "digitalRead", 1));
     JS_SetPropertyStr(ctx, gpio, "digitalWrite", JS_NewCFunction(ctx, js_gpio_digital_write, "digitalWrite", 1));
     JS_SetPropertyStr(ctx, gpio, "adcConfigBits", JS_NewCFunction(ctx, js_adc_set_bits, "adcConfigBits", 1));
@@ -549,6 +638,10 @@ void require_module_gpio(JSContext *ctx) {
 
 void gpio_init() {
     gpio_install_isr_service(0);
+    
+    for(uint8_t p=0; p<PIN_CNT; p++) {
+        gpio_state[p] = 0 ;
+    }
 }
 
 void gpio_on_before_reset(JSContext *ctx) {
@@ -557,6 +650,11 @@ void gpio_on_before_reset(JSContext *ctx) {
         JS_FreeValue(ctx, _gpio_isr_js_callback) ;
         _gpio_isr_js_callback = NULL ;
     }
+
+    for(uint8_t p=0; p<PIN_CNT; p++) {
+        gpio_state[p] = 0 ;
+    }
+
 
     // 停止所有 pwm
     for(uint8_t speedMode=0; speedMode<LEDC_SPEED_MODE_MAX; speedMode++) {
@@ -576,4 +674,26 @@ void gpio_on_before_reset(JSContext *ctx) {
             timerHolds[speedMode][t].resolution = 0 ;
         }
     }
+}
+
+
+void gpio_loop(JSContext *ctx)  {
+    if(!_gpio_isr_js_callback)
+        return ;
+    
+    JSValueConst * argv = malloc(sizeof(JSValue)*2) ;
+
+    for(uint8_t p=0; p<PIN_CNT; p++) {
+        if( gpio_state[p] & 1 ) {
+            gpio_state[p] &= ~1;
+
+            argv[0] = JS_NewInt32(ctx, p) ;
+            argv[1] = JS_NewInt32(ctx, gpio_state[p]) ;
+            JS_Call(ctx, _gpio_isr_js_callback, JS_UNDEFINED, 2, argv) ;
+            JS_FreeValue(ctx, argv[0]) ;
+            JS_FreeValue(ctx, argv[1]) ;
+        }
+    }
+
+    free(argv) ;
 }

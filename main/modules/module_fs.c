@@ -20,6 +20,13 @@ char * js_arg_to_vfspath(JSContext *ctx, JSValueConst argv) {
     return path ;
 }
 
+
+/**
+ * 同步返回文件状态
+ * 
+ * @param {string} path 文件路径
+ * @return {object} {dev, ino, mode, size, isDir, atime, mtime, ctime}
+ */
 JSValue js_fs_stat_sync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(1)
     JS2VSFPath(path, argv[0]) ;
@@ -48,6 +55,12 @@ JSValue js_fs_stat_sync(JSContext *ctx, JSValueConst this_val, int argc, JSValue
     return obj ;
 }
 
+/**
+ * 同步返回路径是否是一个存在的目录
+ * 
+ * @param {string} path
+ * @return {bool}
+ */
 JSValue js_fs_is_dir_sync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(1)
     JS2VSFPath(path, argv[0]) 
@@ -59,6 +72,14 @@ JSValue js_fs_is_dir_sync(JSContext *ctx, JSValueConst this_val, int argc, JSVal
     free(path) ;
     return S_ISDIR(statbuf.st_mode)? JS_TRUE: JS_FALSE ;
 }
+
+
+/**
+ * 同步返回路径是否是一个存在的文件
+ * 
+ * @param {string} path
+ * @return {bool}
+ */
 JSValue js_fs_is_file_sync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(1)
     JS2VSFPath(path, argv[0]) 
@@ -71,6 +92,12 @@ JSValue js_fs_is_file_sync(JSContext *ctx, JSValueConst this_val, int argc, JSVa
     return S_ISREG(statbuf.st_mode)? JS_TRUE: JS_FALSE ;
 }
 
+/**
+ * 同步返回路径是否存在
+ * 
+ * @param {string} path
+ * @return {bool}
+ */
 JSValue js_fs_exists_sync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(1)
     JS2VSFPath(path, argv[0])

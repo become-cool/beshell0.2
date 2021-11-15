@@ -45,6 +45,11 @@ static esp_err_t http_server_handler(httpd_req_t *req) {
 
 /**
  * port = 80
+ * 启动HTTP服务器
+ * 
+ * @param {int} port
+ * @param {function} request callback function
+ * @return {int} server id
  */
 JSValue js_http_server_start(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(2)
@@ -117,7 +122,10 @@ JSValue js_http_server_start(JSContext *ctx, JSValueConst this_val, int argc, JS
             }
 
 /**
- * serverHandle
+ * stop HTTP server
+ * 
+ * @param {int} server id
+ * @return {bool}
  */
 JSValue js_http_server_stop(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(1)
@@ -134,29 +142,42 @@ JSValue js_http_server_stop(JSContext *ctx, JSValueConst this_val, int argc, JSV
 
     return JS_TRUE ;
 }
-// httpd_stop
 
 /**
- * serverHandle
+ * 发送 http response header
+ * 
+ * @param {int} server id
+ * @param {string} header name
+ * @param {string} header content
  */
 JSValue js_http_resp_header(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(3)
     return JS_UNDEFINED ;
 }
+
 /**
- * serverHandle
+ * 发送 http response body
+ * 
+ * @param {int} server id
+ * @param {string|ArrayBuffer} body
  */
-JSValue js_http_resp_send(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+JSValue js_http_resp_body(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(2)
 
     return JS_UNDEFINED ;
 }
+
 /**
- * serverHandle
+ * 结束 http response
+ * 
  */
 JSValue js_http_resp_end(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(1)
     ARGV_TO_UINT32(0, handle)
+
+    
+    // httpd_resp_send_chunk(req, NULL, 0);
+
     return JS_UNDEFINED ;
 }
 
@@ -171,8 +192,8 @@ void require_module_http(JSContext *ctx) {
 
     JS_SetPropertyStr(ctx, http, "serverStart", JS_NewCFunction(ctx, js_http_server_start, "serverStart", 1));
     JS_SetPropertyStr(ctx, http, "serverStop", JS_NewCFunction(ctx, js_http_server_stop, "serverStop", 1));
-    JS_SetPropertyStr(ctx, http, "respSendHeader", JS_NewCFunction(ctx, js_http_resp_header, "respSendHeader", 1));
-    JS_SetPropertyStr(ctx, http, "respSendBody", JS_NewCFunction(ctx, js_http_resp_send, "respSendBody", 1));
+    JS_SetPropertyStr(ctx, http, "respHeader", JS_NewCFunction(ctx, js_http_resp_header, "respHeader", 1));
+    JS_SetPropertyStr(ctx, http, "respBody", JS_NewCFunction(ctx, js_http_resp_body, "respBody", 1));
     JS_SetPropertyStr(ctx, http, "respEnd", JS_NewCFunction(ctx, js_http_resp_end, "respEnd", 1));
 
     JS_FreeValue(ctx, global);

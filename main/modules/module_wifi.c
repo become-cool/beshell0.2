@@ -200,9 +200,8 @@ static char *wifiReasonToString(uint8_t reason) {
 // } 
 static void esp32_wifi_eventHandler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data)
 {
-	// printf("event_base: %d, event_id: %d, _sta_connected=%d, sta_connect_pending=%d, has callback=%d\n", (int32_t)event_base, event_id, _sta_connected, sta_connect_pending, __connect_callback?1:0);
+	printf("event_base: %d, event_id: %d, _sta_connected=%d, sta_connect_pending=%d, has callback=%d\n", (int32_t)event_base, event_id, _sta_connected, sta_connect_pending, __connect_callback?1:0);
 
-	// Your event handling code here...
 	switch(event_id) {
 		
 		case SYSTEM_EVENT_STA_CONNECTED: {
@@ -226,8 +225,8 @@ static void esp32_wifi_eventHandler(void* arg, esp_event_base_t event_base, int3
 		case SYSTEM_EVENT_STA_DISCONNECTED: {
 			
 			_sta_connected = false ;
-			// printf("_sta_connected=false, pending=%d\n", sta_connect_pending) ;
-			// printf("%d\n",((wifi_event_sta_disconnected_t*) event_data)->reason) ;
+			printf("_sta_connected=false, pending=%d\n", sta_connect_pending) ;
+			printf("%d\n",((wifi_event_sta_disconnected_t*) event_data)->reason) ;
 
             __disconnect_reason = ((wifi_event_sta_disconnected_t*) event_data)->reason ;
 
@@ -261,11 +260,11 @@ static void esp32_wifi_eventHandler(void* arg, esp_event_base_t event_base, int3
 
         case SYSTEM_EVENT_AP_START:
             _ap_connected = true ;
-            // printf("SYSTEM_EVENT_AP_START\n") ;
+            printf("SYSTEM_EVENT_AP_START\n") ;
             break;
 
         case SYSTEM_EVENT_AP_STOP:
-            // printf("SYSTEM_EVENT_AP_STOP\n") ;
+            printf("SYSTEM_EVENT_AP_STOP\n") ;
             _ap_connected = false ;
             break;
 
@@ -466,7 +465,7 @@ JSValue js_wifi_set_mode(JSContext *ctx, JSValueConst this_val, int argc, JSValu
         }
     }
     if(argc>=2) {
-            mode|= WIFI_MODE_STA ;
+        mode|= WIFI_MODE_STA ;
     }
     wifi_mode_t mode_ori;
     ESP_ERROR_CHECK(esp_wifi_get_mode(&mode_ori));
@@ -617,7 +616,7 @@ JSValue js_wifi_start_ap(JSContext *ctx, JSValueConst this_val, int argc, JSValu
 
 
 JSValue js_wifi_stop_ap(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-        
+
     wifi_mode_t mode;
     ESP_ERROR_CHECK(esp_wifi_get_mode(&mode));
     if(mode==WIFI_MODE_AP) {
@@ -635,7 +634,12 @@ JSValue js_wifi_stop_ap(JSContext *ctx, JSValueConst this_val, int argc, JSValue
     return JS_UNDEFINED ;
 }
 
-
+JSValue js_wifi_set_ps(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+    ARGV_TO_UINT32(0, ps_mode)
+    esp_wifi_set_ps(ps_mode);
+    return JS_UNDEFINED ;
+}
 
 void wifi_init() {
 
@@ -682,6 +686,9 @@ void require_module_wifi(JSContext *ctx) {
     JS_SetPropertyStr(ctx, wifi, "setHostname", JS_NewCFunction(ctx, js_wifi_set_hostname, "setHostname", 1));
     JS_SetPropertyStr(ctx, wifi, "startAP", JS_NewCFunction(ctx, js_wifi_start_ap, "startAP", 1));
     JS_SetPropertyStr(ctx, wifi, "stopAP", JS_NewCFunction(ctx, js_wifi_stop_ap, "stopAP", 1));
+    JS_SetPropertyStr(ctx, wifi, "setPS", JS_NewCFunction(ctx, js_wifi_set_ps, "setPS", 1));
+
+    
     // JS_SetPropertyStr(ctx, wifi, "eventHandle", JS_NULL);
 
     JS_FreeValue(ctx, global);

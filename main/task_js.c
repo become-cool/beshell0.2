@@ -12,6 +12,7 @@
 #include "module_http.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "esp_task_wdt.h"
 
 #include <string.h>
 #include <nvs_flash.h>
@@ -231,10 +232,16 @@ void deinit_quickjs() {
 void task_js_main(){
 
     nvs_flash_init();
+    vTaskDelay(1) ;
 
     fs_init() ;
+    vTaskDelay(1) ;
+
     wifi_init() ;
+    vTaskDelay(1) ;
+
     socks_init() ;
+    vTaskDelay(1) ;
 
     telnet_init() ;
     sniffer_init() ;
@@ -264,9 +271,12 @@ void task_js_main(){
         telnet_loop(ctx) ;
         sniffer_loop() ;
         socks_udp_loop(ctx) ;
+        gpio_loop(ctx) ;
         eventloop_pump(ctx) ;
 
         js_std_loop(ctx) ;
+
+        printf(".") ;
         
         vTaskDelay(1) ;
     }

@@ -2,13 +2,14 @@
 #include "module_utils.h"
 #include "logging.h"
 #include "esp_system.h"
+#include "esp_task_wdt.h"
+#include "soc/soc.h"
 #include <string.h>
 #include <time.h>
 #include "eventloop.h"
 #include "utils.h"
 #include "telnet.h"
 #include "module_fs.h"
-#include "soc/soc.h"
 
 #include "untar.h"
 #include "libb64/cdecode.h"
@@ -110,6 +111,9 @@ JSValue js_util_var_refcount(JSContext *ctx, JSValueConst this_val, int argc, JS
 
 
 JSValue js_util_sleep(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    
     if(argc<1) {
         JS_ThrowReferenceError(ctx, "Missing param");
         return JS_EXCEPTION ;
@@ -119,7 +123,27 @@ JSValue js_util_sleep(JSContext *ctx, JSValueConst this_val, int argc, JSValueCo
         JS_ThrowReferenceError(ctx, "Invalid param type");
         return JS_EXCEPTION ;
 	}
-    vTaskDelay(pdMS_TO_TICKS(ms));
+    
+    uint32_t us = 0 ;
+    if(argc>1) {
+        if(JS_ToUint32(ctx, &us, argv[1]) ) {
+            JS_ThrowReferenceError(ctx, "Invalid param type");
+            return JS_EXCEPTION ;
+        }
+    }
+
+    int64_t expire = (int64_t)tv.tv_sec * 1000000 + tv.tv_usec + ms*1000 + us;
+    int64_t now = 0 ;
+
+    while(1) {
+        gettimeofday(&tv, NULL);
+        now = (int64_t)tv.tv_sec * 1000000 + tv.tv_usec;
+        if(now >= expire ) {
+            break ;
+        }
+        esp_task_wdt_reset() ;
+    }
+
     return JS_UNDEFINED ;
 }
 
@@ -218,7 +242,7 @@ JSValue js_fs_eval_as_file(JSContext *ctx, JSValueConst this_val, int argc, JSVa
     char * code = JS_ToCStringLen(ctx, &len, argv[0]) ;
     char * path = JS_ToCString(ctx, argv[1]) ;
 
-    JSValue ret = JS_Eval(ctx, code, len, path, JS_EVAL_TYPE_GLOBAL) ;
+    JSValue ret = JS_Eval(ctx, code, len, path, JS_EVAL_TYPE_GLOBAL|JS_EVAL_FLAG_STRIP) ;
 	JS_FreeCString(ctx, code) ;
     return ret ;
 }
@@ -528,6 +552,11 @@ JSValue js_read_string_from_ArrayBuffer(JSContext *ctx, JSValueConst this_val, i
     return JS_NewStringLen(ctx, buff+offset, strlen) ;
 }
 
+JSValue js_feed_watchdog(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    esp_task_wdt_reset() ;
+    return JS_UNDEFINED ;
+}
+
 void require_module_utils(JSContext *ctx) {
 
     JSValue global = JS_GetGlobalObject(ctx);
@@ -557,6 +586,7 @@ void require_module_utils(JSContext *ctx) {
     JS_SetPropertyStr(ctx, utils, "unpackString", JS_NewCFunction(ctx, js_unpack_string, "unpackString", 1));
     JS_SetPropertyStr(ctx, utils, "writeStringToArrayBuffer", JS_NewCFunction(ctx, js_write_string_to_ArrayBuffer, "writeStringToArrayBuffer", 1));
     JS_SetPropertyStr(ctx, utils, "readStringFromArrayBuffer", JS_NewCFunction(ctx, js_read_string_from_ArrayBuffer, "readStringFromArrayBuffer", 1));
+    JS_SetPropertyStr(ctx, utils, "feed", JS_NewCFunction(ctx, js_feed_watchdog, "feed", 1));
 
 	// global
     JS_SetPropertyStr(ctx, global, "sleep", JS_NewCFunction(ctx, js_util_sleep, "sleep", 1));

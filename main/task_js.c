@@ -10,9 +10,10 @@
 #include "module_serial.h"
 #include "module_socks.h"
 #include "module_http.h"
+#include "module_lvgl.h"
+
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "esp_task_wdt.h"
 
 #include <string.h>
 #include <nvs_flash.h>
@@ -191,6 +192,8 @@ static JSContext * JS_NewCustomContext(JSRuntime *rt)
     require_module_socks(ctx) ;
     require_module_http(ctx) ;
 
+    require_module_lvgl(ctx) ;
+
     return ctx;
 }
 
@@ -232,21 +235,17 @@ void deinit_quickjs() {
 void task_js_main(){
 
     nvs_flash_init();
-    vTaskDelay(1) ;
 
     fs_init() ;
-    vTaskDelay(1) ;
-
     wifi_init() ;
-    vTaskDelay(1) ;
-
     socks_init() ;
-    vTaskDelay(1) ;
 
     telnet_init() ;
     sniffer_init() ;
     gpio_init() ;
     http_init() ;
+
+    // init_lvgl() ;
 
     init_quickjs() ;
 
@@ -275,8 +274,6 @@ void task_js_main(){
         eventloop_pump(ctx) ;
 
         js_std_loop(ctx) ;
-
-        printf(".") ;
         
         vTaskDelay(1) ;
     }

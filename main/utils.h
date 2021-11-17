@@ -81,7 +81,7 @@
     argv[0] = arg1 ;
 
 #define MAKE_ARGV2(argv, arg1, arg2)                                                \
-    JSValueConst * argv = malloc(sizeof(JSValue)) ;                                 \
+    JSValueConst * argv = malloc(sizeof(JSValue)*2) ;                               \
     argv[0] = arg1 ;                                                                \
     argv[1] = arg2 ;
 

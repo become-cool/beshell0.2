@@ -185,7 +185,6 @@ void app_main(void)
     task_js_main() ;
 #else
 
-    psram_init() ;
     printf("Total heap: %d\n", getHeapSize());
     printf("Free heap: %d\n", getFreeHeap());
     printf("Total PSRAM: %d\n", getPsramSize());

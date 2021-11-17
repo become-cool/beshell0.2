@@ -30,18 +30,11 @@ void psram_init() {
 
     printf("init PSRAM\n");
 
-    // if (spiramDetected) {
-    //     return true;
-    // }
 #ifndef CONFIG_SPIRAM_BOOT_INIT
-    // if (spiramFailed) {
-    //     return ;
-    // }
 #if CONFIG_IDF_TARGET_ESP32
     uint32_t chip_ver = REG_GET_FIELD(EFUSE_BLK0_RDATA3_REG, EFUSE_RD_CHIP_VER_PKG);
     uint32_t pkg_ver = chip_ver & 0x7;
     if (pkg_ver == EFUSE_RD_CHIP_VER_PKG_ESP32D2WDQ5 || pkg_ver == EFUSE_RD_CHIP_VER_PKG_ESP32PICOD2) {
-        // spiramFailed = true;
         printf("PSRAM not supported!\n");
         return ;
     }
@@ -51,7 +44,6 @@ void psram_init() {
     // Cache_Enable_DCache(0);
 #endif
     if (esp_spiram_init() != ESP_OK) {
-        // spiramFailed = true;
         printf("PSRAM init failed!\n");
 #if CONFIG_IDF_TARGET_ESP32
         // pinMatrixOutDetach(16, false, false);
@@ -61,12 +53,10 @@ void psram_init() {
     }
     esp_spiram_init_cache();
     if (!esp_spiram_test()) {
-        // spiramFailed = true;
         printf("PSRAM test failed!\n");
         return ;
     }
     if (esp_spiram_add_to_heapalloc() != ESP_OK) {
-        // spiramFailed = true;
         printf("PSRAM could not be added to the heap!\n");
         return ;
     }
@@ -74,7 +64,6 @@ void psram_init() {
         heap_caps_malloc_extmem_enable(CONFIG_SPIRAM_MALLOC_ALWAYSINTERNAL);
 #endif
 #endif
-    // spiramDetected = true;
     printf("PSRAM enabled\n");
     return ;
 }

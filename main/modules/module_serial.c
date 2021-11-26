@@ -42,7 +42,7 @@ JSValue js_spi_bus_setup(JSContext *ctx, JSValueConst this_val, int argc, JSValu
 
     ARGV_TO_UINT8(0, busnum)
     if(busnum<0 || busnum>2) {
-        THROW_EXCEPTION("Bus num must be 0-2")
+        THROW_EXCEPTION("Bus num must be 1-2")
     }
     ARGV_TO_UINT8(1, clkpin)
 

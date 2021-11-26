@@ -33,7 +33,7 @@ rst:0x10 (RTCWDT_RTC_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
 * 修改 efuses 配置，固定以 3.3V 驱动flash，不再检查 GPIO12 ：
 
     ```
-    python esp-idf/components/esptool_py/esptool/espefuse.py --port COM8 set_flash_voltage 3.3V
+    python esp-idf/components/esptool_py/esptool/espefuse.py set_flash_voltage 3.3V --port COM9
     ```
 
 官方说明：

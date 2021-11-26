@@ -22,7 +22,7 @@ let parttables = [
         name: "factory",
         type: "app",
         subtype: "factory",
-        size: 1.5*1024*1024,
+        size: 2*1024*1024,
     } ,
     {
         name: "fsroot",

@@ -10,22 +10,9 @@
     JS_ThrowReferenceError(ctx, msg);                       \
     return JS_EXCEPTION ;
 
-#define THROW_FORMAT(format, ...)                           \
-    {                                                       \
-        char * msg = mallocf(__VA_ARGS__) ;                 \
-        if( msg ) {                                         \
-            JS_ThrowReferenceError(ctx, msg);               \
-            free(msg) ;                                     \
-        }                                                   \
-        else {                                              \
-            JS_ThrowReferenceError(ctx, format);            \
-        }                                                   \
-        return JS_EXCEPTION ;                               \
-    }
-
 #define CHECK_ARGC(num)                                     \
     if(argc<num) {                                          \
-        THROW_EXCEPTION("Missing param")               \
+        THROW_EXCEPTION("Missing param")                    \
     }
 
 #define ARGV_TO_INT(i, var, ctype, api)                     \
@@ -33,7 +20,6 @@
 	if(api(ctx, &var, argv[i]) ) {                          \
         THROW_EXCEPTION("Invalid param type");              \
 	}
-
 
 #define  ARGV_TO_UINT8(i,var)   ARGV_TO_INT(i, var, uint8_t,  JS_ToUint32)
 #define   ARGV_TO_INT8(i,var)   ARGV_TO_INT(i, var, int8_t,  JS_ToInt32)
@@ -51,7 +37,11 @@
     if(!var) {                                                                      \
         THROW_EXCEPTION("argv is not a ArrayBuffer")                                \
     }
-
+#define ARGV_TO_STRING_E(i, var, len, msg)                  \
+    if(!JS_IsString(argv[i])) {                             \
+        THROW_EXCEPTION(msg)                                \
+    }                                                       \
+    ARGV_TO_STRING(i, var, len)
 
 #define EVAL_CODE_LEN(str, len, filename)                                           \
     {                                                                               \
@@ -104,5 +94,38 @@ uint64_t gettime() ;
 char * mallocf(char * format, ...) ;
 
 void freeArrayBuffer(JSRuntime *rt, void *opaque, void *ptr) ;
+
+#define GET_INT_PROP(obj, propName, cvar, error_goto)                               \
+    int32_t cvar = 0 ;                                                              \
+    {                                                                               \
+        JSValue jsvar = JS_GetPropertyStr(ctx, obj, propName) ;                     \
+        if( jsvar==JS_UNDEFINED ) {                                                 \
+            JS_ThrowReferenceError(ctx, "property %s not exists", propName) ;       \
+            goto error_goto ;                                                       \
+        }                                                                           \
+        if( !JS_IsNumber(jsvar) ) {                                                 \
+            JS_FreeValue(ctx, jsvar) ;                                              \
+            JS_ThrowReferenceError(ctx, "property %s is not a number", propName) ;  \
+            goto error_goto ;                                                       \
+        }                                                                           \
+        JS_ToInt32(ctx, &cvar, jsvar) ;                                             \
+    }
+
+#define GET_INT_PROP_DEFAULT(obj, propName, cvar, default, error_goto)                  \
+    int32_t cvar = 0 ;                                                                  \
+    {                                                                                   \
+        JSValue jsvar = JS_GetPropertyStr(ctx, obj, propName) ;                         \
+        if( jsvar==JS_UNDEFINED ) {                                                     \
+            cvar = default ;                                                            \
+        }                                                                               \
+        else {                                                                          \
+            if( !JS_IsNumber(jsvar) ) {                                                 \
+                JS_FreeValue(ctx, jsvar) ;                                              \
+                JS_ThrowReferenceError(ctx, "property %s is not a number", propName) ;  \
+                goto error_goto ;                                                       \
+            }                                                                           \
+            JS_ToInt32(ctx, &cvar, jsvar) ;                                             \
+        }                                                                               \
+    }
 
 #endif

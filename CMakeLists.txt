@@ -6,3 +6,5 @@ include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 project(beshell)
 
 target_link_libraries(${CMAKE_PROJECT_NAME}.elf "-lm")
+
+add_compile_options (-fdiagnostics-color=always)

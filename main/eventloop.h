@@ -15,7 +15,7 @@ typedef struct eventloop_callback_t {
     struct eventloop_callback_t * next ;
 }  ;
 
-inline struct eventloop_callback_t * eventloop_header() ;
+// inline struct eventloop_callback_t * eventloop_header() ;
 
 struct eventloop_callback_t * eventloop_push(JSContext *ctx, JSValue func, int interval, bool repeat) ;
 struct eventloop_callback_t * eventloop_push_with_argv(JSContext *ctx, JSValue func, int argc, JSValueConst *argv) ;

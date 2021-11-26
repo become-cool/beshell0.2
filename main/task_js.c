@@ -3,6 +3,7 @@
 #include "telnet.h"
 #include "sniffer.h"
 #include "eventloop.h"
+#include "module_events.h"
 #include "module_wifi.h"
 #include "module_fs.h"
 #include "module_utils.h"
@@ -24,7 +25,7 @@
 
 JSRuntime *rt;
 JSContext *ctx;
-uint8_t boot_level = 5 ;
+uint8_t boot_level = 6 ;
 bool requst_reset = false ;
 
 
@@ -184,6 +185,7 @@ static JSContext * JS_NewCustomContext(JSRuntime *rt)
 
     require_module_fs(ctx) ;
     require_module_utils(ctx) ;
+    require_module_events(ctx) ;
     require_module_wifi(ctx) ;
     require_module_gpio(ctx) ;
     require_module_process(ctx) ;    
@@ -191,7 +193,6 @@ static JSContext * JS_NewCustomContext(JSRuntime *rt)
     require_module_serial(ctx) ;
     require_module_socks(ctx) ;
     require_module_http(ctx) ;
-
     require_module_lvgl(ctx) ;
 
     return ctx;
@@ -233,19 +234,19 @@ void deinit_quickjs() {
 }
 
 void task_js_main(){
-
+    
     nvs_flash_init();
+
 
     fs_init() ;
     wifi_init() ;
-    socks_init() ;
+    init_lvgl() ;
 
+    socks_init() ;
     telnet_init() ;
     sniffer_init() ;
     gpio_init() ;
     http_init() ;
-
-    // init_lvgl() ;
 
     init_quickjs() ;
 
@@ -271,6 +272,7 @@ void task_js_main(){
         sniffer_loop() ;
         socks_udp_loop(ctx) ;
         gpio_loop(ctx) ;
+        lvgl_loop(ctx) ;
         eventloop_pump(ctx) ;
 
         js_std_loop(ctx) ;

@@ -26,7 +26,6 @@ char * mallocf(char * format, ...) {
 
 	va_end(argptr);
 	return str ;
-
 }
 
 void freeArrayBuffer(JSRuntime *rt, void *opaque, void *ptr) {

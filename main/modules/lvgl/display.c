@@ -28,8 +28,7 @@ static void btn_event_cb(lv_event_t * e) {
 }
 
 
-void disp_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color_p) {
-    // printf("disp_flush() (%d,%d) -> (%d,%d) \n", area->x1,area->y1, area->x2, area->y2) ;
+void disp_st7789_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color_p) {
     if(!disp->user_data) {
         printf("spidev is NULL\n") ;
         return ;
@@ -38,7 +37,10 @@ void disp_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color
     lv_disp_flush_ready(disp) ;
 }
 
-
+void disp_virtual_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color_p) {
+    printf("disp_virtual_flush() (%d,%d) -> (%d,%d) \n", area->x1,area->y1, area->x2, area->y2) ;
+    lv_disp_flush_ready(disp) ;
+}
 
 static JSClassID js_lvgl_disp_class_id ;
 
@@ -138,12 +140,36 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
         THROW_EXCEPTION("argv options must be a object")
     }
 
+    lv_disp_draw_buf_t * drawbuf = NULL ;
+    lv_disp_drv_t * dispdrv = NULL ;
+
+    GET_INT_PROP(argv[1], "width", width, excp)
+    GET_INT_PROP(argv[1], "height", height, excp)
+    
+    // 创建缓冲区
+    size_t buflen = (DMA_BUFF_LEN / width) * width ;
+    drawbuf = malloc(sizeof(lv_disp_draw_buf_t)) ;
+    if(!drawbuf){
+        JS_ThrowReferenceError(ctx, "out of memory?");
+        goto excp ;
+    }
+    lv_disp_draw_buf_init(drawbuf, dma_buff, NULL, buflen/2);  
+
+    // 创建设备驱动对象
+    dispdrv = malloc(sizeof(lv_disp_drv_t)) ;
+    if(!dispdrv){
+        JS_ThrowReferenceError(ctx, "out of memory?");
+        goto excp ;
+    }
+    lv_disp_drv_init(dispdrv); 
+    dispdrv->draw_buf = drawbuf;
+    dispdrv->hor_res = width;
+    dispdrv->ver_res = height;
+
     if( strcmp(typestr, "ST7789")==0 ) {
 
         GET_INT_PROP(argv[1], "cs", cs, excp)
         GET_INT_PROP(argv[1], "dc", dc, excp)
-        GET_INT_PROP(argv[1], "width", width, excp)
-        GET_INT_PROP(argv[1], "height", height, excp)
         GET_INT_PROP_DEFAULT(argv[1], "spi", spi, 1, excp)
         GET_INT_PROP_DEFAULT(argv[1], "freq", freq, 26000000, excp)
 
@@ -154,57 +180,60 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
         st77xx_spi_init(spidev, spi, cs, dc, freq);
         st77xx_init(spidev, width, height, 0, 0);
 
-        // 创建缓冲区
-        lv_disp_draw_buf_t * drawbuf = malloc(sizeof(lv_disp_draw_buf_t)) ;
-        size_t buflen = (DMA_BUFF_LEN / width) * width ;
-        // printf("dma buff len: %d\n", buflen) ;
-        lv_disp_draw_buf_init(drawbuf, dma_buff, NULL, buflen/2);  
 
-        // 创建设备驱动对象
-        lv_disp_drv_t * dispdrv = malloc(sizeof(lv_disp_drv_t)) ;
-        lv_disp_drv_init(dispdrv); 
-        dispdrv->flush_cb = disp_flush ;
-        dispdrv->draw_buf = drawbuf;
-        dispdrv->hor_res = width;
-        dispdrv->ver_res = height;
+        // 注册设备驱动对象
+        dispdrv->flush_cb = disp_st7789_flush ;
         dispdrv->user_data = spidev ;
-        lv_disp_t * disp = lv_disp_drv_register(dispdrv); 
+    }
 
-        JS_SetOpaque(jsdisp, disp);
+    // 虚拟屏幕
+    if( strcmp(typestr, "VIRTUAL")==0 ) {
 
-
-        // demo ------------
-        // 触摸设备
-        tp_spi_add_device(1, 18);
-        xpt2046_init();
-
-        lv_indev_drv_init(&indev_drv);
-        indev_drv.read_cb = touch_driver_read;
-        indev_drv.type = LV_INDEV_TYPE_POINTER;
-        lv_indev_t *indev = lv_indev_drv_register(&indev_drv);
-        if(!indev) {
-            printf("Cound create indev\n") ;
-        }
-
-        lv_obj_t * btn = lv_btn_create(lv_scr_act());     /*Add a button the current screen*/
-        lv_obj_set_pos(btn, 10, 10);                            /*Set its position*/
-        lv_obj_set_size(btn, 120, 50);                          /*Set its size*/
-        lv_obj_add_event_cb(btn, btn_event_cb, LV_EVENT_ALL, NULL);           /*Assign a callback to the button*/
-
-        lv_obj_t * label = lv_label_create(btn);          /*Add a label to the button*/
-        lv_label_set_text(label, "Button");                     /*Set the labels text*/
-        lv_obj_center(label);
-
-        lv_task_handler() ;
-
-        return jsdisp ;
+        // 注册设备驱动对象
+        dispdrv->flush_cb = disp_virtual_flush ;
     }
     else {
         JS_ThrowReferenceError(ctx, "unknow disp driver: %s", typestr);
         goto excp ;
     }
 
+    lv_disp_t * disp = lv_disp_drv_register(dispdrv); 
+    JS_SetOpaque(jsdisp, disp);
+
+    // demo ------------
+    // 触摸设备
+    tp_spi_add_device(1, 18);
+    xpt2046_init();
+
+    lv_indev_drv_init(&indev_drv);
+    indev_drv.read_cb = touch_driver_read;
+    indev_drv.type = LV_INDEV_TYPE_POINTER;
+    lv_indev_t *indev = lv_indev_drv_register(&indev_drv);
+    if(!indev) {
+        printf("Cound create indev\n") ;
+    }
+
+    lv_obj_t * btn = lv_btn_create(lv_scr_act());     /*Add a button the current screen*/
+    lv_obj_set_pos(btn, 10, 10);                            /*Set its position*/
+    lv_obj_set_size(btn, 120, 50);                          /*Set its size*/
+    lv_obj_add_event_cb(btn, btn_event_cb, LV_EVENT_ALL, NULL);           /*Assign a callback to the button*/
+
+    lv_obj_t * label = lv_label_create(btn);          /*Add a label to the button*/
+    lv_label_set_text(label, "Button");                     /*Set the labels text*/
+    lv_obj_center(label);
+
+    lv_task_handler() ;
+
+    JS_DupValue(ctx,jsdisp) ;
+
+
+    return jsdisp ;
+
 excp:
+    if(drawbuf)
+        free(drawbuf) ;
+    if(dispdrv)
+        free(dispdrv) ;
     JS_FreeCString(ctx, typestr) ;
     return JS_EXCEPTION ;
 }

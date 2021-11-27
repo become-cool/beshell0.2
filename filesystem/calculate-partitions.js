@@ -28,7 +28,7 @@ let parttables = [
         name: "fsroot",
         type: "data",
         subtype: "fat",
-        size: 256*1024,
+        size: 512*1024,
     } ,
     {
         name: "fshome",

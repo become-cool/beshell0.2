@@ -6,8 +6,8 @@
 #define VAR_REFCNT(var) ((JSRefCountHeader *)JS_VALUE_GET_PTR(var))->ref_count
 #define P_VAR_REFCNT(var) printf(#var" ref count:%d @%d\n", VAR_REFCNT(var), __LINE__) ;
 
-#define THROW_EXCEPTION(msg)                                \
-    JS_ThrowReferenceError(ctx, msg);                       \
+#define THROW_EXCEPTION(...)                                \
+    JS_ThrowReferenceError(ctx, __VA_ARGS__);               \
     return JS_EXCEPTION ;
 
 #define CHECK_ARGC(num)                                     \
@@ -74,6 +74,12 @@
     JSValueConst * argv = malloc(sizeof(JSValue)*2) ;                               \
     argv[0] = arg1 ;                                                                \
     argv[1] = arg2 ;
+
+#define MAKE_ARGV3(argv, arg1, arg2, arg3)                                          \
+    JSValueConst * argv = malloc(sizeof(JSValue)*3) ;                               \
+    argv[0] = arg1 ;                                                                \
+    argv[1] = arg2 ;                                                                \
+    argv[2] = arg3 ;
 
 #define STR1(R)  #R
 #define STR2(R)  STR1(R)

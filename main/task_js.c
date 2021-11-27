@@ -131,6 +131,7 @@ void require_module_process(JSContext *ctx) {
     
     JSValue versions = JS_NewObject(ctx) ;
     JS_SetPropertyStr(ctx, versions, "beshell", JS_NewString(ctx, BESHELL_VERSION));
+    JS_SetPropertyStr(ctx, versions, "esp-idf", JS_NewString(ctx, ESPIDF_VERSION));
     JS_SetPropertyStr(ctx, versions, "quickjs", JS_NewString(ctx, QUICKJS_VERSION));
     JS_SetPropertyStr(ctx, process, "versions", versions);
     
@@ -237,7 +238,6 @@ void task_js_main(){
     
     nvs_flash_init();
 
-
     fs_init() ;
     wifi_init() ;
     init_lvgl() ;
@@ -250,6 +250,8 @@ void task_js_main(){
 
     init_quickjs() ;
 
+
+
     while(1) {
 
         if(requst_reset) {
@@ -260,6 +262,7 @@ void task_js_main(){
             serial_on_before_reset(ctx) ;
             socks_on_before_reset(ctx) ;
             http_on_before_reset(ctx) ;
+            wifi_reset(ctx) ;
 
             deinit_quickjs() ;
             init_quickjs() ;

@@ -5,7 +5,12 @@ try{
 
     require("./init.d/banner.js")()
 
-    require("./init.d/wifi.js")
+    global.WiFi = require("besdk/wifi")
+    try{
+        WiFi.restore()
+    }catch(e) {
+        console.error(e)
+    }
 
     require("./init.d/beconsoled.js")
 

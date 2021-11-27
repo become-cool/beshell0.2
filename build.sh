@@ -1,3 +1,7 @@
+cd filesystem
+make
+cd ..
+
 idf.py build || exit 1
 
 echo ''
@@ -7,7 +11,7 @@ ls -lh build/beshell.bin
 echo ''
 echo ===============================
 echo copy to beconsole dist dir ...
-cp build/beshell.bin ../beconsole/build/src/assets/firmware/beshell-1.1.9/flash/beshell.bin
+cp build/beshell.bin ../beconsole/build/src/assets/firmware/beshell-0.2.0/flash/beshell.bin
 
 echo ''
 echo ''

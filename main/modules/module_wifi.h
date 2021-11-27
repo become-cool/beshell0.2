@@ -10,5 +10,8 @@ esp_netif_t * get_netif_sta() ;
 void wifi_init() ;
 
 void require_module_wifi(JSContext *ctx) ;
+void wifi_reset(JSContext *ctx) ;
+
+void wifidemo() ;
 
 #endif

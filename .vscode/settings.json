@@ -12,7 +12,8 @@
         "fenv.h": "c",
         "string.h": "c",
         "stdint.h": "c",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "stdarg.h": "c"
     },
     "cmake.configureOnOpen": false
 }

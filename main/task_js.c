@@ -3,6 +3,7 @@
 #include "telnet.h"
 #include "sniffer.h"
 #include "eventloop.h"
+#include "webtelnet.h"
 #include "module_events.h"
 #include "module_wifi.h"
 #include "module_fs.h"
@@ -25,7 +26,7 @@
 
 JSRuntime *rt;
 JSContext *ctx;
-uint8_t boot_level = 6 ;
+uint8_t boot_level = 5 ;
 bool requst_reset = false ;
 
 
@@ -240,6 +241,7 @@ void task_js_main(){
 
     fs_init() ;
     wifi_init() ;
+    webtelnet_init() ;
     init_lvgl() ;
 
     socks_init() ;

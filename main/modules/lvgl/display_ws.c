@@ -1,31 +1,33 @@
 #include "display_ws.h"
+#include "utils.h"
+#include "list.h"
+#include "webtelnet.h"
 
 #include <esp_log.h>
-#include <esp_system.h>
-#include <esp_http_server.h>
 
 #define TAG "disp.ws"
 
 static httpd_handle_t server = NULL;
 
 
+list_t disp_clients ;
+
 /*
  * Structure holding server handle
  * and internal socket fd in order
  * to use out of request send
  */
-struct async_resp_arg {
+typedef struct {
     httpd_handle_t hd;
     int fd;
-};
+} client_t ;
 
 /*
  * async send function, which we put into the httpd work queue
  */
-static void ws_async_send(void *arg)
-{
+static void ws_async_send(void *arg) {
     static const char * data = "Async data";
-    struct async_resp_arg *resp_arg = arg;
+    client_t *resp_arg = arg;
     httpd_handle_t hd = resp_arg->hd;
     int fd = resp_arg->fd;
     httpd_ws_frame_t ws_pkt;
@@ -38,21 +40,44 @@ static void ws_async_send(void *arg)
     free(resp_arg);
 }
 
-static esp_err_t trigger_async_send(httpd_handle_t handle, httpd_req_t *req)
-{
-    struct async_resp_arg *resp_arg = malloc(sizeof(struct async_resp_arg));
-    resp_arg->hd = req->handle;
-    resp_arg->fd = httpd_req_to_sockfd(req);
-    return httpd_queue_work(handle, ws_async_send, resp_arg);
+// static esp_err_t trigger_async_send(httpd_handle_t handle, client_t * client) {
+// }
+
+
+void free_socket_ctx(void * ctx) {
+    printf("xxxxxxxx free_socket_ctx()\n") ;
+    if(!ctx) {
+        printf("free_socket_ctx() ctx == NULL !") ;
+        return ;
+    }
+    list_remove(&disp_clients, ctx) ;
+    free(ctx) ;
+
+    list_is_empty(&disp_clients) ;
+    printf("client cnt:%d \n", list_count(&disp_clients)) ;
 }
+
+
+
+
 
 /*
  * This handler echos back the received ws data
  * and triggers an async send if certain message received
  */
-static esp_err_t echo_handler(httpd_req_t *req) {
+static esp_err_t disp_client_handler(httpd_req_t *req) {    
 
-    printf("come in\n") ;
+    printf("req->sess_ctx==NULL? %d\n", req->sess_ctx==NULL? 1: 0) ;
+    if(!req->sess_ctx) {
+
+        client_t * client = malloc(sizeof(client_t));
+        client->hd = req->handle;
+        client->fd = httpd_req_to_sockfd(req);
+        list_append(&disp_clients, client) ;
+
+        req->sess_ctx = (void *) client ;
+        req->free_ctx = free_socket_ctx ;
+    }
 
     uint8_t buf[128] = { 0 };
     httpd_ws_frame_t ws_pkt;
@@ -63,12 +88,6 @@ static esp_err_t echo_handler(httpd_req_t *req) {
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "httpd_ws_recv_frame failed with %d", ret);
         return ret;
-    }
-    ESP_LOGI(TAG, "Got packet with message: %s", ws_pkt.payload);
-    ESP_LOGI(TAG, "Packet type: %d", ws_pkt.type);
-    if (ws_pkt.type == HTTPD_WS_TYPE_TEXT &&
-        strcmp((char*)ws_pkt.payload,"Trigger async") == 0) {
-        return trigger_async_send(req->handle, req);
     }
 
     ret = httpd_ws_send_frame(req, &ws_pkt);
@@ -84,23 +103,20 @@ static esp_err_t echo_handler(httpd_req_t *req) {
 
 void vlgl_js_display_ws_init() {
     
-    httpd_config_t config = HTTPD_DEFAULT_CONFIG();
-    config.server_port = 8023 ;
+    list_init(&disp_clients) ;
 
-    if (httpd_start(&server, &config) != ESP_OK) {
-        printf("cound not start http server on port 8023\n") ;
-        return ;
-    }
-        
-    httpd_uri_t ws = {
-        .uri        = "/display/dev",
-        .method     = HTTP_GET,
-        .handler    = echo_handler,
-        .user_ctx   = NULL,
-        .is_websocket = true
-    };
-    if( httpd_register_uri_handler(server, &ws)!=ESP_OK ){
-        printf("cound not register_uri\n") ;
-        return ;
+    httpd_handle_t server = webtelnet_handle() ;
+    if(server) {
+        httpd_uri_t ws = {
+            .uri        = "/display/dev",
+            .method     = HTTP_GET,
+            .handler    = disp_client_handler,
+            .user_ctx   = NULL,
+            .is_websocket = true
+        };
+        if( httpd_register_uri_handler(server, &ws)!=ESP_OK ){
+            printf("cound not register_uri\n") ;
+            return ;
+        }
     }
 }

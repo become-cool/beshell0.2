@@ -93,6 +93,9 @@
 #define dn(v)   printf(#v"=%d\n", v) ;
 #define dn2(v1,v2)   printf(#v1"=%d, "#v2"=\n", v1, v2) ;
 
+#define YES_OR_NO(exp) printf(#exp"? %s\n", (exp)? "yes": "no") ;
+#define IS_NULL(exp) YES_OR_NO((exp)==NULL)
+
 #define dref(var,when) printf( "[%s]" #var " ref:%d\n", when, VAR_REFCNT(var)) ;
 
 uint64_t gettime() ;

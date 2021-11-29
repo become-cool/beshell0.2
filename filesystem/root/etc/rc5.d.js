@@ -14,9 +14,19 @@ try{
 
     require("./init.d/beconsoled.js")
 
+    require("./init.d/display.js")
+
+    require("/lib/local/webtelnet/main.js")
+
     require("./init.d/app.js").autoBoot()
 
     console.log('BeShell is ready.')
+
+    let rcpath = process.env.HOME + "/.beshellrc"
+    if(beapi.fs.isFileSync(rcpath)) {
+        require(rcpath)
+    }
+
 }
 catch(e) {
     console.log(e.message)

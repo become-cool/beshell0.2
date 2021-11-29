@@ -1,0 +1,10 @@
+console.log("xxxxxxxxxx")
+console.log(__filename)
+
+if(WiFi.status().sta.connected){
+    WiFi.save(); 
+    WiFi.restore(); 
+}
+
+global.server = beapi.http.createServer(80)
+server.route("/x", req=>{req.rspnFile(__filename)})

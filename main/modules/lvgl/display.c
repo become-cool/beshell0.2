@@ -73,7 +73,7 @@ static void js_lvgl_disp_finalizer(JSRuntime *rt, JSValue val) {
 }
 
 static JSClassDef js_lvgl_disp_class = {
-    "lvgl.DispDriver",
+    "lvgl.Driver",
     .finalizer = js_lvgl_disp_finalizer,
 };
 
@@ -132,7 +132,7 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
     JSValue jsdisp = JS_NewObjectClass(ctx, js_lvgl_disp_class_id) ;
 
     JS_SetPropertyStr(ctx, jsdisp, "type", argv[0]) ;
-    JS_SetPropertyStr(ctx, jsdisp, "options", argv[1]) ;
+    // JS_SetPropertyStr(ctx, jsdisp, "options", argv[1]) ;
 
 
     ARGV_TO_STRING_E(0, typestr, typelen, "argv type must be a string")

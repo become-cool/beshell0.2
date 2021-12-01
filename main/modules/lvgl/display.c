@@ -10,7 +10,6 @@
 #include "disp_st77xx.h"
 #include "touch_driver.h"
 
-#define DMA_BUFF_LEN 320*20*2
 uint8_t * dma_buff = NULL ;
 
 lv_indev_drv_t indev_drv;
@@ -34,12 +33,18 @@ void disp_st7789_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t 
         return ;
     }
     st77xx_draw_rect(disp->user_data, area->x1,area->y1, area->x2, area->y2, color_p) ;
+    disp_virtual_flush(disp, area, color_p) ;
     lv_disp_flush_ready(disp) ;
 }
 
-void disp_virtual_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color_p) {
-    printf("disp_virtual_flush() (%d,%d) -> (%d,%d) \n", area->x1,area->y1, area->x2, area->y2) ;
-    lv_disp_flush_ready(disp) ;
+
+void input_driver_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
+    if(ws_driver_input_read(drv, data))
+        return ;
+    touch_driver_read(drv, data) ;
+    if(data->state == LV_INDEV_STATE_PRESSED) {
+        data->point.x -= 8 ;
+    }
 }
 
 static JSClassID js_lvgl_disp_class_id ;
@@ -153,7 +158,7 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
         JS_ThrowReferenceError(ctx, "out of memory?");
         goto excp ;
     }
-    lv_disp_draw_buf_init(drawbuf, dma_buff, NULL, buflen/2);  
+    lv_disp_draw_buf_init(drawbuf, dma_buff+DMA_BUFF_AUX_SIZE, NULL, buflen/2);
 
     // 创建设备驱动对象
     dispdrv = malloc(sizeof(lv_disp_drv_t)) ;
@@ -187,7 +192,7 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
     }
 
     // 虚拟屏幕
-    if( strcmp(typestr, "VIRTUAL")==0 ) {
+    else if( strcmp(typestr, "VIRTUAL")==0 ) {
 
         // 注册设备驱动对象
         dispdrv->flush_cb = disp_virtual_flush ;
@@ -206,7 +211,7 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
     xpt2046_init();
 
     lv_indev_drv_init(&indev_drv);
-    indev_drv.read_cb = touch_driver_read;
+    indev_drv.read_cb = input_driver_read ;
     indev_drv.type = LV_INDEV_TYPE_POINTER;
     lv_indev_t *indev = lv_indev_drv_register(&indev_drv);
     if(!indev) {
@@ -221,6 +226,18 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
     lv_obj_t * label = lv_label_create(btn);          /*Add a label to the button*/
     lv_label_set_text(label, "Button");                     /*Set the labels text*/
     lv_obj_center(label);
+
+    
+    /*Create a slider in the center of the display*/
+    lv_obj_t * slider = lv_slider_create(lv_scr_act());
+    lv_obj_center(slider);
+
+    /*Create a label below the slider*/
+    lv_obj_t * slider_label = lv_label_create(lv_scr_act());
+    lv_label_set_text(slider_label, "0%");
+    lv_obj_align_to(slider_label, slider, LV_ALIGN_OUT_BOTTOM_MID, 0, 10);
+
+
 
     lv_task_handler() ;
 
@@ -238,13 +255,13 @@ excp:
     return JS_EXCEPTION ;
 }
 
-
+uint8_t * display_dma_buff() {
+    return dma_buff ;
+}
 
 void vlgl_js_display_init() {
 
-    
-    printf("heap_caps_get_free_size(MALLOC_CAP_DMA): %d\n", heap_caps_get_free_size(MALLOC_CAP_DMA)) ;
-    dma_buff = heap_caps_malloc( DMA_BUFF_LEN, MALLOC_CAP_DMA);
+    dma_buff = heap_caps_malloc( DMA_BUFF_LEN + DMA_BUFF_AUX_SIZE, MALLOC_CAP_DMA);
     if(!dma_buff) {
         printf("heap_caps_malloc(%d) faild for display buff.\n", DMA_BUFF_LEN) ;
     }
@@ -259,8 +276,6 @@ void vlgl_js_display_init() {
 
 
 void require_vlgl_js_display(JSContext *ctx, JSValue lvgl) {
-
-    printf("require_vlgl_js_display()\n") ;
 
     // lvgl.Display
     JS_NewClass(JS_GetRuntime(ctx), js_lvgl_disp_class_id, &js_lvgl_disp_class);

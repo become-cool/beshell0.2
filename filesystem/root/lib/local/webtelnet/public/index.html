@@ -5,6 +5,110 @@
     <title>BECOME</title>
 </head>
 <body>
-    Hello
+    <div>
+        <input id="url" style="width:400px" value="ws://192.168.4.1:8023/display">
+        <button onclick="openws()">连接</button>
+        <button onclick="closews()">关闭</button>
+        <button onclick="refresh()">刷新</button>
+    </div>
+    <div>
+        <img id="img"></img>
+    </div>
+    <div>
+        <canvas width="320" height="240" style="width:320px; height:240px" id="canvas"></canvas>
+    </div>
+    <script>
+         
+        const WS_DISP_CMD_REFRESH = 1
+        const WS_DISP_CMD_PRESS = 22
+        const WS_DISP_CMD_RELEASE = 23
+
+        window.ws = null
+        function openws() {
+            console.log("open()",url.value)
+            ws = new WebSocket(url.value);
+            // ws.binaryType = "arraybuffer"
+            
+            ws.onopen = function(evt) { 
+                console.log("Connection has opened"); 
+                ws.send(new Uint8Array([WS_DISP_CMD_REFRESH]));
+            }
+            ws.onclose = function(evt) {
+                console.log("Connection closed.");
+            }
+
+            ws.onmessage = async function(evt) {
+                if(!(evt.data instanceof Blob)){
+                    console.log(evt.data)
+                    return ;
+                }
+
+                let data = await evt.data.arrayBuffer()
+                
+                let view16 = new Uint16Array(data.slice(0,8))
+                fragx = view16[0]
+                fragy = view16[1]
+                let jpgdata = new Uint8Array(data.slice(8))
+
+                let strdata = ""
+                for(let b of jpgdata) {
+                    strdata+= String.fromCharCode(b)
+                }
+                strdata = btoa(strdata)
+                img.src = 'data:image/jpeg;base64,' + strdata
+
+            };
+        }
+        function closews() {
+            ws.close()
+        }
+
+        function refresh() {
+            ws.send(new Uint8Array([WS_DISP_CMD_REFRESH]));
+        }
+
+        
+        var img = new Image();
+        let fragx = 0, fragy = 0
+        img.onload = function() {
+            canvas.getContext("2d").drawImage(img, fragx, fragy)
+        }
+
+        let mouse_pressed = false
+        function onmousedown(e) {
+            console.log("onmousedown")
+            if(!ws)
+                return
+            mouse_pressed = true
+
+            let data = [WS_DISP_CMD_PRESS]
+            data.push(e.offsetX&255)
+            data.push((e.offsetX>>8)&255)
+            data.push(e.offsetY&255)
+            data.push((e.offsetY>>8)&255)
+            console.log(e.offsetX, e.offsetY,data)
+            ws.send(new Uint8Array(data));
+        }
+        canvas.onmousedown = onmousedown
+        canvas.onmousemove = function(e) {
+            if(!mouse_pressed)
+                return
+            onmousedown(e)
+        }
+        canvas.onmouseup = function(e) {
+            if(!ws)
+                return
+            mouse_pressed = false
+
+            let data = [WS_DISP_CMD_RELEASE]
+            // data.push(e.offsetX&255)
+            // data.push((e.offsetX>>8)&255)
+            // data.push(e.offsetY&255)
+            // data.push((e.offsetY>>8)&255)
+            ws.send(new Uint8Array(data));
+        }
+        canvas.onmouseout = canvas.onmouseup
+        window.ws = ws
+    </script>
 </body>
 </html>

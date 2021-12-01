@@ -246,6 +246,15 @@ JSValue js_wifi_start_ap(JSContext *ctx, JSValueConst this_val, int argc, JSValu
     if(passwordlen>0 && passwordlen<8) {
         THROW_EXCEPTION("wifi password length must be greater than 8")
     }
+    
+    wifi_mode_t mode;
+    if(esp_wifi_get_mode(&mode)!=ESP_OK) {
+        THROW_EXCEPTION("esp_wifi_get_mode() failed")
+    }
+    printf("wifi mode:%d\n", mode) ;
+    if(esp_wifi_set_mode( WIFI_MODE_APSTA)!=ESP_OK) {
+        THROW_EXCEPTION("esp_wifi_set_mode() failed")
+    }
 
     wifi_config_t wifi_config = {
         .ap = {

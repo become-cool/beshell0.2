@@ -13,5 +13,5 @@ switch(beapi.utils.partId()) {
         break
 }
 if(!hasDisplay) {
-    // beapi.lvgl.createDisplay("VIRTUAL", {width:320, height:240}) 
+    beapi.lvgl.createDisplay("VIRTUAL", {width:320, height:240}) 
 }

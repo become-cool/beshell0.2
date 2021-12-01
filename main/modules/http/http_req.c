@@ -32,6 +32,25 @@ static JSClassDef js_http_req_class = {
         THROW_EXCEPTION("Invalid http.Request object")   \
     }
 
+static JSValue req_get_header(JSContext *ctx, httpd_req_t * req, const char * name) {
+
+    size_t val_len = httpd_req_get_hdr_value_len(req, name) ;
+    if (val_len < 1) {
+        return JS_NULL ;
+    }
+
+    char * val = malloc(val_len+1);
+    /* Copy null terminated value string into buffer */
+    if (httpd_req_get_hdr_value_str(req, "Host", val, val_len+1) != ESP_OK) {
+        free(val);
+        return JS_NULL ;
+    }
+    
+    JSValue jsval = JS_NewStringLen(ctx, val, val_len) ;
+    free(val);
+
+    return jsval ;
+}
 
 /**
  * 取得 http request header 
@@ -45,29 +64,57 @@ JSValue js_http_req_get_header(JSContext *ctx, JSValueConst this_val, int argc, 
 
     ARGV_TO_STRING_E(0, name, namelen, "http.Request.getHeader() arg name must be a string")
 
-
-    /* Get header value string length and allocate memory for length + 1,
-     * extra byte for null termination */
-    size_t val_len = httpd_req_get_hdr_value_len(creq->req, name) ;
-    if (val_len < 1) {
-        JS_FreeCString(ctx,name) ;
-        return JS_NULL ;
-    }
-
-    char * val = malloc(val_len+1);
-    /* Copy null terminated value string into buffer */
-    if (httpd_req_get_hdr_value_str(creq->req, "Host", val, val_len+1) != ESP_OK) {
-        JS_FreeCString(ctx,name) ;
-        free(val);
-        return JS_NULL ;
-    }
-    
-    JSValue jsval = JS_NewStringLen(ctx, val, val_len) ;
-    
-    free(val);
+    JSValue jsval = req_get_header(ctx, creq->req, name) ;
     JS_FreeCString(ctx,name) ;
 
     return jsval ;
+}
+
+
+JSValue js_http_req_get_method(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    REQ_OPAQUE(creq) 
+    switch(creq->req->method){
+        case HTTP_DELETE:
+            return JS_NewString(ctx, "DELETE") ;
+        case HTTP_GET:
+            return JS_NewString(ctx, "GET") ;
+        case HTTP_HEAD:
+            return JS_NewString(ctx, "HEAD") ;
+        case HTTP_POST:
+            return JS_NewString(ctx, "POST") ;
+        case HTTP_PUT:
+            return JS_NewString(ctx, "PUT") ;
+        case HTTP_MOVE:
+            return JS_NewString(ctx, "MOVE") ;
+        default:
+            return JS_NewString(ctx, "unknow") ;
+    }   
+}
+JSValue js_http_req_get_host(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    REQ_OPAQUE(creq)    
+    return req_get_header(ctx, creq->req, "Host") ; 
+}
+JSValue js_http_req_get_path(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    REQ_OPAQUE(creq)    
+    return JS_NewString(ctx, creq->req->uri);
+}
+JSValue js_http_req_get_query(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+
+    REQ_OPAQUE(creq)
+    size_t len = httpd_req_get_url_query_len(creq->req) ;
+    if(len<1) {
+        return JS_NULL ;
+    }
+    char * query = malloc(len+1) ;
+    if( httpd_req_get_url_query_str(creq->req, query, len+1)!=ESP_OK ) {
+        free(query) ;
+        return JS_NULL ;
+    }
+
+    JSValue jsquery = JS_NewStringLen(ctx, query, len) ;
+    free(query) ;
+
+    return jsquery ;
 }
 
 inline JSValue http_send_data(JSContext *ctx, httpd_req_t * req, JSValue jsdata) {
@@ -76,14 +123,14 @@ inline JSValue http_send_data(JSContext *ctx, httpd_req_t * req, JSValue jsdata)
     const char * data = (char *)JS_GetArrayBuffer(ctx, &datalen, jsdata) ;
     if (data) {
         httpd_resp_send_chunk(req, data, datalen);
-        return JS_TRUE ;
+        return TRUE ;
     }
 
     else if(JS_IsString(jsdata)) {
         data = JS_ToCStringLen(ctx, &datalen, jsdata) ;
         httpd_resp_send_chunk(req, data, datalen);
         JS_FreeCString(ctx,data) ;
-        return JS_TRUE ;
+        return TRUE ;
     }
 
     else {
@@ -96,15 +143,27 @@ JSValue js_http_req_end(JSContext *ctx, JSValueConst this_val, int argc, JSValue
     REQ_OPAQUE(creq)
 
     if(argc>=1) {
-        http_send_data(ctx, creq->req, argv[0]) ;
+        if( JS_IsException(http_send_data(ctx, creq->req, argv[0])) ) {
+            return JS_EXCEPTION ;
+        }
     }
 
     httpd_resp_send_chunk(creq->req, NULL, 0);
 
-    return JS_UNDEFINED ;
+    return JS_DupValue(ctx, this_val);
 }
 
 
+JSValue js_http_req_rspn_status(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+
+    CHECK_ARGC(1)
+    ARGV_TO_STRING_E(0, code, codelen, "http response status must be a string, eg. \"200\"")
+    REQ_OPAQUE(creq)
+
+    httpd_resp_set_status(creq->req, code) ;
+
+    return JS_DupValue(ctx, this_val);
+}
 
 /**
  * 取得 http request header 
@@ -113,27 +172,31 @@ JSValue js_http_req_end(JSContext *ctx, JSValueConst this_val, int argc, JSValue
  * @param {string} header value
  * @return {string}
  */
-JSValue js_http_req_write_header(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+JSValue js_http_req_rspn_header(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(2)
     REQ_OPAQUE(creq)
     ARGV_TO_STRING_E(0, name, namelen, "argv header name must be a string")
     ARGV_TO_STRING_E(1, value, valuelen, "argv header value must be a string")
 
-    JSValue ret = ESP_OK == httpd_resp_set_hdr(creq->req, name, value);
+    httpd_resp_set_hdr(creq->req, name, value) ;
 
     JS_FreeCString(ctx, name);
     JS_FreeCString(ctx, value);
 
-    return ret ;
+    return JS_DupValue(ctx, this_val);
 }
 
 
 
-JSValue js_http_req_write(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+JSValue js_http_req_rspn(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(1)
     REQ_OPAQUE(creq)    
-    return http_send_data(ctx, creq->req, argv[0]) ;
+    if( JS_IsException(http_send_data(ctx, creq->req, argv[0])) ) {
+        return JS_EXCEPTION ;
+    }
+    return JS_DupValue(ctx, this_val);
 }
+
 
 JSValue js_http_req_rspn_file(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(1)
@@ -178,22 +241,43 @@ JSValue js_http_req_rspn_file(JSContext *ctx, JSValueConst this_val, int argc, J
     free(buff) ;
     free(contentlength) ;
 
-    return JS_UNDEFINED ;
+    return JS_DupValue(ctx, this_val);
 }
 
 
+
+static JSValue js_http_req_getter(JSContext *ctx, JSValueConst this_val, JSValueConst val, int magic){
+    switch(magic) {
+        case 0: 
+            return js_http_req_get_method(ctx,this_val,0,NULL) ;
+        case 1: 
+            return js_http_req_get_host(ctx,this_val,0,NULL) ;
+        case 2: 
+            return js_http_req_get_path(ctx,this_val,0,NULL) ;
+        case 3: 
+            return js_http_req_get_query(ctx,this_val,0,NULL) ;
+        default:
+            return JS_UNDEFINED ;
+    }
+}
+
 static const JSCFunctionListEntry js_http_req_proto_funcs[] = {
     JS_CFUNC_DEF("getHeader", 0, js_http_req_get_header),
-    // JS_CGETSET_MAGIC_DEF("path", js_http_req_path, js_http_req_path, 0),
-    // JS_CGETSET_MAGIC_DEF("host", js_http_req_host, js_http_req_host, 0),
-    JS_CFUNC_DEF("writeHeader", 0, js_http_req_write_header),
-    JS_CFUNC_DEF("write", 0, js_http_req_write),
+    JS_CFUNC_DEF("getMethod", 0, js_http_req_get_method),
+    JS_CFUNC_DEF("getHost", 0, js_http_req_get_host),
+    JS_CFUNC_DEF("getPath", 0, js_http_req_get_path),
+    JS_CFUNC_DEF("getQuery", 0, js_http_req_get_query),
+    JS_CFUNC_DEF("rspnStatus", 0, js_http_req_rspn_status),
+    JS_CFUNC_DEF("rspnHeader", 0, js_http_req_rspn_header),
+    JS_CFUNC_DEF("rspn", 0, js_http_req_rspn),
     JS_CFUNC_DEF("end", 0, js_http_req_end),
     JS_CFUNC_DEF("rspnFile", 0, js_http_req_rspn_file),
+
+    JS_CGETSET_MAGIC_DEF("method", js_http_req_getter, NULL, 0) ,
+    JS_CGETSET_MAGIC_DEF("host", js_http_req_getter, NULL, 1) ,
+    JS_CGETSET_MAGIC_DEF("path", js_http_req_getter, NULL, 2) ,
+    JS_CGETSET_MAGIC_DEF("query", js_http_req_getter, NULL, 3) ,
 };
-
-
-
 
 
 req_t * http_request(httpd_req_t *req) {

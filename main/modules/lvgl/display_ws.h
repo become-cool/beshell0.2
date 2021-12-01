@@ -3,6 +3,7 @@
 
 #include <esp_system.h>
 #include <esp_http_server.h>
+#include "lvgl.h"
 
 
 
@@ -19,6 +20,11 @@
 #define PARSER_BLOCK_SIZE  128
 /* Calculate the maximum size needed for the scratch buffer */
 #define HTTPD_SCRATCH_BUF  MAX(HTTPD_MAX_REQ_HDR_LEN, HTTPD_MAX_URI_LEN)
+
+
+#define WS_DISP_CMD_REFRESH 1
+#define WS_DISP_CMD_PRESS 22
+#define WS_DISP_CMD_RELEASE 23
 
 /**
  * @brief A database of all the open sockets in the system.
@@ -73,5 +79,7 @@ struct httpd_req_aux {
 
 
 void vlgl_js_display_ws_init() ;
+void disp_virtual_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color_p) ;
+bool ws_driver_input_read(lv_indev_drv_t *drv, lv_indev_data_t *data) ;
 
 #endif

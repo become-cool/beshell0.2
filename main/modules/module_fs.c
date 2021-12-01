@@ -558,7 +558,7 @@ void require_module_fs(JSContext *ctx) {
     JS_SetPropertyStr(ctx, fs, "existsSync", JS_NewCFunction(ctx, js_fs_exists_sync, "existsSync", 1));
     JS_SetPropertyStr(ctx, fs, "isDirSync", JS_NewCFunction(ctx, js_fs_is_dir_sync, "isDirSync", 1));
     JS_SetPropertyStr(ctx, fs, "isFileSync", JS_NewCFunction(ctx, js_fs_is_file_sync, "isFileSync", 1));
-    JS_SetPropertyStr(ctx, fs, "renameSync", JS_NewCFunction(ctx, js_fs_is_file_sync, "renameSync", 1));
+    JS_SetPropertyStr(ctx, fs, "renameSync", JS_NewCFunction(ctx, js_fs_rename_sync, "renameSync", 1));
     JS_SetPropertyStr(ctx, fs, "info", JS_NewCFunction(ctx, js_fs_info, "info", 1));
 
     JS_FreeValue(ctx, global);

@@ -206,40 +206,28 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
     JS_SetOpaque(jsdisp, disp);
 
     // demo ------------
-    // 触摸设备
-    tp_spi_add_device(1, 18);
-    xpt2046_init();
+    // lv_obj_t * btn = lv_btn_create(lv_scr_act());     /*Add a button the current screen*/
+    // lv_obj_set_pos(btn, 10, 10);                            /*Set its position*/
+    // lv_obj_set_size(btn, 120, 50);                          /*Set its size*/
+    // lv_obj_add_event_cb(btn, btn_event_cb, LV_EVENT_ALL, NULL);           /*Assign a callback to the button*/
 
-    lv_indev_drv_init(&indev_drv);
-    indev_drv.read_cb = input_driver_read ;
-    indev_drv.type = LV_INDEV_TYPE_POINTER;
-    lv_indev_t *indev = lv_indev_drv_register(&indev_drv);
-    if(!indev) {
-        printf("Cound create indev\n") ;
-    }
-
-    lv_obj_t * btn = lv_btn_create(lv_scr_act());     /*Add a button the current screen*/
-    lv_obj_set_pos(btn, 10, 10);                            /*Set its position*/
-    lv_obj_set_size(btn, 120, 50);                          /*Set its size*/
-    lv_obj_add_event_cb(btn, btn_event_cb, LV_EVENT_ALL, NULL);           /*Assign a callback to the button*/
-
-    lv_obj_t * label = lv_label_create(btn);          /*Add a label to the button*/
-    lv_label_set_text(label, "Button");                     /*Set the labels text*/
-    lv_obj_center(label);
+    // lv_obj_t * label = lv_label_create(btn);          /*Add a label to the button*/
+    // lv_label_set_text(label, "Button");                     /*Set the labels text*/
+    // lv_obj_center(label);
 
     
-    /*Create a slider in the center of the display*/
-    lv_obj_t * slider = lv_slider_create(lv_scr_act());
-    lv_obj_center(slider);
+    // /*Create a slider in the center of the display*/
+    // lv_obj_t * slider = lv_slider_create(lv_scr_act());
+    // lv_obj_center(slider);
 
-    /*Create a label below the slider*/
-    lv_obj_t * slider_label = lv_label_create(lv_scr_act());
-    lv_label_set_text(slider_label, "0%");
-    lv_obj_align_to(slider_label, slider, LV_ALIGN_OUT_BOTTOM_MID, 0, 10);
+    // /*Create a label below the slider*/
+    // lv_obj_t * slider_label = lv_label_create(lv_scr_act());
+    // lv_label_set_text(slider_label, "0%");
+    // lv_obj_align_to(slider_label, slider, LV_ALIGN_OUT_BOTTOM_MID, 0, 10);
 
 
 
-    lv_task_handler() ;
+    // lv_task_handler() ;
 
     JS_DupValue(ctx,jsdisp) ;
 
@@ -277,6 +265,18 @@ void vlgl_js_display_init() {
 
 void require_vlgl_js_display(JSContext *ctx, JSValue lvgl) {
 
+    // 触摸设备
+    tp_spi_add_device(1, 18);
+    xpt2046_init();
+
+    lv_indev_drv_init(&indev_drv);
+    indev_drv.read_cb = input_driver_read ;
+    indev_drv.type = LV_INDEV_TYPE_POINTER;
+    lv_indev_t *indev = lv_indev_drv_register(&indev_drv);
+    if(!indev) {
+        printf("Cound create indev\n") ;
+    }
+    
     // lvgl.Display
     JS_NewClass(JS_GetRuntime(ctx), js_lvgl_disp_class_id, &js_lvgl_disp_class);
     JSValue dispDriverProto = JS_NewObject(ctx);

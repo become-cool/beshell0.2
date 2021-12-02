@@ -6,30 +6,429 @@
 #include "lv_conf.h"
 
 
-
-
+// AUTO GENERATE CODE START [DEFINE CLASS] --------
+ // beapi.lvgl.Obj --
 static JSClassID js_lv_obj_class_id ;
-static JSValue js_lv_obj_constructor(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
-    printf("js_lv_obj_constructor()\n") ;
+static JSValue js_lv_obj_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
+    lv_obj_t * cparent = NULL ;
+    if(argc>=1) {
+        cparent = JS_GetOpaque(argv[0], js_lv_obj_class_id) ;
+    }
+    lv_obj_t * cobj = lv_obj_create(cparent) ;
+    JSValue jsobj = JS_NewObjectClass(ctx, js_lv_obj_class_id) ;
 
-    // JS_SetOpaque(val, disp);
-    
-    return JS_UNDEFINED ;
+    lv_obj_set_user_data(cobj, jsobj) ;
+
+    JS_SetOpaque(jsobj, cobj) ;
+    JS_DupValue(ctx, jsobj) ;  // 此引用在 c struct 销毁时清除
+
+    return jsobj ;
 }
 static void js_lv_obj_finalizer(JSRuntime *rt, JSValue val){
-    printf("js_lv_obj_finalizer()\n") ;
+    lv_obj_t * thisobj = JS_GetOpaque(val, js_lv_obj_class_id) ;
+    lv_obj_del(thisobj) ;
 }
 static JSClassDef js_lv_obj_class = {
-    "lvgl.Object",
-    .call = js_lv_obj_constructor,
+    "lvgl.Obj",
     .finalizer = js_lv_obj_finalizer,
 };
 
+ // beapi.lvgl.Arc --
+static JSClassID js_lv_arc_class_id ;
+static JSValue js_lv_arc_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
+    lv_obj_t * cparent = NULL ;
+    if(argc>=1) {
+        cparent = JS_GetOpaque(argv[0], js_lv_arc_class_id) ;
+    }
+    lv_arc_t * cobj = lv_arc_create(cparent) ;
+    JSValue jsobj = JS_NewObjectClass(ctx, js_lv_arc_class_id) ;
+
+    lv_obj_set_user_data(cobj, jsobj) ;
+
+    JS_SetOpaque(jsobj, cobj) ;
+    JS_DupValue(ctx, jsobj) ;  // 此引用在 c struct 销毁时清除
+
+    return jsobj ;
+}
+static void js_lv_arc_finalizer(JSRuntime *rt, JSValue val){
+    lv_arc_t * thisobj = JS_GetOpaque(val, js_lv_arc_class_id) ;
+    lv_obj_del(thisobj) ;
+}
+static JSClassDef js_lv_arc_class = {
+    "lvgl.Arc",
+    .finalizer = js_lv_arc_finalizer,
+};
+
+ // beapi.lvgl.Bar --
+static JSClassID js_lv_bar_class_id ;
+static JSValue js_lv_bar_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
+    lv_obj_t * cparent = NULL ;
+    if(argc>=1) {
+        cparent = JS_GetOpaque(argv[0], js_lv_bar_class_id) ;
+    }
+    lv_bar_t * cobj = lv_bar_create(cparent) ;
+    JSValue jsobj = JS_NewObjectClass(ctx, js_lv_bar_class_id) ;
+
+    lv_obj_set_user_data(cobj, jsobj) ;
+
+    JS_SetOpaque(jsobj, cobj) ;
+    JS_DupValue(ctx, jsobj) ;  // 此引用在 c struct 销毁时清除
+
+    return jsobj ;
+}
+static void js_lv_bar_finalizer(JSRuntime *rt, JSValue val){
+    lv_bar_t * thisobj = JS_GetOpaque(val, js_lv_bar_class_id) ;
+    lv_obj_del(thisobj) ;
+}
+static JSClassDef js_lv_bar_class = {
+    "lvgl.Bar",
+    .finalizer = js_lv_bar_finalizer,
+};
+
+ // beapi.lvgl.Btn --
+static JSClassID js_lv_btn_class_id ;
+static JSValue js_lv_btn_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
+    lv_obj_t * cparent = NULL ;
+    if(argc>=1) {
+        cparent = JS_GetOpaque(argv[0], js_lv_btn_class_id) ;
+    }
+    lv_btn_t * cobj = lv_btn_create(cparent) ;
+    JSValue jsobj = JS_NewObjectClass(ctx, js_lv_btn_class_id) ;
+
+    lv_obj_set_user_data(cobj, jsobj) ;
+
+    JS_SetOpaque(jsobj, cobj) ;
+    JS_DupValue(ctx, jsobj) ;  // 此引用在 c struct 销毁时清除
+
+    return jsobj ;
+}
+static void js_lv_btn_finalizer(JSRuntime *rt, JSValue val){
+    lv_btn_t * thisobj = JS_GetOpaque(val, js_lv_btn_class_id) ;
+    lv_obj_del(thisobj) ;
+}
+static JSClassDef js_lv_btn_class = {
+    "lvgl.Btn",
+    .finalizer = js_lv_btn_finalizer,
+};
+
+ // beapi.lvgl.BtnMatrix --
+static JSClassID js_lv_btnmatrix_class_id ;
+static JSValue js_lv_btnmatrix_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
+    lv_obj_t * cparent = NULL ;
+    if(argc>=1) {
+        cparent = JS_GetOpaque(argv[0], js_lv_btnmatrix_class_id) ;
+    }
+    lv_btnmatrix_t * cobj = lv_btnmatrix_create(cparent) ;
+    JSValue jsobj = JS_NewObjectClass(ctx, js_lv_btnmatrix_class_id) ;
+
+    lv_obj_set_user_data(cobj, jsobj) ;
+
+    JS_SetOpaque(jsobj, cobj) ;
+    JS_DupValue(ctx, jsobj) ;  // 此引用在 c struct 销毁时清除
+
+    return jsobj ;
+}
+static void js_lv_btnmatrix_finalizer(JSRuntime *rt, JSValue val){
+    lv_btnmatrix_t * thisobj = JS_GetOpaque(val, js_lv_btnmatrix_class_id) ;
+    lv_obj_del(thisobj) ;
+}
+static JSClassDef js_lv_btnmatrix_class = {
+    "lvgl.BtnMatrix",
+    .finalizer = js_lv_btnmatrix_finalizer,
+};
+
+ // beapi.lvgl.Canvas --
+static JSClassID js_lv_canvas_class_id ;
+static JSValue js_lv_canvas_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
+    lv_obj_t * cparent = NULL ;
+    if(argc>=1) {
+        cparent = JS_GetOpaque(argv[0], js_lv_canvas_class_id) ;
+    }
+    lv_canvas_t * cobj = lv_canvas_create(cparent) ;
+    JSValue jsobj = JS_NewObjectClass(ctx, js_lv_canvas_class_id) ;
+
+    lv_obj_set_user_data(cobj, jsobj) ;
+
+    JS_SetOpaque(jsobj, cobj) ;
+    JS_DupValue(ctx, jsobj) ;  // 此引用在 c struct 销毁时清除
+
+    return jsobj ;
+}
+static void js_lv_canvas_finalizer(JSRuntime *rt, JSValue val){
+    lv_canvas_t * thisobj = JS_GetOpaque(val, js_lv_canvas_class_id) ;
+    lv_obj_del(thisobj) ;
+}
+static JSClassDef js_lv_canvas_class = {
+    "lvgl.Canvas",
+    .finalizer = js_lv_canvas_finalizer,
+};
+
+ // beapi.lvgl.Checkbox --
+static JSClassID js_lv_checkbox_class_id ;
+static JSValue js_lv_checkbox_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
+    lv_obj_t * cparent = NULL ;
+    if(argc>=1) {
+        cparent = JS_GetOpaque(argv[0], js_lv_checkbox_class_id) ;
+    }
+    lv_checkbox_t * cobj = lv_checkbox_create(cparent) ;
+    JSValue jsobj = JS_NewObjectClass(ctx, js_lv_checkbox_class_id) ;
+
+    lv_obj_set_user_data(cobj, jsobj) ;
+
+    JS_SetOpaque(jsobj, cobj) ;
+    JS_DupValue(ctx, jsobj) ;  // 此引用在 c struct 销毁时清除
+
+    return jsobj ;
+}
+static void js_lv_checkbox_finalizer(JSRuntime *rt, JSValue val){
+    lv_checkbox_t * thisobj = JS_GetOpaque(val, js_lv_checkbox_class_id) ;
+    lv_obj_del(thisobj) ;
+}
+static JSClassDef js_lv_checkbox_class = {
+    "lvgl.Checkbox",
+    .finalizer = js_lv_checkbox_finalizer,
+};
+
+ // beapi.lvgl.Dropdown --
+static JSClassID js_lv_dropdown_class_id ;
+static JSValue js_lv_dropdown_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
+    lv_obj_t * cparent = NULL ;
+    if(argc>=1) {
+        cparent = JS_GetOpaque(argv[0], js_lv_dropdown_class_id) ;
+    }
+    lv_dropdown_t * cobj = lv_dropdown_create(cparent) ;
+    JSValue jsobj = JS_NewObjectClass(ctx, js_lv_dropdown_class_id) ;
+
+    lv_obj_set_user_data(cobj, jsobj) ;
+
+    JS_SetOpaque(jsobj, cobj) ;
+    JS_DupValue(ctx, jsobj) ;  // 此引用在 c struct 销毁时清除
+
+    return jsobj ;
+}
+static void js_lv_dropdown_finalizer(JSRuntime *rt, JSValue val){
+    lv_dropdown_t * thisobj = JS_GetOpaque(val, js_lv_dropdown_class_id) ;
+    lv_obj_del(thisobj) ;
+}
+static JSClassDef js_lv_dropdown_class = {
+    "lvgl.Dropdown",
+    .finalizer = js_lv_dropdown_finalizer,
+};
+
+ // beapi.lvgl.Img --
+static JSClassID js_lv_img_class_id ;
+static JSValue js_lv_img_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
+    lv_obj_t * cparent = NULL ;
+    if(argc>=1) {
+        cparent = JS_GetOpaque(argv[0], js_lv_img_class_id) ;
+    }
+    lv_img_t * cobj = lv_img_create(cparent) ;
+    JSValue jsobj = JS_NewObjectClass(ctx, js_lv_img_class_id) ;
+
+    lv_obj_set_user_data(cobj, jsobj) ;
+
+    JS_SetOpaque(jsobj, cobj) ;
+    JS_DupValue(ctx, jsobj) ;  // 此引用在 c struct 销毁时清除
+
+    return jsobj ;
+}
+static void js_lv_img_finalizer(JSRuntime *rt, JSValue val){
+    lv_img_t * thisobj = JS_GetOpaque(val, js_lv_img_class_id) ;
+    lv_obj_del(thisobj) ;
+}
+static JSClassDef js_lv_img_class = {
+    "lvgl.Img",
+    .finalizer = js_lv_img_finalizer,
+};
+
+ // beapi.lvgl.Label --
+static JSClassID js_lv_label_class_id ;
+static JSValue js_lv_label_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
+    lv_obj_t * cparent = NULL ;
+    if(argc>=1) {
+        cparent = JS_GetOpaque(argv[0], js_lv_label_class_id) ;
+    }
+    lv_label_t * cobj = lv_label_create(cparent) ;
+    JSValue jsobj = JS_NewObjectClass(ctx, js_lv_label_class_id) ;
+
+    lv_obj_set_user_data(cobj, jsobj) ;
+
+    JS_SetOpaque(jsobj, cobj) ;
+    JS_DupValue(ctx, jsobj) ;  // 此引用在 c struct 销毁时清除
+
+    return jsobj ;
+}
+static void js_lv_label_finalizer(JSRuntime *rt, JSValue val){
+    lv_label_t * thisobj = JS_GetOpaque(val, js_lv_label_class_id) ;
+    lv_obj_del(thisobj) ;
+}
+static JSClassDef js_lv_label_class = {
+    "lvgl.Label",
+    .finalizer = js_lv_label_finalizer,
+};
+
+ // beapi.lvgl.Line --
+static JSClassID js_lv_line_class_id ;
+static JSValue js_lv_line_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
+    lv_obj_t * cparent = NULL ;
+    if(argc>=1) {
+        cparent = JS_GetOpaque(argv[0], js_lv_line_class_id) ;
+    }
+    lv_line_t * cobj = lv_line_create(cparent) ;
+    JSValue jsobj = JS_NewObjectClass(ctx, js_lv_line_class_id) ;
+
+    lv_obj_set_user_data(cobj, jsobj) ;
+
+    JS_SetOpaque(jsobj, cobj) ;
+    JS_DupValue(ctx, jsobj) ;  // 此引用在 c struct 销毁时清除
+
+    return jsobj ;
+}
+static void js_lv_line_finalizer(JSRuntime *rt, JSValue val){
+    lv_line_t * thisobj = JS_GetOpaque(val, js_lv_line_class_id) ;
+    lv_obj_del(thisobj) ;
+}
+static JSClassDef js_lv_line_class = {
+    "lvgl.Line",
+    .finalizer = js_lv_line_finalizer,
+};
+
+ // beapi.lvgl.Roller --
+static JSClassID js_lv_roller_class_id ;
+static JSValue js_lv_roller_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
+    lv_obj_t * cparent = NULL ;
+    if(argc>=1) {
+        cparent = JS_GetOpaque(argv[0], js_lv_roller_class_id) ;
+    }
+    lv_roller_t * cobj = lv_roller_create(cparent) ;
+    JSValue jsobj = JS_NewObjectClass(ctx, js_lv_roller_class_id) ;
+
+    lv_obj_set_user_data(cobj, jsobj) ;
+
+    JS_SetOpaque(jsobj, cobj) ;
+    JS_DupValue(ctx, jsobj) ;  // 此引用在 c struct 销毁时清除
+
+    return jsobj ;
+}
+static void js_lv_roller_finalizer(JSRuntime *rt, JSValue val){
+    lv_roller_t * thisobj = JS_GetOpaque(val, js_lv_roller_class_id) ;
+    lv_obj_del(thisobj) ;
+}
+static JSClassDef js_lv_roller_class = {
+    "lvgl.Roller",
+    .finalizer = js_lv_roller_finalizer,
+};
+
+ // beapi.lvgl.Slider --
+static JSClassID js_lv_slider_class_id ;
+static JSValue js_lv_slider_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
+    lv_obj_t * cparent = NULL ;
+    if(argc>=1) {
+        cparent = JS_GetOpaque(argv[0], js_lv_slider_class_id) ;
+    }
+    lv_slider_t * cobj = lv_slider_create(cparent) ;
+    JSValue jsobj = JS_NewObjectClass(ctx, js_lv_slider_class_id) ;
+
+    lv_obj_set_user_data(cobj, jsobj) ;
+
+    JS_SetOpaque(jsobj, cobj) ;
+    JS_DupValue(ctx, jsobj) ;  // 此引用在 c struct 销毁时清除
+
+    return jsobj ;
+}
+static void js_lv_slider_finalizer(JSRuntime *rt, JSValue val){
+    lv_slider_t * thisobj = JS_GetOpaque(val, js_lv_slider_class_id) ;
+    lv_obj_del(thisobj) ;
+}
+static JSClassDef js_lv_slider_class = {
+    "lvgl.Slider",
+    .finalizer = js_lv_slider_finalizer,
+};
+
+ // beapi.lvgl.Switch --
+static JSClassID js_lv_switch_class_id ;
+static JSValue js_lv_switch_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
+    lv_obj_t * cparent = NULL ;
+    if(argc>=1) {
+        cparent = JS_GetOpaque(argv[0], js_lv_switch_class_id) ;
+    }
+    lv_switch_t * cobj = lv_switch_create(cparent) ;
+    JSValue jsobj = JS_NewObjectClass(ctx, js_lv_switch_class_id) ;
+
+    lv_obj_set_user_data(cobj, jsobj) ;
+
+    JS_SetOpaque(jsobj, cobj) ;
+    JS_DupValue(ctx, jsobj) ;  // 此引用在 c struct 销毁时清除
+
+    return jsobj ;
+}
+static void js_lv_switch_finalizer(JSRuntime *rt, JSValue val){
+    lv_switch_t * thisobj = JS_GetOpaque(val, js_lv_switch_class_id) ;
+    lv_obj_del(thisobj) ;
+}
+static JSClassDef js_lv_switch_class = {
+    "lvgl.Switch",
+    .finalizer = js_lv_switch_finalizer,
+};
+
+ // beapi.lvgl.Table --
+static JSClassID js_lv_table_class_id ;
+static JSValue js_lv_table_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
+    lv_obj_t * cparent = NULL ;
+    if(argc>=1) {
+        cparent = JS_GetOpaque(argv[0], js_lv_table_class_id) ;
+    }
+    lv_table_t * cobj = lv_table_create(cparent) ;
+    JSValue jsobj = JS_NewObjectClass(ctx, js_lv_table_class_id) ;
+
+    lv_obj_set_user_data(cobj, jsobj) ;
+
+    JS_SetOpaque(jsobj, cobj) ;
+    JS_DupValue(ctx, jsobj) ;  // 此引用在 c struct 销毁时清除
+
+    return jsobj ;
+}
+static void js_lv_table_finalizer(JSRuntime *rt, JSValue val){
+    lv_table_t * thisobj = JS_GetOpaque(val, js_lv_table_class_id) ;
+    lv_obj_del(thisobj) ;
+}
+static JSClassDef js_lv_table_class = {
+    "lvgl.Table",
+    .finalizer = js_lv_table_finalizer,
+};
+
+ // beapi.lvgl.TextArea --
+static JSClassID js_lv_textarea_class_id ;
+static JSValue js_lv_textarea_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
+    lv_obj_t * cparent = NULL ;
+    if(argc>=1) {
+        cparent = JS_GetOpaque(argv[0], js_lv_textarea_class_id) ;
+    }
+    lv_textarea_t * cobj = lv_textarea_create(cparent) ;
+    JSValue jsobj = JS_NewObjectClass(ctx, js_lv_textarea_class_id) ;
+
+    lv_obj_set_user_data(cobj, jsobj) ;
+
+    JS_SetOpaque(jsobj, cobj) ;
+    JS_DupValue(ctx, jsobj) ;  // 此引用在 c struct 销毁时清除
+
+    return jsobj ;
+}
+static void js_lv_textarea_finalizer(JSRuntime *rt, JSValue val){
+    lv_textarea_t * thisobj = JS_GetOpaque(val, js_lv_textarea_class_id) ;
+    lv_obj_del(thisobj) ;
+}
+static JSClassDef js_lv_textarea_class = {
+    "lvgl.TextArea",
+    .finalizer = js_lv_textarea_finalizer,
+};
+
+// AUTO GENERATE CODE END [DEFINE CLASS] --------
 
 
 
 
-// AUTO GENERATE CODE START --------
+// AUTO GENERATE CODE START [METHOD LIST] --------
 static JSValue js_lv_obj_add_flag(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Obj.addFlag() missing arg")
@@ -1587,29 +1986,231 @@ static const JSCFunctionListEntry js_lv_obj_proto_funcs[] = {
     JS_CFUNC_DEF("moveBackground", 0, js_lv_obj_move_background),
     JS_CFUNC_DEF("getChildId", 0, js_lv_obj_get_child_id),
 } ;
+#define __def_js_lv_obj_proto_funcs__
 
-// AUTO GENERATE CODE END --------
+// AUTO GENERATE CODE END [METHOD LIST] --------
 
 
+
+static const JSCFunctionListEntry js_lv_arc_proto_funcs[] = {} ;
+static const JSCFunctionListEntry js_lv_bar_proto_funcs[] = {} ;
+static const JSCFunctionListEntry js_lv_btn_proto_funcs[] = {} ;
+static const JSCFunctionListEntry js_lv_btnmatrix_proto_funcs[] = {} ;
+static const JSCFunctionListEntry js_lv_canvas_proto_funcs[] = {} ;
+static const JSCFunctionListEntry js_lv_checkbox_proto_funcs[] = {} ;
+static const JSCFunctionListEntry js_lv_dropdown_proto_funcs[] = {} ;
+static const JSCFunctionListEntry js_lv_img_proto_funcs[] = {} ;
+static const JSCFunctionListEntry js_lv_label_proto_funcs[] = {} ;
+static const JSCFunctionListEntry js_lv_line_proto_funcs[] = {} ;
+static const JSCFunctionListEntry js_lv_roller_proto_funcs[] = {} ;
+static const JSCFunctionListEntry js_lv_slider_proto_funcs[] = {} ;
+static const JSCFunctionListEntry js_lv_switch_proto_funcs[] = {} ;
+static const JSCFunctionListEntry js_lv_table_proto_funcs[] = {} ;
+static const JSCFunctionListEntry js_lv_textarea_proto_funcs[] = {} ;
+
+
+
+
+
+void require_vlgl_js_widgets(JSContext *ctx, JSValue lvgl) {
+
+    JSValue global = JS_GetGlobalObject(ctx);
+    JSValue beapi = JS_GetPropertyStr(ctx, global, "beapi") ;
+    JSValue EventEmitter = JS_GetPropertyStr(ctx, beapi, "EventEmitter") ;
+    JSValue EventEmitterProto = JS_GetPropertyStr(ctx, EventEmitter, "prototype") ;
+
+
+
+// AUTO GENERATE CODE START [REGISTER CLASS] --------
+    // define js class lvgl.lv_obj
+    JS_NewClass(JS_GetRuntime(ctx), js_lv_obj_class_id, &js_lv_obj_class);
+    JSValue proto_lv_obj = JS_NewObject(ctx);
+    JS_SetPropertyFunctionList(ctx, proto_lv_obj, js_lv_obj_proto_funcs, countof(js_lv_obj_proto_funcs));
+    JSValue jscotr_lv_obj = JS_NewCFunction2(ctx, js_lv_obj_constructor, "lvgl.Obj", 1, JS_CFUNC_constructor, 0) ;
+    JS_SetConstructor(ctx, jscotr_lv_obj, proto_lv_obj) ;
+    JS_SetPropertyStr(ctx, lvgl, "Obj", jscotr_lv_obj);
+    JS_SetPropertyStr(ctx, proto_lv_obj, "__proto__", EventEmitterProto);
+    JS_SetClassProto(ctx, js_lv_obj_class_id, proto_lv_obj);
+
+    // define js class lvgl.lv_arc
+    JS_NewClass(JS_GetRuntime(ctx), js_lv_arc_class_id, &js_lv_arc_class);
+    JSValue proto_lv_arc = JS_NewObject(ctx);
+    JS_SetPropertyFunctionList(ctx, proto_lv_arc, js_lv_arc_proto_funcs, countof(js_lv_arc_proto_funcs));
+    JSValue jscotr_lv_arc = JS_NewCFunction2(ctx, js_lv_arc_constructor, "lvgl.Arc", 1, JS_CFUNC_constructor, 0) ;
+    JS_SetConstructor(ctx, jscotr_lv_arc, proto_lv_arc) ;
+    JS_SetPropertyStr(ctx, lvgl, "Arc", jscotr_lv_arc);
+    JS_SetPropertyStr(ctx, proto_lv_arc, "__proto__", proto_lv_obj);
+    JS_SetClassProto(ctx, js_lv_arc_class_id, proto_lv_arc);
+
+    // define js class lvgl.lv_bar
+    JS_NewClass(JS_GetRuntime(ctx), js_lv_bar_class_id, &js_lv_bar_class);
+    JSValue proto_lv_bar = JS_NewObject(ctx);
+    JS_SetPropertyFunctionList(ctx, proto_lv_bar, js_lv_bar_proto_funcs, countof(js_lv_bar_proto_funcs));
+    JSValue jscotr_lv_bar = JS_NewCFunction2(ctx, js_lv_bar_constructor, "lvgl.Bar", 1, JS_CFUNC_constructor, 0) ;
+    JS_SetConstructor(ctx, jscotr_lv_bar, proto_lv_bar) ;
+    JS_SetPropertyStr(ctx, lvgl, "Bar", jscotr_lv_bar);
+    JS_SetPropertyStr(ctx, proto_lv_bar, "__proto__", proto_lv_obj);
+    JS_SetClassProto(ctx, js_lv_bar_class_id, proto_lv_bar);
+
+    // define js class lvgl.lv_btn
+    JS_NewClass(JS_GetRuntime(ctx), js_lv_btn_class_id, &js_lv_btn_class);
+    JSValue proto_lv_btn = JS_NewObject(ctx);
+    JS_SetPropertyFunctionList(ctx, proto_lv_btn, js_lv_btn_proto_funcs, countof(js_lv_btn_proto_funcs));
+    JSValue jscotr_lv_btn = JS_NewCFunction2(ctx, js_lv_btn_constructor, "lvgl.Btn", 1, JS_CFUNC_constructor, 0) ;
+    JS_SetConstructor(ctx, jscotr_lv_btn, proto_lv_btn) ;
+    JS_SetPropertyStr(ctx, lvgl, "Btn", jscotr_lv_btn);
+    JS_SetPropertyStr(ctx, proto_lv_btn, "__proto__", proto_lv_obj);
+    JS_SetClassProto(ctx, js_lv_btn_class_id, proto_lv_btn);
+
+    // define js class lvgl.lv_btnmatrix
+    JS_NewClass(JS_GetRuntime(ctx), js_lv_btnmatrix_class_id, &js_lv_btnmatrix_class);
+    JSValue proto_lv_btnmatrix = JS_NewObject(ctx);
+    JS_SetPropertyFunctionList(ctx, proto_lv_btnmatrix, js_lv_btnmatrix_proto_funcs, countof(js_lv_btnmatrix_proto_funcs));
+    JSValue jscotr_lv_btnmatrix = JS_NewCFunction2(ctx, js_lv_btnmatrix_constructor, "lvgl.BtnMatrix", 1, JS_CFUNC_constructor, 0) ;
+    JS_SetConstructor(ctx, jscotr_lv_btnmatrix, proto_lv_btnmatrix) ;
+    JS_SetPropertyStr(ctx, lvgl, "BtnMatrix", jscotr_lv_btnmatrix);
+    JS_SetPropertyStr(ctx, proto_lv_btnmatrix, "__proto__", proto_lv_obj);
+    JS_SetClassProto(ctx, js_lv_btnmatrix_class_id, proto_lv_btnmatrix);
+
+    // define js class lvgl.lv_canvas
+    JS_NewClass(JS_GetRuntime(ctx), js_lv_canvas_class_id, &js_lv_canvas_class);
+    JSValue proto_lv_canvas = JS_NewObject(ctx);
+    JS_SetPropertyFunctionList(ctx, proto_lv_canvas, js_lv_canvas_proto_funcs, countof(js_lv_canvas_proto_funcs));
+    JSValue jscotr_lv_canvas = JS_NewCFunction2(ctx, js_lv_canvas_constructor, "lvgl.Canvas", 1, JS_CFUNC_constructor, 0) ;
+    JS_SetConstructor(ctx, jscotr_lv_canvas, proto_lv_canvas) ;
+    JS_SetPropertyStr(ctx, lvgl, "Canvas", jscotr_lv_canvas);
+    JS_SetPropertyStr(ctx, proto_lv_canvas, "__proto__", proto_lv_obj);
+    JS_SetClassProto(ctx, js_lv_canvas_class_id, proto_lv_canvas);
+
+    // define js class lvgl.lv_checkbox
+    JS_NewClass(JS_GetRuntime(ctx), js_lv_checkbox_class_id, &js_lv_checkbox_class);
+    JSValue proto_lv_checkbox = JS_NewObject(ctx);
+    JS_SetPropertyFunctionList(ctx, proto_lv_checkbox, js_lv_checkbox_proto_funcs, countof(js_lv_checkbox_proto_funcs));
+    JSValue jscotr_lv_checkbox = JS_NewCFunction2(ctx, js_lv_checkbox_constructor, "lvgl.Checkbox", 1, JS_CFUNC_constructor, 0) ;
+    JS_SetConstructor(ctx, jscotr_lv_checkbox, proto_lv_checkbox) ;
+    JS_SetPropertyStr(ctx, lvgl, "Checkbox", jscotr_lv_checkbox);
+    JS_SetPropertyStr(ctx, proto_lv_checkbox, "__proto__", proto_lv_obj);
+    JS_SetClassProto(ctx, js_lv_checkbox_class_id, proto_lv_checkbox);
+
+    // define js class lvgl.lv_dropdown
+    JS_NewClass(JS_GetRuntime(ctx), js_lv_dropdown_class_id, &js_lv_dropdown_class);
+    JSValue proto_lv_dropdown = JS_NewObject(ctx);
+    JS_SetPropertyFunctionList(ctx, proto_lv_dropdown, js_lv_dropdown_proto_funcs, countof(js_lv_dropdown_proto_funcs));
+    JSValue jscotr_lv_dropdown = JS_NewCFunction2(ctx, js_lv_dropdown_constructor, "lvgl.Dropdown", 1, JS_CFUNC_constructor, 0) ;
+    JS_SetConstructor(ctx, jscotr_lv_dropdown, proto_lv_dropdown) ;
+    JS_SetPropertyStr(ctx, lvgl, "Dropdown", jscotr_lv_dropdown);
+    JS_SetPropertyStr(ctx, proto_lv_dropdown, "__proto__", proto_lv_obj);
+    JS_SetClassProto(ctx, js_lv_dropdown_class_id, proto_lv_dropdown);
+
+    // define js class lvgl.lv_img
+    JS_NewClass(JS_GetRuntime(ctx), js_lv_img_class_id, &js_lv_img_class);
+    JSValue proto_lv_img = JS_NewObject(ctx);
+    JS_SetPropertyFunctionList(ctx, proto_lv_img, js_lv_img_proto_funcs, countof(js_lv_img_proto_funcs));
+    JSValue jscotr_lv_img = JS_NewCFunction2(ctx, js_lv_img_constructor, "lvgl.Img", 1, JS_CFUNC_constructor, 0) ;
+    JS_SetConstructor(ctx, jscotr_lv_img, proto_lv_img) ;
+    JS_SetPropertyStr(ctx, lvgl, "Img", jscotr_lv_img);
+    JS_SetPropertyStr(ctx, proto_lv_img, "__proto__", proto_lv_obj);
+    JS_SetClassProto(ctx, js_lv_img_class_id, proto_lv_img);
+
+    // define js class lvgl.lv_label
+    JS_NewClass(JS_GetRuntime(ctx), js_lv_label_class_id, &js_lv_label_class);
+    JSValue proto_lv_label = JS_NewObject(ctx);
+    JS_SetPropertyFunctionList(ctx, proto_lv_label, js_lv_label_proto_funcs, countof(js_lv_label_proto_funcs));
+    JSValue jscotr_lv_label = JS_NewCFunction2(ctx, js_lv_label_constructor, "lvgl.Label", 1, JS_CFUNC_constructor, 0) ;
+    JS_SetConstructor(ctx, jscotr_lv_label, proto_lv_label) ;
+    JS_SetPropertyStr(ctx, lvgl, "Label", jscotr_lv_label);
+    JS_SetPropertyStr(ctx, proto_lv_label, "__proto__", proto_lv_obj);
+    JS_SetClassProto(ctx, js_lv_label_class_id, proto_lv_label);
+
+    // define js class lvgl.lv_line
+    JS_NewClass(JS_GetRuntime(ctx), js_lv_line_class_id, &js_lv_line_class);
+    JSValue proto_lv_line = JS_NewObject(ctx);
+    JS_SetPropertyFunctionList(ctx, proto_lv_line, js_lv_line_proto_funcs, countof(js_lv_line_proto_funcs));
+    JSValue jscotr_lv_line = JS_NewCFunction2(ctx, js_lv_line_constructor, "lvgl.Line", 1, JS_CFUNC_constructor, 0) ;
+    JS_SetConstructor(ctx, jscotr_lv_line, proto_lv_line) ;
+    JS_SetPropertyStr(ctx, lvgl, "Line", jscotr_lv_line);
+    JS_SetPropertyStr(ctx, proto_lv_line, "__proto__", proto_lv_obj);
+    JS_SetClassProto(ctx, js_lv_line_class_id, proto_lv_line);
+
+    // define js class lvgl.lv_roller
+    JS_NewClass(JS_GetRuntime(ctx), js_lv_roller_class_id, &js_lv_roller_class);
+    JSValue proto_lv_roller = JS_NewObject(ctx);
+    JS_SetPropertyFunctionList(ctx, proto_lv_roller, js_lv_roller_proto_funcs, countof(js_lv_roller_proto_funcs));
+    JSValue jscotr_lv_roller = JS_NewCFunction2(ctx, js_lv_roller_constructor, "lvgl.Roller", 1, JS_CFUNC_constructor, 0) ;
+    JS_SetConstructor(ctx, jscotr_lv_roller, proto_lv_roller) ;
+    JS_SetPropertyStr(ctx, lvgl, "Roller", jscotr_lv_roller);
+    JS_SetPropertyStr(ctx, proto_lv_roller, "__proto__", proto_lv_obj);
+    JS_SetClassProto(ctx, js_lv_roller_class_id, proto_lv_roller);
+
+    // define js class lvgl.lv_slider
+    JS_NewClass(JS_GetRuntime(ctx), js_lv_slider_class_id, &js_lv_slider_class);
+    JSValue proto_lv_slider = JS_NewObject(ctx);
+    JS_SetPropertyFunctionList(ctx, proto_lv_slider, js_lv_slider_proto_funcs, countof(js_lv_slider_proto_funcs));
+    JSValue jscotr_lv_slider = JS_NewCFunction2(ctx, js_lv_slider_constructor, "lvgl.Slider", 1, JS_CFUNC_constructor, 0) ;
+    JS_SetConstructor(ctx, jscotr_lv_slider, proto_lv_slider) ;
+    JS_SetPropertyStr(ctx, lvgl, "Slider", jscotr_lv_slider);
+    JS_SetPropertyStr(ctx, proto_lv_slider, "__proto__", proto_lv_obj);
+    JS_SetClassProto(ctx, js_lv_slider_class_id, proto_lv_slider);
+
+    // define js class lvgl.lv_switch
+    JS_NewClass(JS_GetRuntime(ctx), js_lv_switch_class_id, &js_lv_switch_class);
+    JSValue proto_lv_switch = JS_NewObject(ctx);
+    JS_SetPropertyFunctionList(ctx, proto_lv_switch, js_lv_switch_proto_funcs, countof(js_lv_switch_proto_funcs));
+    JSValue jscotr_lv_switch = JS_NewCFunction2(ctx, js_lv_switch_constructor, "lvgl.Switch", 1, JS_CFUNC_constructor, 0) ;
+    JS_SetConstructor(ctx, jscotr_lv_switch, proto_lv_switch) ;
+    JS_SetPropertyStr(ctx, lvgl, "Switch", jscotr_lv_switch);
+    JS_SetPropertyStr(ctx, proto_lv_switch, "__proto__", proto_lv_obj);
+    JS_SetClassProto(ctx, js_lv_switch_class_id, proto_lv_switch);
+
+    // define js class lvgl.lv_table
+    JS_NewClass(JS_GetRuntime(ctx), js_lv_table_class_id, &js_lv_table_class);
+    JSValue proto_lv_table = JS_NewObject(ctx);
+    JS_SetPropertyFunctionList(ctx, proto_lv_table, js_lv_table_proto_funcs, countof(js_lv_table_proto_funcs));
+    JSValue jscotr_lv_table = JS_NewCFunction2(ctx, js_lv_table_constructor, "lvgl.Table", 1, JS_CFUNC_constructor, 0) ;
+    JS_SetConstructor(ctx, jscotr_lv_table, proto_lv_table) ;
+    JS_SetPropertyStr(ctx, lvgl, "Table", jscotr_lv_table);
+    JS_SetPropertyStr(ctx, proto_lv_table, "__proto__", proto_lv_obj);
+    JS_SetClassProto(ctx, js_lv_table_class_id, proto_lv_table);
+
+    // define js class lvgl.lv_textarea
+    JS_NewClass(JS_GetRuntime(ctx), js_lv_textarea_class_id, &js_lv_textarea_class);
+    JSValue proto_lv_textarea = JS_NewObject(ctx);
+    JS_SetPropertyFunctionList(ctx, proto_lv_textarea, js_lv_textarea_proto_funcs, countof(js_lv_textarea_proto_funcs));
+    JSValue jscotr_lv_textarea = JS_NewCFunction2(ctx, js_lv_textarea_constructor, "lvgl.TextArea", 1, JS_CFUNC_constructor, 0) ;
+    JS_SetConstructor(ctx, jscotr_lv_textarea, proto_lv_textarea) ;
+    JS_SetPropertyStr(ctx, lvgl, "TextArea", jscotr_lv_textarea);
+    JS_SetPropertyStr(ctx, proto_lv_textarea, "__proto__", proto_lv_obj);
+    JS_SetClassProto(ctx, js_lv_textarea_class_id, proto_lv_textarea);
+
+// AUTO GENERATE CODE END [REGISTER CLASS] --------
+
+
+    JS_FreeValue(ctx, global);
+    JS_FreeValue(ctx, beapi);
+    JS_FreeValue(ctx, EventEmitter);
+    JS_FreeValue(ctx, EventEmitterProto);
+}
 
 
 
 void vlgl_js_widgets_init() {
     // class id 全局, 分配一次
+// AUTO GENERATE CODE START [REGISTER CLASS ID] --------
     JS_NewClassID(&js_lv_obj_class_id);
-}
-
-void require_vlgl_js_widgets(JSContext *ctx, JSValue lvgl) {
-
-    {
-        JS_NewClass(JS_GetRuntime(ctx), js_lv_obj_class_id, &js_lv_obj_class);
-        JSValue proto = JS_NewObject(ctx);
-        JS_SetPropertyFunctionList(ctx, proto, js_lv_obj_proto_funcs, countof(js_lv_obj_proto_funcs));
-        JS_SetClassProto(ctx, js_lv_obj_class_id, proto);
-
-        JSValue jsctro = JS_NewCFunction2(ctx, js_lv_obj_constructor, "lvgl.Object", 1, JS_CFUNC_constructor, 0) ;
-        JS_SetConstructor(ctx, jsctro, proto) ;
-        JS_SetPropertyStr(ctx, lvgl, "Object", jsctro);
-    }
-
+    JS_NewClassID(&js_lv_arc_class_id);
+    JS_NewClassID(&js_lv_bar_class_id);
+    JS_NewClassID(&js_lv_btn_class_id);
+    JS_NewClassID(&js_lv_btnmatrix_class_id);
+    JS_NewClassID(&js_lv_canvas_class_id);
+    JS_NewClassID(&js_lv_checkbox_class_id);
+    JS_NewClassID(&js_lv_dropdown_class_id);
+    JS_NewClassID(&js_lv_img_class_id);
+    JS_NewClassID(&js_lv_label_class_id);
+    JS_NewClassID(&js_lv_line_class_id);
+    JS_NewClassID(&js_lv_roller_class_id);
+    JS_NewClassID(&js_lv_slider_class_id);
+    JS_NewClassID(&js_lv_switch_class_id);
+    JS_NewClassID(&js_lv_table_class_id);
+    JS_NewClassID(&js_lv_textarea_class_id);
+// AUTO GENERATE CODE END [REGISTER CLASS ID] --------
 }

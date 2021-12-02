@@ -183,34 +183,142 @@ function gen_lv_class(cName, className, api){
         codeMethedList+= `    JS_CFUNC_DEF("${jsmethod}", 0, js_${cfunc}),\r\n`
     }
 
-    codeMethedList+= "} ;\r\n\r\n"
+    codeMethedList+= "} ;\r\n"
+    codeMethedList+= `#define __def_js_${cName}_proto_funcs__\r\n\r\n`
 
     return codeFuncDef + "\r\n" + codeMethedList
 
 }
 
-let src_mark_start = "// AUTO GENERATE CODE START --------"
-let src_mark_end = "// AUTO GENERATE CODE END --------"
-let src_path = __dirname + "/widgets.template.c"
+const LstClasses = [
+    "Obj",
+    "Arc",
+    "Bar",
+    "Btn",
+    "BtnMatrix",
+    "Canvas",
+    "Checkbox",
+    "Dropdown",
+    "Img",
+    "Label",
+    "Line",
+    "Roller",
+    "Slider",
+    "Switch",
+    "Table",
+    "TextArea",
+]
+
+function generateClassDefine() {
+    let code = ""
+    for(let clzName of LstClasses) {
+        let ctypeName = "lv_" + clzName.toLowerCase()
+        code+=
+` // beapi.lvgl.${clzName} --
+static JSClassID js_${ctypeName}_class_id ;
+static JSValue js_${ctypeName}_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
+    lv_obj_t * cparent = NULL ;
+    if(argc>=1) {
+        cparent = JS_GetOpaque(argv[0], js_${ctypeName}_class_id) ;
+    }
+    ${ctypeName}_t * cobj = ${ctypeName}_create(cparent) ;
+    JSValue jsobj = JS_NewObjectClass(ctx, js_${ctypeName}_class_id) ;
+
+    lv_obj_set_user_data(cobj, jsobj) ;
+
+    JS_SetOpaque(jsobj, cobj) ;
+    JS_DupValue(ctx, jsobj) ;  // 此引用在 c struct 销毁时清除
+
+    return jsobj ;
+}
+static void js_${ctypeName}_finalizer(JSRuntime *rt, JSValue val){
+    ${ctypeName}_t * thisobj = JS_GetOpaque(val, js_${ctypeName}_class_id) ;
+    lv_obj_del(thisobj) ;
+}
+static JSClassDef js_${ctypeName}_class = {
+    "lvgl.${clzName}",
+    .finalizer = js_${ctypeName}_finalizer,
+};
+
+`
+    }
+    return code
+}
+function generateClassRegister() {
+
+    let code = ""
+    for(let clzName of LstClasses) {
+        let ctypeName = "lv_" + clzName.toLowerCase()
+        if(clzName=="Obj")
+            var parentProtoName = "EventEmitterProto"
+        else
+            var parentProtoName = "proto_lv_obj"
+        code+= 
+`    // define js class lvgl.${ctypeName}
+    JS_NewClass(JS_GetRuntime(ctx), js_${ctypeName}_class_id, &js_${ctypeName}_class);
+    JSValue proto_${ctypeName} = JS_NewObject(ctx);
+    JS_SetPropertyFunctionList(ctx, proto_${ctypeName}, js_${ctypeName}_proto_funcs, countof(js_${ctypeName}_proto_funcs));
+    JSValue jscotr_${ctypeName} = JS_NewCFunction2(ctx, js_${ctypeName}_constructor, "lvgl.${clzName}", 1, JS_CFUNC_constructor, 0) ;
+    JS_SetConstructor(ctx, jscotr_${ctypeName}, proto_${ctypeName}) ;
+    JS_SetPropertyStr(ctx, lvgl, "${clzName}", jscotr_${ctypeName});
+    JS_SetPropertyStr(ctx, proto_${ctypeName}, "__proto__", ${parentProtoName});
+    JS_SetClassProto(ctx, js_${ctypeName}_class_id, proto_${ctypeName});
+
+`
+    }
+
+    return code
+
+}
+function generateClassIDRegister() {
+    let code = ""
+    for(let clzName of LstClasses) {
+        let ctypeName = "lv_" + clzName.toLowerCase()
+        code+= `    JS_NewClassID(&js_${ctypeName}_class_id);\r\n`
+    }
+    return code
+}
+
+function srcInsert(src, code, startMart, endMark) {
+    
+    let markStartAt = src.indexOf(startMart)
+    if(markStartAt<0) {
+        console.log(src)    
+        throw new Error ("not found mark "+startMart)
+    }
+    let markEndAt = src.indexOf(endMark)
+    if(markEndAt<0) {
+        console.log(src)    
+        throw new Error ("not found mark "+endMark)
+    }
+    
+    return src.substr(0, markStartAt) + startMart + "\r\n" + code + src.substr(markEndAt) 
+}
+
+
+const methodlst_mark_start = "// AUTO GENERATE CODE START [METHOD LIST] --------"
+const methodlst_mark_end = "// AUTO GENERATE CODE END [METHOD LIST] --------"
+const defclass_mark_start = "// AUTO GENERATE CODE START [DEFINE CLASS] --------"
+const defclass_mark_end = "// AUTO GENERATE CODE END [DEFINE CLASS] --------"
+const registerclass_mark_start = "// AUTO GENERATE CODE START [REGISTER CLASS] --------"
+const registerclass_mark_end = "// AUTO GENERATE CODE END [REGISTER CLASS] --------"
+const registerclass_id_mark_start = "// AUTO GENERATE CODE START [REGISTER CLASS ID] --------"
+const registerclass_id_mark_end = "// AUTO GENERATE CODE END [REGISTER CLASS ID] --------"
+
 let dist_path = __dirname + "/../widgets.c"
 
 function main() {
     let code = ""
     code+= gen_lv_class("lv_obj", "lvgl.Obj", lvapi_obj)
 
-    let src = fs.readFileSync(src_path).toString()
-    let markStartAt = src.indexOf(src_mark_start)
-    let markEndAt = src.indexOf(src_mark_end)
-    if(markStartAt<0 || markEndAt<0) {
-        console.log(code)    
-        console.log("not found mark start or end")
-        return
-    }
+    let src = fs.readFileSync(dist_path).toString()
+    src = srcInsert(src, code, methodlst_mark_start, methodlst_mark_end)
 
-    code = src.substr(0, markStartAt) + src_mark_start + "\r\n" + code + src.substr(markEndAt) 
-    // console.log(code)
+    src = srcInsert(src, generateClassDefine(), defclass_mark_start, defclass_mark_end)
+    src = srcInsert(src, generateClassRegister(), registerclass_mark_start, registerclass_mark_end)
+    src = srcInsert(src, generateClassIDRegister(), registerclass_id_mark_start, registerclass_id_mark_end)
 
-    fs.writeFileSync(dist_path, code)
+    fs.writeFileSync(dist_path, src)
 
 }
 main()

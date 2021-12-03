@@ -138,3 +138,7 @@ void freeArrayBuffer(JSRuntime *rt, void *opaque, void *ptr) ;
     }
 
 #endif
+
+JSValue js_get_prop(JSContext *ctx, JSValue obj, int depth, ...)  ;
+JSValue js_get_glob_prop(JSContext *ctx, int depth, ...)  ;
+

@@ -99,14 +99,14 @@ JSValue js_util_ptr_refcount(JSContext *ctx, JSValueConst this_val, int argc, JS
         JS_ThrowReferenceError(ctx, "Invalid param type");
         return JS_EXCEPTION ;
 	}
-	return JS_NewInt32(ctx, JS_VALUE_HAS_REF_COUNT((JSValue) ptr)? VAR_REFCNT((JSValue) ptr): 0 ) ;
+	return JS_NewInt32(ctx, JS_VALUE_HAS_REF_COUNT((JSValue) ptr)? VAR_REFCNT((JSValue) ptr)-1: 0 ) ;
 }
 JSValue js_util_var_refcount(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
 	if(argc<1) {
         JS_ThrowReferenceError(ctx, "Missing param");
         return JS_EXCEPTION ;
 	}
-	return JS_NewInt32(ctx, JS_VALUE_HAS_REF_COUNT(argv[0])? VAR_REFCNT(argv[0]): 0) ;
+	return JS_NewInt32(ctx, JS_VALUE_HAS_REF_COUNT(argv[0])? VAR_REFCNT(argv[0])-1: 0) ;
 }
 
 

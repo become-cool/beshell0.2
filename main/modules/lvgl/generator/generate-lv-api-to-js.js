@@ -1,7 +1,5 @@
 const fs = require("fs")
 
-const lvapi_obj = require("./api/lv_obj.js")
-
 function create_conver_base(ctype, js_conver_func) {
     return function (cargv,i,className,jsmethod){
         code = `    ${ctype} ${cargv} ;\r\n`
@@ -59,17 +57,23 @@ function conver_obj(cargv,i,className,jsmethod) {
     code+= `    }\r\n`
     return code
 }
+function conver_string(cargv,i) {
+    return `    char * ${cargv} = JS_ToCString(ctx, argv[${i}]) ;\r\n`
+}
 
-const MapC2JS_IntConver = {
-    "uint32_t": conver_uint32 ,
-    "int32_t": conver_int32 ,
-    "uint16_t": conver_uint16 ,
+const MapC2JS_Conver = {
+    "uint8_t": conver_uint8 ,
     "int16_t": conver_int16 ,
+    "uint16_t": conver_uint16 ,
+    "int32_t": conver_int32 ,
+    "uint32_t": conver_uint32 ,
     "lv_coord_t": conver_int16 ,
     "lv_obj_flag_t": conver_uint32 ,
     "lv_state_t": conver_uint16 ,
     "lv_align_t": conver_uint8 ,
     "bool": conver_bool ,
+    "char *": conver_string ,
+    "const char *": conver_string ,
     "lv_anim_enable_t": conver_bool,
     "lv_color_t": conver_uint16 ,
     "lv_scrollbar_mode_t": conver_uint8,
@@ -79,6 +83,19 @@ const MapC2JS_IntConver = {
     "lv_point_t *": conver_point ,
     "lv_obj_t *": conver_obj,
     "_lv_obj_t *": conver_obj,
+    "lv_flex_align_t": conver_uint8,
+    "lv_flex_flow_t": conver_uint8,
+    "lv_style_selector_t": conver_uint32,
+    "lv_label_long_mode_t": conver_uint8,   
+}
+
+function free_argv_string(cargv){
+    return `    JS_FreeCString(ctx, ${cargv}) ;\r\n`
+}
+
+const MapFreeArgTypes = {
+    "char *": free_argv_string ,
+    "const char *": free_argv_string ,
 }
 
 // 在栈上创建、填充的 struct 参数，做为指针传递给 lvgl c api
@@ -86,17 +103,23 @@ const ArrStructArgTypes = ['lv_area_t *', 'lv_point_t *']
 
 
 
-const MapJS2C_IntConver = {
-    "uint32_t": "JS_NewUint32" ,
-    "int32_t": "JS_NewInt32" ,
-    "uint16_t": "JS_NewUint32" ,
+const MapJS2C_Conver = {
+    "uint8_t": "JS_NewUint32" ,
     "int16_t": "JS_NewInt32" ,
+    "uint16_t": "JS_NewUint32" ,
+    "int32_t": "JS_NewInt32" ,
+    "uint32_t": "JS_NewUint32" ,
     "lv_coord_t": "JS_NewInt32" ,
     "lv_state_t": "JS_NewUint32" ,
     "lv_obj_flag_t": "JS_NewUint32" ,
     "lv_scrollbar_mode_t": "JS_NewUint32" ,
     "lv_scroll_snap_t": "JS_NewUint32" ,
     "lv_dir_t": "JS_NewUint32" ,
+    "lv_flex_align_t": "JS_NewUint32",
+    "lv_flex_flow_t": "JS_NewUint32",
+    "lv_style_selector_t": "JS_NewUint32",
+    "lv_label_long_mode_t": "JS_NewUint32",   
+    "char *": "JS_NewString",   
 }
 
 function gen_lv_class(cName, className, api){
@@ -133,12 +156,14 @@ function gen_lv_class(cName, className, api){
         codeFuncDef+= `        THROW_EXCEPTION("${className}.${jsmethod}() must be called as a ${className} method")\r\n`
         codeFuncDef+= `    }\r\n`
 
+        codeFreeArgvs = ''
+
         let cargvLst = ''
         if(argLstConf) {
             for(let i=0;i<argLstConf.length;i++) {
                 let [argtype, cargv] = argLstConf[i]
-                if(MapC2JS_IntConver[argtype]) {
-                    codeFuncDef+= MapC2JS_IntConver[argtype](cargv, i, className, jsmethod)
+                if(MapC2JS_Conver[argtype]) {
+                    codeFuncDef+= MapC2JS_Conver[argtype](cargv, i, className, jsmethod)
                 }
 
                 else {
@@ -153,31 +178,42 @@ function gen_lv_class(cName, className, api){
                 else {
                     cargvLst+= `, ${cargv}`
                 }
+
+                if(MapFreeArgTypes[argtype]){
+                    codeFreeArgvs+= MapFreeArgTypes[argtype](cargv) ;
+                }
             }
         }
 
         // js method 返回 this
         if(returnType=="this") {
             codeFuncDef+= `    ${cfunc}(thisobj${cargvLst}) ;\r\n`
-            codeFuncDef+= `    JS_DupValue(ctx, this_val) ;\r\n`
+            codeFuncDef+= `    JSValue retval = JS_DupValue(ctx, this_val) ;\r\n`
         }
         else if(returnType=="void") {
             codeFuncDef+= `    ${cfunc}(thisobj${cargvLst}) ;\r\n`
-            codeFuncDef+= `    return JS_UNDEFINED ;\r\n`
+            codeFuncDef+= `    JSValue retval = JS_UNDEFINED ;\r\n`
         }
         else if(returnType=="_lv_obj_t *"||returnType=="lv_obj_t *") {
-            codeFuncDef+= `    return lv_obj_get_user_data(${cfunc}(thisobj${cargvLst})) || JS_NULL ;\r\n`
+            codeFuncDef+= `    void * retptr = lv_obj_get_user_data(${cfunc}(thisobj${cargvLst}));\r\n`
+            codeFuncDef+= `    if(!retptr){\r\n`
+            codeFuncDef+= `        return JS_NULL; \r\n`
+            codeFuncDef+= `    } \r\n`
+            codeFuncDef+= `    JSValue retval = JS_MKPTR(JS_TAG_OBJECT, retptr) ; \r\n`
         }
         else if(returnType=="bool") {
-            codeFuncDef+= `    return JS_NewBool(ctx,${cfunc}(thisobj${cargvLst})) ;\r\n`
+            codeFuncDef+= `    JSValue retval = JS_NewBool(ctx,${cfunc}(thisobj${cargvLst})) ;\r\n`
         }
-        else if(MapJS2C_IntConver[returnType]) {
-            codeFuncDef+= `    return ${MapJS2C_IntConver[returnType]}(ctx,${cfunc}(thisobj${cargvLst})) ;\r\n`
+        else if(MapJS2C_Conver[returnType]) {
+            codeFuncDef+= `    JSValue retval = ${MapJS2C_Conver[returnType]}(ctx,${cfunc}(thisobj${cargvLst})) ;\r\n`
         }
         else {
             console.error("unknow return type",returnType, "for function", cfunc)
         }
 
+
+        codeFuncDef+= codeFreeArgvs
+        codeFuncDef+= "    return retval ;\r\n"
         codeFuncDef+= "}\r\n\r\n"
 
         codeMethedList+= `    JS_CFUNC_DEF("${jsmethod}", 0, js_${cfunc}),\r\n`
@@ -192,6 +228,7 @@ function gen_lv_class(cName, className, api){
 
 const LstClasses = [
     "Obj",
+    "Label",
     "Arc",
     "Bar",
     "Btn",
@@ -200,7 +237,6 @@ const LstClasses = [
     "Checkbox",
     "Dropdown",
     "Img",
-    "Label",
     "Line",
     "Roller",
     "Slider",
@@ -219,19 +255,24 @@ static JSClassID js_${ctypeName}_class_id ;
 static JSValue js_${ctypeName}_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
     lv_obj_t * cparent = NULL ;
     if(argc>=1) {
-        cparent = JS_GetOpaque(argv[0], js_${ctypeName}_class_id) ;
+        JSValue ObjCotr = js_get_glob_prop(ctx, 3, "beapi", "lvgl", "Obj") ;
+        if(!JS_IsInstanceOf(ctx, argv[0], ObjCotr)) {
+            JS_FreeValue(ctx,ObjCotr) ;
+            THROW_EXCEPTION("arg parent must a lvgl.Obj object") ;
+        }
+        JS_FreeValue(ctx,ObjCotr) ;
+        cparent = JS_GetOpaqueInternal(argv[0]) ;
     }
     ${ctypeName}_t * cobj = ${ctypeName}_create(cparent) ;
-    JSValue jsobj = JS_NewObjectClass(ctx, js_${ctypeName}_class_id) ;
-
-    lv_obj_set_user_data(cobj, jsobj) ;
-
-    JS_SetOpaque(jsobj, cobj) ;
-    JS_DupValue(ctx, jsobj) ;  // 此引用在 c struct 销毁时清除
-
+    JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, js_${ctypeName}_class_id) ;
+    if(cparent) {
+        JS_DupValue(ctx, argv[0]) ;
+        JS_DupValue(ctx, jsobj) ;
+    }
     return jsobj ;
 }
 static void js_${ctypeName}_finalizer(JSRuntime *rt, JSValue val){
+    printf("js_${ctypeName}_finalizer()\\n") ;
     ${ctypeName}_t * thisobj = JS_GetOpaque(val, js_${ctypeName}_class_id) ;
     lv_obj_del(thisobj) ;
 }
@@ -254,15 +295,9 @@ function generateClassRegister() {
         else
             var parentProtoName = "proto_lv_obj"
         code+= 
-`    // define js class lvgl.${ctypeName}
-    JS_NewClass(JS_GetRuntime(ctx), js_${ctypeName}_class_id, &js_${ctypeName}_class);
-    JSValue proto_${ctypeName} = JS_NewObject(ctx);
-    JS_SetPropertyFunctionList(ctx, proto_${ctypeName}, js_${ctypeName}_proto_funcs, countof(js_${ctypeName}_proto_funcs));
-    JSValue jscotr_${ctypeName} = JS_NewCFunction2(ctx, js_${ctypeName}_constructor, "lvgl.${clzName}", 1, JS_CFUNC_constructor, 0) ;
-    JS_SetConstructor(ctx, jscotr_${ctypeName}, proto_${ctypeName}) ;
-    JS_SetPropertyStr(ctx, lvgl, "${clzName}", jscotr_${ctypeName});
-    JS_SetPropertyStr(ctx, proto_${ctypeName}, "__proto__", ${parentProtoName});
-    JS_SetClassProto(ctx, js_${ctypeName}_class_id, proto_${ctypeName});
+`    // define js class lvgl.${ctypeName}    
+    JSValue proto_${ctypeName} = js_def_class(ctx, "${clzName}", js_${ctypeName}_class_id, &js_${ctypeName}_class
+                , "lvgl.${clzName}", js_${ctypeName}_constructor, js_${ctypeName}_proto_funcs, countof(js_${ctypeName}_proto_funcs), ${parentProtoName}, lvgl) ;
 
 `
     }
@@ -296,6 +331,7 @@ function srcInsert(src, code, startMart, endMark) {
 }
 
 
+
 const methodlst_mark_start = "// AUTO GENERATE CODE START [METHOD LIST] --------"
 const methodlst_mark_end = "// AUTO GENERATE CODE END [METHOD LIST] --------"
 const defclass_mark_start = "// AUTO GENERATE CODE START [DEFINE CLASS] --------"
@@ -309,7 +345,9 @@ let dist_path = __dirname + "/../widgets.c"
 
 function main() {
     let code = ""
-    code+= gen_lv_class("lv_obj", "lvgl.Obj", lvapi_obj)
+
+    code+= gen_lv_class("lv_obj", "lvgl.Obj", require("./api/lv_obj.js"))
+    code+= gen_lv_class("lv_label", "lvgl.Label", require("./api/lv_label.js"))
 
     let src = fs.readFileSync(dist_path).toString()
     src = srcInsert(src, code, methodlst_mark_start, methodlst_mark_end)
@@ -319,6 +357,8 @@ function main() {
     src = srcInsert(src, generateClassIDRegister(), registerclass_id_mark_start, registerclass_id_mark_end)
 
     fs.writeFileSync(dist_path, src)
+
+    console.log()
 
 }
 main()

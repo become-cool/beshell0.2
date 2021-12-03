@@ -9723,6 +9723,22 @@ void JS_SetOpaque(JSValue obj, void *opaque)
     }
 }
 
+void * JS_GetOpaqueInternal(JSValueConst obj) {
+    JSObject *p;
+    if (JS_VALUE_GET_TAG(obj) != JS_TAG_OBJECT)
+        return NULL;
+    p = JS_VALUE_GET_OBJ(obj);
+    return p->u.opaque;
+}
+
+uint32_t JS_GetOpaqueClassID(JSValueConst obj) {
+    JSObject *p;
+    if (JS_VALUE_GET_TAG(obj) != JS_TAG_OBJECT)
+        return 0;
+    p = JS_VALUE_GET_OBJ(obj);
+    return p->class_id ;
+}
+
 /* return NULL if not an object of class class_id */
 void *JS_GetOpaque(JSValueConst obj, JSClassID class_id)
 {

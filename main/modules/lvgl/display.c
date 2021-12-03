@@ -1,4 +1,5 @@
 #include "display.h"
+#include "widgets.h"
 #include "display_ws.h"
 #include "utils.h"
 #include "cutils.h"
@@ -78,47 +79,68 @@ static void js_lvgl_disp_finalizer(JSRuntime *rt, JSValue val) {
 }
 
 static JSClassDef js_lvgl_disp_class = {
-    "lvgl.Driver",
+    "lvgl.Display",
     .finalizer = js_lvgl_disp_finalizer,
 };
 
 
-static JSValue js_lvgl_disp_fillRect(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-    CHECK_ARGC(4)
-
-    ARGV_TO_UINT16(0, x1)
-    ARGV_TO_UINT16(1, y1)
-    ARGV_TO_UINT16(2, x2)
-    ARGV_TO_UINT16(3, y2)
-    // ARGV_TO_UINT8(4, r)
-    // ARGV_TO_UINT8(5, g)
-    // ARGV_TO_UINT8(6, b)
-
-    uint16_t size = (x2-x1+1) * (y2-y1+1) * 2;
-    uint8_t * buff = malloc(size) ;
-    memset(buff,0,size) ;
-    
-    st77xx_dev_t * spidev = ((lv_disp_t *)JS_GetOpaque(this_val, js_lvgl_disp_class_id))->driver->user_data ;
-    if(!spidev) {
-        THROW_EXCEPTION("JS_GetOpaque(this_val, js_lvgl_disp_class_id) is NULL")
+#define THIS_DISP                                                                               \
+    lv_disp_t * thisdisp = JS_GetOpaque(this_val, js_lvgl_disp_class_id);                       \
+    if(!thisdisp) {                                                                             \
+        THROW_EXCEPTION("lvgl.Display.activeScreen() must be called as a lvgl.Display method")  \
     }
-    st77xx_draw_rect(spidev, x1,y1, x2, y2, (uint16_t*)buff) ;
 
-    return JS_UNDEFINED ;
-}
 
-static JSValue js_lvgl_disp_action_screen(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-    return JS_UNDEFINED ;
+
+
+
+static JSValue js_lvgl_disp_active_screen(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    THIS_DISP
+    lv_obj_t * scr = lv_disp_get_scr_act(thisdisp) ;
+    if(!scr) {
+        return JS_NULL ;
+    }
+
+    void * objptr = (JSValue)lv_obj_get_user_data(scr) ;
+    JSValue jsobj = JS_MKPTR(JS_TAG_OBJECT, objptr) ;
+
+    return JS_DupValue(ctx,jsobj) ;
 }
 static JSValue js_lvgl_disp_load_screen(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+    THIS_DISP
+    
+    JSValue ObjCotr = js_get_glob_prop(ctx, 3, "beapi", "lvgl", "Obj") ;
+    if(!JS_IsInstanceOf(ctx, argv[0], ObjCotr)) {
+        JS_FreeValue(ctx,ObjCotr) ;
+        THROW_EXCEPTION("arg screen must a lvgl.Obj object") ;
+    }
+    JS_FreeValue(ctx,ObjCotr) ;
+
+    lv_obj_t* cobj = (lv_obj_t*)JS_GetOpaqueInternal(argv[0]) ;
+    lv_disp_load_scr(cobj) ;
     return JS_UNDEFINED ;
 }
 
 static const JSCFunctionListEntry js_display_proto_funcs[] = {
-    JS_CFUNC_DEF("actionScreen", 0, js_lvgl_disp_action_screen),
+    JS_CFUNC_DEF("activeScreen", 0, js_lvgl_disp_active_screen),
     JS_CFUNC_DEF("loadScreen", 0, js_lvgl_disp_load_screen),
-    JS_CFUNC_DEF("fillRect", 0, js_lvgl_disp_fillRect),
 };
+
+
+
+static JSValue js_lvgl_get_default_display(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    lv_disp_t * disp = lv_disp_get_default() ;
+    if(!disp) {
+        
+    }
+    return JS_UNDEFINED ;
+}
+static JSValue js_lvgl_set_default_display(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    // lv_disp_set_default
+    return JS_UNDEFINED ;
+}
+
 
 /**
  * 
@@ -205,32 +227,27 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
     lv_disp_t * disp = lv_disp_drv_register(dispdrv); 
     JS_SetOpaque(jsdisp, disp);
 
-    // demo ------------
-    // lv_obj_t * btn = lv_btn_create(lv_scr_act());     /*Add a button the current screen*/
-    // lv_obj_set_pos(btn, 10, 10);                            /*Set its position*/
-    // lv_obj_set_size(btn, 120, 50);                          /*Set its size*/
-    // lv_obj_add_event_cb(btn, btn_event_cb, LV_EVENT_ALL, NULL);           /*Assign a callback to the button*/
-
-    // lv_obj_t * label = lv_label_create(btn);          /*Add a label to the button*/
-    // lv_label_set_text(label, "Button");                     /*Set the labels text*/
-    // lv_obj_center(label);
-
-    
-    // /*Create a slider in the center of the display*/
-    // lv_obj_t * slider = lv_slider_create(lv_scr_act());
-    // lv_obj_center(slider);
-
-    // /*Create a label below the slider*/
-    // lv_obj_t * slider_label = lv_label_create(lv_scr_act());
-    // lv_label_set_text(slider_label, "0%");
-    // lv_obj_align_to(slider_label, slider, LV_ALIGN_OUT_BOTTOM_MID, 0, 10);
-
-
-
-    // lv_task_handler() ;
-
     JS_DupValue(ctx,jsdisp) ;
 
+    // default screen of this display, created by lvgl
+    lv_obj_t * scr = lv_disp_get_scr_act(disp);
+    JS_DupValue(ctx,scr) ; // disp 对该 screen 的引用
+    
+    // printf(">>>> disp %p, screen %p\n", disp, scr) ;
+    js_lv_obj_wrapper(ctx, scr, lv_obj_js_class_id()) ;
+
+
+    // 触摸设备
+    tp_spi_add_device(1, 18);
+    xpt2046_init();
+
+    lv_indev_drv_init(&indev_drv);
+    indev_drv.read_cb = input_driver_read ;
+    indev_drv.type = LV_INDEV_TYPE_POINTER;
+    lv_indev_t *indev = lv_indev_drv_register(&indev_drv);
+    if(!indev) {
+        printf("Cound not create indev\n") ;
+    }
 
     return jsdisp ;
 
@@ -264,18 +281,6 @@ void vlgl_js_display_init() {
 
 
 void require_vlgl_js_display(JSContext *ctx, JSValue lvgl) {
-
-    // 触摸设备
-    tp_spi_add_device(1, 18);
-    xpt2046_init();
-
-    lv_indev_drv_init(&indev_drv);
-    indev_drv.read_cb = input_driver_read ;
-    indev_drv.type = LV_INDEV_TYPE_POINTER;
-    lv_indev_t *indev = lv_indev_drv_register(&indev_drv);
-    if(!indev) {
-        printf("Cound create indev\n") ;
-    }
     
     // lvgl.Display
     JS_NewClass(JS_GetRuntime(ctx), js_lvgl_disp_class_id, &js_lvgl_disp_class);
@@ -285,5 +290,5 @@ void require_vlgl_js_display(JSContext *ctx, JSValue lvgl) {
 
     JS_SetPropertyStr(ctx, lvgl, "createDisplay", JS_NewCFunction(ctx, js_lvgl_create_display, "createDisplay", 1));
 
-    // JS_SetPropertyStr(ctx, lvgl, "setDefaultDisplay", JS_NewCFunction(ctx, js_lvgl_set_default_display, "setDefaultDisplay", 1));
+    JS_SetPropertyStr(ctx, lvgl, "actionDisplay", JS_NewCFunction(ctx, js_lvgl_set_default_display, "actionDisplay", 1));
 }

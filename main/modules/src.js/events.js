@@ -1,8 +1,5 @@
 beapi.EventEmitter = class EventEmitter {
     _handles = {}
-    constructor() {
-        console.log("EventEmitter.constructor()")
-    }
     /**
      * 
      * @param {string|string[]} event 
@@ -13,6 +10,7 @@ beapi.EventEmitter = class EventEmitter {
         if(typeof(event)=="string") {
             if(!this._handles[event]){
                 this._handles[event] = []
+                this.emit("#EVENT.ADD#",event)
             }
             if(!norepeat || !this.isListening(event, handle)) {
                 this._handles[event].push(handle)
@@ -57,6 +55,7 @@ beapi.EventEmitter = class EventEmitter {
         }
         if(!this._handles[eventName].length) {
             delete this._handles[eventName]
+            this.emit("#EVENT.CLEAR#",eventName)
         }
         return this
     }

@@ -797,6 +797,8 @@ int JS_DefinePropertyGetSet(JSContext *ctx, JSValueConst this_obj,
                             JSAtom prop, JSValue getter, JSValue setter,
                             int flags);
 void JS_SetOpaque(JSValue obj, void *opaque);
+void *JS_GetOpaqueInternal(JSValueConst obj);
+uint32_t JS_GetOpaqueClassID(JSValueConst obj);
 void *JS_GetOpaque(JSValueConst obj, JSClassID class_id);
 void *JS_GetOpaque2(JSContext *ctx, JSValueConst obj, JSClassID class_id);
 

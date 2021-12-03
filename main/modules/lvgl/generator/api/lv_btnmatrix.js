@@ -1,0 +1,18 @@
+module.exports = {
+    "lv_btnmatrix_get_popovers": [null, [], "bool"],
+    // "lv_btnmatrix_create": [null, [], "lv_obj_t *"],
+    // "lv_btnmatrix_set_map": [null, [["char *","map[]"]], "void"],
+    // "lv_btnmatrix_set_ctrl_map": [null, [["lv_btnmatrix_ctrl_t","ctrl_map[]"]], "void"],
+    "lv_btnmatrix_set_selected_btn": [null, [["uint16_t","btn_id"]], "void"],
+    "lv_btnmatrix_set_btn_ctrl": [null, [["uint16_t","btn_id"],["lv_btnmatrix_ctrl_t","ctrl"]], "void"],
+    "lv_btnmatrix_clear_btn_ctrl": [null, [["uint16_t","btn_id"],["lv_btnmatrix_ctrl_t","ctrl"]], "void"],
+    "lv_btnmatrix_set_btn_ctrl_all": [null, [["lv_btnmatrix_ctrl_t","ctrl"]], "void"],
+    "lv_btnmatrix_clear_btn_ctrl_all": [null, [["lv_btnmatrix_ctrl_t","ctrl"]], "void"],
+    "lv_btnmatrix_set_btn_width": [null, [["uint16_t","btn_id"],["uint8_t","width"]], "void"],
+    "lv_btnmatrix_set_one_checked": [null, [["bool","en"]], "void"],
+    // "lv_btnmatrix_get_map": [null, [], "**"],
+    "lv_btnmatrix_get_selected_btn": [null, [], "uint16_t"],
+    "lv_btnmatrix_get_btn_text": [null, [["uint16_t","btn_id"]], "char *"],
+    "lv_btnmatrix_has_btn_ctrl": [null, [["uint16_t","btn_id"],["lv_btnmatrix_ctrl_t","ctrl"]], "bool"],
+    "lv_btnmatrix_get_one_checked": [null, [], "bool"],
+}

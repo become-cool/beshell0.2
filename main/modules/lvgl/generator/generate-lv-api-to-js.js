@@ -3,13 +3,14 @@ const fs = require("fs")
 function create_conver_base(ctype, js_conver_func) {
     return function (cargv,i,className,jsmethod){
         code = `    ${ctype} ${cargv} ;\r\n`
-        code+= `    if(!${js_conver_func}(ctx, &${cargv}, argv[${i}])){\r\n`
+        code+= `    if(${js_conver_func}(ctx, &${cargv}, argv[${i}])!=0){\r\n`
         code+= `        THROW_EXCEPTION("arg ${cargv} of method ${className}.${jsmethod}() must be a number")\r\n`
         code+= `    }\r\n`
         return code
     }
 }
 
+const conver_int8 = create_conver_base("int8_t", "JS_ToInt32")
 const conver_uint8 = create_conver_base("uint8_t", "JS_ToUint32")
 const conver_int16 = create_conver_base("int16_t", "JS_ToInt32")
 const conver_uint16 = create_conver_base("uint16_t", "JS_ToUint32")
@@ -62,6 +63,7 @@ function conver_string(cargv,i) {
 }
 
 const MapC2JS_Conver = {
+    "int8_t": conver_int8 ,
     "uint8_t": conver_uint8 ,
     "int16_t": conver_int16 ,
     "uint16_t": conver_uint16 ,
@@ -87,6 +89,17 @@ const MapC2JS_Conver = {
     "lv_flex_flow_t": conver_uint8,
     "lv_style_selector_t": conver_uint32,
     "lv_label_long_mode_t": conver_uint8,   
+    "lv_arc_mode_t": conver_uint8,
+    "lv_bar_mode_t": conver_uint8,
+    "lv_table_cell_ctrl_t": conver_uint8,
+    "lv_text_align_t": conver_uint8,
+    "lv_slider_mode_t": conver_uint8,
+    "lv_roller_mode_t": conver_uint8,
+    "lv_img_cf_t": conver_uint8,
+    "lv_img_size_mode_t": conver_uint8,
+    "lv_btnmatrix_ctrl_t": conver_uint8,
+    "lv_img_src_t": conver_uint8,
+    "lv_opa_t": conver_uint8,
 }
 
 function free_argv_string(cargv){
@@ -98,12 +111,27 @@ const MapFreeArgTypes = {
     "const char *": free_argv_string ,
 }
 
+function arglst_modifier_color(argvName) {
+    return "(lv_color_t)"+argvName
+}
 // 在栈上创建、填充的 struct 参数，做为指针传递给 lvgl c api
-const ArrStructArgTypes = ['lv_area_t *', 'lv_point_t *']
+function arglst_modifier_pass_addr(argvName) {
+    return "&"+argvName
+}
+
+const MapModifyArgLst = {
+    "lv_color_t": arglst_modifier_color ,
+    "lv_area_t *": arglst_modifier_pass_addr ,
+    "lv_point_t *": arglst_modifier_pass_addr ,
+}
+
+
 
 
 
 const MapJS2C_Conver = {
+    "char *": "JS_NewString",   
+    "int8_t": "JS_NewInt32" ,
     "uint8_t": "JS_NewUint32" ,
     "int16_t": "JS_NewInt32" ,
     "uint16_t": "JS_NewUint32" ,
@@ -118,8 +146,19 @@ const MapJS2C_Conver = {
     "lv_flex_align_t": "JS_NewUint32",
     "lv_flex_flow_t": "JS_NewUint32",
     "lv_style_selector_t": "JS_NewUint32",
-    "lv_label_long_mode_t": "JS_NewUint32",   
-    "char *": "JS_NewString",   
+    "lv_label_long_mode_t": "JS_NewUint32",
+    "lv_arc_mode_t": "JS_NewUint32",
+    "lv_bar_mode_t":"JS_NewUint32",
+    "lv_table_cell_ctrl_t":"JS_NewUint32",
+    "lv_text_align_t":"JS_NewUint32",
+    "lv_slider_mode_t":"JS_NewUint32",
+    "lv_roller_mode_t":"JS_NewUint32",
+    "lv_img_cf_t":"JS_NewUint32",
+    "lv_img_size_mode_t":"JS_NewUint32",
+    "lv_btnmatrix_ctrl_t":"JS_NewUint32",
+    "lv_img_src_t":"JS_NewUint32",
+    "lv_opa_t":"JS_NewUint32",
+    "lv_color_t":"(uint16_t)JS_NewUint32",
 }
 
 function gen_lv_class(cName, className, api, extraMethod) {
@@ -175,13 +214,7 @@ function gen_lv_class(cName, className, api, extraMethod) {
                     continue
                 }
 
-                // 复合类型
-                if( ArrStructArgTypes.includes(argtype) ) {
-                    cargvLst+= `, &${cargv}`
-                }
-                else {
-                    cargvLst+= `, ${cargv}`
-                }
+                cargvLst+= `, ` + (MapModifyArgLst[argtype]? MapModifyArgLst[argtype](cargv): cargv)
 
                 if(MapFreeArgTypes[argtype]){
                     codeFreeArgvs+= MapFreeArgTypes[argtype](cargv) ;
@@ -433,7 +466,25 @@ function main() {
                 }
     )
     code+= gen_lv_class("lv_label", "lvgl.Label", require("./api/lv_label.js"))
+    code+= gen_lv_class("lv_arc", "lvgl.Arc", require("./api/lv_arc.js"))
+    code+= gen_lv_class("lv_bar", "lvgl.Bar", require("./api/lv_bar.js"))
+    code+= gen_lv_class("lv_btn", "lvgl.Btn", require("./api/lv_btn.js"))
+    code+= gen_lv_class("lv_table", "lvgl.Table", require("./api/lv_table.js"))
+    code+= gen_lv_class("lv_textarea", "lvgl.TextArea", require("./api/lv_textarea.js"))
+    code+= gen_lv_class("lv_slider", "lvgl.Slider", require("./api/lv_slider.js"))
+    code+= gen_lv_class("lv_switch", "lvgl.Switch", require("./api/lv_switch.js"))
+    code+= gen_lv_class("lv_roller", "lvgl.Roller", require("./api/lv_roller.js"))
+    code+= gen_lv_class("lv_checkbox", "lvgl.Checkbox", require("./api/lv_checkbox.js"))
+    code+= gen_lv_class("lv_line", "lvgl.Line", require("./api/lv_line.js"), {
+                "lv_line_set_points": "setPoints"
+    })
+    code+= gen_lv_class("lv_dropdown", "lvgl.Dropdown", require("./api/lv_dropdown.js"))
+    code+= gen_lv_class("lv_img", "lvgl.Img", require("./api/lv_img.js"))
+    code+= gen_lv_class("lv_btnmatrix", "lvgl.BtnMatrix", require("./api/lv_btnmatrix.js"))
+    code+= gen_lv_class("lv_canvas", "lvgl.Canvas", require("./api/lv_canvas.js"))
 
+
+    
     let src = fs.readFileSync(dist_path).toString()
     src = srcInsert(src, code, methodlst_mark_start, methodlst_mark_end)
 

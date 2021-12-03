@@ -35,7 +35,7 @@ function main() {
 
     let funclst = []
 
-    let out = "{\r\n"
+    let out = "module.exports = {\r\n"
     function parseHead(path) {
         let src = fs.readFileSync(path).toString()
         for(let defres of src.matchAll(/([^\(\)\"\s=\,]+( +\*)?) +(lv_[a-z_]+)\(([^\(\)\"]+)\)/g)){

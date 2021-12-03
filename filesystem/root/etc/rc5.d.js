@@ -16,7 +16,9 @@ try{
 
     require("./init.d/display.js")
 
-    require("/lib/local/webtelnet/main.js")
+    // require("/lib/local/webtelnet/main.js")
+    
+    require("./init.d/desktop.js")
 
     require("./init.d/app.js").autoBoot()
 

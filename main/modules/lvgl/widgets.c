@@ -13,16 +13,40 @@ unsigned char lv_obj_init_js[] = {
   0x69, 0x73, 0x2e, 0x5f, 0x68, 0x61, 0x6e, 0x64, 0x6c, 0x65, 0x73, 0x3d,
   0x7b, 0x7d, 0x0d, 0x0a, 0x20, 0x20, 0x20, 0x20, 0x74, 0x68, 0x69, 0x73,
   0x2e, 0x6f, 0x6e, 0x28, 0x22, 0x23, 0x45, 0x56, 0x45, 0x4e, 0x54, 0x2e,
-  0x41, 0x44, 0x44, 0x23, 0x22, 0x2c, 0x66, 0x75, 0x6e, 0x63, 0x74, 0x69,
-  0x6f, 0x6e, 0x28, 0x65, 0x76, 0x65, 0x6e, 0x74, 0x4e, 0x61, 0x6d, 0x65,
-  0x29, 0x7b, 0x0d, 0x0a, 0x20, 0x20, 0x20, 0x20, 0x7d, 0x29, 0x0d, 0x0a,
-  0x20, 0x20, 0x20, 0x20, 0x74, 0x68, 0x69, 0x73, 0x2e, 0x6f, 0x6e, 0x28,
-  0x22, 0x23, 0x45, 0x56, 0x45, 0x4e, 0x54, 0x2e, 0x43, 0x4c, 0x45, 0x41,
-  0x52, 0x23, 0x22, 0x2c, 0x66, 0x75, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e,
-  0x28, 0x65, 0x76, 0x65, 0x6e, 0x74, 0x4e, 0x61, 0x6d, 0x65, 0x29, 0x7b,
-  0x0d, 0x0a, 0x20, 0x20, 0x20, 0x20, 0x7d, 0x29, 0x0d, 0x0a, 0x7d
+  0x41, 0x44, 0x44, 0x23, 0x22, 0x2c, 0x28, 0x65, 0x76, 0x65, 0x6e, 0x74,
+  0x4e, 0x61, 0x6d, 0x65, 0x29, 0x3d, 0x3e, 0x7b, 0x0d, 0x0a, 0x20, 0x20,
+  0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x74, 0x68, 0x69, 0x73, 0x2e, 0x65,
+  0x6e, 0x61, 0x62, 0x6c, 0x65, 0x45, 0x76, 0x65, 0x6e, 0x74, 0x28, 0x65,
+  0x76, 0x65, 0x6e, 0x74, 0x4e, 0x61, 0x6d, 0x65, 0x29, 0x0d, 0x0a, 0x20,
+  0x20, 0x20, 0x20, 0x7d, 0x29, 0x0d, 0x0a, 0x20, 0x20, 0x20, 0x20, 0x74,
+  0x68, 0x69, 0x73, 0x2e, 0x6f, 0x6e, 0x28, 0x22, 0x23, 0x45, 0x56, 0x45,
+  0x4e, 0x54, 0x2e, 0x43, 0x4c, 0x45, 0x41, 0x52, 0x23, 0x22, 0x2c, 0x28,
+  0x65, 0x76, 0x65, 0x6e, 0x74, 0x4e, 0x61, 0x6d, 0x65, 0x29, 0x3d, 0x3e,
+  0x7b, 0x0d, 0x0a, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x74,
+  0x68, 0x69, 0x73, 0x2e, 0x64, 0x69, 0x73, 0x61, 0x62, 0x6c, 0x65, 0x45,
+  0x76, 0x65, 0x6e, 0x74, 0x28, 0x65, 0x76, 0x65, 0x6e, 0x74, 0x4e, 0x61,
+  0x6d, 0x65, 0x29, 0x0d, 0x0a, 0x20, 0x20, 0x20, 0x20, 0x7d, 0x29, 0x0d,
+  0x0a, 0x7d
 };
-unsigned int lv_obj_init_js_len = 179;
+unsigned int lv_obj_init_js_len = 242;
+
+#define CHECK_INSOF_LVOBJ(className, var, msg)                                  \
+    {                                                                           \
+        JSValue ObjCotr = js_get_glob_prop(ctx, 3, "beapi", "lvgl", className) ;\
+        if(!JS_IsInstanceOf(ctx, var, ObjCotr)) {                               \
+            JS_FreeValue(ctx,ObjCotr) ;                                         \
+            THROW_EXCEPTION(msg) ;                                              \
+        }                                                                       \
+        JS_FreeValue(ctx,ObjCotr) ;                                             \
+    }
+
+#define THIS_LBOBJ(clzname, mehtodname, thisobj)                                                                        \
+    CHECK_INSOF_LVOBJ(clzname, this_val, "lvgl."clzname"."mehtodname"() must be called as a lvgl."clzname" method")     \
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;                                                               \
+    if(!thisobj) {                                                                                                      \
+        THROW_EXCEPTION("lvgl."clzname"."mehtodname"() must be called as a lvgl."clzname" method")                      \
+    }
+
 
 static void js_lv_obj_init(JSContext *ctx, JSValue jsobj) {
     
@@ -44,18 +68,253 @@ JSValue js_lv_obj_wrapper(JSContext *ctx, lv_obj_t * cobj, JSClassID clsid) {
     return jsobj ;
 }
 
+static void js_lv_event_cb(lv_event_t * event) {
+
+    if(!event->user_data) {
+        printf("event->user_data==NULL, no ctx.") ;
+        return ;
+    }
+    JSContext *ctx = (JSContext *)event->user_data ;
+    if(!event->current_target->user_data) {
+        return ;
+    }
+    JSValue jstarget = JS_MKPTR(JS_TAG_OBJECT, event->current_target->user_data) ;
+    JSValue ObjCotr = js_get_glob_prop(ctx, 3, "beapi", "lvgl", "Obj") ;
+    if(!JS_IsInstanceOf(ctx, jstarget, ObjCotr) ){
+        printf("target is not a js lv object") ;
+        return ;
+    }
+
+    JSValue jsname = lv_event_code_to_jsstr(ctx, event->code) ;
+
+    // jstarget
+    MAKE_ARGV1( cbargv, jsname )
+
+    JSValue func_emit = js_get_prop(ctx, jstarget, 1, "emit") ;
+    
+    JS_Call(ctx, func_emit, jstarget, 1, cbargv) ;
+
+    free(cbargv) ;
+    JS_FreeValue(ctx, func_emit) ;
+}
+
+typedef struct _lv_event_dsc_t {
+    lv_event_cb_t cb;
+    void * user_data;
+    lv_event_code_t filter : 8;
+} lv_event_dsc_t;
+static lv_event_dsc_t * find_event_dsc(lv_obj_t* obj, lv_event_code_t e) {
+    if(!obj->spec_attr)
+        return NULL ;
+
+    if(!obj->spec_attr->event_dsc){
+        return NULL ;
+    }
+
+    for(int i=0; i<obj->spec_attr->event_dsc_cnt; i++) {
+        if(obj->spec_attr->event_dsc[i].cb!=js_lv_event_cb)
+            continue ;
+        if(obj->spec_attr->event_dsc[i].filter==LV_EVENT_ALL || obj->spec_attr->event_dsc[i].filter==e) {
+            return & obj->spec_attr->event_dsc[i] ;
+        }
+    }
+    
+    return NULL ;
+}
+
+static JSValue js_lv_obj_enable_event(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    THIS_LBOBJ("Obj", "enableEvent", thisobj)
+    CHECK_ARGC(1)
+    uint8_t eventcode = lv_event_jsstr_to_code(ctx, argv[0]) ;
+
+    if(find_event_dsc(thisobj, eventcode)!=NULL) {
+        // printf("event aleady enabled \n") ;
+        return JS_UNDEFINED ;
+    }
+    // printf("enable event: %d \n", eventcode) ;
+
+    lv_obj_add_event_cb(thisobj, js_lv_event_cb, eventcode, ctx) ;
+    return JS_UNDEFINED ;
+}
+
+static JSValue js_lv_obj_disable_event(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    
+    THIS_LBOBJ("Obj", "disableEvent", thisobj)
+    CHECK_ARGC(1)
+    uint8_t eventcode = lv_event_jsstr_to_code(ctx, argv[0]) ;
+
+    lv_event_dsc_t * event_dsc = find_event_dsc(thisobj, eventcode) ;
+    if(event_dsc) {
+        // printf("disable event: %d \n", eventcode) ;
+        lv_obj_remove_event_dsc(thisobj, event_dsc) ;
+    }
+    return JS_UNDEFINED ;
+}
+
+// AUTO GENERATE CODE START [EVENT MAPPING] --------
+
+const char * lv_event_names[] = { "all", "pressed", "pressing", "press_lost", "short_clicked", "long_pressed", "long_pressed_repeat", "clicked", "released", "scroll_begin", "scroll_end", "scroll", "gesture", "key", "focused", "defocused", "leave", "hit_test", "cover_check", "refr_ext_draw_size", "draw_main_begin", "draw_main", "draw_main_end", "draw_post_begin", "draw_post", "draw_post_end", "draw_part_begin", "draw_part_end", "value_changed", "insert", "refresh", "ready", "cancel", "delete", "child_changed", "child_created", "child_deleted", "screen_unload_start", "screen_load_start", "screen_loaded", "screen_unloaded", "size_changed", "style_changed", "layout_changed", "get_self_size" } ;
+lv_event_code_t lv_event_jsstr_to_code(JSContext *ctx, JSValue jsstr) {
+    char * cstr = JS_ToCString(ctx, jsstr) ;
+    // printf("event name: %s\n", cstr) ;
+    lv_event_code_t code = _LV_EVENT_LAST ;
+    if(strcmp(cstr,"all")==0) {
+        code = LV_EVENT_ALL ;
+    }
+    else if(strcmp(cstr,"pressed")==0) {
+        code = LV_EVENT_PRESSED ;
+    }
+    else if(strcmp(cstr,"pressing")==0) {
+        code = LV_EVENT_PRESSING ;
+    }
+    else if(strcmp(cstr,"press_lost")==0) {
+        code = LV_EVENT_PRESS_LOST ;
+    }
+    else if(strcmp(cstr,"short_clicked")==0) {
+        code = LV_EVENT_SHORT_CLICKED ;
+    }
+    else if(strcmp(cstr,"long_pressed")==0) {
+        code = LV_EVENT_LONG_PRESSED ;
+    }
+    else if(strcmp(cstr,"long_pressed_repeat")==0) {
+        code = LV_EVENT_LONG_PRESSED_REPEAT ;
+    }
+    else if(strcmp(cstr,"clicked")==0) {
+        code = LV_EVENT_CLICKED ;
+    }
+    else if(strcmp(cstr,"released")==0) {
+        code = LV_EVENT_RELEASED ;
+    }
+    else if(strcmp(cstr,"scroll_begin")==0) {
+        code = LV_EVENT_SCROLL_BEGIN ;
+    }
+    else if(strcmp(cstr,"scroll_end")==0) {
+        code = LV_EVENT_SCROLL_END ;
+    }
+    else if(strcmp(cstr,"scroll")==0) {
+        code = LV_EVENT_SCROLL ;
+    }
+    else if(strcmp(cstr,"gesture")==0) {
+        code = LV_EVENT_GESTURE ;
+    }
+    else if(strcmp(cstr,"key")==0) {
+        code = LV_EVENT_KEY ;
+    }
+    else if(strcmp(cstr,"focused")==0) {
+        code = LV_EVENT_FOCUSED ;
+    }
+    else if(strcmp(cstr,"defocused")==0) {
+        code = LV_EVENT_DEFOCUSED ;
+    }
+    else if(strcmp(cstr,"leave")==0) {
+        code = LV_EVENT_LEAVE ;
+    }
+    else if(strcmp(cstr,"hit_test")==0) {
+        code = LV_EVENT_HIT_TEST ;
+    }
+    else if(strcmp(cstr,"cover_check")==0) {
+        code = LV_EVENT_COVER_CHECK ;
+    }
+    else if(strcmp(cstr,"refr_ext_draw_size")==0) {
+        code = LV_EVENT_REFR_EXT_DRAW_SIZE ;
+    }
+    else if(strcmp(cstr,"draw_main_begin")==0) {
+        code = LV_EVENT_DRAW_MAIN_BEGIN ;
+    }
+    else if(strcmp(cstr,"draw_main")==0) {
+        code = LV_EVENT_DRAW_MAIN ;
+    }
+    else if(strcmp(cstr,"draw_main_end")==0) {
+        code = LV_EVENT_DRAW_MAIN_END ;
+    }
+    else if(strcmp(cstr,"draw_post_begin")==0) {
+        code = LV_EVENT_DRAW_POST_BEGIN ;
+    }
+    else if(strcmp(cstr,"draw_post")==0) {
+        code = LV_EVENT_DRAW_POST ;
+    }
+    else if(strcmp(cstr,"draw_post_end")==0) {
+        code = LV_EVENT_DRAW_POST_END ;
+    }
+    else if(strcmp(cstr,"draw_part_begin")==0) {
+        code = LV_EVENT_DRAW_PART_BEGIN ;
+    }
+    else if(strcmp(cstr,"draw_part_end")==0) {
+        code = LV_EVENT_DRAW_PART_END ;
+    }
+    else if(strcmp(cstr,"value_changed")==0) {
+        code = LV_EVENT_VALUE_CHANGED ;
+    }
+    else if(strcmp(cstr,"insert")==0) {
+        code = LV_EVENT_INSERT ;
+    }
+    else if(strcmp(cstr,"refresh")==0) {
+        code = LV_EVENT_REFRESH ;
+    }
+    else if(strcmp(cstr,"ready")==0) {
+        code = LV_EVENT_READY ;
+    }
+    else if(strcmp(cstr,"cancel")==0) {
+        code = LV_EVENT_CANCEL ;
+    }
+    else if(strcmp(cstr,"delete")==0) {
+        code = LV_EVENT_DELETE ;
+    }
+    else if(strcmp(cstr,"child_changed")==0) {
+        code = LV_EVENT_CHILD_CHANGED ;
+    }
+    else if(strcmp(cstr,"child_created")==0) {
+        code = LV_EVENT_CHILD_CREATED ;
+    }
+    else if(strcmp(cstr,"child_deleted")==0) {
+        code = LV_EVENT_CHILD_DELETED ;
+    }
+    else if(strcmp(cstr,"screen_unload_start")==0) {
+        code = LV_EVENT_SCREEN_UNLOAD_START ;
+    }
+    else if(strcmp(cstr,"screen_load_start")==0) {
+        code = LV_EVENT_SCREEN_LOAD_START ;
+    }
+    else if(strcmp(cstr,"screen_loaded")==0) {
+        code = LV_EVENT_SCREEN_LOADED ;
+    }
+    else if(strcmp(cstr,"screen_unloaded")==0) {
+        code = LV_EVENT_SCREEN_UNLOADED ;
+    }
+    else if(strcmp(cstr,"size_changed")==0) {
+        code = LV_EVENT_SIZE_CHANGED ;
+    }
+    else if(strcmp(cstr,"style_changed")==0) {
+        code = LV_EVENT_STYLE_CHANGED ;
+    }
+    else if(strcmp(cstr,"layout_changed")==0) {
+        code = LV_EVENT_LAYOUT_CHANGED ;
+    }
+    else if(strcmp(cstr,"get_self_size")==0) {
+        code = LV_EVENT_GET_SELF_SIZE ;
+    }
+
+    JS_FreeCString(ctx, cstr) ;
+    return code ;
+}
+// AUTO GENERATE CODE END [EVENT MAPPING] --------
+
+
+JSValue lv_event_code_to_jsstr(JSContext *ctx, lv_event_code_t code) {
+    if(code>=_LV_EVENT_LAST) {
+        return JS_NewString(ctx, "unkonw");
+    }
+    return JS_NewString(ctx, lv_event_names[code]);
+}
+
+
 // AUTO GENERATE CODE START [DEFINE CLASS] --------
  // beapi.lvgl.Obj --
 static JSClassID js_lv_obj_class_id ;
 static JSValue js_lv_obj_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
     lv_obj_t * cparent = NULL ;
     if(argc>=1) {
-        JSValue ObjCotr = js_get_glob_prop(ctx, 3, "beapi", "lvgl", "Obj") ;
-        if(!JS_IsInstanceOf(ctx, argv[0], ObjCotr)) {
-            JS_FreeValue(ctx,ObjCotr) ;
-            THROW_EXCEPTION("arg parent must a lvgl.Obj object") ;
-        }
-        JS_FreeValue(ctx,ObjCotr) ;
+        CHECK_INSOF_LVOBJ("Obj", argv[0], "arg parent must a lvgl.Obj object")
         cparent = JS_GetOpaqueInternal(argv[0]) ;
     }
     lv_obj_t * cobj = lv_obj_create(cparent) ;
@@ -81,12 +340,7 @@ static JSClassID js_lv_label_class_id ;
 static JSValue js_lv_label_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
     lv_obj_t * cparent = NULL ;
     if(argc>=1) {
-        JSValue ObjCotr = js_get_glob_prop(ctx, 3, "beapi", "lvgl", "Obj") ;
-        if(!JS_IsInstanceOf(ctx, argv[0], ObjCotr)) {
-            JS_FreeValue(ctx,ObjCotr) ;
-            THROW_EXCEPTION("arg parent must a lvgl.Obj object") ;
-        }
-        JS_FreeValue(ctx,ObjCotr) ;
+        CHECK_INSOF_LVOBJ("Obj", argv[0], "arg parent must a lvgl.Obj object")
         cparent = JS_GetOpaqueInternal(argv[0]) ;
     }
     lv_label_t * cobj = lv_label_create(cparent) ;
@@ -112,12 +366,7 @@ static JSClassID js_lv_arc_class_id ;
 static JSValue js_lv_arc_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
     lv_obj_t * cparent = NULL ;
     if(argc>=1) {
-        JSValue ObjCotr = js_get_glob_prop(ctx, 3, "beapi", "lvgl", "Obj") ;
-        if(!JS_IsInstanceOf(ctx, argv[0], ObjCotr)) {
-            JS_FreeValue(ctx,ObjCotr) ;
-            THROW_EXCEPTION("arg parent must a lvgl.Obj object") ;
-        }
-        JS_FreeValue(ctx,ObjCotr) ;
+        CHECK_INSOF_LVOBJ("Obj", argv[0], "arg parent must a lvgl.Obj object")
         cparent = JS_GetOpaqueInternal(argv[0]) ;
     }
     lv_arc_t * cobj = lv_arc_create(cparent) ;
@@ -143,12 +392,7 @@ static JSClassID js_lv_bar_class_id ;
 static JSValue js_lv_bar_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
     lv_obj_t * cparent = NULL ;
     if(argc>=1) {
-        JSValue ObjCotr = js_get_glob_prop(ctx, 3, "beapi", "lvgl", "Obj") ;
-        if(!JS_IsInstanceOf(ctx, argv[0], ObjCotr)) {
-            JS_FreeValue(ctx,ObjCotr) ;
-            THROW_EXCEPTION("arg parent must a lvgl.Obj object") ;
-        }
-        JS_FreeValue(ctx,ObjCotr) ;
+        CHECK_INSOF_LVOBJ("Obj", argv[0], "arg parent must a lvgl.Obj object")
         cparent = JS_GetOpaqueInternal(argv[0]) ;
     }
     lv_bar_t * cobj = lv_bar_create(cparent) ;
@@ -174,12 +418,7 @@ static JSClassID js_lv_btn_class_id ;
 static JSValue js_lv_btn_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
     lv_obj_t * cparent = NULL ;
     if(argc>=1) {
-        JSValue ObjCotr = js_get_glob_prop(ctx, 3, "beapi", "lvgl", "Obj") ;
-        if(!JS_IsInstanceOf(ctx, argv[0], ObjCotr)) {
-            JS_FreeValue(ctx,ObjCotr) ;
-            THROW_EXCEPTION("arg parent must a lvgl.Obj object") ;
-        }
-        JS_FreeValue(ctx,ObjCotr) ;
+        CHECK_INSOF_LVOBJ("Obj", argv[0], "arg parent must a lvgl.Obj object")
         cparent = JS_GetOpaqueInternal(argv[0]) ;
     }
     lv_btn_t * cobj = lv_btn_create(cparent) ;
@@ -205,12 +444,7 @@ static JSClassID js_lv_btnmatrix_class_id ;
 static JSValue js_lv_btnmatrix_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
     lv_obj_t * cparent = NULL ;
     if(argc>=1) {
-        JSValue ObjCotr = js_get_glob_prop(ctx, 3, "beapi", "lvgl", "Obj") ;
-        if(!JS_IsInstanceOf(ctx, argv[0], ObjCotr)) {
-            JS_FreeValue(ctx,ObjCotr) ;
-            THROW_EXCEPTION("arg parent must a lvgl.Obj object") ;
-        }
-        JS_FreeValue(ctx,ObjCotr) ;
+        CHECK_INSOF_LVOBJ("Obj", argv[0], "arg parent must a lvgl.Obj object")
         cparent = JS_GetOpaqueInternal(argv[0]) ;
     }
     lv_btnmatrix_t * cobj = lv_btnmatrix_create(cparent) ;
@@ -236,12 +470,7 @@ static JSClassID js_lv_canvas_class_id ;
 static JSValue js_lv_canvas_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
     lv_obj_t * cparent = NULL ;
     if(argc>=1) {
-        JSValue ObjCotr = js_get_glob_prop(ctx, 3, "beapi", "lvgl", "Obj") ;
-        if(!JS_IsInstanceOf(ctx, argv[0], ObjCotr)) {
-            JS_FreeValue(ctx,ObjCotr) ;
-            THROW_EXCEPTION("arg parent must a lvgl.Obj object") ;
-        }
-        JS_FreeValue(ctx,ObjCotr) ;
+        CHECK_INSOF_LVOBJ("Obj", argv[0], "arg parent must a lvgl.Obj object")
         cparent = JS_GetOpaqueInternal(argv[0]) ;
     }
     lv_canvas_t * cobj = lv_canvas_create(cparent) ;
@@ -267,12 +496,7 @@ static JSClassID js_lv_checkbox_class_id ;
 static JSValue js_lv_checkbox_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
     lv_obj_t * cparent = NULL ;
     if(argc>=1) {
-        JSValue ObjCotr = js_get_glob_prop(ctx, 3, "beapi", "lvgl", "Obj") ;
-        if(!JS_IsInstanceOf(ctx, argv[0], ObjCotr)) {
-            JS_FreeValue(ctx,ObjCotr) ;
-            THROW_EXCEPTION("arg parent must a lvgl.Obj object") ;
-        }
-        JS_FreeValue(ctx,ObjCotr) ;
+        CHECK_INSOF_LVOBJ("Obj", argv[0], "arg parent must a lvgl.Obj object")
         cparent = JS_GetOpaqueInternal(argv[0]) ;
     }
     lv_checkbox_t * cobj = lv_checkbox_create(cparent) ;
@@ -298,12 +522,7 @@ static JSClassID js_lv_dropdown_class_id ;
 static JSValue js_lv_dropdown_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
     lv_obj_t * cparent = NULL ;
     if(argc>=1) {
-        JSValue ObjCotr = js_get_glob_prop(ctx, 3, "beapi", "lvgl", "Obj") ;
-        if(!JS_IsInstanceOf(ctx, argv[0], ObjCotr)) {
-            JS_FreeValue(ctx,ObjCotr) ;
-            THROW_EXCEPTION("arg parent must a lvgl.Obj object") ;
-        }
-        JS_FreeValue(ctx,ObjCotr) ;
+        CHECK_INSOF_LVOBJ("Obj", argv[0], "arg parent must a lvgl.Obj object")
         cparent = JS_GetOpaqueInternal(argv[0]) ;
     }
     lv_dropdown_t * cobj = lv_dropdown_create(cparent) ;
@@ -329,12 +548,7 @@ static JSClassID js_lv_img_class_id ;
 static JSValue js_lv_img_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
     lv_obj_t * cparent = NULL ;
     if(argc>=1) {
-        JSValue ObjCotr = js_get_glob_prop(ctx, 3, "beapi", "lvgl", "Obj") ;
-        if(!JS_IsInstanceOf(ctx, argv[0], ObjCotr)) {
-            JS_FreeValue(ctx,ObjCotr) ;
-            THROW_EXCEPTION("arg parent must a lvgl.Obj object") ;
-        }
-        JS_FreeValue(ctx,ObjCotr) ;
+        CHECK_INSOF_LVOBJ("Obj", argv[0], "arg parent must a lvgl.Obj object")
         cparent = JS_GetOpaqueInternal(argv[0]) ;
     }
     lv_img_t * cobj = lv_img_create(cparent) ;
@@ -360,12 +574,7 @@ static JSClassID js_lv_line_class_id ;
 static JSValue js_lv_line_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
     lv_obj_t * cparent = NULL ;
     if(argc>=1) {
-        JSValue ObjCotr = js_get_glob_prop(ctx, 3, "beapi", "lvgl", "Obj") ;
-        if(!JS_IsInstanceOf(ctx, argv[0], ObjCotr)) {
-            JS_FreeValue(ctx,ObjCotr) ;
-            THROW_EXCEPTION("arg parent must a lvgl.Obj object") ;
-        }
-        JS_FreeValue(ctx,ObjCotr) ;
+        CHECK_INSOF_LVOBJ("Obj", argv[0], "arg parent must a lvgl.Obj object")
         cparent = JS_GetOpaqueInternal(argv[0]) ;
     }
     lv_line_t * cobj = lv_line_create(cparent) ;
@@ -391,12 +600,7 @@ static JSClassID js_lv_roller_class_id ;
 static JSValue js_lv_roller_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
     lv_obj_t * cparent = NULL ;
     if(argc>=1) {
-        JSValue ObjCotr = js_get_glob_prop(ctx, 3, "beapi", "lvgl", "Obj") ;
-        if(!JS_IsInstanceOf(ctx, argv[0], ObjCotr)) {
-            JS_FreeValue(ctx,ObjCotr) ;
-            THROW_EXCEPTION("arg parent must a lvgl.Obj object") ;
-        }
-        JS_FreeValue(ctx,ObjCotr) ;
+        CHECK_INSOF_LVOBJ("Obj", argv[0], "arg parent must a lvgl.Obj object")
         cparent = JS_GetOpaqueInternal(argv[0]) ;
     }
     lv_roller_t * cobj = lv_roller_create(cparent) ;
@@ -422,12 +626,7 @@ static JSClassID js_lv_slider_class_id ;
 static JSValue js_lv_slider_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
     lv_obj_t * cparent = NULL ;
     if(argc>=1) {
-        JSValue ObjCotr = js_get_glob_prop(ctx, 3, "beapi", "lvgl", "Obj") ;
-        if(!JS_IsInstanceOf(ctx, argv[0], ObjCotr)) {
-            JS_FreeValue(ctx,ObjCotr) ;
-            THROW_EXCEPTION("arg parent must a lvgl.Obj object") ;
-        }
-        JS_FreeValue(ctx,ObjCotr) ;
+        CHECK_INSOF_LVOBJ("Obj", argv[0], "arg parent must a lvgl.Obj object")
         cparent = JS_GetOpaqueInternal(argv[0]) ;
     }
     lv_slider_t * cobj = lv_slider_create(cparent) ;
@@ -453,12 +652,7 @@ static JSClassID js_lv_switch_class_id ;
 static JSValue js_lv_switch_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
     lv_obj_t * cparent = NULL ;
     if(argc>=1) {
-        JSValue ObjCotr = js_get_glob_prop(ctx, 3, "beapi", "lvgl", "Obj") ;
-        if(!JS_IsInstanceOf(ctx, argv[0], ObjCotr)) {
-            JS_FreeValue(ctx,ObjCotr) ;
-            THROW_EXCEPTION("arg parent must a lvgl.Obj object") ;
-        }
-        JS_FreeValue(ctx,ObjCotr) ;
+        CHECK_INSOF_LVOBJ("Obj", argv[0], "arg parent must a lvgl.Obj object")
         cparent = JS_GetOpaqueInternal(argv[0]) ;
     }
     lv_switch_t * cobj = lv_switch_create(cparent) ;
@@ -484,12 +678,7 @@ static JSClassID js_lv_table_class_id ;
 static JSValue js_lv_table_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
     lv_obj_t * cparent = NULL ;
     if(argc>=1) {
-        JSValue ObjCotr = js_get_glob_prop(ctx, 3, "beapi", "lvgl", "Obj") ;
-        if(!JS_IsInstanceOf(ctx, argv[0], ObjCotr)) {
-            JS_FreeValue(ctx,ObjCotr) ;
-            THROW_EXCEPTION("arg parent must a lvgl.Obj object") ;
-        }
-        JS_FreeValue(ctx,ObjCotr) ;
+        CHECK_INSOF_LVOBJ("Obj", argv[0], "arg parent must a lvgl.Obj object")
         cparent = JS_GetOpaqueInternal(argv[0]) ;
     }
     lv_table_t * cobj = lv_table_create(cparent) ;
@@ -515,12 +704,7 @@ static JSClassID js_lv_textarea_class_id ;
 static JSValue js_lv_textarea_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
     lv_obj_t * cparent = NULL ;
     if(argc>=1) {
-        JSValue ObjCotr = js_get_glob_prop(ctx, 3, "beapi", "lvgl", "Obj") ;
-        if(!JS_IsInstanceOf(ctx, argv[0], ObjCotr)) {
-            JS_FreeValue(ctx,ObjCotr) ;
-            THROW_EXCEPTION("arg parent must a lvgl.Obj object") ;
-        }
-        JS_FreeValue(ctx,ObjCotr) ;
+        CHECK_INSOF_LVOBJ("Obj", argv[0], "arg parent must a lvgl.Obj object")
         cparent = JS_GetOpaqueInternal(argv[0]) ;
     }
     lv_textarea_t * cobj = lv_textarea_create(cparent) ;
@@ -551,7 +735,7 @@ static JSValue js_lv_obj_add_flag(JSContext *ctx, JSValueConst this_val, int arg
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Obj.addFlag() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.addFlag() must be called as a lvgl.Obj method")
     }
@@ -568,7 +752,7 @@ static JSValue js_lv_obj_clear_flag(JSContext *ctx, JSValueConst this_val, int a
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Obj.clearFlag() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.clearFlag() must be called as a lvgl.Obj method")
     }
@@ -585,7 +769,7 @@ static JSValue js_lv_obj_add_state(JSContext *ctx, JSValueConst this_val, int ar
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Obj.addState() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.addState() must be called as a lvgl.Obj method")
     }
@@ -602,7 +786,7 @@ static JSValue js_lv_obj_clear_state(JSContext *ctx, JSValueConst this_val, int 
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Obj.clearState() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.clearState() must be called as a lvgl.Obj method")
     }
@@ -619,7 +803,7 @@ static JSValue js_lv_obj_has_flag(JSContext *ctx, JSValueConst this_val, int arg
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Obj.hasFlag() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.hasFlag() must be called as a lvgl.Obj method")
     }
@@ -635,7 +819,7 @@ static JSValue js_lv_obj_has_flag_any(JSContext *ctx, JSValueConst this_val, int
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Obj.hasFlagAny() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.hasFlagAny() must be called as a lvgl.Obj method")
     }
@@ -651,7 +835,7 @@ static JSValue js_lv_obj_get_state(JSContext *ctx, JSValueConst this_val, int ar
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Obj.getState() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.getState() must be called as a lvgl.Obj method")
     }
@@ -663,7 +847,7 @@ static JSValue js_lv_obj_has_state(JSContext *ctx, JSValueConst this_val, int ar
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Obj.hasState() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.hasState() must be called as a lvgl.Obj method")
     }
@@ -679,7 +863,7 @@ static JSValue js_lv_obj_allocate_spec_attr(JSContext *ctx, JSValueConst this_va
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Obj.allocateSpecAttr() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.allocateSpecAttr() must be called as a lvgl.Obj method")
     }
@@ -692,7 +876,7 @@ static JSValue js_lv_obj_is_valid(JSContext *ctx, JSValueConst this_val, int arg
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Obj.isValid() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.isValid() must be called as a lvgl.Obj method")
     }
@@ -704,7 +888,7 @@ static JSValue js_lv_obj_dpx(JSContext *ctx, JSValueConst this_val, int argc, JS
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Obj.dpx() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.dpx() must be called as a lvgl.Obj method")
     }
@@ -720,7 +904,7 @@ static JSValue js_lv_obj_is_editable(JSContext *ctx, JSValueConst this_val, int 
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Obj.isEditable() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.isEditable() must be called as a lvgl.Obj method")
     }
@@ -732,7 +916,7 @@ static JSValue js_lv_obj_set_pos(JSContext *ctx, JSValueConst this_val, int argc
     if(argc<2) {
         THROW_EXCEPTION("lvgl.Obj.setPos() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.setPos() must be called as a lvgl.Obj method")
     }
@@ -753,7 +937,7 @@ static JSValue js_lv_obj_set_x(JSContext *ctx, JSValueConst this_val, int argc, 
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Obj.setX() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.setX() must be called as a lvgl.Obj method")
     }
@@ -770,7 +954,7 @@ static JSValue js_lv_obj_set_y(JSContext *ctx, JSValueConst this_val, int argc, 
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Obj.setY() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.setY() must be called as a lvgl.Obj method")
     }
@@ -787,7 +971,7 @@ static JSValue js_lv_obj_set_size(JSContext *ctx, JSValueConst this_val, int arg
     if(argc<2) {
         THROW_EXCEPTION("lvgl.Obj.setSize() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.setSize() must be called as a lvgl.Obj method")
     }
@@ -808,7 +992,7 @@ static JSValue js_lv_obj_refr_size(JSContext *ctx, JSValueConst this_val, int ar
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Obj.refrSize() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.refrSize() must be called as a lvgl.Obj method")
     }
@@ -820,7 +1004,7 @@ static JSValue js_lv_obj_set_width(JSContext *ctx, JSValueConst this_val, int ar
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Obj.setWidth() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.setWidth() must be called as a lvgl.Obj method")
     }
@@ -837,7 +1021,7 @@ static JSValue js_lv_obj_set_height(JSContext *ctx, JSValueConst this_val, int a
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Obj.setHeight() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.setHeight() must be called as a lvgl.Obj method")
     }
@@ -854,7 +1038,7 @@ static JSValue js_lv_obj_set_content_width(JSContext *ctx, JSValueConst this_val
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Obj.setContentWidth() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.setContentWidth() must be called as a lvgl.Obj method")
     }
@@ -871,7 +1055,7 @@ static JSValue js_lv_obj_set_content_height(JSContext *ctx, JSValueConst this_va
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Obj.setContentHeight() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.setContentHeight() must be called as a lvgl.Obj method")
     }
@@ -888,7 +1072,7 @@ static JSValue js_lv_obj_set_layout(JSContext *ctx, JSValueConst this_val, int a
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Obj.setLayout() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.setLayout() must be called as a lvgl.Obj method")
     }
@@ -905,7 +1089,7 @@ static JSValue js_lv_obj_is_layout_positioned(JSContext *ctx, JSValueConst this_
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Obj.isLayoutPositioned() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.isLayoutPositioned() must be called as a lvgl.Obj method")
     }
@@ -917,7 +1101,7 @@ static JSValue js_lv_obj_mark_layout_as_dirty(JSContext *ctx, JSValueConst this_
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Obj.markLayoutAsDirty() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.markLayoutAsDirty() must be called as a lvgl.Obj method")
     }
@@ -930,7 +1114,7 @@ static JSValue js_lv_obj_update_layout(JSContext *ctx, JSValueConst this_val, in
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Obj.updateLayout() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.updateLayout() must be called as a lvgl.Obj method")
     }
@@ -943,7 +1127,7 @@ static JSValue js_lv_obj_set_align(JSContext *ctx, JSValueConst this_val, int ar
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Obj.setAlign() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.setAlign() must be called as a lvgl.Obj method")
     }
@@ -960,7 +1144,7 @@ static JSValue js_lv_obj_align(JSContext *ctx, JSValueConst this_val, int argc, 
     if(argc<3) {
         THROW_EXCEPTION("lvgl.Obj.align() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.align() must be called as a lvgl.Obj method")
     }
@@ -985,7 +1169,7 @@ static JSValue js_lv_obj_align_to(JSContext *ctx, JSValueConst this_val, int arg
     if(argc<4) {
         THROW_EXCEPTION("lvgl.Obj.alignTo() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.alignTo() must be called as a lvgl.Obj method")
     }
@@ -1014,7 +1198,7 @@ static JSValue js_lv_obj_center(JSContext *ctx, JSValueConst this_val, int argc,
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Obj.center() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.center() must be called as a lvgl.Obj method")
     }
@@ -1027,7 +1211,7 @@ static JSValue js_lv_obj_get_coords(JSContext *ctx, JSValueConst this_val, int a
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Obj.getCoords() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.getCoords() must be called as a lvgl.Obj method")
     }
@@ -1064,7 +1248,7 @@ static JSValue js_lv_obj_get_x(JSContext *ctx, JSValueConst this_val, int argc, 
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Obj.getX() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.getX() must be called as a lvgl.Obj method")
     }
@@ -1076,7 +1260,7 @@ static JSValue js_lv_obj_get_y(JSContext *ctx, JSValueConst this_val, int argc, 
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Obj.getY() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.getY() must be called as a lvgl.Obj method")
     }
@@ -1088,7 +1272,7 @@ static JSValue js_lv_obj_get_x_aligned(JSContext *ctx, JSValueConst this_val, in
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Obj.getXAligned() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.getXAligned() must be called as a lvgl.Obj method")
     }
@@ -1100,7 +1284,7 @@ static JSValue js_lv_obj_get_y_aligned(JSContext *ctx, JSValueConst this_val, in
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Obj.getYAligned() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.getYAligned() must be called as a lvgl.Obj method")
     }
@@ -1112,7 +1296,7 @@ static JSValue js_lv_obj_get_width(JSContext *ctx, JSValueConst this_val, int ar
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Obj.getWidth() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.getWidth() must be called as a lvgl.Obj method")
     }
@@ -1124,7 +1308,7 @@ static JSValue js_lv_obj_get_height(JSContext *ctx, JSValueConst this_val, int a
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Obj.getHeight() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.getHeight() must be called as a lvgl.Obj method")
     }
@@ -1136,7 +1320,7 @@ static JSValue js_lv_obj_get_content_width(JSContext *ctx, JSValueConst this_val
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Obj.getContentWidth() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.getContentWidth() must be called as a lvgl.Obj method")
     }
@@ -1148,7 +1332,7 @@ static JSValue js_lv_obj_get_content_height(JSContext *ctx, JSValueConst this_va
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Obj.getContentHeight() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.getContentHeight() must be called as a lvgl.Obj method")
     }
@@ -1160,7 +1344,7 @@ static JSValue js_lv_obj_get_content_coords(JSContext *ctx, JSValueConst this_va
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Obj.getContentCoords() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.getContentCoords() must be called as a lvgl.Obj method")
     }
@@ -1197,7 +1381,7 @@ static JSValue js_lv_obj_get_self_width(JSContext *ctx, JSValueConst this_val, i
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Obj.getSelfWidth() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.getSelfWidth() must be called as a lvgl.Obj method")
     }
@@ -1209,7 +1393,7 @@ static JSValue js_lv_obj_get_self_height(JSContext *ctx, JSValueConst this_val, 
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Obj.getSelfHeight() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.getSelfHeight() must be called as a lvgl.Obj method")
     }
@@ -1221,7 +1405,7 @@ static JSValue js_lv_obj_refresh_self_size(JSContext *ctx, JSValueConst this_val
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Obj.refreshSelfSize() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.refreshSelfSize() must be called as a lvgl.Obj method")
     }
@@ -1233,7 +1417,7 @@ static JSValue js_lv_obj_refr_pos(JSContext *ctx, JSValueConst this_val, int arg
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Obj.refrPos() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.refrPos() must be called as a lvgl.Obj method")
     }
@@ -1246,7 +1430,7 @@ static JSValue js_lv_obj_move_to(JSContext *ctx, JSValueConst this_val, int argc
     if(argc<2) {
         THROW_EXCEPTION("lvgl.Obj.moveTo() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.moveTo() must be called as a lvgl.Obj method")
     }
@@ -1267,7 +1451,7 @@ static JSValue js_lv_obj_move_children_by(JSContext *ctx, JSValueConst this_val,
     if(argc<3) {
         THROW_EXCEPTION("lvgl.Obj.moveChildrenBy() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.moveChildrenBy() must be called as a lvgl.Obj method")
     }
@@ -1289,7 +1473,7 @@ static JSValue js_lv_obj_invalidate_area(JSContext *ctx, JSValueConst this_val, 
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Obj.invalidateArea() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.invalidateArea() must be called as a lvgl.Obj method")
     }
@@ -1326,7 +1510,7 @@ static JSValue js_lv_obj_invalidate(JSContext *ctx, JSValueConst this_val, int a
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Obj.invalidate() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.invalidate() must be called as a lvgl.Obj method")
     }
@@ -1339,7 +1523,7 @@ static JSValue js_lv_obj_area_is_visible(JSContext *ctx, JSValueConst this_val, 
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Obj.areaIsVisible() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.areaIsVisible() must be called as a lvgl.Obj method")
     }
@@ -1375,7 +1559,7 @@ static JSValue js_lv_obj_is_visible(JSContext *ctx, JSValueConst this_val, int a
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Obj.isVisible() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.isVisible() must be called as a lvgl.Obj method")
     }
@@ -1387,7 +1571,7 @@ static JSValue js_lv_obj_set_ext_click_area(JSContext *ctx, JSValueConst this_va
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Obj.setExtClickArea() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.setExtClickArea() must be called as a lvgl.Obj method")
     }
@@ -1404,7 +1588,7 @@ static JSValue js_lv_obj_get_click_area(JSContext *ctx, JSValueConst this_val, i
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Obj.getClickArea() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.getClickArea() must be called as a lvgl.Obj method")
     }
@@ -1441,7 +1625,7 @@ static JSValue js_lv_obj_hit_test(JSContext *ctx, JSValueConst this_val, int arg
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Obj.hitTest() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.hitTest() must be called as a lvgl.Obj method")
     }
@@ -1467,7 +1651,7 @@ static JSValue js_lv_obj_set_scrollbar_mode(JSContext *ctx, JSValueConst this_va
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Obj.setScrollbarMode() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.setScrollbarMode() must be called as a lvgl.Obj method")
     }
@@ -1484,7 +1668,7 @@ static JSValue js_lv_obj_set_scroll_dir(JSContext *ctx, JSValueConst this_val, i
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Obj.setScrollDir() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.setScrollDir() must be called as a lvgl.Obj method")
     }
@@ -1501,7 +1685,7 @@ static JSValue js_lv_obj_set_scroll_snap_x(JSContext *ctx, JSValueConst this_val
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Obj.setScrollSnapX() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.setScrollSnapX() must be called as a lvgl.Obj method")
     }
@@ -1518,7 +1702,7 @@ static JSValue js_lv_obj_set_scroll_snap_y(JSContext *ctx, JSValueConst this_val
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Obj.setScrollSnapY() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.setScrollSnapY() must be called as a lvgl.Obj method")
     }
@@ -1535,7 +1719,7 @@ static JSValue js_lv_obj_get_scrollbar_mode(JSContext *ctx, JSValueConst this_va
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Obj.getScrollbarMode() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.getScrollbarMode() must be called as a lvgl.Obj method")
     }
@@ -1547,7 +1731,7 @@ static JSValue js_lv_obj_get_scroll_dir(JSContext *ctx, JSValueConst this_val, i
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Obj.getScrollDir() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.getScrollDir() must be called as a lvgl.Obj method")
     }
@@ -1559,7 +1743,7 @@ static JSValue js_lv_obj_get_scroll_snap_x(JSContext *ctx, JSValueConst this_val
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Obj.getScrollSnapX() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.getScrollSnapX() must be called as a lvgl.Obj method")
     }
@@ -1571,7 +1755,7 @@ static JSValue js_lv_obj_get_scroll_snap_y(JSContext *ctx, JSValueConst this_val
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Obj.getScrollSnapY() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.getScrollSnapY() must be called as a lvgl.Obj method")
     }
@@ -1583,7 +1767,7 @@ static JSValue js_lv_obj_get_scroll_x(JSContext *ctx, JSValueConst this_val, int
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Obj.getScrollX() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.getScrollX() must be called as a lvgl.Obj method")
     }
@@ -1595,7 +1779,7 @@ static JSValue js_lv_obj_get_scroll_y(JSContext *ctx, JSValueConst this_val, int
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Obj.getScrollY() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.getScrollY() must be called as a lvgl.Obj method")
     }
@@ -1607,7 +1791,7 @@ static JSValue js_lv_obj_get_scroll_top(JSContext *ctx, JSValueConst this_val, i
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Obj.getScrollTop() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.getScrollTop() must be called as a lvgl.Obj method")
     }
@@ -1619,7 +1803,7 @@ static JSValue js_lv_obj_get_scroll_bottom(JSContext *ctx, JSValueConst this_val
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Obj.getScrollBottom() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.getScrollBottom() must be called as a lvgl.Obj method")
     }
@@ -1631,7 +1815,7 @@ static JSValue js_lv_obj_get_scroll_left(JSContext *ctx, JSValueConst this_val, 
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Obj.getScrollLeft() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.getScrollLeft() must be called as a lvgl.Obj method")
     }
@@ -1643,7 +1827,7 @@ static JSValue js_lv_obj_get_scroll_right(JSContext *ctx, JSValueConst this_val,
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Obj.getScrollRight() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.getScrollRight() must be called as a lvgl.Obj method")
     }
@@ -1655,7 +1839,7 @@ static JSValue js_lv_obj_get_scroll_end(JSContext *ctx, JSValueConst this_val, i
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Obj.getScrollEnd() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.getScrollEnd() must be called as a lvgl.Obj method")
     }
@@ -1682,7 +1866,7 @@ static JSValue js_lv_obj_scroll_by(JSContext *ctx, JSValueConst this_val, int ar
     if(argc<3) {
         THROW_EXCEPTION("lvgl.Obj.scrollBy() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.scrollBy() must be called as a lvgl.Obj method")
     }
@@ -1704,7 +1888,7 @@ static JSValue js_lv_obj_scroll_to(JSContext *ctx, JSValueConst this_val, int ar
     if(argc<3) {
         THROW_EXCEPTION("lvgl.Obj.scrollTo() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.scrollTo() must be called as a lvgl.Obj method")
     }
@@ -1726,7 +1910,7 @@ static JSValue js_lv_obj_scroll_to_x(JSContext *ctx, JSValueConst this_val, int 
     if(argc<2) {
         THROW_EXCEPTION("lvgl.Obj.scrollToX() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.scrollToX() must be called as a lvgl.Obj method")
     }
@@ -1744,7 +1928,7 @@ static JSValue js_lv_obj_scroll_to_y(JSContext *ctx, JSValueConst this_val, int 
     if(argc<2) {
         THROW_EXCEPTION("lvgl.Obj.scrollToY() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.scrollToY() must be called as a lvgl.Obj method")
     }
@@ -1762,7 +1946,7 @@ static JSValue js_lv_obj_scroll_to_view(JSContext *ctx, JSValueConst this_val, i
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Obj.scrollToView() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.scrollToView() must be called as a lvgl.Obj method")
     }
@@ -1776,7 +1960,7 @@ static JSValue js_lv_obj_scroll_to_view_recursive(JSContext *ctx, JSValueConst t
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Obj.scrollToViewRecursive() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.scrollToViewRecursive() must be called as a lvgl.Obj method")
     }
@@ -1790,7 +1974,7 @@ static JSValue js_lv_obj_is_scrolling(JSContext *ctx, JSValueConst this_val, int
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Obj.isScrolling() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.isScrolling() must be called as a lvgl.Obj method")
     }
@@ -1802,7 +1986,7 @@ static JSValue js_lv_obj_update_snap(JSContext *ctx, JSValueConst this_val, int 
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Obj.updateSnap() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.updateSnap() must be called as a lvgl.Obj method")
     }
@@ -1816,7 +2000,7 @@ static JSValue js_lv_obj_get_scrollbar_area(JSContext *ctx, JSValueConst this_va
     if(argc<2) {
         THROW_EXCEPTION("lvgl.Obj.getScrollbarArea() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.getScrollbarArea() must be called as a lvgl.Obj method")
     }
@@ -1877,7 +2061,7 @@ static JSValue js_lv_obj_scrollbar_invalidate(JSContext *ctx, JSValueConst this_
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Obj.scrollbarInvalidate() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.scrollbarInvalidate() must be called as a lvgl.Obj method")
     }
@@ -1890,7 +2074,7 @@ static JSValue js_lv_obj_readjust_scroll(JSContext *ctx, JSValueConst this_val, 
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Obj.readjustScroll() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.readjustScroll() must be called as a lvgl.Obj method")
     }
@@ -1904,7 +2088,7 @@ static JSValue js_lv_obj_fade_in(JSContext *ctx, JSValueConst this_val, int argc
     if(argc<2) {
         THROW_EXCEPTION("lvgl.Obj.fadeIn() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.fadeIn() must be called as a lvgl.Obj method")
     }
@@ -1925,7 +2109,7 @@ static JSValue js_lv_obj_fade_out(JSContext *ctx, JSValueConst this_val, int arg
     if(argc<2) {
         THROW_EXCEPTION("lvgl.Obj.fadeOut() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.fadeOut() must be called as a lvgl.Obj method")
     }
@@ -1946,7 +2130,7 @@ static JSValue js_lv_obj_move_to_index(JSContext *ctx, JSValueConst this_val, in
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Obj.moveToIndex() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.moveToIndex() must be called as a lvgl.Obj method")
     }
@@ -1963,7 +2147,7 @@ static JSValue js_lv_obj_get_screen(JSContext *ctx, JSValueConst this_val, int a
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Obj.getScreen() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.getScreen() must be called as a lvgl.Obj method")
     }
@@ -1979,7 +2163,7 @@ static JSValue js_lv_obj_get_parent(JSContext *ctx, JSValueConst this_val, int a
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Obj.getParent() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.getParent() must be called as a lvgl.Obj method")
     }
@@ -1995,7 +2179,7 @@ static JSValue js_lv_obj_get_child(JSContext *ctx, JSValueConst this_val, int ar
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Obj.getChild() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.getChild() must be called as a lvgl.Obj method")
     }
@@ -2015,7 +2199,7 @@ static JSValue js_lv_obj_get_child_cnt(JSContext *ctx, JSValueConst this_val, in
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Obj.getChildCnt() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.getChildCnt() must be called as a lvgl.Obj method")
     }
@@ -2027,7 +2211,7 @@ static JSValue js_lv_obj_get_index(JSContext *ctx, JSValueConst this_val, int ar
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Obj.getIndex() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.getIndex() must be called as a lvgl.Obj method")
     }
@@ -2039,7 +2223,7 @@ static JSValue js_lv_obj_set_flex_flow(JSContext *ctx, JSValueConst this_val, in
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Obj.setFlexFlow() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.setFlexFlow() must be called as a lvgl.Obj method")
     }
@@ -2056,7 +2240,7 @@ static JSValue js_lv_obj_set_flex_align(JSContext *ctx, JSValueConst this_val, i
     if(argc<3) {
         THROW_EXCEPTION("lvgl.Obj.setFlexAlign() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.setFlexAlign() must be called as a lvgl.Obj method")
     }
@@ -2081,7 +2265,7 @@ static JSValue js_lv_obj_set_flex_grow(JSContext *ctx, JSValueConst this_val, in
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Obj.setFlexGrow() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.setFlexGrow() must be called as a lvgl.Obj method")
     }
@@ -2098,7 +2282,7 @@ static JSValue js_lv_obj_get_style_flex_flow(JSContext *ctx, JSValueConst this_v
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Obj.getStyleFlexFlow() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.getStyleFlexFlow() must be called as a lvgl.Obj method")
     }
@@ -2114,7 +2298,7 @@ static JSValue js_lv_obj_get_style_flex_main_place(JSContext *ctx, JSValueConst 
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Obj.getStyleFlexMainPlace() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.getStyleFlexMainPlace() must be called as a lvgl.Obj method")
     }
@@ -2130,7 +2314,7 @@ static JSValue js_lv_obj_get_style_flex_cross_place(JSContext *ctx, JSValueConst
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Obj.getStyleFlexCrossPlace() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.getStyleFlexCrossPlace() must be called as a lvgl.Obj method")
     }
@@ -2146,7 +2330,7 @@ static JSValue js_lv_obj_get_style_flex_track_place(JSContext *ctx, JSValueConst
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Obj.getStyleFlexTrackPlace() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.getStyleFlexTrackPlace() must be called as a lvgl.Obj method")
     }
@@ -2162,7 +2346,7 @@ static JSValue js_lv_obj_get_style_flex_grow(JSContext *ctx, JSValueConst this_v
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Obj.getStyleFlexGrow() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.getStyleFlexGrow() must be called as a lvgl.Obj method")
     }
@@ -2178,7 +2362,7 @@ static JSValue js_lv_obj_set_tile(JSContext *ctx, JSValueConst this_val, int arg
     if(argc<2) {
         THROW_EXCEPTION("lvgl.Obj.setTile() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.setTile() must be called as a lvgl.Obj method")
     }
@@ -2196,7 +2380,7 @@ static JSValue js_lv_obj_set_tile_id(JSContext *ctx, JSValueConst this_val, int 
     if(argc<3) {
         THROW_EXCEPTION("lvgl.Obj.setTileId() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.setTileId() must be called as a lvgl.Obj method")
     }
@@ -2218,7 +2402,7 @@ static JSValue js_lv_obj_move_foreground(JSContext *ctx, JSValueConst this_val, 
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Obj.moveForeground() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.moveForeground() must be called as a lvgl.Obj method")
     }
@@ -2231,7 +2415,7 @@ static JSValue js_lv_obj_move_background(JSContext *ctx, JSValueConst this_val, 
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Obj.moveBackground() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.moveBackground() must be called as a lvgl.Obj method")
     }
@@ -2244,7 +2428,7 @@ static JSValue js_lv_obj_get_child_id(JSContext *ctx, JSValueConst this_val, int
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Obj.getChildId() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.getChildId() must be called as a lvgl.Obj method")
     }
@@ -2254,6 +2438,8 @@ static JSValue js_lv_obj_get_child_id(JSContext *ctx, JSValueConst this_val, int
 
 
 static const JSCFunctionListEntry js_lv_obj_proto_funcs[] = {
+    JS_CFUNC_DEF("enableEvent", 0, js_lv_obj_enable_event),
+    JS_CFUNC_DEF("disableEvent", 0, js_lv_obj_disable_event),
     JS_CFUNC_DEF("addFlag", 0, js_lv_obj_add_flag),
     JS_CFUNC_DEF("clearFlag", 0, js_lv_obj_clear_flag),
     JS_CFUNC_DEF("addState", 0, js_lv_obj_add_state),
@@ -2360,7 +2546,7 @@ static JSValue js_lv_label_set_text(JSContext *ctx, JSValueConst this_val, int a
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Label.setText() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_label_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Label.setText() must be called as a lvgl.Label method")
     }
@@ -2375,7 +2561,7 @@ static JSValue js_lv_label_set_text_static(JSContext *ctx, JSValueConst this_val
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Label.setTextStatic() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_label_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Label.setTextStatic() must be called as a lvgl.Label method")
     }
@@ -2390,7 +2576,7 @@ static JSValue js_lv_label_set_long_mode(JSContext *ctx, JSValueConst this_val, 
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Label.setLongMode() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_label_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Label.setLongMode() must be called as a lvgl.Label method")
     }
@@ -2407,7 +2593,7 @@ static JSValue js_lv_label_set_recolor(JSContext *ctx, JSValueConst this_val, in
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Label.setRecolor() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_label_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Label.setRecolor() must be called as a lvgl.Label method")
     }
@@ -2421,7 +2607,7 @@ static JSValue js_lv_label_set_text_sel_start(JSContext *ctx, JSValueConst this_
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Label.setTextSelStart() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_label_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Label.setTextSelStart() must be called as a lvgl.Label method")
     }
@@ -2438,7 +2624,7 @@ static JSValue js_lv_label_set_text_sel_end(JSContext *ctx, JSValueConst this_va
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Label.setTextSelEnd() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_label_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Label.setTextSelEnd() must be called as a lvgl.Label method")
     }
@@ -2455,7 +2641,7 @@ static JSValue js_lv_label_get_text(JSContext *ctx, JSValueConst this_val, int a
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Label.getText() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_label_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Label.getText() must be called as a lvgl.Label method")
     }
@@ -2467,7 +2653,7 @@ static JSValue js_lv_label_get_long_mode(JSContext *ctx, JSValueConst this_val, 
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Label.getLongMode() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_label_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Label.getLongMode() must be called as a lvgl.Label method")
     }
@@ -2479,7 +2665,7 @@ static JSValue js_lv_label_get_recolor(JSContext *ctx, JSValueConst this_val, in
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Label.getRecolor() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_label_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Label.getRecolor() must be called as a lvgl.Label method")
     }
@@ -2491,7 +2677,7 @@ static JSValue js_lv_label_get_letter_pos(JSContext *ctx, JSValueConst this_val,
     if(argc<2) {
         THROW_EXCEPTION("lvgl.Label.getLetterPos() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_label_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Label.getLetterPos() must be called as a lvgl.Label method")
     }
@@ -2522,7 +2708,7 @@ static JSValue js_lv_label_get_letter_on(JSContext *ctx, JSValueConst this_val, 
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Label.getLetterOn() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_label_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Label.getLetterOn() must be called as a lvgl.Label method")
     }
@@ -2548,7 +2734,7 @@ static JSValue js_lv_label_is_char_under_pos(JSContext *ctx, JSValueConst this_v
     if(argc<1) {
         THROW_EXCEPTION("lvgl.Label.isCharUnderPos() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_label_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Label.isCharUnderPos() must be called as a lvgl.Label method")
     }
@@ -2574,7 +2760,7 @@ static JSValue js_lv_label_get_text_selection_start(JSContext *ctx, JSValueConst
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Label.getTextSelectionStart() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_label_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Label.getTextSelectionStart() must be called as a lvgl.Label method")
     }
@@ -2586,7 +2772,7 @@ static JSValue js_lv_label_get_text_selection_end(JSContext *ctx, JSValueConst t
     if(argc<0) {
         THROW_EXCEPTION("lvgl.Label.getTextSelectionEnd() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_label_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Label.getTextSelectionEnd() must be called as a lvgl.Label method")
     }
@@ -2598,7 +2784,7 @@ static JSValue js_lv_label_ins_text(JSContext *ctx, JSValueConst this_val, int a
     if(argc<2) {
         THROW_EXCEPTION("lvgl.Label.insText() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_label_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Label.insText() must be called as a lvgl.Label method")
     }
@@ -2617,7 +2803,7 @@ static JSValue js_lv_label_cut_text(JSContext *ctx, JSValueConst this_val, int a
     if(argc<2) {
         THROW_EXCEPTION("lvgl.Label.cutText() missing arg")
     }
-    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_lv_label_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Label.cutText() must be called as a lvgl.Label method")
     }
@@ -2778,10 +2964,6 @@ void require_vlgl_js_widgets(JSContext *ctx, JSValue lvgl) {
     JS_Eval(ctx, (const char *)lv_obj_init_js, lv_obj_init_js_len, "[native]lv_obj_init", JS_EVAL_TYPE_GLOBAL|JS_EVAL_FLAG_STRIP) ;
 
     JS_FreeValue(ctx, EventEmitterProto);
-    
-    printf("----\n") ;
-    dn(js_lv_obj_class_id) ;
-    dn(js_lv_label_class_id) ;
 }
 
 

@@ -122,10 +122,14 @@ const MapJS2C_Conver = {
     "char *": "JS_NewString",   
 }
 
-function gen_lv_class(cName, className, api){
+function gen_lv_class(cName, className, api, extraMethod) {
 
     let codeFuncDef = ""
     let codeMethedList = `static const JSCFunctionListEntry js_${cName}_proto_funcs[] = {\r\n`
+
+    for(let cfuncName in extraMethod) {
+        codeMethedList+= `    JS_CFUNC_DEF("${extraMethod[cfuncName]}", 0, ${cfuncName}),\r\n`
+    }
 
     for(let cfunc in api) {
 
@@ -151,7 +155,7 @@ function gen_lv_class(cName, className, api){
             codeFuncDef+= `        THROW_EXCEPTION("${className}.${jsmethod}() missing arg")\r\n`
             codeFuncDef+= `    }\r\n`
         }
-        codeFuncDef+= `    lv_obj_t * thisobj = JS_GetOpaque(this_val, js_${cName}_class_id) ;\r\n`
+        codeFuncDef+= `    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;\r\n`
         codeFuncDef+= `    if(!thisobj) {\r\n`
         codeFuncDef+= `        THROW_EXCEPTION("${className}.${jsmethod}() must be called as a ${className} method")\r\n`
         codeFuncDef+= `    }\r\n`
@@ -255,12 +259,7 @@ static JSClassID js_${ctypeName}_class_id ;
 static JSValue js_${ctypeName}_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
     lv_obj_t * cparent = NULL ;
     if(argc>=1) {
-        JSValue ObjCotr = js_get_glob_prop(ctx, 3, "beapi", "lvgl", "Obj") ;
-        if(!JS_IsInstanceOf(ctx, argv[0], ObjCotr)) {
-            JS_FreeValue(ctx,ObjCotr) ;
-            THROW_EXCEPTION("arg parent must a lvgl.Obj object") ;
-        }
-        JS_FreeValue(ctx,ObjCotr) ;
+        CHECK_INSOF_LVOBJ("Obj", argv[0], "arg parent must a lvgl.Obj object")
         cparent = JS_GetOpaqueInternal(argv[0]) ;
     }
     ${ctypeName}_t * cobj = ${ctypeName}_create(cparent) ;
@@ -331,6 +330,83 @@ function srcInsert(src, code, startMart, endMark) {
 }
 
 
+const ArrEvents = [
+    "LV_EVENT_ALL",
+    "LV_EVENT_PRESSED",
+    "LV_EVENT_PRESSING",
+    "LV_EVENT_PRESS_LOST",
+    "LV_EVENT_SHORT_CLICKED",
+    "LV_EVENT_LONG_PRESSED",
+    "LV_EVENT_LONG_PRESSED_REPEAT",
+    "LV_EVENT_CLICKED",
+    "LV_EVENT_RELEASED",
+    "LV_EVENT_SCROLL_BEGIN",
+    "LV_EVENT_SCROLL_END",
+    "LV_EVENT_SCROLL",
+    "LV_EVENT_GESTURE",
+    "LV_EVENT_KEY",
+    "LV_EVENT_FOCUSED",
+    "LV_EVENT_DEFOCUSED",
+    "LV_EVENT_LEAVE",
+    "LV_EVENT_HIT_TEST",
+    "LV_EVENT_COVER_CHECK",
+    "LV_EVENT_REFR_EXT_DRAW_SIZE",
+    "LV_EVENT_DRAW_MAIN_BEGIN",
+    "LV_EVENT_DRAW_MAIN",
+    "LV_EVENT_DRAW_MAIN_END",
+    "LV_EVENT_DRAW_POST_BEGIN",
+    "LV_EVENT_DRAW_POST",
+    "LV_EVENT_DRAW_POST_END",
+    "LV_EVENT_DRAW_PART_BEGIN",
+    "LV_EVENT_DRAW_PART_END",
+    "LV_EVENT_VALUE_CHANGED",
+    "LV_EVENT_INSERT",
+    "LV_EVENT_REFRESH",
+    "LV_EVENT_READY",
+    "LV_EVENT_CANCEL",
+    "LV_EVENT_DELETE",
+    "LV_EVENT_CHILD_CHANGED",
+    "LV_EVENT_CHILD_CREATED",
+    "LV_EVENT_CHILD_DELETED",
+    "LV_EVENT_SCREEN_UNLOAD_START",
+    "LV_EVENT_SCREEN_LOAD_START",
+    "LV_EVENT_SCREEN_LOADED",
+    "LV_EVENT_SCREEN_UNLOADED",
+    "LV_EVENT_SIZE_CHANGED",
+    "LV_EVENT_STYLE_CHANGED",
+    "LV_EVENT_LAYOUT_CHANGED",
+    "LV_EVENT_GET_SELF_SIZE",
+]
+function generateEventsMapping() {
+    
+    let mappingCode = ""
+    let nameLstCode = ""
+    let i = 0
+    for(let constName of ArrEvents) {
+        let name = constName.replace(/^LV_EVENT_/, "").toLowerCase()
+        mappingCode+= `    ${i? 'else ':''}if(strcmp(cstr,"${name}")==0) {\r\n`
+        mappingCode+= `        code = ${constName} ;\r\n`
+        mappingCode+= `    }\r\n`
+
+        if(i) {
+            nameLstCode+= ", "
+        }
+        nameLstCode+= `"${name}"`
+        i++
+    }
+
+    return `
+const char * lv_event_names[] = { ${nameLstCode} } ;
+lv_event_code_t lv_event_jsstr_to_code(JSContext *ctx, JSValue jsstr) {
+    char * cstr = JS_ToCString(ctx, jsstr) ;
+    lv_event_code_t code = _LV_EVENT_LAST ;
+${mappingCode}
+    JS_FreeCString(ctx, cstr) ;
+    return code ;
+}
+` ;
+}
+
 
 const methodlst_mark_start = "// AUTO GENERATE CODE START [METHOD LIST] --------"
 const methodlst_mark_end = "// AUTO GENERATE CODE END [METHOD LIST] --------"
@@ -340,13 +416,22 @@ const registerclass_mark_start = "// AUTO GENERATE CODE START [REGISTER CLASS] -
 const registerclass_mark_end = "// AUTO GENERATE CODE END [REGISTER CLASS] --------"
 const registerclass_id_mark_start = "// AUTO GENERATE CODE START [REGISTER CLASS ID] --------"
 const registerclass_id_mark_end = "// AUTO GENERATE CODE END [REGISTER CLASS ID] --------"
+const event_mapping_mark_start = "// AUTO GENERATE CODE START [EVENT MAPPING] --------"
+const event_mapping_mark_end = "// AUTO GENERATE CODE END [EVENT MAPPING] --------"
 
 let dist_path = __dirname + "/../widgets.c"
 
 function main() {
     let code = ""
 
-    code+= gen_lv_class("lv_obj", "lvgl.Obj", require("./api/lv_obj.js"))
+    code+= gen_lv_class(
+                "lv_obj", "lvgl.Obj"
+                , require("./api/lv_obj.js")
+                , {
+                    "js_lv_obj_enable_event": "enableEvent" ,
+                    "js_lv_obj_disable_event": "disableEvent" ,
+                }
+    )
     code+= gen_lv_class("lv_label", "lvgl.Label", require("./api/lv_label.js"))
 
     let src = fs.readFileSync(dist_path).toString()
@@ -355,6 +440,7 @@ function main() {
     src = srcInsert(src, generateClassDefine(), defclass_mark_start, defclass_mark_end)
     src = srcInsert(src, generateClassRegister(), registerclass_mark_start, registerclass_mark_end)
     src = srcInsert(src, generateClassIDRegister(), registerclass_id_mark_start, registerclass_id_mark_end)
+    src = srcInsert(src, generateEventsMapping(), event_mapping_mark_start, event_mapping_mark_end)
 
     fs.writeFileSync(dist_path, src)
 

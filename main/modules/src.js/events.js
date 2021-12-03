@@ -10,7 +10,8 @@ beapi.EventEmitter = class EventEmitter {
         if(typeof(event)=="string") {
             if(!this._handles[event]){
                 this._handles[event] = []
-                this.emit("#EVENT.ADD#",event)
+                if(event!="#EVENT.ADD#"&&event!="#EVENT.CLEAR#")
+                    this.emit("#EVENT.ADD#",event)
             }
             if(!norepeat || !this.isListening(event, handle)) {
                 this._handles[event].push(handle)
@@ -55,7 +56,8 @@ beapi.EventEmitter = class EventEmitter {
         }
         if(!this._handles[eventName].length) {
             delete this._handles[eventName]
-            this.emit("#EVENT.CLEAR#",eventName)
+            if(eventName!="#EVENT.ADD#"&&eventName!="#EVENT.CLEAR#")
+                this.emit("#EVENT.CLEAR#",eventName)
         }
         return this
     }

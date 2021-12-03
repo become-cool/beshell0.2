@@ -14,19 +14,6 @@
 uint8_t * dma_buff = NULL ;
 
 lv_indev_drv_t indev_drv;
-static void btn_event_cb(lv_event_t * e) {
-    lv_event_code_t code = lv_event_get_code(e);
-    lv_obj_t * btn = lv_event_get_target(e);
-    if(code == LV_EVENT_CLICKED) {
-        static uint8_t cnt = 0;
-        cnt++;
-
-        /*Get the first child of the button which is the label and change its text*/
-        lv_obj_t * label = lv_obj_get_child(btn, 0);
-        lv_label_set_text_fmt(label, "Button: %d", cnt);
-    }
-}
-
 
 void disp_st7789_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color_p) {
     if(!disp->user_data) {
@@ -44,7 +31,7 @@ void input_driver_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
         return ;
     touch_driver_read(drv, data) ;
     if(data->state == LV_INDEV_STATE_PRESSED) {
-        data->point.x -= 8 ;
+        data->point.x -= 10 ;
     }
 }
 

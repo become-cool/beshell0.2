@@ -10,12 +10,26 @@ function create_conver_base(ctype, js_conver_func) {
     }
 }
 
+
+function create_conver_mappingconst(ctype, js_conver_func) {
+    return function (cargv,i,className,jsmethod){
+        return `    ${ctype} ${cargv} ;
+    if(!${js_conver_func}(ctx, argv[${i}], &${cargv})) {
+        return JS_EXCEPTION ;
+    }
+`
+    }
+}
+
+
 const conver_int8 = create_conver_base("int8_t", "JS_ToInt32")
 const conver_uint8 = create_conver_base("uint8_t", "JS_ToUint32")
 const conver_int16 = create_conver_base("int16_t", "JS_ToInt32")
 const conver_uint16 = create_conver_base("uint16_t", "JS_ToUint32")
 const conver_int32 = create_conver_base("int32_t", "JS_ToInt32")
 const conver_uint32 = create_conver_base("uint32_t", "JS_ToUint32")
+const conver_flex_flow = create_conver_mappingconst('lv_flex_flow_t', 'lv_flex_flow_jsstr_to_code')
+const conver_flex_align = create_conver_mappingconst('lv_flex_align_t', 'lv_flex_align_jsstr_to_code')
 
 
 function conver_bool(cargv,i){
@@ -85,8 +99,8 @@ const MapC2JS_Conver = {
     "lv_point_t *": conver_point ,
     "lv_obj_t *": conver_obj,
     "_lv_obj_t *": conver_obj,
-    "lv_flex_align_t": conver_uint8,
-    "lv_flex_flow_t": conver_uint8,
+    "lv_flex_align_t": conver_flex_align,
+    "lv_flex_flow_t": conver_flex_flow,
     "lv_style_selector_t": conver_uint32,
     "lv_label_long_mode_t": conver_uint8,   
     "lv_arc_mode_t": conver_uint8,
@@ -291,7 +305,7 @@ function generateClassDefine() {
 static JSClassID js_${ctypeName}_class_id ;
 static JSValue js_${ctypeName}_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
     lv_obj_t * cparent = NULL ;
-    if(argc>=1) {
+    if(argc>=1 && !JS_IsUndefined(argv[0]) && !JS_IsNull(argv[0])) {
         CHECK_INSOF_LVOBJ("Obj", argv[0], "arg parent must a lvgl.Obj object")
         cparent = JS_GetOpaqueInternal(argv[0]) ;
     }
@@ -363,62 +377,15 @@ function srcInsert(src, code, startMart, endMark) {
 }
 
 
-const ArrEvents = [
-    "LV_EVENT_ALL",
-    "LV_EVENT_PRESSED",
-    "LV_EVENT_PRESSING",
-    "LV_EVENT_PRESS_LOST",
-    "LV_EVENT_SHORT_CLICKED",
-    "LV_EVENT_LONG_PRESSED",
-    "LV_EVENT_LONG_PRESSED_REPEAT",
-    "LV_EVENT_CLICKED",
-    "LV_EVENT_RELEASED",
-    "LV_EVENT_SCROLL_BEGIN",
-    "LV_EVENT_SCROLL_END",
-    "LV_EVENT_SCROLL",
-    "LV_EVENT_GESTURE",
-    "LV_EVENT_KEY",
-    "LV_EVENT_FOCUSED",
-    "LV_EVENT_DEFOCUSED",
-    "LV_EVENT_LEAVE",
-    "LV_EVENT_HIT_TEST",
-    "LV_EVENT_COVER_CHECK",
-    "LV_EVENT_REFR_EXT_DRAW_SIZE",
-    "LV_EVENT_DRAW_MAIN_BEGIN",
-    "LV_EVENT_DRAW_MAIN",
-    "LV_EVENT_DRAW_MAIN_END",
-    "LV_EVENT_DRAW_POST_BEGIN",
-    "LV_EVENT_DRAW_POST",
-    "LV_EVENT_DRAW_POST_END",
-    "LV_EVENT_DRAW_PART_BEGIN",
-    "LV_EVENT_DRAW_PART_END",
-    "LV_EVENT_VALUE_CHANGED",
-    "LV_EVENT_INSERT",
-    "LV_EVENT_REFRESH",
-    "LV_EVENT_READY",
-    "LV_EVENT_CANCEL",
-    "LV_EVENT_DELETE",
-    "LV_EVENT_CHILD_CHANGED",
-    "LV_EVENT_CHILD_CREATED",
-    "LV_EVENT_CHILD_DELETED",
-    "LV_EVENT_SCREEN_UNLOAD_START",
-    "LV_EVENT_SCREEN_LOAD_START",
-    "LV_EVENT_SCREEN_LOADED",
-    "LV_EVENT_SCREEN_UNLOADED",
-    "LV_EVENT_SIZE_CHANGED",
-    "LV_EVENT_STYLE_CHANGED",
-    "LV_EVENT_LAYOUT_CHANGED",
-    "LV_EVENT_GET_SELF_SIZE",
-]
-function generateEventsMapping() {
+function generateConstMapping(arrconst, prefix, ctype, cname, lastval) {
     
     let mappingCode = ""
     let nameLstCode = ""
     let i = 0
-    for(let constName of ArrEvents) {
-        let name = constName.replace(/^LV_EVENT_/, "").toLowerCase()
+    for(let constName of arrconst) {
+        let name = constName.substr(prefix.length).toLowerCase()
         mappingCode+= `    ${i? 'else ':''}if(strcmp(cstr,"${name}")==0) {\r\n`
-        mappingCode+= `        code = ${constName} ;\r\n`
+        mappingCode+= `        (*out) = ${constName} ;\r\n`
         mappingCode+= `    }\r\n`
 
         if(i) {
@@ -428,16 +395,27 @@ function generateEventsMapping() {
         i++
     }
 
-    return `
-const char * lv_event_names[] = { ${nameLstCode} } ;
-lv_event_code_t lv_event_jsstr_to_code(JSContext *ctx, JSValue jsstr) {
+    let code = `
+const char * ${cname}_names[] = { ${nameLstCode} } ;
+bool ${cname}_jsstr_to_code(JSContext *ctx, JSValue jsstr, ${ctype}* out) {
     char * cstr = JS_ToCString(ctx, jsstr) ;
-    lv_event_code_t code = _LV_EVENT_LAST ;
 ${mappingCode}
+    else {
+        JS_ThrowReferenceError(ctx, "unkonw ${cname} pass in: %s", cstr) ;
+        JS_FreeCString(ctx, cstr) ;
+        return false ;
+    }
     JS_FreeCString(ctx, cstr) ;
-    return code ;
+    return true ;
 }
-` ;
+JSValue ${cname}_code_to_jsstr(JSContext *ctx, ${ctype} code) {
+    if(code>=${lastval}) {
+        return JS_NewString(ctx, "unkonw");
+    }
+    return JS_NewString(ctx, ${cname}_names[code]);
+}
+`
+    return code
 }
 
 
@@ -449,8 +427,8 @@ const registerclass_mark_start = "// AUTO GENERATE CODE START [REGISTER CLASS] -
 const registerclass_mark_end = "// AUTO GENERATE CODE END [REGISTER CLASS] --------"
 const registerclass_id_mark_start = "// AUTO GENERATE CODE START [REGISTER CLASS ID] --------"
 const registerclass_id_mark_end = "// AUTO GENERATE CODE END [REGISTER CLASS ID] --------"
-const event_mapping_mark_start = "// AUTO GENERATE CODE START [EVENT MAPPING] --------"
-const event_mapping_mark_end = "// AUTO GENERATE CODE END [EVENT MAPPING] --------"
+const const_mapping_mark_start = "// AUTO GENERATE CODE START [CONST MAPPING] --------"
+const const_mapping_mark_end = "// AUTO GENERATE CODE END [CONST MAPPING] --------"
 
 let dist_path = __dirname + "/../widgets.c"
 
@@ -491,7 +469,11 @@ function main() {
     src = srcInsert(src, generateClassDefine(), defclass_mark_start, defclass_mark_end)
     src = srcInsert(src, generateClassRegister(), registerclass_mark_start, registerclass_mark_end)
     src = srcInsert(src, generateClassIDRegister(), registerclass_id_mark_start, registerclass_id_mark_end)
-    src = srcInsert(src, generateEventsMapping(), event_mapping_mark_start, event_mapping_mark_end)
+
+    code = generateConstMapping(require("./api/const_event"), 'LV_EVENT_', 'lv_event_code_t', 'lv_event', '_LV_EVENT_LAST')
+    code+= generateConstMapping(require("./api/const_flex_flow"), 'LV_FLEX_FLOW_', 'lv_flex_flow_t', 'lv_flex_flow', 'LV_FLEX_FLOW_COLUMN_WRAP_REVERSE+1')
+    code+= generateConstMapping(require("./api/const_flex_align"), 'LV_FLEX_ALIGN_', 'lv_flex_align_t', 'lv_flex_align', 'LV_FLEX_ALIGN_SPACE_BETWEEN+1')
+    src = srcInsert(src, code, const_mapping_mark_start, const_mapping_mark_end)
 
     fs.writeFileSync(dist_path, src)
 

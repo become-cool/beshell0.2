@@ -125,7 +125,10 @@ static lv_event_dsc_t * find_event_dsc(lv_obj_t* obj, lv_event_code_t e) {
 static JSValue js_lv_obj_enable_event(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     THIS_LBOBJ("Obj", "enableEvent", thisobj)
     CHECK_ARGC(1)
-    uint8_t eventcode = lv_event_jsstr_to_code(ctx, argv[0]) ;
+    uint8_t eventcode ;
+    if(!lv_event_jsstr_to_code(ctx, argv[0], &eventcode)) {
+        return JS_EXCEPTION ;
+    }
 
     if(find_event_dsc(thisobj, eventcode)!=NULL) {
         // printf("event aleady enabled \n") ;
@@ -141,7 +144,10 @@ static JSValue js_lv_obj_disable_event(JSContext *ctx, JSValueConst this_val, in
     
     THIS_LBOBJ("Obj", "disableEvent", thisobj)
     CHECK_ARGC(1)
-    uint8_t eventcode = lv_event_jsstr_to_code(ctx, argv[0]) ;
+    uint8_t eventcode ;
+    if(!lv_event_jsstr_to_code(ctx, argv[0], &eventcode)) {
+        return JS_EXCEPTION ;
+    }
 
     lv_event_dsc_t * event_dsc = find_event_dsc(thisobj, eventcode) ;
     if(event_dsc) {
@@ -151,154 +157,155 @@ static JSValue js_lv_obj_disable_event(JSContext *ctx, JSValueConst this_val, in
     return JS_UNDEFINED ;
 }
 
-// AUTO GENERATE CODE START [EVENT MAPPING] --------
+// AUTO GENERATE CODE START [CONST MAPPING] --------
 
 const char * lv_event_names[] = { "all", "pressed", "pressing", "press_lost", "short_clicked", "long_pressed", "long_pressed_repeat", "clicked", "released", "scroll_begin", "scroll_end", "scroll", "gesture", "key", "focused", "defocused", "leave", "hit_test", "cover_check", "refr_ext_draw_size", "draw_main_begin", "draw_main", "draw_main_end", "draw_post_begin", "draw_post", "draw_post_end", "draw_part_begin", "draw_part_end", "value_changed", "insert", "refresh", "ready", "cancel", "delete", "child_changed", "child_created", "child_deleted", "screen_unload_start", "screen_load_start", "screen_loaded", "screen_unloaded", "size_changed", "style_changed", "layout_changed", "get_self_size" } ;
-lv_event_code_t lv_event_jsstr_to_code(JSContext *ctx, JSValue jsstr) {
+bool lv_event_jsstr_to_code(JSContext *ctx, JSValue jsstr, lv_event_code_t* out) {
     char * cstr = JS_ToCString(ctx, jsstr) ;
-    lv_event_code_t code = _LV_EVENT_LAST ;
     if(strcmp(cstr,"all")==0) {
-        code = LV_EVENT_ALL ;
+        (*out) = LV_EVENT_ALL ;
     }
     else if(strcmp(cstr,"pressed")==0) {
-        code = LV_EVENT_PRESSED ;
+        (*out) = LV_EVENT_PRESSED ;
     }
     else if(strcmp(cstr,"pressing")==0) {
-        code = LV_EVENT_PRESSING ;
+        (*out) = LV_EVENT_PRESSING ;
     }
     else if(strcmp(cstr,"press_lost")==0) {
-        code = LV_EVENT_PRESS_LOST ;
+        (*out) = LV_EVENT_PRESS_LOST ;
     }
     else if(strcmp(cstr,"short_clicked")==0) {
-        code = LV_EVENT_SHORT_CLICKED ;
+        (*out) = LV_EVENT_SHORT_CLICKED ;
     }
     else if(strcmp(cstr,"long_pressed")==0) {
-        code = LV_EVENT_LONG_PRESSED ;
+        (*out) = LV_EVENT_LONG_PRESSED ;
     }
     else if(strcmp(cstr,"long_pressed_repeat")==0) {
-        code = LV_EVENT_LONG_PRESSED_REPEAT ;
+        (*out) = LV_EVENT_LONG_PRESSED_REPEAT ;
     }
     else if(strcmp(cstr,"clicked")==0) {
-        code = LV_EVENT_CLICKED ;
+        (*out) = LV_EVENT_CLICKED ;
     }
     else if(strcmp(cstr,"released")==0) {
-        code = LV_EVENT_RELEASED ;
+        (*out) = LV_EVENT_RELEASED ;
     }
     else if(strcmp(cstr,"scroll_begin")==0) {
-        code = LV_EVENT_SCROLL_BEGIN ;
+        (*out) = LV_EVENT_SCROLL_BEGIN ;
     }
     else if(strcmp(cstr,"scroll_end")==0) {
-        code = LV_EVENT_SCROLL_END ;
+        (*out) = LV_EVENT_SCROLL_END ;
     }
     else if(strcmp(cstr,"scroll")==0) {
-        code = LV_EVENT_SCROLL ;
+        (*out) = LV_EVENT_SCROLL ;
     }
     else if(strcmp(cstr,"gesture")==0) {
-        code = LV_EVENT_GESTURE ;
+        (*out) = LV_EVENT_GESTURE ;
     }
     else if(strcmp(cstr,"key")==0) {
-        code = LV_EVENT_KEY ;
+        (*out) = LV_EVENT_KEY ;
     }
     else if(strcmp(cstr,"focused")==0) {
-        code = LV_EVENT_FOCUSED ;
+        (*out) = LV_EVENT_FOCUSED ;
     }
     else if(strcmp(cstr,"defocused")==0) {
-        code = LV_EVENT_DEFOCUSED ;
+        (*out) = LV_EVENT_DEFOCUSED ;
     }
     else if(strcmp(cstr,"leave")==0) {
-        code = LV_EVENT_LEAVE ;
+        (*out) = LV_EVENT_LEAVE ;
     }
     else if(strcmp(cstr,"hit_test")==0) {
-        code = LV_EVENT_HIT_TEST ;
+        (*out) = LV_EVENT_HIT_TEST ;
     }
     else if(strcmp(cstr,"cover_check")==0) {
-        code = LV_EVENT_COVER_CHECK ;
+        (*out) = LV_EVENT_COVER_CHECK ;
     }
     else if(strcmp(cstr,"refr_ext_draw_size")==0) {
-        code = LV_EVENT_REFR_EXT_DRAW_SIZE ;
+        (*out) = LV_EVENT_REFR_EXT_DRAW_SIZE ;
     }
     else if(strcmp(cstr,"draw_main_begin")==0) {
-        code = LV_EVENT_DRAW_MAIN_BEGIN ;
+        (*out) = LV_EVENT_DRAW_MAIN_BEGIN ;
     }
     else if(strcmp(cstr,"draw_main")==0) {
-        code = LV_EVENT_DRAW_MAIN ;
+        (*out) = LV_EVENT_DRAW_MAIN ;
     }
     else if(strcmp(cstr,"draw_main_end")==0) {
-        code = LV_EVENT_DRAW_MAIN_END ;
+        (*out) = LV_EVENT_DRAW_MAIN_END ;
     }
     else if(strcmp(cstr,"draw_post_begin")==0) {
-        code = LV_EVENT_DRAW_POST_BEGIN ;
+        (*out) = LV_EVENT_DRAW_POST_BEGIN ;
     }
     else if(strcmp(cstr,"draw_post")==0) {
-        code = LV_EVENT_DRAW_POST ;
+        (*out) = LV_EVENT_DRAW_POST ;
     }
     else if(strcmp(cstr,"draw_post_end")==0) {
-        code = LV_EVENT_DRAW_POST_END ;
+        (*out) = LV_EVENT_DRAW_POST_END ;
     }
     else if(strcmp(cstr,"draw_part_begin")==0) {
-        code = LV_EVENT_DRAW_PART_BEGIN ;
+        (*out) = LV_EVENT_DRAW_PART_BEGIN ;
     }
     else if(strcmp(cstr,"draw_part_end")==0) {
-        code = LV_EVENT_DRAW_PART_END ;
+        (*out) = LV_EVENT_DRAW_PART_END ;
     }
     else if(strcmp(cstr,"value_changed")==0) {
-        code = LV_EVENT_VALUE_CHANGED ;
+        (*out) = LV_EVENT_VALUE_CHANGED ;
     }
     else if(strcmp(cstr,"insert")==0) {
-        code = LV_EVENT_INSERT ;
+        (*out) = LV_EVENT_INSERT ;
     }
     else if(strcmp(cstr,"refresh")==0) {
-        code = LV_EVENT_REFRESH ;
+        (*out) = LV_EVENT_REFRESH ;
     }
     else if(strcmp(cstr,"ready")==0) {
-        code = LV_EVENT_READY ;
+        (*out) = LV_EVENT_READY ;
     }
     else if(strcmp(cstr,"cancel")==0) {
-        code = LV_EVENT_CANCEL ;
+        (*out) = LV_EVENT_CANCEL ;
     }
     else if(strcmp(cstr,"delete")==0) {
-        code = LV_EVENT_DELETE ;
+        (*out) = LV_EVENT_DELETE ;
     }
     else if(strcmp(cstr,"child_changed")==0) {
-        code = LV_EVENT_CHILD_CHANGED ;
+        (*out) = LV_EVENT_CHILD_CHANGED ;
     }
     else if(strcmp(cstr,"child_created")==0) {
-        code = LV_EVENT_CHILD_CREATED ;
+        (*out) = LV_EVENT_CHILD_CREATED ;
     }
     else if(strcmp(cstr,"child_deleted")==0) {
-        code = LV_EVENT_CHILD_DELETED ;
+        (*out) = LV_EVENT_CHILD_DELETED ;
     }
     else if(strcmp(cstr,"screen_unload_start")==0) {
-        code = LV_EVENT_SCREEN_UNLOAD_START ;
+        (*out) = LV_EVENT_SCREEN_UNLOAD_START ;
     }
     else if(strcmp(cstr,"screen_load_start")==0) {
-        code = LV_EVENT_SCREEN_LOAD_START ;
+        (*out) = LV_EVENT_SCREEN_LOAD_START ;
     }
     else if(strcmp(cstr,"screen_loaded")==0) {
-        code = LV_EVENT_SCREEN_LOADED ;
+        (*out) = LV_EVENT_SCREEN_LOADED ;
     }
     else if(strcmp(cstr,"screen_unloaded")==0) {
-        code = LV_EVENT_SCREEN_UNLOADED ;
+        (*out) = LV_EVENT_SCREEN_UNLOADED ;
     }
     else if(strcmp(cstr,"size_changed")==0) {
-        code = LV_EVENT_SIZE_CHANGED ;
+        (*out) = LV_EVENT_SIZE_CHANGED ;
     }
     else if(strcmp(cstr,"style_changed")==0) {
-        code = LV_EVENT_STYLE_CHANGED ;
+        (*out) = LV_EVENT_STYLE_CHANGED ;
     }
     else if(strcmp(cstr,"layout_changed")==0) {
-        code = LV_EVENT_LAYOUT_CHANGED ;
+        (*out) = LV_EVENT_LAYOUT_CHANGED ;
     }
     else if(strcmp(cstr,"get_self_size")==0) {
-        code = LV_EVENT_GET_SELF_SIZE ;
+        (*out) = LV_EVENT_GET_SELF_SIZE ;
     }
 
+    else {
+        JS_ThrowReferenceError(ctx, "unkonw lv_event pass in: %s", cstr) ;
+        JS_FreeCString(ctx, cstr) ;
+        return false ;
+    }
     JS_FreeCString(ctx, cstr) ;
-    return code ;
+    return true ;
 }
-// AUTO GENERATE CODE END [EVENT MAPPING] --------
-
-
 JSValue lv_event_code_to_jsstr(JSContext *ctx, lv_event_code_t code) {
     if(code>=_LV_EVENT_LAST) {
         return JS_NewString(ctx, "unkonw");
@@ -306,13 +313,97 @@ JSValue lv_event_code_to_jsstr(JSContext *ctx, lv_event_code_t code) {
     return JS_NewString(ctx, lv_event_names[code]);
 }
 
+const char * lv_flex_flow_names[] = { "row", "column", "row_wrap", "row_reverse", "row_wrap_reverse", "column_wrap", "column_reverse", "column_wrap_reverse" } ;
+bool lv_flex_flow_jsstr_to_code(JSContext *ctx, JSValue jsstr, lv_flex_flow_t* out) {
+    char * cstr = JS_ToCString(ctx, jsstr) ;
+    if(strcmp(cstr,"row")==0) {
+        (*out) = LV_FLEX_FLOW_ROW ;
+    }
+    else if(strcmp(cstr,"column")==0) {
+        (*out) = LV_FLEX_FLOW_COLUMN ;
+    }
+    else if(strcmp(cstr,"row_wrap")==0) {
+        (*out) = LV_FLEX_FLOW_ROW_WRAP ;
+    }
+    else if(strcmp(cstr,"row_reverse")==0) {
+        (*out) = LV_FLEX_FLOW_ROW_REVERSE ;
+    }
+    else if(strcmp(cstr,"row_wrap_reverse")==0) {
+        (*out) = LV_FLEX_FLOW_ROW_WRAP_REVERSE ;
+    }
+    else if(strcmp(cstr,"column_wrap")==0) {
+        (*out) = LV_FLEX_FLOW_COLUMN_WRAP ;
+    }
+    else if(strcmp(cstr,"column_reverse")==0) {
+        (*out) = LV_FLEX_FLOW_COLUMN_REVERSE ;
+    }
+    else if(strcmp(cstr,"column_wrap_reverse")==0) {
+        (*out) = LV_FLEX_FLOW_COLUMN_WRAP_REVERSE ;
+    }
+
+    else {
+        JS_ThrowReferenceError(ctx, "unkonw lv_flex_flow pass in: %s", cstr) ;
+        JS_FreeCString(ctx, cstr) ;
+        return false ;
+    }
+    JS_FreeCString(ctx, cstr) ;
+    return true ;
+}
+JSValue lv_flex_flow_code_to_jsstr(JSContext *ctx, lv_flex_flow_t code) {
+    if(code>=LV_FLEX_FLOW_COLUMN_WRAP_REVERSE+1) {
+        return JS_NewString(ctx, "unkonw");
+    }
+    return JS_NewString(ctx, lv_flex_flow_names[code]);
+}
+
+const char * lv_flex_align_names[] = { "start", "end", "center", "space_evenly", "space_around", "space_between" } ;
+bool lv_flex_align_jsstr_to_code(JSContext *ctx, JSValue jsstr, lv_flex_align_t* out) {
+    char * cstr = JS_ToCString(ctx, jsstr) ;
+    if(strcmp(cstr,"start")==0) {
+        (*out) = LV_FLEX_ALIGN_START ;
+    }
+    else if(strcmp(cstr,"end")==0) {
+        (*out) = LV_FLEX_ALIGN_END ;
+    }
+    else if(strcmp(cstr,"center")==0) {
+        (*out) = LV_FLEX_ALIGN_CENTER ;
+    }
+    else if(strcmp(cstr,"space_evenly")==0) {
+        (*out) = LV_FLEX_ALIGN_SPACE_EVENLY ;
+    }
+    else if(strcmp(cstr,"space_around")==0) {
+        (*out) = LV_FLEX_ALIGN_SPACE_AROUND ;
+    }
+    else if(strcmp(cstr,"space_between")==0) {
+        (*out) = LV_FLEX_ALIGN_SPACE_BETWEEN ;
+    }
+
+    else {
+        JS_ThrowReferenceError(ctx, "unkonw lv_flex_align pass in: %s", cstr) ;
+        JS_FreeCString(ctx, cstr) ;
+        return false ;
+    }
+    JS_FreeCString(ctx, cstr) ;
+    return true ;
+}
+JSValue lv_flex_align_code_to_jsstr(JSContext *ctx, lv_flex_align_t code) {
+    if(code>=LV_FLEX_ALIGN_SPACE_BETWEEN+1) {
+        return JS_NewString(ctx, "unkonw");
+    }
+    return JS_NewString(ctx, lv_flex_align_names[code]);
+}
+// AUTO GENERATE CODE END [CONST MAPPING] --------
+
+
+
+
 
 // AUTO GENERATE CODE START [DEFINE CLASS] --------
  // beapi.lvgl.Obj --
 static JSClassID js_lv_obj_class_id ;
 static JSValue js_lv_obj_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
     lv_obj_t * cparent = NULL ;
-    if(argc>=1) {
+    if(argc>=1 && !JS_IsUndefined(argv[0]) && !JS_IsNull(argv[0])) {
         CHECK_INSOF_LVOBJ("Obj", argv[0], "arg parent must a lvgl.Obj object")
         cparent = JS_GetOpaqueInternal(argv[0]) ;
     }
@@ -338,7 +429,7 @@ static JSClassDef js_lv_obj_class = {
 static JSClassID js_lv_label_class_id ;
 static JSValue js_lv_label_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
     lv_obj_t * cparent = NULL ;
-    if(argc>=1) {
+    if(argc>=1 && !JS_IsUndefined(argv[0]) && !JS_IsNull(argv[0])) {
         CHECK_INSOF_LVOBJ("Obj", argv[0], "arg parent must a lvgl.Obj object")
         cparent = JS_GetOpaqueInternal(argv[0]) ;
     }
@@ -364,7 +455,7 @@ static JSClassDef js_lv_label_class = {
 static JSClassID js_lv_arc_class_id ;
 static JSValue js_lv_arc_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
     lv_obj_t * cparent = NULL ;
-    if(argc>=1) {
+    if(argc>=1 && !JS_IsUndefined(argv[0]) && !JS_IsNull(argv[0])) {
         CHECK_INSOF_LVOBJ("Obj", argv[0], "arg parent must a lvgl.Obj object")
         cparent = JS_GetOpaqueInternal(argv[0]) ;
     }
@@ -390,7 +481,7 @@ static JSClassDef js_lv_arc_class = {
 static JSClassID js_lv_bar_class_id ;
 static JSValue js_lv_bar_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
     lv_obj_t * cparent = NULL ;
-    if(argc>=1) {
+    if(argc>=1 && !JS_IsUndefined(argv[0]) && !JS_IsNull(argv[0])) {
         CHECK_INSOF_LVOBJ("Obj", argv[0], "arg parent must a lvgl.Obj object")
         cparent = JS_GetOpaqueInternal(argv[0]) ;
     }
@@ -416,7 +507,7 @@ static JSClassDef js_lv_bar_class = {
 static JSClassID js_lv_btn_class_id ;
 static JSValue js_lv_btn_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
     lv_obj_t * cparent = NULL ;
-    if(argc>=1) {
+    if(argc>=1 && !JS_IsUndefined(argv[0]) && !JS_IsNull(argv[0])) {
         CHECK_INSOF_LVOBJ("Obj", argv[0], "arg parent must a lvgl.Obj object")
         cparent = JS_GetOpaqueInternal(argv[0]) ;
     }
@@ -442,7 +533,7 @@ static JSClassDef js_lv_btn_class = {
 static JSClassID js_lv_btnmatrix_class_id ;
 static JSValue js_lv_btnmatrix_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
     lv_obj_t * cparent = NULL ;
-    if(argc>=1) {
+    if(argc>=1 && !JS_IsUndefined(argv[0]) && !JS_IsNull(argv[0])) {
         CHECK_INSOF_LVOBJ("Obj", argv[0], "arg parent must a lvgl.Obj object")
         cparent = JS_GetOpaqueInternal(argv[0]) ;
     }
@@ -468,7 +559,7 @@ static JSClassDef js_lv_btnmatrix_class = {
 static JSClassID js_lv_canvas_class_id ;
 static JSValue js_lv_canvas_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
     lv_obj_t * cparent = NULL ;
-    if(argc>=1) {
+    if(argc>=1 && !JS_IsUndefined(argv[0]) && !JS_IsNull(argv[0])) {
         CHECK_INSOF_LVOBJ("Obj", argv[0], "arg parent must a lvgl.Obj object")
         cparent = JS_GetOpaqueInternal(argv[0]) ;
     }
@@ -494,7 +585,7 @@ static JSClassDef js_lv_canvas_class = {
 static JSClassID js_lv_checkbox_class_id ;
 static JSValue js_lv_checkbox_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
     lv_obj_t * cparent = NULL ;
-    if(argc>=1) {
+    if(argc>=1 && !JS_IsUndefined(argv[0]) && !JS_IsNull(argv[0])) {
         CHECK_INSOF_LVOBJ("Obj", argv[0], "arg parent must a lvgl.Obj object")
         cparent = JS_GetOpaqueInternal(argv[0]) ;
     }
@@ -520,7 +611,7 @@ static JSClassDef js_lv_checkbox_class = {
 static JSClassID js_lv_dropdown_class_id ;
 static JSValue js_lv_dropdown_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
     lv_obj_t * cparent = NULL ;
-    if(argc>=1) {
+    if(argc>=1 && !JS_IsUndefined(argv[0]) && !JS_IsNull(argv[0])) {
         CHECK_INSOF_LVOBJ("Obj", argv[0], "arg parent must a lvgl.Obj object")
         cparent = JS_GetOpaqueInternal(argv[0]) ;
     }
@@ -546,7 +637,7 @@ static JSClassDef js_lv_dropdown_class = {
 static JSClassID js_lv_img_class_id ;
 static JSValue js_lv_img_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
     lv_obj_t * cparent = NULL ;
-    if(argc>=1) {
+    if(argc>=1 && !JS_IsUndefined(argv[0]) && !JS_IsNull(argv[0])) {
         CHECK_INSOF_LVOBJ("Obj", argv[0], "arg parent must a lvgl.Obj object")
         cparent = JS_GetOpaqueInternal(argv[0]) ;
     }
@@ -572,7 +663,7 @@ static JSClassDef js_lv_img_class = {
 static JSClassID js_lv_line_class_id ;
 static JSValue js_lv_line_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
     lv_obj_t * cparent = NULL ;
-    if(argc>=1) {
+    if(argc>=1 && !JS_IsUndefined(argv[0]) && !JS_IsNull(argv[0])) {
         CHECK_INSOF_LVOBJ("Obj", argv[0], "arg parent must a lvgl.Obj object")
         cparent = JS_GetOpaqueInternal(argv[0]) ;
     }
@@ -598,7 +689,7 @@ static JSClassDef js_lv_line_class = {
 static JSClassID js_lv_roller_class_id ;
 static JSValue js_lv_roller_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
     lv_obj_t * cparent = NULL ;
-    if(argc>=1) {
+    if(argc>=1 && !JS_IsUndefined(argv[0]) && !JS_IsNull(argv[0])) {
         CHECK_INSOF_LVOBJ("Obj", argv[0], "arg parent must a lvgl.Obj object")
         cparent = JS_GetOpaqueInternal(argv[0]) ;
     }
@@ -624,7 +715,7 @@ static JSClassDef js_lv_roller_class = {
 static JSClassID js_lv_slider_class_id ;
 static JSValue js_lv_slider_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
     lv_obj_t * cparent = NULL ;
-    if(argc>=1) {
+    if(argc>=1 && !JS_IsUndefined(argv[0]) && !JS_IsNull(argv[0])) {
         CHECK_INSOF_LVOBJ("Obj", argv[0], "arg parent must a lvgl.Obj object")
         cparent = JS_GetOpaqueInternal(argv[0]) ;
     }
@@ -650,7 +741,7 @@ static JSClassDef js_lv_slider_class = {
 static JSClassID js_lv_switch_class_id ;
 static JSValue js_lv_switch_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
     lv_obj_t * cparent = NULL ;
-    if(argc>=1) {
+    if(argc>=1 && !JS_IsUndefined(argv[0]) && !JS_IsNull(argv[0])) {
         CHECK_INSOF_LVOBJ("Obj", argv[0], "arg parent must a lvgl.Obj object")
         cparent = JS_GetOpaqueInternal(argv[0]) ;
     }
@@ -676,7 +767,7 @@ static JSClassDef js_lv_switch_class = {
 static JSClassID js_lv_table_class_id ;
 static JSValue js_lv_table_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
     lv_obj_t * cparent = NULL ;
-    if(argc>=1) {
+    if(argc>=1 && !JS_IsUndefined(argv[0]) && !JS_IsNull(argv[0])) {
         CHECK_INSOF_LVOBJ("Obj", argv[0], "arg parent must a lvgl.Obj object")
         cparent = JS_GetOpaqueInternal(argv[0]) ;
     }
@@ -702,7 +793,7 @@ static JSClassDef js_lv_table_class = {
 static JSClassID js_lv_textarea_class_id ;
 static JSValue js_lv_textarea_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
     lv_obj_t * cparent = NULL ;
-    if(argc>=1) {
+    if(argc>=1 && !JS_IsUndefined(argv[0]) && !JS_IsNull(argv[0])) {
         CHECK_INSOF_LVOBJ("Obj", argv[0], "arg parent must a lvgl.Obj object")
         cparent = JS_GetOpaqueInternal(argv[0]) ;
     }
@@ -2226,9 +2317,9 @@ static JSValue js_lv_obj_set_flex_flow(JSContext *ctx, JSValueConst this_val, in
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.setFlexFlow() must be called as a lvgl.Obj method")
     }
-    uint8_t flow ;
-    if(JS_ToUint32(ctx, &flow, argv[0])!=0){
-        THROW_EXCEPTION("arg flow of method lvgl.Obj.setFlexFlow() must be a number")
+    lv_flex_flow_t flow ;
+    if(!lv_flex_flow_jsstr_to_code(ctx, argv[0], &flow)) {
+        return JS_EXCEPTION ;
     }
     lv_obj_set_flex_flow(thisobj, flow) ;
     JSValue retval = JS_UNDEFINED ;
@@ -2243,17 +2334,17 @@ static JSValue js_lv_obj_set_flex_align(JSContext *ctx, JSValueConst this_val, i
     if(!thisobj) {
         THROW_EXCEPTION("lvgl.Obj.setFlexAlign() must be called as a lvgl.Obj method")
     }
-    uint8_t main_place ;
-    if(JS_ToUint32(ctx, &main_place, argv[0])!=0){
-        THROW_EXCEPTION("arg main_place of method lvgl.Obj.setFlexAlign() must be a number")
+    lv_flex_align_t main_place ;
+    if(!lv_flex_align_jsstr_to_code(ctx, argv[0], &main_place)) {
+        return JS_EXCEPTION ;
     }
-    uint8_t cross_place ;
-    if(JS_ToUint32(ctx, &cross_place, argv[1])!=0){
-        THROW_EXCEPTION("arg cross_place of method lvgl.Obj.setFlexAlign() must be a number")
+    lv_flex_align_t cross_place ;
+    if(!lv_flex_align_jsstr_to_code(ctx, argv[1], &cross_place)) {
+        return JS_EXCEPTION ;
     }
-    uint8_t track_cross_place ;
-    if(JS_ToUint32(ctx, &track_cross_place, argv[2])!=0){
-        THROW_EXCEPTION("arg track_cross_place of method lvgl.Obj.setFlexAlign() must be a number")
+    lv_flex_align_t track_cross_place ;
+    if(!lv_flex_align_jsstr_to_code(ctx, argv[2], &track_cross_place)) {
+        return JS_EXCEPTION ;
     }
     lv_obj_set_flex_align(thisobj, main_place, cross_place, track_cross_place) ;
     JSValue retval = JS_UNDEFINED ;

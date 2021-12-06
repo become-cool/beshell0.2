@@ -110,16 +110,16 @@ function __mkrequire(__dirname) {
         // JS 文件
         else {
             let scriptDir = dirname(path)
-            let script = `var _$_module$ = {exports:{}} ; (function(exports, require, module, __filename, __dirname) { ${beapi.fs.readFileSync(path)}
-})(_$_module$.exports, Module.__mkrequire("${scriptDir}"), _$_module$, "${path}", "${scriptDir}");
-_$_module$.exports`
+            // let script = "(function(require,__filename,__dirname) {var exports={};var module = {exports};" + beapi.fs.readFileSync(path) + ';return module.exports})(Module.__mkrequire("'+scriptDir+'"),"'+path+'","'+scriptDir+'");'
+            let script = `(function(require,__filename,__dirname) {var exports={};var module = {exports}; ${beapi.fs.readFileSync(path)} ; return module.exports})(Module.__mkrequire('${scriptDir}'),'${path}','${scriptDir}');`
+
             Module.caches[path] = evalAsFile(script, path)
         }
         return Module.caches[path]
     }
 }
 
-let Module = {
+const Module = {
     caches: {} ,
     globalPaths: [
         '/lib/node_modules'

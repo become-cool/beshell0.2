@@ -1,7 +1,9 @@
 #include "utils.h"
+#include "mallocf.h"
 #include <time.h>
 #include <stdarg.h>
 #include <string.h>
+#include <stdbool.h>
 
 uint64_t gettime() {
 	struct timespec tm = {0, 0};
@@ -10,23 +12,15 @@ uint64_t gettime() {
 }
 
 
-char * mallocf(char * format, ...) {
+char * mallocf(char * fmt, ...) {
+	char *result;
+	va_list args;
 
-	char * str = NULL ;
+	va_start( args, fmt );
+	result = vstrdupf( fmt, args );
+	va_end( args );
 
-    va_list argptr;
-    va_start(argptr, format);
-
-	size_t len = vsnprintf(NULL, 0, format, argptr) ;
-	if(len) {
-		str = malloc(len+1) ;
-		if(str) {
-			vsnprintf(str, len+1, format,argptr ) ;
-		}
-	}
-
-	va_end(argptr);
-	return str ;
+	return result;
 }
 
 void freeArrayBuffer(JSRuntime *rt, void *opaque, void *ptr) {
@@ -75,4 +69,13 @@ JSValue js_get_glob_prop(JSContext *ctx, int depth, ...) {
 	va_end(argptr);
 
 	return JS_GetPropertyStr(ctx,obj,name) ;
+}
+
+void echo_error(JSContext * ctx) ;
+void eval_code_len(JSContext *ctx,const char * str,size_t len,const char * filename) {
+    JSValue ret = JS_Eval(ctx, str, len, filename, JS_EVAL_TYPE_GLOBAL) ;   // JS_EVAL_FLAG_STRIP
+	if(JS_IsException(ret)) {
+		echo_error(ctx) ;
+	}
+	JS_FreeValue(ctx, ret) ;
 }

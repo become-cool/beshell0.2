@@ -13,7 +13,13 @@
         "string.h": "c",
         "stdint.h": "c",
         "stdio.h": "c",
-        "stdarg.h": "c"
+        "stdarg.h": "c",
+        "malloc.h": "c",
+        "stdlib.h": "c",
+        "fcntl.h": "c",
+        "stat.h": "c",
+        "stdbool.h": "c",
+        "signal.h": "c"
     },
     "cmake.configureOnOpen": false
 }

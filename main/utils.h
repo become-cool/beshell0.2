@@ -3,6 +3,12 @@
 
 #include "quickjs-libc.h"
 
+#ifdef SIMULATION
+
+void echo_error(JSContext *) ;
+
+#endif
+
 #define VAR_REFCNT(var) ((JSRefCountHeader *)JS_VALUE_GET_PTR(var))->ref_count
 #define P_VAR_REFCNT(var) printf(#var" ref count:%d @%d\n", VAR_REFCNT(var), __LINE__) ;
 
@@ -52,7 +58,9 @@
 	JS_FreeValue(ctx, ret) ;                                                        \
     }
 
-#define EVAL_CODE(str, filename) EVAL_CODE_LEN(str, strlen(str), filename)
+void eval_code_len(JSContext *ctx, const char * str,size_t len,const char * filename) ;
+
+#define EVAL_CODE(str, filename) eval_code_len(ctx, str, strlen(str), filename) ;
 
 #define CALL_FUNC_EX(ctx, func, thisobj, argc, argv)                                \
     {                                                                               \
@@ -108,7 +116,7 @@ void freeArrayBuffer(JSRuntime *rt, void *opaque, void *ptr) ;
     int32_t cvar = 0 ;                                                              \
     {                                                                               \
         JSValue jsvar = JS_GetPropertyStr(ctx, obj, propName) ;                     \
-        if( jsvar==JS_UNDEFINED ) {                                                 \
+        if( JS_IsUndefined(jsvar) ) {                                               \
             JS_ThrowReferenceError(ctx, "property %s not exists", propName) ;       \
             goto error_goto ;                                                       \
         }                                                                           \

@@ -1,0 +1,36 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "gdb Remote Launch",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/pc/build/beshell",
+            "args": ["myarg1", "myarg2", "myarg3"],
+            "stopAtEntry": true,
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "gdb",
+            "miDebuggerArgs": "gdb",
+            "linux": {
+                "MIMode": "gdb",
+                "miDebuggerPath": "/usr/bin/gdb",
+                "miDebuggerServerAddress": "172.17.139.4:1234",
+            },
+            "logging": {
+                "moduleLoad": false,
+                "engineLogging": false,
+                "trace": false
+            },
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "cwd": "${workspaceFolder}",
+        }
+    ]
+}

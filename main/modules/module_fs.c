@@ -1,22 +1,45 @@
 #include "module_fs.h"
 #include "logging.h"
-#include "diskio_wl.h"
-#include "vfs_fat_internal.h"
 #include <fcntl.h>
-#include "esp_littlefs.h"
 #include <sys/stat.h>
 #include <dirent.h>
 #include <unistd.h>
 #include "utils.h"
 #include <errno.h>
+#include <stdbool.h>
 
+
+    
+#ifndef SIMULATION
+#include "diskio_wl.h"
+#include "esp_littlefs.h"
+#include "vfs_fat_internal.h"
 LOG_TAG("fs")
+#endif
+
+char * vfs_path_prefix = PATH_PREFIX ;
+void module_fs_set_vfs_path_prefix(char * path) {
+    vfs_path_prefix = path ;
+}
+
+char * vfspath_to_fs(const char * path) {
+    size_t pathlen = strlen(path) ;
+    size_t prefixlen = strlen(vfs_path_prefix) ;
+    char * fullpath = (void *)malloc(prefixlen+pathlen+1) ;
+    strcpy(fullpath, vfs_path_prefix) ;
+    strcpy(fullpath+prefixlen, path) ;
+    return fullpath ;
+}
 
 // esp32 vfs 不能挂在根目录，将整个系统挂载到 /fs 下，访问时自动加上
 char * js_arg_to_vfspath(JSContext *ctx, JSValueConst argv) {
+    
     char * jspath = JS_ToCString(ctx, argv) ;
-    char * path = mallocf(PATH_PREFIX"%s", jspath) ;
+
+    char * path = vfspath_to_fs(jspath) ;
+    // char * path = mallocf(PATH_PREFIX"%s", jspath) ;
     JS_FreeCString(ctx, jspath) ;
+
     return path ;
 }
 
@@ -124,22 +147,36 @@ bool isFile(const char * path) {
 }
 
 // 递归创建目录
+#ifdef WIN32
+int mkdir_p(char* file_path) {
+#else
 int mkdir_p(char* file_path, mode_t mode) {
+#endif
     if( !file_path || !(*file_path) )
         return -1 ;
-    for (char* p = strchr(file_path + 1, '/'); p; p = strchr(p + 1, '/')) {
+    char* p = strchr(file_path + 1, '/') ;
+    while (p!=NULL) {
         *p = '\0';
+#ifdef WIN32
+        if (mkdir(file_path) == -1) {
+#else
         if (mkdir(file_path, mode) == -1) {
+#endif
             if (errno != EEXIST) {
                 *p = '/';
                 return -1;
             }
         }
         *p = '/';
+        p = strchr(p + 1, '/') ;
     }
 
     if( !isDir(file_path) ) {
+#ifdef WIN32
+        return mkdir(file_path) ;
+#else
         return mkdir(file_path, mode) ;
+#endif
     }
     else 
         return 0 ;
@@ -170,10 +207,18 @@ JSValue js_fs_mkdir_sync(JSContext *ctx, JSValueConst this_val, int argc, JSValu
 
     bool ret ;
     if(recursive) {
+#ifdef WIN32
+        ret = mkdir_p(path)>=0 ;
+#else
         ret = mkdir_p(path, ACCESSPERMS)>=0 ;
+#endif
     }
     else {
+#ifdef WIN32
+        ret = mkdir(path)>=0 ;
+#else
         ret = mkdir(path, ACCESSPERMS)>=0 ;
+#endif
     }
     free(path) ;
     return ret? JS_TRUE: JS_FALSE ;
@@ -208,7 +253,6 @@ JSValue js_fs_unlink_sync(JSContext *ctx, JSValueConst this_val, int argc, JSVal
  *  offset=0 int
  */
 JSValue js_fs_read_file_sync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
-    
     JS2VSFPath(path, argv[0])
     CHECK_ARGV0_NOT_DIR(path)
 
@@ -232,21 +276,19 @@ JSValue js_fs_read_file_sync(JSContext *ctx, JSValueConst this_val, int argc, JS
     char * buff = malloc(readlen) ;
     if(!buff) {
         free(path) ;
-        JS_ThrowReferenceError(ctx, "Failed to malloc buff");
-        return JS_EXCEPTION ;
+        THROW_EXCEPTION("Failed to malloc buff");
     }
 
-	int fd = fopen(path, "r");
+	FILE * fd = fopen(path, "r");
     free(path) ;
 
-    if(fd<0) {
+    if(NULL==fd) {
         free(buff) ;
-        JS_ThrowReferenceError(ctx, "Failed to open file (%d).", fd);
-        return JS_EXCEPTION ;
+        THROW_EXCEPTION("Failed to open file (%d).", errno);
     }
-
-    if(offset>0)
+    if(offset>0) {
         fseek(fd, offset, SEEK_SET) ;
+    }
 
     int readedBytes = fread(buff, 1, readlen, fd) ;
     // buff[readedBytes] = 0 ;
@@ -345,7 +387,7 @@ JSValue js_fs_readdir_sync(JSContext *ctx, JSValueConst this_val, int argc, JSVa
     }
     
     struct dirent *dirEnt;
-    JSValue ret = NULL ;
+    JSValue ret = JS_NULL ;
     
     if(detail)
         ret = JS_NewObject(ctx) ;
@@ -456,9 +498,11 @@ JSValue js_fs_info(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst
     size_t total = 0 ;
     size_t used = 0 ;
 
+#ifndef SIMULATION
     if( esp_littlefs_info("fs", &total, &used) != ESP_OK ) {
         THROW_EXCEPTION("esp_littlefs_info() bad")
     }
+#endif
 
     JSValue obj = JS_NewObject(ctx) ;
     JS_SetPropertyStr(ctx, obj, "total", JS_NewUint32(ctx, total));
@@ -467,6 +511,7 @@ JSValue js_fs_info(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst
     return obj ;
 }
 
+#ifndef SIMULATION
 void extend_partition() {
     // 检查 unextend 文件
     struct stat statbuf;
@@ -537,7 +582,7 @@ bool fs_init() {
     
     return true ;
 }
-
+#endif
 
 void require_module_fs(JSContext *ctx) {
 

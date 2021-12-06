@@ -133,7 +133,7 @@ static inline int ctz32(unsigned int a)
 static inline int ctz64(uint64_t a)
 {
     return __builtin_ctzll(a);
-}
+};
 
 struct __attribute__((packed)) packed_u64 {
     uint64_t v;

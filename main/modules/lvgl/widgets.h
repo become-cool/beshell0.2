@@ -21,4 +21,9 @@ JSValue lv_flex_flow_code_to_jsstr(JSContext *ctx, lv_flex_flow_t code) ;
 bool lv_flex_align_jsstr_to_code(JSContext *ctx, JSValue jsstr, lv_flex_align_t* out) ;
 JSValue lv_flex_align_code_to_jsstr(JSContext *ctx, lv_flex_align_t code) ;
 
+bool lv_align_jsstr_to_code(JSContext *ctx, JSValue jsstr, lv_align_t* out) ;
+JSValue lv_align_code_to_jsstr(JSContext *ctx, lv_align_t code) ;
+
+bool lv_dir_jsstr_to_code(JSContext *ctx, JSValue jsstr, lv_dir_t* out) ;
+JSValue lv_dir_code_to_jsstr(JSContext *ctx, lv_dir_t code) ;
 #endif

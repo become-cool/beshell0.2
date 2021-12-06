@@ -103,7 +103,7 @@ module.exports = {
     "lv_obj_readjust_scroll": [null, [["lv_anim_enable_t","anim_en"]], "void"],
     // "lv_obj_add_style": [null, [["lv_style_t *","style"],["lv_style_selector_t","selector"]], "void"],
     // "lv_obj_remove_style": [null, [["lv_style_t *","style"],["lv_style_selector_t","selector"]], "void"],
-    // "lv_obj_remove_style_all": [null, [], "void"],
+    "lv_obj_remove_style_all": [null, [], "void"],
     // "lv_obj_report_style_change": [null, [["lv_style_t *","style"]], "void"],
     // "lv_obj_refresh_style": [null, [["lv_part_t","part"],["lv_style_prop_t","prop"]], "void"],
     // "lv_obj_enable_style_refresh": [null, [["bool","en"]], "void"],

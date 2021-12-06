@@ -1,27 +1,36 @@
 #include "task_js.h"
+#include <string.h>
+#include <stdbool.h>
 #include "utils.h"
+#include "eventloop.h"
+
+#ifndef SIMULATION
 #include "telnet.h"
 #include "sniffer.h"
-#include "eventloop.h"
 #include "webtelnet.h"
+#else
+#include "repl.h"
+#endif
+
 #include "module_events.h"
-#include "module_wifi.h"
 #include "module_fs.h"
 #include "module_utils.h"
+#ifndef SIMULATION
+#include "module_wifi.h"
 #include "module_gpio.h"
 #include "module_serial.h"
 #include "module_socks.h"
 #include "module_http.h"
+#endif
 #include "module_lvgl.h"
+#include "beshell.h"
 
+#ifndef SIMULATION
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-
-#include <string.h>
 #include <nvs_flash.h>
-
 #include "esp_vfs_fat.h"
-#include "beshell.h"
+#endif
 
 
 JSRuntime *rt;
@@ -57,7 +66,9 @@ JSValue js_process_reset(JSContext *ctx, JSValueConst this_val, int argc, JSValu
     return JS_UNDEFINED ;
 }
 JSValue js_process_reboot(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+#ifndef SIMULATION
     esp_restart() ;
+#endif
     return JS_UNDEFINED ;
 }
 
@@ -65,12 +76,18 @@ JSValue js_process_reboot(JSContext *ctx, JSValueConst this_val, int argc, JSVal
 JSValue js_console_print(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(1)
     size_t len = 0 ;
-    char * str = JS_ToCStringLen(ctx, &len, argv[0]) ;
+    const char * str = JS_ToCStringLen(ctx, &len, argv[0]) ;
     if(!str) {
         THROW_EXCEPTION("not a avalid string.") 
     }
     if(len) {
+#ifndef SIMULATION
         telnet_send_pkg(echo_pkgid(), CMD_OUTPUT, str, len) ;
+#else
+        printf(str) ;
+        printf("\n") ;
+        fflush(stdout) ;
+#endif
     }
     JS_FreeCString(ctx, str) ;
     return JS_UNDEFINED ;
@@ -103,7 +120,13 @@ JSValue js_console_log(JSContext *ctx, JSValueConst this_val, int argc, JSValueC
     }
     buff[totalLen-1] = 0 ;
 
+#ifndef SIMULATION
     telnet_send_pkg(echo_pkgid(), CMD_OUTPUT, buff, totalLen-1) ;
+#else
+    printf(buff) ;
+    printf("\n") ;
+    fflush(stdout) ;
+#endif
 
     for(i = 0; i < argc; i++) {
         JS_FreeCString(ctx, strlst[i]);
@@ -132,7 +155,12 @@ void require_module_process(JSContext *ctx) {
     
     JSValue versions = JS_NewObject(ctx) ;
     JS_SetPropertyStr(ctx, versions, "beshell", JS_NewString(ctx, BESHELL_VERSION));
+#ifndef SIMULATION
     JS_SetPropertyStr(ctx, versions, "esp-idf", JS_NewString(ctx, ESPIDF_VERSION));
+#else
+    JS_SetPropertyStr(ctx, versions, "esp-idf", JS_NewString(ctx, "none"));
+    JS_SetPropertyStr(ctx, process, "simulate", JS_NewBool(ctx, true));
+#endif
     JS_SetPropertyStr(ctx, versions, "quickjs", JS_NewString(ctx, QUICKJS_VERSION));
     JS_SetPropertyStr(ctx, process, "versions", versions);
     
@@ -188,19 +216,27 @@ static JSContext * JS_NewCustomContext(JSRuntime *rt)
     require_module_fs(ctx) ;
     require_module_utils(ctx) ;
     require_module_events(ctx) ;
+    require_module_process(ctx) ;  
+#ifndef SIMULATION
     require_module_wifi(ctx) ;
-    require_module_gpio(ctx) ;
-    require_module_process(ctx) ;    
+    require_module_gpio(ctx) ;  
     require_module_telnet(ctx) ;
     require_module_serial(ctx) ;
     require_module_socks(ctx) ;
     require_module_http(ctx) ;
+#endif
     require_module_lvgl(ctx) ;
 
     return ctx;
 }
 
 #define InitScriptTpl "require('/etc/rc%d.d.js')"
+
+void eval_rc_script(JSContext *ctx, const char * path) {
+    char * fullpath = vfspath_to_fs(path) ;
+    evalScript(ctx, fullpath) ;
+    free(fullpath) ;
+}
 
 void init_quickjs() {
     if(rt!=NULL) {
@@ -212,19 +248,25 @@ void init_quickjs() {
     ctx = JS_NewCustomContext(rt);
 
     // base 函数
-    evalScript(ctx, "/fs/lib/base/console.js") ;
-    evalScript(ctx, "/fs/lib/base/require.js") ;
+    eval_rc_script(ctx, "/lib/base/console.js") ;
+    eval_rc_script(ctx, "/lib/base/require.js") ;
 
     // 0等级，不加载任何启动脚本，作为安全模式
-    if(boot_level>0) {  
+    if(boot_level>0) { 
+#ifndef SIMULATION    
         echof("init level: %d\n", boot_level) ;
+#else
+        printf("init level: %d\n", boot_level) ;
+#endif
         char * initScriptCodeBuff = mallocf(InitScriptTpl, boot_level) ;
         EVAL_CODE(initScriptCodeBuff, ":init.d")
         free(initScriptCodeBuff) ;
     }
 
+#ifndef SIMULATION
     // ready 包
     telnet_send_ready() ;
+#endif
 }
 
 void deinit_quickjs() {
@@ -236,35 +278,41 @@ void deinit_quickjs() {
 }
 
 void task_js_main(){
-    
+
+#ifndef SIMULATION
     nvs_flash_init();
 
     fs_init() ;
     wifi_init() ;
     webtelnet_init() ;
+#endif
     init_lvgl() ;
 
+#ifndef SIMULATION
     socks_init() ;
     telnet_init() ;
     sniffer_init() ;
     gpio_init() ;
     http_init() ;
+#else
+    repl_init() ;
+#endif
 
     init_quickjs() ;
-
-
 
     while(1) {
 
         if(requst_reset) {
 
-            telnet_on_before_reset(ctx) ;
             eventloop_on_before_reset(ctx) ;
+#ifndef SIMULATION
+            telnet_on_before_reset(ctx) ;
             gpio_on_before_reset(ctx) ;
             serial_on_before_reset(ctx) ;
             socks_on_before_reset(ctx) ;
             http_on_before_reset(ctx) ;
             wifi_reset(ctx) ;
+#endif
 
             deinit_quickjs() ;
             init_quickjs() ;
@@ -273,15 +321,20 @@ void task_js_main(){
         }
 
         js_std_loop(ctx) ;
+#ifndef SIMULATION
         telnet_loop(ctx) ;
         sniffer_loop() ;
         socks_udp_loop(ctx) ;
         gpio_loop(ctx) ;
+#else
         lvgl_loop(ctx) ;
+        repl_loop(ctx) ;
+#endif
         eventloop_pump(ctx) ;
 
         js_std_loop(ctx) ;
-        
+#ifndef SIMULATION
         vTaskDelay(1) ;
+#endif
     }
 }

@@ -32,8 +32,6 @@
 extern "C" {
 #endif
 
-#define dd printf("%d\n", __LINE__) ;
-
 #if defined(__GNUC__) || defined(__clang__)
 #define js_likely(x)          __builtin_expect(!!(x), 1)
 #define js_unlikely(x)        __builtin_expect(!!(x), 0)
@@ -322,7 +320,7 @@ typedef struct JSMallocState {
 } JSMallocState;
 
 
-size_t malloc_usable_size(const void *ptr) ;
+size_t malloc_usable_size(void *ptr) ;
 
 typedef struct JSMallocFunctions {
     void *(*js_malloc)(JSMallocState *s, size_t size);

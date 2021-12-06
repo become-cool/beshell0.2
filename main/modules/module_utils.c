@@ -1,16 +1,18 @@
 #include "module_utils.h"
-#include "module_utils.h"
+#include <stdbool.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <time.h>
 #include "logging.h"
+#include "utils.h"
+#include "module_fs.h"
+#include "eventloop.h"
+
+#ifndef SIMULATION
 #include "esp_system.h"
 #include "esp_task_wdt.h"
 #include "soc/soc.h"
-#include <string.h>
-#include <time.h>
-#include "eventloop.h"
-#include "utils.h"
 #include "telnet.h"
-#include "module_fs.h"
-
 #include "untar.h"
 #include "libb64/cdecode.h"
 #include "libb64/cencode.h"
@@ -21,19 +23,6 @@ JSValue js_util_free_stacks(JSContext *ctx, JSValueConst this_val, int argc, JSV
     (void) argc ;
     (void) argv ;
     return JS_NewInt32(ctx, esp_get_free_heap_size()) ;
-}
-
-JSValue js_util_uuid(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
-
-    uint8_t mac_addr[6] = {0};
-    char mac_addr_str[13] = {0};
-    esp_efuse_mac_get_default(mac_addr);
-
-    sprintf(mac_addr_str, "%02x%02x%02x%02x%02x%02x", mac_addr[0], mac_addr[1], mac_addr[2], mac_addr[3], mac_addr[4], mac_addr[5]) ;
-    mac_addr_str[12] = 0 ;
-    // printf(mac_addr_str, "[%02x%02x%02x%02x%02x%02x]\n", mac_addr[0], mac_addr[1], mac_addr[2], mac_addr[3], mac_addr[4], mac_addr[5]) ;
-
-    return JS_NewStringLen(ctx, mac_addr_str, 12) ;
 }
 
 
@@ -82,34 +71,6 @@ JSValue js_util_time(JSContext *ctx, JSValueConst this_val, int argc, JSValueCon
 	return JS_NewInt64(ctx, gettime()) ;
 }
 
-JSValue js_util_var_ptr(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
-	if(argc<1) {
-        JS_ThrowReferenceError(ctx, "Missing param");
-        return JS_EXCEPTION ;
-	}
-	return JS_NewInt32(ctx, (uint32_t)argv[0]) ;
-}
-JSValue js_util_ptr_refcount(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
-	if(argc<1) {
-        JS_ThrowReferenceError(ctx, "Missing param");
-        return JS_EXCEPTION ;
-	}
-	uint32_t ptr ;
-	if(JS_ToUint32(ctx, &ptr, argv[0]) ) {
-        JS_ThrowReferenceError(ctx, "Invalid param type");
-        return JS_EXCEPTION ;
-	}
-	return JS_NewInt32(ctx, JS_VALUE_HAS_REF_COUNT((JSValue) ptr)? VAR_REFCNT((JSValue) ptr)-1: 0 ) ;
-}
-JSValue js_util_var_refcount(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
-	if(argc<1) {
-        JS_ThrowReferenceError(ctx, "Missing param");
-        return JS_EXCEPTION ;
-	}
-	return JS_NewInt32(ctx, JS_VALUE_HAS_REF_COUNT(argv[0])? VAR_REFCNT(argv[0])-1: 0) ;
-}
-
-
 JSValue js_util_sleep(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     struct timeval tv;
     gettimeofday(&tv, NULL);
@@ -147,6 +108,19 @@ JSValue js_util_sleep(JSContext *ctx, JSValueConst this_val, int argc, JSValueCo
     return JS_UNDEFINED ;
 }
 
+#endif
+
+
+JSValue js_util_var_refcount(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+	if(argc<1) {
+        JS_ThrowReferenceError(ctx, "Missing param");
+        return JS_EXCEPTION ;
+	}
+	return JS_NewInt32(ctx, JS_VALUE_HAS_REF_COUNT(argv[0])? VAR_REFCNT(argv[0])-1: 0) ;
+}
+
+
+
 JSValue __js_util_set_timer(JSContext *ctx, int argc, JSValueConst *argv, bool repeat){
     if(argc<2) {
         JS_ThrowReferenceError(ctx, "Missing param");
@@ -178,7 +152,7 @@ JSValue js_util_clear_timeout(JSContext *ctx, JSValueConst this_val, int argc, J
         JS_ThrowReferenceError(ctx, "Invalid param type");
         return JS_EXCEPTION ;
 	}
-	eventloop_remove(ctx, (struct eventloop_callback_t *)ptr) ;
+	eventloop_remove(ctx, (eventloop_callback_t *)ptr) ;
 	return JS_UNDEFINED ;
 }
 
@@ -188,42 +162,30 @@ JSValue js_util_clear_timeout(JSContext *ctx, JSValueConst this_val, int argc, J
 	"(function(exports, require, module, __filename, __dirname) {\n" 	\
 	"%s" 																\
 	"})(exports); "
-JSValue js_util_require_abspath(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
-	CHECK_ARGC(1)
-	char * path = JS_ToCString(ctx, argv[0]) ;
-
-
-	JS_FreeCString(ctx, path) ;
-	return JS_UNDEFINED ;
-}
 
 void evalScript(JSContext *ctx, const char * path) {
 
     struct stat statbuf;
     if(stat(path,&statbuf)<0) {
-        LOGE("Path not exists: %s\n", path) ;
-        return NULL ;
+        return ;
     }
     if(S_ISDIR(statbuf.st_mode)){
-        LOGE("Path is directory: %s\n", path) ;
-        return NULL ;
+        return ;
     }
     char * buff = malloc(statbuf.st_size+1) ;
     if(!buff) {
-        LOGE("Cound not malloc buff(%d), memory low?\n", (int)statbuf.st_size+1) ;
-        return NULL ;
+        return ;
     }
-	int fd = fopen(path, "r") ;
-    if(fd<0) {
-        LOGE("Cound not open path: %s\n", path) ;
-        return NULL ;
+	FILE * fd = fopen(path, "r") ;
+    if(fd==NULL) {
+        return ;
     }
 
     int readedBytes = fread(buff, 1, statbuf.st_size, fd) ;
     fclose(fd) ;
     buff[readedBytes] = 0 ;
 
-    EVAL_CODE_LEN(buff, readedBytes, path) ;
+    eval_code_len(ctx, buff, readedBytes, path) ;
     free(buff) ;
 }
 
@@ -247,7 +209,33 @@ JSValue js_fs_eval_as_file(JSContext *ctx, JSValueConst this_val, int argc, JSVa
     return ret ;
 }
 
+JSValue js_utils_part_id(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+#ifdef SIMULATION
+    return JS_NewInt32(ctx, 255) ;
+#else
+    int value = REG_READ(0x3FF5A078) ;
+    return JS_NewInt32(ctx, value) ;
+#endif
+}
 
+JSValue js_util_uuid(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+#ifdef SIMULATION
+    return JS_NewString(ctx, "123456789AEF") ;
+#else
+    uint8_t mac_addr[6] = {0};
+    char mac_addr_str[13] = {0};
+    esp_efuse_mac_get_default(mac_addr);
+
+    sprintf(mac_addr_str, "%02x%02x%02x%02x%02x%02x", mac_addr[0], mac_addr[1], mac_addr[2], mac_addr[3], mac_addr[4], mac_addr[5]) ;
+    mac_addr_str[12] = 0 ;
+
+    return JS_NewStringLen(ctx, mac_addr_str, 12) ;
+#endif
+}
+
+
+
+#ifndef SIMULATION
 JSValue js_repl_set_input_func(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(1)
     if(!JS_IsFunction(ctx, argv[0])) {
@@ -257,11 +245,6 @@ JSValue js_repl_set_input_func(JSContext *ctx, JSValueConst this_val, int argc, 
     return JS_UNDEFINED ;
 }
 
-
-JSValue js_utils_part_id(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
-    int value = REG_READ(0x3FF5A078) ;
-    return JS_NewInt32(ctx, value) ;
-}
 
 JSValue js_utils_base64_encode(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(1)
@@ -278,7 +261,7 @@ JSValue js_utils_base64_encode(JSContext *ctx, JSValueConst this_val, int argc, 
     base64_init_encodestate(&_state);
     int len = base64_encode_block((const char *) &src[0], srclen, &code[0], &_state);
     len = base64_encode_blockend((code + len), &_state);
-    
+
     JSValue ret = JS_NewStringLen(ctx, code, codelen) ;
 
     JS_FreeCString(ctx, src) ;
@@ -309,6 +292,7 @@ JSValue js_utils_base64_decode(JSContext *ctx, JSValueConst this_val, int argc, 
 
     return ret ;
 }
+#endif
 
 const uint8_t gamma8_table[256] = {
           0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
@@ -336,7 +320,7 @@ JSValue js_utils_gamma8_correct(JSContext *ctx, JSValueConst this_val, int argc,
     return JS_NewUint32(ctx, gamma8_table[val]) ;
 }
 
-
+#ifndef SIMULATION
 int untar_dist_fd = NULL;
 int untar_entry_header_cb(header_translated_t *proper, int entry_index, void *context_data) {
     if(proper->type == T_NORMAL) {
@@ -396,6 +380,8 @@ JSValue js_fs_untar(JSContext *ctx, JSValueConst this_val, int argc, JSValueCons
 
     return res==0? JS_TRUE: JS_FALSE ;
 }
+
+#endif
 
 JSValue js_string_bytes(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(1)
@@ -553,7 +539,9 @@ JSValue js_read_string_from_ArrayBuffer(JSContext *ctx, JSValueConst this_val, i
 }
 
 JSValue js_feed_watchdog(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+#ifndef SIMULATION
     esp_task_wdt_reset() ;
+#endif
     return JS_UNDEFINED ;
 }
 
@@ -561,23 +549,23 @@ void require_module_utils(JSContext *ctx) {
 
     JSValue global = JS_GetGlobalObject(ctx);
     JSValue beapi = JS_GetPropertyStr(ctx, global, "beapi") ;
-    JS_SetPropertyStr(ctx, beapi, "_repl_set_input_func", JS_NewCFunction(ctx, js_repl_set_input_func, "_repl_set_input_func", 1));
 
 	// utils 
     JSValue utils = JS_NewObject(ctx);
     JS_SetPropertyStr(ctx, beapi, "utils", utils);
+#ifndef SIMULATION
+    JS_SetPropertyStr(ctx, beapi, "_repl_set_input_func", JS_NewCFunction(ctx, js_repl_set_input_func, "_repl_set_input_func", 1));
     JS_SetPropertyStr(ctx, utils, "freeStacks", JS_NewCFunction(ctx, js_util_free_stacks, "freeStacks", 1));
     JS_SetPropertyStr(ctx, utils, "time", JS_NewCFunction(ctx, js_util_time, "time", 1));
     JS_SetPropertyStr(ctx, utils, "setLogLevel", JS_NewCFunction(ctx, js_util_set_log_level, "setLogLevel", 1));
-    JS_SetPropertyStr(ctx, utils, "partId", JS_NewCFunction(ctx, js_utils_part_id, "partId", 1));
-    JS_SetPropertyStr(ctx, utils, "uuid", JS_NewCFunction(ctx, js_util_uuid, "uuid", 1));
-    JS_SetPropertyStr(ctx, utils, "ptrRefCnt", JS_NewCFunction(ctx, js_util_ptr_refcount, "ptrRefCnt", 1));
-    JS_SetPropertyStr(ctx, utils, "varRefCnt", JS_NewCFunction(ctx, js_util_var_refcount, "varRefCnt", 1));
-    JS_SetPropertyStr(ctx, utils, "varPtr", JS_NewCFunction(ctx, js_util_var_ptr, "varPtr", 1));
+    JS_SetPropertyStr(ctx, utils, "untar", JS_NewCFunction(ctx, js_fs_untar, "untar", 1));
     JS_SetPropertyStr(ctx, utils, "base64Encode", JS_NewCFunction(ctx, js_utils_base64_encode, "base64Encode", 1));
     JS_SetPropertyStr(ctx, utils, "base64Decode", JS_NewCFunction(ctx, js_utils_base64_decode, "base64Decode", 1));
+#endif
+    JS_SetPropertyStr(ctx, utils, "partId", JS_NewCFunction(ctx, js_utils_part_id, "partId", 1));
+    JS_SetPropertyStr(ctx, utils, "uuid", JS_NewCFunction(ctx, js_util_uuid, "uuid", 1));
+    JS_SetPropertyStr(ctx, utils, "varRefCnt", JS_NewCFunction(ctx, js_util_var_refcount, "varRefCnt", 1));
     JS_SetPropertyStr(ctx, utils, "gamma8Correct", JS_NewCFunction(ctx, js_utils_gamma8_correct, "gamma8Correct", 1));
-    JS_SetPropertyStr(ctx, utils, "untar", JS_NewCFunction(ctx, js_fs_untar, "untar", 1));
     JS_SetPropertyStr(ctx, utils, "stringBytes", JS_NewCFunction(ctx, js_string_bytes, "stringBytes", 1));
     JS_SetPropertyStr(ctx, utils, "pack", JS_NewCFunction(ctx, js_pack, "pack", 1));
     JS_SetPropertyStr(ctx, utils, "packInt32", JS_NewCFunction(ctx, js_pack_int32, "packInt32", 1));
@@ -589,7 +577,9 @@ void require_module_utils(JSContext *ctx) {
     JS_SetPropertyStr(ctx, utils, "feed", JS_NewCFunction(ctx, js_feed_watchdog, "feed", 1));
 
 	// global
+#ifndef SIMULATION
     JS_SetPropertyStr(ctx, global, "sleep", JS_NewCFunction(ctx, js_util_sleep, "sleep", 1));
+#endif
     JS_SetPropertyStr(ctx, global, "setTimeout", JS_NewCFunction(ctx, js_util_set_timeout, "setTimeout", 1));
     JS_SetPropertyStr(ctx, global, "setInterval", JS_NewCFunction(ctx, js_util_set_interval, "setInterval", 1));
     JS_SetPropertyStr(ctx, global, "clearTimeout", JS_NewCFunction(ctx, js_util_clear_timeout, "clearTimeout", 1));

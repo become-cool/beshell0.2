@@ -20,40 +20,42 @@ function _mkreject(pkgid) {
 let _pending_pkg_id = -1
 let _pending_code = ''
 
-beapi._repl_set_input_func(function(pkgid, remain, pkgcmd, code){
+if(beapi._repl_set_input_func) {
+    beapi._repl_set_input_func(function(pkgid, remain, pkgcmd, code){
 
-    if(_pending_pkg_id>0 && _pending_pkg_id!=pkgid) {
+        if(_pending_pkg_id>0 && _pending_pkg_id!=pkgid) {
+            _pending_pkg_id = -1
+            _pending_code = ''
+        }
+
+        _pending_code+= code
+
+        if(remain>0) {
+            return
+        }
+        
+        code = _pending_code.trim()
         _pending_pkg_id = -1
         _pending_code = ''
-    }
 
-    _pending_code+= code
+        try{
+            if(pkgcmd == CMD_RUN) {
+                evalAsFile(code, "REPL")
+            }
+            else if(pkgcmd == CMD_CALL) {
+                let res = evalAsFile(code, "REPL")
+                telnet.send(pkgid, CMD_RSPN, JSON.stringify(res))
+            }
+            else if(pkgcmd == CMD_CALL_ASYNC) {
+                evalAsFile(`(async ()=>{let resolve = repl._mkresolve(${pkgid});let reject = repl._mkreject(${pkgid}); try{${code}}catch(e){reject(e)}})()`, "REPL")
+            }
 
-    if(remain>0) {
-        return
-    }
-    
-    code = _pending_code.trim()
-    _pending_pkg_id = -1
-    _pending_code = ''
-
-    try{
-        if(pkgcmd == CMD_RUN) {
-            evalAsFile(code, "REPL")
+        } catch(e) {
+            telnet.send(pkgid, CMD_EXCEPTION, console.valueToString(e))
+            return
         }
-        else if(pkgcmd == CMD_CALL) {
-            let res = evalAsFile(code, "REPL")
-            telnet.send(pkgid, CMD_RSPN, JSON.stringify(res))
-        }
-        else if(pkgcmd == CMD_CALL_ASYNC) {
-            evalAsFile(`(async ()=>{let resolve = repl._mkresolve(${pkgid});let reject = repl._mkreject(${pkgid}); try{${code}}catch(e){reject(e)}})()`, "REPL")
-        }
-
-    } catch(e) {
-        telnet.send(pkgid, CMD_EXCEPTION, console.valueToString(e))
-        return
-    }
-})
+    })
+}
 
 function resolvepath(path) {
     if(path=='~' ) {

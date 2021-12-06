@@ -31,18 +31,22 @@ const conver_uint32 = create_conver_base("uint32_t", "JS_ToUint32")
 const conver_flex_flow = create_conver_mappingconst('lv_flex_flow_t', 'lv_flex_flow_jsstr_to_code')
 const conver_flex_align = create_conver_mappingconst('lv_flex_align_t', 'lv_flex_align_jsstr_to_code')
 
+const conver_align = create_conver_mappingconst('lv_align_t', 'lv_align_jsstr_to_code')
+const conver_dir = create_conver_mappingconst('lv_dir_t', 'lv_dir_jsstr_to_code')
 
 function conver_bool(cargv,i){
     return `    bool ${cargv} = JS_ToBool(ctx, argv[${i}]) ;\r\n`
 }
 
 function conver_int_prop(propName, cargv,i,className,jsmethod) {
-    code = `    JSValue js${cargv}_${propName} = JS_GetPropertyStr(ctx, argv[${i}], "${propName}") ;\r\n`
-    code+= `    if(!JS_IsNumber(js${cargv}_${propName})){\r\n`
-    code+= `        THROW_EXCEPTION("arg ${cargv} of method ${className}.${jsmethod}() missing property x, or is not a number")\r\n`
-    code+= `    }\r\n`
-    code+= `    ${cargv}.${propName} = js${cargv}_${propName} ;\r\n`
-    return code
+    return `    JSValue js${cargv}_${propName} = JS_GetPropertyStr(ctx, argv[${i}], "${propName}") ;
+    if(!JS_IsNumber(js${cargv}_${propName})){
+        THROW_EXCEPTION("arg ${cargv} of method ${className}.${jsmethod}() missing property x, or is not a number")
+    }
+    if(JS_ToInt32(ctx, &${cargv}.${propName}, js${cargv}_${propName})!=0) {
+        THROW_EXCEPTION("property ${propName} of arg ${cargv} is not a number")
+    }
+`
 }
 
 function conver_point(cargv,i,className,jsmethod) {
@@ -86,7 +90,8 @@ const MapC2JS_Conver = {
     "lv_coord_t": conver_int16 ,
     "lv_obj_flag_t": conver_uint32 ,
     "lv_state_t": conver_uint16 ,
-    "lv_align_t": conver_uint8 ,
+    "lv_align_t": conver_align ,
+    "lv_dir_t": conver_dir,
     "bool": conver_bool ,
     "char *": conver_string ,
     "const char *": conver_string ,
@@ -94,7 +99,6 @@ const MapC2JS_Conver = {
     "lv_color_t": conver_uint16 ,
     "lv_scrollbar_mode_t": conver_uint8,
     "lv_scroll_snap_t": conver_uint8,
-    "lv_dir_t": conver_uint8,
     "lv_area_t *": conver_area ,
     "lv_point_t *": conver_point ,
     "lv_obj_t *": conver_obj,
@@ -156,9 +160,10 @@ const MapJS2C_Conver = {
     "lv_obj_flag_t": "JS_NewUint32" ,
     "lv_scrollbar_mode_t": "JS_NewUint32" ,
     "lv_scroll_snap_t": "JS_NewUint32" ,
-    "lv_dir_t": "JS_NewUint32" ,
-    "lv_flex_align_t": "JS_NewUint32",
-    "lv_flex_flow_t": "JS_NewUint32",
+    "lv_dir_t": "lv_dir_code_to_jsstr" ,
+    "lv_align_t": 'lv_align_code_to_jsstr' ,
+    "lv_flex_align_t": "lv_flex_align_code_to_jsstr",
+    "lv_flex_flow_t": "lv_flex_flow_code_to_jsstr",
     "lv_style_selector_t": "JS_NewUint32",
     "lv_label_long_mode_t": "JS_NewUint32",
     "lv_arc_mode_t": "JS_NewUint32",
@@ -203,7 +208,7 @@ function gen_lv_class(cName, className, api, extraMethod) {
         }
         
         codeFuncDef+= `static JSValue js_${cfunc}(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {\r\n`
-        if(argLstConf) {
+        if(argLstConf.length) {
             codeFuncDef+= `    if(argc<${Object.keys(argLstConf).length}) {\r\n`
             codeFuncDef+= `        THROW_EXCEPTION("${className}.${jsmethod}() missing arg")\r\n`
             codeFuncDef+= `    }\r\n`
@@ -473,6 +478,8 @@ function main() {
     code = generateConstMapping(require("./api/const_event"), 'LV_EVENT_', 'lv_event_code_t', 'lv_event', '_LV_EVENT_LAST')
     code+= generateConstMapping(require("./api/const_flex_flow"), 'LV_FLEX_FLOW_', 'lv_flex_flow_t', 'lv_flex_flow', 'LV_FLEX_FLOW_COLUMN_WRAP_REVERSE+1')
     code+= generateConstMapping(require("./api/const_flex_align"), 'LV_FLEX_ALIGN_', 'lv_flex_align_t', 'lv_flex_align', 'LV_FLEX_ALIGN_SPACE_BETWEEN+1')
+    code+= generateConstMapping(require("./api/const_align"), 'LV_ALIGN_', 'lv_align_t', 'lv_align', 'LV_ALIGN_OUT_RIGHT_BOTTOM+1')
+    code+= generateConstMapping(require("./api/const_dir"), 'LV_DIR_', 'lv_dir_t', 'lv_dir', 'LV_DIR_ALL+1')
     src = srcInsert(src, code, const_mapping_mark_start, const_mapping_mark_end)
 
     fs.writeFileSync(dist_path, src)

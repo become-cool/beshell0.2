@@ -2,11 +2,17 @@
 #define _MODULE_FS_H
 
 #include "quickjs-libc.h"
+
+#ifndef SIMULATION
 #include "esp_vfs.h"
 
+bool fs_init() ;
+#endif
 
-char * vfspath(const char * jspath, size_t len) ;
+
+void module_fs_set_vfs_path_prefix(char * path) ;
 char * js_arg_to_vfspath(JSContext *ctx, JSValueConst argv) ;
+char * vfspath_to_fs(const char * path) ;
 
 #define JS2VSFPath(path, arg)                                                       \
     char * path = js_arg_to_vfspath(ctx, arg) ;                                     \
@@ -34,9 +40,12 @@ char * js_arg_to_vfspath(JSContext *ctx, JSValueConst argv) ;
 #define PATH_PREFIX "/fs"
 
 // 递归创建目录
+#ifdef WIN32
+int mkdir_p(char* file_path) ;
+#else
 int mkdir_p(char* file_path, mode_t mode) ;
+#endif
 
-bool fs_init() ;
 void require_module_fs(JSContext *ctx) ;
 
 #endif

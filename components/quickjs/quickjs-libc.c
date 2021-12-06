@@ -571,8 +571,6 @@ JSModuleDef *js_module_loader(JSContext *ctx,
 {
     JSModuleDef *m;
 
-    printf("js_module_loader(%s)\n", module_name) ;
-
     // if (has_suffix(module_name, ".so")) {
     //     // m = js_module_loader_so(ctx, module_name);
     // } else {
@@ -582,7 +580,6 @@ JSModuleDef *js_module_loader(JSContext *ctx,
     
         buf = js_load_file(ctx, &buf_len, module_name);
         if (!buf) {
-            dd
             JS_ThrowReferenceError(ctx, "could not load module filename '%s'",
                                    module_name);
             return NULL;
@@ -595,10 +592,8 @@ JSModuleDef *js_module_loader(JSContext *ctx,
                            JS_EVAL_TYPE_MODULE | JS_EVAL_FLAG_COMPILE_ONLY);
         js_free(ctx, buf);
         if (JS_IsException(func_val)) {
-            dd
             return NULL;
         }
-        dd
         /* XXX: could propagate the exception */
         js_module_set_import_meta(ctx, func_val, TRUE, FALSE);
         /* the module is already referenced, so we must free it */
@@ -1814,52 +1809,52 @@ static void os_signal_handler(int sig_num)
 typedef void (*sighandler_t)(int sig_num);
 #endif
 
-static JSValue js_os_signal(JSContext *ctx, JSValueConst this_val,
-                            int argc, JSValueConst *argv)
-{
-    JSRuntime *rt = JS_GetRuntime(ctx);
-    JSThreadState *ts = JS_GetRuntimeOpaque(rt);
-    JSOSSignalHandler *sh;
-    uint32_t sig_num;
-    JSValueConst func;
-    sighandler_t handler;
+// static JSValue js_os_signal(JSContext *ctx, JSValueConst this_val,
+//                             int argc, JSValueConst *argv)
+// {
+//     JSRuntime *rt = JS_GetRuntime(ctx);
+//     JSThreadState *ts = JS_GetRuntimeOpaque(rt);
+//     JSOSSignalHandler *sh;
+//     uint32_t sig_num;
+//     JSValueConst func;
+//     sighandler_t handler;
 
-    if (!is_main_thread(rt))
-        return JS_ThrowTypeError(ctx, "signal handler can only be set in the main thread");
+//     if (!is_main_thread(rt))
+//         return JS_ThrowTypeError(ctx, "signal handler can only be set in the main thread");
     
-    if (JS_ToUint32(ctx, &sig_num, argv[0]))
-        return JS_EXCEPTION;
-    if (sig_num >= 64)
-        return JS_ThrowRangeError(ctx, "invalid signal number");
-    func = argv[1];
-    /* func = null: SIG_DFL, func = undefined, SIG_IGN */
-    if (JS_IsNull(func) || JS_IsUndefined(func)) {
-        sh = find_sh(ts, sig_num);
-        if (sh) {
-            free_sh(JS_GetRuntime(ctx), sh);
-        }
-        if (JS_IsNull(func))
-            handler = SIG_DFL;
-        else
-            handler = SIG_IGN;
-        signal(sig_num, handler);
-    } else {
-        if (!JS_IsFunction(ctx, func))
-            return JS_ThrowTypeError(ctx, "not a function");
-        sh = find_sh(ts, sig_num);
-        if (!sh) {
-            sh = js_mallocz(ctx, sizeof(*sh));
-            if (!sh)
-                return JS_EXCEPTION;
-            sh->sig_num = sig_num;
-            list_add_tail(&sh->link, &ts->os_signal_handlers);
-        }
-        JS_FreeValue(ctx, sh->func);
-        sh->func = JS_DupValue(ctx, func);
-        signal(sig_num, os_signal_handler);
-    }
-    return JS_UNDEFINED;
-}
+//     if (JS_ToUint32(ctx, &sig_num, argv[0]))
+//         return JS_EXCEPTION;
+//     if (sig_num >= 64)
+//         return JS_ThrowRangeError(ctx, "invalid signal number");
+//     func = argv[1];
+//     /* func = null: SIG_DFL, func = undefined, SIG_IGN */
+//     if (JS_IsNull(func) || JS_IsUndefined(func)) {
+//         sh = find_sh(ts, sig_num);
+//         if (sh) {
+//             free_sh(JS_GetRuntime(ctx), sh);
+//         }
+//         if (JS_IsNull(func))
+//             handler = SIG_DFL;
+//         else
+//             handler = SIG_IGN;
+//         signal(sig_num, handler);
+//     } else {
+//         if (!JS_IsFunction(ctx, func))
+//             return JS_ThrowTypeError(ctx, "not a function");
+//         sh = find_sh(ts, sig_num);
+//         if (!sh) {
+//             sh = js_mallocz(ctx, sizeof(*sh));
+//             if (!sh)
+//                 return JS_EXCEPTION;
+//             sh->sig_num = sig_num;
+//             list_add_tail(&sh->link, &ts->os_signal_handlers);
+//         }
+//         JS_FreeValue(ctx, sh->func);
+//         sh->func = JS_DupValue(ctx, func);
+//         signal(sig_num, os_signal_handler);
+//     }
+//     return JS_UNDEFINED;
+// }
 
 #if defined(__linux__) || defined(__APPLE__)
 static int64_t get_time_ms(void)
@@ -2690,202 +2685,202 @@ static int my_execvpe(const char *filename, char **argv, char **envp)
 }
 
 /* exec(args[, options]) -> exitcode */
-static JSValue js_os_exec(JSContext *ctx, JSValueConst this_val,
-                          int argc, JSValueConst *argv)
-{
-    JSValueConst options, args = argv[0];
-    JSValue val, ret_val;
-    const char **exec_argv, *file = NULL, *str, *cwd = NULL;
-    char **envp = environ;
-    uint32_t exec_argc, i;
-    int ret, pid, status;
-    BOOL block_flag = TRUE, use_path = TRUE;
-    static const char *std_name[3] = { "stdin", "stdout", "stderr" };
-    int std_fds[3];
-    uint32_t uid = -1, gid = -1;
+// static JSValue js_os_exec(JSContext *ctx, JSValueConst this_val,
+//                           int argc, JSValueConst *argv)
+// {
+//     JSValueConst options, args = argv[0];
+//     JSValue val, ret_val;
+//     const char **exec_argv, *file = NULL, *str, *cwd = NULL;
+//     char **envp = environ;
+//     uint32_t exec_argc, i;
+//     int ret, pid, status;
+//     BOOL block_flag = TRUE, use_path = TRUE;
+//     static const char *std_name[3] = { "stdin", "stdout", "stderr" };
+//     int std_fds[3];
+//     uint32_t uid = -1, gid = -1;
     
-    val = JS_GetPropertyStr(ctx, args, "length");
-    if (JS_IsException(val))
-        return JS_EXCEPTION;
-    ret = JS_ToUint32(ctx, &exec_argc, val);
-    JS_FreeValue(ctx, val);
-    if (ret)
-        return JS_EXCEPTION;
-    /* arbitrary limit to avoid overflow */
-    if (exec_argc < 1 || exec_argc > 65535) {
-        return JS_ThrowTypeError(ctx, "invalid number of arguments");
-    }
-    exec_argv = js_mallocz(ctx, sizeof(exec_argv[0]) * (exec_argc + 1));
-    if (!exec_argv)
-        return JS_EXCEPTION;
-    for(i = 0; i < exec_argc; i++) {
-        val = JS_GetPropertyUint32(ctx, args, i);
-        if (JS_IsException(val))
-            goto exception;
-        str = JS_ToCString(ctx, val);
-        JS_FreeValue(ctx, val);
-        if (!str)
-            goto exception;
-        exec_argv[i] = str;
-    }
-    exec_argv[exec_argc] = NULL;
+//     val = JS_GetPropertyStr(ctx, args, "length");
+//     if (JS_IsException(val))
+//         return JS_EXCEPTION;
+//     ret = JS_ToUint32(ctx, &exec_argc, val);
+//     JS_FreeValue(ctx, val);
+//     if (ret)
+//         return JS_EXCEPTION;
+//     /* arbitrary limit to avoid overflow */
+//     if (exec_argc < 1 || exec_argc > 65535) {
+//         return JS_ThrowTypeError(ctx, "invalid number of arguments");
+//     }
+//     exec_argv = js_mallocz(ctx, sizeof(exec_argv[0]) * (exec_argc + 1));
+//     if (!exec_argv)
+//         return JS_EXCEPTION;
+//     for(i = 0; i < exec_argc; i++) {
+//         val = JS_GetPropertyUint32(ctx, args, i);
+//         if (JS_IsException(val))
+//             goto exception;
+//         str = JS_ToCString(ctx, val);
+//         JS_FreeValue(ctx, val);
+//         if (!str)
+//             goto exception;
+//         exec_argv[i] = str;
+//     }
+//     exec_argv[exec_argc] = NULL;
 
-    for(i = 0; i < 3; i++)
-        std_fds[i] = i;
+//     for(i = 0; i < 3; i++)
+//         std_fds[i] = i;
     
-    /* get the options, if any */
-    if (argc >= 2) {
-        options = argv[1];
+//     /* get the options, if any */
+//     if (argc >= 2) {
+//         options = argv[1];
 
-        if (get_bool_option(ctx, &block_flag, options, "block"))
-            goto exception;
-        if (get_bool_option(ctx, &use_path, options, "usePath"))
-            goto exception;
+//         if (get_bool_option(ctx, &block_flag, options, "block"))
+//             goto exception;
+//         if (get_bool_option(ctx, &use_path, options, "usePath"))
+//             goto exception;
         
-        val = JS_GetPropertyStr(ctx, options, "file");
-        if (JS_IsException(val))
-            goto exception;
-        if (!JS_IsUndefined(val)) {
-            file = JS_ToCString(ctx, val);
-            JS_FreeValue(ctx, val);
-            if (!file)
-                goto exception;
-        }
+//         val = JS_GetPropertyStr(ctx, options, "file");
+//         if (JS_IsException(val))
+//             goto exception;
+//         if (!JS_IsUndefined(val)) {
+//             file = JS_ToCString(ctx, val);
+//             JS_FreeValue(ctx, val);
+//             if (!file)
+//                 goto exception;
+//         }
 
-        val = JS_GetPropertyStr(ctx, options, "cwd");
-        if (JS_IsException(val))
-            goto exception;
-        if (!JS_IsUndefined(val)) {
-            cwd = JS_ToCString(ctx, val);
-            JS_FreeValue(ctx, val);
-            if (!cwd)
-                goto exception;
-        }
+//         val = JS_GetPropertyStr(ctx, options, "cwd");
+//         if (JS_IsException(val))
+//             goto exception;
+//         if (!JS_IsUndefined(val)) {
+//             cwd = JS_ToCString(ctx, val);
+//             JS_FreeValue(ctx, val);
+//             if (!cwd)
+//                 goto exception;
+//         }
 
-        /* stdin/stdout/stderr handles */
-        for(i = 0; i < 3; i++) {
-            val = JS_GetPropertyStr(ctx, options, std_name[i]);
-            if (JS_IsException(val))
-                goto exception;
-            if (!JS_IsUndefined(val)) {
-                int fd;
-                ret = JS_ToInt32(ctx, &fd, val);
-                JS_FreeValue(ctx, val);
-                if (ret)
-                    goto exception;
-                std_fds[i] = fd;
-            }
-        }
+//         /* stdin/stdout/stderr handles */
+//         for(i = 0; i < 3; i++) {
+//             val = JS_GetPropertyStr(ctx, options, std_name[i]);
+//             if (JS_IsException(val))
+//                 goto exception;
+//             if (!JS_IsUndefined(val)) {
+//                 int fd;
+//                 ret = JS_ToInt32(ctx, &fd, val);
+//                 JS_FreeValue(ctx, val);
+//                 if (ret)
+//                     goto exception;
+//                 std_fds[i] = fd;
+//             }
+//         }
 
-        val = JS_GetPropertyStr(ctx, options, "env");
-        if (JS_IsException(val))
-            goto exception;
-        if (!JS_IsUndefined(val)) {
-            envp = build_envp(ctx, val);
-            JS_FreeValue(ctx, val);
-            if (!envp)
-                goto exception;
-        }
+//         val = JS_GetPropertyStr(ctx, options, "env");
+//         if (JS_IsException(val))
+//             goto exception;
+//         if (!JS_IsUndefined(val)) {
+//             envp = build_envp(ctx, val);
+//             JS_FreeValue(ctx, val);
+//             if (!envp)
+//                 goto exception;
+//         }
         
-        val = JS_GetPropertyStr(ctx, options, "uid");
-        if (JS_IsException(val))
-            goto exception;
-        if (!JS_IsUndefined(val)) {
-            ret = JS_ToUint32(ctx, &uid, val);
-            JS_FreeValue(ctx, val);
-            if (ret)
-                goto exception;
-        }
+//         val = JS_GetPropertyStr(ctx, options, "uid");
+//         if (JS_IsException(val))
+//             goto exception;
+//         if (!JS_IsUndefined(val)) {
+//             ret = JS_ToUint32(ctx, &uid, val);
+//             JS_FreeValue(ctx, val);
+//             if (ret)
+//                 goto exception;
+//         }
 
-        val = JS_GetPropertyStr(ctx, options, "gid");
-        if (JS_IsException(val))
-            goto exception;
-        if (!JS_IsUndefined(val)) {
-            ret = JS_ToUint32(ctx, &gid, val);
-            JS_FreeValue(ctx, val);
-            if (ret)
-                goto exception;
-        }
-    }
+//         val = JS_GetPropertyStr(ctx, options, "gid");
+//         if (JS_IsException(val))
+//             goto exception;
+//         if (!JS_IsUndefined(val)) {
+//             ret = JS_ToUint32(ctx, &gid, val);
+//             JS_FreeValue(ctx, val);
+//             if (ret)
+//                 goto exception;
+//         }
+//     }
 
-    pid = fork();
-    if (pid < 0) {
-        JS_ThrowTypeError(ctx, "fork error");
-        goto exception;
-    }
-    if (pid == 0) {
-        /* child */
-        int fd_max = sysconf(_SC_OPEN_MAX);
+//     pid = fork();
+//     if (pid < 0) {
+//         JS_ThrowTypeError(ctx, "fork error");
+//         goto exception;
+//     }
+//     if (pid == 0) {
+//         /* child */
+//         int fd_max = sysconf(_SC_OPEN_MAX);
 
-        /* remap the stdin/stdout/stderr handles if necessary */
-        for(i = 0; i < 3; i++) {
-            if (std_fds[i] != i) {
-                if (dup2(std_fds[i], i) < 0)
-                    _exit(127);
-            }
-        }
+//         /* remap the stdin/stdout/stderr handles if necessary */
+//         for(i = 0; i < 3; i++) {
+//             if (std_fds[i] != i) {
+//                 if (dup2(std_fds[i], i) < 0)
+//                     _exit(127);
+//             }
+//         }
 
-        for(i = 3; i < fd_max; i++)
-            close(i);
-        if (cwd) {
-            if (chdir(cwd) < 0)
-                _exit(127);
-        }
-        if (uid != -1) {
-            if (setuid(uid) < 0)
-                _exit(127);
-        }
-        if (gid != -1) {
-            if (setgid(gid) < 0)
-                _exit(127);
-        }
+//         for(i = 3; i < fd_max; i++)
+//             close(i);
+//         if (cwd) {
+//             if (chdir(cwd) < 0)
+//                 _exit(127);
+//         }
+//         if (uid != -1) {
+//             if (setuid(uid) < 0)
+//                 _exit(127);
+//         }
+//         if (gid != -1) {
+//             if (setgid(gid) < 0)
+//                 _exit(127);
+//         }
 
-        if (!file)
-            file = exec_argv[0];
-        if (use_path)
-            ret = my_execvpe(file, (char **)exec_argv, envp);
-        else
-            ret = execve(file, (char **)exec_argv, envp);
-        _exit(127);
-    }
-    /* parent */
-    if (block_flag) {
-        for(;;) {
-            ret = waitpid(pid, &status, 0);
-            if (ret == pid) {
-                if (WIFEXITED(status)) {
-                    ret = WEXITSTATUS(status);
-                    break;
-                } else if (WIFSIGNALED(status)) {
-                    ret = -WTERMSIG(status);
-                    break;
-                }
-            }
-        }
-    } else {
-        ret = pid;
-    }
-    ret_val = JS_NewInt32(ctx, ret);
- done:
-    JS_FreeCString(ctx, file);
-    JS_FreeCString(ctx, cwd);
-    for(i = 0; i < exec_argc; i++)
-        JS_FreeCString(ctx, exec_argv[i]);
-    js_free(ctx, exec_argv);
-    if (envp != environ) {
-        char **p;
-        p = envp;
-        while (*p != NULL) {
-            js_free(ctx, *p);
-            p++;
-        }
-        js_free(ctx, envp);
-    }
-    return ret_val;
- exception:
-    ret_val = JS_EXCEPTION;
-    goto done;
-}
+//         if (!file)
+//             file = exec_argv[0];
+//         if (use_path)
+//             ret = my_execvpe(file, (char **)exec_argv, envp);
+//         else
+//             ret = execve(file, (char **)exec_argv, envp);
+//         _exit(127);
+//     }
+//     /* parent */
+//     if (block_flag) {
+//         for(;;) {
+//             ret = waitpid(pid, &status, 0);
+//             if (ret == pid) {
+//                 if (WIFEXITED(status)) {
+//                     ret = WEXITSTATUS(status);
+//                     break;
+//                 } else if (WIFSIGNALED(status)) {
+//                     ret = -WTERMSIG(status);
+//                     break;
+//                 }
+//             }
+//         }
+//     } else {
+//         ret = pid;
+//     }
+//     ret_val = JS_NewInt32(ctx, ret);
+//  done:
+//     JS_FreeCString(ctx, file);
+//     JS_FreeCString(ctx, cwd);
+//     for(i = 0; i < exec_argc; i++)
+//         JS_FreeCString(ctx, exec_argv[i]);
+//     js_free(ctx, exec_argv);
+//     if (envp != environ) {
+//         char **p;
+//         p = envp;
+//         while (*p != NULL) {
+//             js_free(ctx, *p);
+//             p++;
+//         }
+//         js_free(ctx, envp);
+//     }
+//     return ret_val;
+//  exception:
+//     ret_val = JS_EXCEPTION;
+//     goto done;
+// }
 
 /* waitpid(pid, block) -> [pid, status] */
 static JSValue js_os_waitpid(JSContext *ctx, JSValueConst this_val,
@@ -3474,7 +3469,7 @@ static const JSCFunctionListEntry js_os_funcs[] = {
     JS_CFUNC_DEF("rename", 2, js_os_rename ),
     JS_CFUNC_MAGIC_DEF("setReadHandler", 2, js_os_setReadHandler, 0 ),
     JS_CFUNC_MAGIC_DEF("setWriteHandler", 2, js_os_setReadHandler, 1 ),
-    JS_CFUNC_DEF("signal", 2, js_os_signal ),
+    // JS_CFUNC_DEF("signal", 2, js_os_signal ),
     OS_FLAG(SIGINT),
     OS_FLAG(SIGABRT),
     OS_FLAG(SIGFPE),
@@ -3521,7 +3516,7 @@ static const JSCFunctionListEntry js_os_funcs[] = {
     // JS_CFUNC_DEF("realpath", 1, js_os_realpath ),
     JS_CFUNC_DEF("symlink", 2, js_os_symlink ),
     JS_CFUNC_DEF("readlink", 1, js_os_readlink ),
-    JS_CFUNC_DEF("exec", 1, js_os_exec ),
+    // JS_CFUNC_DEF("exec", 1, js_os_exec ),
     JS_CFUNC_DEF("waitpid", 2, js_os_waitpid ),
     OS_FLAG(WNOHANG),
     JS_CFUNC_DEF("pipe", 0, js_os_pipe ),

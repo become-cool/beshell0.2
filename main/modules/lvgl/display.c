@@ -1,18 +1,23 @@
 #include "display.h"
 #include "widgets.h"
-#include "display_ws.h"
 #include "utils.h"
 #include "cutils.h"
 
 #include "lvgl.h"
 #include "lv_conf.h"
 
+#ifndef SIMULATION
+#include "display_ws.h"
 #include "lvgl_touch/tp_spi.h"
 #include "disp_st77xx.h"
 #include "touch_driver.h"
+#endif
 
 uint8_t * dma_buff = NULL ;
 
+
+
+#ifndef SIMULATION
 lv_indev_drv_t indev_drv;
 
 void disp_st7789_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color_p) {
@@ -24,8 +29,6 @@ void disp_st7789_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t 
     disp_virtual_flush(disp, area, color_p) ;
     lv_disp_flush_ready(disp) ;
 }
-
-
 void input_driver_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
     if(ws_driver_input_read(drv, data))
         return ;
@@ -34,6 +37,14 @@ void input_driver_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
         data->point.x -= 10 ;
     }
 }
+#else
+
+void disp_virtual_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color_p) {
+    printf("disp_virtual_flush()\n") ;
+    lv_disp_flush_ready(disp) ;
+}
+
+#endif
 
 static JSClassID js_lvgl_disp_class_id ;
 
@@ -45,11 +56,13 @@ static void js_lvgl_disp_finalizer(JSRuntime *rt, JSValue val) {
     lv_disp_remove(disp) ;
 
     // spi 设备
+#ifndef SIMULATION
     if(disp->driver->user_data) {
         st77xx_dev_t * dev = (st77xx_dev_t*)disp->driver->user_data ;
         spi_bus_remove_device(dev->spi_dev) ;
         free(dev) ;
     }
+#endif
 
     if(disp->driver->draw_buf) {
         if(disp->driver->draw_buf->buf1) {
@@ -88,7 +101,7 @@ static JSValue js_lvgl_disp_active_screen(JSContext *ctx, JSValueConst this_val,
         return JS_NULL ;
     }
 
-    void * objptr = (JSValue)lv_obj_get_user_data(scr) ;
+    void * objptr = lv_obj_get_user_data(scr) ;
     JSValue jsobj = JS_MKPTR(JS_TAG_OBJECT, objptr) ;
 
     return JS_DupValue(ctx,jsobj) ;
@@ -182,6 +195,7 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
 
     if( strcmp(typestr, "ST7789")==0 ) {
 
+#ifndef SIMULATION
         GET_INT_PROP(argv[1], "cs", cs, excp)
         GET_INT_PROP(argv[1], "dc", dc, excp)
         GET_INT_PROP_DEFAULT(argv[1], "spi", spi, 1, excp)
@@ -198,6 +212,7 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
         // 注册设备驱动对象
         dispdrv->flush_cb = disp_st7789_flush ;
         dispdrv->user_data = spidev ;
+#endif
     }
 
     // 虚拟屏幕
@@ -216,15 +231,13 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
 
     JS_DupValue(ctx,jsdisp) ;
 
-    // default screen of this display, created by lvgl
     lv_obj_t * scr = lv_disp_get_scr_act(disp);
-    JS_DupValue(ctx,scr) ; // disp 对该 screen 的引用
     
-    // printf(">>>> disp %p, screen %p\n", disp, scr) ;
-    js_lv_obj_wrapper(ctx, scr, lv_obj_js_class_id()) ;
-
+    JSValue jsscr = js_lv_obj_wrapper(ctx, scr, lv_obj_js_class_id()) ;
+    JS_DupValue(ctx,jsscr) ; // disp 对该 screen 的引用
 
     // 触摸设备
+#ifndef SIMULATION
     tp_spi_add_device(1, 18);
     xpt2046_init();
 
@@ -235,6 +248,7 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
     if(!indev) {
         printf("Cound not create indev\n") ;
     }
+#endif
 
     return jsdisp ;
 
@@ -253,7 +267,11 @@ uint8_t * display_dma_buff() {
 
 void vlgl_js_display_init() {
 
+#ifndef SIMULATION
     dma_buff = heap_caps_malloc( DMA_BUFF_LEN + DMA_BUFF_AUX_SIZE, MALLOC_CAP_DMA);
+#else
+    dma_buff = malloc(DMA_BUFF_LEN + DMA_BUFF_AUX_SIZE) ;
+#endif
     if(!dma_buff) {
         printf("heap_caps_malloc(%d) faild for display buff.\n", DMA_BUFF_LEN) ;
     }
@@ -261,7 +279,9 @@ void vlgl_js_display_init() {
     // class id 全局, 分配一次
     JS_NewClassID(&js_lvgl_disp_class_id);
 
+#ifndef SIMULATION
     vlgl_js_display_ws_init() ;
+#endif
 }
 
 

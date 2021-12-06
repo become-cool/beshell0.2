@@ -1,22 +1,24 @@
 try{
     require("/lib/base/utils.js")
-    
+
     require("./init.d/repl.js")
 
     require("./init.d/banner.js")()
 
-    global.WiFi = require("besdk/wifi")
-    try{
-        WiFi.restore()
-    }catch(e) {
-        console.error(e)
+
+    if(!process.simulate) {
+        global.WiFi = require("besdk/wifi")
+        try{
+            // WiFi.restore()
+        }catch(e) {
+            console.error(e)
+        }
+        require("./init.d/beconsoled.js")
+    
+        // require("/lib/local/webtelnet/main.js")
     }
-
-    require("./init.d/beconsoled.js")
-
+    
     require("./init.d/display.js")
-
-    // require("/lib/local/webtelnet/main.js")
     
     require("./init.d/desktop.js")
 
@@ -28,7 +30,6 @@ try{
     if(beapi.fs.isFileSync(rcpath)) {
         require(rcpath)
     }
-
 }
 catch(e) {
     console.log(e.message)

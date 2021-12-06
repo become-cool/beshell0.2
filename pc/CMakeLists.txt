@@ -1,0 +1,50 @@
+cmake_minimum_required(VERSION 3.10)
+
+project(beshell)
+
+set(CMAKE_CXX_STANDARD 11)
+
+set(CMAKE_BUILD_TYPE "Debug")
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0")
+
+
+LINK_LIBRARIES(m)
+LINK_LIBRARIES(pthread)
+
+add_definitions(-g)
+add_definitions(-DSIMULATION)
+# add_definitions(-DWIN32)
+
+
+
+# lvgl
+add_definitions(-DLV_CONF_SKIP)
+include_directories(../components/lvgl/src)
+file(GLOB_RECURSE SRC_LIST "../components/lvgl/src/*.c")
+
+# quickjs
+AUX_SOURCE_DIRECTORY(../components/quickjs SRC_LIST)
+include_directories(../components/quickjs)
+
+
+AUX_SOURCE_DIRECTORY(. SRC_LIST)
+
+include_directories(./)
+include_directories(../main)
+include_directories(../main/modules)
+include_directories(../main/modules/lvgl)
+
+list(APPEND SRC_LIST ../main/utils.c)
+list(APPEND SRC_LIST ../main/eventloop.c)
+list(APPEND SRC_LIST ../main/task_js.c)
+list(APPEND SRC_LIST ../main/mallocf.c)
+list(APPEND SRC_LIST ../main/modules/module_fs.c)
+list(APPEND SRC_LIST ../main/modules/module_utils.c)
+list(APPEND SRC_LIST ../main/modules/module_events.c)
+list(APPEND SRC_LIST ../main/modules/lvgl/module_lvgl.c)
+list(APPEND SRC_LIST ../main/modules/lvgl/display.c)
+list(APPEND SRC_LIST ../main/modules/lvgl/widgets.c)
+
+ADD_EXECUTABLE(beshell ${SRC_LIST})
+
+set_property(TARGET beshell PROPERTY C_STANDARD 99)

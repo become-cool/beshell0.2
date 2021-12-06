@@ -2,15 +2,15 @@
 #include <time.h>
 #include "utils.h"
 
-struct eventloop_callback_t * _callback_stack_top = NULL ;
+eventloop_callback_t * _callback_stack_top = NULL ;
 
-// struct eventloop_callback_t * eventloop_header() {
+// eventloop_callback_t * eventloop_header() {
 //     return _callback_stack_top ;
 // }
 
-struct eventloop_callback_t * eventloop_push(JSContext *ctx, JSValue func, int interval, bool repeat) {
+eventloop_callback_t * eventloop_push(JSContext *ctx, JSValue func, int interval, bool repeat) {
 
-    struct eventloop_callback_t * newcb = malloc(sizeof(struct eventloop_callback_t)) ;
+    eventloop_callback_t * newcb = malloc(sizeof(eventloop_callback_t)) ;
     newcb->func = JS_DupValue(ctx, func) ;
     newcb->interval = interval ;
     newcb->repeat = repeat ;
@@ -26,8 +26,8 @@ struct eventloop_callback_t * eventloop_push(JSContext *ctx, JSValue func, int i
 
 
 
-struct eventloop_callback_t * eventloop_push_with_argv(JSContext *ctx, JSValue func, int argc, JSValueConst *argv) {
-    struct eventloop_callback_t * newcb = malloc(sizeof(struct eventloop_callback_t)) ;
+eventloop_callback_t * eventloop_push_with_argv(JSContext *ctx, JSValue func, int argc, JSValueConst *argv) {
+    eventloop_callback_t * newcb = malloc(sizeof(eventloop_callback_t)) ;
     newcb->func = JS_DupValue(ctx, func) ;
     newcb->interval = 0 ;
     newcb->repeat = 0 ;
@@ -46,7 +46,7 @@ struct eventloop_callback_t * eventloop_push_with_argv(JSContext *ctx, JSValue f
     return newcb ;
 }
 
-void eventloop_out(JSContext *ctx, struct eventloop_callback_t * prev, struct eventloop_callback_t * current) {
+void eventloop_out(JSContext *ctx, eventloop_callback_t * prev, eventloop_callback_t * current) {
 
     // 回收 argv
     for(int i=0; i<current->argc; i++) {
@@ -71,9 +71,9 @@ void eventloop_out(JSContext *ctx, struct eventloop_callback_t * prev, struct ev
 
 }
 
-void eventloop_remove(JSContext *ctx, struct eventloop_callback_t * item) {
+void eventloop_remove(JSContext *ctx, eventloop_callback_t * item) {
     for(
-        struct eventloop_callback_t * prev = NULL, * current = _callback_stack_top;
+        eventloop_callback_t * prev = NULL, * current = _callback_stack_top;
         current!=NULL ;
         prev=current, current=current->next
     ) {
@@ -91,7 +91,7 @@ void eventloop_pump(JSContext *ctx) {
 
     uint64_t now = gettime() ;
     
-    struct eventloop_callback_t * prev = NULL, * current = _callback_stack_top;
+    eventloop_callback_t * prev = NULL, * current = _callback_stack_top;
     while( current!=NULL ) {
         if(current->deadline > now) {
             goto next ;
@@ -105,7 +105,7 @@ void eventloop_pump(JSContext *ctx) {
 
         // 一次性任务
         if(!current->repeat) {
-            struct eventloop_callback_t * _current = current;
+            eventloop_callback_t * _current = current;
             current = current->next ;
             eventloop_remove(ctx, _current) ;
             continue ;
@@ -133,7 +133,7 @@ void eventloop_pump(JSContext *ctx) {
 void eventloop_on_before_reset(JSContext *ctx){
     // 清空未决事件表
     for(
-        struct eventloop_callback_t * prev = NULL, * current = _callback_stack_top;
+        eventloop_callback_t * prev = NULL, * current = _callback_stack_top;
         current!=NULL ;
         prev=current, current=current->next
     ) {

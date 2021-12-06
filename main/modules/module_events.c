@@ -1,7 +1,6 @@
 #include "module_events.h"
 #include "cutils.h"
 #include "utils.h"
-#include "telnet.h"
 
 // static JSClassID js_eventemitter_class_id;
 
@@ -297,13 +296,18 @@ unsigned char events_js[] = {
   0x0a, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x7d, 0x0a, 0x20,
   0x20, 0x20, 0x20, 0x7d, 0x0a, 0x7d, 0x0a
 };
-unsigned int events_js_len = 2995;
+#define events_js_len 2995
 
 
 
 
 
+void echo_error(JSContext *) ;
 
 void require_module_events(JSContext *ctx) {
-  EVAL_CODE_LEN((const char *)events_js, events_js_len, "[native]events")
+  JSValue ret = JS_Eval(ctx, (const char *)events_js, events_js_len, "events.js", JS_EVAL_TYPE_GLOBAL) ;  // JS_EVAL_FLAG_STRIP
+  if(JS_IsException(ret)) {
+      echo_error(ctx) ;
+  }
+  JS_FreeValue(ctx, ret) ;
 }

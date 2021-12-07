@@ -279,6 +279,8 @@ void deinit_quickjs() {
 
 void task_js_main(){
 
+
+
 #ifndef SIMULATION
     nvs_flash_init();
 
@@ -296,6 +298,7 @@ void task_js_main(){
     http_init() ;
 #else
     repl_init() ;
+    httplws_init() ;
 #endif
 
     init_quickjs() ;
@@ -329,6 +332,7 @@ void task_js_main(){
 #else
         lvgl_loop(ctx) ;
         repl_loop(ctx) ;
+        httplws_loop(ctx) ;
 #endif
         eventloop_pump(ctx) ;
 

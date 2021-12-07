@@ -30,8 +30,7 @@ void lv_tick_task(void *arg) {
 struct sigaction tact;
 struct itimerval value;
 void sig_alm_handler(int sig_num) {
-    // printf("sig_alm_handler()\n");
-    // fflush(stdout) ;
+    lv_tick_inc(LV_TICK_PERIOD_MS);
 }
 #endif
 
@@ -64,7 +63,7 @@ void require_module_lvgl(JSContext *ctx) {
     sigaction(SIGALRM, &tact, NULL);
     
     value.it_value.tv_sec = 0;
-    value.it_value.tv_usec = 1000 *500;
+    value.it_value.tv_usec = 1000 * LV_TICK_PERIOD_MS;
     value.it_interval = value.it_value;
     setitimer(ITIMER_REAL, &value, NULL);
 

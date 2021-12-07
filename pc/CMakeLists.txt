@@ -15,6 +15,9 @@ add_definitions(-g)
 add_definitions(-DSIMULATION)
 # add_definitions(-DWIN32)
 
+# ssl
+LINK_DIRECTORIES(/usr/lib/x86_64-linux-gnu/)
+add_definitions(-lssl -lcrypto -ldl)
 
 
 # lvgl
@@ -25,7 +28,6 @@ file(GLOB_RECURSE SRC_LIST "../components/lvgl/src/*.c")
 # quickjs
 AUX_SOURCE_DIRECTORY(../components/quickjs SRC_LIST)
 include_directories(../components/quickjs)
-
 
 AUX_SOURCE_DIRECTORY(. SRC_LIST)
 
@@ -38,6 +40,8 @@ list(APPEND SRC_LIST ../main/utils.c)
 list(APPEND SRC_LIST ../main/eventloop.c)
 list(APPEND SRC_LIST ../main/task_js.c)
 list(APPEND SRC_LIST ../main/mallocf.c)
+list(APPEND SRC_LIST ../main/stack.c)
+list(APPEND SRC_LIST ../main/list.c)
 list(APPEND SRC_LIST ../main/modules/module_fs.c)
 list(APPEND SRC_LIST ../main/modules/module_utils.c)
 list(APPEND SRC_LIST ../main/modules/module_events.c)
@@ -46,5 +50,7 @@ list(APPEND SRC_LIST ../main/modules/lvgl/display.c)
 list(APPEND SRC_LIST ../main/modules/lvgl/widgets.c)
 
 ADD_EXECUTABLE(beshell ${SRC_LIST})
+target_link_libraries(beshell libssl.a libcrypto.a dl)
+target_link_libraries(beshell dl pthread)
 
 set_property(TARGET beshell PROPERTY C_STANDARD 99)

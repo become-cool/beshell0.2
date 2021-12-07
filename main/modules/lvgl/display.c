@@ -11,14 +11,15 @@
 #include "lvgl_touch/tp_spi.h"
 #include "disp_st77xx.h"
 #include "touch_driver.h"
+#else
+#include "http_lws.h"
 #endif
 
 uint8_t * dma_buff = NULL ;
 
-
+lv_indev_drv_t indev_drv;
 
 #ifndef SIMULATION
-lv_indev_drv_t indev_drv;
 
 void disp_st7789_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color_p) {
     if(!disp->user_data) {
@@ -30,6 +31,7 @@ void disp_st7789_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t 
     lv_disp_flush_ready(disp) ;
 }
 void input_driver_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
+    data->continue_reading = false;
     if(ws_driver_input_read(drv, data))
         return ;
     touch_driver_read(drv, data) ;
@@ -37,13 +39,6 @@ void input_driver_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
         data->point.x -= 10 ;
     }
 }
-#else
-
-void disp_virtual_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color_p) {
-    printf("disp_virtual_flush()\n") ;
-    lv_disp_flush_ready(disp) ;
-}
-
 #endif
 
 static JSClassID js_lvgl_disp_class_id ;
@@ -219,7 +214,7 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
     else if( strcmp(typestr, "VIRTUAL")==0 ) {
 
         // 注册设备驱动对象
-        dispdrv->flush_cb = disp_virtual_flush ;
+        dispdrv->flush_cb = ws_disp_flush ;
     }
     else {
         JS_ThrowReferenceError(ctx, "unknow disp driver: %s", typestr);
@@ -240,15 +235,20 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
 #ifndef SIMULATION
     tp_spi_add_device(1, 18);
     xpt2046_init();
+#endif
+
 
     lv_indev_drv_init(&indev_drv);
+#ifndef SIMULATION
     indev_drv.read_cb = input_driver_read ;
+#else
+    indev_drv.read_cb = ws_driver_input_read ;
+#endif
     indev_drv.type = LV_INDEV_TYPE_POINTER;
     lv_indev_t *indev = lv_indev_drv_register(&indev_drv);
     if(!indev) {
         printf("Cound not create indev\n") ;
     }
-#endif
 
     return jsdisp ;
 

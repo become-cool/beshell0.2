@@ -15,7 +15,7 @@ try{
         }
         require("./init.d/beconsoled.js")
     
-        // require("/lib/local/webtelnet/main.js")
+        // require("/lib/local/telweb/main.js")
     }
     
     require("./init.d/display.js")

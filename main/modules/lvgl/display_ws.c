@@ -58,7 +58,6 @@ bool ws_driver_input_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
 
 
 void free_socket_ctx(void * ctx) {
-    printf("xxxxxxxx free_socket_ctx()\n") ;
     if(!ctx) {
         printf("free_socket_ctx() ctx == NULL !") ;
         return ;

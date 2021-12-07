@@ -6,7 +6,7 @@
 </head>
 <body>
     <div>
-        <input id="url" style="width:400px" value="ws://192.168.4.1:8023/display">
+        <input id="url" style="width:400px" value="ws://127.0.0.1:8022/display">
         <button onclick="openws()">连接</button>
         <button onclick="closews()">关闭</button>
         <button onclick="refresh()">刷新</button>
@@ -20,8 +20,12 @@
     <script>
          
         const WS_DISP_CMD_REFRESH = 1
+        const WS_DISP_CMD_DRAW = 2
         const WS_DISP_CMD_PRESS = 22
         const WS_DISP_CMD_RELEASE = 23
+
+        const WS_DISP_BUFF_RAW = 1
+        const WS_DISP_BUFF_JPEG = 2
 
         window.ws = null
         function openws() {
@@ -39,24 +43,51 @@
 
             ws.onmessage = async function(evt) {
                 if(!(evt.data instanceof Blob)){
-                    console.log(evt.data)
                     return ;
                 }
 
                 let data = await evt.data.arrayBuffer()
-                
-                let view16 = new Uint16Array(data.slice(0,8))
-                fragx = view16[0]
-                fragy = view16[1]
-                let jpgdata = new Uint8Array(data.slice(8))
+                let header = new Uint8Array(data.slice(0,2))
 
-                let strdata = ""
-                for(let b of jpgdata) {
-                    strdata+= String.fromCharCode(b)
+                // 屏幕绘制
+                if(header[0]==WS_DISP_CMD_DRAW) {
+                    let area = new Uint16Array(data.slice(2,10))
+                    let dispdata = new Uint8Array(data.slice(10))
+
+                    // 原始
+                    if(header[1] == WS_DISP_BUFF_RAW){
+                        let width = area[2]-area[0] + 1
+                        let height = area[3]-area[1] + 1
+
+                        // let pixelsLen = width * height * 4
+                        const pixels = new Uint8ClampedArray(new ArrayBuffer(width * height * 4));
+
+                        for(let i=0; i<dispdata.length; i+=2) {
+
+                            let lb = dispdata[i]
+                            let hb = dispdata[i+1]
+
+                            let pi = i *2
+                            pixels[pi] = ((hb>>3) & 255) * 255 / 31 
+                            pixels[pi+1] = (((hb & 0x07) << 3) | ((lb >> 5) & 255))*255/63
+                            pixels[pi+2] = (lb & 0x1f)* 255 / 31 
+                            pixels[pi+3] = 255
+                        }
+
+                        const imageData = new ImageData(pixels, width, height);
+                        canvas.getContext("2d").putImageData(imageData, area[0], area[1]);
+                        
+                    }
+                    // jpeg
+                    else if(header[1] == WS_DISP_BUFF_JPEG){
+                        let strdata = ""
+                        for(let b of dispdata) {
+                            strdata+= String.fromCharCode(b)
+                        }
+                        strdata = btoa(strdata)
+                        img.src = 'data:image/jpeg;base64,' + strdata
+                    }
                 }
-                strdata = btoa(strdata)
-                img.src = 'data:image/jpeg;base64,' + strdata
-
             };
         }
         function closews() {
@@ -76,7 +107,6 @@
 
         let mouse_pressed = false
         function onmousedown(e) {
-            console.log("onmousedown")
             if(!ws)
                 return
             mouse_pressed = true
@@ -86,7 +116,6 @@
             data.push((e.offsetX>>8)&255)
             data.push(e.offsetY&255)
             data.push((e.offsetY>>8)&255)
-            console.log(e.offsetX, e.offsetY,data)
             ws.send(new Uint8Array(data));
         }
         canvas.onmousedown = onmousedown
@@ -101,10 +130,6 @@
             mouse_pressed = false
 
             let data = [WS_DISP_CMD_RELEASE]
-            // data.push(e.offsetX&255)
-            // data.push((e.offsetX>>8)&255)
-            // data.push(e.offsetY&255)
-            // data.push((e.offsetY>>8)&255)
             ws.send(new Uint8Array(data));
         }
         canvas.onmouseout = canvas.onmouseup

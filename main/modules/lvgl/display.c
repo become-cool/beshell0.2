@@ -1,5 +1,6 @@
 #include "display.h"
 #include "widgets.h"
+#include "widgets_extra.h"
 #include "utils.h"
 #include "cutils.h"
 
@@ -21,13 +22,16 @@ lv_indev_drv_t indev_drv;
 
 #ifndef SIMULATION
 
+void ws_disp_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color_p) {}
+
 void disp_st7789_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color_p) {
+    printf("disp_st7789_flush()\n") ;
     if(!disp->user_data) {
         printf("spidev is NULL\n") ;
         return ;
     }
     st77xx_draw_rect(disp->user_data, area->x1,area->y1, area->x2, area->y2, color_p) ;
-    disp_virtual_flush(disp, area, color_p) ;
+    // disp_virtual_flush(disp, area, color_p) ;
     lv_disp_flush_ready(disp) ;
 }
 void input_driver_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
@@ -117,9 +121,20 @@ static JSValue js_lvgl_disp_load_screen(JSContext *ctx, JSValueConst this_val, i
     return JS_UNDEFINED ;
 }
 
+static JSValue js_lvgl_disp_get_screens(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    THIS_DISP
+    JSValue arr = JS_NewArray(ctx) ;
+    for(int i=0;i<thisdisp->screen_cnt; i++) {
+        JSValue jsscr = js_lv_obj_wrapper(ctx, thisdisp->screens[i], lv_obj_js_class_id())  ;
+        JS_SetPropertyUint32(ctx, arr, i, jsscr);
+    }
+    return arr ;
+}
+
 static const JSCFunctionListEntry js_display_proto_funcs[] = {
     JS_CFUNC_DEF("activeScreen", 0, js_lvgl_disp_active_screen),
     JS_CFUNC_DEF("loadScreen", 0, js_lvgl_disp_load_screen),
+    JS_CFUNC_DEF("getScreens", 0, js_lvgl_disp_get_screens),
 };
 
 
@@ -150,12 +165,6 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
     }
 
     CHECK_ARGC(2)
-
-    JSValue jsdisp = JS_NewObjectClass(ctx, js_lvgl_disp_class_id) ;
-
-    JS_SetPropertyStr(ctx, jsdisp, "type", argv[0]) ;
-    // JS_SetPropertyStr(ctx, jsdisp, "options", argv[1]) ;
-
 
     ARGV_TO_STRING_E(0, typestr, typelen, "argv type must be a string")
     if(!JS_IsObject(argv[1])) {
@@ -191,6 +200,7 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
     if( strcmp(typestr, "ST7789")==0 ) {
 
 #ifndef SIMULATION
+
         GET_INT_PROP(argv[1], "cs", cs, excp)
         GET_INT_PROP(argv[1], "dc", dc, excp)
         GET_INT_PROP_DEFAULT(argv[1], "spi", spi, 1, excp)
@@ -222,14 +232,11 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
     }
 
     lv_disp_t * disp = lv_disp_drv_register(dispdrv); 
-    JS_SetOpaque(jsdisp, disp);
-
-    JS_DupValue(ctx,jsdisp) ;
-
-    lv_obj_t * scr = lv_disp_get_scr_act(disp);
     
-    JSValue jsscr = js_lv_obj_wrapper(ctx, scr, lv_obj_js_class_id()) ;
-    JS_DupValue(ctx,jsscr) ; // disp 对该 screen 的引用
+    JSValue jsdisp = JS_NewObjectClass(ctx, js_lvgl_disp_class_id) ;
+    JS_SetPropertyStr(ctx, jsdisp, "type", argv[0]) ;
+    // JS_SetPropertyStr(ctx, jsdisp, "options", argv[1]) ;
+    JS_SetOpaque(jsdisp, disp);
 
     // 触摸设备
 #ifndef SIMULATION
@@ -250,7 +257,9 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
         printf("Cound not create indev\n") ;
     }
 
-    return jsdisp ;
+    lv_task_handler() ;
+
+    return JS_DupValue(ctx,jsdisp) ;
 
 excp:
     if(drawbuf)

@@ -15,6 +15,9 @@ add_definitions(-g)
 add_definitions(-DSIMULATION)
 # add_definitions(-DWIN32)
 
+SET(CMAKE_CXX_FLAGS_DEBUG "-O0")
+SET(CMAKE_C_FLAGS_DEBUG "-O0")
+
 # ssl
 LINK_DIRECTORIES(/usr/lib/x86_64-linux-gnu/)
 add_definitions(-lssl -lcrypto -ldl)
@@ -33,6 +36,7 @@ AUX_SOURCE_DIRECTORY(. SRC_LIST)
 
 include_directories(./)
 include_directories(../main)
+include_directories(../main/anchor9)
 include_directories(../main/modules)
 include_directories(../main/modules/lvgl)
 
@@ -42,12 +46,15 @@ list(APPEND SRC_LIST ../main/task_js.c)
 list(APPEND SRC_LIST ../main/mallocf.c)
 list(APPEND SRC_LIST ../main/stack.c)
 list(APPEND SRC_LIST ../main/list.c)
+list(APPEND SRC_LIST ../main/anchor9/anchor9.c)
+list(APPEND SRC_LIST ../main/anchor9/anchor9_lvgl.c)
 list(APPEND SRC_LIST ../main/modules/module_fs.c)
 list(APPEND SRC_LIST ../main/modules/module_utils.c)
 list(APPEND SRC_LIST ../main/modules/module_events.c)
 list(APPEND SRC_LIST ../main/modules/lvgl/module_lvgl.c)
 list(APPEND SRC_LIST ../main/modules/lvgl/display.c)
 list(APPEND SRC_LIST ../main/modules/lvgl/widgets.c)
+list(APPEND SRC_LIST ../main/modules/lvgl/widgets_extra.c)
 
 ADD_EXECUTABLE(beshell ${SRC_LIST})
 target_link_libraries(beshell libssl.a libcrypto.a dl)

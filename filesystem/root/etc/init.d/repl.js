@@ -91,3 +91,32 @@ global.repl = {
     _mkresolve, _mkreject, cd, resolvepath
 }
 
+if(process.simulate && process.setStdinCallback) {
+    let pendingStdinInput = ""
+    process.setStdinCallback(function(instr) {
+        pendingStdinInput+= instr
+        execLine()
+    })
+    function execLine() {
+        let firstLineEnd = pendingStdinInput.indexOf("\n")
+        if(firstLineEnd<0) {
+            return
+        }
+        let line = pendingStdinInput.substr(0, firstLineEnd+1).trim()
+        pendingStdinInput = pendingStdinInput.substr(firstLineEnd+1)
+        try{
+            let res = evalAsFile(line, "REPL")
+            if( typeof res=='object' ) {
+                console.log(JSON.stringify(res))
+            }
+            else {
+                console.log(res)
+            }
+        }catch(e){
+            console.log(e.toString())
+            console.log(e.stack)
+        }
+        if(pendingStdinInput)
+            execLine(pendingStdinInput)
+    }
+}

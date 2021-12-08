@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
+#include <unistd.h>
 
 void js_dump_err(JSContext *ctx, JSValueConst val) {
     const char * str = JS_ToCString(ctx, val);
@@ -44,8 +45,37 @@ int fd_stdin ;
 char buf[MAXBYTES] ;
 
 
+JSValue js_stdin_callback ;
+
+
+JSValue js_proc_set_stdin_callback(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+    if( !JS_IsFunction(ctx, argv[0]) ) {
+        THROW_EXCEPTION("arg callback must be a function")
+    }
+    JS_DupValue(ctx, argv[0]) ;
+    js_stdin_callback = argv[0] ;
+    return JS_UNDEFINED ;
+}
+
 void repl_init() {
+    js_stdin_callback = JS_UNDEFINED ;
     fd_stdin = fileno(stdin);
+}
+
+void repl_reset(JSContext * ctx) {
+    JS_FreeValue(ctx, js_stdin_callback) ;
+    js_stdin_callback = JS_UNDEFINED ;
+}
+void repl_require(JSContext * ctx) {
+    JSValue jsproc = js_get_glob_prop(ctx, 1, "process") ;
+    JS_SetPropertyStr(ctx, jsproc, "setStdinCallback", JS_NewCFunction(ctx, js_proc_set_stdin_callback, "setStdinCallback", 1));
+
+    pid_t pid = getpid() ;    
+    JS_SetPropertyStr(ctx, jsproc, "pid", JS_NewInt32(ctx, pid));
+
+
+    JS_FreeValue(ctx, jsproc) ;
 }
 
 void repl_loop(JSContext * ctx) {
@@ -71,20 +101,13 @@ void repl_loop(JSContext * ctx) {
                 fprintf(stderr, "\nError on read : %s\n", strerror(errno));
                 exit(1);
         }
-        if(num_bytes<MAXBYTES) {
-            buf[num_bytes] = 0 ;
-        }
-        JSValue ret = JS_Eval(ctx, buf, num_bytes, "REPL", JS_EVAL_TYPE_GLOBAL) ;
-        if(JS_IsException(ret)) {
-            echo_error(ctx) ;
-        }
 
-        else {
-            char * retstr = JS_ToCString(ctx, ret) ;
-            printf("%s\n", retstr) ;
-            JS_FreeCString(ctx, retstr) ;
-        }
+        if( JS_IsFunction(ctx, js_stdin_callback) ) {
+            JSValue jsstr = JS_NewStringLen(ctx, buf, num_bytes) ;
+            MAKE_ARGV1(jsargv, jsstr);
 
-        JS_FreeValue(ctx, ret) ;
+            JS_Call(ctx, js_stdin_callback, JS_UNDEFINED, 1, jsargv) ;
+            free(jsargv) ;
+        }
     }
 }

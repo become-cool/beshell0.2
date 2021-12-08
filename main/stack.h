@@ -10,7 +10,7 @@ typedef struct _stack_base {
 
 stack_base_t* stack_shift(stack_base_t** ppstack) ;
 
-stack_base_t* stack_unshift(stack_base_t** ppstack, stack_base_t * pitem) ;
+void stack_unshift(stack_base_t** ppstack, stack_base_t * pitem) ;
 
 stack_base_t* stack_prev(stack_base_t* pstack, stack_base_t * pitem) ;
 
@@ -40,7 +40,7 @@ size_t stack_count(stack_base_t* pstack) ;
     STACK_SEARCH(pstack, member, member_val, _##member_val##_is_exists, type)              \
     if(_##member_val##_is_exists==NULL)
 
-
+/*
 // // 定义
 // #define STACK_DEF_START(name)               \
 //     typedef struct _##name {                \
@@ -111,5 +111,6 @@ size_t stack_count(stack_base_t* pstack) ;
 //         }                                   \
 //     }
 
+*/
 
 #endif

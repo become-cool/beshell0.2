@@ -1,9 +1,9 @@
 const fs = require("fs")
 
-function create_conver_base(ctype, js_conver_func) {
+function create_conver_base(ctype, js_conver_func, api_arg_type) {
     return function (cargv,i,className,jsmethod){
         code = `    ${ctype} ${cargv} ;\r\n`
-        code+= `    if(${js_conver_func}(ctx, &${cargv}, argv[${i}])!=0){\r\n`
+        code+= `    if(${js_conver_func}(ctx, (${api_arg_type} *) &${cargv}, argv[${i}])!=0){\r\n`
         code+= `        THROW_EXCEPTION("arg ${cargv} of method ${className}.${jsmethod}() must be a number")\r\n`
         code+= `    }\r\n`
         return code
@@ -22,12 +22,12 @@ function create_conver_mappingconst(ctype, js_conver_func) {
 }
 
 
-const conver_int8 = create_conver_base("int8_t", "JS_ToInt32")
-const conver_uint8 = create_conver_base("uint8_t", "JS_ToUint32")
-const conver_int16 = create_conver_base("int16_t", "JS_ToInt32")
-const conver_uint16 = create_conver_base("uint16_t", "JS_ToUint32")
-const conver_int32 = create_conver_base("int32_t", "JS_ToInt32")
-const conver_uint32 = create_conver_base("uint32_t", "JS_ToUint32")
+const conver_int8 = create_conver_base("int8_t", "JS_ToInt32", "int32_t")
+const conver_uint8 = create_conver_base("uint8_t", "JS_ToUint32", "uint32_t")
+const conver_int16 = create_conver_base("int16_t", "JS_ToInt32", "int32_t")
+const conver_uint16 = create_conver_base("uint16_t", "JS_ToUint32", "uint32_t")
+const conver_int32 = create_conver_base("int32_t", "JS_ToInt32", "int32_t")
+const conver_uint32 = create_conver_base("uint32_t", "JS_ToUint32", "uint32_t")
 const conver_flex_flow = create_conver_mappingconst('lv_flex_flow_t', 'lv_flex_flow_jsstr_to_code')
 const conver_flex_align = create_conver_mappingconst('lv_flex_align_t', 'lv_flex_align_jsstr_to_code')
 
@@ -43,7 +43,7 @@ function conver_int_prop(propName, cargv,i,className,jsmethod) {
     if(!JS_IsNumber(js${cargv}_${propName})){
         THROW_EXCEPTION("arg ${cargv} of method ${className}.${jsmethod}() missing property x, or is not a number")
     }
-    if(JS_ToInt32(ctx, &${cargv}.${propName}, js${cargv}_${propName})!=0) {
+    if(JS_ToInt32(ctx, (int32_t*)&${cargv}.${propName}, js${cargv}_${propName})!=0) {
         THROW_EXCEPTION("property ${propName} of arg ${cargv} is not a number")
     }
 `
@@ -77,7 +77,7 @@ function conver_obj(cargv,i,className,jsmethod) {
     return code
 }
 function conver_string(cargv,i) {
-    return `    char * ${cargv} = JS_ToCString(ctx, argv[${i}]) ;\r\n`
+    return `    char * ${cargv} = (char *)JS_ToCString(ctx, argv[${i}]) ;\r\n`
 }
 
 const MapC2JS_Conver = {
@@ -213,10 +213,11 @@ function gen_lv_class(cName, className, api, extraMethod) {
             codeFuncDef+= `        THROW_EXCEPTION("${className}.${jsmethod}() missing arg")\r\n`
             codeFuncDef+= `    }\r\n`
         }
-        codeFuncDef+= `    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;\r\n`
-        codeFuncDef+= `    if(!thisobj) {\r\n`
+        codeFuncDef+= `    void * lv_userdata = JS_GetOpaqueInternal(this_val) ;\r\n`
+        codeFuncDef+= `    if(!lv_userdata) {\r\n`
         codeFuncDef+= `        THROW_EXCEPTION("${className}.${jsmethod}() must be called as a ${className} method")\r\n`
         codeFuncDef+= `    }\r\n`
+        codeFuncDef+= `    lv_obj_t * thisobj = lv_userdata ;\r\n`
 
         codeFreeArgvs = ''
 
@@ -251,11 +252,11 @@ function gen_lv_class(cName, className, api, extraMethod) {
             codeFuncDef+= `    JSValue retval = JS_UNDEFINED ;\r\n`
         }
         else if(returnType=="_lv_obj_t *"||returnType=="lv_obj_t *") {
-            codeFuncDef+= `    void * retptr = lv_obj_get_user_data(${cfunc}(thisobj${cargvLst}));\r\n`
-            codeFuncDef+= `    if(!retptr){\r\n`
-            codeFuncDef+= `        return JS_NULL; \r\n`
+            codeFuncDef+= `    JSValue retval = JS_NULL ;\r\n`
+            codeFuncDef+= `    void * lvobj = ${cfunc}(thisobj${cargvLst});\r\n`
+            codeFuncDef+= `    if(lvobj){\r\n`
+            codeFuncDef+= `        retval = js_lv_obj_wrapper(ctx, lvobj, js_lv_obj_class_id) ;\r\n`
             codeFuncDef+= `    } \r\n`
-            codeFuncDef+= `    JSValue retval = JS_MKPTR(JS_TAG_OBJECT, retptr) ; \r\n`
         }
         else if(returnType=="bool") {
             codeFuncDef+= `    JSValue retval = JS_NewBool(ctx,${cfunc}(thisobj${cargvLst})) ;\r\n`
@@ -316,10 +317,6 @@ static JSValue js_${ctypeName}_constructor(JSContext *ctx, JSValueConst new_targ
     }
     ${ctypeName}_t * cobj = ${ctypeName}_create(cparent) ;
     JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, js_${ctypeName}_class_id) ;
-    if(cparent) {
-        JS_DupValue(ctx, argv[0]) ;
-        JS_DupValue(ctx, jsobj) ;
-    }
     return jsobj ;
 }
 static void js_${ctypeName}_finalizer(JSRuntime *rt, JSValue val){
@@ -403,7 +400,7 @@ function generateConstMapping(arrconst, prefix, ctype, cname, lastval) {
     let code = `
 const char * ${cname}_names[] = { ${nameLstCode} } ;
 bool ${cname}_jsstr_to_code(JSContext *ctx, JSValue jsstr, ${ctype}* out) {
-    char * cstr = JS_ToCString(ctx, jsstr) ;
+    char * cstr = (char *)JS_ToCString(ctx, jsstr) ;
 ${mappingCode}
     else {
         JS_ThrowReferenceError(ctx, "unkonw ${cname} pass in: %s", cstr) ;
@@ -446,6 +443,10 @@ function main() {
                 , {
                     "js_lv_obj_enable_event": "enableEvent" ,
                     "js_lv_obj_disable_event": "disableEvent" ,
+                    "js_lv_obj_is_screen": "isScreen" ,
+                    "js_lv_obj_ptr": "ptr" ,
+                    "js_lv_obj_get_coords": "getCoords" ,
+                    "js_lv_obj_set_coords": "setCoords" ,
                 }
     )
     code+= gen_lv_class("lv_label", "lvgl.Label", require("./api/lv_label.js"))

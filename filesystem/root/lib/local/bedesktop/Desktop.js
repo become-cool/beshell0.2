@@ -14,9 +14,10 @@ module.exports = class Desktop {
         // }
         this._disp = disp
         this._scrConsole = new ScrConsole()
-        this._scrApps = new ScrApps()
-        this._scrPreApps = new ScrPreApps()
+        // this._scrApps = new ScrApps()
+        // this._scrPreApps = new ScrPreApps()
 
         this._disp.loadScreen(this._scrConsole)
+        global.scr = this._scrConsole
     }
 }

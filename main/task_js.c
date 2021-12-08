@@ -10,6 +10,7 @@
 #include "webtelnet.h"
 #else
 #include "repl.h"
+#include "http_lws.h"
 #endif
 
 #include "module_events.h"
@@ -224,6 +225,8 @@ static JSContext * JS_NewCustomContext(JSRuntime *rt)
     require_module_serial(ctx) ;
     require_module_socks(ctx) ;
     require_module_http(ctx) ;
+#else
+    repl_require(ctx) ;
 #endif
     require_module_lvgl(ctx) ;
 
@@ -315,6 +318,8 @@ void task_js_main(){
             socks_on_before_reset(ctx) ;
             http_on_before_reset(ctx) ;
             wifi_reset(ctx) ;
+#else
+            repl_reset(ctx) ;
 #endif
 
             deinit_quickjs() ;
@@ -330,10 +335,10 @@ void task_js_main(){
         socks_udp_loop(ctx) ;
         gpio_loop(ctx) ;
 #else
-        lvgl_loop(ctx) ;
         repl_loop(ctx) ;
         httplws_loop(ctx) ;
 #endif
+        lvgl_loop(ctx) ;
         eventloop_pump(ctx) ;
 
         js_std_loop(ctx) ;

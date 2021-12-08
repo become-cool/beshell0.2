@@ -20,9 +20,9 @@ bool ws_input_pressed = false ;
 bool ws_input_update = false ;
 
 void ws_driver_input_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
-    if(!ws_input_update) {
-        return ;
-    }
+    // if(!ws_input_update) {
+    //     return ;
+    // }
     if(ws_input_pressed) {
         data->state = LV_INDEV_STATE_PRESSED ;
         data->point.x = ws_input_x ;
@@ -31,8 +31,7 @@ void ws_driver_input_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
     else {
         data->state = LV_INDEV_STATE_RELEASED ;
     }
-    ws_input_update = false ;
-    return ;
+    // ws_input_update = false ;
 }
 
 

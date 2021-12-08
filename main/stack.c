@@ -12,7 +12,7 @@ stack_base_t* stack_shift(stack_base_t** ppstack) {
     }
 }
 
-stack_base_t* stack_unshift(stack_base_t** ppstack, stack_base_t * pitem) {
+void stack_unshift(stack_base_t** ppstack, stack_base_t * pitem) {
     if(pitem) {
         pitem->_next = *ppstack ;
         *ppstack = pitem ;

@@ -28,9 +28,11 @@ void echo_error(JSContext *) ;
 	}
 
 #define  ARGV_TO_UINT8(i,var)   ARGV_TO_INT(i, var, uint8_t,  JS_ToUint32)
-#define   ARGV_TO_INT8(i,var)   ARGV_TO_INT(i, var, int8_t,  JS_ToInt32)
+#define   ARGV_TO_INT8(i,var)   ARGV_TO_INT(i, var, int8_t,   JS_ToInt32)
 #define ARGV_TO_UINT16(i,var)   ARGV_TO_INT(i, var, uint16_t, JS_ToUint32)
+#define ARGV_TO_INT16(i,var)    ARGV_TO_INT(i, var, int16_t,  JS_ToInt32)
 #define ARGV_TO_UINT32(i,var)   ARGV_TO_INT(i, var, uint32_t, JS_ToUint32)
+#define ARGV_TO_INT32(i,var)    ARGV_TO_INT(i, var, int32_t,  JS_ToInt32)
 #define ARGV_TO_DOUBLE(i,var)                               \
     double var ;                                            \
     JS_ToFloat64(ctx, &var, argv[i]) ;
@@ -98,6 +100,7 @@ void eval_code_len(JSContext *ctx, const char * str,size_t len,const char * file
 #define dd printf("@%d\n", __LINE__) ;
 #define df(msg) printf("@%d %s\n", __LINE__, msg) ;
 #define dm(msg) printf("%s: %dKB\n", msg, esp_get_free_heap_size()/1024);
+#define dp(p)   printf(#p"@%p\n", p) ;
 #define dn(v)   printf(#v"=%d\n", v) ;
 #define dn2(v1,v2)   printf(#v1"=%d, "#v2"=\n", v1, v2) ;
 

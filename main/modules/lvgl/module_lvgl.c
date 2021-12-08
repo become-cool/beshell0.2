@@ -45,28 +45,25 @@ void require_module_lvgl(JSContext *ctx) {
         lv_init();
         
 #ifndef SIMULATION
-    // lvgl 时钟
-    const esp_timer_create_args_t periodic_timer_args = {
-        .callback = &lv_tick_task,
-        .name = "lvgl"
-    };
-    esp_timer_handle_t periodic_timer;
-    ESP_ERROR_CHECK(esp_timer_create(&periodic_timer_args, &periodic_timer));
-    ESP_ERROR_CHECK(esp_timer_start_periodic(periodic_timer, LV_TICK_PERIOD_MS * 1000));
-
+        // lvgl 时钟
+        const esp_timer_create_args_t periodic_timer_args = {
+            .callback = &lv_tick_task,
+            .name = "lvgl"
+        };
+        esp_timer_handle_t periodic_timer;
+        ESP_ERROR_CHECK(esp_timer_create(&periodic_timer_args, &periodic_timer));
+        ESP_ERROR_CHECK(esp_timer_start_periodic(periodic_timer, LV_TICK_PERIOD_MS * 1000));
 #else 
-
-
-    tact.sa_handler = sig_alm_handler;
-    tact.sa_flags = SA_RESTART ;  // SA_RESTART 在 select() 时遇到中断发生，在中断完成后自动恢复
-    sigemptyset(&tact.sa_mask);
-    sigaction(SIGALRM, &tact, NULL);
-    
-    value.it_value.tv_sec = 0;
-    value.it_value.tv_usec = 1000 * LV_TICK_PERIOD_MS;
-    value.it_interval = value.it_value;
-    setitimer(ITIMER_REAL, &value, NULL);
-
+        // lvgl 时钟
+        tact.sa_handler = sig_alm_handler;
+        tact.sa_flags = SA_RESTART ;  // SA_RESTART 在 select() 时遇到中断发生，在中断完成后自动恢复
+        sigemptyset(&tact.sa_mask);
+        sigaction(SIGALRM, &tact, NULL);
+        
+        value.it_value.tv_sec = 0;
+        value.it_value.tv_usec = 1000 * LV_TICK_PERIOD_MS;
+        value.it_interval = value.it_value;
+        setitimer(ITIMER_REAL, &value, NULL);
 #endif
         
         lv_has_inited = true ;
@@ -83,6 +80,7 @@ void require_module_lvgl(JSContext *ctx) {
     JS_FreeValue(ctx, global);
     JS_FreeValue(ctx, beapi);
 }
+
 
 void lvgl_loop(JSContext *ctx)  {
     if(lv_has_inited) {

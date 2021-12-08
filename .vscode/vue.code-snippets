@@ -1,0 +1,45 @@
+{
+	"c-header": {
+		"prefix": "cheader",
+		"body": [
+			"#ifndef __H_${TM_FILENAME_BASE/(.*)$/${1:/upcase}/}__" ,
+			"#define __H_${TM_FILENAME_BASE/(.*)$/${1:/upcase}/}__",
+			"",
+			"",
+			"#endif",
+		],
+		"description": "c 头文件"
+	} ,
+
+	"c-sourse": {
+		"prefix": "csource",
+		"body": [
+			"#include \"${TM_FILENAME_BASE}.h\"" ,
+			"",
+			"",
+		],
+		"description": "c 头文件"
+	} ,
+
+	"quickjs c func": {
+		"prefix": "jsfunction",
+		"body": [
+			"static JSValue js_${funcName}(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {" ,
+			"" ,
+			"    return JS_UNDEFINED ;" ,
+			"}" 
+		],
+		"description": "c function for qjs"
+	} ,
+
+	"return promise": {
+		"prefix": "promise",
+		"body": [
+			"return new Promise(resolve=>{" ,
+			"" ,
+			"})"
+		],
+		"description": "return promise"
+	} ,
+
+}

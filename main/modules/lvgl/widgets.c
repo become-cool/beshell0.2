@@ -2982,7 +2982,7 @@ static const JSCFunctionListEntry js_lv_obj_proto_funcs[] = {
     JS_CFUNC_DEF("move", 0, js_lv_obj_move),
     JS_CFUNC_DEF("moveX", 0, js_lv_obj_move_x),
     JS_CFUNC_DEF("moveY", 0, js_lv_obj_move_y),
-    JS_CFUNC_DEF("allStyles", 0, js_lv_obj_get_all_styles),
+    JS_CFUNC_DEF("allStyleValues", 0, js_lv_obj_get_all_style_values),
     JS_CFUNC_DEF("setStyle", 0, js_lv_obj_set_style),
     JS_CFUNC_DEF("style", 0, js_lv_obj_get_style),
     JS_CFUNC_DEF("addFlag", 0, js_lv_obj_add_flag),

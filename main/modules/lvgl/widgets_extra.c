@@ -365,7 +365,7 @@ bool lv_style_js_to_value(JSContext * ctx, lv_style_prop_t prop, JSValue jsval, 
     return false ;
 }
 
-JSValue js_lv_obj_get_all_styles(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+JSValue js_lv_obj_get_all_style_values(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     THIS_LBOBJ("Obj", "getAllStyles", thisobj)
     JSValue jsstyles = JS_NewObject(ctx) ;
     for(int i = 0; i < thisobj->style_cnt; i++) {

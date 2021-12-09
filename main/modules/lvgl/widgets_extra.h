@@ -23,7 +23,7 @@ JSValue js_lv_obj_move(JSContext *ctx, JSValueConst this_val, int argc, JSValueC
 JSValue js_lv_obj_move_x(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
 JSValue js_lv_obj_move_y(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
 
-JSValue js_lv_obj_get_all_styles(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
+JSValue js_lv_obj_get_all_style_values(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
 
 JSValue js_lv_obj_set_style(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
 JSValue js_lv_obj_get_style(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;

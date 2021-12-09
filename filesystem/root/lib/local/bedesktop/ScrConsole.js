@@ -2,37 +2,41 @@ const lv = require("lv")
 class ScrConsole extends lv.Obj {
     constructor(parent) {
         super(parent)
+
+        this.setFlexFlow("column")
         
-        let {btn1,btn2,btn3,rect1} = this.refs = lv.fromJson([
+        let objs = lv.fromJson([
             {
-                class: "Btn" ,
-                text: "btn1" ,
-                ref: 'btn1' ,
+                class: 'Row' ,
+                grow: 1 ,
+                ref: "row1" ,
             } ,
             {
-                class: "Btn" ,
-                text: "btn2" ,
-                ref: 'btn2' ,
-            } ,
-            {
-                class: "Obj" ,
-                ref: 'rect1' ,
-                center: "center" ,
+                class: 'Row' ,
+                ref: "row2" ,
+                height: 32 ,
                 children: [
                     {
-                        class: "Btn" ,
-                        text: "btn3" ,
-                        ref: 'btn3' ,
+                        class: 'Btn' ,
+                        text: 'btn1' ,
+                        ref: "btn1" ,
+                        width: 100 ,
+                    } ,
+                    {
+                        class: 'Btn' ,
+                        text: 'btn2' ,
+                        ref: "btn2" ,
                     }
                 ]
-            }
+            } ,
         ], this)
 
-        global.btn1 = btn1
-        global.btn2 = btn2
-        global.btn3 = btn3
-        global.rect1 = rect1
+        for(let name in objs) {
+            global[name] = objs[name]
+        }
         
+        row1.setStyle("border-width", 1)
+        row2.setStyle("border-width", 1)
     }
 }
 module.exports = ScrConsole

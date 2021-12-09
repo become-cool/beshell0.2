@@ -31,19 +31,28 @@ JSValue js_lv_obj_wrapper(JSContext *ctx, lv_obj_t * cobj, JSClassID clzid) ;
 void vlgl_js_widgets_init() ;
 void require_vlgl_js_widgets(JSContext *ctx, JSValue lvgl) ;
 
-bool lv_event_jsstr_to_code(JSContext *ctx, JSValue jsstr, lv_event_code_t* out) ;
-JSValue lv_event_code_to_jsstr(JSContext *ctx, lv_event_code_t code) ;
+bool lv_event_code_jsstr_to_const(JSContext *ctx, JSValue jsstr, lv_event_code_t* out) ;
+const char *  lv_event_code_const_to_str(lv_event_code_t code) ;
+JSValue lv_event_code_const_to_jsstr(JSContext *ctx, lv_event_code_t code) ;
 
-bool lv_flex_flow_jsstr_to_code(JSContext *ctx, JSValue jsstr, lv_flex_flow_t* out) ;
-JSValue lv_flex_flow_code_to_jsstr(JSContext *ctx, lv_flex_flow_t code) ;
+bool lv_flex_flow_jsstr_to_const(JSContext *ctx, JSValue jsstr, lv_flex_flow_t* out) ;
+const char *  lv_flex_flow_const_to_str(lv_flex_flow_t code) ;
+JSValue lv_flex_flow_const_to_jsstr(JSContext *ctx, lv_flex_flow_t code) ;
     
-bool lv_flex_align_jsstr_to_code(JSContext *ctx, JSValue jsstr, lv_flex_align_t* out) ;
-JSValue lv_flex_align_code_to_jsstr(JSContext *ctx, lv_flex_align_t code) ;
+bool lv_flex_align_jsstr_to_const(JSContext *ctx, JSValue jsstr, lv_flex_align_t* out) ;
+const char *  lv_flex_align_const_to_str(lv_flex_align_t code) ;
+JSValue lv_flex_align_const_to_jsstr(JSContext *ctx, lv_flex_align_t code) ;
 
-bool lv_align_jsstr_to_code(JSContext *ctx, JSValue jsstr, lv_align_t* out) ;
-JSValue lv_align_code_to_jsstr(JSContext *ctx, lv_align_t code) ;
+bool lv_align_jsstr_to_const(JSContext *ctx, JSValue jsstr, lv_align_t* out) ;
+const char *  lv_align_const_to_str(lv_align_t code) ;
+JSValue lv_align_const_to_jsstr(JSContext *ctx, lv_align_t code) ;
 
-bool lv_dir_jsstr_to_code(JSContext *ctx, JSValue jsstr, lv_dir_t* out) ;
-JSValue lv_dir_code_to_jsstr(JSContext *ctx, lv_dir_t code) ;
+bool lv_dir_jsstr_to_const(JSContext *ctx, JSValue jsstr, lv_dir_t* out) ;
+const char *  lv_dir_const_to_str(lv_dir_t code) ;
+JSValue lv_dir_const_to_jsstr(JSContext *ctx, lv_dir_t code) ;
+
+bool lv_style_prop_jsstr_to_const(JSContext *ctx, JSValue jsstr, lv_style_prop_t* out) ;
+const char * lv_style_prop_const_to_str(lv_style_prop_t code) ;
+JSValue lv_style_prop_const_to_jsstr(JSContext *ctx, lv_style_prop_t code) ;
 
 #endif

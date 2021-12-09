@@ -28,11 +28,10 @@ const conver_int16 = create_conver_base("int16_t", "JS_ToInt32", "int32_t")
 const conver_uint16 = create_conver_base("uint16_t", "JS_ToUint32", "uint32_t")
 const conver_int32 = create_conver_base("int32_t", "JS_ToInt32", "int32_t")
 const conver_uint32 = create_conver_base("uint32_t", "JS_ToUint32", "uint32_t")
-const conver_flex_flow = create_conver_mappingconst('lv_flex_flow_t', 'lv_flex_flow_jsstr_to_code')
-const conver_flex_align = create_conver_mappingconst('lv_flex_align_t', 'lv_flex_align_jsstr_to_code')
-
-const conver_align = create_conver_mappingconst('lv_align_t', 'lv_align_jsstr_to_code')
-const conver_dir = create_conver_mappingconst('lv_dir_t', 'lv_dir_jsstr_to_code')
+const conver_flex_flow = create_conver_mappingconst('lv_flex_flow_t', 'lv_flex_flow_jsstr_to_const')
+const conver_flex_align = create_conver_mappingconst('lv_flex_align_t', 'lv_flex_align_jsstr_to_const')
+const conver_align = create_conver_mappingconst('lv_align_t', 'lv_align_jsstr_to_const')
+const conver_dir = create_conver_mappingconst('lv_dir_t', 'lv_dir_jsstr_to_const')
 
 function conver_bool(cargv,i){
     return `    bool ${cargv} = JS_ToBool(ctx, argv[${i}]) ;\r\n`
@@ -118,6 +117,12 @@ const MapC2JS_Conver = {
     "lv_btnmatrix_ctrl_t": conver_uint8,
     "lv_img_src_t": conver_uint8,
     "lv_opa_t": conver_uint8,
+    "lv_state_t": conver_uint32,
+    "lv_part_t": conver_uint32,
+    "lv_style_selector_t": conver_uint32,
+    "lv_base_dir_t": create_conver_mappingconst('lv_base_dir_t', 'lv_base_dir_jsstr_to_const'),
+    "lv_border_side_t": create_conver_mappingconst('lv_border_side_t', 'lv_border_side_jsstr_to_const'),
+    "lv_style_prop_t": create_conver_mappingconst('lv_style_prop_t', 'lv_style_prop_jsstr_to_const'),
 }
 
 function free_argv_string(cargv){
@@ -160,10 +165,10 @@ const MapJS2C_Conver = {
     "lv_obj_flag_t": "JS_NewUint32" ,
     "lv_scrollbar_mode_t": "JS_NewUint32" ,
     "lv_scroll_snap_t": "JS_NewUint32" ,
-    "lv_dir_t": "lv_dir_code_to_jsstr" ,
-    "lv_align_t": 'lv_align_code_to_jsstr' ,
-    "lv_flex_align_t": "lv_flex_align_code_to_jsstr",
-    "lv_flex_flow_t": "lv_flex_flow_code_to_jsstr",
+    "lv_dir_t": "lv_dir_const_to_jsstr" ,
+    "lv_align_t": 'lv_align_const_to_jsstr' ,
+    "lv_flex_align_t": "lv_flex_align_const_to_jsstr",
+    "lv_flex_flow_t": "lv_flex_flow_const_to_jsstr",
     "lv_style_selector_t": "JS_NewUint32",
     "lv_label_long_mode_t": "JS_NewUint32",
     "lv_arc_mode_t": "JS_NewUint32",
@@ -177,8 +182,20 @@ const MapJS2C_Conver = {
     "lv_btnmatrix_ctrl_t":"JS_NewUint32",
     "lv_img_src_t":"JS_NewUint32",
     "lv_opa_t":"JS_NewUint32",
-    "lv_color_t":"(uint16_t)JS_NewUint32",
+    "lv_state_t": 'JS_NewUint32',
+    "lv_part_t": 'JS_NewUint32',
+    "lv_style_selector_t": 'JS_NewUint32',
+    "lv_base_dir_t": 'lv_base_dir_const_to_jsstr',
+    "lv_border_side_t": 'lv_border_side_const_to_jsstr',
+    "lv_style_prop_t": 'lv_style_prop_const_to_jsstr',
 }
+
+const MapJS2C_ConverFunc = {
+    "lv_color_t": function(cfunc, cargvLst){
+        return `    JSValue retval = JS_NewUint32(ctx,${cfunc}(thisobj${cargvLst}).full) ;\r\n`
+    },
+}
+
 
 function gen_lv_class(cName, className, api, extraMethod) {
 
@@ -198,6 +215,9 @@ function gen_lv_class(cName, className, api, extraMethod) {
                 jsmethod = cfunc.substr(cName.length+1)
                 let arr = jsmethod.split("_")
                 jsmethod = arr.shift()
+                if(jsmethod=='get') {
+                    jsmethod = arr.shift()
+                }
                 for(let n of arr) {
                     jsmethod+= n[0].toUpperCase() + n.substr(1)
                 }
@@ -260,6 +280,9 @@ function gen_lv_class(cName, className, api, extraMethod) {
         }
         else if(returnType=="bool") {
             codeFuncDef+= `    JSValue retval = JS_NewBool(ctx,${cfunc}(thisobj${cargvLst})) ;\r\n`
+        }
+        else if(MapJS2C_ConverFunc[returnType]) {
+            codeFuncDef+= MapJS2C_ConverFunc[returnType](cfunc, cargvLst)
         }
         else if(MapJS2C_Conver[returnType]) {
             codeFuncDef+= `    JSValue retval = ${MapJS2C_Conver[returnType]}(ctx,${cfunc}(thisobj${cargvLst})) ;\r\n`
@@ -379,27 +402,23 @@ function srcInsert(src, code, startMart, endMark) {
 }
 
 
-function generateConstMapping(arrconst, prefix, ctype, cname, lastval) {
+function generateConstMapping(arrconst, prefix, ctype, cname) {
     
     let mappingCode = ""
-    let nameLstCode = ""
+    let mappingName = ""
     let i = 0
     for(let constName of arrconst) {
-        let name = constName.substr(prefix.length).toLowerCase()
+        let name = constName.substr(prefix.length).toLowerCase().replace(/_/g,'-')
         mappingCode+= `    ${i? 'else ':''}if(strcmp(cstr,"${name}")==0) {\r\n`
         mappingCode+= `        (*out) = ${constName} ;\r\n`
         mappingCode+= `    }\r\n`
 
-        if(i) {
-            nameLstCode+= ", "
-        }
-        nameLstCode+= `"${name}"`
+        mappingName+= `        case ${constName}: return "${name}";\r\n`
         i++
     }
 
     let code = `
-const char * ${cname}_names[] = { ${nameLstCode} } ;
-bool ${cname}_jsstr_to_code(JSContext *ctx, JSValue jsstr, ${ctype}* out) {
+bool ${cname}_jsstr_to_const(JSContext *ctx, JSValue jsstr, ${ctype}* out) {
     char * cstr = (char *)JS_ToCString(ctx, jsstr) ;
 ${mappingCode}
     else {
@@ -410,13 +429,25 @@ ${mappingCode}
     JS_FreeCString(ctx, cstr) ;
     return true ;
 }
-JSValue ${cname}_code_to_jsstr(JSContext *ctx, ${ctype} code) {
-    if(code>=${lastval}) {
-        return JS_NewString(ctx, "unkonw");
-    }
-    return JS_NewString(ctx, ${cname}_names[code]);
+const char * ${cname}_const_to_str(${ctype} code) {
+    switch(code) {
+${mappingName}    }
+    return "unkonw";
+}
+JSValue ${cname}_const_to_jsstr(JSContext *ctx, ${ctype} code) {
+    return JS_NewString(ctx, ${cname}_const_to_str(code));
 }
 `
+    return code
+}
+
+function generateConsts() {
+
+    let code = ''
+    let libConst = require("./api/consts.js")
+    for(defConst of libConst) {
+        code+= generateConstMapping(defConst.def, defConst.prefix, defConst.type, defConst.name)
+    }
     return code
 }
 
@@ -445,11 +476,14 @@ function main() {
                     "js_lv_obj_disable_event": "disableEvent" ,
                     "js_lv_obj_is_screen": "isScreen" ,
                     "js_lv_obj_ptr": "ptr" ,
-                    "js_lv_obj_get_coords": "getCoords" ,
+                    "js_lv_obj_get_coords": "coords" ,
                     "js_lv_obj_set_coords": "setCoords" ,
                     "js_lv_obj_move": "move" ,
                     "js_lv_obj_move_x": "moveX" ,
                     "js_lv_obj_move_y": "moveY" ,
+                    "js_lv_obj_get_all_styles": "getAllStyles" ,
+                    "js_lv_obj_set_style": "setStyle" ,
+                    "js_lv_obj_get_style": "style" ,
                 }
     )
     code+= gen_lv_class("lv_label", "lvgl.Label", require("./api/lv_label.js"))
@@ -479,12 +513,7 @@ function main() {
     src = srcInsert(src, generateClassRegister(), registerclass_mark_start, registerclass_mark_end)
     src = srcInsert(src, generateClassIDRegister(), registerclass_id_mark_start, registerclass_id_mark_end)
 
-    code = generateConstMapping(require("./api/const_event"), 'LV_EVENT_', 'lv_event_code_t', 'lv_event', '_LV_EVENT_LAST')
-    code+= generateConstMapping(require("./api/const_flex_flow"), 'LV_FLEX_FLOW_', 'lv_flex_flow_t', 'lv_flex_flow', 'LV_FLEX_FLOW_COLUMN_WRAP_REVERSE+1')
-    code+= generateConstMapping(require("./api/const_flex_align"), 'LV_FLEX_ALIGN_', 'lv_flex_align_t', 'lv_flex_align', 'LV_FLEX_ALIGN_SPACE_BETWEEN+1')
-    code+= generateConstMapping(require("./api/const_align"), 'LV_ALIGN_', 'lv_align_t', 'lv_align', 'LV_ALIGN_OUT_RIGHT_BOTTOM+1')
-    code+= generateConstMapping(require("./api/const_dir"), 'LV_DIR_', 'lv_dir_t', 'lv_dir', 'LV_DIR_ALL+1')
-    src = srcInsert(src, code, const_mapping_mark_start, const_mapping_mark_end)
+    src = srcInsert(src, generateConsts(), const_mapping_mark_start, const_mapping_mark_end)
 
     fs.writeFileSync(dist_path, src)
 

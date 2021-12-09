@@ -101,8 +101,9 @@ void eval_code_len(JSContext *ctx, const char * str,size_t len,const char * file
 #define df(msg) printf("@%d %s\n", __LINE__, msg) ;
 #define dm(msg) printf("%s: %dKB\n", msg, esp_get_free_heap_size()/1024);
 #define dp(p)   printf(#p"@%p\n", p) ;
+#define ds(s)   printf(#s"=%s\n", s) ;
 #define dn(v)   printf(#v"=%d\n", v) ;
-#define dn2(v1,v2)   printf(#v1"=%d, "#v2"=\n", v1, v2) ;
+#define dn2(v1,v2)   printf(#v1"=%d, "#v2"=%d\n", v1, v2) ;
 
 #define YES_OR_NO(exp) printf(#exp"? %s\n", (exp)? "yes": "no") ;
 #define IS_NULL(exp) YES_OR_NO((exp)==NULL)

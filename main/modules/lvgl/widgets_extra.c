@@ -50,7 +50,7 @@ static void js_lv_event_cb(lv_event_t * event) {
         return ;
     }
 
-    JSValue jsname = lv_event_code_to_jsstr(ctx, event->code) ;
+    JSValue jsname = lv_event_code_const_to_jsstr(ctx, event->code) ;
 
     // jstarget
     MAKE_ARGV1( cbargv, jsname )
@@ -91,7 +91,7 @@ JSValue js_lv_obj_enable_event(JSContext *ctx, JSValueConst this_val, int argc, 
     THIS_LBOBJ("Obj", "enableEvent", thisobj)
     CHECK_ARGC(1)
     uint8_t eventcode ;
-    if(!lv_event_jsstr_to_code(ctx, argv[0], &eventcode)) {
+    if(!lv_event_code_jsstr_to_const(ctx, argv[0], &eventcode)) {
         return JS_EXCEPTION ;
     }
 
@@ -110,7 +110,7 @@ JSValue js_lv_obj_disable_event(JSContext *ctx, JSValueConst this_val, int argc,
     THIS_LBOBJ("Obj", "disableEvent", thisobj)
     CHECK_ARGC(1)
     uint8_t eventcode ;
-    if(!lv_event_jsstr_to_code(ctx, argv[0], &eventcode)) {
+    if(!lv_event_code_jsstr_to_const(ctx, argv[0], &eventcode)) {
         return JS_EXCEPTION ;
     }
 
@@ -180,4 +180,276 @@ JSValue js_lv_obj_move_y(JSContext *ctx, JSValueConst this_val, int argc, JSValu
     THIS_LBOBJ("Obj", "moveY", thisobj)
     lv_obj_set_y(thisobj, lv_obj_get_y_aligned(thisobj) + delta) ;
     return JS_UNDEFINED ;
+}
+JSValue js_lv_obj_get_all_styles(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    THIS_LBOBJ("Obj", "getAllStyles", thisobj)
+
+    dn(thisobj->style_cnt)
+
+    JSValue jsstyles = JS_NewObject(ctx) ;
+    
+    uint32_t i;
+    for(i = 0; i < thisobj->style_cnt; i++) {
+        // if(!thisobj->styles[i].is_local) {
+        //     continue ;
+        // }
+
+        lv_style_t * style = thisobj->styles[i].style ;
+
+        dn2(i, style->prop_cnt)
+
+        if(style->prop_cnt==1) {
+            dn(style->prop1)
+            // style->prop1
+            // style->v_p.value1
+        }
+        else {
+            uint8_t * tmp = style->v_p.values_and_props + style->prop_cnt * sizeof(lv_style_value_t);
+            uint16_t * props = (uint16_t *)tmp;
+
+            for(int j=0;j<style->prop_cnt;j++) {
+                // style->v_p.values_and_props[j] ;
+                // JSValue jspropName = lv_style_prop_const_to_jsstr(ctx, props[i]) ;
+                ds(lv_style_prop_const_to_str(props[j]))
+            }
+        }
+    }
+
+    return JS_UNDEFINED ;
+}
+
+
+JSValue lv_style_value_to_js(JSContext * ctx, lv_style_prop_t prop, lv_style_value_t value) {
+    switch(prop) {
+        case LV_STYLE_WIDTH:
+        case LV_STYLE_MIN_WIDTH:
+        case LV_STYLE_MAX_WIDTH:
+        case LV_STYLE_HEIGHT:
+        case LV_STYLE_MIN_HEIGHT:
+        case LV_STYLE_MAX_HEIGHT:
+        case LV_STYLE_X:
+        case LV_STYLE_Y:
+        case LV_STYLE_ALIGN:
+        case LV_STYLE_TRANSFORM_WIDTH:
+        case LV_STYLE_TRANSFORM_HEIGHT:
+        case LV_STYLE_TRANSLATE_X:
+        case LV_STYLE_TRANSLATE_Y:
+        case LV_STYLE_TRANSFORM_ZOOM:
+        case LV_STYLE_TRANSFORM_ANGLE:
+        case LV_STYLE_PAD_TOP:
+        case LV_STYLE_PAD_BOTTOM:
+        case LV_STYLE_PAD_LEFT:
+        case LV_STYLE_PAD_RIGHT:
+        case LV_STYLE_PAD_ROW:
+        case LV_STYLE_PAD_COLUMN:
+        case LV_STYLE_RADIUS:
+        case LV_STYLE_CLIP_CORNER:
+        case LV_STYLE_OPA:
+        case LV_STYLE_COLOR_FILTER_OPA:
+        case LV_STYLE_ANIM_TIME:
+        case LV_STYLE_ANIM_SPEED:
+        case LV_STYLE_BLEND_MODE:
+        case LV_STYLE_LAYOUT:
+        case LV_STYLE_BASE_DIR:
+        case LV_STYLE_BG_COLOR:
+        case LV_STYLE_BG_COLOR_FILTERED:
+        case LV_STYLE_BG_OPA:
+        case LV_STYLE_BG_GRAD_COLOR:
+        case LV_STYLE_BG_GRAD_COLOR_FILTERED:
+        case LV_STYLE_BG_GRAD_DIR:
+        case LV_STYLE_BG_MAIN_STOP:
+        case LV_STYLE_BG_GRAD_STOP:
+        case LV_STYLE_BG_IMG_OPA:
+        case LV_STYLE_BG_IMG_RECOLOR:
+        case LV_STYLE_BG_IMG_RECOLOR_FILTERED:
+        case LV_STYLE_BG_IMG_RECOLOR_OPA:
+        case LV_STYLE_BG_IMG_TILED:
+        case LV_STYLE_BORDER_COLOR:
+        case LV_STYLE_BORDER_COLOR_FILTERED:
+        case LV_STYLE_BORDER_OPA:
+        case LV_STYLE_BORDER_WIDTH:
+        case LV_STYLE_BORDER_SIDE:
+        case LV_STYLE_BORDER_POST:
+        case LV_STYLE_TEXT_COLOR:
+        case LV_STYLE_TEXT_COLOR_FILTERED:
+        case LV_STYLE_TEXT_OPA:
+        case LV_STYLE_TEXT_LETTER_SPACE:
+        case LV_STYLE_TEXT_LINE_SPACE:
+        case LV_STYLE_TEXT_DECOR:
+        case LV_STYLE_TEXT_ALIGN:
+        case LV_STYLE_IMG_OPA:
+        case LV_STYLE_IMG_RECOLOR:
+        case LV_STYLE_IMG_RECOLOR_FILTERED:
+        case LV_STYLE_IMG_RECOLOR_OPA:
+        case LV_STYLE_OUTLINE_WIDTH:
+        case LV_STYLE_OUTLINE_COLOR:
+        case LV_STYLE_OUTLINE_COLOR_FILTERED:
+        case LV_STYLE_OUTLINE_OPA:
+        case LV_STYLE_OUTLINE_PAD:
+        case LV_STYLE_SHADOW_WIDTH:
+        case LV_STYLE_SHADOW_OFS_X:
+        case LV_STYLE_SHADOW_OFS_Y:
+        case LV_STYLE_SHADOW_SPREAD:
+        case LV_STYLE_SHADOW_COLOR:
+        case LV_STYLE_SHADOW_COLOR_FILTERED:
+        case LV_STYLE_SHADOW_OPA:
+        case LV_STYLE_LINE_WIDTH:
+        case LV_STYLE_LINE_DASH_WIDTH:
+        case LV_STYLE_LINE_DASH_GAP:
+        case LV_STYLE_LINE_ROUNDED:
+        case LV_STYLE_LINE_COLOR:
+        case LV_STYLE_LINE_COLOR_FILTERED:
+        case LV_STYLE_LINE_OPA:
+        case LV_STYLE_ARC_WIDTH:
+        case LV_STYLE_ARC_ROUNDED:
+        case LV_STYLE_ARC_COLOR:
+        case LV_STYLE_ARC_COLOR_FILTERED:
+        case LV_STYLE_ARC_OPA:
+            return JS_NewInt32(ctx, value.num) ;
+    }
+    return JS_NewString(ctx, "unknow type") ;
+}
+
+
+bool lv_style_js_to_value(JSContext * ctx, lv_style_prop_t prop, JSValue jsval, lv_style_value_t * value) {
+    switch(prop) {
+        case LV_STYLE_WIDTH:
+        case LV_STYLE_MIN_WIDTH:
+        case LV_STYLE_MAX_WIDTH:
+        case LV_STYLE_HEIGHT:
+        case LV_STYLE_MIN_HEIGHT:
+        case LV_STYLE_MAX_HEIGHT:
+        case LV_STYLE_X:
+        case LV_STYLE_Y:
+        case LV_STYLE_ALIGN:
+        case LV_STYLE_TRANSFORM_WIDTH:
+        case LV_STYLE_TRANSFORM_HEIGHT:
+        case LV_STYLE_TRANSLATE_X:
+        case LV_STYLE_TRANSLATE_Y:
+        case LV_STYLE_TRANSFORM_ZOOM:
+        case LV_STYLE_TRANSFORM_ANGLE:
+        case LV_STYLE_PAD_TOP:
+        case LV_STYLE_PAD_BOTTOM:
+        case LV_STYLE_PAD_LEFT:
+        case LV_STYLE_PAD_RIGHT:
+        case LV_STYLE_PAD_ROW:
+        case LV_STYLE_PAD_COLUMN:
+        case LV_STYLE_RADIUS:
+        case LV_STYLE_CLIP_CORNER:
+        case LV_STYLE_OPA:
+        case LV_STYLE_COLOR_FILTER_OPA:
+        case LV_STYLE_ANIM_TIME:
+        case LV_STYLE_ANIM_SPEED:
+        case LV_STYLE_BLEND_MODE:
+        case LV_STYLE_LAYOUT:
+        case LV_STYLE_BASE_DIR:
+        case LV_STYLE_BG_COLOR:
+        case LV_STYLE_BG_COLOR_FILTERED:
+        case LV_STYLE_BG_OPA:
+        case LV_STYLE_BG_GRAD_COLOR:
+        case LV_STYLE_BG_GRAD_COLOR_FILTERED:
+        case LV_STYLE_BG_GRAD_DIR:
+        case LV_STYLE_BG_MAIN_STOP:
+        case LV_STYLE_BG_GRAD_STOP:
+        case LV_STYLE_BG_IMG_OPA:
+        case LV_STYLE_BG_IMG_RECOLOR:
+        case LV_STYLE_BG_IMG_RECOLOR_FILTERED:
+        case LV_STYLE_BG_IMG_RECOLOR_OPA:
+        case LV_STYLE_BG_IMG_TILED:
+        case LV_STYLE_BORDER_COLOR:
+        case LV_STYLE_BORDER_COLOR_FILTERED:
+        case LV_STYLE_BORDER_OPA:
+        case LV_STYLE_BORDER_WIDTH:
+        case LV_STYLE_BORDER_SIDE:
+        case LV_STYLE_BORDER_POST:
+        case LV_STYLE_TEXT_COLOR:
+        case LV_STYLE_TEXT_COLOR_FILTERED:
+        case LV_STYLE_TEXT_OPA:
+        case LV_STYLE_TEXT_LETTER_SPACE:
+        case LV_STYLE_TEXT_LINE_SPACE:
+        case LV_STYLE_TEXT_DECOR:
+        case LV_STYLE_TEXT_ALIGN:
+        case LV_STYLE_IMG_OPA:
+        case LV_STYLE_IMG_RECOLOR:
+        case LV_STYLE_IMG_RECOLOR_FILTERED:
+        case LV_STYLE_IMG_RECOLOR_OPA:
+        case LV_STYLE_OUTLINE_WIDTH:
+        case LV_STYLE_OUTLINE_COLOR:
+        case LV_STYLE_OUTLINE_COLOR_FILTERED:
+        case LV_STYLE_OUTLINE_OPA:
+        case LV_STYLE_OUTLINE_PAD:
+        case LV_STYLE_SHADOW_WIDTH:
+        case LV_STYLE_SHADOW_OFS_X:
+        case LV_STYLE_SHADOW_OFS_Y:
+        case LV_STYLE_SHADOW_SPREAD:
+        case LV_STYLE_SHADOW_COLOR:
+        case LV_STYLE_SHADOW_COLOR_FILTERED:
+        case LV_STYLE_SHADOW_OPA:
+        case LV_STYLE_LINE_WIDTH:
+        case LV_STYLE_LINE_DASH_WIDTH:
+        case LV_STYLE_LINE_DASH_GAP:
+        case LV_STYLE_LINE_ROUNDED:
+        case LV_STYLE_LINE_COLOR:
+        case LV_STYLE_LINE_COLOR_FILTERED:
+        case LV_STYLE_LINE_OPA:
+        case LV_STYLE_ARC_WIDTH:
+        case LV_STYLE_ARC_ROUNDED:
+        case LV_STYLE_ARC_COLOR:
+        case LV_STYLE_ARC_COLOR_FILTERED:
+        case LV_STYLE_ARC_OPA:
+            return JS_ToInt32(ctx, &(value->num), jsval)==0 ;
+    }
+    return false ;
+}
+
+JSValue js_lv_obj_set_style(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(2)
+    if(!JS_IsString(argv[0])) {
+        THROW_EXCEPTION("arg style name must be a string")
+    }
+    lv_style_prop_t prop ;
+    if(!lv_style_prop_jsstr_to_const(ctx, argv[0], &prop)){
+        THROW_EXCEPTION("unknow style name pass in")
+    }
+
+    lv_style_value_t value ;
+    if(!lv_style_js_to_value(ctx, prop, argv[1], &value)){
+        THROW_EXCEPTION("style value invalid")
+    }
+
+    lv_style_selector_t selector = LV_PART_MAIN | LV_STATE_DEFAULT ;
+    if(argc>2) {
+        if(JS_ToUint32(ctx, &selector, argv[2])!=0) {
+            THROW_EXCEPTION("invalid arg selector")
+        }
+    }
+
+    THIS_LBOBJ("Obj", "getStyle", thisobj)
+    
+    lv_obj_set_local_style_prop(thisobj, prop, value, selector) ;
+
+    return JS_UNDEFINED ;
+}
+
+JSValue js_lv_obj_get_style(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+    if(!JS_IsString(argv[0])) {
+        THROW_EXCEPTION("arg style name must be a string")
+    }
+    lv_style_prop_t prop ;
+    if(!lv_style_prop_jsstr_to_const(ctx, argv[0], &prop)){
+        THROW_EXCEPTION("unknow style name pass in")
+    }
+    lv_style_selector_t selector = LV_PART_MAIN | LV_STATE_DEFAULT ;
+    if(argc>1) {
+        if(JS_ToUint32(ctx, &selector, argv[1])!=0) {
+            THROW_EXCEPTION("invalid arg part")
+        }
+    }
+
+    THIS_LBOBJ("Obj", "getStyle", thisobj)
+
+    lv_style_value_t value = lv_obj_get_style_prop(thisobj, selector, prop) ;
+
+    return lv_style_value_to_js(ctx, prop, value) ;
 }

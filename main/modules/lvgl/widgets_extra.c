@@ -181,43 +181,6 @@ JSValue js_lv_obj_move_y(JSContext *ctx, JSValueConst this_val, int argc, JSValu
     lv_obj_set_y(thisobj, lv_obj_get_y_aligned(thisobj) + delta) ;
     return JS_UNDEFINED ;
 }
-JSValue js_lv_obj_get_all_styles(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-    THIS_LBOBJ("Obj", "getAllStyles", thisobj)
-
-    dn(thisobj->style_cnt)
-
-    JSValue jsstyles = JS_NewObject(ctx) ;
-    
-    uint32_t i;
-    for(i = 0; i < thisobj->style_cnt; i++) {
-        // if(!thisobj->styles[i].is_local) {
-        //     continue ;
-        // }
-
-        lv_style_t * style = thisobj->styles[i].style ;
-
-        dn2(i, style->prop_cnt)
-
-        if(style->prop_cnt==1) {
-            dn(style->prop1)
-            // style->prop1
-            // style->v_p.value1
-        }
-        else {
-            uint8_t * tmp = style->v_p.values_and_props + style->prop_cnt * sizeof(lv_style_value_t);
-            uint16_t * props = (uint16_t *)tmp;
-
-            for(int j=0;j<style->prop_cnt;j++) {
-                // style->v_p.values_and_props[j] ;
-                // JSValue jspropName = lv_style_prop_const_to_jsstr(ctx, props[i]) ;
-                ds(lv_style_prop_const_to_str(props[j]))
-            }
-        }
-    }
-
-    return JS_UNDEFINED ;
-}
-
 
 JSValue lv_style_value_to_js(JSContext * ctx, lv_style_prop_t prop, lv_style_value_t value) {
     switch(prop) {
@@ -401,6 +364,35 @@ bool lv_style_js_to_value(JSContext * ctx, lv_style_prop_t prop, JSValue jsval, 
     }
     return false ;
 }
+
+JSValue js_lv_obj_get_all_styles(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    THIS_LBOBJ("Obj", "getAllStyles", thisobj)
+    JSValue jsstyles = JS_NewObject(ctx) ;
+    for(int i = 0; i < thisobj->style_cnt; i++) {
+
+        lv_style_t * style = thisobj->styles[i].style ;
+
+        if(style->prop_cnt==1) {
+            const char * propName = lv_style_prop_const_to_str(style->prop1) ;
+            JSValue jsval = lv_style_value_to_js(ctx, style->prop1, style->v_p.value1) ;
+            JS_SetPropertyStr(ctx, jsstyles, propName, jsval) ;
+        }
+        else {
+            lv_style_value_t * values = (lv_style_value_t *)style->v_p.values_and_props;
+            uint8_t * tmp = style->v_p.values_and_props + style->prop_cnt * sizeof(lv_style_value_t);
+            uint16_t * props = (uint16_t *)tmp;
+
+            for(int j=0;j<style->prop_cnt;j++) {
+                const char * propName = lv_style_prop_const_to_str(props[j]) ;
+                JSValue jsval = lv_style_value_to_js(ctx, props[j], values[j]) ;
+                JS_SetPropertyStr(ctx, jsstyles, propName, jsval) ;
+            }
+        }
+    }
+
+    return jsstyles ;
+}
+
 
 JSValue js_lv_obj_set_style(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(2)

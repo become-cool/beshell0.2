@@ -481,7 +481,7 @@ function main() {
                     "js_lv_obj_move": "move" ,
                     "js_lv_obj_move_x": "moveX" ,
                     "js_lv_obj_move_y": "moveY" ,
-                    "js_lv_obj_get_all_styles": "getAllStyles" ,
+                    "js_lv_obj_get_all_styles": "allStyles" ,
                     "js_lv_obj_set_style": "setStyle" ,
                     "js_lv_obj_get_style": "style" ,
                 }

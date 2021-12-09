@@ -447,6 +447,9 @@ function main() {
                     "js_lv_obj_ptr": "ptr" ,
                     "js_lv_obj_get_coords": "getCoords" ,
                     "js_lv_obj_set_coords": "setCoords" ,
+                    "js_lv_obj_move": "move" ,
+                    "js_lv_obj_move_x": "moveX" ,
+                    "js_lv_obj_move_y": "moveY" ,
                 }
     )
     code+= gen_lv_class("lv_label", "lvgl.Label", require("./api/lv_label.js"))

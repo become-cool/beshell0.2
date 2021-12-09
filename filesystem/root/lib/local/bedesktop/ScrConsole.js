@@ -17,6 +17,7 @@ class ScrConsole extends lv.Obj {
             {
                 class: "Obj" ,
                 ref: 'rect1' ,
+                center: "center" ,
                 children: [
                     {
                         class: "Btn" ,
@@ -31,6 +32,7 @@ class ScrConsole extends lv.Obj {
         global.btn2 = btn2
         global.btn3 = btn3
         global.rect1 = rect1
+        
     }
 }
 module.exports = ScrConsole

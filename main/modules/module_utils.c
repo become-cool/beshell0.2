@@ -19,12 +19,6 @@
 
 LOG_TAG("util");
 
-JSValue js_util_free_stacks(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
-    (void) argc ;
-    (void) argv ;
-    return JS_NewInt32(ctx, esp_get_free_heap_size()) ;
-}
-
 
 typedef struct {
 	char *          levelString;
@@ -110,6 +104,17 @@ JSValue js_util_sleep(JSContext *ctx, JSValueConst this_val, int argc, JSValueCo
 
 #endif
 
+
+
+JSValue js_util_free_stacks(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    (void) argc ;
+    (void) argv ;
+#ifdef SIMULATION
+    return JS_NewInt32(ctx, 0) ;
+#else
+    return JS_NewInt32(ctx, esp_get_free_heap_size()) ;
+#endif
+}
 
 JSValue js_util_var_refcount(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
 	if(argc<1) {
@@ -204,7 +209,7 @@ JSValue js_fs_eval_as_file(JSContext *ctx, JSValueConst this_val, int argc, JSVa
     char * code = JS_ToCStringLen(ctx, &len, argv[0]) ;
     char * path = JS_ToCString(ctx, argv[1]) ;
 
-    JSValue ret = JS_Eval(ctx, code, len, path, JS_EVAL_TYPE_GLOBAL|JS_EVAL_FLAG_STRIP) ;
+    JSValue ret = JS_Eval(ctx, code, len, path, JS_EVAL_TYPE_GLOBAL) ; // JS_EVAL_FLAG_STRIP
 	JS_FreeCString(ctx, code) ;
     return ret ;
 }
@@ -555,13 +560,13 @@ void require_module_utils(JSContext *ctx) {
     JS_SetPropertyStr(ctx, beapi, "utils", utils);
 #ifndef SIMULATION
     JS_SetPropertyStr(ctx, beapi, "_repl_set_input_func", JS_NewCFunction(ctx, js_repl_set_input_func, "_repl_set_input_func", 1));
-    JS_SetPropertyStr(ctx, utils, "freeStacks", JS_NewCFunction(ctx, js_util_free_stacks, "freeStacks", 1));
     JS_SetPropertyStr(ctx, utils, "time", JS_NewCFunction(ctx, js_util_time, "time", 1));
     JS_SetPropertyStr(ctx, utils, "setLogLevel", JS_NewCFunction(ctx, js_util_set_log_level, "setLogLevel", 1));
     JS_SetPropertyStr(ctx, utils, "untar", JS_NewCFunction(ctx, js_fs_untar, "untar", 1));
     JS_SetPropertyStr(ctx, utils, "base64Encode", JS_NewCFunction(ctx, js_utils_base64_encode, "base64Encode", 1));
     JS_SetPropertyStr(ctx, utils, "base64Decode", JS_NewCFunction(ctx, js_utils_base64_decode, "base64Decode", 1));
 #endif
+    JS_SetPropertyStr(ctx, utils, "freeStacks", JS_NewCFunction(ctx, js_util_free_stacks, "freeStacks", 1));
     JS_SetPropertyStr(ctx, utils, "partId", JS_NewCFunction(ctx, js_utils_part_id, "partId", 1));
     JS_SetPropertyStr(ctx, utils, "uuid", JS_NewCFunction(ctx, js_util_uuid, "uuid", 1));
     JS_SetPropertyStr(ctx, utils, "varRefCnt", JS_NewCFunction(ctx, js_util_var_refcount, "varRefCnt", 1));

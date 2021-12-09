@@ -17,11 +17,10 @@
 
 #define THIS_LBOBJ(clzname, mehtodname, thisobj)                                                                        \
     CHECK_INSOF_LVOBJ(clzname, this_val, "lvgl."clzname"."mehtodname"() must be called as a lvgl."clzname" method")     \
-    lv_obj_t * _thisobj = JS_GetOpaqueInternal(this_val) ;                                                              \
-    if(!_thisobj) {                                                                                                     \
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;                                                               \
+    if(!thisobj) {                                                                                                      \
         THROW_EXCEPTION("lvgl."clzname"."mehtodname"() must be called as a lvgl."clzname" method")                      \
-    }                                                                                                                   \
-    lv_obj_t * thisobj = _thisobj ;
+    }
 
 
 

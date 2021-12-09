@@ -59,13 +59,13 @@ if(beapi._repl_set_input_func) {
 
 function resolvepath(path) {
     if(path=='~' ) {
-        path = process.env.HOME
+        return process.env.HOME
     } 
     else if(path[0]=='~' && path[1]=='/') {
-        path = process.env.HOME + path.substr(1)
-    } 
+        return process.env.HOME + path.substr(1)
+    }
     else if(path[0]!='/') {
-        path = process.env.PWD + '/' + path
+        return process.env.PWD + '/' + path
     }
     return path
 }
@@ -76,7 +76,7 @@ function cd(path) {
     }
     path = path? resolvepath(path): process.env.HOME
     if(!beapi.fs.isDirSync(path)) {
-        throw new Error("Is not a directory."+path)
+        throw new Error("Is not a directory: "+path)
     }
     path = beapi.fs.normalize(path) || '/'
     if(process.env.PWD != path) {
@@ -86,9 +86,97 @@ function cd(path) {
     return process.env.PWD
 }
 
+function ls() {
+    for(let item of beapi.fs.readdirSync(process.env.PWD)) {
+        if(item=='.')
+            continue
+        if( beapi.fs.isDirSync(process.env.PWD+'/'+item) ) {
+            console.log(item+'/')
+        }
+        else {
+            console.log(item)
+        }
+    }
+}
 
-global.repl = {
-    _mkresolve, _mkreject, cd, resolvepath
+
+function cmd_require() {
+    console.log("not implemented")
+}
+function mv() {
+    console.log("not implemented")
+}
+function cp(path) {
+    console.log("not implemented")
+}
+function rm() {
+    console.log("not implemented")
+}
+function touch() {
+    console.log("not implemented")
+}
+function cat(path) {
+    console.log(beapi.fs.readFileSync(resolvepath(path)))
+}
+function pwd() {
+    console.log(process.env.PWD)
+}
+
+function free() {
+    console.log(beapi.utils.freeStacks())
+}
+function reset(level) {
+    level = parseInt((level||'5').trim())
+    if(isNaN(level)) {
+        process.reset()
+    }
+    else {
+        process.reset(level)
+    }
+}
+
+const ShellCmds = {
+    cd, pwd, ls, cp, rm, mv, touch, cat
+    , require:cmd_require
+    , free, reset
+}
+
+
+function stringify(value) {
+    let pool = []
+    let str = JSON.stringify(value, (key,value)=>{
+        if( key=="_handles" ) {
+            return undefined
+        }
+        if(value===null) {
+            return value
+        }
+        if( typeof value=="object" || typeof value=="function" ) {
+            let idx = pool.indexOf(value)
+            if( idx>=0 ) {
+                return "<circular reference>#"+idx
+            }
+            pool.push(value)
+            if(typeof value=="function") {
+                return (value.name||'')+'<function>'
+            }
+        }
+        return value
+    },2)
+    pool.length = 0
+    return str
+}
+
+function runShellCmd(code) {
+    let argvs = code.trim().split(/ +/)
+    let cmd = argvs.shift()
+    if(!ShellCmds[cmd]) {
+        return false
+    }
+    
+    ShellCmds[cmd].apply(null, argvs)
+
+    return true
 }
 
 if(process.simulate && process.setStdinCallback) {
@@ -105,12 +193,14 @@ if(process.simulate && process.setStdinCallback) {
         let line = pendingStdinInput.substr(0, firstLineEnd+1).trim()
         pendingStdinInput = pendingStdinInput.substr(firstLineEnd+1)
         try{
-            let res = evalAsFile(line, "REPL")
-            if( typeof res=='object' ) {
-                console.log(JSON.stringify(res))
-            }
-            else {
-                console.log(res)
+            if( !runShellCmd(line) ) {
+                let res = evalAsFile(line, "REPL")
+                if( typeof res=='object' ) {
+                    console.log(stringify(res))
+                }
+                else {
+                    console.log(res)
+                }
             }
         }catch(e){
             console.log(e.toString())

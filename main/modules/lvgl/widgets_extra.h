@@ -19,4 +19,9 @@ JSValue js_lv_obj_set_coords(JSContext *ctx, JSValueConst this_val, int argc, JS
 
 JSValue js_lv_obj_get_coords(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
 
+JSValue js_lv_obj_move(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
+JSValue js_lv_obj_move_x(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
+JSValue js_lv_obj_move_y(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
+
+
 #endif

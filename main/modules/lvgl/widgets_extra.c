@@ -134,24 +134,18 @@ JSValue js_lv_obj_ptr(JSContext *ctx, JSValueConst this_val, int argc, JSValueCo
 }
 
 JSValue js_lv_obj_set_coords(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-    
-    THIS_LBOBJ("Obj", "getCoords", thisobj)
     CHECK_ARGC(2)
-dp(thisobj)
-
     ARGV_TO_INT16(0, x)
     ARGV_TO_INT16(1, y)
-dp(thisobj)
-    dn(thisobj->coords.x1)
-    dn(thisobj->coords.y1)
-    dn(thisobj->coords.x2)
-    dn(thisobj->coords.y2)
+    
+    THIS_LBOBJ("Obj", "setCoords", thisobj)
 
-    thisobj->coords.x2+= x - thisobj->coords.x1 ;
-    thisobj->coords.y2+= y - thisobj->coords.y1 ;
-    thisobj->coords.x1 = x ;
-    thisobj->coords.y1 = y ;
-
+    int16_t dx = x - thisobj->coords.x1 ;
+    int16_t dy = y - thisobj->coords.y1 ;
+    
+    lv_obj_set_x(thisobj, lv_obj_get_x_aligned(thisobj) + dx) ;
+    lv_obj_set_y(thisobj, lv_obj_get_y_aligned(thisobj) + dy) ;
+    
     return JS_UNDEFINED ;
 }
 JSValue js_lv_obj_get_coords(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
@@ -163,4 +157,27 @@ JSValue js_lv_obj_get_coords(JSContext *ctx, JSValueConst this_val, int argc, JS
     JS_SetPropertyUint32(ctx, arr, 1, JS_NewInt32(ctx, thisobj->coords.y1));
     
     return arr ;
+}
+JSValue js_lv_obj_move(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(2)
+    ARGV_TO_INT16(0, dx)
+    ARGV_TO_INT16(1, dy)
+    THIS_LBOBJ("Obj", "move", thisobj)
+    lv_obj_set_x(thisobj, lv_obj_get_x_aligned(thisobj) + dx) ;
+    lv_obj_set_y(thisobj, lv_obj_get_y_aligned(thisobj) + dy) ;
+    return JS_UNDEFINED ;
+}
+JSValue js_lv_obj_move_x(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+    ARGV_TO_INT16(0, delta)
+    THIS_LBOBJ("Obj", "moveX", thisobj)
+    lv_obj_set_x(thisobj, lv_obj_get_x_aligned(thisobj) + delta) ;
+    return JS_UNDEFINED ;
+}
+JSValue js_lv_obj_move_y(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+    ARGV_TO_INT16(0, delta)
+    THIS_LBOBJ("Obj", "moveY", thisobj)
+    lv_obj_set_y(thisobj, lv_obj_get_y_aligned(thisobj) + delta) ;
+    return JS_UNDEFINED ;
 }

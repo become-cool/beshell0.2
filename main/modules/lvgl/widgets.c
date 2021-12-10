@@ -81,8 +81,10 @@ const char * lv_flex_flow_const_to_str(lv_flex_flow_t code) {
         case LV_FLEX_FLOW_COLUMN_WRAP: return "column-wrap";
         case LV_FLEX_FLOW_COLUMN_REVERSE: return "column-reverse";
         case LV_FLEX_FLOW_COLUMN_WRAP_REVERSE: return "column-wrap-reverse";
+
+        default:
+            return "unkonw";
     }
-    return "unkonw";
 }
 JSValue lv_flex_flow_const_to_jsstr(JSContext *ctx, lv_flex_flow_t code) {
     return JS_NewString(ctx, lv_flex_flow_const_to_str(code));
@@ -126,8 +128,10 @@ const char * lv_flex_align_const_to_str(lv_flex_align_t code) {
         case LV_FLEX_ALIGN_SPACE_EVENLY: return "space-evenly";
         case LV_FLEX_ALIGN_SPACE_AROUND: return "space-around";
         case LV_FLEX_ALIGN_SPACE_BETWEEN: return "space-between";
+
+        default:
+            return "unkonw";
     }
-    return "unkonw";
 }
 JSValue lv_flex_align_const_to_jsstr(JSContext *ctx, lv_flex_align_t code) {
     return JS_NewString(ctx, lv_flex_align_const_to_str(code));
@@ -327,8 +331,10 @@ const char * lv_event_code_const_to_str(lv_event_code_t code) {
         case LV_EVENT_STYLE_CHANGED: return "style-changed";
         case LV_EVENT_LAYOUT_CHANGED: return "layout-changed";
         case LV_EVENT_GET_SELF_SIZE: return "get-self-size";
+
+        default:
+            return "unkonw";
     }
-    return "unkonw";
 }
 JSValue lv_event_code_const_to_jsstr(JSContext *ctx, lv_event_code_t code) {
     return JS_NewString(ctx, lv_event_code_const_to_str(code));
@@ -380,8 +386,10 @@ const char * lv_dir_const_to_str(lv_dir_t code) {
         case LV_DIR_HOR: return "hor";
         case LV_DIR_VER: return "ver";
         case LV_DIR_ALL: return "all";
+
+        default:
+            return "unkonw";
     }
-    return "unkonw";
 }
 JSValue lv_dir_const_to_jsstr(JSContext *ctx, lv_dir_t code) {
     return JS_NewString(ctx, lv_dir_const_to_str(code));
@@ -489,8 +497,10 @@ const char * lv_align_const_to_str(lv_align_t code) {
         case LV_ALIGN_OUT_RIGHT_TOP: return "out-right-top";
         case LV_ALIGN_OUT_RIGHT_MID: return "out-right-mid";
         case LV_ALIGN_OUT_RIGHT_BOTTOM: return "out-right-bottom";
+
+        default:
+            return "unkonw";
     }
-    return "unkonw";
 }
 JSValue lv_align_const_to_jsstr(JSContext *ctx, lv_align_t code) {
     return JS_NewString(ctx, lv_align_const_to_str(code));
@@ -538,8 +548,10 @@ const char * lv_border_side_const_to_str(lv_border_side_t code) {
         case LV_BORDER_SIDE_RIGHT: return "right";
         case LV_BORDER_SIDE_FULL: return "full";
         case LV_BORDER_SIDE_INTERNAL: return "internal";
+
+        default:
+            return "unkonw";
     }
-    return "unkonw";
 }
 JSValue lv_border_side_const_to_jsstr(JSContext *ctx, lv_border_side_t code) {
     return JS_NewString(ctx, lv_border_side_const_to_str(code));
@@ -579,8 +591,10 @@ const char * lv_base_dir_const_to_str(lv_base_dir_t code) {
         case LV_BASE_DIR_AUTO: return "auto";
         case LV_BASE_DIR_NEUTRAL: return "neutral";
         case LV_BASE_DIR_WEAK: return "weak";
+
+        default:
+            return "unkonw";
     }
-    return "unkonw";
 }
 JSValue lv_base_dir_const_to_jsstr(JSContext *ctx, lv_base_dir_t code) {
     return JS_NewString(ctx, lv_base_dir_const_to_str(code));
@@ -861,9 +875,6 @@ bool lv_style_prop_jsstr_to_const(JSContext *ctx, JSValue jsstr, lv_style_prop_t
     else if(strcmp(cstr,"-last-built-in-prop")==0) {
         (*out) = _LV_STYLE_LAST_BUILT_IN_PROP ;
     }
-    else if(strcmp(cstr,"prop-any")==0) {
-        (*out) = LV_STYLE_PROP_ANY ;
-    }
     else if(strcmp(cstr,"flex-flow")==0) {
         (*out) = LV_STYLE_FLEX_FLOW ;
     }
@@ -985,12 +996,199 @@ const char * lv_style_prop_const_to_str(lv_style_prop_t code) {
         case LV_STYLE_LAYOUT: return "layout";
         case LV_STYLE_BASE_DIR: return "base-dir";
         case _LV_STYLE_LAST_BUILT_IN_PROP: return "-last-built-in-prop";
-        case LV_STYLE_PROP_ANY: return "prop-any";
+
+        default:
+            return "unkonw";
     }
-    return "unkonw";
 }
 JSValue lv_style_prop_const_to_jsstr(JSContext *ctx, lv_style_prop_t code) {
     return JS_NewString(ctx, lv_style_prop_const_to_str(code));
+}
+
+bool lv_scr_load_anim_jsstr_to_const(JSContext *ctx, JSValue jsstr, lv_scr_load_anim_t* out) {
+    char * cstr = (char *)JS_ToCString(ctx, jsstr) ;
+    if(strcmp(cstr,"none")==0) {
+        (*out) = LV_SCR_LOAD_ANIM_NONE ;
+    }
+    else if(strcmp(cstr,"over-left")==0) {
+        (*out) = LV_SCR_LOAD_ANIM_OVER_LEFT ;
+    }
+    else if(strcmp(cstr,"over-right")==0) {
+        (*out) = LV_SCR_LOAD_ANIM_OVER_RIGHT ;
+    }
+    else if(strcmp(cstr,"over-top")==0) {
+        (*out) = LV_SCR_LOAD_ANIM_OVER_TOP ;
+    }
+    else if(strcmp(cstr,"over-bottom")==0) {
+        (*out) = LV_SCR_LOAD_ANIM_OVER_BOTTOM ;
+    }
+    else if(strcmp(cstr,"move-left")==0) {
+        (*out) = LV_SCR_LOAD_ANIM_MOVE_LEFT ;
+    }
+    else if(strcmp(cstr,"move-right")==0) {
+        (*out) = LV_SCR_LOAD_ANIM_MOVE_RIGHT ;
+    }
+    else if(strcmp(cstr,"move-top")==0) {
+        (*out) = LV_SCR_LOAD_ANIM_MOVE_TOP ;
+    }
+    else if(strcmp(cstr,"move-bottom")==0) {
+        (*out) = LV_SCR_LOAD_ANIM_MOVE_BOTTOM ;
+    }
+    else if(strcmp(cstr,"fade-on")==0) {
+        (*out) = LV_SCR_LOAD_ANIM_FADE_ON ;
+    }
+
+    else {
+        JS_ThrowReferenceError(ctx, "unkonw lv_scr_load_anim pass in: %s", cstr) ;
+        JS_FreeCString(ctx, cstr) ;
+        return false ;
+    }
+    JS_FreeCString(ctx, cstr) ;
+    return true ;
+}
+const char * lv_scr_load_anim_const_to_str(lv_scr_load_anim_t code) {
+
+    switch(code) {
+        case LV_SCR_LOAD_ANIM_NONE: return "none";
+        case LV_SCR_LOAD_ANIM_OVER_LEFT: return "over-left";
+        case LV_SCR_LOAD_ANIM_OVER_RIGHT: return "over-right";
+        case LV_SCR_LOAD_ANIM_OVER_TOP: return "over-top";
+        case LV_SCR_LOAD_ANIM_OVER_BOTTOM: return "over-bottom";
+        case LV_SCR_LOAD_ANIM_MOVE_LEFT: return "move-left";
+        case LV_SCR_LOAD_ANIM_MOVE_RIGHT: return "move-right";
+        case LV_SCR_LOAD_ANIM_MOVE_TOP: return "move-top";
+        case LV_SCR_LOAD_ANIM_MOVE_BOTTOM: return "move-bottom";
+        case LV_SCR_LOAD_ANIM_FADE_ON: return "fade-on";
+
+        default:
+            return "unkonw";
+    }
+}
+JSValue lv_scr_load_anim_const_to_jsstr(JSContext *ctx, lv_scr_load_anim_t code) {
+    return JS_NewString(ctx, lv_scr_load_anim_const_to_str(code));
+}
+
+bool lv_obj_flag_jsstr_to_const(JSContext *ctx, JSValue jsstr, lv_obj_flag_t* out) {
+    char * cstr = (char *)JS_ToCString(ctx, jsstr) ;
+    if(strcmp(cstr,"hidden")==0) {
+        (*out) = LV_OBJ_FLAG_HIDDEN ;
+    }
+    else if(strcmp(cstr,"clickable")==0) {
+        (*out) = LV_OBJ_FLAG_CLICKABLE ;
+    }
+    else if(strcmp(cstr,"click-focusable")==0) {
+        (*out) = LV_OBJ_FLAG_CLICK_FOCUSABLE ;
+    }
+    else if(strcmp(cstr,"checkable")==0) {
+        (*out) = LV_OBJ_FLAG_CHECKABLE ;
+    }
+    else if(strcmp(cstr,"scrollable")==0) {
+        (*out) = LV_OBJ_FLAG_SCROLLABLE ;
+    }
+    else if(strcmp(cstr,"scroll-elastic")==0) {
+        (*out) = LV_OBJ_FLAG_SCROLL_ELASTIC ;
+    }
+    else if(strcmp(cstr,"scroll-momentum")==0) {
+        (*out) = LV_OBJ_FLAG_SCROLL_MOMENTUM ;
+    }
+    else if(strcmp(cstr,"scroll-one")==0) {
+        (*out) = LV_OBJ_FLAG_SCROLL_ONE ;
+    }
+    else if(strcmp(cstr,"scroll-chain")==0) {
+        (*out) = LV_OBJ_FLAG_SCROLL_CHAIN ;
+    }
+    else if(strcmp(cstr,"scroll-on-focus")==0) {
+        (*out) = LV_OBJ_FLAG_SCROLL_ON_FOCUS ;
+    }
+    else if(strcmp(cstr,"snappable")==0) {
+        (*out) = LV_OBJ_FLAG_SNAPPABLE ;
+    }
+    else if(strcmp(cstr,"press-lock")==0) {
+        (*out) = LV_OBJ_FLAG_PRESS_LOCK ;
+    }
+    else if(strcmp(cstr,"event-bubble")==0) {
+        (*out) = LV_OBJ_FLAG_EVENT_BUBBLE ;
+    }
+    else if(strcmp(cstr,"gesture-bubble")==0) {
+        (*out) = LV_OBJ_FLAG_GESTURE_BUBBLE ;
+    }
+    else if(strcmp(cstr,"adv-hittest")==0) {
+        (*out) = LV_OBJ_FLAG_ADV_HITTEST ;
+    }
+    else if(strcmp(cstr,"ignore-layout")==0) {
+        (*out) = LV_OBJ_FLAG_IGNORE_LAYOUT ;
+    }
+    else if(strcmp(cstr,"floating")==0) {
+        (*out) = LV_OBJ_FLAG_FLOATING ;
+    }
+    else if(strcmp(cstr,"layout-1")==0) {
+        (*out) = LV_OBJ_FLAG_LAYOUT_1 ;
+    }
+    else if(strcmp(cstr,"layout-2")==0) {
+        (*out) = LV_OBJ_FLAG_LAYOUT_2 ;
+    }
+    else if(strcmp(cstr,"widget-1")==0) {
+        (*out) = LV_OBJ_FLAG_WIDGET_1 ;
+    }
+    else if(strcmp(cstr,"widget-2")==0) {
+        (*out) = LV_OBJ_FLAG_WIDGET_2 ;
+    }
+    else if(strcmp(cstr,"user-1")==0) {
+        (*out) = LV_OBJ_FLAG_USER_1 ;
+    }
+    else if(strcmp(cstr,"user-2")==0) {
+        (*out) = LV_OBJ_FLAG_USER_2 ;
+    }
+    else if(strcmp(cstr,"user-3")==0) {
+        (*out) = LV_OBJ_FLAG_USER_3 ;
+    }
+    else if(strcmp(cstr,"user-4")==0) {
+        (*out) = LV_OBJ_FLAG_USER_4 ;
+    }
+
+    else {
+        JS_ThrowReferenceError(ctx, "unkonw lv_obj_flag pass in: %s", cstr) ;
+        JS_FreeCString(ctx, cstr) ;
+        return false ;
+    }
+    JS_FreeCString(ctx, cstr) ;
+    return true ;
+}
+const char * lv_obj_flag_const_to_str(lv_obj_flag_t code) {
+
+    switch(code) {
+        case LV_OBJ_FLAG_HIDDEN: return "hidden";
+        case LV_OBJ_FLAG_CLICKABLE: return "clickable";
+        case LV_OBJ_FLAG_CLICK_FOCUSABLE: return "click-focusable";
+        case LV_OBJ_FLAG_CHECKABLE: return "checkable";
+        case LV_OBJ_FLAG_SCROLLABLE: return "scrollable";
+        case LV_OBJ_FLAG_SCROLL_ELASTIC: return "scroll-elastic";
+        case LV_OBJ_FLAG_SCROLL_MOMENTUM: return "scroll-momentum";
+        case LV_OBJ_FLAG_SCROLL_ONE: return "scroll-one";
+        case LV_OBJ_FLAG_SCROLL_CHAIN: return "scroll-chain";
+        case LV_OBJ_FLAG_SCROLL_ON_FOCUS: return "scroll-on-focus";
+        case LV_OBJ_FLAG_SNAPPABLE: return "snappable";
+        case LV_OBJ_FLAG_PRESS_LOCK: return "press-lock";
+        case LV_OBJ_FLAG_EVENT_BUBBLE: return "event-bubble";
+        case LV_OBJ_FLAG_GESTURE_BUBBLE: return "gesture-bubble";
+        case LV_OBJ_FLAG_ADV_HITTEST: return "adv-hittest";
+        case LV_OBJ_FLAG_IGNORE_LAYOUT: return "ignore-layout";
+        case LV_OBJ_FLAG_FLOATING: return "floating";
+        case LV_OBJ_FLAG_LAYOUT_1: return "layout-1";
+        case LV_OBJ_FLAG_LAYOUT_2: return "layout-2";
+        case LV_OBJ_FLAG_WIDGET_1: return "widget-1";
+        case LV_OBJ_FLAG_WIDGET_2: return "widget-2";
+        case LV_OBJ_FLAG_USER_1: return "user-1";
+        case LV_OBJ_FLAG_USER_2: return "user-2";
+        case LV_OBJ_FLAG_USER_3: return "user-3";
+        case LV_OBJ_FLAG_USER_4: return "user-4";
+
+        default:
+            return "unkonw";
+    }
+}
+JSValue lv_obj_flag_const_to_jsstr(JSContext *ctx, lv_obj_flag_t code) {
+    return JS_NewString(ctx, lv_obj_flag_const_to_str(code));
 }
 // AUTO GENERATE CODE END [CONST MAPPING] --------
 
@@ -1366,9 +1564,9 @@ static JSValue js_lv_obj_add_flag(JSContext *ctx, JSValueConst this_val, int arg
         THROW_EXCEPTION("lvgl.Obj.addFlag() must be called as a lvgl.Obj method")
     }
     lv_obj_t * thisobj = lv_userdata ;
-    uint32_t f ;
-    if(JS_ToUint32(ctx, (uint32_t *) &f, argv[0])!=0){
-        THROW_EXCEPTION("arg f of method lvgl.Obj.addFlag() must be a number")
+    lv_obj_flag_t f ;
+    if(!lv_obj_flag_jsstr_to_const(ctx, argv[0], &f)) {
+        return JS_EXCEPTION ;
     }
     lv_obj_add_flag(thisobj, f) ;
     JSValue retval = JS_UNDEFINED ;
@@ -1384,9 +1582,9 @@ static JSValue js_lv_obj_clear_flag(JSContext *ctx, JSValueConst this_val, int a
         THROW_EXCEPTION("lvgl.Obj.clearFlag() must be called as a lvgl.Obj method")
     }
     lv_obj_t * thisobj = lv_userdata ;
-    uint32_t f ;
-    if(JS_ToUint32(ctx, (uint32_t *) &f, argv[0])!=0){
-        THROW_EXCEPTION("arg f of method lvgl.Obj.clearFlag() must be a number")
+    lv_obj_flag_t f ;
+    if(!lv_obj_flag_jsstr_to_const(ctx, argv[0], &f)) {
+        return JS_EXCEPTION ;
     }
     lv_obj_clear_flag(thisobj, f) ;
     JSValue retval = JS_UNDEFINED ;
@@ -1438,9 +1636,9 @@ static JSValue js_lv_obj_has_flag(JSContext *ctx, JSValueConst this_val, int arg
         THROW_EXCEPTION("lvgl.Obj.hasFlag() must be called as a lvgl.Obj method")
     }
     lv_obj_t * thisobj = lv_userdata ;
-    uint32_t f ;
-    if(JS_ToUint32(ctx, (uint32_t *) &f, argv[0])!=0){
-        THROW_EXCEPTION("arg f of method lvgl.Obj.hasFlag() must be a number")
+    lv_obj_flag_t f ;
+    if(!lv_obj_flag_jsstr_to_const(ctx, argv[0], &f)) {
+        return JS_EXCEPTION ;
     }
     JSValue retval = JS_NewBool(ctx,lv_obj_has_flag(thisobj, f)) ;
     return retval ;
@@ -1455,9 +1653,9 @@ static JSValue js_lv_obj_has_flag_any(JSContext *ctx, JSValueConst this_val, int
         THROW_EXCEPTION("lvgl.Obj.hasFlagAny() must be called as a lvgl.Obj method")
     }
     lv_obj_t * thisobj = lv_userdata ;
-    uint32_t f ;
-    if(JS_ToUint32(ctx, (uint32_t *) &f, argv[0])!=0){
-        THROW_EXCEPTION("arg f of method lvgl.Obj.hasFlagAny() must be a number")
+    lv_obj_flag_t f ;
+    if(!lv_obj_flag_jsstr_to_const(ctx, argv[0], &f)) {
+        return JS_EXCEPTION ;
     }
     JSValue retval = JS_NewBool(ctx,lv_obj_has_flag_any(thisobj, f)) ;
     return retval ;

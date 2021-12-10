@@ -119,6 +119,7 @@ const MapC2JS_Conver = {
     "lv_base_dir_t": create_conver_mappingconst('lv_base_dir_t', 'lv_base_dir_jsstr_to_const'),
     "lv_border_side_t": create_conver_mappingconst('lv_border_side_t', 'lv_border_side_jsstr_to_const'),
     "lv_style_prop_t": create_conver_mappingconst('lv_style_prop_t', 'lv_style_prop_jsstr_to_const'),
+    "lv_obj_flag_t": create_conver_mappingconst('lv_obj_flag_t', 'lv_obj_flag_jsstr_to_const'),
 }
 
 function free_argv_string(cargv){
@@ -184,6 +185,7 @@ const MapJS2C_Conver = {
     "lv_base_dir_t": 'lv_base_dir_const_to_jsstr',
     "lv_border_side_t": 'lv_border_side_const_to_jsstr',
     "lv_style_prop_t": 'lv_style_prop_const_to_jsstr',
+    "lv_obj_flag_t": 'lv_obj_flag_const_to_jsstr',
 }
 
 const MapJS2C_ConverFunc = {
@@ -440,8 +442,10 @@ ${mappingCode}
 const char * ${defConst.name}_const_to_str(${defConst.type} code) {
 ${mappingByVar}
     switch(code) {
-${mappingName}    }
-    return "unkonw";
+${mappingName}
+        default:
+            return "unkonw";
+    }
 }
 JSValue ${defConst.name}_const_to_jsstr(JSContext *ctx, ${defConst.type} code) {
     return JS_NewString(ctx, ${defConst.name}_const_to_str(code));

@@ -457,8 +457,9 @@ ${src_styles_uint}
             return JS_NewUint32(ctx, value.num) ;
 ${src_styles_color}
             return JS_NewUint32(ctx, value.color.full) ;
+        default:
+            return JS_NewString(ctx, "unknow type") ;
     }
-    return JS_NewString(ctx, "unknow type") ;
 }
 
 
@@ -473,18 +474,19 @@ bool lv_style_js_to_value(JSContext * ctx, lv_style_prop_t prop, JSValue jsval, 
         return lv_flex_align_jsstr_to_const(ctx, jsval, &(value->num)) ;
     }
     else if( prop==LV_STYLE_FLEX_GROW ) {
-        return JS_ToUint32(ctx, &(value->num), jsval)==0 ;
+        return JS_ToUint32(ctx, (uint32_t*)&(value->num), jsval)==0 ;
     }
     switch(prop) {
 ${src_styles_convert_js2c}
 ${src_styles_int}
             return JS_ToInt32(ctx, &(value->num), jsval)==0 ;
 ${src_styles_uint}
-            return JS_ToUint32(ctx, &(value->num), jsval)==0 ;
+            return JS_ToUint32(ctx, (uint32_t*)&(value->num), jsval)==0 ;
 ${src_styles_color}
             return JS_ToUint32(ctx, &(value->color.full), jsval)==0 ;
+        default:
+            return false ;
     }
-    return false ;
 }
 `
     

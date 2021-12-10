@@ -21,6 +21,55 @@ bool lv_has_inited = false ;
 
 
 
+static JSValue js_lv_coord_pct(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+    ARGV_TO_UINT16(0,val)
+    return JS_NewUint32(ctx,LV_PCT(val)) ;
+}
+
+static JSValue js_lv_coord_is_pct(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+    ARGV_TO_UINT16(0,val)
+    return JS_NewBool(ctx,LV_COORD_IS_PCT(val)) ;
+}
+
+
+static JSValue js_lvgl_load_screen(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+    
+    CHECK_INSOF_LVOBJ("Obj", argv[0], "arg screen must a lvgl.Obj")
+    lv_obj_t* cobj = (lv_obj_t*)JS_GetOpaqueInternal(argv[0]) ;
+
+    if(argc>1) {
+
+        lv_scr_load_anim_t anim ;
+        if(!lv_scr_load_anim_jsstr_to_const(ctx, argv[1], &anim)) {
+            THROW_EXCEPTION("invalid screen load animation type")
+        }
+
+        ARGV_TO_UINT32(2, dur)
+
+        uint32_t delay = 0 ;    
+        if(argc>3) {
+            if(JS_ToUint32(ctx, &delay, argv[3])!=0) {
+                THROW_EXCEPTION("invalid delay")
+            }
+        }
+
+        bool autoDel = false ;
+        if(argc>4) {
+            autoDel = JS_ToBool(ctx, argv[4])? true: false ;
+        }
+        
+        lv_scr_load_anim(cobj, anim, dur, delay, autoDel) ;
+    }
+    else {
+        lv_disp_load_scr(cobj) ;
+    }
+
+    return JS_UNDEFINED ;
+}
+
 void lv_tick_task(void *arg) {
     (void) arg;
     lv_tick_inc(LV_TICK_PERIOD_MS);
@@ -74,6 +123,14 @@ void require_module_lvgl(JSContext *ctx) {
     JSValue lvgl = JS_NewObject(ctx);
     JS_SetPropertyStr(ctx, beapi, "lvgl", lvgl);  
 
+    JS_SetPropertyStr(ctx, lvgl, "loadScreen", JS_NewCFunction(ctx, js_lvgl_load_screen, "loadScreen", 1));
+    JS_SetPropertyStr(ctx, lvgl, "pct", JS_NewCFunction(ctx, js_lv_coord_pct, "pct", 1));
+    JS_SetPropertyStr(ctx, lvgl, "isPct", JS_NewCFunction(ctx, js_lv_coord_is_pct, "isPct", 1));
+
+    JS_SetPropertyStr(ctx, lvgl, "SizeContent", JS_NewUint32(ctx, LV_SIZE_CONTENT));
+    JS_SetPropertyStr(ctx, lvgl, "MaxCoord", JS_NewUint32(ctx, LV_COORD_MAX));
+    JS_SetPropertyStr(ctx, lvgl, "MinCoord", JS_NewUint32(ctx, LV_COORD_MIN));
+    
     require_vlgl_js_display(ctx, lvgl) ;
     require_vlgl_js_widgets(ctx, lvgl) ;
 

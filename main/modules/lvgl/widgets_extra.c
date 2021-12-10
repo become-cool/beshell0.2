@@ -99,7 +99,6 @@ JSValue js_lv_obj_enable_event(JSContext *ctx, JSValueConst this_val, int argc, 
         // printf("event aleady enabled \n") ;
         return JS_UNDEFINED ;
     }
-    // printf("enable event: %d \n", eventcode) ;
 
     lv_obj_add_event_cb(thisobj, js_lv_event_cb, eventcode, ctx) ;
     return JS_UNDEFINED ;
@@ -292,8 +291,9 @@ JSValue lv_style_value_to_js(JSContext * ctx, lv_style_prop_t prop, lv_style_val
         case LV_STYLE_ARC_COLOR_FILTERED: 
 
             return JS_NewUint32(ctx, value.color.full) ;
+        default:
+            return JS_NewString(ctx, "unknow type") ;
     }
-    return JS_NewString(ctx, "unknow type") ;
 }
 
 
@@ -308,7 +308,7 @@ bool lv_style_js_to_value(JSContext * ctx, lv_style_prop_t prop, JSValue jsval, 
         return lv_flex_align_jsstr_to_const(ctx, jsval, &(value->num)) ;
     }
     else if( prop==LV_STYLE_FLEX_GROW ) {
-        return JS_ToUint32(ctx, &(value->num), jsval)==0 ;
+        return JS_ToUint32(ctx, (uint32_t*)&(value->num), jsval)==0 ;
     }
     switch(prop) {
         case LV_STYLE_ALIGN:
@@ -382,7 +382,7 @@ bool lv_style_js_to_value(JSContext * ctx, lv_style_prop_t prop, JSValue jsval, 
         case LV_STYLE_ARC_ROUNDED: 
         case LV_STYLE_ARC_OPA: 
 
-            return JS_ToUint32(ctx, &(value->num), jsval)==0 ;
+            return JS_ToUint32(ctx, (uint32_t*)&(value->num), jsval)==0 ;
         case LV_STYLE_BG_COLOR: 
         case LV_STYLE_BG_COLOR_FILTERED: 
         case LV_STYLE_BG_GRAD_COLOR: 
@@ -405,8 +405,9 @@ bool lv_style_js_to_value(JSContext * ctx, lv_style_prop_t prop, JSValue jsval, 
         case LV_STYLE_ARC_COLOR_FILTERED: 
 
             return JS_ToUint32(ctx, &(value->color.full), jsval)==0 ;
+        default:
+            return false ;
     }
-    return false ;
 }
 // AUTO GENERATE CODE END [STYLE VALUE SETTER/GETTER] --------
 
@@ -462,7 +463,7 @@ JSValue js_lv_obj_set_style(JSContext *ctx, JSValueConst this_val, int argc, JSV
     }
 
     THIS_LBOBJ("Obj", "getStyle", thisobj)
-    
+
     lv_obj_set_local_style_prop(thisobj, prop, value, selector) ;
 
     return JS_UNDEFINED ;

@@ -65,6 +65,14 @@ JSValue lv_base_dir_const_to_jsstr(JSContext *ctx, lv_base_dir_t code) ;
 bool lv_style_prop_jsstr_to_const(JSContext *ctx, JSValue jsstr, lv_style_prop_t* out) ;
 const char *  lv_style_prop_const_to_str(lv_style_prop_t code) ;
 JSValue lv_style_prop_const_to_jsstr(JSContext *ctx, lv_style_prop_t code) ;
+
+bool lv_scr_load_anim_jsstr_to_const(JSContext *ctx, JSValue jsstr, lv_scr_load_anim_t* out) ;
+const char *  lv_scr_load_anim_const_to_str(lv_scr_load_anim_t code) ;
+JSValue lv_scr_load_anim_const_to_jsstr(JSContext *ctx, lv_scr_load_anim_t code) ;
+
+bool lv_obj_flag_jsstr_to_const(JSContext *ctx, JSValue jsstr, lv_obj_flag_t* out) ;
+const char *  lv_obj_flag_const_to_str(lv_obj_flag_t code) ;
+JSValue lv_obj_flag_const_to_jsstr(JSContext *ctx, lv_obj_flag_t code) ;
 // AUTO GENERATE CODE END [CONST CONVERT] --------
 
 #endif

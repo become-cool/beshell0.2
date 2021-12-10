@@ -90,9 +90,6 @@ static JSClassDef js_lvgl_disp_class = {
     }
 
 
-
-
-
 static JSValue js_lvgl_disp_active_screen(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     THIS_DISP
     lv_obj_t * scr = lv_disp_get_scr_act(thisdisp) ;
@@ -104,21 +101,6 @@ static JSValue js_lvgl_disp_active_screen(JSContext *ctx, JSValueConst this_val,
     JSValue jsobj = JS_MKPTR(JS_TAG_OBJECT, objptr) ;
 
     return JS_DupValue(ctx,jsobj) ;
-}
-static JSValue js_lvgl_disp_load_screen(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-    CHECK_ARGC(1)
-    THIS_DISP
-    
-    JSValue ObjCotr = js_get_glob_prop(ctx, 3, "beapi", "lvgl", "Obj") ;
-    if(!JS_IsInstanceOf(ctx, argv[0], ObjCotr)) {
-        JS_FreeValue(ctx,ObjCotr) ;
-        THROW_EXCEPTION("arg screen must a lvgl.Obj object") ;
-    }
-    JS_FreeValue(ctx,ObjCotr) ;
-
-    lv_obj_t* cobj = (lv_obj_t*)JS_GetOpaqueInternal(argv[0]) ;
-    lv_disp_load_scr(cobj) ;
-    return JS_UNDEFINED ;
 }
 
 static JSValue js_lvgl_disp_get_screens(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
@@ -133,7 +115,6 @@ static JSValue js_lvgl_disp_get_screens(JSContext *ctx, JSValueConst this_val, i
 
 static const JSCFunctionListEntry js_display_proto_funcs[] = {
     JS_CFUNC_DEF("activeScreen", 0, js_lvgl_disp_active_screen),
-    JS_CFUNC_DEF("loadScreen", 0, js_lvgl_disp_load_screen),
     JS_CFUNC_DEF("getScreens", 0, js_lvgl_disp_get_screens),
 };
 

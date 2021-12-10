@@ -71,6 +71,7 @@ bool lv_flex_flow_jsstr_to_const(JSContext *ctx, JSValue jsstr, lv_flex_flow_t* 
     return true ;
 }
 const char * lv_flex_flow_const_to_str(lv_flex_flow_t code) {
+
     switch(code) {
         case LV_FLEX_FLOW_ROW: return "row";
         case LV_FLEX_FLOW_COLUMN: return "column";
@@ -117,6 +118,7 @@ bool lv_flex_align_jsstr_to_const(JSContext *ctx, JSValue jsstr, lv_flex_align_t
     return true ;
 }
 const char * lv_flex_align_const_to_str(lv_flex_align_t code) {
+
     switch(code) {
         case LV_FLEX_ALIGN_START: return "start";
         case LV_FLEX_ALIGN_END: return "end";
@@ -278,6 +280,7 @@ bool lv_event_code_jsstr_to_const(JSContext *ctx, JSValue jsstr, lv_event_code_t
     return true ;
 }
 const char * lv_event_code_const_to_str(lv_event_code_t code) {
+
     switch(code) {
         case LV_EVENT_ALL: return "all";
         case LV_EVENT_PRESSED: return "pressed";
@@ -367,6 +370,7 @@ bool lv_dir_jsstr_to_const(JSContext *ctx, JSValue jsstr, lv_dir_t* out) {
     return true ;
 }
 const char * lv_dir_const_to_str(lv_dir_t code) {
+
     switch(code) {
         case LV_DIR_NONE: return "none";
         case LV_DIR_LEFT: return "left";
@@ -461,6 +465,7 @@ bool lv_align_jsstr_to_const(JSContext *ctx, JSValue jsstr, lv_align_t* out) {
     return true ;
 }
 const char * lv_align_const_to_str(lv_align_t code) {
+
     switch(code) {
         case LV_ALIGN_DEFAULT: return "default";
         case LV_ALIGN_TOP_LEFT: return "top-left";
@@ -524,6 +529,7 @@ bool lv_border_side_jsstr_to_const(JSContext *ctx, JSValue jsstr, lv_border_side
     return true ;
 }
 const char * lv_border_side_const_to_str(lv_border_side_t code) {
+
     switch(code) {
         case LV_BORDER_SIDE_NONE: return "none";
         case LV_BORDER_SIDE_BOTTOM: return "bottom";
@@ -566,6 +572,7 @@ bool lv_base_dir_jsstr_to_const(JSContext *ctx, JSValue jsstr, lv_base_dir_t* ou
     return true ;
 }
 const char * lv_base_dir_const_to_str(lv_base_dir_t code) {
+
     switch(code) {
         case LV_BASE_DIR_LTR: return "ltr";
         case LV_BASE_DIR_RTL: return "rtl";
@@ -857,6 +864,21 @@ bool lv_style_prop_jsstr_to_const(JSContext *ctx, JSValue jsstr, lv_style_prop_t
     else if(strcmp(cstr,"prop-any")==0) {
         (*out) = LV_STYLE_PROP_ANY ;
     }
+    else if(strcmp(cstr,"flex-flow")==0) {
+        (*out) = LV_STYLE_FLEX_FLOW ;
+    }
+    else if(strcmp(cstr,"flex-main-place")==0) {
+        (*out) = LV_STYLE_FLEX_MAIN_PLACE ;
+    }
+    else if(strcmp(cstr,"flex-cross-place")==0) {
+        (*out) = LV_STYLE_FLEX_CROSS_PLACE ;
+    }
+    else if(strcmp(cstr,"flex-track-place")==0) {
+        (*out) = LV_STYLE_FLEX_TRACK_PLACE ;
+    }
+    else if(strcmp(cstr,"flex-grow")==0) {
+        (*out) = LV_STYLE_FLEX_GROW ;
+    }
 
     else {
         JS_ThrowReferenceError(ctx, "unkonw lv_style_prop pass in: %s", cstr) ;
@@ -867,6 +889,10 @@ bool lv_style_prop_jsstr_to_const(JSContext *ctx, JSValue jsstr, lv_style_prop_t
     return true ;
 }
 const char * lv_style_prop_const_to_str(lv_style_prop_t code) {
+    if(code==LV_STYLE_FLEX_GROW) {
+        return "flex-grow" ;
+    }
+
     switch(code) {
         case LV_STYLE_PROP_INV: return "prop-inv";
         case LV_STYLE_WIDTH: return "width";

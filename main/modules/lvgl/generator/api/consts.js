@@ -305,9 +305,15 @@ module.exports = [
             LV_STYLE_PROP_ANY                = 0xFFFF
         } lv_style_prop_t;
         `)
+        , vars: [
+            'LV_STYLE_FLEX_FLOW' ,
+            'LV_STYLE_FLEX_MAIN_PLACE' ,
+            'LV_STYLE_FLEX_CROSS_PLACE' ,
+            'LV_STYLE_FLEX_TRACK_PLACE' ,
+            'LV_STYLE_FLEX_GROW' ,
+        ]
         
     }
-
 
 
     

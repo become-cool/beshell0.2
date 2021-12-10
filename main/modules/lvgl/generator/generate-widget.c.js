@@ -28,10 +28,6 @@ const conver_int16 = create_conver_base("int16_t", "JS_ToInt32", "int32_t")
 const conver_uint16 = create_conver_base("uint16_t", "JS_ToUint32", "uint32_t")
 const conver_int32 = create_conver_base("int32_t", "JS_ToInt32", "int32_t")
 const conver_uint32 = create_conver_base("uint32_t", "JS_ToUint32", "uint32_t")
-const conver_flex_flow = create_conver_mappingconst('lv_flex_flow_t', 'lv_flex_flow_jsstr_to_const')
-const conver_flex_align = create_conver_mappingconst('lv_flex_align_t', 'lv_flex_align_jsstr_to_const')
-const conver_align = create_conver_mappingconst('lv_align_t', 'lv_align_jsstr_to_const')
-const conver_dir = create_conver_mappingconst('lv_dir_t', 'lv_dir_jsstr_to_const')
 
 function conver_bool(cargv,i){
     return `    bool ${cargv} = JS_ToBool(ctx, argv[${i}]) ;\r\n`
@@ -89,8 +85,8 @@ const MapC2JS_Conver = {
     "lv_coord_t": conver_int16 ,
     "lv_obj_flag_t": conver_uint32 ,
     "lv_state_t": conver_uint16 ,
-    "lv_align_t": conver_align ,
-    "lv_dir_t": conver_dir,
+    "lv_align_t": create_conver_mappingconst('lv_align_t', 'lv_align_jsstr_to_const') ,
+    "lv_dir_t": create_conver_mappingconst('lv_dir_t', 'lv_dir_jsstr_to_const'),
     "bool": conver_bool ,
     "char *": conver_string ,
     "const char *": conver_string ,
@@ -102,8 +98,8 @@ const MapC2JS_Conver = {
     "lv_point_t *": conver_point ,
     "lv_obj_t *": conver_obj,
     "_lv_obj_t *": conver_obj,
-    "lv_flex_align_t": conver_flex_align,
-    "lv_flex_flow_t": conver_flex_flow,
+    "lv_flex_align_t": create_conver_mappingconst('lv_flex_align_t', 'lv_flex_align_jsstr_to_const'),
+    "lv_flex_flow_t": create_conver_mappingconst('lv_flex_flow_t', 'lv_flex_flow_jsstr_to_const'),
     "lv_style_selector_t": conver_uint32,
     "lv_label_long_mode_t": conver_uint8,   
     "lv_arc_mode_t": conver_uint8,
@@ -402,13 +398,13 @@ function srcInsert(src, code, startMart, endMark) {
 }
 
 
-function generateConstMapping(arrconst, prefix, ctype, cname) {
-    
+function generateConstMapping(defConst) {
     let mappingCode = ""
     let mappingName = ""
+    let mappingByVar = ""
     let i = 0
-    for(let constName of arrconst) {
-        let name = constName.substr(prefix.length).toLowerCase().replace(/_/g,'-')
+    for(let constName of defConst.def) {
+        let name = constName.substr(defConst.prefix.length).toLowerCase().replace(/_/g,'-')
         mappingCode+= `    ${i? 'else ':''}if(strcmp(cstr,"${name}")==0) {\r\n`
         mappingCode+= `        (*out) = ${constName} ;\r\n`
         mappingCode+= `    }\r\n`
@@ -417,36 +413,62 @@ function generateConstMapping(arrconst, prefix, ctype, cname) {
         i++
     }
 
+    i = 0
+    for(let varName of defConst.vars||[]) {
+        let name = varName.substr(defConst.prefix.length).toLowerCase().replace(/_/g,'-')
+        mappingByVar = `    ${i? 'else ':''}if(code==${varName}) {\r\n`
+        mappingByVar+= `        return "${name}" ;\r\n`
+        mappingByVar+= `    }\r\n`
+
+        mappingCode+= `    else if(strcmp(cstr,"${name}")==0) {\r\n`
+        mappingCode+= `        (*out) = ${varName} ;\r\n`
+        mappingCode+= `    }\r\n`
+    }
+
     let code = `
-bool ${cname}_jsstr_to_const(JSContext *ctx, JSValue jsstr, ${ctype}* out) {
+bool ${defConst.name}_jsstr_to_const(JSContext *ctx, JSValue jsstr, ${defConst.type}* out) {
     char * cstr = (char *)JS_ToCString(ctx, jsstr) ;
 ${mappingCode}
     else {
-        JS_ThrowReferenceError(ctx, "unkonw ${cname} pass in: %s", cstr) ;
+        JS_ThrowReferenceError(ctx, "unkonw ${defConst.name} pass in: %s", cstr) ;
         JS_FreeCString(ctx, cstr) ;
         return false ;
     }
     JS_FreeCString(ctx, cstr) ;
     return true ;
 }
-const char * ${cname}_const_to_str(${ctype} code) {
+const char * ${defConst.name}_const_to_str(${defConst.type} code) {
+${mappingByVar}
     switch(code) {
 ${mappingName}    }
     return "unkonw";
 }
-JSValue ${cname}_const_to_jsstr(JSContext *ctx, ${ctype} code) {
-    return JS_NewString(ctx, ${cname}_const_to_str(code));
+JSValue ${defConst.name}_const_to_jsstr(JSContext *ctx, ${defConst.type} code) {
+    return JS_NewString(ctx, ${defConst.name}_const_to_str(code));
 }
 `
     return code
 }
 
-function generateConsts() {
 
+function generateConstDeclare() {
+    let code = ""
+    let libConst = require("./api/consts.js")
+    for(defConst of libConst) {
+        code+= `
+bool ${defConst.name}_jsstr_to_const(JSContext *ctx, JSValue jsstr, ${defConst.type}* out) ;
+const char *  ${defConst.name}_const_to_str(${defConst.type} code) ;
+JSValue ${defConst.name}_const_to_jsstr(JSContext *ctx, ${defConst.type} code) ;
+`
+    }
+    return code
+}
+
+function generateConsts() {
     let code = ''
     let libConst = require("./api/consts.js")
     for(defConst of libConst) {
-        code+= generateConstMapping(defConst.def, defConst.prefix, defConst.type, defConst.name)
+        code+= generateConstMapping(defConst)
     }
     return code
 }
@@ -463,7 +485,12 @@ const registerclass_id_mark_end = "// AUTO GENERATE CODE END [REGISTER CLASS ID]
 const const_mapping_mark_start = "// AUTO GENERATE CODE START [CONST MAPPING] --------"
 const const_mapping_mark_end = "// AUTO GENERATE CODE END [CONST MAPPING] --------"
 
-let dist_path = __dirname + "/../widgets.c"
+const const_mapping_header_mark_start = "// AUTO GENERATE CODE START [CONST CONVERT] --------"
+const const_mapping_header_mark_end = "// AUTO GENERATE CODE END [CONST CONVERT] --------"
+
+
+let dist_src_path = __dirname + "/../widgets.c"
+let dist_header_path = __dirname + "/../widgets.h"
 
 function main() {
     let code = ""
@@ -506,7 +533,7 @@ function main() {
 
 
     
-    let src = fs.readFileSync(dist_path).toString()
+    let src = fs.readFileSync(dist_src_path).toString()
     src = srcInsert(src, code, methodlst_mark_start, methodlst_mark_end)
 
     src = srcInsert(src, generateClassDefine(), defclass_mark_start, defclass_mark_end)
@@ -515,9 +542,12 @@ function main() {
 
     src = srcInsert(src, generateConsts(), const_mapping_mark_start, const_mapping_mark_end)
 
-    fs.writeFileSync(dist_path, src)
+    fs.writeFileSync(dist_src_path, src)
 
-    console.log()
+    // header file
+    src = fs.readFileSync(dist_header_path).toString()
+    src = srcInsert(src, generateConstDeclare(), const_mapping_header_mark_start, const_mapping_header_mark_end)
+    fs.writeFileSync(dist_header_path, src)
 
 }
 main()

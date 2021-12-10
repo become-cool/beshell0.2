@@ -192,7 +192,6 @@ JSValue lv_style_value_to_js(JSContext * ctx, lv_style_prop_t prop, lv_style_val
         case LV_STYLE_MAX_HEIGHT:
         case LV_STYLE_X:
         case LV_STYLE_Y:
-        case LV_STYLE_ALIGN:
         case LV_STYLE_TRANSFORM_WIDTH:
         case LV_STYLE_TRANSFORM_HEIGHT:
         case LV_STYLE_TRANSLATE_X:
@@ -206,6 +205,24 @@ JSValue lv_style_value_to_js(JSContext * ctx, lv_style_prop_t prop, lv_style_val
         case LV_STYLE_PAD_ROW:
         case LV_STYLE_PAD_COLUMN:
         case LV_STYLE_RADIUS:
+        case LV_STYLE_BG_MAIN_STOP:
+        case LV_STYLE_BG_GRAD_STOP:
+        case LV_STYLE_BORDER_WIDTH:
+        case LV_STYLE_TEXT_LETTER_SPACE:
+        case LV_STYLE_TEXT_LINE_SPACE:
+        case LV_STYLE_OUTLINE_WIDTH:
+        case LV_STYLE_OUTLINE_PAD:
+        case LV_STYLE_SHADOW_WIDTH:
+        case LV_STYLE_SHADOW_OFS_X:
+        case LV_STYLE_SHADOW_OFS_Y:
+        case LV_STYLE_SHADOW_SPREAD:
+        case LV_STYLE_LINE_WIDTH:
+        case LV_STYLE_LINE_DASH_WIDTH:
+        case LV_STYLE_LINE_DASH_GAP:
+        case LV_STYLE_ARC_WIDTH:
+            return JS_NewInt32(ctx, (int32_t)value.num) ;
+
+        case LV_STYLE_ALIGN:
         case LV_STYLE_CLIP_CORNER:
         case LV_STYLE_OPA:
         case LV_STYLE_COLOR_FILTER_OPA:
@@ -214,69 +231,55 @@ JSValue lv_style_value_to_js(JSContext * ctx, lv_style_prop_t prop, lv_style_val
         case LV_STYLE_BLEND_MODE:
         case LV_STYLE_LAYOUT:
         case LV_STYLE_BASE_DIR:
-        case LV_STYLE_BG_COLOR:
-        case LV_STYLE_BG_COLOR_FILTERED:
         case LV_STYLE_BG_OPA:
-        case LV_STYLE_BG_GRAD_COLOR:
-        case LV_STYLE_BG_GRAD_COLOR_FILTERED:
         case LV_STYLE_BG_GRAD_DIR:
-        case LV_STYLE_BG_MAIN_STOP:
-        case LV_STYLE_BG_GRAD_STOP:
         case LV_STYLE_BG_IMG_OPA:
-        case LV_STYLE_BG_IMG_RECOLOR:
-        case LV_STYLE_BG_IMG_RECOLOR_FILTERED:
         case LV_STYLE_BG_IMG_RECOLOR_OPA:
         case LV_STYLE_BG_IMG_TILED:
-        case LV_STYLE_BORDER_COLOR:
-        case LV_STYLE_BORDER_COLOR_FILTERED:
         case LV_STYLE_BORDER_OPA:
-        case LV_STYLE_BORDER_WIDTH:
         case LV_STYLE_BORDER_SIDE:
         case LV_STYLE_BORDER_POST:
-        case LV_STYLE_TEXT_COLOR:
-        case LV_STYLE_TEXT_COLOR_FILTERED:
         case LV_STYLE_TEXT_OPA:
-        case LV_STYLE_TEXT_LETTER_SPACE:
-        case LV_STYLE_TEXT_LINE_SPACE:
         case LV_STYLE_TEXT_DECOR:
         case LV_STYLE_TEXT_ALIGN:
         case LV_STYLE_IMG_OPA:
+        case LV_STYLE_IMG_RECOLOR_OPA:
+        case LV_STYLE_OUTLINE_OPA:
+        case LV_STYLE_SHADOW_OPA:
+        case LV_STYLE_LINE_ROUNDED:
+        case LV_STYLE_LINE_OPA:
+        case LV_STYLE_ARC_ROUNDED:
+        case LV_STYLE_ARC_OPA:
+            return JS_NewUint32(ctx, value.num) ;
+
+        case LV_STYLE_BG_COLOR:
+        case LV_STYLE_BG_COLOR_FILTERED:
+        case LV_STYLE_BG_GRAD_COLOR:
+        case LV_STYLE_BG_GRAD_COLOR_FILTERED:
+        case LV_STYLE_BG_IMG_RECOLOR:
+        case LV_STYLE_BG_IMG_RECOLOR_FILTERED:
+        case LV_STYLE_BORDER_COLOR:
+        case LV_STYLE_BORDER_COLOR_FILTERED:
+        case LV_STYLE_TEXT_COLOR:
+        case LV_STYLE_TEXT_COLOR_FILTERED:
         case LV_STYLE_IMG_RECOLOR:
         case LV_STYLE_IMG_RECOLOR_FILTERED:
-        case LV_STYLE_IMG_RECOLOR_OPA:
-        case LV_STYLE_OUTLINE_WIDTH:
         case LV_STYLE_OUTLINE_COLOR:
         case LV_STYLE_OUTLINE_COLOR_FILTERED:
-        case LV_STYLE_OUTLINE_OPA:
-        case LV_STYLE_OUTLINE_PAD:
-        case LV_STYLE_SHADOW_WIDTH:
-        case LV_STYLE_SHADOW_OFS_X:
-        case LV_STYLE_SHADOW_OFS_Y:
-        case LV_STYLE_SHADOW_SPREAD:
         case LV_STYLE_SHADOW_COLOR:
         case LV_STYLE_SHADOW_COLOR_FILTERED:
-        case LV_STYLE_SHADOW_OPA:
-        case LV_STYLE_LINE_WIDTH:
-        case LV_STYLE_LINE_DASH_WIDTH:
-        case LV_STYLE_LINE_DASH_GAP:
-        case LV_STYLE_LINE_ROUNDED:
         case LV_STYLE_LINE_COLOR:
         case LV_STYLE_LINE_COLOR_FILTERED:
-        case LV_STYLE_LINE_OPA:
-        case LV_STYLE_ARC_WIDTH:
-        case LV_STYLE_ARC_ROUNDED:
         case LV_STYLE_ARC_COLOR:
         case LV_STYLE_ARC_COLOR_FILTERED:
-        case LV_STYLE_ARC_OPA:
-            return JS_NewInt32(ctx, value.num) ;
+            return JS_NewUint32(ctx, value.color.full) ;
     }
     return JS_NewString(ctx, "unknow type") ;
 }
 
 
 bool lv_style_js_to_value(JSContext * ctx, lv_style_prop_t prop, JSValue jsval, lv_style_value_t * value) {
-    switch(prop) {
-        case LV_STYLE_WIDTH:
+    switch(prop) {        case LV_STYLE_WIDTH:
         case LV_STYLE_MIN_WIDTH:
         case LV_STYLE_MAX_WIDTH:
         case LV_STYLE_HEIGHT:
@@ -284,7 +287,6 @@ bool lv_style_js_to_value(JSContext * ctx, lv_style_prop_t prop, JSValue jsval, 
         case LV_STYLE_MAX_HEIGHT:
         case LV_STYLE_X:
         case LV_STYLE_Y:
-        case LV_STYLE_ALIGN:
         case LV_STYLE_TRANSFORM_WIDTH:
         case LV_STYLE_TRANSFORM_HEIGHT:
         case LV_STYLE_TRANSLATE_X:
@@ -298,6 +300,24 @@ bool lv_style_js_to_value(JSContext * ctx, lv_style_prop_t prop, JSValue jsval, 
         case LV_STYLE_PAD_ROW:
         case LV_STYLE_PAD_COLUMN:
         case LV_STYLE_RADIUS:
+        case LV_STYLE_BG_MAIN_STOP:
+        case LV_STYLE_BG_GRAD_STOP:
+        case LV_STYLE_BORDER_WIDTH:
+        case LV_STYLE_TEXT_LETTER_SPACE:
+        case LV_STYLE_TEXT_LINE_SPACE:
+        case LV_STYLE_OUTLINE_WIDTH:
+        case LV_STYLE_OUTLINE_PAD:
+        case LV_STYLE_SHADOW_WIDTH:
+        case LV_STYLE_SHADOW_OFS_X:
+        case LV_STYLE_SHADOW_OFS_Y:
+        case LV_STYLE_SHADOW_SPREAD:
+        case LV_STYLE_LINE_WIDTH:
+        case LV_STYLE_LINE_DASH_WIDTH:
+        case LV_STYLE_LINE_DASH_GAP:
+        case LV_STYLE_ARC_WIDTH:
+            return JS_ToInt32(ctx, &(value->num), jsval)==0 ;
+
+        case LV_STYLE_ALIGN:
         case LV_STYLE_CLIP_CORNER:
         case LV_STYLE_OPA:
         case LV_STYLE_COLOR_FILTER_OPA:
@@ -306,61 +326,48 @@ bool lv_style_js_to_value(JSContext * ctx, lv_style_prop_t prop, JSValue jsval, 
         case LV_STYLE_BLEND_MODE:
         case LV_STYLE_LAYOUT:
         case LV_STYLE_BASE_DIR:
-        case LV_STYLE_BG_COLOR:
-        case LV_STYLE_BG_COLOR_FILTERED:
         case LV_STYLE_BG_OPA:
-        case LV_STYLE_BG_GRAD_COLOR:
-        case LV_STYLE_BG_GRAD_COLOR_FILTERED:
         case LV_STYLE_BG_GRAD_DIR:
-        case LV_STYLE_BG_MAIN_STOP:
-        case LV_STYLE_BG_GRAD_STOP:
         case LV_STYLE_BG_IMG_OPA:
-        case LV_STYLE_BG_IMG_RECOLOR:
-        case LV_STYLE_BG_IMG_RECOLOR_FILTERED:
         case LV_STYLE_BG_IMG_RECOLOR_OPA:
         case LV_STYLE_BG_IMG_TILED:
-        case LV_STYLE_BORDER_COLOR:
-        case LV_STYLE_BORDER_COLOR_FILTERED:
         case LV_STYLE_BORDER_OPA:
-        case LV_STYLE_BORDER_WIDTH:
         case LV_STYLE_BORDER_SIDE:
         case LV_STYLE_BORDER_POST:
-        case LV_STYLE_TEXT_COLOR:
-        case LV_STYLE_TEXT_COLOR_FILTERED:
         case LV_STYLE_TEXT_OPA:
-        case LV_STYLE_TEXT_LETTER_SPACE:
-        case LV_STYLE_TEXT_LINE_SPACE:
         case LV_STYLE_TEXT_DECOR:
         case LV_STYLE_TEXT_ALIGN:
         case LV_STYLE_IMG_OPA:
+        case LV_STYLE_IMG_RECOLOR_OPA:
+        case LV_STYLE_OUTLINE_OPA:
+        case LV_STYLE_SHADOW_OPA:
+        case LV_STYLE_LINE_ROUNDED:
+        case LV_STYLE_LINE_OPA:
+        case LV_STYLE_ARC_ROUNDED:
+        case LV_STYLE_ARC_OPA:
+            return JS_ToUint32(ctx, &(value->num), jsval)==0 ;
+
+        case LV_STYLE_BG_COLOR:
+        case LV_STYLE_BG_COLOR_FILTERED:
+        case LV_STYLE_BG_GRAD_COLOR:
+        case LV_STYLE_BG_GRAD_COLOR_FILTERED:
+        case LV_STYLE_BG_IMG_RECOLOR:
+        case LV_STYLE_BG_IMG_RECOLOR_FILTERED:
+        case LV_STYLE_BORDER_COLOR:
+        case LV_STYLE_BORDER_COLOR_FILTERED:
+        case LV_STYLE_TEXT_COLOR:
+        case LV_STYLE_TEXT_COLOR_FILTERED:
         case LV_STYLE_IMG_RECOLOR:
         case LV_STYLE_IMG_RECOLOR_FILTERED:
-        case LV_STYLE_IMG_RECOLOR_OPA:
-        case LV_STYLE_OUTLINE_WIDTH:
         case LV_STYLE_OUTLINE_COLOR:
         case LV_STYLE_OUTLINE_COLOR_FILTERED:
-        case LV_STYLE_OUTLINE_OPA:
-        case LV_STYLE_OUTLINE_PAD:
-        case LV_STYLE_SHADOW_WIDTH:
-        case LV_STYLE_SHADOW_OFS_X:
-        case LV_STYLE_SHADOW_OFS_Y:
-        case LV_STYLE_SHADOW_SPREAD:
         case LV_STYLE_SHADOW_COLOR:
         case LV_STYLE_SHADOW_COLOR_FILTERED:
-        case LV_STYLE_SHADOW_OPA:
-        case LV_STYLE_LINE_WIDTH:
-        case LV_STYLE_LINE_DASH_WIDTH:
-        case LV_STYLE_LINE_DASH_GAP:
-        case LV_STYLE_LINE_ROUNDED:
         case LV_STYLE_LINE_COLOR:
         case LV_STYLE_LINE_COLOR_FILTERED:
-        case LV_STYLE_LINE_OPA:
-        case LV_STYLE_ARC_WIDTH:
-        case LV_STYLE_ARC_ROUNDED:
         case LV_STYLE_ARC_COLOR:
         case LV_STYLE_ARC_COLOR_FILTERED:
-        case LV_STYLE_ARC_OPA:
-            return JS_ToInt32(ctx, &(value->num), jsval)==0 ;
+            return JS_ToUint32(ctx, &(value->color.full), jsval)==0 ;
     }
     return false ;
 }

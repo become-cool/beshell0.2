@@ -398,7 +398,8 @@ const props = [
 function generateStyleValueFuncs() {
 
     let src_styles_int = ""
-    // let src_styles_uint = ""
+    let src_styles_uint = ""
+    let src_styles_color = ""
     let src_styles_ptr = ""
     
     for(let prop of props) {
@@ -408,10 +409,15 @@ function generateStyleValueFuncs() {
         // console.log(prop.style_type, prop.var_type)
         
         if(prop.style_type=='num') {
-            src_styles_int+= `        case LV_STYLE_${prop.name}: \r\n`
+            if(prop.var_type=="lv_coord_t") {
+                src_styles_int+= `        case LV_STYLE_${prop.name}: \r\n`
+            }
+            else {
+                src_styles_uint+= `        case LV_STYLE_${prop.name}: \r\n`
+            }
         }
         else if(prop.style_type=='color') {
-            src_styles_int+= `        case LV_STYLE_${prop.name}: \r\n`
+            src_styles_color+= `        case LV_STYLE_${prop.name}: \r\n`
         }
         else if(prop.style_type=='ptr') {
             src_styles_ptr+= `        case LV_STYLE_${prop.name}: \r\n`
@@ -422,7 +428,11 @@ function generateStyleValueFuncs() {
 JSValue lv_style_value_to_js(JSContext * ctx, lv_style_prop_t prop, lv_style_value_t value) {
     switch(prop) {
 ${src_styles_int}
-            return JS_NewInt32(ctx, value.num) ;
+            return JS_NewInt32(ctx, (int32_t)value.num) ;
+${src_styles_uint}
+            return JS_NewUint32(ctx, value.num) ;
+${src_styles_color}
+            return JS_NewUint32(ctx, value.color.full) ;
     }
     return JS_NewString(ctx, "unknow type") ;
 }

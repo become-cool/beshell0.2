@@ -10,6 +10,9 @@ class ScrConsole extends lv.Obj {
                 class: 'Row' ,
                 grow: 1 ,
                 ref: "row1" ,
+                style: {
+                    "border-width": 2
+                }
             } ,
             {
                 class: 'Row' ,
@@ -35,8 +38,6 @@ class ScrConsole extends lv.Obj {
             global[name] = objs[name]
         }
         
-        row1.setStyle("border-width", 1)
-        row2.setStyle("border-width", 1)
     }
 }
 module.exports = ScrConsole

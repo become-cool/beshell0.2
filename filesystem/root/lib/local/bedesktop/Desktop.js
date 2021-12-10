@@ -20,5 +20,6 @@ module.exports = class Desktop {
         this._disp.loadScreen(this._scrConsole)
         global.scr = this._scrConsole
         global.disp = disp
+        global.lv = beapi.lvgl
     }
 }

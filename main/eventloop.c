@@ -84,7 +84,7 @@ void eventloop_remove(JSContext *ctx, eventloop_callback_t * item) {
     }
 }
 
-void eventloop_pump(JSContext *ctx) {
+void be_module_eventloop_loop(JSContext *ctx) {
     if(!_callback_stack_top) {
         return ;
     }
@@ -130,7 +130,7 @@ void eventloop_pump(JSContext *ctx) {
     }
 }
 
-void eventloop_on_before_reset(JSContext *ctx){
+void be_module_eventloop_reset(JSContext *ctx){
     // 清空未决事件表
     for(
         eventloop_callback_t * prev = NULL, * current = _callback_stack_top;

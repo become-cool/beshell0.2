@@ -5,6 +5,6 @@
 
 void evalScript(JSContext *ctx, const char * path) ;
 
-void require_module_utils(JSContext *ctx) ;
+void be_module_utils_require(JSContext *ctx) ;
 
 #endif

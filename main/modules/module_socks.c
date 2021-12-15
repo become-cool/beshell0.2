@@ -24,7 +24,7 @@ fd_set udp_recv_rfds;
 
 JSValue _js_udp_recv_callback = NULL ;
 
-void socks_udp_loop(JSContext *ctx) {
+void be_module_socks_udp_loop(JSContext *ctx) {
 
 	FD_ZERO(&udp_recv_rfds);
     int fds = -1 ;
@@ -249,7 +249,7 @@ JSValue js_udp_set_recv_callback(JSContext *ctx, JSValueConst this_val, int argc
 }
 
 
-void socks_init() {
+void be_module_socks_init() {
     for(int i=0;i<UDP_POOR_SIZE;i++) {
         udp_listen_handles[i] = -1 ;
     }
@@ -282,7 +282,7 @@ JSValue js_tcp_on(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst 
     return JS_UNDEFINED ;
 }
 
-void require_module_socks(JSContext *ctx) {
+void be_module_socks_require(JSContext *ctx) {
     
     JSValue global = JS_GetGlobalObject(ctx);
     JSValue beapi = JS_GetPropertyStr(ctx, global, "beapi") ;
@@ -313,7 +313,7 @@ void require_module_socks(JSContext *ctx) {
 
 
 
-void socks_on_before_reset(JSContext *ctx) {
+void be_module_socks_reset(JSContext *ctx) {
     
     // 清空 js 回调函数
     if(_js_udp_recv_callback) {

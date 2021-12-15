@@ -14,9 +14,11 @@ LINK_LIBRARIES(pthread)
 add_definitions(-g)
 add_definitions(-DSIMULATION)
 # add_definitions(-DWIN32)
+add_definitions(-DMG_ENABLE_LINES)
 
 SET(CMAKE_CXX_FLAGS_DEBUG "-O0")
 SET(CMAKE_C_FLAGS_DEBUG "-O0")
+
 
 # ssl
 LINK_DIRECTORIES(/usr/lib/x86_64-linux-gnu/)
@@ -31,6 +33,11 @@ file(GLOB_RECURSE SRC_LIST "../components/lvgl/src/*.c")
 # quickjs
 AUX_SOURCE_DIRECTORY(../components/quickjs SRC_LIST)
 include_directories(../components/quickjs)
+
+# mongoose
+AUX_SOURCE_DIRECTORY(../components/mongoose SRC_LIST)
+include_directories(../components/mongoose)
+
 
 AUX_SOURCE_DIRECTORY(. SRC_LIST)
 
@@ -51,8 +58,10 @@ list(APPEND SRC_LIST ../main/anchor9/anchor9_lvgl.c)
 list(APPEND SRC_LIST ../main/modules/module_fs.c)
 list(APPEND SRC_LIST ../main/modules/module_utils.c)
 list(APPEND SRC_LIST ../main/modules/module_events.c)
+list(APPEND SRC_LIST ../main/modules/module_mg.c)
 list(APPEND SRC_LIST ../main/modules/lvgl/module_lvgl.c)
 list(APPEND SRC_LIST ../main/modules/lvgl/display.c)
+list(APPEND SRC_LIST ../main/modules/lvgl/style.c)
 list(APPEND SRC_LIST ../main/modules/lvgl/widgets.c)
 list(APPEND SRC_LIST ../main/modules/lvgl/widgets_extra.c)
 

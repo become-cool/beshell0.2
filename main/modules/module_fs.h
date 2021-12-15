@@ -6,7 +6,7 @@
 #ifndef SIMULATION
 #include "esp_vfs.h"
 
-bool fs_init() ;
+bool be_module_fs_init() ;
 #endif
 
 
@@ -46,6 +46,6 @@ int mkdir_p(char* file_path) ;
 int mkdir_p(char* file_path, mode_t mode) ;
 #endif
 
-void require_module_fs(JSContext *ctx) ;
+void be_module_fs_require(JSContext *ctx) ;
 
 #endif

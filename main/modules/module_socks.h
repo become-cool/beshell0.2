@@ -3,10 +3,10 @@
 
 #include "quickjs-libc.h"
 
-void socks_init() ;
-void socks_udp_loop(JSContext *ctx) ;
-void socks_on_before_reset(JSContext *ctx) ;
+void be_module_socks_init() ;
+void be_module_socks_udp_loop(JSContext *ctx) ;
+void be_module_socks_reset(JSContext *ctx) ;
 
-void require_module_socks(JSContext *ctx) ;
+void be_module_socks_require(JSContext *ctx) ;
 
 #endif

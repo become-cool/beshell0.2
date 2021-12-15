@@ -3,7 +3,7 @@
 
 httpd_handle_t handle = NULL ;
 
-void webtelnet_init() {
+void be_module_telweb_init() {
     
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
     config.max_open_sockets = MAX_OPEN_SOCKETS;

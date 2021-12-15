@@ -154,3 +154,15 @@ void freeArrayBuffer(JSRuntime *rt, void *opaque, void *ptr) ;
 JSValue js_get_prop(JSContext *ctx, JSValue obj, int depth, ...)  ;
 JSValue js_get_glob_prop(JSContext *ctx, int depth, ...)  ;
 
+JSValue qjs_def_class(
+        JSContext *ctx,
+        const char * className,
+        JSClassID js_class_id,
+        JSClassDef * js_class_p,
+        const char * cotrName,
+        JSCFunction cotr,
+        const JSCFunctionListEntry* funclst,
+        uint16_t funcs,
+        JSValue parentProto ,
+        JSValue pkg
+) ;

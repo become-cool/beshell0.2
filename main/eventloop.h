@@ -19,10 +19,10 @@ typedef struct _eventloop_callback_t {
 eventloop_callback_t * eventloop_push(JSContext *ctx, JSValue func, int interval, bool repeat) ;
 eventloop_callback_t * eventloop_push_with_argv(JSContext *ctx, JSValue func, int argc, JSValueConst *argv) ;
 
-void eventloop_pump(JSContext *ctx) ;
+void be_module_eventloop_loop(JSContext *ctx) ;
 
 void eventloop_remove(JSContext *ctx, eventloop_callback_t * item) ;
 
-void eventloop_on_before_reset(JSContext *ctx) ;
+void be_module_eventloop_reset(JSContext *ctx) ;
 
 #endif

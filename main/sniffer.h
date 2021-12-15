@@ -2,8 +2,8 @@
 #define _SNIFFER_H
 
 
-void sniffer_init() ;
+void be_module_sniffer_init() ;
 
-void sniffer_loop() ;
+void be_module_sniffer_loop() ;
 
 #endif

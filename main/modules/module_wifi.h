@@ -7,10 +7,10 @@
 esp_netif_t * get_netif_ap() ;
 esp_netif_t * get_netif_sta() ;
 
-void wifi_init() ;
+void be_module_wifi_init() ;
 
-void require_module_wifi(JSContext *ctx) ;
-void wifi_reset(JSContext *ctx) ;
+void be_module_wifi_require(JSContext *ctx) ;
+void be_module_wifi_reset(JSContext *ctx) ;
 
 void wifidemo() ;
 

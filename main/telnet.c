@@ -47,7 +47,7 @@ void telnet_set_input_function(JSContext * ctx, JSValue func) {
 	_func_repl_input = func ;
 }
 
-void telnet_on_before_reset(JSContext *ctx) {
+void be_module_telnet_reset(JSContext *ctx) {
 	if(_func_repl_input) {
 		JS_FreeValue(ctx, _func_repl_input) ;
 		_func_repl_input = NULL ;
@@ -83,7 +83,7 @@ uint addr_len = sizeof(source_addr);
 
 void on_pkg_receive (uint8_t pkgid, uint8_t remain, uint8_t cmd, uint8_t * data, uint8_t datalen, void * ctx) ;
 
-void telnet_init() {
+void be_module_telnet_init() {
 
 	telnet_prot_on_package = on_pkg_receive ;
 
@@ -142,7 +142,7 @@ struct timeval telnet_tv = {
 };
 fd_set telnet_rfds;
 
-void telnet_loop(JSContext *ctx) {
+void be_module_telnet_loop(JSContext *ctx) {
 
 	FD_ZERO(&telnet_rfds);
 
@@ -297,7 +297,7 @@ JSValue js_telnet_send(JSContext *ctx, JSValueConst this_val, int argc, JSValueC
 	// @todo : array/ArrayBuffer
 	return JS_UNDEFINED ;
 }
-void require_module_telnet(JSContext *ctx) {
+void be_module_telnet_require(JSContext *ctx) {
     JSValue global = JS_GetGlobalObject(ctx);
     JSValue telnet = JS_NewObject(ctx) ;
     JS_SetPropertyStr(ctx, global, "telnet", telnet);

@@ -28,4 +28,8 @@ JSValue js_lv_obj_get_all_style_values(JSContext *ctx, JSValueConst this_val, in
 JSValue js_lv_obj_set_style(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
 JSValue js_lv_obj_get_style(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
 
+JSValue js_lv_obj_refresh_style(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
+
+JSValue js_lv_obj_get_local_style(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)  ;
+
 #endif

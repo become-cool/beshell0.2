@@ -607,7 +607,7 @@ JSValue js_pwm_stop(JSContext *ctx, JSValueConst this_val, int argc, JSValueCons
     return JS_UNDEFINED ;
 }
 
-void require_module_gpio(JSContext *ctx) {
+void be_module_gpio_require(JSContext *ctx) {
     
     JSValue global = JS_GetGlobalObject(ctx);
     JSValue beapi = JS_GetPropertyStr(ctx, global, "beapi") ;
@@ -636,7 +636,7 @@ void require_module_gpio(JSContext *ctx) {
     JS_FreeValue(ctx, beapi);
 }
 
-void gpio_init() {
+void be_module_gpio_init() {
     gpio_install_isr_service(0);
     
     for(uint8_t p=0; p<PIN_CNT; p++) {
@@ -644,7 +644,7 @@ void gpio_init() {
     }
 }
 
-void gpio_on_before_reset(JSContext *ctx) {
+void be_module_gpio_reset(JSContext *ctx) {
     // 清空 js 回调函数
     if(_gpio_isr_js_callback) {
         JS_FreeValue(ctx, _gpio_isr_js_callback) ;
@@ -677,7 +677,7 @@ void gpio_on_before_reset(JSContext *ctx) {
 }
 
 
-void gpio_loop(JSContext *ctx)  {
+void be_module_gpio_loop(JSContext *ctx)  {
     if(!_gpio_isr_js_callback)
         return ;
     

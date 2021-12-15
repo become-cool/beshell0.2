@@ -22,8 +22,8 @@ esp_err_t http_server_close(server_t * cserver) ;
 
 void require_module_http(JSContext *ctx) ;
 
-void http_init() ;
-void http_on_before_reset(JSContext *ctx) ;
+void be_module_http_init() ;
+void be_module_http_reset(JSContext *ctx) ;
 
 server_t * this_http_server(JSValue this_val) ;
 

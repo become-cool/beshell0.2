@@ -34,7 +34,7 @@ struct sockaddr_in6 sniffer_source_addr; // Large enough for both IPv4 or IPv6
 socklen_t sniffer_socklen = sizeof(sniffer_source_addr);
 
 
-void sniffer_init() {
+void be_module_sniffer_init() {
     
     if(sniffer_sock>-1) {
         echo("udp sniffer answer startup already.\n") ;
@@ -63,7 +63,7 @@ void sniffer_init() {
 }
 
 
-void sniffer_loop() {
+void be_module_sniffer_loop() {
 
 
     FD_ZERO(&sniffer_rfds);

@@ -3209,6 +3209,8 @@ static const JSCFunctionListEntry js_lv_obj_proto_funcs[] = {
     JS_CFUNC_DEF("allStyleValues", 0, js_lv_obj_get_all_style_values),
     JS_CFUNC_DEF("setStyle", 0, js_lv_obj_set_style),
     JS_CFUNC_DEF("style", 0, js_lv_obj_get_style),
+    JS_CFUNC_DEF("refreshStyle", 0, js_lv_obj_refresh_style),
+    JS_CFUNC_DEF("localStyle", 0, js_lv_obj_get_local_style),
     JS_CFUNC_DEF("addFlag", 0, js_lv_obj_add_flag),
     JS_CFUNC_DEF("clearFlag", 0, js_lv_obj_clear_flag),
     JS_CFUNC_DEF("addState", 0, js_lv_obj_add_state),
@@ -6084,32 +6086,6 @@ static const JSCFunctionListEntry js_lv_canvas_proto_funcs[] = {
 
 
 
-JSValue js_def_class(
-        JSContext *ctx,
-        const char * className,
-        JSClassID js_class_id,
-        JSClassDef * js_class_p,
-        const char * cotrName,
-        JSCFunction cotr,
-        const JSCFunctionListEntry* funclst,
-        uint16_t funcs,
-        JSValue parentProto ,
-        JSValue pkg
-) {    
-    JS_NewClass(JS_GetRuntime(ctx), js_class_id, js_class_p);
-
-    JSValue proto = JS_NewObject(ctx);
-    JS_SetPropertyFunctionList(ctx, proto, funclst, funcs);
-    JS_SetClassProto(ctx, js_class_id, proto);
-    JS_SetPropertyStr(ctx, proto, "__proto__", parentProto);
-
-    JSValue jscotr = JS_NewCFunction2(ctx, cotr, cotrName, 1, JS_CFUNC_constructor, 0) ;
-    JS_SetConstructor(ctx, jscotr, proto) ;
-
-    JS_SetPropertyStr(ctx, pkg, className, jscotr);
-
-    return proto ;
-}
 
 
 
@@ -6119,67 +6095,67 @@ void require_vlgl_js_widgets(JSContext *ctx, JSValue lvgl) {
 
 // AUTO GENERATE CODE START [REGISTER CLASS] --------
     // define js class lvgl.lv_obj    
-    JSValue proto_lv_obj = js_def_class(ctx, "Obj", js_lv_obj_class_id, &js_lv_obj_class
+    JSValue proto_lv_obj = qjs_def_class(ctx, "Obj", js_lv_obj_class_id, &js_lv_obj_class
                 , "lvgl.Obj", js_lv_obj_constructor, js_lv_obj_proto_funcs, countof(js_lv_obj_proto_funcs), EventEmitterProto, lvgl) ;
 
     // define js class lvgl.lv_label    
-    JSValue proto_lv_label = js_def_class(ctx, "Label", js_lv_label_class_id, &js_lv_label_class
+    JSValue proto_lv_label = qjs_def_class(ctx, "Label", js_lv_label_class_id, &js_lv_label_class
                 , "lvgl.Label", js_lv_label_constructor, js_lv_label_proto_funcs, countof(js_lv_label_proto_funcs), proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_arc    
-    JSValue proto_lv_arc = js_def_class(ctx, "Arc", js_lv_arc_class_id, &js_lv_arc_class
+    JSValue proto_lv_arc = qjs_def_class(ctx, "Arc", js_lv_arc_class_id, &js_lv_arc_class
                 , "lvgl.Arc", js_lv_arc_constructor, js_lv_arc_proto_funcs, countof(js_lv_arc_proto_funcs), proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_bar    
-    JSValue proto_lv_bar = js_def_class(ctx, "Bar", js_lv_bar_class_id, &js_lv_bar_class
+    JSValue proto_lv_bar = qjs_def_class(ctx, "Bar", js_lv_bar_class_id, &js_lv_bar_class
                 , "lvgl.Bar", js_lv_bar_constructor, js_lv_bar_proto_funcs, countof(js_lv_bar_proto_funcs), proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_btn    
-    JSValue proto_lv_btn = js_def_class(ctx, "Btn", js_lv_btn_class_id, &js_lv_btn_class
+    JSValue proto_lv_btn = qjs_def_class(ctx, "Btn", js_lv_btn_class_id, &js_lv_btn_class
                 , "lvgl.Btn", js_lv_btn_constructor, js_lv_btn_proto_funcs, countof(js_lv_btn_proto_funcs), proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_btnmatrix    
-    JSValue proto_lv_btnmatrix = js_def_class(ctx, "BtnMatrix", js_lv_btnmatrix_class_id, &js_lv_btnmatrix_class
+    JSValue proto_lv_btnmatrix = qjs_def_class(ctx, "BtnMatrix", js_lv_btnmatrix_class_id, &js_lv_btnmatrix_class
                 , "lvgl.BtnMatrix", js_lv_btnmatrix_constructor, js_lv_btnmatrix_proto_funcs, countof(js_lv_btnmatrix_proto_funcs), proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_canvas    
-    JSValue proto_lv_canvas = js_def_class(ctx, "Canvas", js_lv_canvas_class_id, &js_lv_canvas_class
+    JSValue proto_lv_canvas = qjs_def_class(ctx, "Canvas", js_lv_canvas_class_id, &js_lv_canvas_class
                 , "lvgl.Canvas", js_lv_canvas_constructor, js_lv_canvas_proto_funcs, countof(js_lv_canvas_proto_funcs), proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_checkbox    
-    JSValue proto_lv_checkbox = js_def_class(ctx, "Checkbox", js_lv_checkbox_class_id, &js_lv_checkbox_class
+    JSValue proto_lv_checkbox = qjs_def_class(ctx, "Checkbox", js_lv_checkbox_class_id, &js_lv_checkbox_class
                 , "lvgl.Checkbox", js_lv_checkbox_constructor, js_lv_checkbox_proto_funcs, countof(js_lv_checkbox_proto_funcs), proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_dropdown    
-    JSValue proto_lv_dropdown = js_def_class(ctx, "Dropdown", js_lv_dropdown_class_id, &js_lv_dropdown_class
+    JSValue proto_lv_dropdown = qjs_def_class(ctx, "Dropdown", js_lv_dropdown_class_id, &js_lv_dropdown_class
                 , "lvgl.Dropdown", js_lv_dropdown_constructor, js_lv_dropdown_proto_funcs, countof(js_lv_dropdown_proto_funcs), proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_img    
-    JSValue proto_lv_img = js_def_class(ctx, "Img", js_lv_img_class_id, &js_lv_img_class
+    JSValue proto_lv_img = qjs_def_class(ctx, "Img", js_lv_img_class_id, &js_lv_img_class
                 , "lvgl.Img", js_lv_img_constructor, js_lv_img_proto_funcs, countof(js_lv_img_proto_funcs), proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_line    
-    JSValue proto_lv_line = js_def_class(ctx, "Line", js_lv_line_class_id, &js_lv_line_class
+    JSValue proto_lv_line = qjs_def_class(ctx, "Line", js_lv_line_class_id, &js_lv_line_class
                 , "lvgl.Line", js_lv_line_constructor, js_lv_line_proto_funcs, countof(js_lv_line_proto_funcs), proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_roller    
-    JSValue proto_lv_roller = js_def_class(ctx, "Roller", js_lv_roller_class_id, &js_lv_roller_class
+    JSValue proto_lv_roller = qjs_def_class(ctx, "Roller", js_lv_roller_class_id, &js_lv_roller_class
                 , "lvgl.Roller", js_lv_roller_constructor, js_lv_roller_proto_funcs, countof(js_lv_roller_proto_funcs), proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_slider    
-    JSValue proto_lv_slider = js_def_class(ctx, "Slider", js_lv_slider_class_id, &js_lv_slider_class
+    JSValue proto_lv_slider = qjs_def_class(ctx, "Slider", js_lv_slider_class_id, &js_lv_slider_class
                 , "lvgl.Slider", js_lv_slider_constructor, js_lv_slider_proto_funcs, countof(js_lv_slider_proto_funcs), proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_switch    
-    JSValue proto_lv_switch = js_def_class(ctx, "Switch", js_lv_switch_class_id, &js_lv_switch_class
+    JSValue proto_lv_switch = qjs_def_class(ctx, "Switch", js_lv_switch_class_id, &js_lv_switch_class
                 , "lvgl.Switch", js_lv_switch_constructor, js_lv_switch_proto_funcs, countof(js_lv_switch_proto_funcs), proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_table    
-    JSValue proto_lv_table = js_def_class(ctx, "Table", js_lv_table_class_id, &js_lv_table_class
+    JSValue proto_lv_table = qjs_def_class(ctx, "Table", js_lv_table_class_id, &js_lv_table_class
                 , "lvgl.Table", js_lv_table_constructor, js_lv_table_proto_funcs, countof(js_lv_table_proto_funcs), proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_textarea    
-    JSValue proto_lv_textarea = js_def_class(ctx, "TextArea", js_lv_textarea_class_id, &js_lv_textarea_class
+    JSValue proto_lv_textarea = qjs_def_class(ctx, "TextArea", js_lv_textarea_class_id, &js_lv_textarea_class
                 , "lvgl.TextArea", js_lv_textarea_constructor, js_lv_textarea_proto_funcs, countof(js_lv_textarea_proto_funcs), proto_lv_obj, lvgl) ;
 
 // AUTO GENERATE CODE END [REGISTER CLASS] --------
@@ -6193,7 +6169,7 @@ void require_vlgl_js_widgets(JSContext *ctx, JSValue lvgl) {
 
 
 
-void vlgl_js_widgets_init() {
+void init_lvgl_widgets() {
     // class id 全局, 分配一次
 // AUTO GENERATE CODE START [REGISTER CLASS ID] --------
     JS_NewClassID(&js_lv_obj_class_id);

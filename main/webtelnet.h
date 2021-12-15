@@ -6,7 +6,7 @@
 #define MAX_OPEN_SOCKETS 7
 #define WEBTELNET_PORT 8023
 
-void webtelnet_init() ;
+void be_module_telweb_init() ;
 httpd_handle_t webtelnet_handle()  ;
 
 #endif

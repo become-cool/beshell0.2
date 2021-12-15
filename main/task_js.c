@@ -22,6 +22,7 @@
 #include "module_serial.h"
 #include "module_socks.h"
 #include "module_http.h"
+#include "module_mg.h"
 #endif
 #include "module_lvgl.h"
 #include "beshell.h"
@@ -137,7 +138,7 @@ JSValue js_console_log(JSContext *ctx, JSValueConst this_val, int argc, JSValueC
     return JS_UNDEFINED;
 }
 
-void require_module_process(JSContext *ctx) {
+void be_module_process_require(JSContext *ctx) {
 
     JSValue global = JS_GetGlobalObject(ctx);
 
@@ -214,21 +215,22 @@ static JSContext * JS_NewCustomContext(JSRuntime *rt)
     JS_SetPropertyStr(ctx, global, "beapi", beapi);
     JS_FreeValue(ctx, global);
 
-    require_module_fs(ctx) ;
-    require_module_utils(ctx) ;
-    require_module_events(ctx) ;
-    require_module_process(ctx) ;  
+    be_module_fs_require(ctx) ;
+    be_module_utils_require(ctx) ;
+    be_module_events_require(ctx) ;
+    be_module_process_require(ctx) ;  
 #ifndef SIMULATION
-    require_module_wifi(ctx) ;
-    require_module_gpio(ctx) ;  
-    require_module_telnet(ctx) ;
-    require_module_serial(ctx) ;
-    require_module_socks(ctx) ;
+    be_module_wifi_require(ctx) ;
+    be_module_gpio_require(ctx) ;  
+    be_module_telnet_require(ctx) ;
+    be_module_serial_require(ctx) ;
+    be_module_socks_require(ctx) ;
     require_module_http(ctx) ;
 #else
-    repl_require(ctx) ;
+    be_module_mg_require(ctx) ;
+    be_module_repl_require(ctx) ;
 #endif
-    require_module_lvgl(ctx) ;
+    be_module_lvgl_require(ctx) ;
 
     return ctx;
 }
@@ -241,7 +243,7 @@ void eval_rc_script(JSContext *ctx, const char * path) {
     free(fullpath) ;
 }
 
-void init_quickjs() {
+void quickjs_init() {
     if(rt!=NULL) {
         return ;
     }
@@ -272,7 +274,7 @@ void init_quickjs() {
 #endif
 }
 
-void deinit_quickjs() {
+void quickjs_deinit() {
     js_std_free_handlers(rt);
     JS_FreeContext(ctx);
     JS_FreeRuntime(rt);
@@ -287,59 +289,59 @@ void task_js_main(){
 #ifndef SIMULATION
     nvs_flash_init();
 
-    fs_init() ;
-    wifi_init() ;
-    webtelnet_init() ;
+    be_module_fs_init() ;
+    be_module_wifi_init() ;
+    be_module_telweb_init() ;
 #endif
-    init_lvgl() ;
+    be_module_init_lvgl() ;
 
 #ifndef SIMULATION
-    socks_init() ;
-    telnet_init() ;
-    sniffer_init() ;
-    gpio_init() ;
-    http_init() ;
+    be_module_socks_init() ;
+    be_module_telnet_init() ;
+    be_module_sniffer_init() ;
+    be_module_gpio_init() ;
+    be_module_http_init() ;
 #else
-    repl_init() ;
-    httplws_init() ;
+    be_module_repl_init() ;
+    be_module_httplws_init() ;
 #endif
 
-    init_quickjs() ;
+    quickjs_init() ;
 
     while(1) {
 
         if(requst_reset) {
 
-            eventloop_on_before_reset(ctx) ;
+            be_module_eventloop_reset(ctx) ;
 #ifndef SIMULATION
-            telnet_on_before_reset(ctx) ;
-            gpio_on_before_reset(ctx) ;
-            serial_on_before_reset(ctx) ;
-            socks_on_before_reset(ctx) ;
-            http_on_before_reset(ctx) ;
-            wifi_reset(ctx) ;
+            be_module_telnet_reset(ctx) ;
+            be_module_gpio_reset(ctx) ;
+            be_module_serial_reset(ctx) ;
+            be_module_socks_reset(ctx) ;
+            be_module_http_reset(ctx) ;
+            be_module_wifi_reset(ctx) ;
 #else
-            repl_reset(ctx) ;
+            be_module_repl_reset(ctx) ;
 #endif
 
-            deinit_quickjs() ;
-            init_quickjs() ;
+            quickjs_deinit() ;
+            quickjs_init() ;
             
             requst_reset = false ;
         }
 
         js_std_loop(ctx) ;
 #ifndef SIMULATION
-        telnet_loop(ctx) ;
-        sniffer_loop() ;
-        socks_udp_loop(ctx) ;
-        gpio_loop(ctx) ;
+        be_module_telnet_loop(ctx) ;
+        be_module_sniffer_loop() ;
+        be_module_socks_udp_loop(ctx) ;
+        be_module_gpio_loop(ctx) ;
 #else
-        repl_loop(ctx) ;
-        httplws_loop(ctx) ;
+        be_module_repl_loop(ctx) ;
+        be_module_httplws_loop(ctx) ;
 #endif
-        lvgl_loop(ctx) ;
-        eventloop_pump(ctx) ;
+        be_module_lvgl_loop(ctx) ;
+        be_module_eventloop_loop(ctx) ;
 
         js_std_loop(ctx) ;
 #ifndef SIMULATION

@@ -94,7 +94,6 @@ static void fn(struct mg_connection *c, int ev, void *ev_data, void *fn_data)
 {
     if (ev == MG_EV_OPEN)
     {
-        // c->is_hexdumping = 1;
         printf("MG_EV_OPEN\n");
     }
     else if (ev == MG_EV_HTTP_MSG)
@@ -189,14 +188,14 @@ static void fn(struct mg_connection *c, int ev, void *ev_data, void *fn_data)
 
 struct mg_mgr mgr;
 
-void httplws_init()
+void be_module_httplws_init()
 {
 
     mg_mgr_init(&mgr);                           // Initialise event manager
     mg_http_listen(&mgr, s_listen_on, fn, NULL); // Create HTTP listener
 }
 
-void httplws_loop(JSContext *ctx)
+void be_module_httplws_loop(JSContext *ctx)
 {
     mg_mgr_poll(&mgr, 1000);
 }

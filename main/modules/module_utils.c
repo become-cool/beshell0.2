@@ -550,7 +550,7 @@ JSValue js_feed_watchdog(JSContext *ctx, JSValueConst this_val, int argc, JSValu
     return JS_UNDEFINED ;
 }
 
-void require_module_utils(JSContext *ctx) {
+void be_module_utils_require(JSContext *ctx) {
 
     JSValue global = JS_GetGlobalObject(ctx);
     JSValue beapi = JS_GetPropertyStr(ctx, global, "beapi") ;

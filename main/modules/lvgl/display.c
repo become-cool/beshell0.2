@@ -255,7 +255,7 @@ uint8_t * display_dma_buff() {
     return dma_buff ;
 }
 
-void vlgl_js_display_init() {
+void init_lvgl_display() {
 
 #ifndef SIMULATION
     dma_buff = heap_caps_malloc( DMA_BUFF_LEN + DMA_BUFF_AUX_SIZE, MALLOC_CAP_DMA);

@@ -3,8 +3,8 @@
 
 #include "quickjs-libc.h"
 
-void require_module_serial(JSContext *ctx) ;
+void be_module_serial_require(JSContext *ctx) ;
 
-void serial_on_before_reset(JSContext *ctx) ;
+void be_module_serial_reset(JSContext *ctx) ;
 
 #endif

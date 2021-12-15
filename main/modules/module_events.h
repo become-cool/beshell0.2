@@ -4,6 +4,6 @@
 #include "quickjs-libc.h"
 
 
-void require_module_events(JSContext *ctx) ;
+void be_module_events_require(JSContext *ctx) ;
 
 #endif

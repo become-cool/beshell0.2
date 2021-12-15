@@ -7,11 +7,11 @@
 
 #include "quickjs-libc.h"
 
-void telnet_init() ;
+void be_module_telnet_init() ;
 
-void telnet_loop(JSContext *ctx) ;
+void be_module_telnet_loop(JSContext *ctx) ;
 
-void telnet_on_before_reset(JSContext *ctx) ;
+void be_module_telnet_reset(JSContext *ctx) ;
 
 void telnet_set_input_function(JSContext * ctx, JSValue func) ;
 
@@ -19,7 +19,7 @@ void telnet_send_pkg(char reqid, char cmd, char * data, uint16_t datalen) ;
 void telnet_send_pkg_str(char reqid, char cmd, char * data) ;
 void telnet_send_ready() ;
 
-void require_module_telnet(JSContext *ctx) ;
+void be_module_telnet_require(JSContext *ctx) ;
 
 uint8_t echo_pkgid() ;
 

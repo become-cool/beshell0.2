@@ -3,8 +3,8 @@
 
 #include "quickjs-libc.h"
 
-void repl_init() ;
+void be_module_repl_init() ;
 
-void repl_loop(JSContext * ctx) ;
+void be_module_repl_loop(JSContext * ctx) ;
 
 #endif

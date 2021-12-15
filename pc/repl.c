@@ -58,16 +58,16 @@ JSValue js_proc_set_stdin_callback(JSContext *ctx, JSValueConst this_val, int ar
     return JS_UNDEFINED ;
 }
 
-void repl_init() {
+void be_module_repl_init() {
     js_stdin_callback = JS_UNDEFINED ;
     fd_stdin = fileno(stdin);
 }
 
-void repl_reset(JSContext * ctx) {
+void be_module_repl_reset(JSContext * ctx) {
     JS_FreeValue(ctx, js_stdin_callback) ;
     js_stdin_callback = JS_UNDEFINED ;
 }
-void repl_require(JSContext * ctx) {
+void be_module_repl_require(JSContext * ctx) {
     JSValue jsproc = js_get_glob_prop(ctx, 1, "process") ;
     JS_SetPropertyStr(ctx, jsproc, "setStdinCallback", JS_NewCFunction(ctx, js_proc_set_stdin_callback, "setStdinCallback", 1));
 
@@ -78,7 +78,7 @@ void repl_require(JSContext * ctx) {
     JS_FreeValue(ctx, jsproc) ;
 }
 
-void repl_loop(JSContext * ctx) {
+void be_module_repl_loop(JSContext * ctx) {
 
     FD_ZERO(&readfds);
     FD_SET(fileno(stdin), &readfds);

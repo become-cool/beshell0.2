@@ -387,7 +387,7 @@ JSValue js_wifi_stop(JSContext *ctx, JSValueConst this_val, int argc, JSValueCon
     return JS_NewInt32(ctx, esp_wifi_stop());
 }
 
-void wifi_init() {
+void be_module_wifi_init() {
 
     ESP_ERROR_CHECK(esp_netif_init());
 
@@ -402,10 +402,10 @@ void wifi_init() {
 
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_NULL));
 
-    printf("wifi_init()\n") ;
+    printf("be_module_wifi_init()\n") ;
 }
 
-void require_module_wifi(JSContext *ctx) {
+void be_module_wifi_require(JSContext *ctx) {
 
     JSValue global = JS_GetGlobalObject(ctx);
     JSValue beapi = JS_GetPropertyStr(ctx, global, "beapi") ;
@@ -437,7 +437,7 @@ void require_module_wifi(JSContext *ctx) {
 
 
 
-void wifi_reset(JSContext *ctx) {
+void be_module_wifi_reset(JSContext *ctx) {
     JS_FreeValue(ctx, __event_handle);
     __event_handle  = JS_UNDEFINED ;
     __event_handle_ctx = NULL ;

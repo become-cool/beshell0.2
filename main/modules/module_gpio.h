@@ -3,10 +3,10 @@
 
 #include "quickjs-libc.h"
 
-void require_module_gpio(JSContext *ctx) ;
+void be_module_gpio_require(JSContext *ctx) ;
 
-void gpio_init() ;
-void gpio_on_before_reset(JSContext *ctx) ;
-void gpio_loop(JSContext *ctx) ;
+void be_module_gpio_init() ;
+void be_module_gpio_reset(JSContext *ctx) ;
+void be_module_gpio_loop(JSContext *ctx) ;
 
 #endif

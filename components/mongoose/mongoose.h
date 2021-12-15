@@ -37,6 +37,10 @@ extern "C" {
 #define MG_ENABLE_OPENSSL 0
 #endif
 
+#ifndef MG_ENABLE_CUSTOM_TLS
+#define MG_ENABLE_CUSTOM_TLS 0
+#endif
+
 #ifndef MG_ENABLE_SSI
 #define MG_ENABLE_SSI 1
 #endif
@@ -82,6 +86,10 @@ extern "C" {
 
 #ifndef MG_MAX_HTTP_HEADERS
 #define MG_MAX_HTTP_HEADERS 40
+#endif
+
+#ifndef MG_HTTP_INDEX
+#define MG_HTTP_INDEX "index.html"
 #endif
 
 #ifndef MG_PATH_MAX
@@ -609,6 +617,14 @@ void mg_usleep(unsigned long usecs);
 #define mg_htons(x) mg_ntohs(x)
 #define mg_htonl(x) mg_ntohl(x)
 
+#ifndef EXTERN_C
+#ifdef __cplusplus
+#define EXTERN_C extern "C"
+#else
+#define EXTERN_C
+#endif
+#endif
+
 // Expands to a string representation of its argument: e.g.
 // MG_STRINGIFY_LITERAL(5) expands to "5"
 #if !defined(_MSC_VER) || _MSC_VER >= 1900
@@ -904,6 +920,9 @@ void mg_http_serve_ssi(struct mg_connection *c, const char *root,
 
 
 
+
+
+
 struct mg_tls_opts {
   const char *ca;         // CA certificate file. For both listeners and clients
   const char *crl;        // Certificate Revocation List. For clients
@@ -911,6 +930,7 @@ struct mg_tls_opts {
   const char *certkey;    // Certificate key
   const char *ciphers;    // Cipher list
   struct mg_str srvname;  // If not empty, enables server name verification
+  int (*custom_init)(struct mg_connection *, struct mg_tls_opts *, void *tls);
 };
 
 void mg_tls_init(struct mg_connection *, struct mg_tls_opts *);
@@ -918,6 +938,48 @@ void mg_tls_free(struct mg_connection *);
 long mg_tls_send(struct mg_connection *, const void *buf, size_t len);
 long mg_tls_recv(struct mg_connection *, void *buf, size_t len);
 void mg_tls_handshake(struct mg_connection *);
+
+
+#if MG_ENABLE_MBEDTLS
+
+
+
+
+#include <mbedtls/debug.h>
+#include <mbedtls/ssl.h>
+
+#if defined(MBEDTLS_VERSION_NUMBER) && MBEDTLS_VERSION_NUMBER >= 0x03000000
+#define RNG , rng_get, NULL
+#else
+#define RNG
+#endif
+
+// Different versions have those in different files, so declare here
+EXTERN_C int mbedtls_net_recv(void *, unsigned char *, size_t);
+EXTERN_C int mbedtls_net_send(void *, const unsigned char *, size_t);
+
+struct mg_tls {
+  char *cafile;             // CA certificate path
+  mbedtls_x509_crt ca;      // Parsed CA certificate
+  mbedtls_x509_crl crl;     // Parsed Certificate Revocation List
+  mbedtls_x509_crt cert;    // Parsed certificate
+  mbedtls_ssl_context ssl;  // SSL/TLS context
+  mbedtls_ssl_config conf;  // SSL-TLS config
+  mbedtls_pk_context pk;    // Private key context
+};
+#endif
+
+
+#if MG_ENABLE_OPENSSL
+
+#include <openssl/err.h>
+#include <openssl/ssl.h>
+
+struct mg_tls {
+  SSL_CTX *ctx;
+  SSL *ssl;
+};
+#endif
 
 
 #define WEBSOCKET_OP_CONTINUE 0

@@ -15,12 +15,14 @@
         JS_FreeValue(ctx,ObjCotr) ;                                             \
     }
 
-#define THIS_LBOBJ(clzname, mehtodname, thisobj)                                                                        \
+#define THIS_OBJ(clzname, mehtodname, thisobj, ctype)                                                                        \
     CHECK_INSOF_LVOBJ(clzname, this_val, "lvgl."clzname"."mehtodname"() must be called as a lvgl."clzname" method")     \
-    lv_obj_t * thisobj = JS_GetOpaqueInternal(this_val) ;                                                               \
+    ctype * thisobj = JS_GetOpaqueInternal(this_val) ;                                                               \
     if(!thisobj) {                                                                                                      \
         THROW_EXCEPTION("lvgl."clzname"."mehtodname"() must be called as a lvgl."clzname" method")                      \
     }
+
+#define THIS_LVOBJ(clzname, mehtodname, thisobj) THIS_OBJ(clzname, mehtodname, thisobj, lv_obj_t)
 
 
 
@@ -28,7 +30,7 @@ JSClassID lv_obj_js_class_id() ;
 
 JSValue js_lv_obj_wrapper(JSContext *ctx, lv_obj_t * cobj, JSClassID clzid) ;
 
-void vlgl_js_widgets_init() ;
+void init_lvgl_widgets() ;
 void require_vlgl_js_widgets(JSContext *ctx, JSValue lvgl) ;
 
 

@@ -218,7 +218,7 @@ void require_module_http(JSContext *ctx) {
     JS_FreeValue(ctx, EventEmitterProto);
 }
 
-void http_init() {
+void be_module_http_init() {
     // class id 全局, 分配一次
     JS_NewClassID(&js_http_server_class_id);
 
@@ -228,6 +228,6 @@ void http_init() {
 }
 
 
-void http_on_before_reset(JSContext *ctx) {
+void be_module_http_reset(JSContext *ctx) {
 
 }

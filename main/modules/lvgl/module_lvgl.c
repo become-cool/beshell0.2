@@ -1,6 +1,7 @@
 #include "module_lvgl.h"
 #include "display.h"
 #include "widgets.h"
+#include "style.h"
 #include "lvgl.h"
 #include "lv_conf.h"
 #include "utils.h"
@@ -18,7 +19,6 @@
 
 bool lv_has_inited = false ;
 #define LV_TICK_PERIOD_MS 1
-
 
 
 static JSValue js_lv_coord_pct(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
@@ -84,12 +84,13 @@ void sig_alm_handler(int sig_num) {
 #endif
 
 
-void init_lvgl() {
-    vlgl_js_display_init() ;
-    vlgl_js_widgets_init() ;
+void be_module_init_lvgl() {
+    init_lvgl_display() ;
+    init_lvgl_widgets() ;
+    init_lvgl_style() ;
 }
 
-void require_module_lvgl(JSContext *ctx) {
+void be_module_lvgl_require(JSContext *ctx) {
     if(!lv_has_inited) {
         lv_init();
         
@@ -114,6 +115,8 @@ void require_module_lvgl(JSContext *ctx) {
         value.it_interval = value.it_value;
         setitimer(ITIMER_REAL, &value, NULL);
 #endif
+
+
         
         lv_has_inited = true ;
     }
@@ -133,13 +136,14 @@ void require_module_lvgl(JSContext *ctx) {
     
     require_vlgl_js_display(ctx, lvgl) ;
     require_vlgl_js_widgets(ctx, lvgl) ;
+    require_vlgl_js_style(ctx, lvgl) ;
 
     JS_FreeValue(ctx, global);
     JS_FreeValue(ctx, beapi);
 }
 
 
-void lvgl_loop(JSContext *ctx)  {
+void be_module_lvgl_loop(JSContext *ctx)  {
     if(lv_has_inited) {
         lv_task_handler() ;
     }

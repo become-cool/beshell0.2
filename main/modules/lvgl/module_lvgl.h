@@ -3,9 +3,9 @@
 
 #include "quickjs-libc.h"
 
-void init_lvgl() ;
-void lvgl_loop(JSContext *ctx)  ;
+void be_module_init_lvgl() ;
+void be_module_lvgl_loop(JSContext *ctx)  ;
 
-void require_module_lvgl(JSContext *ctx)  ;
+void be_module_lvgl_require(JSContext *ctx) ;
 
 #endif

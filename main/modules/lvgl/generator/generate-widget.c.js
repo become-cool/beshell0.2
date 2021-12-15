@@ -365,7 +365,7 @@ function generateClassRegister() {
             var parentProtoName = "proto_lv_obj"
         code+= 
 `    // define js class lvgl.${ctypeName}    
-    JSValue proto_${ctypeName} = js_def_class(ctx, "${clzName}", js_${ctypeName}_class_id, &js_${ctypeName}_class
+    JSValue proto_${ctypeName} = qjs_def_class(ctx, "${clzName}", js_${ctypeName}_class_id, &js_${ctypeName}_class
                 , "lvgl.${clzName}", js_${ctypeName}_constructor, js_${ctypeName}_proto_funcs, countof(js_${ctypeName}_proto_funcs), ${parentProtoName}, lvgl) ;
 
 `
@@ -515,6 +515,8 @@ function main() {
                     "js_lv_obj_get_all_style_values": "allStyleValues" ,
                     "js_lv_obj_set_style": "setStyle" ,
                     "js_lv_obj_get_style": "style" ,
+                    "js_lv_obj_refresh_style": "refreshStyle" ,
+                    "js_lv_obj_get_local_style": "localStyle"
                 }
     )
     code+= gen_lv_class("lv_label", "lvgl.Label", require("./api/lv_label.js"))

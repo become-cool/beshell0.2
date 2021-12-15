@@ -304,7 +304,7 @@ unsigned char events_js[] = {
 
 void echo_error(JSContext *) ;
 
-void require_module_events(JSContext *ctx) {
+void be_module_events_require(JSContext *ctx) {
   JSValue ret = JS_Eval(ctx, (const char *)events_js, events_js_len, "events.js", JS_EVAL_TYPE_GLOBAL) ;  // JS_EVAL_FLAG_STRIP
   if(JS_IsException(ret)) {
       echo_error(ctx) ;

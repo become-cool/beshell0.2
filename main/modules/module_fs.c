@@ -557,7 +557,7 @@ void extend_partition() {
     // return unlink(path)>-1 ;
 }
 
-bool fs_init() {
+bool be_module_fs_init() {
     const esp_vfs_littlefs_conf_t conf_root = {
         .base_path = "/fs",
         .partition_label = "fsroot",
@@ -584,7 +584,7 @@ bool fs_init() {
 }
 #endif
 
-void require_module_fs(JSContext *ctx) {
+void be_module_fs_require(JSContext *ctx) {
 
     JSValue global = JS_GetGlobalObject(ctx);
     JSValue beapi = JS_GetPropertyStr(ctx, global, "beapi") ;

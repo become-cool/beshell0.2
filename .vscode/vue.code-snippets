@@ -1,6 +1,6 @@
 {
 	"c-header": {
-		"prefix": "cheader",
+		"prefix": "c-header",
 		"body": [
 			"#ifndef __H_${TM_FILENAME_BASE/(.*)$/${1:/upcase}/}__" ,
 			"#define __H_${TM_FILENAME_BASE/(.*)$/${1:/upcase}/}__",
@@ -12,17 +12,88 @@
 	} ,
 
 	"c-sourse": {
-		"prefix": "csource",
+		"prefix": "c-source",
 		"body": [
 			"#include \"${TM_FILENAME_BASE}.h\"" ,
 			"",
 			"",
 		],
+		"description": "c 源文件"
+	} ,
+
+	"c-module-header": {
+		"prefix": "c-module-header",
+		"body": [
+			"#ifndef __H_${TM_FILENAME_BASE/(.*)$/${1:/upcase}/}__" ,
+			"#define __H_${TM_FILENAME_BASE/(.*)$/${1:/upcase}/}__",
+			"",
+			"#include \"quickjs-libc.h\"",
+			"",
+			"void be_${TM_FILENAME_BASE}_init() ;",
+			"void be_${TM_FILENAME_BASE}_require(JSContext *ctx) ;",
+			"void be_${TM_FILENAME_BASE}_loop(JSContext *ctx) ;",
+			"void be_${TM_FILENAME_BASE}_reset(JSContext *ctx) ;",
+			"",
+			"#endif",
+		],
 		"description": "c 头文件"
 	} ,
 
+	"c-module-sourse": {
+		"prefix": "c-module-source",
+		"body": [
+			"#include \"${TM_FILENAME_BASE}.h\"" ,
+			"",
+			"",
+			"void be_${TM_FILENAME_BASE}_init() {",
+			"}",
+			"",
+			"void be_${TM_FILENAME_BASE}_require(JSContext *ctx) {",
+			"",
+			"    JSValue beapi = js_get_glob_prop(ctx, 1, \"beapi\") ;",
+			"    JSValue ${TM_FILENAME_BASE/^module_(.+)$/${1}/} = JS_NewObject(ctx);",
+			"    JS_SetPropertyStr(ctx, beapi, \"${TM_FILENAME_BASE/^module_(.+)$/${1}/}\", ${TM_FILENAME_BASE/^module_(.+)$/${1}/});",
+			"",
+			"",
+			"",
+			"    JS_FreeValue(ctx, beapi);",
+			"}",
+			"",
+			"void be_${TM_FILENAME_BASE}_loop(JSContext *ctx) {",
+			"}",
+			"",
+			"void be_${TM_FILENAME_BASE}_reset(JSContext *ctx) {",
+			"}",
+			"",
+			"",
+		],
+		"description": "c 源文件"
+	} ,
+
+	"quickjs class define": {
+		"prefix": "quickjs-class",
+		"body": [
+			"static JSClassID js_${class_name}_class_id ;" ,
+			"static JSValue js_${class_name}_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){" ,
+			"    JSValue jsobj = JS_NewObjectClass(ctx, js_${class_name}_class_id) ;" ,
+			"    return jsobj ;" ,
+			"}" ,
+			"static void js_${class_name}_finalizer(JSRuntime *rt, JSValue val){" ,
+			"    printf(\"js_${class_name}_finalizer()\\n\") ;" ,
+			"}" ,
+			"static JSClassDef js_${class_name}_class = {" ,
+			"    \"${js_full_name}\"," ,
+			"    .finalizer = js_${class_name}_finalizer," ,
+			"} ;" ,
+			"static const JSCFunctionListEntry js_${class_name}_proto_funcs[] = {" ,
+			"    // JS_CFUNC_DEF(\"xxxx\", 0, js_xxxx)," ,
+			"} ;" ,
+		],
+		"description": "c 源文件"
+	} ,
+
 	"quickjs c func": {
-		"prefix": "jsfunction",
+		"prefix": "quickjs-function",
 		"body": [
 			"static JSValue js_${funcName}(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {" ,
 			"" ,

@@ -500,7 +500,7 @@ const mark_end = "// AUTO GENERATE CODE END [STYLE VALUE SETTER/GETTER] --------
 
 
 
-let dist_path = __dirname + "/../widgets_extra.c"
+let dist_path = __dirname + "/../style.c"
 
 function main() {
 

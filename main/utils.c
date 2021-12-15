@@ -79,3 +79,37 @@ void eval_code_len(JSContext *ctx,const char * str,size_t len,const char * filen
 	}
 	JS_FreeValue(ctx, ret) ;
 }
+
+JSValue qjs_def_class(
+        JSContext *ctx,
+        const char * className,
+        JSClassID js_class_id,
+        JSClassDef * js_class_p,
+        const char * cotrName,
+        JSCFunction cotr,
+        const JSCFunctionListEntry* funclst,
+        uint16_t funcs,
+        JSValue parentProto ,
+        JSValue pkg
+) {    
+    JS_NewClass(JS_GetRuntime(ctx), js_class_id, js_class_p);
+
+    JSValue proto = JS_NewObject(ctx);
+    JS_SetPropertyFunctionList(ctx, proto, funclst, funcs);
+    JS_SetClassProto(ctx, js_class_id, proto);
+
+	if(!JS_IsUndefined(parentProto)) {
+    	JS_SetPropertyStr(ctx, proto, "__proto__", parentProto);
+	}
+
+	if(cotr) {
+		JSValue jscotr = JS_NewCFunction2(ctx, cotr, cotrName, 1, JS_CFUNC_constructor, 0) ;
+		JS_SetConstructor(ctx, jscotr, proto) ;
+		
+		if(!JS_IsUndefined(pkg)) {
+			JS_SetPropertyStr(ctx, pkg, className, jscotr);
+		}
+	}
+
+    return proto ;
+}

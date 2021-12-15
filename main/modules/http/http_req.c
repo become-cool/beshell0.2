@@ -62,7 +62,7 @@ JSValue js_http_req_get_header(JSContext *ctx, JSValueConst this_val, int argc, 
     CHECK_ARGC(1)
     REQ_OPAQUE(creq)
 
-    ARGV_TO_STRING_E(0, name, namelen, "http.Request.getHeader() arg name must be a string")
+    ARGV_TO_STRING_LEN_E(0, name, namelen, "http.Request.getHeader() arg name must be a string")
 
     JSValue jsval = req_get_header(ctx, creq->req, name) ;
     JS_FreeCString(ctx,name) ;
@@ -157,7 +157,7 @@ JSValue js_http_req_end(JSContext *ctx, JSValueConst this_val, int argc, JSValue
 JSValue js_http_req_rspn_status(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
 
     CHECK_ARGC(1)
-    ARGV_TO_STRING_E(0, code, codelen, "http response status must be a string, eg. \"200\"")
+    ARGV_TO_STRING_LEN_E(0, code, codelen, "http response status must be a string, eg. \"200\"")
     REQ_OPAQUE(creq)
 
     httpd_resp_set_status(creq->req, code) ;
@@ -175,8 +175,8 @@ JSValue js_http_req_rspn_status(JSContext *ctx, JSValueConst this_val, int argc,
 JSValue js_http_req_rspn_header(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(2)
     REQ_OPAQUE(creq)
-    ARGV_TO_STRING_E(0, name, namelen, "argv header name must be a string")
-    ARGV_TO_STRING_E(1, value, valuelen, "argv header value must be a string")
+    ARGV_TO_STRING_LEN_E(0, name, namelen, "argv header name must be a string")
+    ARGV_TO_STRING_LEN_E(1, value, valuelen, "argv header value must be a string")
 
     httpd_resp_set_hdr(creq->req, name, value) ;
 

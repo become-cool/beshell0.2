@@ -2,6 +2,7 @@
 #define _UTILS_H
 
 #include "quickjs-libc.h"
+#include <stdbool.h>
 
 #ifdef SIMULATION
 
@@ -36,20 +37,31 @@ void echo_error(JSContext *) ;
 #define ARGV_TO_DOUBLE(i,var)                               \
     double var ;                                            \
     JS_ToFloat64(ctx, &var, argv[i]) ;
-#define ARGV_TO_STRING(i, var, len)                         \
+
+#define ARGV_TO_STRING_LEN(i, var, len)                     \
     size_t len = 0 ;                                        \
     char * var = JS_ToCStringLen(ctx, &len, argv[i]) ;
+#define ARGV_TO_STRING_LEN_E(i, var, len, msg)              \
+    if(!JS_IsString(argv[i])) {                             \
+        THROW_EXCEPTION(msg)                                \
+    }                                                       \
+    ARGV_TO_STRING_LEN(i, var, len)
+
+#define ARGV_TO_STRING(i, var)                              \
+    size_t len = 0 ;                                        \
+    char * var = JS_ToCString(ctx, argv[i]) ;
+#define ARGV_TO_STRING_E(i, var, msg)                       \
+    if(!JS_IsString(argv[i])) {                             \
+        THROW_EXCEPTION(msg)                                \
+    }                                                       \
+    ARGV_TO_STRING(i, var)
+
 #define ARGV_TO_ARRAYBUFFER(i, var, varlen)                                         \
     size_t varlen = 0;                                                              \
     char * var = (char *)JS_GetArrayBuffer(ctx, &varlen, argv[i]) ;                 \
     if(!var) {                                                                      \
         THROW_EXCEPTION("argv is not a ArrayBuffer")                                \
     }
-#define ARGV_TO_STRING_E(i, var, len, msg)                  \
-    if(!JS_IsString(argv[i])) {                             \
-        THROW_EXCEPTION(msg)                                \
-    }                                                       \
-    ARGV_TO_STRING(i, var, len)
 
 #define EVAL_CODE_LEN(str, len, filename)                                           \
     {                                                                               \
@@ -166,3 +178,9 @@ JSValue qjs_def_class(
         JSValue parentProto ,
         JSValue pkg
 ) ;
+
+bool qjs_instanceof(JSContext *ctx, JSValue obj, JSClassID clz_id) ;
+
+#define QJS_DEF_CLASS(typeName, clzName, fullClzName, protoVar, pkgVar)                          \
+    qjs_def_class(ctx, clzName, js_##typeName##_class_id, &js_##typeName##_class     \
+                , fullClzName, js_##typeName##_constructor, js_##typeName##_proto_funcs, countof(js_##typeName##_proto_funcs), protoVar, pkgVar) ;

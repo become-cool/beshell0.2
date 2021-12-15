@@ -390,7 +390,7 @@ JSValue js_fs_untar(JSContext *ctx, JSValueConst this_val, int argc, JSValueCons
 
 JSValue js_string_bytes(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(1)
-    ARGV_TO_STRING(0, str, len)
+    ARGV_TO_STRING_LEN(0, str, len)
 
     JS_FreeCString(ctx, str) ;
     return JS_NewUint32(ctx, len) ;
@@ -466,7 +466,7 @@ JSValue js_pack_string(JSContext *ctx, JSValueConst this_val, int argc, JSValueC
     CHECK_ARGC(3)
     ARGV_TO_ARRAYBUFFER(0, buff, bufflen)
     ARGV_TO_UINT16(1, offset)
-    ARGV_TO_STRING(2, str, strlen)
+    ARGV_TO_STRING_LEN(2, str, strlen)
 
     if(strlen>255) {
         strlen = 255 ;
@@ -498,7 +498,7 @@ JSValue js_unpack_string(JSContext *ctx, JSValueConst this_val, int argc, JSValu
 JSValue js_write_string_to_ArrayBuffer(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(2)
     ARGV_TO_ARRAYBUFFER(0, buff, bufflen)
-    ARGV_TO_STRING(1, str, strlen)
+    ARGV_TO_STRING_LEN(1, str, strlen)
     size_t offset = 0 ;
     if(argc>=3) {
         if( JS_ToUint32(ctx, &offset, argv[2]) ) {

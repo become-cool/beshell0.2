@@ -147,7 +147,7 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
 
     CHECK_ARGC(2)
 
-    ARGV_TO_STRING_E(0, typestr, typelen, "argv type must be a string")
+    ARGV_TO_STRING_LEN_E(0, typestr, typelen, "argv type must be a string")
     if(!JS_IsObject(argv[1])) {
         THROW_EXCEPTION("argv options must be a object")
     }

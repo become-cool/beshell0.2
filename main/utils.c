@@ -113,3 +113,12 @@ JSValue qjs_def_class(
 
     return proto ;
 }
+
+bool qjs_instanceof(JSContext *ctx, JSValue obj, JSClassID clz_id) {
+    JSValue proto = JS_GetClassProto(ctx, clz_id);
+    JSValue cotr = JS_GetPropertyStr(ctx, proto, "constructor") ;
+    bool res = JS_IsInstanceOf(ctx, obj, cotr) ;
+    JS_FreeValue(ctx,proto) ;
+    JS_FreeValue(ctx,cotr) ;
+	return res ;
+}

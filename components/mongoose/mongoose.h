@@ -18,6 +18,8 @@
 #ifndef MONGOOSE_H
 #define MONGOOSE_H
 
+#include "utils.h"
+
 #define MG_VERSION "7.4"
 
 #ifdef __cplusplus
@@ -830,6 +832,7 @@ struct mg_connection {
   unsigned is_closing : 1;     // Close and free the connection immediately
   unsigned is_readable : 1;    // Connection is ready to read
   unsigned is_writable : 1;    // Connection is ready to write
+  void * userdata ;
 };
 
 void mg_mgr_poll(struct mg_mgr *, int ms);

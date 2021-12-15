@@ -11,6 +11,20 @@ source esp-idf/export.sh
 ```
 
 
+## quickjs / c 对象混合编程
+
+JSValue 是多种类型的联合体，按值传递，在 c 语言里记录 JSValue 的指针没有意义 (lvgl/moogoose 等库需要保存上下文数据的指针)，应该持有 JSValue 指向的 JSObject 指针。
+
+通过 `JS_VALUE_GET_PTR(<JSValue>)` 宏可以取出 JSValue 指向的 JSObject 指针（如果该 JSValue 是object类型）；
+
+通过 `JS_MKPTR(JS_TAG_OBJECT, <JSObject *>)` 宏将 JSObject 包装成一个 JSValue 传递给 js
+
+
+##  quickjs / c 内存管理
+
+
+
+
 ## GPIO12 启动时上拉状态
 
 在 ESP32 中，GPIO12 是硬件 SPI 的 MISO MUX引脚, SPI 使用 MUX 引脚可高达 80MHz 频率，其它任意引进仅为 26MHz。

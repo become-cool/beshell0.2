@@ -1,5 +1,5 @@
 {
     "level": 6 ,
     "login": "become" ,
-    "active-app": ""
+    "active-app": "/home/become/test.js"
 }

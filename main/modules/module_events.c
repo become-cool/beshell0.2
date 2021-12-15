@@ -25,7 +25,7 @@
 //     if(!JS_IsFunction(argv[1])) {
 //         THROW_EXCEPTION("arg callback of EventEmitter.on() must be a function")
 //     }
-//     ARGV_TO_STRING_E(0, eventName, eventNamelen, "HttpRequest.getHeader() arg name must be a string")
+//     ARGV_TO_STRING_LEN_E(0, eventName, eventNamelen, "HttpRequest.getHeader() arg name must be a string")
     
 
 

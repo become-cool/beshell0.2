@@ -91,7 +91,7 @@ JSValue js_http_server_route(JSContext *ctx, JSValueConst this_val, int argc, JS
     SERVER_THIS(cserver)
 
     CHECK_ARGC(2)
-    ARGV_TO_STRING_E(0, uri, urilen, "argv callback must be a function")
+    ARGV_TO_STRING_LEN_E(0, uri, urilen, "argv callback must be a function")
     if( !JS_IsFunction(ctx, argv[1]) ) {
         THROW_EXCEPTION("argv callback must be a function")
     }
@@ -151,7 +151,7 @@ JSValue js_http_server_route_ws(JSContext *ctx, JSValueConst this_val, int argc,
     SERVER_THIS(cserver)
 
     CHECK_ARGC(2)
-    ARGV_TO_STRING_E(0, uri, urilen, "argv callback must be a function")
+    ARGV_TO_STRING_LEN_E(0, uri, urilen, "argv callback must be a function")
     if( !JS_IsFunction(ctx, argv[1]) ) {
         THROW_EXCEPTION("argv callback must be a function")
     }

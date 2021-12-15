@@ -289,7 +289,7 @@ JSValue js_telnet_send(JSContext *ctx, JSValueConst this_val, int argc, JSValueC
 
 	// printf("pkgid=%d, cmd=%d\n", pkgid, cmd) ;
 
-	ARGV_TO_STRING(2, data, datalen)
+	ARGV_TO_STRING_LEN(2, data, datalen)
 	// printf("send pkg data=%s, datalen=%d\n", data, datalen) ;
 	telnet_send_pkg(pkgid, cmd, data, datalen) ;
 	JS_FreeCString(ctx, data) ;

@@ -293,6 +293,7 @@ void task_js_main(){
     be_module_wifi_init() ;
     be_module_telweb_init() ;
 #endif
+    be_module_mg_init() ;
     be_module_init_lvgl() ;
 
 #ifndef SIMULATION
@@ -323,6 +324,7 @@ void task_js_main(){
 #else
             be_module_repl_reset(ctx) ;
 #endif
+            be_module_mg_reset(ctx) ;
 
             quickjs_deinit() ;
             quickjs_init() ;
@@ -340,6 +342,7 @@ void task_js_main(){
         be_module_repl_loop(ctx) ;
         be_module_httplws_loop(ctx) ;
 #endif
+        be_module_mg_loop(ctx) ;
         be_module_lvgl_loop(ctx) ;
         be_module_eventloop_loop(ctx) ;
 

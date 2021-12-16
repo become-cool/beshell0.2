@@ -14,7 +14,9 @@ LINK_LIBRARIES(pthread)
 add_definitions(-g)
 add_definitions(-DSIMULATION)
 # add_definitions(-DWIN32)
-add_definitions(-DMG_ENABLE_LINES)
+# add_definitions(-DMG_ENABLE_LINES)
+add_definitions(-DCMAKE_GENERATOR_PLATFORM=x64)
+ 
 
 SET(CMAKE_CXX_FLAGS_DEBUG "-O0")
 SET(CMAKE_C_FLAGS_DEBUG "-O0")

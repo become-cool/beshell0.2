@@ -11,8 +11,8 @@ bool be_module_fs_init() ;
 
 
 void module_fs_set_vfs_path_prefix(char * path) ;
-char * js_arg_to_vfspath(JSContext *ctx, JSValueConst argv) ;
 char * vfspath_to_fs(const char * path) ;
+char * js_arg_to_vfspath(JSContext *ctx, JSValueConst argv) ;
 
 #define JS2VSFPath(path, arg)                                                       \
     char * path = js_arg_to_vfspath(ctx, arg) ;                                     \

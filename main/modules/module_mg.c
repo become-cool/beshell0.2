@@ -3,6 +3,7 @@
 #include "cutils.h"
 #include "mongoose.h"
 #include "stack.h"
+#include "module_fs.h"
 
 struct mg_mgr mgr ;
 
@@ -174,7 +175,17 @@ static JSValue js_mg_http_message_header(JSContext *ctx, JSValueConst this_val, 
     return JS_NewStringLen(ctx, val->ptr, val->len) ;
 }
 static JSValue js_mg_http_message_all_headers(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-    return JS_UNDEFINED ;
+    THIS_HTTP_MSG(msg)
+    JSValue jsheaders = JS_NewObject(ctx) ;
+    int max = sizeof(msg->headers) / sizeof(msg->headers[0]);
+    for (int i = 0; i < max && msg->headers[i].name.len > 0; i++) {
+        JS_SetPropertyStr(
+            ctx, jsheaders,
+            msg->headers[i].name.ptr ,
+            JS_NewStringLen(ctx, msg->headers[i].value.ptr, msg->headers[i].value.len)
+        ) ;
+    }
+    return jsheaders ;
 }
 static JSValue js_mg_http_message_body(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     THIS_HTTP_MSG(msg)
@@ -192,20 +203,6 @@ static JSValue js_mg_http_message_rawHead(JSContext *ctx, JSValueConst this_val,
     THIS_HTTP_MSG(msg)
     return JS_NewStringLen(ctx, msg->head.ptr, msg->head.len) ;
 }
-static JSValue js_mg_http_message_upgrade(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-    THIS_HTTP_MSG(msg)
-    CHECK_ARGC(1)
-    if( !qjs_instanceof(ctx, argv[0], js_mg_http_rspn_class_id) ){
-        THROW_EXCEPTION("arg rspn must be a mg.Response")
-    }
-    response_t * rspn = JS_GetOpaque(argv[0], js_mg_http_rspn_class_id) ;
-    if(!rspn) {
-        JS_ThrowReferenceError(ctx, "mg.HttpResponse object has free.");
-        return JS_EXCEPTION ;
-    }
-    mg_ws_upgrade(rspn->conn, msg, NULL);
-    return JS_UNDEFINED ;
-}
 
 static const JSCFunctionListEntry js_mg_http_message_proto_funcs[] = {
     JS_CFUNC_DEF("method", 0, js_mg_http_message_method),
@@ -218,7 +215,6 @@ static const JSCFunctionListEntry js_mg_http_message_proto_funcs[] = {
     JS_CFUNC_DEF("chunk", 0, js_mg_http_message_chunk),
     JS_CFUNC_DEF("raw", 0, js_mg_http_message_raw),
     JS_CFUNC_DEF("rawHead", 0, js_mg_http_message_rawHead),
-    JS_CFUNC_DEF("upgrade", 0, js_mg_http_message_upgrade),
 } ;
 
 
@@ -236,6 +232,11 @@ static const JSCFunctionListEntry js_mg_http_message_proto_funcs[] = {
         THROW_EXCEPTION(methodName"() do not invoke with a websocket connection.")  \
     }
 
+#define MUST_BE_WS_FUNC(methodName)                                                     \
+    if(!rspn->conn->is_websocket) {                                                  \
+        THROW_EXCEPTION(methodName"() must be invoked with a websocket connection.")  \
+    }
+
 static JSValue js_mg_http_rspn_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
     return JS_NewObjectClass(ctx, js_mg_http_rspn_class_id) ;
 }
@@ -248,9 +249,7 @@ static JSClassDef js_mg_http_rspn_class = {
 } ;
 
 static JSValue js_mg_rspn_reply(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-
     CHECK_ARGC(1)
-
     THIS_HTTP_RSPN(rspn)
     NOT_WS_FUNC("mg.HttpResponse.replay")
     
@@ -267,14 +266,71 @@ static JSValue js_mg_rspn_reply(JSContext *ctx, JSValueConst this_val, int argc,
     return JS_UNDEFINED ;
 }
 
+
+static JSValue js_mg_rspn_serve_dir(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(2)
+    THIS_HTTP_RSPN(rspn)
+    NOT_WS_FUNC("mg.HttpResponse.replay")
+
+    if(!qjs_instanceof(ctx, argv[0], js_mg_http_message_class_id)){
+        THROW_EXCEPTION("arg req must be an instance of mg.HttpMessage")
+    }
+    struct mg_http_message * msg = JS_GetOpaque(argv[0], js_mg_http_message_class_id) ;
+
+    ARGV_TO_STRING_E(1, _path, "arg path must be a string")
+    char * path = vfspath_to_fs(_path) ;
+
+    struct mg_http_serve_opts opts = {.root_dir = path};
+    mg_http_serve_dir(rspn->conn, msg, &opts);
+
+    JS_FreeCString(ctx, _path) ;
+    free(path) ;
+
+    return JS_UNDEFINED ;
+}
+
+static JSValue js_mg_http_rspn_upgrade(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    THIS_HTTP_RSPN(rspn)
+    CHECK_ARGC(1)
+    NOT_WS_FUNC("mg.HttpResponse.upgrade")
+    if( !qjs_instanceof(ctx, argv[0], js_mg_http_message_class_id) ){
+        THROW_EXCEPTION("arg rspn must be a mg.HttpMessage")
+    }
+    struct mg_http_message * msg = JS_GetOpaque(argv[0], js_mg_http_message_class_id) ;
+    if(!msg) {
+        JS_ThrowReferenceError(ctx, "mg.HttpMessage object has free.");
+        return JS_EXCEPTION ;
+    }
+    mg_ws_upgrade(rspn->conn, msg, NULL);
+    return JS_UNDEFINED ;
+}
+
+static JSValue js_mg_rspn_ws_send(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+    THIS_HTTP_RSPN(rspn)
+    MUST_BE_WS_FUNC("mg.HttpResponse.wsSend")
+
+    if( JS_IsString(argv[0]) ){
+        ARGV_TO_STRING_LEN(0, str, len)
+        mg_ws_send(rspn->conn, str, len, WEBSOCKET_OP_TEXT) ;
+        JS_FreeCString(ctx, str) ;
+    }
+    
+    // if( JS_IsArray(argv[0]) ){
+
+    // }
+    // else {
+
+    // }
+
+    return JS_UNDEFINED ;
+}
+
 static const JSCFunctionListEntry js_mg_http_rspn_proto_funcs[] = {
     JS_CFUNC_DEF("reply", 0, js_mg_rspn_reply),
-} ;
-
-
-
-static const JSCFunctionListEntry js_mg_ws_message_proto_funcs[] = {
-    // JS_CFUNC_DEF("xxxx", 0, js_xxxx),
+    JS_CFUNC_DEF("serveDir", 0, js_mg_rspn_serve_dir),
+    JS_CFUNC_DEF("upgrade", 0, js_mg_http_rspn_upgrade),
+    JS_CFUNC_DEF("wsSend", 0, js_mg_rspn_ws_send),
 } ;
 
 
@@ -300,7 +356,7 @@ static const JSCFunctionListEntry js_mg_ws_message_proto_funcs[] = {
 //   MG_EV_SNTP_TIME,   // SNTP time received           struct timeval *
 //   MG_EV_USER,        // Starting ID for user events
 // };
-static void mg_event_handler(struct mg_connection * conn, int ev, void *ev_data, void *fn_data) {
+static void http_event_handler(struct mg_connection * conn, int ev, void *ev_data, void *fn_data) {
     if(ev== MG_EV_POLL || !fn_data) {
         return ;
     }
@@ -316,6 +372,7 @@ static void mg_event_handler(struct mg_connection * conn, int ev, void *ev_data,
 
     // server connection
     if(server->conn==NULL || server->conn==conn) {
+        dd
         if(ev==MG_EV_CLOSE) {
             JS_FreeValue(server->ctx, server->callback) ;
             server->callback = JS_NULL ;
@@ -373,6 +430,7 @@ static void mg_event_handler(struct mg_connection * conn, int ev, void *ev_data,
             }
             case MG_EV_WS_CTL: 
             case MG_EV_WS_MSG: {
+
                 if(!conn->userdata) {
                     printf("conn->userdata == NULL ??") ;
                     return ;
@@ -394,6 +452,11 @@ static void mg_event_handler(struct mg_connection * conn, int ev, void *ev_data,
 
                 MAKE_ARGV3(cbargv, JS_NewString(server->ctx, mg_event_const_to_name(ev)), jsmsg, rspn->jsrspn)
                 JSValue ret = JS_Call(server->ctx, server->callback, JS_UNDEFINED, 3, cbargv) ;
+
+                if( JS_IsException(ret) ){
+                    js_std_dump_error(server->ctx) ;
+                }
+                dd
                 JS_FreeValue(server->ctx, jsmsg) ;
                 free(cbargv) ;
 
@@ -422,7 +485,7 @@ static JSValue js_mg_mgr_http_listen(JSContext *ctx, JSValueConst this_val, int 
     server->callback = argv[1] ;
     server->conn = NULL ;
 
-    server->conn = mg_http_listen(&mgr, addr, mg_event_handler, server) ;
+    server->conn = mg_http_listen(&mgr, addr, http_event_handler, server) ;
     JS_FreeCString(ctx, addr) ;
 
     if(server->conn==NULL) {
@@ -439,7 +502,24 @@ static JSValue js_mg_mgr_http_listen(JSContext *ctx, JSValueConst this_val, int 
 }
 
 
+static void sntp_event_handler(struct mg_connection * conn, int ev, void *ev_data, void *fn_data) {
+    if(ev==MG_EV_POLL)
+        return ;
+    ds( mg_event_const_to_name(ev) ) ;
+    if (ev == MG_EV_SNTP_TIME) {
+        // Time received
+        struct timeval *tv = (struct timeval *)ev_data;
+        dn2(tv->tv_sec,tv->tv_usec)
+    }
+}
 
+static JSValue js_mg_sntp_connect(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    // CHECK_ARGC(0)
+
+    mg_sntp_connect(&mgr, "udp://pool.ntp.org:123" /* connect to time.google.com */, sntp_event_handler, NULL);
+
+    return JS_UNDEFINED ;
+}
 
 void be_module_mg_init() {
     JS_NewClassID(&js_mg_server_class_id);
@@ -459,6 +539,7 @@ void be_module_mg_require(JSContext *ctx) {
     QJS_DEF_CLASS(mg_http_rspn, "HttpResponse", "mg.HttpResponse", JS_UNDEFINED, JS_UNDEFINED)
 
     JS_SetPropertyStr(ctx, mg, "httpListen", JS_NewCFunction(ctx, js_mg_mgr_http_listen, "httpListen", 1));
+    JS_SetPropertyStr(ctx, mg, "sntpConnect", JS_NewCFunction(ctx, js_mg_sntp_connect, "sntpConnect", 1));
     
     JS_FreeValue(ctx, beapi);
 }

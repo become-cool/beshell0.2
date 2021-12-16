@@ -9,7 +9,7 @@ void main( int argc, char *argv[] ){
         module_fs_set_vfs_path_prefix(argv[1]) ;
     }
     else {
-        module_fs_set_vfs_path_prefix("../filesystem/root") ;
+        module_fs_set_vfs_path_prefix("../filesystem/root/") ;
     }
 
     task_js_main() ;

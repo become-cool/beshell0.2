@@ -48,7 +48,6 @@ void echo_error(JSContext *) ;
     ARGV_TO_STRING_LEN(i, var, len)
 
 #define ARGV_TO_STRING(i, var)                              \
-    size_t len = 0 ;                                        \
     char * var = JS_ToCString(ctx, argv[i]) ;
 #define ARGV_TO_STRING_E(i, var, msg)                       \
     if(!JS_IsString(argv[i])) {                             \

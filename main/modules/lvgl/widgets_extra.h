@@ -6,7 +6,7 @@
 
 void js_lv_obj_init(JSContext *ctx, JSValue jsobj) ;
 
-JSValue js_lv_obj_wrapper(JSContext *ctx, lv_obj_t * cobj, JSClassID clsid) ;
+JSValue js_lv_obj_wrapper(JSContext *ctx, lv_obj_t * cobj, JSValue cotr, JSClassID clsid) ;
 
 JSValue js_lv_obj_enable_event(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
 JSValue js_lv_obj_disable_event(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
@@ -31,5 +31,11 @@ JSValue js_lv_obj_get_style(JSContext *ctx, JSValueConst this_val, int argc, JSV
 JSValue js_lv_obj_refresh_style(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
 
 JSValue js_lv_obj_get_local_style(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)  ;
+
+JSValue js_lv_obj_get_font_height(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
+
+JSValue js_lv_label_set_font(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
+
+JSValue js_lv_img_set_src(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
 
 #endif

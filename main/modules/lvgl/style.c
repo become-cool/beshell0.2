@@ -5,14 +5,11 @@
 
 
 lv_style_prop_t LV_STYLE_JSVALUE ;
-
-
-
-static JSClassID js_lvgl_style_class_id ;
+JSClassID js_lv_style_class_id ;
 
 static JSValue create_js_style(JSContext *ctx, lv_style_t * style) {
 
-    JSValue jsstyle = JS_NewObjectClass(ctx, js_lvgl_style_class_id) ;
+    JSValue jsstyle = JS_NewObjectClass(ctx, js_lv_style_class_id) ;
     JS_SetOpaque(jsstyle, style) ;    
 
     lv_style_value_t v = {.ptr = JS_VALUE_GET_PTR(jsstyle)};
@@ -57,6 +54,8 @@ JSValue lv_style_value_to_js(JSContext * ctx, lv_style_prop_t prop, lv_style_val
             return lv_base_dir_const_to_jsstr(ctx, value.num) ;
         case LV_STYLE_BORDER_SIDE:
             return lv_border_side_const_to_jsstr(ctx, value.num) ;
+        case LV_STYLE_TEXT_ALIGN:
+            return lv_text_align_const_to_jsstr(ctx, value.num) ;
 
         case LV_STYLE_WIDTH: 
         case LV_STYLE_MIN_WIDTH: 
@@ -112,7 +111,6 @@ JSValue lv_style_value_to_js(JSContext * ctx, lv_style_prop_t prop, lv_style_val
         case LV_STYLE_BORDER_POST: 
         case LV_STYLE_TEXT_OPA: 
         case LV_STYLE_TEXT_DECOR: 
-        case LV_STYLE_TEXT_ALIGN: 
         case LV_STYLE_IMG_OPA: 
         case LV_STYLE_IMG_RECOLOR_OPA: 
         case LV_STYLE_OUTLINE_OPA: 
@@ -171,6 +169,8 @@ bool lv_style_js_to_value(JSContext * ctx, lv_style_prop_t prop, JSValue jsval, 
             return lv_base_dir_jsstr_to_const(ctx, jsval, &(value->num)) ;
         case LV_STYLE_BORDER_SIDE:
             return lv_border_side_jsstr_to_const(ctx, jsval, &(value->num)) ;
+        case LV_STYLE_TEXT_ALIGN:
+            return lv_text_align_jsstr_to_const(ctx, jsval, &(value->num)) ;
 
         case LV_STYLE_WIDTH: 
         case LV_STYLE_MIN_WIDTH: 
@@ -226,7 +226,6 @@ bool lv_style_js_to_value(JSContext * ctx, lv_style_prop_t prop, JSValue jsval, 
         case LV_STYLE_BORDER_POST: 
         case LV_STYLE_TEXT_OPA: 
         case LV_STYLE_TEXT_DECOR: 
-        case LV_STYLE_TEXT_ALIGN: 
         case LV_STYLE_IMG_OPA: 
         case LV_STYLE_IMG_RECOLOR_OPA: 
         case LV_STYLE_OUTLINE_OPA: 
@@ -265,23 +264,75 @@ bool lv_style_js_to_value(JSContext * ctx, lv_style_prop_t prop, JSValue jsval, 
 }
 // AUTO GENERATE CODE END [STYLE VALUE SETTER/GETTER] --------
 
+JSValue _js_lv_style_set_prop(JSContext *ctx, lv_style_t * style, JSValue jsProp, JSValue jsValue) {
+
+    lv_style_value_t value ;
+    const char * propName = JS_ToCString(ctx, jsProp) ;
+
+    if( strcmp(propName,"pad")==0 ) {
+        if(JS_ToInt32(ctx, &(value.num), jsValue)!=0) {
+            THROW_EXCEPTION("invalid pad value")
+        }
+        lv_style_set_prop(style, LV_STYLE_PAD_TOP, value) ;
+        lv_style_set_prop(style, LV_STYLE_PAD_BOTTOM, value) ;
+        lv_style_set_prop(style, LV_STYLE_PAD_LEFT, value) ;
+        lv_style_set_prop(style, LV_STYLE_PAD_RIGHT, value) ;
+        
+        JS_FreeCString(ctx, propName) ;
+        return JS_UNDEFINED ;
+    }
+
+    lv_style_prop_t prop ;
+    if(!lv_style_prop_jsstr_to_const(ctx, jsProp, &prop)){
+        JS_ThrowReferenceError(ctx, "unknow style name: %s", propName) ;
+        JS_FreeCString(ctx, propName) ;
+        return JS_EXCEPTION ;
+    }
+    JS_FreeCString(ctx, propName) ;
+
+    if(!lv_style_js_to_value(ctx, prop, jsValue, &value)){
+        THROW_EXCEPTION("style value invalid")
+    }
+
+    lv_style_set_prop(style, prop, value) ;
+
+    return JS_UNDEFINED ;
+}
 
 
 static JSValue js_lv_style_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv) {
     lv_style_t * style = malloc(sizeof(lv_style_t));
     lv_style_init(style) ;
+
+    if(argc>0 && JS_IsObject(argv[0])) {
+        uint32_t len;
+        JSPropertyEnum *tab;
+        if (JS_GetOwnPropertyNames(ctx, &tab, &len, argv[0], JS_GPN_STRING_MASK | JS_GPN_ENUM_ONLY) < 0) {
+            THROW_EXCEPTION("invalid styles object") ;
+        }
+        for(uint32_t i = 0; i < len; i++) {
+            JSValue key = JS_AtomToValue(ctx, tab[i].atom);
+            JSValue val = JS_GetProperty(ctx, argv[0], tab[i].atom);
+
+            if( JS_IsException(_js_lv_style_set_prop(ctx, style, key, val)) ) {
+                free(style) ;
+                return JS_EXCEPTION ;
+            }
+        }
+    }
+
     return create_js_style(ctx, style) ;
 }
 
 static void js_lvgl_style_finalizer(JSRuntime *rt, JSValue val) {
 
-    printf("js_lvgl_style_finalizer()\n") ;
+    // printf("js_lvgl_style_finalizer()\n") ;
 
-    lv_style_t * style = (lv_style_t *)JS_GetOpaque(val, js_lvgl_style_class_id) ;
-    if(style) { 
-        lv_style_reset(style) ;
-        free(style) ;
-    }
+    // lv_style_t * style = (lv_style_t *)JS_GetOpaque(val, js_lv_style_class_id) ;
+    // if(style) { 
+    //     lv_style_reset(style) ;
+    //     free(style) ;
+    // }
 }
 static JSClassDef js_lv_style_class = {
     "lvgl.Style",
@@ -314,6 +365,7 @@ static JSValue js_lv_style_get_prop(JSContext *ctx, JSValueConst this_val, int a
     return lv_style_value_to_js(ctx, prop, value) ;
 }
 
+
 static JSValue js_lv_style_set_prop(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
 
     if( argc==1 && JS_IsObject(argv[0]) ) {
@@ -325,23 +377,10 @@ static JSValue js_lv_style_set_prop(JSContext *ctx, JSValueConst this_val, int a
     if(!JS_IsString(argv[0])) {
         THROW_EXCEPTION("arg style name must be a string")
     }
-    lv_style_prop_t prop ;
-    if(!lv_style_prop_jsstr_to_const(ctx, argv[0], &prop)){
-        THROW_EXCEPTION("unknow style name pass in")
-    }
-
-    lv_style_value_t value ;
-    if(!lv_style_js_to_value(ctx, prop, argv[1], &value)){
-        THROW_EXCEPTION("style value invalid")
-    }
 
     THIS_OBJ("Style", "set", cstyle, lv_style_t)
 
-    dn(prop)
-    dn(value.num)
-    lv_style_set_prop(cstyle, prop, value) ;
-
-    return JS_UNDEFINED ;
+    return _js_lv_style_set_prop(ctx, cstyle, argv[0], argv[1]) ;
 }
 static JSValue js_lv_style_props(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
 
@@ -368,25 +407,72 @@ static JSValue js_lv_style_props(JSContext *ctx, JSValueConst this_val, int argc
 }
 
 
-static const JSCFunctionListEntry js_lv_style_funcs[] = {
+// static JSValue js_lv_style_setFont(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+//     THIS_OBJ("Style", "props", style, lv_style_t)
+//     lv_style_set_text_font(style, &lv_font_montserrat_48) ;
+//     return JS_UNDEFINED ;
+// }
+
+static JSValue js_lv_style_set_pad_all(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+    ARGV_TO_INT16(0, pad)
+    THIS_OBJ("Style", "setPadAll", style, lv_style_t)
+
+    lv_style_set_pad_all(style, pad) ;
+
+    return JS_UNDEFINED ;
+}
+
+static const JSCFunctionListEntry js_lv_style_proto_funcs[] = {
     JS_CFUNC_DEF("get", 0, js_lv_style_get_prop),
     JS_CFUNC_DEF("set", 0, js_lv_style_set_prop),
     JS_CFUNC_DEF("props", 0, js_lv_style_props),
+    JS_CFUNC_DEF("setPadAll", 0, js_lv_style_set_pad_all),
+    // JS_CFUNC_DEF("setFont", 0, js_lv_style_setFont),
 } ;
 
 
+static JSValue js_lv_palette_color(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+
+    ARGV_TO_STRING_E(0, colorName, "arg color name must be a string")
+
+    lv_palette_t palette ;
+    if(!lv_palette_str_to_const(colorName, &palette)) {
+        JS_ThrowReferenceError(ctx, "unknow color name: %s", colorName) ;
+        JS_FreeCString(ctx, colorName) ;
+        return JS_EXCEPTION ;
+    }
+    JS_FreeCString(ctx, colorName) ;
+
+    if(argc>1) {
+        ARGV_TO_UINT8(1, level)
+        if( level<1 || level>4 ) {
+            THROW_EXCEPTION("arg level must between 1 to 4")
+        }
+        lv_color_t color = lv_palette_darken(palette,level) ;
+        return JS_NewUint32(ctx, color.full) ;
+    } 
+    else {
+        lv_color_t color = lv_palette_main(palette) ;
+        return JS_NewUint32(ctx, color.full) ;
+    }
+
+}
 
 
 
 void init_lvgl_style() {
     LV_STYLE_JSVALUE = lv_style_register_prop() ;
-    
-    JS_NewClassID(&js_lvgl_style_class_id);
+    JS_NewClassID(&js_lv_style_class_id);
 }
 
 void require_vlgl_js_style(JSContext *ctx, JSValue lvgl) {
-    qjs_def_class( ctx, "lvgl.Style", js_lvgl_style_class_id, &js_lv_style_class, "Style", js_lv_style_constructor,
-            js_lv_style_funcs, countof(js_lv_style_funcs), JS_UNDEFINED, lvgl );
+    QJS_DEF_CLASS(lv_style, "Style", "lvgl.Style", JS_UNDEFINED, lvgl)
+
+    // JSValue palette = JS_NewObject(ctx) ;
+    // JS_SetPropertyStr(ctx, "palette", palette) ;
+    JS_SetPropertyStr(ctx, lvgl, "palette", JS_NewCFunction(ctx, js_lv_palette_color, "palette", 1));
 }
 
 

@@ -122,7 +122,8 @@ function __mkrequire(__dirname) {
 const Module = {
     caches: {} ,
     globalPaths: [
-        '/lib/node_modules'
+        '/lib/local' ,
+        '/lib/node_modules' ,
     ] ,
     __mkrequire
 }

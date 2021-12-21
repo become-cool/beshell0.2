@@ -3,6 +3,7 @@
 #include "utils.h"
 #include "mongoose.h"
 #include "stack.h"
+#include "module_mg.h"
 
 
 #define WS_DISP_CMD_REFRESH 1
@@ -90,13 +91,8 @@ void ws_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color
 //   /websocket - upgrade to Websocket, and implement websocket echo server
 //   /api/rest - respond with JSON string {"result": 123}
 //   any other URI serves static files from s_web_root
-static void fn(struct mg_connection *c, int ev, void *ev_data, void *fn_data)
-{
-    if (ev == MG_EV_OPEN)
-    {
-        printf("MG_EV_OPEN\n");
-    }
-    else if (ev == MG_EV_HTTP_MSG)
+static void fn(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
+    if (ev == MG_EV_HTTP_MSG)
     {
         struct mg_http_message *hm = (struct mg_http_message *)ev_data;
         if (mg_http_match_uri(hm, "/display"))
@@ -188,14 +184,9 @@ static void fn(struct mg_connection *c, int ev, void *ev_data, void *fn_data)
 
 struct mg_mgr mgr;
 
-void be_module_httplws_init()
-{
-
-    mg_mgr_init(&mgr);                           // Initialise event manager
-    mg_http_listen(&mgr, s_listen_on, fn, NULL); // Create HTTP listener
+void be_module_httplws_init() {
+    mg_http_listen(be_module_mg_mgr(), s_listen_on, fn, NULL); // Create HTTP listener
 }
 
-void be_module_httplws_loop(JSContext *ctx)
-{
-    mg_mgr_poll(&mgr, 1000);
+void be_module_httplws_loop(JSContext *ctx) {
 }

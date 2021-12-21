@@ -370,6 +370,7 @@ const constConvertors = [
     "lv_base_dir_t",
     "lv_border_side_t",
     "lv_style_prop_t",
+    "lv_text_align_t",
 ]
 
 

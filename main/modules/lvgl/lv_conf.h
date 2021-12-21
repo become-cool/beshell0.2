@@ -27,7 +27,7 @@
 #define LV_COLOR_DEPTH 16
 
 /*Swap the 2 bytes of RGB565 color. Useful if the display has an 8-bit interface (e.g. SPI)*/
-#define LV_COLOR_16_SWAP 0
+#define LV_COLOR_16_SWAP 1
 
 /*Enable more complex drawing routines to manage screens transparency.
  *Can be used if the UI is above another layer, e.g. an OSD menu or video player.
@@ -46,7 +46,7 @@
  *=========================*/
 
 /*1: use custom malloc/free, 0: use the built-in `lv_mem_alloc()` and `lv_mem_free()`*/
-#define LV_MEM_CUSTOM 0
+#define LV_MEM_CUSTOM 1
 #if LV_MEM_CUSTOM == 0
 /*Size of the memory available for `lv_mem_alloc()` in bytes (>= 2kB)*/
 #  define LV_MEM_SIZE (32U * 1024U)          /*[bytes]*/
@@ -126,7 +126,7 @@
  *With complex image decoders (e.g. PNG or JPG) caching can save the continuous open/decode of images.
  *However the opened images might consume additional RAM.
  *0: to disable caching*/
-#define LV_IMG_CACHE_DEF_SIZE 0
+#define LV_IMG_CACHE_DEF_SIZE 32
 
 /*Maximum buffer size to allocate for rotation. Only used if software rotation is enabled in the display driver.*/
 #define LV_DISP_ROT_MAX_BUF (10*1024)
@@ -171,7 +171,7 @@ e.g. "stm32f769xx.h" or "stm32f429xx.h"*/
  *-----------*/
 
 /*Enable the log module*/
-#define LV_USE_LOG 0
+#define LV_USE_LOG 1
 #if LV_USE_LOG
 
 /*How important log should be added:
@@ -302,37 +302,37 @@ e.g. "stm32f769xx.h" or "stm32f429xx.h"*/
 
 /*Montserrat fonts with ASCII range and some symbols using bpp = 4
  *https://fonts.google.com/specimen/Montserrat*/
-#define LV_FONT_MONTSERRAT_8  0
-#define LV_FONT_MONTSERRAT_10 0
-#define LV_FONT_MONTSERRAT_12 0
-#define LV_FONT_MONTSERRAT_14 1
-#define LV_FONT_MONTSERRAT_16 0
+#define LV_FONT_MONTSERRAT_8  1
+#define LV_FONT_MONTSERRAT_10 1
+#define LV_FONT_MONTSERRAT_12 1
+#define LV_FONT_MONTSERRAT_14 0
+#define LV_FONT_MONTSERRAT_16 1
 #define LV_FONT_MONTSERRAT_18 0
 #define LV_FONT_MONTSERRAT_20 0
 #define LV_FONT_MONTSERRAT_22 0
-#define LV_FONT_MONTSERRAT_24 0
+#define LV_FONT_MONTSERRAT_24 1
 #define LV_FONT_MONTSERRAT_26 0
 #define LV_FONT_MONTSERRAT_28 0
 #define LV_FONT_MONTSERRAT_30 0
-#define LV_FONT_MONTSERRAT_32 0
+#define LV_FONT_MONTSERRAT_32 1
 #define LV_FONT_MONTSERRAT_34 0
 #define LV_FONT_MONTSERRAT_36 0
 #define LV_FONT_MONTSERRAT_38 0
-#define LV_FONT_MONTSERRAT_40 0
+#define LV_FONT_MONTSERRAT_40 1
 #define LV_FONT_MONTSERRAT_42 0
 #define LV_FONT_MONTSERRAT_44 0
 #define LV_FONT_MONTSERRAT_46 0
-#define LV_FONT_MONTSERRAT_48 0
+#define LV_FONT_MONTSERRAT_48 1
 
 /*Demonstrate special features*/
 #define LV_FONT_MONTSERRAT_12_SUBPX      0
 #define LV_FONT_MONTSERRAT_28_COMPRESSED 0  /*bpp = 3*/
 #define LV_FONT_DEJAVU_16_PERSIAN_HEBREW 0  /*Hebrew, Arabic, Perisan letters and all their forms*/
-#define LV_FONT_SIMSUN_16_CJK            0  /*1000 most common CJK radicals*/
+#define LV_FONT_SIMSUN_16_CJK            1  /*1000 most common CJK radicals*/
 
 /*Pixel perfect monospace fonts*/
 #define LV_FONT_UNSCII_8  0
-#define LV_FONT_UNSCII_16 0
+#define LV_FONT_UNSCII_16 1
 
 /*Optionally declare custom fonts here.
  *You can use these fonts as default font too and they will be available globally.
@@ -340,7 +340,7 @@ e.g. "stm32f769xx.h" or "stm32f429xx.h"*/
 #define LV_FONT_CUSTOM_DECLARE
 
 /*Always set a default font*/
-#define LV_FONT_DEFAULT &lv_font_montserrat_14
+#define LV_FONT_DEFAULT &lv_font_montserrat_16
 
 /*Enable handling large font and/or fonts with a lot of characters.
  *The limit depends on the font size, font face and bpp.
@@ -544,7 +544,7 @@ e.g. "stm32f769xx.h" or "stm32f429xx.h"*/
 
 /*File system interfaces for common APIs
  *To enable set a driver letter for that API*/
-#define LV_USE_FS_STDIO '\0'        /*Uses fopen, fread, etc*/
+#define LV_USE_FS_STDIO 'C'        /*Uses fopen, fread, etc*/
 //#define LV_FS_STDIO_PATH "/home/john/"    /*Set the working directory. If commented it will be "./" */
 
 #define LV_USE_FS_POSIX '\0'        /*Uses open, read, etc*/
@@ -556,20 +556,20 @@ e.g. "stm32f769xx.h" or "stm32f429xx.h"*/
 #define LV_USE_FS_FATFS '\0'        /*Uses f_open, f_read, etc*/
 
 /*PNG decoder library*/
-#define LV_USE_PNG 0
+#define LV_USE_PNG 1
 
 /*BMP decoder library*/
-#define LV_USE_BMP 0
+#define LV_USE_BMP 1
 
 /* JPG + split JPG decoder library.
  * Split JPG is a custom format optimized for embedded systems. */
-#define LV_USE_SJPG 0
+#define LV_USE_SJPG 1
 
 /*GIF decoder library*/
 #define LV_USE_GIF 0
 
 /*QR code library*/
-#define LV_USE_QRCODE 0
+#define LV_USE_QRCODE 1
 
 /*FreeType library*/
 #define LV_USE_FREETYPE 0

@@ -84,10 +84,77 @@ void sig_alm_handler(int sig_num) {
 #endif
 
 
+void require_vlgl_js_font_symbol(JSContext *ctx, JSValue lvgl) {
+    JSValue symbol = JS_NewObject(ctx) ;
+    JS_SetPropertyStr(ctx, lvgl, "symbol", symbol);  
+
+    JS_SetPropertyStr(ctx, symbol, "audio", JS_NewString(ctx, LV_SYMBOL_AUDIO));  
+    JS_SetPropertyStr(ctx, symbol, "video", JS_NewString(ctx, LV_SYMBOL_VIDEO));  
+    JS_SetPropertyStr(ctx, symbol, "list", JS_NewString(ctx, LV_SYMBOL_LIST));  
+    JS_SetPropertyStr(ctx, symbol, "ok", JS_NewString(ctx, LV_SYMBOL_OK));  
+    JS_SetPropertyStr(ctx, symbol, "close", JS_NewString(ctx, LV_SYMBOL_CLOSE));  
+    JS_SetPropertyStr(ctx, symbol, "power", JS_NewString(ctx, LV_SYMBOL_POWER));  
+    JS_SetPropertyStr(ctx, symbol, "settings", JS_NewString(ctx, LV_SYMBOL_SETTINGS));  
+    JS_SetPropertyStr(ctx, symbol, "home", JS_NewString(ctx, LV_SYMBOL_HOME));  
+    JS_SetPropertyStr(ctx, symbol, "download", JS_NewString(ctx, LV_SYMBOL_DOWNLOAD));  
+    JS_SetPropertyStr(ctx, symbol, "drive", JS_NewString(ctx, LV_SYMBOL_DRIVE));  
+    JS_SetPropertyStr(ctx, symbol, "refresh", JS_NewString(ctx, LV_SYMBOL_REFRESH));  
+    JS_SetPropertyStr(ctx, symbol, "mute", JS_NewString(ctx, LV_SYMBOL_MUTE));  
+    JS_SetPropertyStr(ctx, symbol, "volume_mid", JS_NewString(ctx, LV_SYMBOL_VOLUME_MID));  
+    JS_SetPropertyStr(ctx, symbol, "volume_max", JS_NewString(ctx, LV_SYMBOL_VOLUME_MAX));  
+    JS_SetPropertyStr(ctx, symbol, "image", JS_NewString(ctx, LV_SYMBOL_IMAGE));  
+    JS_SetPropertyStr(ctx, symbol, "envelope", JS_NewString(ctx, LV_SYMBOL_ENVELOPE));  
+    JS_SetPropertyStr(ctx, symbol, "edit", JS_NewString(ctx, LV_SYMBOL_EDIT));  
+    JS_SetPropertyStr(ctx, symbol, "tint", JS_NewString(ctx, LV_SYMBOL_TINT));  
+    JS_SetPropertyStr(ctx, symbol, "prev", JS_NewString(ctx, LV_SYMBOL_PREV));  
+    JS_SetPropertyStr(ctx, symbol, "play", JS_NewString(ctx, LV_SYMBOL_PLAY));  
+    JS_SetPropertyStr(ctx, symbol, "pause", JS_NewString(ctx, LV_SYMBOL_PAUSE));  
+    JS_SetPropertyStr(ctx, symbol, "stop", JS_NewString(ctx, LV_SYMBOL_STOP));  
+    JS_SetPropertyStr(ctx, symbol, "next", JS_NewString(ctx, LV_SYMBOL_NEXT));  
+    JS_SetPropertyStr(ctx, symbol, "eject", JS_NewString(ctx, LV_SYMBOL_EJECT));  
+    JS_SetPropertyStr(ctx, symbol, "left", JS_NewString(ctx, LV_SYMBOL_LEFT));  
+    JS_SetPropertyStr(ctx, symbol, "right", JS_NewString(ctx, LV_SYMBOL_RIGHT));  
+    JS_SetPropertyStr(ctx, symbol, "plus", JS_NewString(ctx, LV_SYMBOL_PLUS));  
+    JS_SetPropertyStr(ctx, symbol, "minus", JS_NewString(ctx, LV_SYMBOL_MINUS));  
+    JS_SetPropertyStr(ctx, symbol, "eye_open", JS_NewString(ctx, LV_SYMBOL_EYE_OPEN));  
+    JS_SetPropertyStr(ctx, symbol, "eye_close", JS_NewString(ctx, LV_SYMBOL_EYE_CLOSE));  
+    JS_SetPropertyStr(ctx, symbol, "warning", JS_NewString(ctx, LV_SYMBOL_WARNING));  
+    JS_SetPropertyStr(ctx, symbol, "shuffle", JS_NewString(ctx, LV_SYMBOL_SHUFFLE));  
+    JS_SetPropertyStr(ctx, symbol, "up", JS_NewString(ctx, LV_SYMBOL_UP));  
+    JS_SetPropertyStr(ctx, symbol, "down", JS_NewString(ctx, LV_SYMBOL_DOWN));  
+    JS_SetPropertyStr(ctx, symbol, "loop", JS_NewString(ctx, LV_SYMBOL_LOOP));  
+    JS_SetPropertyStr(ctx, symbol, "directory", JS_NewString(ctx, LV_SYMBOL_DIRECTORY));  
+    JS_SetPropertyStr(ctx, symbol, "upload", JS_NewString(ctx, LV_SYMBOL_UPLOAD));  
+    JS_SetPropertyStr(ctx, symbol, "call", JS_NewString(ctx, LV_SYMBOL_CALL));  
+    JS_SetPropertyStr(ctx, symbol, "cut", JS_NewString(ctx, LV_SYMBOL_CUT));  
+    JS_SetPropertyStr(ctx, symbol, "copy", JS_NewString(ctx, LV_SYMBOL_COPY));  
+    JS_SetPropertyStr(ctx, symbol, "save", JS_NewString(ctx, LV_SYMBOL_SAVE));  
+    JS_SetPropertyStr(ctx, symbol, "bars", JS_NewString(ctx, LV_SYMBOL_BARS));  
+    JS_SetPropertyStr(ctx, symbol, "charge", JS_NewString(ctx, LV_SYMBOL_CHARGE));  
+    JS_SetPropertyStr(ctx, symbol, "paste", JS_NewString(ctx, LV_SYMBOL_PASTE));  
+    JS_SetPropertyStr(ctx, symbol, "bell", JS_NewString(ctx, LV_SYMBOL_BELL));  
+    JS_SetPropertyStr(ctx, symbol, "keyboard", JS_NewString(ctx, LV_SYMBOL_KEYBOARD));  
+    JS_SetPropertyStr(ctx, symbol, "gps", JS_NewString(ctx, LV_SYMBOL_GPS));  
+    JS_SetPropertyStr(ctx, symbol, "file", JS_NewString(ctx, LV_SYMBOL_FILE));  
+    JS_SetPropertyStr(ctx, symbol, "wifi", JS_NewString(ctx, LV_SYMBOL_WIFI));  
+    JS_SetPropertyStr(ctx, symbol, "battery_full", JS_NewString(ctx, LV_SYMBOL_BATTERY_FULL));  
+    JS_SetPropertyStr(ctx, symbol, "battery_3", JS_NewString(ctx, LV_SYMBOL_BATTERY_3));  
+    JS_SetPropertyStr(ctx, symbol, "battery_2", JS_NewString(ctx, LV_SYMBOL_BATTERY_2));  
+    JS_SetPropertyStr(ctx, symbol, "battery_1", JS_NewString(ctx, LV_SYMBOL_BATTERY_1));  
+    JS_SetPropertyStr(ctx, symbol, "battery_empty", JS_NewString(ctx, LV_SYMBOL_BATTERY_EMPTY));  
+    JS_SetPropertyStr(ctx, symbol, "usb", JS_NewString(ctx, LV_SYMBOL_USB));  
+    JS_SetPropertyStr(ctx, symbol, "bluetooth", JS_NewString(ctx, LV_SYMBOL_BLUETOOTH));  
+    JS_SetPropertyStr(ctx, symbol, "trash", JS_NewString(ctx, LV_SYMBOL_TRASH));  
+    JS_SetPropertyStr(ctx, symbol, "backspace", JS_NewString(ctx, LV_SYMBOL_BACKSPACE));  
+    JS_SetPropertyStr(ctx, symbol, "sd_card", JS_NewString(ctx, LV_SYMBOL_SD_CARD));  
+    JS_SetPropertyStr(ctx, symbol, "new_line", JS_NewString(ctx, LV_SYMBOL_NEW_LINE));  
+}
+
 void be_module_init_lvgl() {
     init_lvgl_display() ;
     init_lvgl_widgets() ;
     init_lvgl_style() ;
+
 }
 
 void be_module_lvgl_require(JSContext *ctx) {
@@ -116,9 +183,12 @@ void be_module_lvgl_require(JSContext *ctx) {
         setitimer(ITIMER_REAL, &value, NULL);
 #endif
 
-
+        lv_png_init() ;
+        // png_decoder_init() ;
         
         lv_has_inited = true ;
+
+        // dn(LV_MEM_SIZE) ;
     }
 
     JSValue global = JS_GetGlobalObject(ctx);
@@ -137,6 +207,7 @@ void be_module_lvgl_require(JSContext *ctx) {
     require_vlgl_js_display(ctx, lvgl) ;
     require_vlgl_js_widgets(ctx, lvgl) ;
     require_vlgl_js_style(ctx, lvgl) ;
+    require_vlgl_js_font_symbol(ctx, lvgl) ;
 
     JS_FreeValue(ctx, global);
     JS_FreeValue(ctx, beapi);

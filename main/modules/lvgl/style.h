@@ -6,6 +6,7 @@
 #include "quickjs-libc.h"
 
 extern lv_style_prop_t LV_STYLE_JSVALUE ;
+extern JSClassID js_lv_style_class_id ;
 
 JSValue lv_style_wrapper(JSContext * ctx, lv_style_t * style) ;
 

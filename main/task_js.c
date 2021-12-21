@@ -25,7 +25,7 @@
 #include "module_mg.h"
 #endif
 #include "module_lvgl.h"
-#include "beshell.h"
+#include "module_process.h"
 
 #ifndef SIMULATION
 #include "freertos/FreeRTOS.h"
@@ -55,130 +55,7 @@ JSContext * task_current_context() {
     return ctx ;
 }
 
-JSValue js_process_reset(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
-    if(argc>0 && JS_IsNumber(argv[0])) {
-        int level = 0 ;
-        if(JS_ToInt32(ctx, &level, argv[0])>=0) {
-            task_reset(level) ;
-            return JS_UNDEFINED ;
-        }
-    }
 
-    task_reset(-1) ;
-    return JS_UNDEFINED ;
-}
-JSValue js_process_reboot(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
-#ifndef SIMULATION
-    esp_restart() ;
-#endif
-    return JS_UNDEFINED ;
-}
-
-
-JSValue js_console_print(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
-    CHECK_ARGC(1)
-    size_t len = 0 ;
-    const char * str = JS_ToCStringLen(ctx, &len, argv[0]) ;
-    if(!str) {
-        THROW_EXCEPTION("not a avalid string.") 
-    }
-    if(len) {
-#ifndef SIMULATION
-        telnet_send_pkg(echo_pkgid(), CMD_OUTPUT, str, len) ;
-#else
-        printf(str) ;
-        printf("\n") ;
-        fflush(stdout) ;
-#endif
-    }
-    JS_FreeCString(ctx, str) ;
-    return JS_UNDEFINED ;
-}
-
-JSValue js_console_log(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-    // const char *str;
-
-    char * strlst[argc] ;
-    size_t lenlst[argc] ;
-    size_t totalLen = 0 ;
-    
-    int i;
-    for(i = 0; i < argc; i++) {
-        strlst[i] = JS_ToCStringLen(ctx, &lenlst[i], argv[i]);
-        if (!strlst[i])
-            return JS_EXCEPTION;
-        totalLen+= lenlst[i] + 1 ; // +1 表示间隔空格,和最后的0字节
-    }
-
-    char * buff = malloc( totalLen ) ;
-    char * writer = buff ;
-    for(i = 0; i < argc; i++) {
-        memcpy(writer, strlst[i], lenlst[i]) ;
-        writer+= lenlst[i] ;
-        if(i<argc-1) {
-            memcpy(writer, " ", 1) ;
-            writer++ ;
-        }
-    }
-    buff[totalLen-1] = 0 ;
-
-#ifndef SIMULATION
-    telnet_send_pkg(echo_pkgid(), CMD_OUTPUT, buff, totalLen-1) ;
-#else
-    printf(buff) ;
-    printf("\n") ;
-    fflush(stdout) ;
-#endif
-
-    for(i = 0; i < argc; i++) {
-        JS_FreeCString(ctx, strlst[i]);
-    }
-    free(buff) ;
-    
-    return JS_UNDEFINED;
-}
-
-void be_module_process_require(JSContext *ctx) {
-
-    JSValue global = JS_GetGlobalObject(ctx);
-
-    // process
-    JSValue process = JS_NewObject(ctx) ;
-    JS_SetPropertyStr(ctx, global, "process", process);
-
-    JS_SetPropertyStr(ctx, process, "reset", JS_NewCFunction(ctx, js_process_reset, "reset", 1));
-    JS_SetPropertyStr(ctx, process, "reboot", JS_NewCFunction(ctx, js_process_reboot, "reboot", 1));
-
-    JSValue env = JS_NewObject(ctx) ;
-    JS_SetPropertyStr(ctx, env, "LOGNAME", JS_NewString(ctx, "become"));
-    JS_SetPropertyStr(ctx, env, "HOME", JS_NewString(ctx, "/home/become"));
-    JS_SetPropertyStr(ctx, env, "PWD", JS_NewString(ctx, "/home/become"));
-    JS_SetPropertyStr(ctx, process, "env", env);
-    
-    JSValue versions = JS_NewObject(ctx) ;
-    JS_SetPropertyStr(ctx, versions, "beshell", JS_NewString(ctx, BESHELL_VERSION));
-#ifndef SIMULATION
-    JS_SetPropertyStr(ctx, versions, "esp-idf", JS_NewString(ctx, ESPIDF_VERSION));
-#else
-    JS_SetPropertyStr(ctx, versions, "esp-idf", JS_NewString(ctx, "none"));
-    JS_SetPropertyStr(ctx, process, "simulate", JS_NewBool(ctx, true));
-#endif
-    JS_SetPropertyStr(ctx, versions, "quickjs", JS_NewString(ctx, QUICKJS_VERSION));
-    JS_SetPropertyStr(ctx, process, "versions", versions);
-    
-    char buff[32] ;
-    sprintf(buff, "%s %s", __DATE__, __TIME__) ;
-    JS_SetPropertyStr(ctx, process, "build", JS_NewString(ctx, buff));
-
-    // console
-    JSValue console = JS_NewObject(ctx) ;
-    JS_SetPropertyStr(ctx, console, "print", JS_NewCFunction(ctx, js_console_print, "print", 1));
-    JS_SetPropertyStr(ctx, console, "log", JS_NewCFunction(ctx, js_console_log, "log", 1));
-    JS_SetPropertyStr(ctx, console, "error", JS_NewCFunction(ctx, js_console_log, "error", 1));
-    JS_SetPropertyStr(ctx, global, "console", console);
-
-	JS_FreeValue(ctx, global);
-}
 
 static JSContext * JS_NewCustomContext(JSRuntime *rt)
 {
@@ -284,7 +161,7 @@ void quickjs_deinit() {
 
 void task_js_main(){
 
-
+    be_module_process_init() ;
 
 #ifndef SIMULATION
     nvs_flash_init();
@@ -340,7 +217,7 @@ void task_js_main(){
         be_module_gpio_loop(ctx) ;
 #else
         be_module_repl_loop(ctx) ;
-        be_module_httplws_loop(ctx) ;
+        // be_module_httplws_loop(ctx) ;
 #endif
         be_module_mg_loop(ctx) ;
         be_module_lvgl_loop(ctx) ;

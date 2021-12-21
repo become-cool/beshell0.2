@@ -1,12 +1,23 @@
 const fs = require("fs")
 
 function create_conver_base(ctype, js_conver_func, api_arg_type) {
-    return function (cargv,i,className,jsmethod){
-        code = `    ${ctype} ${cargv} ;\r\n`
-        code+= `    if(${js_conver_func}(ctx, (${api_arg_type} *) &${cargv}, argv[${i}])!=0){\r\n`
-        code+= `        THROW_EXCEPTION("arg ${cargv} of method ${className}.${jsmethod}() must be a number")\r\n`
-        code+= `    }\r\n`
-        return code
+    return function (cargv,i,className,jsmethod, defaultVal){
+        if(defaultVal==undefined) {
+            return `    ${ctype} ${cargv} ;
+    if(${js_conver_func}(ctx, (${api_arg_type} *) &${cargv}, argv[${i}])!=0){
+        THROW_EXCEPTION("arg ${cargv} of method ${className}.${jsmethod}() must be a number")
+    }
+`
+        }
+        else {
+            return `    ${ctype} ${cargv} = ${defaultVal} ;
+    if(argc>${i}){
+        if(${js_conver_func}(ctx, (${api_arg_type} *) &${cargv}, argv[${i}])!=0){
+            THROW_EXCEPTION("arg ${cargv} of method ${className}.${jsmethod}() must be a number")
+        }
+    }
+`
+        }
     }
 }
 
@@ -29,8 +40,17 @@ const conver_uint16 = create_conver_base("uint16_t", "JS_ToUint32", "uint32_t")
 const conver_int32 = create_conver_base("int32_t", "JS_ToInt32", "int32_t")
 const conver_uint32 = create_conver_base("uint32_t", "JS_ToUint32", "uint32_t")
 
-function conver_bool(cargv,i){
-    return `    bool ${cargv} = JS_ToBool(ctx, argv[${i}]) ;\r\n`
+function conver_bool(cargv,i,className,jsmethod, defaultVal){
+    if(defaultVal) {
+        return `    bool ${cargv} = ${defaultVal} ;
+    if(argc>${i}) {
+        ${cargv} = JS_ToBool(ctx, argv[${i}]) ;
+    }
+`
+    }
+    else {
+        return `    bool ${cargv} = JS_ToBool(ctx, argv[${i}]) ;\r\n`
+    }
 }
 
 function conver_int_prop(propName, cargv,i,className,jsmethod) {
@@ -70,6 +90,16 @@ function conver_obj(cargv,i,className,jsmethod) {
     code+= `        THROW_EXCEPTION("arg ${cargv} of method ${className}.${jsmethod}() must be a beapi.lvgl.Obj")\r\n`
     code+= `    }\r\n`
     return code
+}
+function conver_style(cargv,i,className,jsmethod) {
+    return `    if( !qjs_instanceof(ctx, argv[${i}], js_lv_style_class_id) ) {
+        THROW_EXCEPTION("arg style of method ${className}.${jsmethod}() must be a lvgl.Style")
+    }
+    lv_style_t * ${cargv} = JS_GetOpaque(argv[${i}], js_lv_style_class_id) ;
+    if(!${cargv}) {
+        THROW_EXCEPTION("arg style of method ${className}.${jsmethod}() is invalid")
+    }
+`
 }
 function conver_string(cargv,i) {
     return `    char * ${cargv} = (char *)JS_ToCString(ctx, argv[${i}]) ;\r\n`
@@ -120,6 +150,8 @@ const MapC2JS_Conver = {
     "lv_border_side_t": create_conver_mappingconst('lv_border_side_t', 'lv_border_side_jsstr_to_const'),
     "lv_style_prop_t": create_conver_mappingconst('lv_style_prop_t', 'lv_style_prop_jsstr_to_const'),
     "lv_obj_flag_t": create_conver_mappingconst('lv_obj_flag_t', 'lv_obj_flag_jsstr_to_const'),
+    "lv_label_long_mode_t": create_conver_mappingconst('lv_label_long_mode_t', 'lv_label_long_mode_jsstr_to_const'),
+    "lv_style_t *": conver_style ,
 }
 
 function free_argv_string(cargv){
@@ -227,9 +259,18 @@ function gen_lv_class(cName, className, api, extraMethod) {
         
         codeFuncDef+= `static JSValue js_${cfunc}(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {\r\n`
         if(argLstConf.length) {
-            codeFuncDef+= `    if(argc<${Object.keys(argLstConf).length}) {\r\n`
-            codeFuncDef+= `        THROW_EXCEPTION("${className}.${jsmethod}() missing arg")\r\n`
-            codeFuncDef+= `    }\r\n`
+
+            let argcMin = 0
+            for(let argconf of argLstConf) {
+                if(argconf[2]==undefined) {  // 参数没有默认值
+                    argcMin++ ;
+                }
+            }
+            if(argcMin) {
+                codeFuncDef+= `    if(argc<${argcMin}) {\r\n`
+                codeFuncDef+= `        THROW_EXCEPTION("${className}.${jsmethod}() missing arg")\r\n`
+                codeFuncDef+= `    }\r\n`
+            }
         }
         codeFuncDef+= `    void * lv_userdata = JS_GetOpaqueInternal(this_val) ;\r\n`
         codeFuncDef+= `    if(!lv_userdata) {\r\n`
@@ -242,9 +283,9 @@ function gen_lv_class(cName, className, api, extraMethod) {
         let cargvLst = ''
         if(argLstConf) {
             for(let i=0;i<argLstConf.length;i++) {
-                let [argtype, cargv] = argLstConf[i]
+                let [argtype, cargv, defaultVal] = argLstConf[i]
                 if(MapC2JS_Conver[argtype]) {
-                    codeFuncDef+= MapC2JS_Conver[argtype](cargv, i, className, jsmethod)
+                    codeFuncDef+= MapC2JS_Conver[argtype](cargv, i, className, jsmethod, defaultVal)
                 }
 
                 else {
@@ -273,7 +314,7 @@ function gen_lv_class(cName, className, api, extraMethod) {
             codeFuncDef+= `    JSValue retval = JS_NULL ;\r\n`
             codeFuncDef+= `    void * lvobj = ${cfunc}(thisobj${cargvLst});\r\n`
             codeFuncDef+= `    if(lvobj){\r\n`
-            codeFuncDef+= `        retval = js_lv_obj_wrapper(ctx, lvobj, js_lv_obj_class_id) ;\r\n`
+            codeFuncDef+= `        retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, js_lv_obj_class_id) ;\r\n`
             codeFuncDef+= `    } \r\n`
         }
         else if(returnType=="bool") {
@@ -321,6 +362,7 @@ const LstClasses = [
     "Switch",
     "Table",
     "TextArea",
+    "TileView",
 ]
 
 function generateClassDefine() {
@@ -337,7 +379,7 @@ static JSValue js_${ctypeName}_constructor(JSContext *ctx, JSValueConst new_targ
         cparent = JS_GetOpaqueInternal(argv[0]) ;
     }
     ${ctypeName}_t * cobj = ${ctypeName}_create(cparent) ;
-    JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, js_${ctypeName}_class_id) ;
+    JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, js_${ctypeName}_class_id) ;
     return jsobj ;
 }
 static void js_${ctypeName}_finalizer(JSRuntime *rt, JSValue val){
@@ -407,7 +449,7 @@ function generateConstMapping(defConst) {
     let i = 0
     for(let constName of defConst.def) {
         let name = constName.substr(defConst.prefix.length).toLowerCase().replace(/_/g,'-')
-        mappingCode+= `    ${i? 'else ':''}if(strcmp(cstr,"${name}")==0) {\r\n`
+        mappingCode+= `    ${i? 'else ':''}if(strcmp(name,"${name}")==0) {\r\n`
         mappingCode+= `        (*out) = ${constName} ;\r\n`
         mappingCode+= `    }\r\n`
 
@@ -422,22 +464,24 @@ function generateConstMapping(defConst) {
         mappingByVar+= `        return "${name}" ;\r\n`
         mappingByVar+= `    }\r\n`
 
-        mappingCode+= `    else if(strcmp(cstr,"${name}")==0) {\r\n`
+        mappingCode+= `    else if(strcmp(name,"${name}")==0) {\r\n`
         mappingCode+= `        (*out) = ${varName} ;\r\n`
         mappingCode+= `    }\r\n`
     }
 
     let code = `
-bool ${defConst.name}_jsstr_to_const(JSContext *ctx, JSValue jsstr, ${defConst.type}* out) {
-    char * cstr = (char *)JS_ToCString(ctx, jsstr) ;
-${mappingCode}
+bool ${defConst.name}_str_to_const(const char * name, ${defConst.type}* out) {
+    ${mappingCode}
     else {
-        JS_ThrowReferenceError(ctx, "unkonw ${defConst.name} pass in: %s", cstr) ;
-        JS_FreeCString(ctx, cstr) ;
         return false ;
     }
-    JS_FreeCString(ctx, cstr) ;
     return true ;
+}
+bool ${defConst.name}_jsstr_to_const(JSContext *ctx, JSValue jsstr, ${defConst.type}* out) {
+    char * cstr = (char *)JS_ToCString(ctx, jsstr) ;
+    bool suc = ${defConst.name}_str_to_const(cstr, out) ;
+    JS_FreeCString(ctx, cstr) ;
+    return suc ;
 }
 const char * ${defConst.name}_const_to_str(${defConst.type} code) {
 ${mappingByVar}
@@ -460,6 +504,7 @@ function generateConstDeclare() {
     let libConst = require("./api/consts.js")
     for(defConst of libConst) {
         code+= `
+bool ${defConst.name}_str_to_const(const char * str, ${defConst.type}* out) ;
 bool ${defConst.name}_jsstr_to_const(JSContext *ctx, JSValue jsstr, ${defConst.type}* out) ;
 const char *  ${defConst.name}_const_to_str(${defConst.type} code) ;
 JSValue ${defConst.name}_const_to_jsstr(JSContext *ctx, ${defConst.type} code) ;
@@ -499,27 +544,27 @@ let dist_header_path = __dirname + "/../widgets.h"
 function main() {
     let code = ""
 
-    code+= gen_lv_class(
-                "lv_obj", "lvgl.Obj"
-                , require("./api/lv_obj.js")
-                , {
-                    "js_lv_obj_enable_event": "enableEvent" ,
-                    "js_lv_obj_disable_event": "disableEvent" ,
-                    "js_lv_obj_is_screen": "isScreen" ,
-                    "js_lv_obj_ptr": "ptr" ,
-                    "js_lv_obj_get_coords": "coords" ,
-                    "js_lv_obj_set_coords": "setCoords" ,
-                    "js_lv_obj_move": "move" ,
-                    "js_lv_obj_move_x": "moveX" ,
-                    "js_lv_obj_move_y": "moveY" ,
-                    "js_lv_obj_get_all_style_values": "allStyleValues" ,
-                    "js_lv_obj_set_style": "setStyle" ,
-                    "js_lv_obj_get_style": "style" ,
-                    "js_lv_obj_refresh_style": "refreshStyle" ,
-                    "js_lv_obj_get_local_style": "localStyle"
-                }
-    )
-    code+= gen_lv_class("lv_label", "lvgl.Label", require("./api/lv_label.js"))
+    code+= gen_lv_class("lv_obj", "lvgl.Obj", require("./api/lv_obj.js"), {
+        "js_lv_obj_enable_event": "enableEvent" ,
+        "js_lv_obj_disable_event": "disableEvent" ,
+        "js_lv_obj_is_screen": "isScreen" ,
+        "js_lv_obj_ptr": "ptr" ,
+        "js_lv_obj_get_coords": "coords" ,
+        "js_lv_obj_set_coords": "setCoords" ,
+        "js_lv_obj_move": "move" ,
+        "js_lv_obj_move_x": "moveX" ,
+        "js_lv_obj_move_y": "moveY" ,
+        "js_lv_obj_get_all_style_values": "allStyleValues" ,
+        "js_lv_obj_set_style": "setStyle" ,
+        "js_lv_obj_get_style": "style" ,
+        "js_lv_obj_refresh_style": "refreshStyle" ,
+        "js_lv_obj_get_local_style": "localStyle" ,
+        "js_lv_obj_get_font_height": "fontHeight" ,
+        
+    })
+    code+= gen_lv_class("lv_label", "lvgl.Label", require("./api/lv_label.js"), {
+        "js_lv_label_set_font": "setFont" ,
+    })
     code+= gen_lv_class("lv_arc", "lvgl.Arc", require("./api/lv_arc.js"))
     code+= gen_lv_class("lv_bar", "lvgl.Bar", require("./api/lv_bar.js"))
     code+= gen_lv_class("lv_btn", "lvgl.Btn", require("./api/lv_btn.js"))
@@ -530,12 +575,17 @@ function main() {
     code+= gen_lv_class("lv_roller", "lvgl.Roller", require("./api/lv_roller.js"))
     code+= gen_lv_class("lv_checkbox", "lvgl.Checkbox", require("./api/lv_checkbox.js"))
     code+= gen_lv_class("lv_line", "lvgl.Line", require("./api/lv_line.js"), {
-                "lv_line_set_points": "setPoints"
+            "lv_line_set_points": "setPoints"
     })
     code+= gen_lv_class("lv_dropdown", "lvgl.Dropdown", require("./api/lv_dropdown.js"))
-    code+= gen_lv_class("lv_img", "lvgl.Img", require("./api/lv_img.js"))
+    code+= gen_lv_class("lv_img", "lvgl.Img", require("./api/lv_img.js"),{
+        "js_lv_img_set_src": "setSrc" ,
+    })
     code+= gen_lv_class("lv_btnmatrix", "lvgl.BtnMatrix", require("./api/lv_btnmatrix.js"))
     code+= gen_lv_class("lv_canvas", "lvgl.Canvas", require("./api/lv_canvas.js"))
+
+    // extra widgets
+    code+= gen_lv_class("lv_tileview", "lvgl.TileView", require("./api/lv_tileview.js"))
 
 
     

@@ -15,8 +15,9 @@ add_definitions(-g)
 add_definitions(-DSIMULATION)
 # add_definitions(-DWIN32)
 # add_definitions(-DMG_ENABLE_LINES)
-add_definitions(-DCMAKE_GENERATOR_PLATFORM=x64)
- 
+add_definitions(-DLV_THEME_DEFAULT_DARK)
+add_definitions(-DLV_CONF_INCLUDE_SIMPLE)
+
 
 SET(CMAKE_CXX_FLAGS_DEBUG "-O0")
 SET(CMAKE_C_FLAGS_DEBUG "-O0")
@@ -28,7 +29,7 @@ add_definitions(-lssl -lcrypto -ldl)
 
 
 # lvgl
-add_definitions(-DLV_CONF_SKIP)
+# add_definitions(-DLV_CONF_SKIP)
 include_directories(../components/lvgl/src)
 file(GLOB_RECURSE SRC_LIST "../components/lvgl/src/*.c")
 
@@ -48,6 +49,7 @@ include_directories(../main)
 include_directories(../main/anchor9)
 include_directories(../main/modules)
 include_directories(../main/modules/lvgl)
+include_directories(../main/modules/lvgl/font)
 
 list(APPEND SRC_LIST ../main/utils.c)
 list(APPEND SRC_LIST ../main/eventloop.c)
@@ -61,11 +63,13 @@ list(APPEND SRC_LIST ../main/modules/module_fs.c)
 list(APPEND SRC_LIST ../main/modules/module_utils.c)
 list(APPEND SRC_LIST ../main/modules/module_events.c)
 list(APPEND SRC_LIST ../main/modules/module_mg.c)
+list(APPEND SRC_LIST ../main/modules/module_process.c)
 list(APPEND SRC_LIST ../main/modules/lvgl/module_lvgl.c)
 list(APPEND SRC_LIST ../main/modules/lvgl/display.c)
 list(APPEND SRC_LIST ../main/modules/lvgl/style.c)
 list(APPEND SRC_LIST ../main/modules/lvgl/widgets.c)
 list(APPEND SRC_LIST ../main/modules/lvgl/widgets_extra.c)
+list(APPEND SRC_LIST ../main/modules/lvgl/font/font_msyh.c)
 
 ADD_EXECUTABLE(beshell ${SRC_LIST})
 target_link_libraries(beshell libssl.a libcrypto.a dl)

@@ -362,8 +362,63 @@ module.exports = [
             LV_OBJ_FLAG_USER_4          = (1L << 30), /**< Custom flag, free to use by user*/
         `)
     }
-    
 
+    ,{
+        prefix: 'LV_TEXT_ALIGN_' ,
+        type: 'lv_text_align_t' ,
+        name: 'lv_text_align' ,
+        end: 'LV_TEXT_ALIGN_RIGHT+1' ,
+        def: [
+            'LV_TEXT_ALIGN_AUTO' ,
+            'LV_TEXT_ALIGN_LEFT' ,
+            'LV_TEXT_ALIGN_CENTER' ,
+            'LV_TEXT_ALIGN_RIGHT' ,
+        ]   
+    }
+
+    ,{
+        prefix: 'LV_PALETTE_' ,
+        type: 'lv_palette_t' ,
+        name: 'lv_palette' ,
+        end: 'LV_PALETTE_NONE+1' ,
+        def: [
+            'LV_PALETTE_RED' ,
+            'LV_PALETTE_PINK' ,
+            'LV_PALETTE_PURPLE' ,
+            'LV_PALETTE_DEEP_PURPLE' ,
+            'LV_PALETTE_INDIGO' ,
+            'LV_PALETTE_BLUE' ,
+            'LV_PALETTE_LIGHT_BLUE' ,
+            'LV_PALETTE_CYAN' ,
+            'LV_PALETTE_TEAL' ,
+            'LV_PALETTE_GREEN' ,
+            'LV_PALETTE_LIGHT_GREEN' ,
+            'LV_PALETTE_LIME' ,
+            'LV_PALETTE_YELLOW' ,
+            'LV_PALETTE_AMBER' ,
+            'LV_PALETTE_ORANGE' ,
+            'LV_PALETTE_DEEP_ORANGE' ,
+            'LV_PALETTE_BROWN' ,
+            'LV_PALETTE_BLUE_GREY' ,
+            'LV_PALETTE_GREY' ,
+            '_LV_PALETTE_LAST' ,
+            'LV_PALETTE_NONE' ,
+        ]   
+    } 
+
+    , {
+        prefix: 'LV_LABEL_LONG_' ,
+        type: 'lv_label_long_mode_t' ,
+        name: 'lv_label_long_mode' ,
+        end: 'LV_LABEL_LONG_CLIP+1' ,
+        def: [
+            'LV_LABEL_LONG_WRAP' ,              /**< Keep the object width, wrap the too long lines and expand the object height*/
+            'LV_LABEL_LONG_DOT' ,               /**< Keep the size and write dots at the end if the text is too long*/
+            'LV_LABEL_LONG_SCROLL' ,            /**< Keep the size and roll the text back and forth*/
+            'LV_LABEL_LONG_SCROLL_CIRCULAR' ,   /**< Keep the size and roll the text circularly*/
+            'LV_LABEL_LONG_CLIP' ,              /**< Keep the size and clip the text out of it*/
+        ]   
+    }       
 ]
 
 

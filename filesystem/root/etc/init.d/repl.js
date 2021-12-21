@@ -123,7 +123,7 @@ function pwd() {
 }
 
 function free() {
-    console.log(beapi.utils.freeStacks())
+    console.log(process.memoryUsage())
 }
 function reset(level) {
     level = parseInt((level||'5').trim())

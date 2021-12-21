@@ -34,6 +34,7 @@ void echo_error(JSContext *) ;
 #define ARGV_TO_INT16(i,var)    ARGV_TO_INT(i, var, int16_t,  JS_ToInt32)
 #define ARGV_TO_UINT32(i,var)   ARGV_TO_INT(i, var, uint32_t, JS_ToUint32)
 #define ARGV_TO_INT32(i,var)    ARGV_TO_INT(i, var, int32_t,  JS_ToInt32)
+#define ARGV_TO_INT64(i,var)    ARGV_TO_INT(i, var, int64_t,  JS_ToInt64)
 #define ARGV_TO_DOUBLE(i,var)                               \
     double var ;                                            \
     JS_ToFloat64(ctx, &var, argv[i]) ;
@@ -113,7 +114,8 @@ void eval_code_len(JSContext *ctx, const char * str,size_t len,const char * file
 #define dm(msg) printf("%s: %dKB\n", msg, esp_get_free_heap_size()/1024);
 #define dp(p)   printf(#p"@%p\n", p) ;
 #define ds(s)   printf(#s"=%s\n", s) ;
-#define dn(v)   printf(#v"=%d\n", v) ;
+#define dn(v)   printf(#v"=%d @%d\n", v, __LINE__) ;
+#define dn64(v)   printf(#v"=%lld\n", v) ;
 #define dn2(v1,v2)   printf(#v1"=%d, "#v2"=%d\n", v1, v2) ;
 
 #define YES_OR_NO(exp) printf(#exp"? %s\n", (exp)? "yes": "no") ;
@@ -180,6 +182,6 @@ JSValue qjs_def_class(
 
 bool qjs_instanceof(JSContext *ctx, JSValue obj, JSClassID clz_id) ;
 
-#define QJS_DEF_CLASS(typeName, clzName, fullClzName, protoVar, pkgVar)                          \
+#define QJS_DEF_CLASS(typeName, clzName, fullClzName, parentProto, pkgVar)                          \
     qjs_def_class(ctx, clzName, js_##typeName##_class_id, &js_##typeName##_class     \
-                , fullClzName, js_##typeName##_constructor, js_##typeName##_proto_funcs, countof(js_##typeName##_proto_funcs), protoVar, pkgVar) ;
+                , fullClzName, js_##typeName##_constructor, js_##typeName##_proto_funcs, countof(js_##typeName##_proto_funcs), parentProto, pkgVar) ;

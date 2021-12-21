@@ -1,7 +1,6 @@
 #include "module_mg.h"
 #include "utils.h"
 #include "cutils.h"
-#include "mongoose.h"
 #include "stack.h"
 #include "module_fs.h"
 
@@ -372,7 +371,6 @@ static void http_event_handler(struct mg_connection * conn, int ev, void *ev_dat
 
     // server connection
     if(server->conn==NULL || server->conn==conn) {
-        dd
         if(ev==MG_EV_CLOSE) {
             JS_FreeValue(server->ctx, server->callback) ;
             server->callback = JS_NULL ;
@@ -509,7 +507,6 @@ static void sntp_event_handler(struct mg_connection * conn, int ev, void *ev_dat
     if (ev == MG_EV_SNTP_TIME) {
         // Time received
         struct timeval *tv = (struct timeval *)ev_data;
-        dn2(tv->tv_sec,tv->tv_usec)
     }
 }
 
@@ -521,15 +518,17 @@ static JSValue js_mg_sntp_connect(JSContext *ctx, JSValueConst this_val, int arg
     return JS_UNDEFINED ;
 }
 
+
+
 void be_module_mg_init() {
+    mg_mgr_init(&mgr) ;
+
     JS_NewClassID(&js_mg_server_class_id);
     JS_NewClassID(&js_mg_http_message_class_id);
     JS_NewClassID(&js_mg_http_rspn_class_id);
 }
 
 void be_module_mg_require(JSContext *ctx) {
-    mg_mgr_init(&mgr) ;
-
     JSValue beapi = js_get_glob_prop(ctx, 1, "beapi") ;
     JSValue mg = JS_NewObject(ctx);
     JS_SetPropertyStr(ctx, beapi, "mg", mg);
@@ -545,7 +544,7 @@ void be_module_mg_require(JSContext *ctx) {
 }
 
 void be_module_mg_loop(JSContext *ctx) {
-    mg_mgr_poll(&mgr, 1000);
+    mg_mgr_poll(&mgr, 10);
 }
 
 void be_module_mg_reset(JSContext *ctx) {
@@ -553,5 +552,6 @@ void be_module_mg_reset(JSContext *ctx) {
 }
 
 
-
-
+struct mg_mgr * be_module_mg_mgr() {
+    return & mgr ;
+}

@@ -8,10 +8,11 @@
 #include "lv_conf.h"
 
 #ifndef SIMULATION
+// #include "touch_driver.h"
+#include "xpt2046.h"
+#include "tp_spi.h"
 #include "display_ws.h"
-#include "lvgl_touch/tp_spi.h"
 #include "disp_st77xx.h"
-#include "touch_driver.h"
 #else
 #include "http_lws.h"
 #endif
@@ -25,7 +26,7 @@ lv_indev_drv_t indev_drv;
 void ws_disp_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color_p) {}
 
 void disp_st7789_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color_p) {
-    printf("disp_st7789_flush()\n") ;
+    // printf("disp_st7789_flush()\n") ;
     if(!disp->user_data) {
         printf("spidev is NULL\n") ;
         return ;
@@ -35,12 +36,14 @@ void disp_st7789_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t 
     lv_disp_flush_ready(disp) ;
 }
 void input_driver_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
-    data->continue_reading = false;
-    if(ws_driver_input_read(drv, data))
-        return ;
-    touch_driver_read(drv, data) ;
+    // data->continue_reading = false;
+    // if(ws_driver_input_read(drv, data))
+    //     return ;
+    // touch_driver_read(drv, data) ;
+
+    data->continue_reading = xpt2046_read(drv, data) ;
     if(data->state == LV_INDEV_STATE_PRESSED) {
-        data->point.x -= 10 ;
+        // data->point.x -= 10 ;
     }
 }
 #endif
@@ -107,7 +110,7 @@ static JSValue js_lvgl_disp_get_screens(JSContext *ctx, JSValueConst this_val, i
     THIS_DISP
     JSValue arr = JS_NewArray(ctx) ;
     for(int i=0;i<thisdisp->screen_cnt; i++) {
-        JSValue jsscr = js_lv_obj_wrapper(ctx, thisdisp->screens[i], lv_obj_js_class_id())  ;
+        JSValue jsscr = js_lv_obj_wrapper(ctx, thisdisp->screens[i], JS_UNDEFINED, lv_obj_js_class_id())  ;
         JS_SetPropertyUint32(ctx, arr, i, jsscr);
     }
     return arr ;

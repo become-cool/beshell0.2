@@ -61,8 +61,21 @@ JSValue js_util_set_log_level(JSContext *ctx, JSValueConst this_val, int argc, J
     }
 }
 
+#endif
+
+
 JSValue js_util_time(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
 	return JS_NewInt64(ctx, gettime()) ;
+}
+JSValue js_util_set_time(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    CHECK_ARGC(1)
+    ARGV_TO_INT64(0, now)
+
+    uint32_t sec = now/1000 ;
+    uint32_t msec = now - sec*1000 ;
+
+	struct timespec tm = {sec, msec*1000*1000} ;
+    return clock_gettime(CLOCK_REALTIME, &tm)>=0? JS_TRUE: JS_FALSE ;
 }
 
 JSValue js_util_sleep(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
@@ -96,24 +109,12 @@ JSValue js_util_sleep(JSContext *ctx, JSValueConst this_val, int argc, JSValueCo
         if(now >= expire ) {
             break ;
         }
+#ifndef SIMULATION
         esp_task_wdt_reset() ;
+#endif
     }
 
     return JS_UNDEFINED ;
-}
-
-#endif
-
-
-
-JSValue js_util_free_stacks(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
-    (void) argc ;
-    (void) argv ;
-#ifdef SIMULATION
-    return JS_NewInt32(ctx, 0) ;
-#else
-    return JS_NewInt32(ctx, esp_get_free_heap_size()) ;
-#endif
 }
 
 JSValue js_util_var_refcount(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
@@ -560,13 +561,14 @@ void be_module_utils_require(JSContext *ctx) {
     JS_SetPropertyStr(ctx, beapi, "utils", utils);
 #ifndef SIMULATION
     JS_SetPropertyStr(ctx, beapi, "_repl_set_input_func", JS_NewCFunction(ctx, js_repl_set_input_func, "_repl_set_input_func", 1));
-    JS_SetPropertyStr(ctx, utils, "time", JS_NewCFunction(ctx, js_util_time, "time", 1));
     JS_SetPropertyStr(ctx, utils, "setLogLevel", JS_NewCFunction(ctx, js_util_set_log_level, "setLogLevel", 1));
     JS_SetPropertyStr(ctx, utils, "untar", JS_NewCFunction(ctx, js_fs_untar, "untar", 1));
     JS_SetPropertyStr(ctx, utils, "base64Encode", JS_NewCFunction(ctx, js_utils_base64_encode, "base64Encode", 1));
     JS_SetPropertyStr(ctx, utils, "base64Decode", JS_NewCFunction(ctx, js_utils_base64_decode, "base64Decode", 1));
 #endif
-    JS_SetPropertyStr(ctx, utils, "freeStacks", JS_NewCFunction(ctx, js_util_free_stacks, "freeStacks", 1));
+    JS_SetPropertyStr(ctx, utils, "time", JS_NewCFunction(ctx, js_util_time, "time", 1));
+    JS_SetPropertyStr(ctx, utils, "setTime", JS_NewCFunction(ctx, js_util_set_time, "setTime", 1));
+    // JS_SetPropertyStr(ctx, utils, "freeStacks", JS_NewCFunction(ctx, js_util_free_stacks, "freeStacks", 1));
     JS_SetPropertyStr(ctx, utils, "partId", JS_NewCFunction(ctx, js_utils_part_id, "partId", 1));
     JS_SetPropertyStr(ctx, utils, "uuid", JS_NewCFunction(ctx, js_util_uuid, "uuid", 1));
     JS_SetPropertyStr(ctx, utils, "varRefCnt", JS_NewCFunction(ctx, js_util_var_refcount, "varRefCnt", 1));
@@ -582,9 +584,7 @@ void be_module_utils_require(JSContext *ctx) {
     JS_SetPropertyStr(ctx, utils, "feed", JS_NewCFunction(ctx, js_feed_watchdog, "feed", 1));
 
 	// global
-#ifndef SIMULATION
     JS_SetPropertyStr(ctx, global, "sleep", JS_NewCFunction(ctx, js_util_sleep, "sleep", 1));
-#endif
     JS_SetPropertyStr(ctx, global, "setTimeout", JS_NewCFunction(ctx, js_util_set_timeout, "setTimeout", 1));
     JS_SetPropertyStr(ctx, global, "setInterval", JS_NewCFunction(ctx, js_util_set_interval, "setInterval", 1));
     JS_SetPropertyStr(ctx, global, "clearTimeout", JS_NewCFunction(ctx, js_util_clear_timeout, "clearTimeout", 1));

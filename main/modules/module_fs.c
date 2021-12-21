@@ -8,7 +8,8 @@
 #include <errno.h>
 #include <stdbool.h>
 
-
+#define PARTITION_LABEL_ROOT "fsroot"
+#define PARTITION_LABEL_HOME "fshome"
     
 #ifndef SIMULATION
 #include "diskio_wl.h"
@@ -67,9 +68,9 @@ JSValue js_fs_stat_sync(JSContext *ctx, JSValueConst this_val, int argc, JSValue
         JS_SetPropertyStr(ctx, obj, "isDir", JS_TRUE) ;
     }
     else {
-        JS_SetPropertyStr(ctx, obj, "size", JS_NewInt32(ctx, statbuf.st_size)) ;
         JS_SetPropertyStr(ctx, obj, "isDir", JS_FALSE) ;
     }
+    JS_SetPropertyStr(ctx, obj, "size", JS_NewInt32(ctx, statbuf.st_size)) ;
     JS_SetPropertyStr(ctx, obj, "atime", JS_NewInt64(ctx, statbuf.st_atime)) ;
     JS_SetPropertyStr(ctx, obj, "mtime", JS_NewInt64(ctx, statbuf.st_mtime)) ;
     JS_SetPropertyStr(ctx, obj, "ctime", JS_NewInt64(ctx, statbuf.st_ctime)) ;
@@ -497,8 +498,25 @@ JSValue js_fs_info(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst
     size_t total = 0 ;
     size_t used = 0 ;
 
+    const char * plabel = PARTITION_LABEL_ROOT ;
+    if(argc>0) {
+        ARGV_TO_STRING(0, jslabel)
+        if(strcmp(jslabel,"/")==0) {
+            plabel = PARTITION_LABEL_ROOT ;
+        }
+        else if(strcmp(jslabel,"/home")==0){
+            plabel = PARTITION_LABEL_HOME ;
+        }
+        else {
+            JS_ThrowReferenceError(ctx, "unknow mount point: %s", jslabel) ;
+            JS_FreeCString(ctx, jslabel) ;
+            return JS_EXCEPTION ;
+        }
+        JS_FreeCString(ctx, jslabel) ;
+    }
+
 #ifndef SIMULATION
-    if( esp_littlefs_info("fs", &total, &used) != ESP_OK ) {
+    if( esp_littlefs_info(plabel, &total, &used) != ESP_OK ) {
         THROW_EXCEPTION("esp_littlefs_info() bad")
     }
 #endif
@@ -525,7 +543,7 @@ void extend_partition() {
     for (; it != NULL; it = esp_partition_next(it)) {
         const esp_partition_t *part = esp_partition_get(it);
         printf("partition '%s' at offset 0x%x with size 0x%x\n", part->label, part->address, part->size);
-        if(strcmp(part->label, "fs")==0) {
+        if(strcmp(part->label, PARTITION_LABEL_ROOT)==0) {
             partition_size = part->size ;
             break ;
         }
@@ -539,7 +557,7 @@ void extend_partition() {
     // 分区内的文件系统大小
     size_t fstotal = 0 ;
     size_t fsused = 0 ;
-    if( esp_littlefs_info("fs", &fstotal, &fsused) != ESP_OK ) {
+    if( esp_littlefs_info(PARTITION_LABEL_ROOT, &fstotal, &fsused) != ESP_OK ) {
         printf("esp_littlefs_info() bad\n") ;
         return ;
     }
@@ -550,7 +568,7 @@ void extend_partition() {
 
     printf("extend partition from %d to %d ...\n", fstotal, partition_size) ;
 
-    lfs_t * lfs = esp_littlefs_hanlde("fs") ;
+    lfs_t * lfs = esp_littlefs_hanlde(PARTITION_LABEL_ROOT) ;
 
     // 删除 unextend 文件
     // return unlink(path)>-1 ;
@@ -559,7 +577,7 @@ void extend_partition() {
 bool be_module_fs_init() {
     const esp_vfs_littlefs_conf_t conf_root = {
         .base_path = "/fs",
-        .partition_label = "fsroot",
+        .partition_label = PARTITION_LABEL_ROOT,
         .format_if_mount_failed = true
     };
     if(esp_vfs_littlefs_register(&conf_root)!=ESP_OK){
@@ -569,7 +587,7 @@ bool be_module_fs_init() {
     
     const esp_vfs_littlefs_conf_t conf_home = {
         .base_path = "/fs/home",
-        .partition_label = "fshome",
+        .partition_label = PARTITION_LABEL_HOME,
         .format_if_mount_failed = true
     };
     if(esp_vfs_littlefs_register(&conf_home)!=ESP_OK){

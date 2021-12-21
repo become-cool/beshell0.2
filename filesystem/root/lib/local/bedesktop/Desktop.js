@@ -1,42 +1,34 @@
-const lv = beapi.lvgl
-const ScrConsole = require("./ScrConsole")
-const ScrApps = require("./ScrApps")
-const ScrPreApps = require("./ScrPreApps")
+const lv = require("lv")
+const Dashboard = require("./dashboard/Dashboard.js")
+// const ScrApps = require("./ScrApps")
+const ScrSysApps = require("./sys/ScrSysApps")
 
 module.exports = class Desktop {
 
     _disp = null
-    _scrConsole = null
+    _dashboard = null
 
     constructor(disp) {
-        // if(!disp instanceof lv.Display) {
-        //     throw Error("arg disp must be a beapi.lvgl.Display") ;
-        // }
         this._disp = disp
-        this._scrConsole = new ScrConsole()
-        this._scrApps = new ScrApps()
-        this._scrPreApps = new ScrPreApps()
 
-        this._scrConsole.refs.btn1.on("clicked", ()=>{
-            lv.loadScreen(this._scrPreApps, "move-right", 100)
-        })
-        this._scrConsole.refs.btn2.on("clicked", ()=>{
-            lv.loadScreen(this._scrApps, "move-left", 100)
-        })
+        let tv = new lv.TileView()
+        lv.loadScreen(tv)
 
+        this._sysApps = new ScrSysApps(tv.addTile(0,0,lv.dir.RIGHT))
         
-        this._scrApps.refs.btn1.on("clicked", ()=>{
-            lv.loadScreen(this._scrConsole, "move-right", 100)
-        })
-        this._scrPreApps.refs.btn1.on("clicked", ()=>{
-            lv.loadScreen(this._scrConsole, "fade-on", 100)
-        })
+        this._dashboard = tv.addTile(1,0,lv.dir.HOR)
+        new Dashboard(this._dashboard)
 
-        lv.loadScreen(this._scrConsole)
-        global.scr1 = this._scrConsole
-        global.scr2 = this._scrApps
-        global.scr3 = this._scrPreApps
-        global.disp = disp
-        global.lv = beapi.lvgl
+        this._apps = tv.addTile(2,0,lv.dir.LEFT)
+        let btn3 = new lv.Btn(this._apps)
+        btn3.setText("Apps")
+        btn3.center()
+
+
+        // let img = new lv.Img(this._apps)
+        // img.set
+
+        tv.setTile(this._dashboard,false)
+        global.desktop = this
     }
 }

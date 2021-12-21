@@ -1,6 +1,8 @@
 #include "widgets_extra.h"
 #include "style.h"
 #include "utils.h"
+#include "font_msyh.h"
+#include "module_fs.h"
 
 
 void js_lv_obj_init(JSContext *ctx, JSValue jsobj) {
@@ -12,7 +14,7 @@ void js_lv_obj_init(JSContext *ctx, JSValue jsobj) {
     JS_FreeValue(ctx, jsFuncLvObjInit) ;
 }
 
-JSValue js_lv_obj_wrapper(JSContext *ctx, lv_obj_t * cobj, JSClassID clsid) {
+JSValue js_lv_obj_wrapper(JSContext *ctx, lv_obj_t * cobj, JSValue cotr, JSClassID clsid) {
 
     JSValue jsobj = JS_UNDEFINED ;
 
@@ -21,7 +23,19 @@ JSValue js_lv_obj_wrapper(JSContext *ctx, lv_obj_t * cobj, JSClassID clsid) {
         jsobj = JS_MKPTR(JS_TAG_OBJECT, _jsobj) ;
     }
     else {
-        jsobj = JS_NewObjectClass(ctx, clsid) ;
+
+        if(JS_IsUndefined(cotr)) {
+            jsobj = JS_NewObjectClass(ctx, clsid) ;
+        }
+        else {
+            JSValue proto = JS_GetPropertyStr(ctx, cotr, "prototype");
+            if (JS_IsException(proto)) {
+                JS_FreeValue(ctx, proto) ;
+                return JS_EXCEPTION ;
+            }
+            jsobj = JS_NewObjectProtoClass(ctx, proto, clsid) ;
+            JS_FreeValue(ctx, proto) ;
+        }
 
         lv_obj_set_user_data(cobj, JS_VALUE_GET_PTR(jsobj)) ;
         JS_SetOpaque(jsobj, cobj) ;        
@@ -277,6 +291,7 @@ JSValue js_lv_obj_get_local_style(JSContext *ctx, JSValueConst this_val, int arg
 
     for(int i = 0; i < thisobj->style_cnt; i++) {
         if(thisobj->styles[i].is_local && thisobj->styles[i].selector == selector) {
+            dn(i)
             JSValue jsstyle = lv_style_wrapper(ctx, thisobj->styles[i].style) ;
             JS_DupValue(ctx,jsstyle) ;
             return jsstyle ;
@@ -305,6 +320,86 @@ JSValue js_lv_obj_refresh_style(JSContext *ctx, JSValueConst this_val, int argc,
     THIS_LVOBJ("Obj", "style", thisobj)
 
     lv_obj_refresh_style(thisobj, selector, prop);
+
+    return JS_UNDEFINED ;
+}
+
+JSValue js_lv_obj_get_font_height(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(0)
+    THIS_LVOBJ("Obj", "style", thisobj)
+    lv_style_selector_t selector = LV_PART_MAIN | LV_STATE_DEFAULT ;
+    if(argc>0) {
+        if(JS_ToUint32(ctx, &selector, argv[0])!=0) {
+            THROW_EXCEPTION("invalid arg part")
+        }
+    }
+    lv_font_t * font = lv_obj_get_style_text_font(thisobj, selector) ;
+    return JS_NewInt32(ctx, font? font->line_height: 0)  ;
+}
+JSValue js_lv_label_set_font(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+    THIS_LVOBJ("Obj", "style", thisobj)
+    ARGV_TO_STRING(0, fontname)
+
+    lv_font_t * font = NULL ;
+    if( strcmp("m8", fontname)==0 ) {
+        font = &lv_font_montserrat_8 ;
+    }
+    if( strcmp("m10", fontname)==0 ) {
+        font = &lv_font_montserrat_10 ;
+    }
+    else if( strcmp("m12", fontname)==0 ) {
+        font = &lv_font_montserrat_12 ;
+    }
+    else if( strcmp("m16", fontname)==0 ) {
+        font = &lv_font_montserrat_16 ;
+    }
+    else if( strcmp("m24", fontname)==0 ) {
+        font = &lv_font_montserrat_24 ;
+    }
+    else if( strcmp("m32", fontname)==0 ) {
+        font = &lv_font_montserrat_32 ;
+    }
+    else if( strcmp("m40", fontname)==0 ) {
+        font = &lv_font_montserrat_40 ;
+    }
+    else if( strcmp("m48", fontname)==0 ) {
+        font = &lv_font_montserrat_48 ;
+    }
+    else if( strcmp("msyh", fontname)==0 ) {
+        font = font_msyh() ;
+    }
+
+    JSValue ret = JS_UNDEFINED ;
+
+    if(!font) {
+        JS_ThrowReferenceError(ctx, "unknow font name: %s", fontname) ;
+        ret = JS_EXCEPTION ;
+    }
+    else {
+        lv_obj_set_style_text_font(thisobj, font, LV_PART_MAIN | LV_STATE_DEFAULT ) ;
+    }
+
+    JS_FreeCString(ctx, fontname) ;
+
+    return ret ;
+}
+
+
+JSValue js_lv_img_set_src(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+    THIS_LVOBJ("Img", "setSrc", thisimg)
+    ARGV_TO_STRING_E(0, jssrc, "arg src must be a string")
+
+    char * _csrc = vfspath_to_fs(jssrc) ;
+    JS_FreeCString(ctx, jssrc) ;
+
+    char * csrc = mallocf("%c:%s", LV_USE_FS_STDIO, _csrc) ;
+    free(_csrc) ;
+
+    ds(csrc)
+    lv_img_set_src(thisimg, csrc) ;
+    free(csrc) ;
 
     return JS_UNDEFINED ;
 }

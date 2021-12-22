@@ -27180,14 +27180,14 @@ static JSModuleDef *js_host_resolve_imported_module(JSContext *ctx,
                                           rt->module_loader_opaque);
     }
     
-    printf("js_host_resolve_imported_module(%s,%s)\n", base_cname, cname1) ;
+    // printf("js_host_resolve_imported_module(%s,%s)\n", base_cname, cname1) ;
 
     if (!cname)
         return NULL;
 
     module_name = JS_NewAtom(ctx, cname);
     if (module_name == JS_ATOM_NULL) {
-        printf("module_name == JS_ATOM_NULL\n") ;
+        // printf("module_name == JS_ATOM_NULL\n") ;
         js_free(ctx, cname);
         return NULL;
     }
@@ -27195,7 +27195,7 @@ static JSModuleDef *js_host_resolve_imported_module(JSContext *ctx,
     /* first look at the loaded modules */
     m = js_find_loaded_module(ctx, module_name);
     if (m) {
-        printf("module_name == loaded\n") ;
+        // printf("module_name == loaded\n") ;
         js_free(ctx, cname);
         JS_FreeAtom(ctx, module_name);
         return m;
@@ -27666,6 +27666,8 @@ static JSValue js_get_module_ns(JSContext *ctx, JSModuleDef *m)
 /* Load all the required modules for module 'm' */
 static int js_resolve_module(JSContext *ctx, JSModuleDef *m)
 {
+    // printf("js_resolve_module()\n") ;
+    
     int i;
     JSModuleDef *m1;
 
@@ -28032,6 +28034,8 @@ JSModuleDef *JS_RunModule(JSContext *ctx, const char *basename,
 {
     JSModuleDef *m;
     JSValue ret, func_obj;
+
+    // printf("JS_RunModule()\n") ;
     
     m = js_host_resolve_imported_module(ctx, basename, filename);
     if (!m)
@@ -28102,8 +28106,6 @@ static JSValue js_dynamic_import_job(JSContext *ctx,
 
 static JSValue js_dynamic_import(JSContext *ctx, JSValueConst specifier)
 {
-    printf("js_dynamic_import()\n") ;
-
     JSAtom basename;
     JSValue promise, resolving_funcs[2], basename_val;
     JSValueConst args[4];

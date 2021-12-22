@@ -4,6 +4,7 @@
 #include "mongoose.h"
 #include "stack.h"
 #include "module_mg.h"
+#include "module_lvgl.h"
 
 
 #define WS_DISP_CMD_REFRESH 1
@@ -15,19 +16,19 @@
 #define WS_DISP_BUFF_JPEG 2
 
 
-uint16_t ws_input_x = 0 ;
-uint16_t ws_input_y = 0 ;
-bool ws_input_pressed = false ;
-bool ws_input_update = false ;
+// uint16_t ws_input_x = 0 ;
+// uint16_t ws_input_y = 0 ;
+// bool ws_input_pressed = false ;
+// bool ws_input_update = false ;
 
 void ws_driver_input_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
     // if(!ws_input_update) {
     //     return ;
     // }
-    if(ws_input_pressed) {
+    if(indev_input_pressed) {
         data->state = LV_INDEV_STATE_PRESSED ;
-        data->point.x = ws_input_x ;
-        data->point.y = ws_input_y ;
+        data->point.x = indev_input_x ;
+        data->point.y = indev_input_y ;
     }
     else {
         data->state = LV_INDEV_STATE_RELEASED ;
@@ -150,16 +151,24 @@ static void fn(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
 
         else if (wm->data.ptr[0] == WS_DISP_CMD_RELEASE && wm->data.len == 1)
         {
-            ws_input_pressed = false;
-            ws_input_update = true;
+            // ws_input_pressed = false;
+            // ws_input_update = true;
+
+            indev_input_pressed = false ;
         }
         else if (wm->data.ptr[0] == WS_DISP_CMD_PRESS && wm->data.len == 5)
         {
-            ws_input_pressed = true;
+            // ws_input_pressed = true;
             uint16_t *data = (uint16_t *)(wm->data.ptr + 1);
-            ws_input_x = *data;
-            ws_input_y = *(data + 1);
-            ws_input_update = true;
+            // ws_input_x = *data;
+            // ws_input_y = *(data + 1);
+
+            
+            indev_input_x = *data ;
+            indev_input_y = *(data + 1);
+            indev_input_pressed = true ;
+
+            // ws_input_update = true;
 
             // printf("ws input press  %d, %d\n",ws_input_x,ws_input_y) ;
         }

@@ -1,10 +1,12 @@
 #include "module_utils.h"
+#include "module_fs.h"
 #include <stdbool.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <time.h>
 #include "logging.h"
 #include "utils.h"
+#include "cutils.h"
 #include "module_fs.h"
 #include "eventloop.h"
 
@@ -163,13 +165,7 @@ JSValue js_util_clear_timeout(JSContext *ctx, JSValueConst this_val, int argc, J
 }
 
 
-#define require_wrapper 												\
-	"let module = {exports={}} ;\n"										\
-	"(function(exports, require, module, __filename, __dirname) {\n" 	\
-	"%s" 																\
-	"})(exports); "
-
-void evalScript(JSContext *ctx, const char * path) {
+void evalScript(JSContext *ctx, const char * path, bool asBin) {
 
     struct stat statbuf;
     if(stat(path,&statbuf)<0) {
@@ -191,27 +187,73 @@ void evalScript(JSContext *ctx, const char * path) {
     fclose(fd) ;
     buff[readedBytes] = 0 ;
 
-    eval_code_len(ctx, buff, readedBytes, path) ;
+    if(asBin) {
+        JSValue func = JS_ReadObject(ctx, (uint8_t*)buff, readedBytes, JS_READ_OBJ_BYTECODE);
+        JSValue ret = JS_EvalFunction(ctx, func);
+        if(JS_IsException(ret)) {
+            echo_error(ctx) ;
+        }
+        JS_FreeValue(ctx, ret) ;
+    }
+    else {
+        eval_code_len(ctx, buff, readedBytes, path) ;
+    }
+
     free(buff) ;
 }
 
-JSValue js_fs_eval_script(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+JSValue js_eval_script(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     JS2VSFPath(path, argv[0])
     CHECK_ARGV0_NOT_DIR(path)
-    evalScript(ctx, path) ;
+    evalScript(ctx, path, false) ;
     free(path) ;
 	return JS_UNDEFINED ;
 }
 
-JSValue js_fs_eval_as_file(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+
+JSValue js_eval_as_file(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(2)
 
-    size_t len = 0 ;
-    char * code = JS_ToCStringLen(ctx, &len, argv[0]) ;
-    char * path = JS_ToCString(ctx, argv[1]) ;
+    ARGV_TO_STRING_LEN_E(0, code, codelen, "argv code must be a string")
+    ARGV_TO_STRING_E(1, path, "argv path must be a string")
 
-    JSValue ret = JS_Eval(ctx, code, len, path, JS_EVAL_TYPE_GLOBAL) ; // JS_EVAL_FLAG_STRIP
+    JSValue ret = JS_Eval(ctx, code, codelen, path, JS_EVAL_TYPE_GLOBAL) ; // JS_EVAL_TYPE_GLOBAL, JS_EVAL_TYPE_MODULE, JS_EVAL_FLAG_STRIP
+
+    JS_FreeCString(ctx, code) ;
+	JS_FreeCString(ctx, path) ;
+    return ret ;
+}
+
+JSValue js_compile_script(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    CHECK_ARGC(2)
+
+    ARGV_TO_STRING_LEN_E(0, code, codelen, "argv code must be a string")
+    ARGV_TO_STRING_E(1, path, "argv path must be a string")
+
+    JSValue func = JS_Eval(ctx, code, codelen, path, JS_EVAL_TYPE_GLOBAL|JS_EVAL_FLAG_COMPILE_ONLY) ; 
+
 	JS_FreeCString(ctx, code) ;
+	JS_FreeCString(ctx, path) ;
+
+    if( JS_IsException(func) ) {
+        JS_FreeValue(ctx,func) ;
+        return JS_EXCEPTION ;
+    }
+
+    size_t bytecode_len;
+    uint8_t * bytecode = JS_WriteObject(ctx, &bytecode_len, func, JS_WRITE_OBJ_BYTECODE);
+    JS_FreeValue(ctx,func) ;
+
+    return JS_NewArrayBuffer(ctx, bytecode, bytecode_len, freeArrayBuffer, NULL, false ) ; ;
+}
+
+JSValue js_eval_bin(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    CHECK_ARGC(1)
+    ARGV_TO_ARRAYBUFFER(0, bytecodes, bytelen)
+
+    JSValue func = JS_ReadObject(ctx, bytecodes, bytelen, JS_READ_OBJ_BYTECODE);
+    JSValue ret = JS_EvalFunction(ctx, func);
+
     return ret ;
 }
 
@@ -367,7 +409,7 @@ int untar_entry_end_cb(header_translated_t *proper, int entry_index, void *conte
     return 0 ;
 }
 
-JSValue js_fs_untar(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+JSValue js_utils_untar(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(2)
 
     char * srcpath = js_arg_to_vfspath(ctx, argv[0])  ;
@@ -493,7 +535,7 @@ JSValue js_unpack_string(JSContext *ctx, JSValueConst this_val, int argc, JSValu
     if(offset+strlen+1>bufflen) {
         strlen = bufflen - offset - 1 ;
     }
-    return JS_NewStringLen(ctx, buff+offset+1, strlen) ;
+    return JS_NewStringLen(ctx, (char*)(buff+offset+1), strlen) ;
 }
 
 JSValue js_write_string_to_ArrayBuffer(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
@@ -541,8 +583,18 @@ JSValue js_read_string_from_ArrayBuffer(JSContext *ctx, JSValueConst this_val, i
         THROW_EXCEPTION("out of buffer length")
     }
 
-    return JS_NewStringLen(ctx, buff+offset, strlen) ;
+    return JS_NewStringLen(ctx, (char*)(buff+offset), strlen) ;
 }
+
+JSValue js_arraybuffer_as_string(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    size_t size ;
+    char * buff = (char *)JS_GetArrayBuffer(ctx, &size, this_val) ;
+    if(!buff || !size) {
+        return JS_NewStringLen(ctx, NULL, 0) ;
+    }
+    return JS_NewStringLen(ctx, buff, size) ;
+}
+
 
 JSValue js_feed_watchdog(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
 #ifndef SIMULATION
@@ -550,6 +602,31 @@ JSValue js_feed_watchdog(JSContext *ctx, JSValueConst this_val, int argc, JSValu
 #endif
     return JS_UNDEFINED ;
 }
+
+// static const JSCFunctionListEntry js_utils_funcs[] = {
+//     JS_CFUNC_DEF("time", 0, js_util_time ),
+// };
+
+// static int js_utils_init(JSContext *ctx, JSModuleDef *m) {
+//     printf("js_utils_init()\n") ;
+//     JS_SetModuleExport(ctx, m, "time", JS_NewCFunction(ctx, js_util_time, "time", 1));
+//     JS_SetModuleExport(ctx, m, "default", JS_NewCFunction(ctx, js_util_time, "time", 1));
+//     return 0;
+// }
+
+// JSModuleDef *be_module_init_utils(JSContext *ctx) {
+//     JSModuleDef *m;
+//     m = JS_NewCModule(ctx, "utils", js_utils_init);
+//     if (!m) {
+//         return NULL;
+//     }
+//     // JS_AddModuleExportList(ctx, m, js_utils_funcs, countof(js_utils_funcs));
+//     JS_AddModuleExport(ctx, m, "time");
+//     JS_AddModuleExport(ctx, m, "default");
+//     return m;
+// }
+
+
 
 void be_module_utils_require(JSContext *ctx) {
 
@@ -562,7 +639,7 @@ void be_module_utils_require(JSContext *ctx) {
 #ifndef SIMULATION
     JS_SetPropertyStr(ctx, beapi, "_repl_set_input_func", JS_NewCFunction(ctx, js_repl_set_input_func, "_repl_set_input_func", 1));
     JS_SetPropertyStr(ctx, utils, "setLogLevel", JS_NewCFunction(ctx, js_util_set_log_level, "setLogLevel", 1));
-    JS_SetPropertyStr(ctx, utils, "untar", JS_NewCFunction(ctx, js_fs_untar, "untar", 1));
+    JS_SetPropertyStr(ctx, utils, "untar", JS_NewCFunction(ctx, js_utils_untar, "untar", 1));
     JS_SetPropertyStr(ctx, utils, "base64Encode", JS_NewCFunction(ctx, js_utils_base64_encode, "base64Encode", 1));
     JS_SetPropertyStr(ctx, utils, "base64Decode", JS_NewCFunction(ctx, js_utils_base64_decode, "base64Decode", 1));
 #endif
@@ -589,10 +666,17 @@ void be_module_utils_require(JSContext *ctx) {
     JS_SetPropertyStr(ctx, global, "setInterval", JS_NewCFunction(ctx, js_util_set_interval, "setInterval", 1));
     JS_SetPropertyStr(ctx, global, "clearTimeout", JS_NewCFunction(ctx, js_util_clear_timeout, "clearTimeout", 1));
     JS_SetPropertyStr(ctx, global, "clearInterval", JS_NewCFunction(ctx, js_util_clear_timeout, "clearInterval", 1));
-    JS_SetPropertyStr(ctx, global, "evalScript", JS_NewCFunction(ctx, js_fs_eval_script, "evalScript", 1));
-    JS_SetPropertyStr(ctx, global, "evalAsFile", JS_NewCFunction(ctx, js_fs_eval_as_file, "evalAsFile", 1));
+    JS_SetPropertyStr(ctx, global, "evalScript", JS_NewCFunction(ctx, js_eval_script, "evalScript", 1));
+    JS_SetPropertyStr(ctx, global, "evalAsFile", JS_NewCFunction(ctx, js_eval_as_file, "evalAsFile", 1));
+    JS_SetPropertyStr(ctx, global, "compileScript", JS_NewCFunction(ctx, js_compile_script, "compileScript", 1));
+    JS_SetPropertyStr(ctx, global, "evalBin", JS_NewCFunction(ctx, js_eval_bin, "evalBin", 1));
 
+    // ArrayBuffer.prototype.asString()
+    JSValue ArrayBufferProto = js_get_glob_prop(ctx, 2, "ArrayBuffer", "prototype") ;
+    JS_SetPropertyStr(ctx, ArrayBufferProto, "asString", JS_NewCFunction(ctx, js_arraybuffer_as_string, "asString", 1));
     
+
+	JS_FreeValue(ctx, ArrayBufferProto);
 	JS_FreeValue(ctx, beapi);
 	JS_FreeValue(ctx, global);
 }

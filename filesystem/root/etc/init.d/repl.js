@@ -51,7 +51,7 @@ if(beapi._repl_set_input_func) {
             }
 
         } catch(e) {
-            telnet.send(pkgid, CMD_EXCEPTION, console.valueToString(e))
+            telnet.send(pkgid, CMD_EXCEPTION, stringify(e))
             return
         }
     })
@@ -100,26 +100,68 @@ function ls() {
 }
 
 
-function cmd_require() {
-    console.log("not implemented")
+function cmd_require(path) {
+    if(!path) {
+        console.log("require <script>|<dir>")
+        return
+    }
+    path = resolvepath(path)
+    return require(path, true)
 }
 function mv() {
-    console.log("not implemented")
+    console.log("this repl cmd not implemented")
 }
 function cp(path) {
-    console.log("not implemented")
+    console.log("this repl cmd not implemented")
 }
 function rm() {
-    console.log("not implemented")
+    console.log("this repl cmd not implemented")
 }
 function touch() {
-    console.log("not implemented")
+    console.log("this repl cmd not implemented")
 }
 function cat(path) {
-    console.log(beapi.fs.readFileSync(resolvepath(path)))
+    console.log(beapi.fs.readFileSync(resolvepath(path)).asString())
 }
 function pwd() {
     console.log(process.env.PWD)
+}
+function compile(path) {
+    if(!path) {
+        console.log("compile <script>|<dir>")
+        return
+    }
+    path = resolvepath(path)
+    path = beapi.fs.normalize(path)
+    if(beapi.fs.isFileSync(path)) {
+        let script = beapi.fs.readFileSync(path).asString()
+        if(path!='/lib/base/require.js') {  // require.js 自身
+            script = Module.wrapExportMeta(script, beapi.fs.dirname(path), path)
+        }
+        try{
+            script = compileScript(script, path)
+        }catch(e){
+            console.error("compile failed:", path)
+            console.error(e)
+            console.error(e.stack)
+            return
+        }
+        beapi.fs.writeFileSync( path+".bin", script)
+        console.log("compile script to:", path+".bin")
+    }
+    else if(beapi.fs.isDirSync(path)) {
+        for(let item of beapi.fs.readdirSync(path)) {
+            if(item=='.' || item=='..')
+                continue
+            let child = path+'/'+item
+            if( beapi.fs.isDirSync(child) || child.substr(-3).toLowerCase()=='.js' ) {
+                compile(child)
+            }
+        }
+    }
+    else {
+        console.error("path not exists: " + path)
+    }
 }
 
 function free() {
@@ -139,6 +181,7 @@ const ShellCmds = {
     cd, pwd, ls, cp, rm, mv, touch, cat
     , require:cmd_require
     , free, reset
+    , compile
 }
 
 

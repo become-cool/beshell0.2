@@ -1,6 +1,7 @@
 all:
-	../bin/mklittlefs -c root -s 524288 img/fs-root.img -d 2
-	../bin/mklittlefs -c home -s 131072 img/fs-home.img -d 2
+	node packfs.js
+	../bin/mklittlefs -c tmp/root -s 524288 img/fs-root.img -d 2
+	../bin/mklittlefs -c tmp/home -s 131072 img/fs-home.img -d 2
 	cp img/fs-root.img ../../beconsole/build/src/assets/firmware/beshell-0.2.0/flash/fs-root.img
 	cp img/fs-home.img ../../beconsole/build/src/assets/firmware/beshell-0.2.0/flash/fs-home.img
 	

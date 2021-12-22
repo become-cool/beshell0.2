@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include "utils.h"
 #include "eventloop.h"
+#include <sys/stat.h>
 
 #ifndef SIMULATION
 #include "telnet.h"
@@ -56,10 +57,16 @@ JSContext * task_current_context() {
 }
 
 
+static JSModuleDef * be_js_module_loader(JSContext *ctx, const char *module_name, void *opaque) {
+    ds(module_name)
+    IS_NULL(opaque)
+    return NULL ;
+}
+                            
 
 static JSContext * JS_NewCustomContext(JSRuntime *rt)
 {
-    JS_SetModuleLoaderFunc(rt, NULL, js_module_loader, NULL);
+    JS_SetModuleLoaderFunc(rt, NULL, be_js_module_loader, NULL);
 
     JSContext *ctx;
     ctx = JS_NewContextRaw(rt);
@@ -116,8 +123,16 @@ static JSContext * JS_NewCustomContext(JSRuntime *rt)
 
 void eval_rc_script(JSContext *ctx, const char * path) {
     char * fullpath = vfspath_to_fs(path) ;
-    evalScript(ctx, fullpath) ;
+    char * binpath = mallocf("%s.bin", fullpath) ;
+    struct stat statbuf;
+    if(stat(binpath,&statbuf)<0) {
+        evalScript(ctx, fullpath, false) ;
+    }
+    else {
+        evalScript(ctx, binpath, true) ;
+    }
     free(fullpath) ;
+    free(binpath) ;
 }
 
 void quickjs_init() {
@@ -130,7 +145,6 @@ void quickjs_init() {
     ctx = JS_NewCustomContext(rt);
 
     // base 函数
-    eval_rc_script(ctx, "/lib/base/console.js") ;
     eval_rc_script(ctx, "/lib/base/require.js") ;
 
     // 0等级，不加载任何启动脚本，作为安全模式

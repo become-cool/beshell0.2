@@ -5911,6 +5911,7 @@ static JSValue js_lv_img_get_size_mode(JSContext *ctx, JSValueConst this_val, in
 
 static const JSCFunctionListEntry js_lv_img_proto_funcs[] = {
     JS_CFUNC_DEF("setSrc", 0, js_lv_img_set_src),
+    JS_CFUNC_DEF("setSymbol", 0, js_lv_img_set_symbol),
     JS_CFUNC_DEF("setOffsetX", 0, js_lv_img_set_offset_x),
     JS_CFUNC_DEF("setOffsetY", 0, js_lv_img_set_offset_y),
     JS_CFUNC_DEF("setAngle", 0, js_lv_img_set_angle),

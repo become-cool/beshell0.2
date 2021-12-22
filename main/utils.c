@@ -24,7 +24,9 @@ char * mallocf(char * fmt, ...) {
 }
 
 void freeArrayBuffer(JSRuntime *rt, void *opaque, void *ptr) {
-    free(ptr) ;
+	// printf("freeArrayBuffer()\n") ;
+	if(ptr)
+    	free(ptr) ;
 }
 
 JSValue js_get_prop(JSContext *ctx, JSValue obj, int depth, ...) {

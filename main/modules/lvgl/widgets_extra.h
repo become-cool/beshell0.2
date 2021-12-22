@@ -37,5 +37,6 @@ JSValue js_lv_obj_get_font_height(JSContext *ctx, JSValueConst this_val, int arg
 JSValue js_lv_label_set_font(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
 
 JSValue js_lv_img_set_src(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
+JSValue js_lv_img_set_symbol(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
 
 #endif

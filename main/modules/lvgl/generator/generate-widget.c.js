@@ -580,6 +580,7 @@ function main() {
     code+= gen_lv_class("lv_dropdown", "lvgl.Dropdown", require("./api/lv_dropdown.js"))
     code+= gen_lv_class("lv_img", "lvgl.Img", require("./api/lv_img.js"),{
         "js_lv_img_set_src": "setSrc" ,
+        "js_lv_img_set_symbol": "setSymbol" ,
     })
     code+= gen_lv_class("lv_btnmatrix", "lvgl.BtnMatrix", require("./api/lv_btnmatrix.js"))
     code+= gen_lv_class("lv_canvas", "lvgl.Canvas", require("./api/lv_canvas.js"))

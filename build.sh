@@ -1,6 +1,6 @@
-cd filesystem
-make
-cd ..
+# cd filesystem
+# make
+# cd ..
 
 idf.py build || exit 1
 

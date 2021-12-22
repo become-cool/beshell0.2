@@ -10,7 +10,7 @@
 
 #define PARTITION_LABEL_ROOT "fsroot"
 #define PARTITION_LABEL_HOME "fshome"
-    
+
 #ifndef SIMULATION
 #include "diskio_wl.h"
 #include "esp_littlefs.h"
@@ -270,7 +270,7 @@ JSValue js_fs_read_file_sync(JSContext *ctx, JSValueConst this_val, int argc, JS
     }
 
     if(readlen<1){
-        return JS_NewStringLen(ctx, "", 0) ;
+        return JS_NewArrayBuffer(ctx, NULL, 0, freeArrayBuffer, NULL, false) ;
     }
 
     char * buff = malloc(readlen) ;
@@ -291,14 +291,9 @@ JSValue js_fs_read_file_sync(JSContext *ctx, JSValueConst this_val, int argc, JS
     }
 
     int readedBytes = fread(buff, 1, readlen, fd) ;
-    // buff[readedBytes] = 0 ;
-
     fclose(fd) ;
 
-    JSValue str = JS_NewStringLen(ctx, buff, readedBytes) ;
-    free(buff) ;
-
-    return str ;
+    return JS_NewArrayBuffer(ctx, (uint8_t *)buff, readedBytes, freeArrayBuffer, NULL, false) ;
 }
 
 /**
@@ -324,8 +319,8 @@ JSValue js_fs_write_file_sync(JSContext *ctx, JSValueConst this_val, int argc, J
         }
     }
 
-	int fd = fopen(path, append? "a+": "w");
-    if(fd<=0) {
+	FILE * fd = fopen(path, append? "a+": "w");
+    if(NULL==fd) {
         JS_ThrowReferenceError(ctx, "Failed to open file %s", path);
         free(path) ;
         return JS_EXCEPTION ;
@@ -340,14 +335,14 @@ JSValue js_fs_write_file_sync(JSContext *ctx, JSValueConst this_val, int argc, J
         length = strlen(buff) ;
     }
 
-    else if(JS_IsObject(argv[1]) /* @todo: 检查 arraybuffer */) {
-        // @todo
-    }
     else {
-        free(path) ;
-        fclose(fd) ;
-        JS_ThrowReferenceError(ctx, "Invalid param type of path");
-        return JS_EXCEPTION ;
+        buff = (char *)JS_GetArrayBuffer(ctx, &length, argv[1]) ;
+        if(!buff || !length) {
+            free(path) ;
+            fclose(fd) ;
+            JS_ThrowReferenceError(ctx, "arg data is invalid type or empty");
+            return JS_EXCEPTION ;
+        }
     }
 
     int wroteBytes = 0 ;

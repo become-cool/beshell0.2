@@ -58,7 +58,7 @@ void echo_error(JSContext *) ;
 
 #define ARGV_TO_ARRAYBUFFER(i, var, varlen)                                         \
     size_t varlen = 0;                                                              \
-    char * var = (char *)JS_GetArrayBuffer(ctx, &varlen, argv[i]) ;                 \
+    uint8_t * var = (uint8_t *)JS_GetArrayBuffer(ctx, &varlen, argv[i]) ;           \
     if(!var) {                                                                      \
         THROW_EXCEPTION("argv is not a ArrayBuffer")                                \
     }

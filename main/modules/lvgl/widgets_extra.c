@@ -64,6 +64,7 @@ static void js_lv_event_cb(lv_event_t * event) {
         printf("target is not a js lv object") ;
         return ;
     }
+    JS_FreeValue(ctx, ObjCotr) ;
 
     JSValue jsname = lv_event_code_const_to_jsstr(ctx, event->code) ;
 
@@ -397,9 +398,16 @@ JSValue js_lv_img_set_src(JSContext *ctx, JSValueConst this_val, int argc, JSVal
     char * csrc = mallocf("%c:%s", LV_USE_FS_STDIO, _csrc) ;
     free(_csrc) ;
 
-    ds(csrc)
     lv_img_set_src(thisimg, csrc) ;
     free(csrc) ;
 
+    return JS_UNDEFINED ;
+}
+JSValue js_lv_img_set_symbol(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+    THIS_LVOBJ("Img", "setSymbol", thisimg)
+    ARGV_TO_STRING_E(0, symbol, "arg symbol must be a string")
+    lv_img_set_src(thisimg, symbol) ;
+    JS_FreeCString(ctx, symbol) ;
     return JS_UNDEFINED ;
 }

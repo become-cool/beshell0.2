@@ -17,6 +17,10 @@
 #endif
 
 
+int16_t indev_input_x = 0 ;
+int16_t indev_input_y = 0 ;
+bool indev_input_pressed = false ;
+
 bool lv_has_inited = false ;
 #define LV_TICK_PERIOD_MS 1
 
@@ -68,6 +72,15 @@ static JSValue js_lvgl_load_screen(JSContext *ctx, JSValueConst this_val, int ar
     }
 
     return JS_UNDEFINED ;
+}
+
+
+static JSValue js_lvgl_input_point(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    JSValue obj = JS_NewObject(ctx) ;
+    JS_SetPropertyStr(ctx, obj, "x", JS_NewInt32(ctx, indev_input_x)) ;
+    JS_SetPropertyStr(ctx, obj, "y", JS_NewInt32(ctx, indev_input_y)) ;
+    JS_SetPropertyStr(ctx, obj, "press", indev_input_pressed? JS_TRUE: JS_FALSE) ;
+    return obj ;
 }
 
 void lv_tick_task(void *arg) {
@@ -197,6 +210,7 @@ void be_module_lvgl_require(JSContext *ctx) {
     JS_SetPropertyStr(ctx, beapi, "lvgl", lvgl);  
 
     JS_SetPropertyStr(ctx, lvgl, "loadScreen", JS_NewCFunction(ctx, js_lvgl_load_screen, "loadScreen", 1));
+    JS_SetPropertyStr(ctx, lvgl, "inputPoint", JS_NewCFunction(ctx, js_lvgl_input_point, "inputPoint", 1));
     JS_SetPropertyStr(ctx, lvgl, "pct", JS_NewCFunction(ctx, js_lv_coord_pct, "pct", 1));
     JS_SetPropertyStr(ctx, lvgl, "isPct", JS_NewCFunction(ctx, js_lv_coord_is_pct, "isPct", 1));
 

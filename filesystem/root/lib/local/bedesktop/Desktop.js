@@ -1,7 +1,7 @@
 const lv = require("lv")
 const Dashboard = require("./dashboard/Dashboard.js")
-// const ScrApps = require("./ScrApps")
-const ScrSysApps = require("./sys/ScrSysApps")
+const ScrApps = require("./ScrApps")
+const ScrSysApps = require("./ScrSysApps")
 
 module.exports = class Desktop {
 
@@ -9,26 +9,25 @@ module.exports = class Desktop {
     _dashboard = null
 
     constructor(disp) {
-        this._disp = disp
+        try{
+            this._disp = disp
 
-        let tv = new lv.TileView()
-        lv.loadScreen(tv)
+            this._tv = new lv.TileView()
+            lv.loadScreen(this._tv)
 
-        this._sysApps = new ScrSysApps(tv.addTile(0,0,lv.dir.RIGHT))
-        
-        this._dashboard = tv.addTile(1,0,lv.dir.HOR)
-        new Dashboard(this._dashboard)
+            this._sysApps = new ScrSysApps(this._tv.addTile(0,0,lv.dir.HOR))
+            
+            this._dashboard = this._tv.addTile(1,0,lv.dir.HOR)
+            new Dashboard(this._dashboard)
 
-        this._apps = tv.addTile(2,0,lv.dir.LEFT)
-        let btn3 = new lv.Btn(this._apps)
-        btn3.setText("Apps")
-        btn3.center()
+            this._apps = this._tv.addTile(2,0,lv.dir.HOR)
+            new ScrApps(this._apps)
 
-
-        // let img = new lv.Img(this._apps)
-        // img.set
-
-        tv.setTile(this._dashboard,false)
-        global.desktop = this
+            setTimeout(() =>this._tv.setTile(this._dashboard,false), 1000)
+            
+            global.desktop = this
+        }catch(e){
+            console.log(e)
+        }
     }
 }

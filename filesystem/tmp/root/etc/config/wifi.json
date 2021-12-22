@@ -1,0 +1,15 @@
+{
+    "sta": {
+        "ssid": "" ,
+        "password": "" ,
+        "useDHCP": true ,
+        "gateway": "" ,
+        "netmask": "" ,
+        "ip": ""
+    } ,
+
+    "ap": {
+        "ssid": "BECOME-${UUID}" ,
+        "password": ""
+    }
+}

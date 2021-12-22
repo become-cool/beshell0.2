@@ -1,6 +1,7 @@
 #include "display.h"
 #include "widgets.h"
 #include "widgets_extra.h"
+#include "module_lvgl.h"
 #include "utils.h"
 #include "cutils.h"
 
@@ -36,15 +37,17 @@ void disp_st7789_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t 
     lv_disp_flush_ready(disp) ;
 }
 void input_driver_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
-    // data->continue_reading = false;
     // if(ws_driver_input_read(drv, data))
     //     return ;
-    // touch_driver_read(drv, data) ;
 
     data->continue_reading = xpt2046_read(drv, data) ;
     if(data->state == LV_INDEV_STATE_PRESSED) {
         // data->point.x -= 10 ;
     }
+
+    indev_input_x = data->point.x ;
+    indev_input_y = data->point.y ;
+    indev_input_pressed = (data->state == LV_INDEV_STATE_PRESSED) ;
 }
 #endif
 

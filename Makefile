@@ -1,3 +1,7 @@
+
+all:
+	./build.sh
+	
 fs:
 	node filesystem/packfs.js
 	bin/mklittlefs -c filesystem/tmp/root -s 524288 filesystem/img/fs-root.img -d 2
@@ -9,6 +13,3 @@ fs:
 	python2 /mnt/d/lib/esp-idf/components/partition_table/gen_esp32part.py filesystem/partitions-16MB.csv filesystem/img/partitions-16MB.bin
 	cp filesystem/img/partitions-4MB.bin ../beconsole/build/src/assets/firmware/beshell-0.2.0/flash/partitions-4MB.bin
 	cp filesystem/img/partitions-16MB.bin ../beconsole/build/src/assets/firmware/beshell-0.2.0/flash/partitions-16MB.bin
-
-all:
-	./build.sh

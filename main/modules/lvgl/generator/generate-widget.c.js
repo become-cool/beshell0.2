@@ -1,4 +1,6 @@
 const fs = require("fs")
+const WidgetsMeta = require("./lv_widgets.meta.js")
+// console.log(WidgetsMeta)
 
 function create_conver_base(ctype, js_conver_func, api_arg_type) {
     return function (cargv,i,className,jsmethod, defaultVal){
@@ -85,7 +87,7 @@ function conver_area(cargv,i,className,jsmethod) {
     return code
 }
 function conver_obj(cargv,i,className,jsmethod) {
-    code = `    lv_obj_t * ${cargv} = (lv_obj_t *)JS_GetOpaque(argv[${i}], js_lv_obj_class_id) ;\r\n`
+    code = `    lv_obj_t * ${cargv} = (lv_obj_t *)JS_GetOpaqueInternal(argv[${i}]) ;\r\n`
     code+= `    if( !${cargv} ){\r\n`
     code+= `        THROW_EXCEPTION("arg ${cargv} of method ${className}.${jsmethod}() must be a beapi.lvgl.Obj")\r\n`
     code+= `    }\r\n`
@@ -151,6 +153,7 @@ const MapC2JS_Conver = {
     "lv_style_prop_t": create_conver_mappingconst('lv_style_prop_t', 'lv_style_prop_jsstr_to_const'),
     "lv_obj_flag_t": create_conver_mappingconst('lv_obj_flag_t', 'lv_obj_flag_jsstr_to_const'),
     "lv_label_long_mode_t": create_conver_mappingconst('lv_label_long_mode_t', 'lv_label_long_mode_jsstr_to_const'),
+    "lv_keyboard_mode_t": create_conver_mappingconst('lv_keyboard_mode_t', 'lv_keyboard_mode_jsstr_to_const'),
     "lv_style_t *": conver_style ,
 }
 
@@ -200,6 +203,7 @@ const MapJS2C_Conver = {
     "lv_flex_flow_t": "lv_flex_flow_const_to_jsstr",
     "lv_style_selector_t": "JS_NewUint32",
     "lv_label_long_mode_t": "JS_NewUint32",
+    "lv_keyboard_mode_t": "JS_NewUint32",
     "lv_arc_mode_t": "JS_NewUint32",
     "lv_bar_mode_t":"JS_NewUint32",
     "lv_table_cell_ctrl_t":"JS_NewUint32",
@@ -218,31 +222,48 @@ const MapJS2C_Conver = {
     "lv_border_side_t": 'lv_border_side_const_to_jsstr',
     "lv_style_prop_t": 'lv_style_prop_const_to_jsstr',
     "lv_obj_flag_t": 'lv_obj_flag_const_to_jsstr',
+    "lv_obj_t *": '',
+    "_lv_obj_t *": '',
+}
+
+function mk_lvobj_converfunc(type) {
+    return function(cfunc, cargvLst) {
+        return `    JSValue retval = JS_NULL ;
+    void * lvobj = ${cfunc}(thisobj${cargvLst});
+    if(lvobj) {
+        retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, js_lv_${type}_class_id) ;
+    }
+`
+    }
 }
 
 const MapJS2C_ConverFunc = {
     "lv_color_t": function(cfunc, cargvLst){
         return `    JSValue retval = JS_NewUint32(ctx,${cfunc}(thisobj${cargvLst}).full) ;\r\n`
     },
+    "lv_obj_t *": mk_lvobj_converfunc("obj") ,
+    "_lv_obj_t *": mk_lvobj_converfunc("obj") ,
+    "lv_label_t *": mk_lvobj_converfunc("label") ,
+    "lv_btn_t *": mk_lvobj_converfunc("btn") ,
 }
 
 
-function gen_lv_class(cName, className, api, extraMethod) {
+function gen_lv_methods(clzConf) {
 
     let codeFuncDef = ""
-    let codeMethedList = `static const JSCFunctionListEntry js_${cName}_proto_funcs[] = {\r\n`
+    let codeMethedList = `static const JSCFunctionListEntry js_${clzConf.typeName}_proto_funcs[] = {\r\n`
 
-    for(let cfuncName in extraMethod) {
-        codeMethedList+= `    JS_CFUNC_DEF("${extraMethod[cfuncName]}", 0, ${cfuncName}),\r\n`
+    for(let cfuncName in clzConf.cusMethods) {
+        codeMethedList+= `    JS_CFUNC_DEF("${clzConf.cusMethods[cfuncName]}", 0, ${cfuncName}),\r\n`
     }
 
-    for(let cfunc in api) {
+    for(let cfunc in clzConf.methods) {
 
-        let [jsmethod, argLstConf, returnType] = api[cfunc]
+        let [jsmethod, argLstConf, returnType] = clzConf.methods[cfunc]
 
         if(!jsmethod) {
-            if( cfunc.substr(0, cName.length+1) == (cName+'_') ){
-                jsmethod = cfunc.substr(cName.length+1)
+            if( cfunc.substr(0, clzConf.typeName.length+1) == (clzConf.typeName+'_') ){
+                jsmethod = cfunc.substr(clzConf.typeName.length+1)
                 let arr = jsmethod.split("_")
                 jsmethod = arr.shift()
                 if(jsmethod=='get') {
@@ -253,7 +274,7 @@ function gen_lv_class(cName, className, api, extraMethod) {
                 }
             }
             else {
-                console.log("not set method name , and do not auto generate.", cName, cfunc)
+                console.log("not set method name , and do not auto generate.", clzConf.typeName, cfunc)
             }
         }
         
@@ -268,13 +289,13 @@ function gen_lv_class(cName, className, api, extraMethod) {
             }
             if(argcMin) {
                 codeFuncDef+= `    if(argc<${argcMin}) {\r\n`
-                codeFuncDef+= `        THROW_EXCEPTION("${className}.${jsmethod}() missing arg")\r\n`
+                codeFuncDef+= `        THROW_EXCEPTION("${clzConf.className}.${jsmethod}() missing arg")\r\n`
                 codeFuncDef+= `    }\r\n`
             }
         }
         codeFuncDef+= `    void * lv_userdata = JS_GetOpaqueInternal(this_val) ;\r\n`
         codeFuncDef+= `    if(!lv_userdata) {\r\n`
-        codeFuncDef+= `        THROW_EXCEPTION("${className}.${jsmethod}() must be called as a ${className} method")\r\n`
+        codeFuncDef+= `        THROW_EXCEPTION("${clzConf.className}.${jsmethod}() must be called as a ${clzConf.className} method")\r\n`
         codeFuncDef+= `    }\r\n`
         codeFuncDef+= `    lv_obj_t * thisobj = lv_userdata ;\r\n`
 
@@ -285,7 +306,7 @@ function gen_lv_class(cName, className, api, extraMethod) {
             for(let i=0;i<argLstConf.length;i++) {
                 let [argtype, cargv, defaultVal] = argLstConf[i]
                 if(MapC2JS_Conver[argtype]) {
-                    codeFuncDef+= MapC2JS_Conver[argtype](cargv, i, className, jsmethod, defaultVal)
+                    codeFuncDef+= MapC2JS_Conver[argtype](cargv, i, clzConf.className, jsmethod, defaultVal)
                 }
 
                 else {
@@ -310,13 +331,6 @@ function gen_lv_class(cName, className, api, extraMethod) {
             codeFuncDef+= `    ${cfunc}(thisobj${cargvLst}) ;\r\n`
             codeFuncDef+= `    JSValue retval = JS_UNDEFINED ;\r\n`
         }
-        else if(returnType=="_lv_obj_t *"||returnType=="lv_obj_t *") {
-            codeFuncDef+= `    JSValue retval = JS_NULL ;\r\n`
-            codeFuncDef+= `    void * lvobj = ${cfunc}(thisobj${cargvLst});\r\n`
-            codeFuncDef+= `    if(lvobj){\r\n`
-            codeFuncDef+= `        retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, js_lv_obj_class_id) ;\r\n`
-            codeFuncDef+= `    } \r\n`
-        }
         else if(returnType=="bool") {
             codeFuncDef+= `    JSValue retval = JS_NewBool(ctx,${cfunc}(thisobj${cargvLst})) ;\r\n`
         }
@@ -339,57 +353,41 @@ function gen_lv_class(cName, className, api, extraMethod) {
     }
 
     codeMethedList+= "} ;\r\n"
-    codeMethedList+= `#define __def_js_${cName}_proto_funcs__\r\n\r\n`
+    codeMethedList+= `#define __def_js_${clzConf.typeName}_proto_funcs__\r\n\r\n`
 
     return codeFuncDef + "\r\n" + codeMethedList
-
 }
-
-const LstClasses = [
-    "Obj",
-    "Label",
-    "Arc",
-    "Bar",
-    "Btn",
-    "BtnMatrix",
-    "Canvas",
-    "Checkbox",
-    "Dropdown",
-    "Img",
-    "Line",
-    "Roller",
-    "Slider",
-    "Switch",
-    "Table",
-    "TextArea",
-    "TileView",
-]
 
 function generateClassDefine() {
     let code = ""
-    for(let clzName of LstClasses) {
-        let ctypeName = "lv_" + clzName.toLowerCase()
+    for(let clzConf of WidgetsMeta) {
         code+=
-` // beapi.lvgl.${clzName} --
-static JSClassID js_${ctypeName}_class_id ;
-static JSValue js_${ctypeName}_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
+` // beapi.lvgl.${clzConf.className} --
+static JSClassID js_${clzConf.typeName}_class_id ;
+`
+
+        if(!clzConf.cusConstructor) {
+            code+= `static JSValue js_${clzConf.typeName}_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
     lv_obj_t * cparent = NULL ;
     if(argc>=1 && !JS_IsUndefined(argv[0]) && !JS_IsNull(argv[0])) {
         CHECK_INSOF_LVOBJ("Obj", argv[0], "arg parent must a lvgl.Obj object")
         cparent = JS_GetOpaqueInternal(argv[0]) ;
     }
-    ${ctypeName}_t * cobj = ${ctypeName}_create(cparent) ;
-    JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, js_${ctypeName}_class_id) ;
+    ${clzConf.typeName}_t * cobj = ${clzConf.typeName}_create(cparent) ;
+    JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, js_${clzConf.typeName}_class_id) ;
     return jsobj ;
 }
-static void js_${ctypeName}_finalizer(JSRuntime *rt, JSValue val){
-    printf("js_${ctypeName}_finalizer()\\n") ;
-    ${ctypeName}_t * thisobj = JS_GetOpaque(val, js_${ctypeName}_class_id) ;
-    lv_obj_del(thisobj) ;
+`
+        }
+
+        code+= `static void js_${clzConf.typeName}_finalizer(JSRuntime *rt, JSValue val){
+    printf("js_${clzConf.typeName}_finalizer()\\n") ;
+    // ${clzConf.typeName}_t * thisobj = JS_GetOpaque(val, js_${clzConf.typeName}_class_id) ;
+    // lv_obj_del(thisobj) ;
 }
-static JSClassDef js_${ctypeName}_class = {
-    "lvgl.${clzName}",
-    .finalizer = js_${ctypeName}_finalizer,
+static JSClassDef js_${clzConf.typeName}_class = {
+    "${clzConf.fullClassName}",
+    .finalizer = js_${clzConf.typeName}_finalizer,
 };
 
 `
@@ -399,16 +397,15 @@ static JSClassDef js_${ctypeName}_class = {
 function generateClassRegister() {
 
     let code = ""
-    for(let clzName of LstClasses) {
-        let ctypeName = "lv_" + clzName.toLowerCase()
-        if(clzName=="Obj")
+    for(let clzConf of WidgetsMeta) {
+        if(clzConf.className=="Obj")
             var parentProtoName = "EventEmitterProto"
         else
             var parentProtoName = "proto_lv_obj"
         code+= 
-`    // define js class lvgl.${ctypeName}    
-    JSValue proto_${ctypeName} = qjs_def_class(ctx, "${clzName}", js_${ctypeName}_class_id, &js_${ctypeName}_class
-                , "lvgl.${clzName}", js_${ctypeName}_constructor, js_${ctypeName}_proto_funcs, countof(js_${ctypeName}_proto_funcs), ${parentProtoName}, lvgl) ;
+`    // define js class lvgl.${clzConf.typeName}    
+    JSValue proto_${clzConf.typeName} = qjs_def_class(ctx, "${clzConf.className}", js_${clzConf.typeName}_class_id, &js_${clzConf.typeName}_class
+                , "${clzConf.fullClassName}", js_${clzConf.typeName}_constructor, js_${clzConf.typeName}_proto_funcs, countof(js_${clzConf.typeName}_proto_funcs), ${parentProtoName}, lvgl) ;
 
 `
     }
@@ -418,9 +415,8 @@ function generateClassRegister() {
 }
 function generateClassIDRegister() {
     let code = ""
-    for(let clzName of LstClasses) {
-        let ctypeName = "lv_" + clzName.toLowerCase()
-        code+= `    JS_NewClassID(&js_${ctypeName}_class_id);\r\n`
+    for(let clzConf of WidgetsMeta) {
+        code+= `    JS_NewClassID(&js_${clzConf.typeName}_class_id);\r\n`
     }
     return code
 }
@@ -538,57 +534,16 @@ const const_mapping_header_mark_start = "// AUTO GENERATE CODE START [CONST CONV
 const const_mapping_header_mark_end = "// AUTO GENERATE CODE END [CONST CONVERT] --------"
 
 
-let dist_src_path = __dirname + "/../widgets.c"
-let dist_header_path = __dirname + "/../widgets.h"
+let dist_src_path = __dirname + "/../widgets_gen.c"
+let dist_header_path = __dirname + "/../widgets_gen.h"
 
 function main() {
     let code = ""
 
-    code+= gen_lv_class("lv_obj", "lvgl.Obj", require("./api/lv_obj.js"), {
-        "js_lv_obj_enable_event": "enableEvent" ,
-        "js_lv_obj_disable_event": "disableEvent" ,
-        "js_lv_obj_is_screen": "isScreen" ,
-        "js_lv_obj_ptr": "ptr" ,
-        "js_lv_obj_get_coords": "coords" ,
-        "js_lv_obj_set_coords": "setCoords" ,
-        "js_lv_obj_move": "move" ,
-        "js_lv_obj_move_x": "moveX" ,
-        "js_lv_obj_move_y": "moveY" ,
-        "js_lv_obj_get_all_style_values": "allStyleValues" ,
-        "js_lv_obj_set_style": "setStyle" ,
-        "js_lv_obj_get_style": "style" ,
-        "js_lv_obj_refresh_style": "refreshStyle" ,
-        "js_lv_obj_get_local_style": "localStyle" ,
-        "js_lv_obj_get_font_height": "fontHeight" ,
-        
-    })
-    code+= gen_lv_class("lv_label", "lvgl.Label", require("./api/lv_label.js"), {
-        "js_lv_label_set_font": "setFont" ,
-    })
-    code+= gen_lv_class("lv_arc", "lvgl.Arc", require("./api/lv_arc.js"))
-    code+= gen_lv_class("lv_bar", "lvgl.Bar", require("./api/lv_bar.js"))
-    code+= gen_lv_class("lv_btn", "lvgl.Btn", require("./api/lv_btn.js"))
-    code+= gen_lv_class("lv_table", "lvgl.Table", require("./api/lv_table.js"))
-    code+= gen_lv_class("lv_textarea", "lvgl.TextArea", require("./api/lv_textarea.js"))
-    code+= gen_lv_class("lv_slider", "lvgl.Slider", require("./api/lv_slider.js"))
-    code+= gen_lv_class("lv_switch", "lvgl.Switch", require("./api/lv_switch.js"))
-    code+= gen_lv_class("lv_roller", "lvgl.Roller", require("./api/lv_roller.js"))
-    code+= gen_lv_class("lv_checkbox", "lvgl.Checkbox", require("./api/lv_checkbox.js"))
-    code+= gen_lv_class("lv_line", "lvgl.Line", require("./api/lv_line.js"), {
-            "lv_line_set_points": "setPoints"
-    })
-    code+= gen_lv_class("lv_dropdown", "lvgl.Dropdown", require("./api/lv_dropdown.js"))
-    code+= gen_lv_class("lv_img", "lvgl.Img", require("./api/lv_img.js"),{
-        "js_lv_img_set_src": "setSrc" ,
-        "js_lv_img_set_symbol": "setSymbol" ,
-    })
-    code+= gen_lv_class("lv_btnmatrix", "lvgl.BtnMatrix", require("./api/lv_btnmatrix.js"))
-    code+= gen_lv_class("lv_canvas", "lvgl.Canvas", require("./api/lv_canvas.js"))
 
-    // extra widgets
-    code+= gen_lv_class("lv_tileview", "lvgl.TileView", require("./api/lv_tileview.js"))
-
-
+    for(let clzConf of WidgetsMeta) {
+        code+= gen_lv_methods(clzConf)
+    }
     
     let src = fs.readFileSync(dist_src_path).toString()
     src = srcInsert(src, code, methodlst_mark_start, methodlst_mark_end)

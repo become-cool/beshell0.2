@@ -418,7 +418,25 @@ module.exports = [
             'LV_LABEL_LONG_SCROLL_CIRCULAR' ,   /**< Keep the size and roll the text circularly*/
             'LV_LABEL_LONG_CLIP' ,              /**< Keep the size and clip the text out of it*/
         ]   
-    }       
+    }
+    , {
+        prefix: 'LV_KEYBOARD_MODE_' ,
+        type: 'lv_keyboard_mode_t' ,
+        name: 'lv_keyboard_mode' ,
+        end: 'LV_KEYBOARD_MODE_USER_4+1' ,
+        def: [
+            'LV_KEYBOARD_MODE_TEXT_LOWER' ,
+            'LV_KEYBOARD_MODE_TEXT_UPPER' ,
+            'LV_KEYBOARD_MODE_SPECIAL' ,
+            'LV_KEYBOARD_MODE_NUMBER' ,
+            'LV_KEYBOARD_MODE_USER_1' ,
+            'LV_KEYBOARD_MODE_USER_2' ,
+            'LV_KEYBOARD_MODE_USER_3' ,
+            'LV_KEYBOARD_MODE_USER_4' ,
+        ]   
+    } ,
+
+    
 ]
 
 

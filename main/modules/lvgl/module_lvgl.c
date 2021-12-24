@@ -1,6 +1,6 @@
 #include "module_lvgl.h"
 #include "display.h"
-#include "widgets.h"
+#include "widgets_gen.h"
 #include "style.h"
 #include "lvgl.h"
 #include "lv_conf.h"

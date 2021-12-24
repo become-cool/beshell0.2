@@ -304,7 +304,7 @@ module.exports = {
     // "lv_obj_del_delayed": [null, [["uint32_t","delay_ms"]], "void"],
     // "lv_obj_del_anim_ready_cb": [null, [["lv_anim_t *","a"]], "void"],
     // "lv_obj_del_async": [null, [], "void"],
-    "lv_obj_set_parent": [null, [["lv_obj_t *"]], "void"],
+    "lv_obj_set_parent": [null, [["lv_obj_t *", "parent"]], "void"],
     // "lv_obj_swap": [null, [], "void"],
     "lv_obj_move_to_index": [null, [["int32_t","index"]], "void"],
     "lv_obj_get_screen": [null, [], "_lv_obj_t *"],

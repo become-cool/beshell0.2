@@ -9,6 +9,7 @@
 #include "cutils.h"
 #include "module_fs.h"
 #include "eventloop.h"
+#include "uuid.h"
 
 #ifndef SIMULATION
 #include "esp_system.h"
@@ -266,7 +267,7 @@ JSValue js_utils_part_id(JSContext *ctx, JSValueConst this_val, int argc, JSValu
 #endif
 }
 
-JSValue js_util_uuid(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+JSValue js_util_part_uuid(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
 #ifdef SIMULATION
     return JS_NewString(ctx, "123456789AEF") ;
 #else
@@ -281,6 +282,13 @@ JSValue js_util_uuid(JSContext *ctx, JSValueConst this_val, int argc, JSValueCon
 #endif
 }
 
+JSValue js_util_generate_uuid(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    uuid_t uu ;
+    char uu_str[UUID_STR_LEN];
+    uuid_generate(uu);
+    uuid_unparse(uu, uu_str);
+    return JS_NewStringLen(ctx, uu_str, UUID_STR_LEN-1) ;
+}
 
 
 #ifndef SIMULATION
@@ -647,7 +655,8 @@ void be_module_utils_require(JSContext *ctx) {
     JS_SetPropertyStr(ctx, utils, "setTime", JS_NewCFunction(ctx, js_util_set_time, "setTime", 1));
     // JS_SetPropertyStr(ctx, utils, "freeStacks", JS_NewCFunction(ctx, js_util_free_stacks, "freeStacks", 1));
     JS_SetPropertyStr(ctx, utils, "partId", JS_NewCFunction(ctx, js_utils_part_id, "partId", 1));
-    JS_SetPropertyStr(ctx, utils, "uuid", JS_NewCFunction(ctx, js_util_uuid, "uuid", 1));
+    JS_SetPropertyStr(ctx, utils, "partUUID", JS_NewCFunction(ctx, js_util_part_uuid, "partUUID", 1));
+    JS_SetPropertyStr(ctx, utils, "genUUID", JS_NewCFunction(ctx, js_util_generate_uuid, "genUUID", 1));
     JS_SetPropertyStr(ctx, utils, "varRefCnt", JS_NewCFunction(ctx, js_util_var_refcount, "varRefCnt", 1));
     JS_SetPropertyStr(ctx, utils, "gamma8Correct", JS_NewCFunction(ctx, js_utils_gamma8_correct, "gamma8Correct", 1));
     JS_SetPropertyStr(ctx, utils, "stringBytes", JS_NewCFunction(ctx, js_string_bytes, "stringBytes", 1));

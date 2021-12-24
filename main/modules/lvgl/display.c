@@ -1,6 +1,6 @@
 #include "display.h"
+#include "widgets_gen.h"
 #include "widgets.h"
-#include "widgets_extra.h"
 #include "module_lvgl.h"
 #include "utils.h"
 #include "cutils.h"
@@ -42,7 +42,7 @@ void input_driver_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
 
     data->continue_reading = xpt2046_read(drv, data) ;
     if(data->state == LV_INDEV_STATE_PRESSED) {
-        // data->point.x -= 10 ;
+        data->point.x -= 10 ;
     }
 
     indev_input_x = data->point.x ;

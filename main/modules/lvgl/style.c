@@ -1,7 +1,7 @@
 #include "style.h"
 #include "utils.h"
 #include "cutils.h"
-#include "widgets.h"
+#include "widgets_gen.h"
 
 
 lv_style_prop_t LV_STYLE_JSVALUE ;

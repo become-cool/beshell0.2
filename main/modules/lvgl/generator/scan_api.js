@@ -1,5 +1,5 @@
 const fs = require("fs")
-const inc_path = __dirname + "/lv.inc/"
+const inc_path = __dirname + "/../../../../components/lvgl/src"
 
 
 function findHeadFile(dir, callback) {
@@ -7,7 +7,10 @@ function findHeadFile(dir, callback) {
         let path = dir+'/'+name
         let stats = fs.statSync(path)
         if( stats.isFile() ){
-            callback(path)
+            if(path.substr(-2).toLowerCase()=='.h') {
+                // console.log(path) 
+                callback(path)
+            }
         }
         else if( stats.isDirectory() ){
             findHeadFile(path, callback)

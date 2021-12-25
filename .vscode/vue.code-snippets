@@ -117,4 +117,27 @@
 		"description": "return promise"
 	} ,
 
+	"lv widget object": {
+		"prefix": "lv-obj",
+		"body": [
+			"const lv = require('lv')" ,
+			"" ,
+			"class ${TM_FILENAME_BASE} extends lv.Obj{" ,
+			"    constructor(parent) {" ,
+			"        super(parent)" ,
+			"" ,
+			"        this.fromJson({" ,
+			"            children: [" ,
+			"                {" ,
+			"                    class: 'Obj' ," ,
+			"                }" ,
+			"            ]" ,
+			"        })" ,
+			"    }" ,
+			"}" ,
+			""  ,
+			"module.exports = ${TM_FILENAME_BASE}"
+		],
+		"description": "lv widget object"
+	} ,
 }

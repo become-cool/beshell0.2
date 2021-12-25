@@ -1878,6 +1878,28 @@ static JSClassDef js_lv_tileview_class = {
     .finalizer = js_lv_tileview_finalizer,
 };
 
+ // beapi.lvgl.List --
+static JSClassID js_lv_list_class_id ;
+static JSValue js_lv_list_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
+    lv_obj_t * cparent = NULL ;
+    if(argc>=1 && !JS_IsUndefined(argv[0]) && !JS_IsNull(argv[0])) {
+        CHECK_INSOF_LVOBJ("Obj", argv[0], "arg parent must a lvgl.Obj object")
+        cparent = JS_GetOpaqueInternal(argv[0]) ;
+    }
+    lv_obj_t * cobj = lv_list_create(cparent) ;
+    JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, js_lv_list_class_id) ;
+    return jsobj ;
+}
+static void js_lv_list_finalizer(JSRuntime *rt, JSValue val){
+    printf("js_lv_list_finalizer()\n") ;
+    // lv_list_t * thisobj = JS_GetOpaque(val, js_lv_list_class_id) ;
+    // lv_obj_del(thisobj) ;
+}
+static JSClassDef js_lv_list_class = {
+    "lvgl.List",
+    .finalizer = js_lv_list_finalizer,
+};
+
 // AUTO GENERATE CODE END [DEFINE CLASS] --------
 
 
@@ -3595,6 +3617,7 @@ static const JSCFunctionListEntry js_lv_obj_proto_funcs[] = {
     JS_CFUNC_DEF("refreshStyle", 0, js_lv_obj_refresh_style),
     JS_CFUNC_DEF("localStyle", 0, js_lv_obj_get_local_style),
     JS_CFUNC_DEF("fontHeight", 0, js_lv_obj_get_font_height),
+    JS_CFUNC_DEF("as", 0, js_lv_obj_as),
     JS_CFUNC_DEF("addFlag", 0, js_lv_obj_add_flag),
     JS_CFUNC_DEF("clearFlag", 0, js_lv_obj_clear_flag),
     JS_CFUNC_DEF("addState", 0, js_lv_obj_add_state),
@@ -6735,16 +6758,80 @@ static const JSCFunctionListEntry js_lv_tileview_proto_funcs[] = {
 } ;
 #define __def_js_lv_tileview_proto_funcs__
 
+static JSValue js_lv_list_add_text(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    if(argc<1) {
+        THROW_EXCEPTION("List.addText() missing arg")
+    }
+    void * lv_userdata = JS_GetOpaqueInternal(this_val) ;
+    if(!lv_userdata) {
+        THROW_EXCEPTION("List.addText() must be called as a List method")
+    }
+    lv_obj_t * thisobj = lv_userdata ;
+    char * txt = (char *)JS_ToCString(ctx, argv[0]) ;
+    JSValue retval = JS_NULL ;
+    void * lvobj = lv_list_add_text(thisobj, txt);
+    if(lvobj) {
+        retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, js_lv_obj_class_id) ;
+    }
+    JS_FreeCString(ctx, txt) ;
+    return retval ;
+}
+
+static JSValue js_lv_list_add_btn(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    if(argc<2) {
+        THROW_EXCEPTION("List.addBtn() missing arg")
+    }
+    void * lv_userdata = JS_GetOpaqueInternal(this_val) ;
+    if(!lv_userdata) {
+        THROW_EXCEPTION("List.addBtn() must be called as a List method")
+    }
+    lv_obj_t * thisobj = lv_userdata ;
+    char * icon = (char *)JS_ToCString(ctx, argv[0]) ;
+    char * txt = (char *)JS_ToCString(ctx, argv[1]) ;
+    JSValue retval = JS_NULL ;
+    void * lvobj = lv_list_add_btn(thisobj, icon, txt);
+    if(lvobj) {
+        retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, js_lv_obj_class_id) ;
+    }
+    JS_FreeCString(ctx, icon) ;
+    JS_FreeCString(ctx, txt) ;
+    return retval ;
+}
+
+static JSValue js_lv_list_get_btn_text(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    if(argc<1) {
+        THROW_EXCEPTION("List.getBtnText() missing arg")
+    }
+    void * lv_userdata = JS_GetOpaqueInternal(this_val) ;
+    if(!lv_userdata) {
+        THROW_EXCEPTION("List.getBtnText() must be called as a List method")
+    }
+    lv_obj_t * thisobj = lv_userdata ;
+    lv_obj_t * btn = (lv_obj_t *)JS_GetOpaqueInternal(argv[0]) ;
+    if( !btn ){
+        THROW_EXCEPTION("arg btn of method List.getBtnText() must be a beapi.lvgl.Obj")
+    }
+    JSValue retval = JS_NewString(ctx,lv_list_get_btn_text(thisobj, btn)) ;
+    return retval ;
+}
+
+
+static const JSCFunctionListEntry js_lv_list_proto_funcs[] = {
+    JS_CFUNC_DEF("addText", 0, js_lv_list_add_text),
+    JS_CFUNC_DEF("addBtn", 0, js_lv_list_add_btn),
+    JS_CFUNC_DEF("getBtnText", 0, js_lv_list_get_btn_text),
+} ;
+#define __def_js_lv_list_proto_funcs__
+
 // AUTO GENERATE CODE END [METHOD LIST] --------
 
 
 
 
 
-void require_vlgl_js_widgets(JSContext *ctx, JSValue lvgl) {
+void require_vlgl_js_widgets_gen(JSContext *ctx, JSValue lvgl) {
 
     JSValue EventEmitterProto = js_get_glob_prop(ctx, 3, "beapi", "EventEmitter", "prototype") ;
-
 
 // AUTO GENERATE CODE START [REGISTER CLASS] --------
     // define js class lvgl.lv_obj    
@@ -6823,9 +6910,16 @@ void require_vlgl_js_widgets(JSContext *ctx, JSValue lvgl) {
     JSValue proto_lv_tileview = qjs_def_class(ctx, "TileView", js_lv_tileview_class_id, &js_lv_tileview_class
                 , "lvgl.TileView", js_lv_tileview_constructor, js_lv_tileview_proto_funcs, countof(js_lv_tileview_proto_funcs), proto_lv_obj, lvgl) ;
 
+    // define js class lvgl.lv_list    
+    JSValue proto_lv_list = qjs_def_class(ctx, "List", js_lv_list_class_id, &js_lv_list_class
+                , "lvgl.List", js_lv_list_constructor, js_lv_list_proto_funcs, countof(js_lv_list_proto_funcs), proto_lv_obj, lvgl) ;
+
 // AUTO GENERATE CODE END [REGISTER CLASS] --------
 
     JS_Eval(ctx, (const char *)lv_obj_init_js, lv_obj_init_js_len, "[native]lv_obj_init", JS_EVAL_TYPE_GLOBAL|JS_EVAL_FLAG_STRIP) ;
+
+    
+    JS_SetPropertyStr(ctx, lvgl, "isEventName", JS_NewCFunction(ctx, js_lvgl_is_event_name, "isEventName", 1));  
 
     JS_FreeValue(ctx, EventEmitterProto);
 }
@@ -6856,6 +6950,7 @@ void init_lvgl_widgets() {
     JS_NewClassID(&js_lv_msgbox_class_id);
     JS_NewClassID(&js_lv_keyboard_class_id);
     JS_NewClassID(&js_lv_tileview_class_id);
+    JS_NewClassID(&js_lv_list_class_id);
 // AUTO GENERATE CODE END [REGISTER CLASS ID] --------
 }
 

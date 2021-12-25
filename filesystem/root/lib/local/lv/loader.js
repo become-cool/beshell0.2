@@ -31,7 +31,7 @@ beapi.lvgl.fromJson = function fromJson(json, parent, refs){
             }
         }
         else {
-            let clzname = json["class"] || json.clazz
+            let clzname = json["class"] || json.clazz || "Obj"
             if(!clzname) {
                 throw new Error("missing class name")
             }
@@ -43,10 +43,6 @@ beapi.lvgl.fromJson = function fromJson(json, parent, refs){
                     throw new Error("unknow class name: "+clzname)
                 }
                 var obj = new beapi.lvgl[clzname](parent)
-            }
-
-            if(json.ref) {
-                refs[json.ref] = obj
             }
 
             obj.fromJson(json,refs)
@@ -101,6 +97,10 @@ beapi.lvgl.Obj.prototype.fromJson = function fromJson(json, refs){
 
             if(json.children) {
                 beapi.lvgl.fromJson(json.children, this, refs)
+            }
+
+            if(json.ref) {
+                refs[json.ref] = this
             }
         }
     }catch(e){

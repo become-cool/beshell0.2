@@ -17,7 +17,7 @@ class ST77XX {
 
     async wakeup() {
         this.sendCommand(0x11);     //Sleep out
-        await delay(120);           //Delay 120ms
+        await sleep(120);           //Delay 120ms
     }
 
     rgb565(r,g,b) {
@@ -74,10 +74,10 @@ class ST77XX {
     sendCmdSeq(seq){
         for(let i=0;i<seq.length;i++) {
             this.sendCommand(seq[i++])
-            // await delay(1)
+            // await sleep(1)
             if(seq[i]) {
                 this.sendData(seq[i])
-                // await delay(1)
+                // await sleep(1)
             }
         }
     }

@@ -122,8 +122,7 @@ module.exports = class DlgNewApp extends lv.Obj {
     }
 
     start() {
-        lv.Obj.prototype.show.apply(this)
-        lv.keyboard().popup(this.refs.appName)
+        this.show()
     }
 
     ok() {
@@ -134,10 +133,9 @@ module.exports = class DlgNewApp extends lv.Obj {
         if(!path){
             return
         }
-
-        lv.msg.sucess("suuccccc!")
-
+        
         this.emit("new-app", path)
+        // lv.msg.sucess("suuccccc!")
     }
 
     cancel() {
@@ -184,7 +182,6 @@ function createApp(title, iconpath) {
     }
     try{
         let folderPath = process.env.HOME + '/' + folderName
-        console.log(folderPath)
 
         mkDir(folderPath)
         mkDir(folderPath+"/.workspace")

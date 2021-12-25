@@ -25,7 +25,7 @@ class BePoser extends beapi.EventEmitter {
                 beapi.i2c.send(0, ADDR, [0x6A, 0xcc]) // 0xcc = FIFO_RST|DMP_RST|DMP_EN|FIFO_EN
                 return euler? this.toEuler(): this.q
             }
-            await delay(1)
+            await sleep(1)
             fifocnt = this.fifoCount()
         }
     }
@@ -43,7 +43,7 @@ class BePoser extends beapi.EventEmitter {
 
         // 重置
         beapi.i2c.send(this.bus, ADDR, [0x6B, 0x80])
-        await delay(100)
+        await sleep(100)
         beapi.i2c.send(this.bus, ADDR, [0x6B, 0])
         beapi.i2c.send(this.bus, ADDR, [0x6C, 0])
 

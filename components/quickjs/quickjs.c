@@ -53600,3 +53600,19 @@ void JS_AddIntrinsicTypedArrays(JSContext *ctx)
     JS_AddIntrinsicAtomics(ctx);
 #endif
 }
+
+
+
+
+
+
+int JS_GetClassIDFromProto(JSContext *ctx, JSValue proto, JSClassID * out) {
+    void * p = JS_VALUE_GET_PTR(proto) ;
+    for(uint32_t i=0;i<ctx->rt->class_count;i++){
+        if(JS_VALUE_GET_PTR(ctx->class_proto[i]) == p ){
+            *out = i ;
+            return 1;
+        }
+    }
+    return 0 ;
+}

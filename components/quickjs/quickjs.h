@@ -1038,6 +1038,9 @@ int JS_SetModuleExportList(JSContext *ctx, JSModuleDef *m,
 #undef js_unlikely
 #undef js_force_inline
 
+
+int JS_GetClassIDFromProto(JSContext *ctx, JSValue proto, JSClassID * out) ;
+
 #ifdef __cplusplus
 } /* extern "C" { */
 #endif

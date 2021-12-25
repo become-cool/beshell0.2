@@ -401,8 +401,6 @@ void be_module_wifi_init() {
     ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &esp32_wifi_eventHandler, NULL, &instance_got_ip));
 
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_NULL));
-
-    printf("be_module_wifi_init()\n") ;
 }
 
 void be_module_wifi_require(JSContext *ctx) {

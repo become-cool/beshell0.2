@@ -10,7 +10,7 @@ class Color{
         let v = Math.round((this.b&255)*31/255)
         v|= Math.round((this.g&255)*63/255) << 5
         v|= Math.round((this.r&255)*31/255) << 11
-        return v
+        return  v
     }
 
     toHex() {

@@ -29,7 +29,7 @@
 JSClassID lv_obj_js_class_id() ;
 
 void init_lvgl_widgets() ;
-void require_vlgl_js_widgets(JSContext *ctx, JSValue lvgl) ;
+void require_vlgl_js_widgets_gen(JSContext *ctx, JSValue lvgl) ;
 
 
 // AUTO GENERATE CODE START [CONST CONVERT] --------

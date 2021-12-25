@@ -135,7 +135,7 @@ function compile(path) {
     path = beapi.fs.normalize(path)
     if(beapi.fs.isFileSync(path)) {
         let script = beapi.fs.readFileSync(path).asString()
-        if(path!='/lib/base/require.js') {  // require.js 自身
+        if(path.substr(0,10)!='/lib/base/') {
             script = Module.wrapExportMeta(script, beapi.fs.dirname(path), path)
         }
         try{

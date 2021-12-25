@@ -14,7 +14,6 @@
 #include "http_lws.h"
 #endif
 
-#include "module_events.h"
 #include "module_fs.h"
 #include "module_utils.h"
 #ifndef SIMULATION
@@ -56,9 +55,30 @@ JSContext * task_current_context() {
     return ctx ;
 }
 
+#define InitScriptTpl "require('/etc/rc%d.d.js')"
+
+void eval_rc_script(JSContext *ctx, const char * path) {
+    char * fullpath = vfspath_to_fs(path) ;
+
+#ifndef SIMULATION
+    char * binpath = mallocf("%s.bin", fullpath) ;
+    struct stat statbuf;
+    if(stat(binpath,&statbuf)<0) {
+        evalScript(ctx, fullpath, false) ;
+    }
+    else {
+        evalScript(ctx, binpath, true) ;
+    }
+    free(binpath) ;
+#else
+    ds(fullpath)
+    evalScript(ctx, fullpath, false) ;
+#endif
+
+    free(fullpath) ;
+}
 
 static JSModuleDef * be_js_module_loader(JSContext *ctx, const char *module_name, void *opaque) {
-    ds(module_name)
     IS_NULL(opaque)
     return NULL ;
 }
@@ -98,10 +118,14 @@ static JSContext * JS_NewCustomContext(JSRuntime *rt)
     JSValue beapi = JS_NewObject(ctx);
     JS_SetPropertyStr(ctx, global, "beapi", beapi);
     JS_FreeValue(ctx, global);
-
+    
     be_module_fs_require(ctx) ;
+
+    // base 函数
+    eval_rc_script(ctx, "/lib/base/events.js") ;
+    eval_rc_script(ctx, "/lib/base/require.js") ;
+
     be_module_utils_require(ctx) ;
-    be_module_events_require(ctx) ;
     be_module_process_require(ctx) ;  
 #ifndef SIMULATION
     be_module_wifi_require(ctx) ;
@@ -119,22 +143,6 @@ static JSContext * JS_NewCustomContext(JSRuntime *rt)
     return ctx;
 }
 
-#define InitScriptTpl "require('/etc/rc%d.d.js')"
-
-void eval_rc_script(JSContext *ctx, const char * path) {
-    char * fullpath = vfspath_to_fs(path) ;
-    char * binpath = mallocf("%s.bin", fullpath) ;
-    struct stat statbuf;
-    if(stat(binpath,&statbuf)<0) {
-        evalScript(ctx, fullpath, false) ;
-    }
-    else {
-        evalScript(ctx, binpath, true) ;
-    }
-    free(fullpath) ;
-    free(binpath) ;
-}
-
 void quickjs_init() {
     if(rt!=NULL) {
         return ;
@@ -143,9 +151,6 @@ void quickjs_init() {
     js_std_set_worker_new_context_func(JS_NewCustomContext);
     js_std_init_handlers(rt);
     ctx = JS_NewCustomContext(rt);
-
-    // base 函数
-    eval_rc_script(ctx, "/lib/base/require.js") ;
 
     // 0等级，不加载任何启动脚本，作为安全模式
     if(boot_level>0) { 

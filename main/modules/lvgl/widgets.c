@@ -48,6 +48,35 @@ JSValue js_lv_obj_wrapper(JSContext *ctx, lv_obj_t * cobj, JSValue cotr, JSClass
     return jsobj ;
 }
 
+
+JSValue js_lv_obj_as(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+    if( !JS_IsFunction(ctx, argv[0]) ) {
+        THROW_EXCEPTION("arg class must be a function")
+    }
+    THIS_LVOBJ("Obj", "as", thisobj)
+    
+    JSValue prototype = JS_GetPropertyStr(ctx, argv[0], "prototype") ;
+    if(! JS_IsObject(prototype) ){
+        THROW_EXCEPTION("invalid class")
+    }
+    JSClassID classid ;
+    if( !JS_GetClassIDFromProto(ctx, prototype, &classid) ){
+        JS_FreeValue(ctx, prototype) ;
+        THROW_EXCEPTION("invalid class")
+    }
+
+    void * _jsobj = lv_obj_get_user_data(thisobj) ;
+    JSValue jsobj ;
+    if(_jsobj) {
+        jsobj = JS_MKPTR(JS_TAG_OBJECT, _jsobj) ;
+        JS_FreeValue(ctx, jsobj) ;
+        lv_obj_set_user_data(thisobj, NULL) ;
+    }
+    
+    return js_lv_obj_wrapper(ctx, thisobj, argv[0], classid) ;
+}
+
 static void js_lv_event_cb(lv_event_t * event) {
 
     if(!event->user_data) {
@@ -108,32 +137,34 @@ JSValue js_lv_obj_enable_event(JSContext *ctx, JSValueConst this_val, int argc, 
     CHECK_ARGC(1)
     uint8_t eventcode ;
     if(!lv_event_code_jsstr_to_const(ctx, argv[0], &eventcode)) {
-        return JS_EXCEPTION ;
+        return JS_UNDEFINED ;
     }
-
     if(find_event_dsc(thisobj, eventcode)!=NULL) {
         return JS_UNDEFINED ;
     }
-
     lv_obj_add_event_cb(thisobj, js_lv_event_cb, eventcode, ctx) ;
     return JS_UNDEFINED ;
 }
 
 JSValue js_lv_obj_disable_event(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
-    
     THIS_LVOBJ("Obj", "disableEvent", thisobj)
     CHECK_ARGC(1)
     uint8_t eventcode ;
     if(!lv_event_code_jsstr_to_const(ctx, argv[0], &eventcode)) {
-        return JS_EXCEPTION ;
+        return JS_UNDEFINED ;
     }
-
     lv_event_dsc_t * event_dsc = find_event_dsc(thisobj, eventcode) ;
     if(event_dsc) {
         // printf("disable event: %d \n", eventcode) ;
         lv_obj_remove_event_dsc(thisobj, event_dsc) ;
     }
     return JS_UNDEFINED ;
+}
+
+JSValue js_lvgl_is_event_name(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+    uint8_t eventcode ;
+    return lv_event_code_jsstr_to_const(ctx, argv[0], &eventcode)? JS_TRUE : JS_FALSE ;
 }
 
 JSValue js_lv_obj_is_screen(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
@@ -449,8 +480,6 @@ JSValue js_lv_msgbox_constructor(JSContext *ctx, JSValueConst new_target, int ar
     }
     JS_FreeValue(ctx, jslen) ;
 
-    dn(btnsLen)
-
     const char ** btns = malloc( sizeof(char*)*btnsLen ) ;
     for(uint32_t i=0; i<btnsLen; i++) {
         JSValue btnTxt = JS_GetPropertyUint32(ctx, argv[3], i) ;
@@ -471,4 +500,11 @@ JSValue js_lv_msgbox_constructor(JSContext *ctx, JSValueConst new_target, int ar
     free(btns) ;
 
     return js_lv_obj_wrapper(ctx, cobj, new_target, lv_obj_js_class_id()) ;
+}
+
+
+
+
+void require_vlgl_js_widgets(JSContext *ctx, JSValue lvgl) {
+
 }

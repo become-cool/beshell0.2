@@ -189,4 +189,17 @@ JSON.load = function(path) {
 
 global.Module  = Module
 global.require = __mkrequire()
-
+global.prequire = async function(scripts, require) {
+    if(!require)
+        require = global.require
+    sleep(0)
+    for(let path of scripts) {
+        try{
+            require(path)
+        }catch(e){
+            console.log(e)
+            console.log(e.stack)
+        }
+        await sleep(0)
+    }
+}

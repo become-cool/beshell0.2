@@ -37,7 +37,7 @@ class ColorDetector extends SensorBase {
     async setEnable(enable) {
         if(enable) {
             this.i2c.writeTo(0x29, 0x80, 1)
-            await delay(3)
+            await sleep(3)
             this.i2c.writeTo(0x29, 0x80, 3)
         }
         else {

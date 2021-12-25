@@ -3,12 +3,17 @@
 
 #include "widgets_gen.h"
 
+void require_vlgl_js_widgets(JSContext *ctx, JSValue lvgl) ;
+
 void js_lv_obj_init(JSContext *ctx, JSValue jsobj) ;
 
 JSValue js_lv_obj_wrapper(JSContext *ctx, lv_obj_t * cobj, JSValue cotr, JSClassID clsid) ;
 
+JSValue js_lv_obj_as(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
+
 JSValue js_lv_obj_enable_event(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
 JSValue js_lv_obj_disable_event(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
+JSValue js_lvgl_is_event_name(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
 
 JSValue js_lv_obj_is_screen(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
 

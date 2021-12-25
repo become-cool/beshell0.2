@@ -31,13 +31,13 @@ exports.setup = function () {
 exports.runCards = async function(){
 	be.part["switch1"].on( "off", async ()=>{
 		be.part["servo2"].setValue(35)
-		await delay(500)
+		await sleep(500)
 		be.part["servo1"].setValue(200)
-		await delay(600)
+		await sleep(600)
 		be.part["servo1"].setValue(70)
-		await delay(500)
+		await sleep(500)
 		be.part["servo2"].setValue(8)
-		await delay(500)
+		await sleep(500)
 
 	})
 

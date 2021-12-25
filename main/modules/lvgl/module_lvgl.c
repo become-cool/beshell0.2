@@ -1,5 +1,6 @@
 #include "module_lvgl.h"
 #include "display.h"
+#include "widgets.h"
 #include "widgets_gen.h"
 #include "style.h"
 #include "lvgl.h"
@@ -81,6 +82,33 @@ static JSValue js_lvgl_input_point(JSContext *ctx, JSValueConst this_val, int ar
     JS_SetPropertyStr(ctx, obj, "y", JS_NewInt32(ctx, indev_input_y)) ;
     JS_SetPropertyStr(ctx, obj, "press", indev_input_pressed? JS_TRUE: JS_FALSE) ;
     return obj ;
+}
+
+static JSValue js_lv_rgb(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(3)
+    lv_color_t color ;
+    uint8_t r, g, b ;
+    if(JS_ToUint32(ctx, &r, argv[0] ) ){
+        THROW_EXCEPTION("arg red must be a int")
+    }
+    if(JS_ToUint32(ctx, &g, argv[1] ) ){
+        THROW_EXCEPTION("arg green must be a int")
+    }
+    if(JS_ToUint32(ctx, &b, argv[2] ) ){
+        THROW_EXCEPTION("arg blue must be a int")
+    }
+    
+    color.ch.red = r * 31 / 255.0 + 0.5 ;
+    color.ch.blue = b * 31 / 255.0 + 0.5 ;
+#if LV_COLOR_16_SWAP == 0
+    color.ch.green = g * 63 / 255.0 + 0.5 ;
+#else
+    g = (g * 63 / 255.0 + 0.5) ;
+    color.ch.green_h = (g >> 3) & 7 ;
+    color.ch.green_l = g & 7 ;
+#endif
+
+    return JS_NewUint32(ctx, color.full) ;
 }
 
 void lv_tick_task(void *arg) {
@@ -213,6 +241,7 @@ void be_module_lvgl_require(JSContext *ctx) {
     JS_SetPropertyStr(ctx, lvgl, "inputPoint", JS_NewCFunction(ctx, js_lvgl_input_point, "inputPoint", 1));
     JS_SetPropertyStr(ctx, lvgl, "pct", JS_NewCFunction(ctx, js_lv_coord_pct, "pct", 1));
     JS_SetPropertyStr(ctx, lvgl, "isPct", JS_NewCFunction(ctx, js_lv_coord_is_pct, "isPct", 1));
+    JS_SetPropertyStr(ctx, lvgl, "rgb", JS_NewCFunction(ctx, js_lv_rgb, "rgb", 1));
 
     JS_SetPropertyStr(ctx, lvgl, "SizeContent", JS_NewUint32(ctx, LV_SIZE_CONTENT));
     JS_SetPropertyStr(ctx, lvgl, "MaxCoord", JS_NewUint32(ctx, LV_COORD_MAX));
@@ -220,6 +249,7 @@ void be_module_lvgl_require(JSContext *ctx) {
     
     require_vlgl_js_display(ctx, lvgl) ;
     require_vlgl_js_widgets(ctx, lvgl) ;
+    require_vlgl_js_widgets_gen(ctx, lvgl) ;
     require_vlgl_js_style(ctx, lvgl) ;
     require_vlgl_js_font_symbol(ctx, lvgl) ;
 

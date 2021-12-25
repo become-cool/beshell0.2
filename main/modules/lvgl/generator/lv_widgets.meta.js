@@ -19,6 +19,7 @@ const lstClasses = [
             "js_lv_obj_refresh_style": "refreshStyle" ,
             "js_lv_obj_get_local_style": "localStyle" ,
             "js_lv_obj_get_font_height": "fontHeight" ,
+            "js_lv_obj_as": "as" ,
         }
     },
     {
@@ -60,6 +61,11 @@ const lstClasses = [
     } ,
     "Keyboard" ,
     "TileView",
+    {
+        className: "List" ,
+        ctypeName: "lv_obj_t *" ,
+        // methods: require(__dirname+"/api/lv_list.js")
+    },
 ]
 
 
@@ -76,6 +82,9 @@ for(let clzconf of lstClasses) {
 
     if(!clzconf.typeName) {
         clzconf.typeName = "lv_"+clzconf.className.toLowerCase()
+    }
+    if(!clzconf.ctypeName) {
+        clzconf.ctypeName = clzconf.typeName + "_t *"
     }
     if(!clzconf.fullClassName) {
         clzconf.fullClassName = "lvgl."+clzconf.className

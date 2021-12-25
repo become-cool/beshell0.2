@@ -170,6 +170,7 @@ void evalScript(JSContext *ctx, const char * path, bool asBin) {
 
     struct stat statbuf;
     if(stat(path,&statbuf)<0) {
+        printf("path not exist: %s\n", path); ;
         return ;
     }
     if(S_ISDIR(statbuf.st_mode)){
@@ -181,6 +182,7 @@ void evalScript(JSContext *ctx, const char * path, bool asBin) {
     }
 	FILE * fd = fopen(path, "r") ;
     if(fd==NULL) {
+        printf("open file failed: %s\n", path); ;
         return ;
     }
 

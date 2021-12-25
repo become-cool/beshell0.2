@@ -3,16 +3,20 @@ const {execSync} = require("child_process")
 
 
 
-function packdir(from, to, packpath) {
+function packdir(from, to, packpath, ignores) {
     if(!fs.existsSync(to)) {
         fs.mkdirSync(to, {recursive:true})
     }
 
     for(let item of fs.readdirSync(from)) {
         let itemFull = from +"/"+ item
+        let vfspath = packpath+"/"+item
+        if(item=='.' || item=='..' || (ignores&&ignores.includes(vfspath))){
+            continue
+        }
         let stat = fs.statSync(itemFull)
         if (stat.isDirectory()) {
-            packdir(itemFull, to+'/'+item, packpath+"/"+item)
+            packdir(itemFull, to+'/'+item, vfspath, ignores)
         }
         else if(stat.isFile()) {
             if(item.substr(-3).toLowerCase()==".js") {
@@ -48,5 +52,5 @@ function packdir(from, to, packpath) {
 
 execSync(`rm -rf "${__dirname}/tmp/"`)
 
-packdir(__dirname+"/root", __dirname+"/tmp/root", "")
+packdir(__dirname+"/root", __dirname+"/tmp/root", "", ["/home/become"])
 packdir(__dirname+"/home", __dirname+"/tmp/home", "/home")

@@ -373,7 +373,7 @@ static JSClassID js_${clzConf.typeName}_class_id ;
         CHECK_INSOF_LVOBJ("Obj", argv[0], "arg parent must a lvgl.Obj object")
         cparent = JS_GetOpaqueInternal(argv[0]) ;
     }
-    ${clzConf.typeName}_t * cobj = ${clzConf.typeName}_create(cparent) ;
+    ${clzConf.ctypeName} cobj = ${clzConf.typeName}_create(cparent) ;
     JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, js_${clzConf.typeName}_class_id) ;
     return jsobj ;
 }

@@ -3794,3 +3794,10 @@ void js_std_eval_binary(JSContext *ctx, const uint8_t *buf, size_t buf_len,
         JS_FreeValue(ctx, val);
     }
 }
+
+
+// os_poll_func = js_os_poll;
+// static const JSCFunctionListEntry js_os_funcs_2[] = {
+//     JS_CFUNC_DEF("setTimeout", 2, js_os_setTimeout ),
+//     JS_CFUNC_DEF("clearTimeout", 1, js_os_clearTimeout ),
+// }

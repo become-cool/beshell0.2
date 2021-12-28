@@ -546,7 +546,7 @@ static esp_err_t esp_littlefs_init(const esp_vfs_littlefs_conf_t* conf)
         // block device configuration
         efs->cfg.read_size = CONFIG_LITTLEFS_READ_SIZE;
         efs->cfg.prog_size = CONFIG_LITTLEFS_WRITE_SIZE;
-        efs->cfg.block_size = CONFIG_LITTLEFS_BLOCK_SIZE;; 
+        efs->cfg.block_size = conf->block_size;// CONFIG_LITTLEFS_BLOCK_SIZE;; 
         efs->cfg.block_count = efs->partition->size / efs->cfg.block_size;
         efs->cfg.cache_size = CONFIG_LITTLEFS_CACHE_SIZE;
         efs->cfg.lookahead_size = CONFIG_LITTLEFS_LOOKAHEAD_SIZE;

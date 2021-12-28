@@ -232,6 +232,7 @@ function mk_lvobj_converfunc(type) {
     void * lvobj = ${cfunc}(thisobj${cargvLst});
     if(lvobj) {
         retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, js_lv_${type}_class_id) ;
+        JS_DupValue(ctx, retval) ;
     }
 `
     }
@@ -375,6 +376,7 @@ static JSClassID js_${clzConf.typeName}_class_id ;
     }
     ${clzConf.ctypeName} cobj = ${clzConf.typeName}_create(cparent) ;
     JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, js_${clzConf.typeName}_class_id) ;
+    JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
 `

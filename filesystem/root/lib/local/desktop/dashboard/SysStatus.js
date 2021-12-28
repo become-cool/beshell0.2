@@ -83,9 +83,9 @@ class SysStatus extends lv.Row {
 
             let mem = process.memoryUsage()
             let total = mem.heap_total + mem.psram_total
-            let free = mem.heap_free + mem.psram_free
+            let used = mem.heap_used + mem.psram_used
             if(total) {
-                this.mem.setValue(Math.round((total-free)*100 / total)) ;
+                this.mem.setValue(Math.round(used*100 / total)) ;
             }
 
             let {total:fstotal, used:fsused} = beapi.fs.info("/")

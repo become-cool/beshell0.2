@@ -5,7 +5,6 @@
 #include "utils.h"
 #include "cutils.h"
 
-#include "lvgl.h"
 #include "lv_conf.h"
 
 #ifndef SIMULATION
@@ -18,9 +17,26 @@
 #include "http_lws.h"
 #endif
 
-uint8_t * dma_buff = NULL ;
+uint8_t * dma_buff1 = NULL ;
+uint8_t * dma_buff2 = NULL ;
 
 lv_indev_drv_t indev_drv;
+bool indev_fake = false ;
+lv_coord_t indev_fake_x = 0 ;
+lv_coord_t indev_fake_y = 0 ;
+bool indev_fake_press = false ;
+
+bool be_lv_fake_indev(lv_indev_data_t *data) {
+    if(!indev_fake) {
+        return false ;
+    }
+    indev_fake = false ;
+    data->point.x = indev_fake_x ;
+    data->point.y = indev_fake_y ;
+    data->state = (indev_fake_press? LV_INDEV_STATE_PRESSED: LV_INDEV_STATE_RELEASED) ;
+    data->continue_reading = false ;
+    return true ;
+}
 
 #ifndef SIMULATION
 
@@ -40,9 +56,11 @@ void input_driver_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
     // if(ws_driver_input_read(drv, data))
     //     return ;
 
-    data->continue_reading = xpt2046_read(drv, data) ;
-    if(data->state == LV_INDEV_STATE_PRESSED) {
-        data->point.x -= 10 ;
+    if(!be_lv_fake_indev(data)) {
+        data->continue_reading = xpt2046_read(drv, data) ;
+        if(data->state == LV_INDEV_STATE_PRESSED) {
+            data->point.x -= 10 ;
+        }
     }
 
     indev_input_x = data->point.x ;
@@ -147,7 +165,7 @@ static JSValue js_lvgl_set_default_display(JSContext *ctx, JSValueConst this_val
  */
 JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
 
-    if(!dma_buff) {
+    if(!dma_buff1) {
         THROW_EXCEPTION("DMA Buff is NULL")
     }
 
@@ -171,7 +189,7 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
         JS_ThrowReferenceError(ctx, "out of memory?");
         goto excp ;
     }
-    lv_disp_draw_buf_init(drawbuf, dma_buff+DMA_BUFF_AUX_SIZE, NULL, buflen/2);
+    lv_disp_draw_buf_init(drawbuf, dma_buff1+DMA_BUFF_AUX_SIZE, NULL, buflen/2);
 
     // 创建设备驱动对象
     dispdrv = malloc(sizeof(lv_disp_drv_t)) ;
@@ -257,21 +275,30 @@ excp:
     return JS_EXCEPTION ;
 }
 
-uint8_t * display_dma_buff() {
-    return dma_buff ;
+void be_module_lvgl_malloc_buffer() {
+    dma_buff1 = NULL ;
+    dma_buff2 = NULL ;
+    
+#ifndef SIMULATION
+    dma_buff1 = heap_caps_malloc( DMA_BUFF_LEN + DMA_BUFF_AUX_SIZE, MALLOC_CAP_DMA);
+    dp(dma_buff1)
+    // dma_buff2 = heap_caps_malloc( DMA_BUFF_LEN + DMA_BUFF_AUX_SIZE, MALLOC_CAP_DMA);
+    // if(!dma_buff2) {
+    //     printf("malloc dma_buff2 faild\n") ;
+    // }
+    // else {
+    //     dp(dma_buff2)
+    // }
+#else
+    dma_buff1 = malloc(DMA_BUFF_LEN + DMA_BUFF_AUX_SIZE) ;
+    dma_buff2 = malloc(DMA_BUFF_LEN + DMA_BUFF_AUX_SIZE) ;
+#endif
+    if(!dma_buff1) {
+        printf("heap_caps_malloc(%d) faild for display buff.\n", DMA_BUFF_LEN) ;
+    }
 }
 
 void init_lvgl_display() {
-
-#ifndef SIMULATION
-    dma_buff = heap_caps_malloc( DMA_BUFF_LEN + DMA_BUFF_AUX_SIZE, MALLOC_CAP_DMA);
-#else
-    dma_buff = malloc(DMA_BUFF_LEN + DMA_BUFF_AUX_SIZE) ;
-#endif
-    if(!dma_buff) {
-        printf("heap_caps_malloc(%d) faild for display buff.\n", DMA_BUFF_LEN) ;
-    }
-
     // class id 全局, 分配一次
     JS_NewClassID(&js_lvgl_disp_class_id);
 
@@ -281,7 +308,25 @@ void init_lvgl_display() {
 }
 
 
+static JSValue js_lvgl_fake_indev(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(3)
 
+    int32_t x, y ;
+
+    JS_ToInt32(ctx, &x, argv[0]) ;
+    indev_fake_x = x ;
+
+    JS_ToInt32(ctx, &y, argv[1]) ;
+    indev_fake_y = y ;
+
+    indev_fake_press = JS_ToBool(ctx, argv[2]) ;
+
+    indev_fake = true ;
+
+    lv_indev_read_timer_cb(indev_drv.read_timer) ;
+
+    return JS_UNDEFINED ;
+}
 
 void require_vlgl_js_display(JSContext *ctx, JSValue lvgl) {
     
@@ -292,6 +337,6 @@ void require_vlgl_js_display(JSContext *ctx, JSValue lvgl) {
     JS_SetClassProto(ctx, js_lvgl_disp_class_id, dispDriverProto);
 
     JS_SetPropertyStr(ctx, lvgl, "createDisplay", JS_NewCFunction(ctx, js_lvgl_create_display, "createDisplay", 1));
-
     JS_SetPropertyStr(ctx, lvgl, "actionDisplay", JS_NewCFunction(ctx, js_lvgl_set_default_display, "actionDisplay", 1));
+    JS_SetPropertyStr(ctx, lvgl, "fakeIndev", JS_NewCFunction(ctx, js_lvgl_fake_indev, "fakeIndev", 1));
 }

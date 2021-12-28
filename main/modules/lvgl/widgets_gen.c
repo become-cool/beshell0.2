@@ -1480,6 +1480,7 @@ static JSValue js_lv_obj_constructor(JSContext *ctx, JSValueConst new_target, in
     }
     lv_obj_t * cobj = lv_obj_create(cparent) ;
     JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, js_lv_obj_class_id) ;
+    JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
 static void js_lv_obj_finalizer(JSRuntime *rt, JSValue val){
@@ -1502,6 +1503,7 @@ static JSValue js_lv_label_constructor(JSContext *ctx, JSValueConst new_target, 
     }
     lv_label_t * cobj = lv_label_create(cparent) ;
     JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, js_lv_label_class_id) ;
+    JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
 static void js_lv_label_finalizer(JSRuntime *rt, JSValue val){
@@ -1524,6 +1526,7 @@ static JSValue js_lv_arc_constructor(JSContext *ctx, JSValueConst new_target, in
     }
     lv_arc_t * cobj = lv_arc_create(cparent) ;
     JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, js_lv_arc_class_id) ;
+    JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
 static void js_lv_arc_finalizer(JSRuntime *rt, JSValue val){
@@ -1546,6 +1549,7 @@ static JSValue js_lv_bar_constructor(JSContext *ctx, JSValueConst new_target, in
     }
     lv_bar_t * cobj = lv_bar_create(cparent) ;
     JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, js_lv_bar_class_id) ;
+    JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
 static void js_lv_bar_finalizer(JSRuntime *rt, JSValue val){
@@ -1568,6 +1572,7 @@ static JSValue js_lv_btn_constructor(JSContext *ctx, JSValueConst new_target, in
     }
     lv_btn_t * cobj = lv_btn_create(cparent) ;
     JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, js_lv_btn_class_id) ;
+    JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
 static void js_lv_btn_finalizer(JSRuntime *rt, JSValue val){
@@ -1590,6 +1595,7 @@ static JSValue js_lv_btnmatrix_constructor(JSContext *ctx, JSValueConst new_targ
     }
     lv_btnmatrix_t * cobj = lv_btnmatrix_create(cparent) ;
     JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, js_lv_btnmatrix_class_id) ;
+    JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
 static void js_lv_btnmatrix_finalizer(JSRuntime *rt, JSValue val){
@@ -1612,6 +1618,7 @@ static JSValue js_lv_canvas_constructor(JSContext *ctx, JSValueConst new_target,
     }
     lv_canvas_t * cobj = lv_canvas_create(cparent) ;
     JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, js_lv_canvas_class_id) ;
+    JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
 static void js_lv_canvas_finalizer(JSRuntime *rt, JSValue val){
@@ -1634,6 +1641,7 @@ static JSValue js_lv_checkbox_constructor(JSContext *ctx, JSValueConst new_targe
     }
     lv_checkbox_t * cobj = lv_checkbox_create(cparent) ;
     JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, js_lv_checkbox_class_id) ;
+    JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
 static void js_lv_checkbox_finalizer(JSRuntime *rt, JSValue val){
@@ -1656,6 +1664,7 @@ static JSValue js_lv_dropdown_constructor(JSContext *ctx, JSValueConst new_targe
     }
     lv_dropdown_t * cobj = lv_dropdown_create(cparent) ;
     JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, js_lv_dropdown_class_id) ;
+    JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
 static void js_lv_dropdown_finalizer(JSRuntime *rt, JSValue val){
@@ -1678,6 +1687,7 @@ static JSValue js_lv_img_constructor(JSContext *ctx, JSValueConst new_target, in
     }
     lv_img_t * cobj = lv_img_create(cparent) ;
     JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, js_lv_img_class_id) ;
+    JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
 static void js_lv_img_finalizer(JSRuntime *rt, JSValue val){
@@ -1700,6 +1710,7 @@ static JSValue js_lv_line_constructor(JSContext *ctx, JSValueConst new_target, i
     }
     lv_line_t * cobj = lv_line_create(cparent) ;
     JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, js_lv_line_class_id) ;
+    JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
 static void js_lv_line_finalizer(JSRuntime *rt, JSValue val){
@@ -1722,6 +1733,7 @@ static JSValue js_lv_roller_constructor(JSContext *ctx, JSValueConst new_target,
     }
     lv_roller_t * cobj = lv_roller_create(cparent) ;
     JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, js_lv_roller_class_id) ;
+    JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
 static void js_lv_roller_finalizer(JSRuntime *rt, JSValue val){
@@ -1744,6 +1756,7 @@ static JSValue js_lv_slider_constructor(JSContext *ctx, JSValueConst new_target,
     }
     lv_slider_t * cobj = lv_slider_create(cparent) ;
     JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, js_lv_slider_class_id) ;
+    JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
 static void js_lv_slider_finalizer(JSRuntime *rt, JSValue val){
@@ -1766,6 +1779,7 @@ static JSValue js_lv_switch_constructor(JSContext *ctx, JSValueConst new_target,
     }
     lv_switch_t * cobj = lv_switch_create(cparent) ;
     JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, js_lv_switch_class_id) ;
+    JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
 static void js_lv_switch_finalizer(JSRuntime *rt, JSValue val){
@@ -1788,6 +1802,7 @@ static JSValue js_lv_table_constructor(JSContext *ctx, JSValueConst new_target, 
     }
     lv_table_t * cobj = lv_table_create(cparent) ;
     JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, js_lv_table_class_id) ;
+    JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
 static void js_lv_table_finalizer(JSRuntime *rt, JSValue val){
@@ -1810,6 +1825,7 @@ static JSValue js_lv_textarea_constructor(JSContext *ctx, JSValueConst new_targe
     }
     lv_textarea_t * cobj = lv_textarea_create(cparent) ;
     JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, js_lv_textarea_class_id) ;
+    JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
 static void js_lv_textarea_finalizer(JSRuntime *rt, JSValue val){
@@ -1844,6 +1860,7 @@ static JSValue js_lv_keyboard_constructor(JSContext *ctx, JSValueConst new_targe
     }
     lv_keyboard_t * cobj = lv_keyboard_create(cparent) ;
     JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, js_lv_keyboard_class_id) ;
+    JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
 static void js_lv_keyboard_finalizer(JSRuntime *rt, JSValue val){
@@ -1866,6 +1883,7 @@ static JSValue js_lv_tileview_constructor(JSContext *ctx, JSValueConst new_targe
     }
     lv_tileview_t * cobj = lv_tileview_create(cparent) ;
     JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, js_lv_tileview_class_id) ;
+    JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
 static void js_lv_tileview_finalizer(JSRuntime *rt, JSValue val){
@@ -1888,6 +1906,7 @@ static JSValue js_lv_list_constructor(JSContext *ctx, JSValueConst new_target, i
     }
     lv_obj_t * cobj = lv_list_create(cparent) ;
     JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, js_lv_list_class_id) ;
+    JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
 static void js_lv_list_finalizer(JSRuntime *rt, JSValue val){
@@ -3405,6 +3424,7 @@ static JSValue js_lv_obj_get_screen(JSContext *ctx, JSValueConst this_val, int a
     void * lvobj = lv_obj_get_screen(thisobj);
     if(lvobj) {
         retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, js_lv_obj_class_id) ;
+        JS_DupValue(ctx, retval) ;
     }
     return retval ;
 }
@@ -3419,6 +3439,7 @@ static JSValue js_lv_obj_get_parent(JSContext *ctx, JSValueConst this_val, int a
     void * lvobj = lv_obj_get_parent(thisobj);
     if(lvobj) {
         retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, js_lv_obj_class_id) ;
+        JS_DupValue(ctx, retval) ;
     }
     return retval ;
 }
@@ -3440,6 +3461,7 @@ static JSValue js_lv_obj_get_child(JSContext *ctx, JSValueConst this_val, int ar
     void * lvobj = lv_obj_get_child(thisobj, id);
     if(lvobj) {
         retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, js_lv_obj_class_id) ;
+        JS_DupValue(ctx, retval) ;
     }
     return retval ;
 }
@@ -3606,7 +3628,11 @@ static const JSCFunctionListEntry js_lv_obj_proto_funcs[] = {
     JS_CFUNC_DEF("disableEvent", 0, js_lv_obj_disable_event),
     JS_CFUNC_DEF("isScreen", 0, js_lv_obj_is_screen),
     JS_CFUNC_DEF("ptr", 0, js_lv_obj_ptr),
+    JS_CFUNC_DEF("coordX", 0, js_lv_obj_get_coord_x),
+    JS_CFUNC_DEF("coordY", 0, js_lv_obj_get_coord_y),
     JS_CFUNC_DEF("coords", 0, js_lv_obj_get_coords),
+    JS_CFUNC_DEF("setCoordX", 0, js_lv_obj_set_coord_x),
+    JS_CFUNC_DEF("setCoordY", 0, js_lv_obj_set_coord_y),
     JS_CFUNC_DEF("setCoords", 0, js_lv_obj_set_coords),
     JS_CFUNC_DEF("move", 0, js_lv_obj_move),
     JS_CFUNC_DEF("moveX", 0, js_lv_obj_move_x),
@@ -3618,6 +3644,7 @@ static const JSCFunctionListEntry js_lv_obj_proto_funcs[] = {
     JS_CFUNC_DEF("localStyle", 0, js_lv_obj_get_local_style),
     JS_CFUNC_DEF("fontHeight", 0, js_lv_obj_get_font_height),
     JS_CFUNC_DEF("as", 0, js_lv_obj_as),
+    JS_CFUNC_DEF("fromPtr", 0, js_lv_obj_from_ptr),
     JS_CFUNC_DEF("addFlag", 0, js_lv_obj_add_flag),
     JS_CFUNC_DEF("clearFlag", 0, js_lv_obj_clear_flag),
     JS_CFUNC_DEF("addState", 0, js_lv_obj_add_state),
@@ -5657,7 +5684,7 @@ static const JSCFunctionListEntry js_lv_roller_proto_funcs[] = {
 #define __def_js_lv_roller_proto_funcs__
 
 static JSValue js_lv_slider_set_value(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-    if(argc<2) {
+    if(argc<1) {
         THROW_EXCEPTION("Slider.setValue() missing arg")
     }
     void * lv_userdata = JS_GetOpaqueInternal(this_val) ;
@@ -5669,14 +5696,17 @@ static JSValue js_lv_slider_set_value(JSContext *ctx, JSValueConst this_val, int
     if(JS_ToInt32(ctx, (int32_t *) &value, argv[0])!=0){
         THROW_EXCEPTION("arg value of method Slider.setValue() must be a number")
     }
-    bool anim = JS_ToBool(ctx, argv[1]) ;
+    bool anim = true ;
+    if(argc>1) {
+        anim = JS_ToBool(ctx, argv[1]) ;
+    }
     lv_slider_set_value(thisobj, value, anim) ;
     JSValue retval = JS_UNDEFINED ;
     return retval ;
 }
 
 static JSValue js_lv_slider_set_left_value(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-    if(argc<2) {
+    if(argc<1) {
         THROW_EXCEPTION("Slider.setLeftValue() missing arg")
     }
     void * lv_userdata = JS_GetOpaqueInternal(this_val) ;
@@ -5688,7 +5718,10 @@ static JSValue js_lv_slider_set_left_value(JSContext *ctx, JSValueConst this_val
     if(JS_ToInt32(ctx, (int32_t *) &value, argv[0])!=0){
         THROW_EXCEPTION("arg value of method Slider.setLeftValue() must be a number")
     }
-    bool anim = JS_ToBool(ctx, argv[1]) ;
+    bool anim = true ;
+    if(argc>1) {
+        anim = JS_ToBool(ctx, argv[1]) ;
+    }
     lv_slider_set_left_value(thisobj, value, anim) ;
     JSValue retval = JS_UNDEFINED ;
     return retval ;
@@ -6311,6 +6344,7 @@ static JSValue js_lv_textarea_get_label(JSContext *ctx, JSValueConst this_val, i
     void * lvobj = lv_textarea_get_label(thisobj);
     if(lvobj) {
         retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, js_lv_obj_class_id) ;
+        JS_DupValue(ctx, retval) ;
     }
     return retval ;
 }
@@ -6507,6 +6541,7 @@ static JSValue js_lv_msgbox_get_title(JSContext *ctx, JSValueConst this_val, int
     void * lvobj = lv_msgbox_get_title(thisobj);
     if(lvobj) {
         retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, js_lv_label_class_id) ;
+        JS_DupValue(ctx, retval) ;
     }
     return retval ;
 }
@@ -6521,6 +6556,7 @@ static JSValue js_lv_msgbox_get_close_btn(JSContext *ctx, JSValueConst this_val,
     void * lvobj = lv_msgbox_get_close_btn(thisobj);
     if(lvobj) {
         retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, js_lv_btn_class_id) ;
+        JS_DupValue(ctx, retval) ;
     }
     return retval ;
 }
@@ -6535,6 +6571,7 @@ static JSValue js_lv_msgbox_get_text(JSContext *ctx, JSValueConst this_val, int 
     void * lvobj = lv_msgbox_get_text(thisobj);
     if(lvobj) {
         retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, js_lv_label_class_id) ;
+        JS_DupValue(ctx, retval) ;
     }
     return retval ;
 }
@@ -6549,6 +6586,7 @@ static JSValue js_lv_msgbox_get_content(JSContext *ctx, JSValueConst this_val, i
     void * lvobj = lv_msgbox_get_content(thisobj);
     if(lvobj) {
         retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, js_lv_obj_class_id) ;
+        JS_DupValue(ctx, retval) ;
     }
     return retval ;
 }
@@ -6563,6 +6601,7 @@ static JSValue js_lv_msgbox_get_btns(JSContext *ctx, JSValueConst this_val, int 
     void * lvobj = lv_msgbox_get_btns(thisobj);
     if(lvobj) {
         retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, js_lv_obj_class_id) ;
+        JS_DupValue(ctx, retval) ;
     }
     return retval ;
 }
@@ -6684,6 +6723,7 @@ static JSValue js_lv_keyboard_get_textarea(JSContext *ctx, JSValueConst this_val
     void * lvobj = lv_keyboard_get_textarea(thisobj);
     if(lvobj) {
         retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, js_lv_obj_class_id) ;
+        JS_DupValue(ctx, retval) ;
     }
     return retval ;
 }
@@ -6733,6 +6773,7 @@ static JSValue js_lv_tileview_add_tile(JSContext *ctx, JSValueConst this_val, in
     void * lvobj = lv_tileview_add_tile(thisobj, col_id, row_id, dir);
     if(lvobj) {
         retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, js_lv_obj_class_id) ;
+        JS_DupValue(ctx, retval) ;
     }
     return retval ;
 }
@@ -6747,6 +6788,7 @@ static JSValue js_lv_tileview_get_tile_act(JSContext *ctx, JSValueConst this_val
     void * lvobj = lv_tileview_get_tile_act(thisobj);
     if(lvobj) {
         retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, js_lv_obj_class_id) ;
+        JS_DupValue(ctx, retval) ;
     }
     return retval ;
 }
@@ -6772,28 +6814,8 @@ static JSValue js_lv_list_add_text(JSContext *ctx, JSValueConst this_val, int ar
     void * lvobj = lv_list_add_text(thisobj, txt);
     if(lvobj) {
         retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, js_lv_obj_class_id) ;
+        JS_DupValue(ctx, retval) ;
     }
-    JS_FreeCString(ctx, txt) ;
-    return retval ;
-}
-
-static JSValue js_lv_list_add_btn(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-    if(argc<2) {
-        THROW_EXCEPTION("List.addBtn() missing arg")
-    }
-    void * lv_userdata = JS_GetOpaqueInternal(this_val) ;
-    if(!lv_userdata) {
-        THROW_EXCEPTION("List.addBtn() must be called as a List method")
-    }
-    lv_obj_t * thisobj = lv_userdata ;
-    char * icon = (char *)JS_ToCString(ctx, argv[0]) ;
-    char * txt = (char *)JS_ToCString(ctx, argv[1]) ;
-    JSValue retval = JS_NULL ;
-    void * lvobj = lv_list_add_btn(thisobj, icon, txt);
-    if(lvobj) {
-        retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, js_lv_obj_class_id) ;
-    }
-    JS_FreeCString(ctx, icon) ;
     JS_FreeCString(ctx, txt) ;
     return retval ;
 }
@@ -6817,8 +6839,8 @@ static JSValue js_lv_list_get_btn_text(JSContext *ctx, JSValueConst this_val, in
 
 
 static const JSCFunctionListEntry js_lv_list_proto_funcs[] = {
-    JS_CFUNC_DEF("addText", 0, js_lv_list_add_text),
     JS_CFUNC_DEF("addBtn", 0, js_lv_list_add_btn),
+    JS_CFUNC_DEF("addText", 0, js_lv_list_add_text),
     JS_CFUNC_DEF("getBtnText", 0, js_lv_list_get_btn_text),
 } ;
 #define __def_js_lv_list_proto_funcs__
@@ -6918,13 +6940,10 @@ void require_vlgl_js_widgets_gen(JSContext *ctx, JSValue lvgl) {
 
     JS_Eval(ctx, (const char *)lv_obj_init_js, lv_obj_init_js_len, "[native]lv_obj_init", JS_EVAL_TYPE_GLOBAL|JS_EVAL_FLAG_STRIP) ;
 
-    
-    JS_SetPropertyStr(ctx, lvgl, "isEventName", JS_NewCFunction(ctx, js_lvgl_is_event_name, "isEventName", 1));  
+
 
     JS_FreeValue(ctx, EventEmitterProto);
 }
-
-
 
 
 
@@ -6956,4 +6975,10 @@ void init_lvgl_widgets() {
 
 JSClassID lv_obj_js_class_id() {
     return js_lv_obj_class_id ;
+}
+JSClassID lv_label_js_class_id() {
+    return js_lv_label_class_id ;
+}
+JSClassID lv_btn_js_class_id() {
+    return js_lv_btn_class_id ;
 }

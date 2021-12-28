@@ -16,22 +16,20 @@
 #define WS_DISP_BUFF_JPEG 2
 
 
-// uint16_t ws_input_x = 0 ;
-// uint16_t ws_input_y = 0 ;
-// bool ws_input_pressed = false ;
-// bool ws_input_update = false ;
-
 void ws_driver_input_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
     // if(!ws_input_update) {
     //     return ;
     // }
-    if(indev_input_pressed) {
-        data->state = LV_INDEV_STATE_PRESSED ;
-        data->point.x = indev_input_x ;
-        data->point.y = indev_input_y ;
-    }
-    else {
-        data->state = LV_INDEV_STATE_RELEASED ;
+    if(!be_lv_fake_indev(data)) {
+        if(indev_input_pressed) {
+            data->state = LV_INDEV_STATE_PRESSED ;
+            data->point.x = indev_input_x ;
+            data->point.y = indev_input_y ;
+        }
+        else {
+            data->state = LV_INDEV_STATE_RELEASED ;
+        }
+
     }
     // ws_input_update = false ;
 }

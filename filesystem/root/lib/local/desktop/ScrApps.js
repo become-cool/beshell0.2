@@ -1,7 +1,6 @@
 const lv = require("lv")
 const AppIcon = require("./AppIcon")
 const DlgNewApp = require("workspace/DlgNewApp")
-const WorkspaceMainScreen = require("workspace/MainScreen")
 
 let selectedAppFolder = null
 
@@ -92,7 +91,7 @@ module.exports = class ScrApps extends lv.Obj {
         }
         if(last) {
             setTimeout(()=>{
-                WorkspaceMainScreen.start( last )
+                require("workspace").start( last )
             },500)
         }
     }
@@ -112,7 +111,7 @@ module.exports = class ScrApps extends lv.Obj {
                         return
                     }
                     console.log("xxx")
-                    WorkspaceMainScreen.start( path )
+                    require("workspace").start( path )
                 } ,
                 longPressed: ()=>{
                     this.popupAppMenu(appico, path)
@@ -140,14 +139,14 @@ module.exports = class ScrApps extends lv.Obj {
         }
         let {x,y} = lv.inputPoint()
 
-        setTimeout(() => {
-            this._appMenu.show()
-            let mx = this.width() - this._appMenu.width()
-            let my = this.height() - this._appMenu.height()
-            if(x>mx) x = mx
-            if(y>my) y = my
-            this._appMenu.setCoords(x, y)
-        },0)
+        this._appMenu.updateLayout()
+
+        this._appMenu.show()
+        let mx = this.width() - this._appMenu.width()
+        let my = this.height() - this._appMenu.height()
+        if(x>mx) x = mx
+        if(y>my) y = my
+        this._appMenu.setCoords(x, y)
     }
 }
 
@@ -159,7 +158,7 @@ class AppMenu extends lv.List {
         this.addItem(lv.symbol.gps, "开机启动", ()=>{
         })
         this.addItem(lv.symbol.edit, "编辑", ()=>{
-            WorkspaceMainScreen.start( selectedAppFolder )
+            require("workspace").start( selectedAppFolder )
         })
         this.addItem(lv.symbol.trash, "删除", ()=>{
             console.log("ccc")

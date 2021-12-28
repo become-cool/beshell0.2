@@ -139,7 +139,7 @@ function compile(path) {
             script = Module.wrapExportMeta(script, beapi.fs.dirname(path), path)
         }
         try{
-            script = compileScript(script, path)
+            script = compileScript(script, path, true)
         }catch(e){
             console.error("compile failed:", path)
             console.error(e)

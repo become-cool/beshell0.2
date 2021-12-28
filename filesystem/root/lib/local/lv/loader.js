@@ -15,10 +15,16 @@ const MapPropFuncs = {
     oneLine: 'setOneLine' ,
     x: 'setX' ,
     y: 'setY' ,
+    value: 'setValue' ,
+    leftValue: 'setLeftValue' ,
 }
-const ArrEvents = [
-    'clicked'
-]
+const MapEvents = {
+    pressed:'pressed',
+    pressing:'pressing',
+    released:'released',
+    clicked:'clicked',
+    valueChanged: 'value-changed',
+}
 
 beapi.lvgl.fromJson = function fromJson(json, parent, refs){
     if(!refs) {
@@ -31,20 +37,22 @@ beapi.lvgl.fromJson = function fromJson(json, parent, refs){
             }
         }
         else {
-            let clzname = json["class"] || json.clazz || "Obj"
-            if(!clzname) {
+            let clz = json["class"] || json.clazz || "Obj"
+            if(!clz) {
                 throw new Error("missing class name")
             }
 
-            if( typeof clzname=="function" ){
-                var obj = new clzname(parent)
-            } else {
-                if(!beapi.lvgl[clzname]){
-                    throw new Error("unknow class name: "+clzname)
+            if(typeof clz=='string'){
+                if(typeof beapi.lvgl[clz]!='function'){
+                    throw new Error("unknow class name: "+clz)
                 }
-                var obj = new beapi.lvgl[clzname](parent)
+                clz = beapi.lvgl[clz]
+            }
+            if( typeof clz!="function" ){
+                throw new Error("invalid lv obj class: "+(typeof clz))
             }
 
+            var obj = new clz(parent, ...(json.args || []))
             obj.fromJson(json,refs)
         }
     }catch(e){
@@ -74,8 +82,8 @@ beapi.lvgl.Obj.prototype.fromJson = function fromJson(json, refs){
                         this[methodName]( json[propName] )
                     }
                 }
-                if(ArrEvents.includes(propName) && typeof json[propName]=="function") {
-                    this.on(propName, json[propName])
+                if(MapEvents[propName] && typeof json[propName]=="function") {
+                    this.on(MapEvents[propName], json[propName])
                 }
             }
 
@@ -94,6 +102,12 @@ beapi.lvgl.Obj.prototype.fromJson = function fromJson(json, refs){
             if(json.bubble) {
                 this.addFlag("event-bubble")
             }
+            
+            if(json.props && typeof json.props=="object") {
+                for(let name in json.props) {
+                    this[name] = json.props[name]
+                }
+            }
 
             if(json.children) {
                 beapi.lvgl.fromJson(json.children, this, refs)
@@ -103,9 +117,15 @@ beapi.lvgl.Obj.prototype.fromJson = function fromJson(json, refs){
                 refs[json.ref] = this
             }
         }
+        
+        this.updateLayout()
+
     }catch(e){
         console.error(e)
         console.error(e.stack)
     }
+
+
+
     return refs
 }

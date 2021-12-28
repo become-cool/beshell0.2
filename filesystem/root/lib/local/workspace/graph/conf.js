@@ -1,1 +1,0 @@
-exports.PPM = 2

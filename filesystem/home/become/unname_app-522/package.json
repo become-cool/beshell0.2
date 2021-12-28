@@ -1,0 +1,8 @@
+{
+    "name": "unname_app-522",
+    "version": "1.0.0",
+    "title": "unname app",
+    "uuid": "ad4fe75d-03ab-4715-85c4-9f3321300522",
+    "icon": "/lib/icon/game.png",
+    "main": "index.js"
+}

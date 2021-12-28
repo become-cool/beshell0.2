@@ -180,6 +180,7 @@ void quickjs_deinit() {
 
 void task_js_main(){
 
+    be_module_lvgl_malloc_buffer() ;
     be_module_process_init() ;
 
 #ifndef SIMULATION
@@ -190,7 +191,7 @@ void task_js_main(){
     be_module_telweb_init() ;
 #endif
     be_module_mg_init() ;
-    be_module_init_lvgl() ;
+    be_module_lvgl_init() ;
 
 #ifndef SIMULATION
     be_module_socks_init() ;

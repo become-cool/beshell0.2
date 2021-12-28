@@ -1,20 +1,22 @@
 const lv = require('lv')
 const Part = require('./Part')
-const {PPM} = require('../conf')
+
+const ScreenWidth = 77.6
+const ScreenHeight = 58 // 54
 
 class BePad extends Part{
+    static config = require("./part.lib/003.js")
     constructor(parent) {
         super(parent)
 
-        this.loadConf("./part.lib/003.js")
+        this.loadConf(BePad.config)
 
-        this.fromJson({
+        this.refs = this.fromJson({
             children: [
                 {
-                    width: 77.6*PPM ,
-                    height: 54*PPM ,
                     center: true ,
                     bubble: true ,
+                    ref: "screen" ,
                     style:{
                         "border-width": 0 ,
                         "bg-color": lv.rgb(0,0,0) ,
@@ -23,8 +25,12 @@ class BePad extends Part{
                 }
             ]
         })
+    }
 
-        this.clearFlag("scrollable")
+    repaint(zoom) {
+        super.repaint(zoom)
+        this.refs.screen.setWidth(ScreenWidth*zoom)
+        this.refs.screen.setHeight(ScreenHeight*zoom)
     }
 }
 

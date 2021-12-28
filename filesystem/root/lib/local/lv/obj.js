@@ -30,6 +30,21 @@ beapi.lvgl.Btn.prototype.setFont = function setFont(font) {
     this.label.setFont(font)
 }
 
+beapi.lvgl.CleanObj = class CleanObj extends beapi.lvgl.Obj {
+    constructor(parent) {
+        super(parent)
+        // this.removeStyleAll()
+        this.setStyle("pad-top", 0)
+        this.setStyle("pad-bottom", 0)
+        this.setStyle("pad-left", 0)
+        this.setStyle("pad-right", 0)
+        this.setStyle("border-width", 0)
+        this.setStyle("radius", 0)
+        this.setStyle("bg-opa", 0)
+        this.clearFlag("scrollable")
+    }
+}
+
 class Row extends beapi.lvgl.Obj {
     constructor(parent) {
         super(parent)

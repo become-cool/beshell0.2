@@ -7,8 +7,11 @@ const lstClasses = [
             "js_lv_obj_enable_event": "enableEvent" ,
             "js_lv_obj_disable_event": "disableEvent" ,
             "js_lv_obj_is_screen": "isScreen" ,
-            "js_lv_obj_ptr": "ptr" ,
+            "js_lv_obj_get_coord_x": "coordX" ,
+            "js_lv_obj_get_coord_y": "coordY" ,
             "js_lv_obj_get_coords": "coords" ,
+            "js_lv_obj_set_coord_x": "setCoordX" ,
+            "js_lv_obj_set_coord_y": "setCoordY" ,
             "js_lv_obj_set_coords": "setCoords" ,
             "js_lv_obj_move": "move" ,
             "js_lv_obj_move_x": "moveX" ,
@@ -20,6 +23,7 @@ const lstClasses = [
             "js_lv_obj_get_local_style": "localStyle" ,
             "js_lv_obj_get_font_height": "fontHeight" ,
             "js_lv_obj_as": "as" ,
+            "js_lv_obj_ptr": "ptr" ,
         }
     },
     {
@@ -64,7 +68,11 @@ const lstClasses = [
     {
         className: "List" ,
         ctypeName: "lv_obj_t *" ,
-        // methods: require(__dirname+"/api/lv_list.js")
+        cusMethods: {
+            "js_lv_list_add_btn": "addBtn" ,
+            // "js_lv_list_add_text": "addText" ,
+        }
+
     },
 ]
 

@@ -27,6 +27,8 @@
 
 
 JSClassID lv_obj_js_class_id() ;
+JSClassID lv_label_js_class_id() ;
+JSClassID lv_btn_js_class_id() ;
 
 void init_lvgl_widgets() ;
 void require_vlgl_js_widgets_gen(JSContext *ctx, JSValue lvgl) ;

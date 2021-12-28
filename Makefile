@@ -4,8 +4,8 @@ all:
 	
 fs:
 	node filesystem/packfs.js
-	bin/mklittlefs -c filesystem/tmp/root -s 524288 filesystem/img/fs-root.img -d 2
-	bin/mklittlefs -c filesystem/tmp/home -s 131072 filesystem/img/fs-home.img -d 2
+	bin/mklittlefs -c filesystem/tmp/root -s 524288 filesystem/img/fs-root.img -d 5 -b 1024
+	bin/mklittlefs -c filesystem/tmp/home -s 131072 filesystem/img/fs-home.img -d 5
 	cp filesystem/img/fs-root.img ../beconsole/build/src/assets/firmware/beshell-0.2.0/flash/fs-root.img
 	cp filesystem/img/fs-home.img ../beconsole/build/src/assets/firmware/beshell-0.2.0/flash/fs-home.img
 	

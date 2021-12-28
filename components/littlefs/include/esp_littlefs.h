@@ -43,6 +43,7 @@ typedef struct {
     const char *partition_label;      /**< Label of partition to use. */
     uint8_t format_if_mount_failed:1; /**< Format the file system if it fails to mount. */
     uint8_t dont_mount:1;             /**< Don't attempt to mount or format. Overrides format_if_mount_failed */
+    uint16_t block_size;
 } esp_vfs_littlefs_conf_t;
 
 /**

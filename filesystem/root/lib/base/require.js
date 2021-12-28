@@ -152,6 +152,7 @@ function __mkrequire(__dirname) {
                         beapi.fs.writeFileSync( path+".bin", bytecode)
                     }catch(e){
                         console.error(e)
+                        console.error(e.stack)
                     }
                     result = evalBin(bytecode)
                 }

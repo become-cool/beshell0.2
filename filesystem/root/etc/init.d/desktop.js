@@ -4,10 +4,7 @@ if(typeof beapi.lvgl.defaultDisplay!='function') {
 else {
 
     (async function worker() {
-        await prequire([
-            'lv',
-        ])
-
+        await require("lv/prequire") ()
         await require("desktop/prequire") ()
         await require("workspace/prequire") ()
 

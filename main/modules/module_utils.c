@@ -233,7 +233,12 @@ JSValue js_compile_script(JSContext *ctx, JSValueConst this_val, int argc, JSVal
     ARGV_TO_STRING_LEN_E(0, code, codelen, "argv code must be a string")
     ARGV_TO_STRING_E(1, path, "argv path must be a string")
 
-    JSValue func = JS_Eval(ctx, code, codelen, path, JS_EVAL_TYPE_GLOBAL|JS_EVAL_FLAG_COMPILE_ONLY) ; 
+    uint32_t flag = JS_EVAL_TYPE_GLOBAL|JS_EVAL_FLAG_COMPILE_ONLY ;
+    if(argc>2 && JS_ToBool(ctx, argv[2])) {
+        flag|= JS_EVAL_FLAG_STRIP ;
+    }
+
+    JSValue func = JS_Eval(ctx, code, codelen, path, flag) ; 
 
 	JS_FreeCString(ctx, code) ;
 	JS_FreeCString(ctx, path) ;

@@ -111,12 +111,49 @@ static JSValue js_lv_rgb(JSContext *ctx, JSValueConst this_val, int argc, JSValu
     return JS_NewUint32(ctx, color.full) ;
 }
 
+static JSValue js_lv_set_indev_active_obj(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+    CHECK_INSOF_LVOBJ("Obj", argv[0], "arg widget of lvgl.setIndevActiveObj() must be a lvgl.Object method")
+    lv_obj_t * obj = JS_GetOpaqueInternal(argv[0]) ;
+    if(!obj) {
+        THROW_EXCEPTION("invalid lv widget obj")
+        // return JS_FALSE ;
+    }
+
+    lv_indev_t * indev = lv_indev_get_act() ;
+    if(!indev) {
+        THROW_EXCEPTION("there is no active indev")
+        // return JS_FALSE ;   
+    }
+
+    if(indev->driver->type != LV_INDEV_TYPE_POINTER) {
+        THROW_EXCEPTION("active indev's type is not pointer")
+        // return JS_FALSE ;
+    }
+
+    indev->proc.types.pointer.act_obj = obj ;
+
+    printf("bingo") ;
+    return JS_UNDEFINED ;
+}
+
+static JSValue js_lvgl_loop(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    lv_task_handler() ;
+    return JS_UNDEFINED ;
+}
+
+static JSValue js_lvgl_tick(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    lv_tick_inc(LV_TICK_PERIOD_MS);
+    return JS_UNDEFINED ;
+}
+
+
+#ifndef SIMULATION
 void lv_tick_task(void *arg) {
     (void) arg;
     lv_tick_inc(LV_TICK_PERIOD_MS);
 }
-
-#ifdef SIMULATION
+#else
 struct sigaction tact;
 struct itimerval value;
 void sig_alm_handler(int sig_num) {
@@ -189,13 +226,15 @@ void require_vlgl_js_font_symbol(JSContext *ctx, JSValue lvgl) {
     JS_SetPropertyStr(ctx, symbol, "backspace", JS_NewString(ctx, LV_SYMBOL_BACKSPACE));  
     JS_SetPropertyStr(ctx, symbol, "sd_card", JS_NewString(ctx, LV_SYMBOL_SD_CARD));  
     JS_SetPropertyStr(ctx, symbol, "new_line", JS_NewString(ctx, LV_SYMBOL_NEW_LINE));  
+
+    // s16
+    JS_SetPropertyStr(ctx, symbol, "search", JS_NewString(ctx, "\xEF\x80\x82"));  
 }
 
-void be_module_init_lvgl() {
+void be_module_lvgl_init() {
     init_lvgl_display() ;
     init_lvgl_widgets() ;
     init_lvgl_style() ;
-
 }
 
 void be_module_lvgl_require(JSContext *ctx) {
@@ -237,11 +276,14 @@ void be_module_lvgl_require(JSContext *ctx) {
     JSValue lvgl = JS_NewObject(ctx);
     JS_SetPropertyStr(ctx, beapi, "lvgl", lvgl);  
 
+    JS_SetPropertyStr(ctx, lvgl, "loop", JS_NewCFunction(ctx, js_lvgl_loop, "loop", 1));
+    JS_SetPropertyStr(ctx, lvgl, "tick", JS_NewCFunction(ctx, js_lvgl_tick, "tick", 1));
     JS_SetPropertyStr(ctx, lvgl, "loadScreen", JS_NewCFunction(ctx, js_lvgl_load_screen, "loadScreen", 1));
     JS_SetPropertyStr(ctx, lvgl, "inputPoint", JS_NewCFunction(ctx, js_lvgl_input_point, "inputPoint", 1));
     JS_SetPropertyStr(ctx, lvgl, "pct", JS_NewCFunction(ctx, js_lv_coord_pct, "pct", 1));
     JS_SetPropertyStr(ctx, lvgl, "isPct", JS_NewCFunction(ctx, js_lv_coord_is_pct, "isPct", 1));
     JS_SetPropertyStr(ctx, lvgl, "rgb", JS_NewCFunction(ctx, js_lv_rgb, "rgb", 1));
+    JS_SetPropertyStr(ctx, lvgl, "setIndevActiveObj", JS_NewCFunction(ctx, js_lv_set_indev_active_obj, "setIndevActiveObj", 1));
 
     JS_SetPropertyStr(ctx, lvgl, "SizeContent", JS_NewUint32(ctx, LV_SIZE_CONTENT));
     JS_SetPropertyStr(ctx, lvgl, "MaxCoord", JS_NewUint32(ctx, LV_COORD_MAX));

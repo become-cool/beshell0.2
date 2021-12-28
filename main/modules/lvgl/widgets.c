@@ -42,7 +42,7 @@ JSValue js_lv_obj_wrapper(JSContext *ctx, lv_obj_t * cobj, JSValue cotr, JSClass
         
         js_lv_obj_init(ctx, jsobj) ;
 
-        JS_DupValue(ctx, jsobj) ;
+        // JS_DupValue(ctx, jsobj) ;
     }
     
     return jsobj ;
@@ -74,7 +74,7 @@ JSValue js_lv_obj_as(JSContext *ctx, JSValueConst this_val, int argc, JSValueCon
         lv_obj_set_user_data(thisobj, NULL) ;
     }
     
-    return js_lv_obj_wrapper(ctx, thisobj, argv[0], classid) ;
+    return JS_DupValue( ctx, js_lv_obj_wrapper(ctx, thisobj, argv[0], classid) );
 }
 
 static void js_lv_event_cb(lv_event_t * event) {
@@ -102,7 +102,12 @@ static void js_lv_event_cb(lv_event_t * event) {
 
     JSValue func_emit = js_get_prop(ctx, jstarget, 1, "emit") ;
     
-    JS_Call(ctx, func_emit, jstarget, 3, cbargv) ;
+    JSValue ret = JS_Call(ctx, func_emit, jstarget, 3, cbargv) ;
+    if(JS_IsException(ret)) {
+        js_std_dump_error(ctx) ;
+    }
+    JS_FreeValue(ctx, ret) ;
+
 
     free(cbargv) ;
     JS_FreeValue(ctx, func_emit) ;
@@ -172,12 +177,22 @@ JSValue js_lv_obj_is_screen(JSContext *ctx, JSValueConst this_val, int argc, JSV
     return lv_obj_get_parent(thisobj)==NULL? JS_TRUE: JS_FALSE ;
 }
 
-JSValue js_lv_obj_ptr(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-    THIS_LVOBJ("Obj", "isScreen", thisobj)
-    printf("%p\n", thisobj) ;
-    return JS_NewUint32(ctx, (uint64_t)thisobj) ;
+JSValue js_lv_obj_set_coord_x(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+        CHECK_ARGC(1)
+    ARGV_TO_INT16(0, x)
+    THIS_LVOBJ("Obj", "setCoordX", thisobj)
+    int16_t dx = x - thisobj->coords.x1 ;
+    lv_obj_set_x(thisobj, lv_obj_get_x_aligned(thisobj) + dx) ;
+    return JS_UNDEFINED ;
 }
-
+JSValue js_lv_obj_set_coord_y(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+    ARGV_TO_INT16(0, y)
+    THIS_LVOBJ("Obj", "setCoordY", thisobj)
+    int16_t dy = y - thisobj->coords.y1 ;
+    lv_obj_set_y(thisobj, lv_obj_get_y_aligned(thisobj) + dy) ;
+    return JS_UNDEFINED ;
+}
 JSValue js_lv_obj_set_coords(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(2)
     ARGV_TO_INT16(0, x)
@@ -192,6 +207,14 @@ JSValue js_lv_obj_set_coords(JSContext *ctx, JSValueConst this_val, int argc, JS
     lv_obj_set_y(thisobj, lv_obj_get_y_aligned(thisobj) + dy) ;
     
     return JS_UNDEFINED ;
+}
+JSValue js_lv_obj_get_coord_x(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    THIS_LVOBJ("Obj", "getCoordX", thisobj)    
+    return JS_NewInt32(ctx, thisobj->coords.x1) ;
+}
+JSValue js_lv_obj_get_coord_y(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    THIS_LVOBJ("Obj", "getCoordY", thisobj)
+    return JS_NewInt32(ctx, thisobj->coords.y1) ;
 }
 JSValue js_lv_obj_get_coords(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
 
@@ -262,22 +285,7 @@ JSValue js_lv_obj_set_style(JSContext *ctx, JSValueConst this_val, int argc, JSV
     if(!JS_IsString(argv[0])) {
         THROW_EXCEPTION("arg style name must be a string")
     }
-    lv_style_prop_t prop ;
     char * jsStyleName = (char *)JS_ToCString(ctx, argv[0]) ;
-    if(!lv_style_prop_str_to_const(jsStyleName, &prop)) {
-        JS_ThrowReferenceError(ctx, "unknow style name: %s", jsStyleName) ;
-        JS_FreeCString(ctx, jsStyleName) ;
-        return JS_EXCEPTION ;
-    }
-    JS_FreeCString(ctx, jsStyleName) ;
-
-    if(!lv_style_prop_jsstr_to_const(ctx, argv[0], &prop)){
-    }
-
-    lv_style_value_t value ;
-    if(!lv_style_js_to_value(ctx, prop, argv[1], &value)){
-        THROW_EXCEPTION("style value invalid")
-    }
 
     lv_style_selector_t selector = LV_PART_MAIN | LV_STATE_DEFAULT ;
     if(argc>2) {
@@ -288,8 +296,33 @@ JSValue js_lv_obj_set_style(JSContext *ctx, JSValueConst this_val, int argc, JSV
 
     THIS_LVOBJ("Obj", "getStyle", thisobj)
 
-    lv_obj_set_local_style_prop(thisobj, prop, value, selector) ;
+    lv_style_value_t value ;
+    
+    if(strcmp(jsStyleName,"pad")==0) {
+        if(!lv_style_js_to_value(ctx, LV_STYLE_PAD_TOP, argv[1], &value)){
+            THROW_EXCEPTION("style value invalid")
+        }
+        lv_obj_set_local_style_prop(thisobj, LV_STYLE_PAD_TOP, value, selector) ;
+        lv_obj_set_local_style_prop(thisobj, LV_STYLE_PAD_BOTTOM, value, selector) ;
+        lv_obj_set_local_style_prop(thisobj, LV_STYLE_PAD_LEFT, value, selector) ;
+        lv_obj_set_local_style_prop(thisobj, LV_STYLE_PAD_RIGHT, value, selector) ;
+    }
+    else {
+        lv_style_prop_t prop ;
+        if(!lv_style_prop_str_to_const(jsStyleName, &prop)) {
+            JS_ThrowReferenceError(ctx, "unknow style name: %s", jsStyleName) ;
+            JS_FreeCString(ctx, jsStyleName) ;
+            return JS_EXCEPTION ;
+        }
+        if(!lv_style_js_to_value(ctx, prop, argv[1], &value)){
+            THROW_EXCEPTION("style value invalid")
+        }
 
+        lv_style_prop_jsstr_to_const(ctx, argv[0], &prop) ;
+        lv_obj_set_local_style_prop(thisobj, prop, value, selector) ;
+    }
+
+    JS_FreeCString(ctx, jsStyleName) ;
     return JS_UNDEFINED ;
 }
 
@@ -378,6 +411,9 @@ JSValue js_lv_obj_get_font_height(JSContext *ctx, JSValueConst this_val, int arg
     lv_font_t * font = lv_obj_get_style_text_font(thisobj, selector) ;
     return JS_NewInt32(ctx, font? font->line_height: 0)  ;
 }
+
+extern lv_font_t be_font_symbol_16 ;
+
 JSValue js_lv_label_set_font(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(1)
     THIS_LVOBJ("Obj", "style", thisobj)
@@ -410,6 +446,9 @@ JSValue js_lv_label_set_font(JSContext *ctx, JSValueConst this_val, int argc, JS
     }
     else if( strcmp("msyh", fontname)==0 ) {
         font = font_msyh() ;
+    }
+    else if( strcmp("s16", fontname)==0 ) {
+        font = & be_font_symbol_16 ;
     }
 
     JSValue ret = JS_UNDEFINED ;
@@ -499,12 +538,61 @@ JSValue js_lv_msgbox_constructor(JSContext *ctx, JSValueConst new_target, int ar
     }
     free(btns) ;
 
-    return js_lv_obj_wrapper(ctx, cobj, new_target, lv_obj_js_class_id()) ;
+    return JS_DupValue( ctx, js_lv_obj_wrapper(ctx, cobj, new_target, lv_obj_js_class_id()) ) ;
 }
 
+JSValue js_lv_list_add_btn(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    if(argc<2) {
+        THROW_EXCEPTION("List.addBtn() missing arg")
+    }
+    void * lv_userdata = JS_GetOpaqueInternal(this_val) ;
+    if(!lv_userdata) {
+        THROW_EXCEPTION("List.addBtn() must be called as a List method")
+    }
+    lv_obj_t * thisobj = lv_userdata ;
+    char * icon = NULL ;
+    if( JS_IsString(argv[0]) ) {
+        icon = (char *)JS_ToCString(ctx, argv[0]) ;
+    }
+    char * txt = (char *)JS_ToCString(ctx, argv[1]) ;
+    JSValue retval = JS_NULL ;
+    void * lvobj = lv_list_add_btn(thisobj, icon, txt);
+    if(lvobj) {
+        retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, lv_btn_js_class_id()) ;
+        JS_DupValue(ctx, retval) ;
+    }
+    if(icon) {
+        JS_FreeCString(ctx, icon) ;
+    }
+    JS_FreeCString(ctx, txt) ;
+    return retval ;
+}
 
+JSValue js_lv_obj_ptr(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    THIS_LVOBJ("Obj","ptr", thisobj)
+    return JS_NewInt64(ctx, (int64_t)thisobj) ;
+}
+JSValue js_lv_obj_from_ptr(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+    int64_t ptr ;
+    if(JS_ToInt64(ctx, &ptr, argv[0])!=0){
+        THROW_EXCEPTION("invalid ptr value")
+    }
+    JSValue jsobj =  js_lv_obj_wrapper(ctx, (lv_obj_t*)ptr, JS_UNDEFINED, lv_obj_js_class_id()) ;
+    return JS_DupValue(ctx, jsobj) ;
+}
 
+#ifndef SIMULATION
+JSValue js_lv_set_debug_log(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    lv_set_debug_log( JS_ToBool(ctx, argv[0])) ;
+    return JS_UNDEFINED ;
+}
+#endif
 
 void require_vlgl_js_widgets(JSContext *ctx, JSValue lvgl) {
-
+    JS_SetPropertyStr(ctx, lvgl, "isEventName", JS_NewCFunction(ctx, js_lvgl_is_event_name, "isEventName", 1));
+    JS_SetPropertyStr(ctx, lvgl, "fromPtr", JS_NewCFunction(ctx, js_lv_obj_from_ptr, "fromPtr", 1));
+#ifndef SIMULATION
+    JS_SetPropertyStr(ctx, lvgl, "setDebugLog", JS_NewCFunction(ctx, js_lv_set_debug_log, "setDebugLog", 1));
+#endif
 }

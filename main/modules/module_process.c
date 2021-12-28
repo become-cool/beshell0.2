@@ -9,6 +9,9 @@
 #include "telnet.h"
 #include "psram.h"
 
+#include "esp_system.h"
+#include "soc/efuse_reg.h"
+#include "esp_heap_caps.h"
 
 
 static int cpu0_idle_cnt = 0;
@@ -95,22 +98,35 @@ JSValue js_process_memory_usage(JSContext *ctx, JSValueConst this_val, int argc,
     (void) argv ;
 
     int heap_total = 0 ;
-    int heap_free = 0 ;
+    int heap_used = 0 ;
     int psram_total = 0 ;
-    int psram_free = 0 ;
+    int psram_used = 0 ;
+    int dma_total = 0 ;
+    int dma_used = 0 ;
 
 #ifndef SIMULATION
-    heap_total = getHeapSize() ;
-    heap_free = getFreeHeap() ;
-    psram_total = getPsramSize() ;
-    psram_free = getFreePsram() ;
+    multi_heap_info_t info;
+
+    heap_caps_get_info(&info, MALLOC_CAP_DMA);
+    dma_total = info.total_free_bytes + info.total_allocated_bytes;
+    dma_used = info.total_allocated_bytes;
+
+    heap_caps_get_info(&info, MALLOC_CAP_INTERNAL);
+    heap_total = info.total_free_bytes + info.total_allocated_bytes;
+    heap_used = info.total_allocated_bytes;
+
+    heap_caps_get_info(&info, MALLOC_CAP_SPIRAM);
+    psram_total = info.total_free_bytes + info.total_allocated_bytes;
+    psram_used = info.total_allocated_bytes;
 #endif
 
     JSValue obj = JS_NewObject(ctx) ;
     JS_SetPropertyStr(ctx, obj, "heap_total", JS_NewUint32(ctx, heap_total)) ;
-    JS_SetPropertyStr(ctx, obj, "heap_free", JS_NewUint32(ctx, heap_free)) ;
+    JS_SetPropertyStr(ctx, obj, "heap_used", JS_NewUint32(ctx, heap_used)) ;
     JS_SetPropertyStr(ctx, obj, "psram_total", JS_NewUint32(ctx, psram_total)) ;
-    JS_SetPropertyStr(ctx, obj, "psram_free", JS_NewUint32(ctx, psram_free)) ;
+    JS_SetPropertyStr(ctx, obj, "psram_used", JS_NewUint32(ctx, psram_used)) ;
+    JS_SetPropertyStr(ctx, obj, "dma_total", JS_NewUint32(ctx, dma_total)) ;
+    JS_SetPropertyStr(ctx, obj, "dma_used", JS_NewUint32(ctx, dma_used)) ;
 
     return obj ;
 }

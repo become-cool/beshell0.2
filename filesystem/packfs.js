@@ -4,6 +4,7 @@ const {execSync} = require("child_process")
 
 
 function packdir(from, to, packpath, ignores) {
+    let bytes = 0
     if(!fs.existsSync(to)) {
         fs.mkdirSync(to, {recursive:true})
     }
@@ -16,7 +17,7 @@ function packdir(from, to, packpath, ignores) {
         }
         let stat = fs.statSync(itemFull)
         if (stat.isDirectory()) {
-            packdir(itemFull, to+'/'+item, vfspath, ignores)
+            bytes+= packdir(itemFull, to+'/'+item, vfspath, ignores)
         }
         else if(stat.isFile()) {
             if(item.substr(-3).toLowerCase()==".js") {
@@ -29,11 +30,14 @@ function packdir(from, to, packpath, ignores) {
             }
             fs.copyFileSync(itemFull, to+'/'+item)
             console.log(itemFull)
+
+            bytes+= stat.size
         }
         else {
             console.error("unknow type", itemFull)
         }
     }
+    return bytes
 }
 
 // function compile(scriptPath, dist, dirname, filename) {
@@ -52,5 +56,8 @@ function packdir(from, to, packpath, ignores) {
 
 execSync(`rm -rf "${__dirname}/tmp/"`)
 
-packdir(__dirname+"/root", __dirname+"/tmp/root", "", ["/home/become"])
-packdir(__dirname+"/home", __dirname+"/tmp/home", "/home")
+var bytes = packdir(__dirname+"/root", __dirname+"/tmp/root", "", ["/home/become"])
+console.log("/root:", bytes, "bytes")
+
+bytes = packdir(__dirname+"/home", __dirname+"/tmp/home", "/home")
+console.log("/home:", bytes, "bytes")

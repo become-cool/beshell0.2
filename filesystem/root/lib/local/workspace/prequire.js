@@ -2,11 +2,13 @@ module.exports = function(){
     return prequire([
         "./DlgNewApp" ,
         "./ToolBar" ,
-        "./graph/conf" ,
+        "./AppModel" ,
         "./graph/parts/Port" ,
         "./graph/parts/Part" ,
         "./graph/parts/BePad" ,
         "./graph/GraphCanvas" ,
-        "./MainScreen" ,
+        "./graph/GraphTools" ,
+        "./graph/PartLib" ,
+        "./Workspace" ,
     ], require)
 }

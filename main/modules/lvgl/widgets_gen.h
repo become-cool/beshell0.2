@@ -105,6 +105,12 @@ bool lv_keyboard_mode_str_to_const(const char * str, lv_keyboard_mode_t* out) ;
 bool lv_keyboard_mode_jsstr_to_const(JSContext *ctx, JSValue jsstr, lv_keyboard_mode_t* out) ;
 const char *  lv_keyboard_mode_const_to_str(lv_keyboard_mode_t code) ;
 JSValue lv_keyboard_mode_const_to_jsstr(JSContext *ctx, lv_keyboard_mode_t code) ;
+
+bool lv_img_cf_str_to_const(const char * str, lv_img_cf_t* out) ;
+bool lv_img_cf_jsstr_to_const(JSContext *ctx, JSValue jsstr, lv_img_cf_t* out) ;
+const char *  lv_img_cf_const_to_str(lv_img_cf_t code) ;
+JSValue lv_img_cf_const_to_jsstr(JSContext *ctx, lv_img_cf_t code) ;
 // AUTO GENERATE CODE END [CONST CONVERT] --------
+
 
 #endif

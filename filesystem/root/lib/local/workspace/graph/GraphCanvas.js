@@ -5,8 +5,14 @@ const GraphHeight = 200*2
 
 class GraphCanvas extends lv.CleanObj{
 
+    activePart = null
+
     docOutterX = 20
     docOutterY = 20
+
+    zoom = 2
+
+    workspace = null
 
     constructor(parent, workspace) {
         super(parent)
@@ -35,11 +41,17 @@ class GraphCanvas extends lv.CleanObj{
         })
 
         this.workspace = workspace
+
+        this.on("clicked", ()=>{
+            if(this.activePart) {
+                this.emit("graph-active-changed", null, this.activePart)
+                this.activePart.setSelected(false)
+                this.activePart = null
+            }
+        })
+
         global.graph = this
     }
-
-    workspace = null
-    zoom = 2
 
     setZoom(zoom) {
         this.zoom = zoom
@@ -65,6 +77,15 @@ class GraphCanvas extends lv.CleanObj{
             Math.round(docX * this.zoom + this.width()/2 + this.coordX())  ,
             Math.round(docY * this.zoom + this.height()/2 + this.coordY()) 
         ]
+    }
+
+    setActivePart(part) {
+        this.emit("graph-active-changed", part, this.activePart)
+        if(this.activePart) {
+            this.activePart.setSelected(false)
+        }
+        part.setSelected(true)
+        this.activePart = part
     }
 }
 

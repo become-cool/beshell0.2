@@ -109,6 +109,14 @@ beapi.lvgl.Obj.prototype.fromJson = function fromJson(json, refs){
                 }
             }
 
+            if(json.visible!=undefined){
+                if(json.visible) {
+                    this.show()
+                } else {
+                    this.hide()
+                }
+            }
+
             if(json.children) {
                 beapi.lvgl.fromJson(json.children, this, refs)
             }

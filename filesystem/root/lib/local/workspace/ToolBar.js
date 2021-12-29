@@ -35,11 +35,6 @@ class ToolBar extends lv.Obj {
                             class: "Label" ,
                             text: lv.symbol.power
                         } ,
-                        {
-                            class: "Label" ,
-                            font: "s16" ,
-                            text: lv.symbol.search
-                        } 
                     ]
                 } ,
 

@@ -12,7 +12,6 @@ class Workspace extends lv.CleanObj {
 
         ; ({  graph: this.graph ,
             zoomer: this.zoomer ,
-            toolbar: this.toolbar ,
         } = this.fromJson({
             style: {} ,
             children: [
@@ -20,12 +19,6 @@ class Workspace extends lv.CleanObj {
                     class: GraphCanvas ,
                     args: [this] ,
                     ref: "graph" ,
-                } ,
-
-                {
-                    class: ToolBar , 
-                    args: [this] ,
-                    ref: "toolbar" ,
                 } ,
                 {
                     class: Zoomer ,
@@ -38,6 +31,19 @@ class Workspace extends lv.CleanObj {
                 } ,
             ]
         }))
+
+
+        ; ({ toolbar: this.toolbar } = this.fromJson({
+            style: {} ,
+            children: [
+                {
+                    class: ToolBar , 
+                    args: [this] ,
+                    ref: "toolbar" ,
+                } ,
+            ]
+        }))
+
 
         this.model = new AppModel(this)
         this.model.createHostFromDevice(this.graph)

@@ -5,6 +5,7 @@ exports["130"] = {
     width: 32 ,
     height: 32 ,
     "bg-color": lv.rgb(80,80,80) ,
+    onlyFemale:true ,
     ports: [
         { title: "VCC", x:44, y:12 } ,
         { title: "GND", x:52, y:12 } ,

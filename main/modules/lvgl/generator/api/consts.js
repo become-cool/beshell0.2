@@ -1,6 +1,9 @@
 
 
 function parseCSource(src) {
+
+    
+
     let array = []
     for(let res of [...src.matchAll(/\s*([\w\-_]+)(\s*=\s*[^\,]+)\s*\,/g)]) {
         array.push(res[1])
@@ -434,7 +437,56 @@ module.exports = [
             'LV_KEYBOARD_MODE_USER_3' ,
             'LV_KEYBOARD_MODE_USER_4' ,
         ]   
+    }
+
+    , {
+        prefix: 'LV_IMG_CF_' ,
+        type: 'lv_img_cf_t' ,
+        name: 'lv_img_cf' ,
+        end: 'LV_IMG_CF_USER_ENCODED_7+1' ,
+        def: [
+            "LV_IMG_CF_UNKNOWN",
+
+            "LV_IMG_CF_RAW",
+            "LV_IMG_CF_RAW_ALPHA",
+            "LV_IMG_CF_RAW_CHROMA_KEYED",
+
+            "LV_IMG_CF_TRUE_COLOR",
+            "LV_IMG_CF_TRUE_COLOR_ALPHA",
+            "LV_IMG_CF_TRUE_COLOR_CHROMA_KEYED",
+
+            "LV_IMG_CF_INDEXED_1BIT",
+            "LV_IMG_CF_INDEXED_2BIT",
+            "LV_IMG_CF_INDEXED_4BIT",
+            "LV_IMG_CF_INDEXED_8BIT",
+
+            "LV_IMG_CF_ALPHA_1BIT",
+            "LV_IMG_CF_ALPHA_2BIT",
+            "LV_IMG_CF_ALPHA_4BIT",
+            "LV_IMG_CF_ALPHA_8BIT",
+
+            "LV_IMG_CF_RESERVED_15",
+            "LV_IMG_CF_RESERVED_16",
+            "LV_IMG_CF_RESERVED_17",
+            "LV_IMG_CF_RESERVED_18",
+            "LV_IMG_CF_RESERVED_19",
+            "LV_IMG_CF_RESERVED_20",
+            "LV_IMG_CF_RESERVED_21",
+            "LV_IMG_CF_RESERVED_22",
+            "LV_IMG_CF_RESERVED_23",
+
+            "LV_IMG_CF_USER_ENCODED_0",
+            "LV_IMG_CF_USER_ENCODED_1",
+            "LV_IMG_CF_USER_ENCODED_2",
+            "LV_IMG_CF_USER_ENCODED_3",
+            "LV_IMG_CF_USER_ENCODED_4",
+            "LV_IMG_CF_USER_ENCODED_5",
+            "LV_IMG_CF_USER_ENCODED_6",
+            "LV_IMG_CF_USER_ENCODED_7",
+        ]
     } ,
+
+    
 
     
 ]

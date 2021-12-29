@@ -1,5 +1,6 @@
 const fs = require("fs")
 const WidgetsMeta = require("./lv_widgets.meta.js")
+const StructWrapper = require("./lv_struct_wrapper.js")
 // console.log(WidgetsMeta)
 
 function create_conver_base(ctype, js_conver_func, api_arg_type) {
@@ -107,6 +108,18 @@ function conver_string(cargv,i) {
     return `    char * ${cargv} = (char *)JS_ToCString(ctx, argv[${i}]) ;\r\n`
 }
 
+function struct_wrapper(structType, class_id, classFullName) {
+    return function(cargv,i,className,jsmethod) {
+        cargv = cargv.replace(/^&/, "")
+        return `    ${structType} * ${cargv} = JS_GetOpaque(argv[${i}], ${class_id});
+    if(!${cargv}) {
+        THROW_EXCEPTION("arg ${cargv} of method ${className}.${jsmethod}() must be a ${classFullName} object")
+    }
+`
+    }
+}
+
+
 const MapC2JS_Conver = {
     "int8_t": conver_int8 ,
     "uint8_t": conver_uint8 ,
@@ -155,6 +168,10 @@ const MapC2JS_Conver = {
     "lv_label_long_mode_t": create_conver_mappingconst('lv_label_long_mode_t', 'lv_label_long_mode_jsstr_to_const'),
     "lv_keyboard_mode_t": create_conver_mappingconst('lv_keyboard_mode_t', 'lv_keyboard_mode_jsstr_to_const'),
     "lv_style_t *": conver_style ,
+    "lv_draw_rect_dsc_t *": struct_wrapper('lv_draw_rect_dsc_t', 'js_lv_draw_rect_dsc_class_id', 'lv.DrawRectDsc') ,
+    "lv_draw_arc_dsc_t *": struct_wrapper('lv_draw_arc_dsc_t', 'js_lv_draw_arc_dsc_class_id', 'lv.DrawArcDsc') ,
+
+    
 }
 
 function free_argv_string(cargv){
@@ -535,9 +552,18 @@ const const_mapping_mark_end = "// AUTO GENERATE CODE END [CONST MAPPING] ------
 const const_mapping_header_mark_start = "// AUTO GENERATE CODE START [CONST CONVERT] --------"
 const const_mapping_header_mark_end = "// AUTO GENERATE CODE END [CONST CONVERT] --------"
 
+function start(name) {
+    return `// AUTO GENERATE CODE START [${name.toUpperCase()}] --------`
+}
+function end(name) {
+    return `// AUTO GENERATE CODE END [${name.toUpperCase()}] --------`
+}
+
 
 let dist_src_path = __dirname + "/../widgets_gen.c"
 let dist_header_path = __dirname + "/../widgets_gen.h"
+
+let struct_wrapper_src_path = __dirname + "/../be_lv_struct_wrapper.c"
 
 function main() {
     let code = ""
@@ -562,6 +588,14 @@ function main() {
     src = fs.readFileSync(dist_header_path).toString()
     src = srcInsert(src, generateConstDeclare(), const_mapping_header_mark_start, const_mapping_header_mark_end)
     fs.writeFileSync(dist_header_path, src)
+
+    // struct wrapper
+    src = fs.readFileSync(struct_wrapper_src_path).toString()
+    src = srcInsert(src, StructWrapper.generateDefine(), start('CLASS DEFINE'), end('CLASS DEFINE'))   
+    src = srcInsert(src, StructWrapper.generateInit(), start('CLASS ID INIT'), end('CLASS ID INIT'))   
+    src = srcInsert(src, StructWrapper.generateRequire(), start('CLASS REQUIRE'), end('CLASS REQUIRE'))    
+    fs.writeFileSync(struct_wrapper_src_path, src)
+
 
 }
 main()

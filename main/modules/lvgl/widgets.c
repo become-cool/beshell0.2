@@ -1,5 +1,6 @@
 #include "widgets.h"
 #include "style.h"
+#include "be_lv_struct_wrapper.h"
 #include "utils.h"
 #include "font_msyh.h"
 #include "module_fs.h"
@@ -97,8 +98,15 @@ static void js_lv_event_cb(lv_event_t * event) {
 
     JSValue jsname = lv_event_code_const_to_jsstr(ctx, event->code) ;
 
-    // jstarget
-    MAKE_ARGV3( cbargv, jsname, jsname, jstarget )
+    // param
+    JSValue param = JS_UNDEFINED ;
+    if(event->code==LV_EVENT_DRAW_MAIN && event->param) {
+        param = JS_NewObjectClass(ctx, js_lv_area_class_id) ;
+        JS_SetOpaque(param, event->param) ;
+    }
+
+
+    MAKE_ARGV3( cbargv, jsname, jsname, param )
 
     JSValue func_emit = js_get_prop(ctx, jstarget, 1, "emit") ;
     
@@ -108,6 +116,11 @@ static void js_lv_event_cb(lv_event_t * event) {
     }
     JS_FreeValue(ctx, ret) ;
 
+    // 解除 opaque 后释放 param
+    if( !JS_IsUndefined(param) ) {
+        JS_SetOpaque(param, NULL) ;
+        JS_FreeValue(ctx, param) ;
+    }
 
     free(cbargv) ;
     JS_FreeValue(ctx, func_emit) ;
@@ -412,7 +425,7 @@ JSValue js_lv_obj_get_font_height(JSContext *ctx, JSValueConst this_val, int arg
     return JS_NewInt32(ctx, font? font->line_height: 0)  ;
 }
 
-extern lv_font_t be_font_symbol_16 ;
+// extern lv_font_t be_font_symbol_16 ;
 
 JSValue js_lv_label_set_font(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(1)
@@ -447,9 +460,9 @@ JSValue js_lv_label_set_font(JSContext *ctx, JSValueConst this_val, int argc, JS
     else if( strcmp("msyh", fontname)==0 ) {
         font = font_msyh() ;
     }
-    else if( strcmp("s16", fontname)==0 ) {
-        font = & be_font_symbol_16 ;
-    }
+    // else if( strcmp("s16", fontname)==0 ) {
+    //     font = & be_font_symbol_16 ;
+    // }
 
     JSValue ret = JS_UNDEFINED ;
 
@@ -588,6 +601,61 @@ JSValue js_lv_set_debug_log(JSContext *ctx, JSValueConst this_val, int argc, JSV
     return JS_UNDEFINED ;
 }
 #endif
+
+
+
+JSValue js_lv_canvas_malloc(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(2)
+    ARGV_TO_UINT16(0, w)
+    ARGV_TO_UINT16(0, h)
+    THIS_LVOBJ("Canvas","malloc", thisobj)
+
+    lv_img_cf_t color_format = LV_IMG_CF_TRUE_COLOR_ALPHA ;
+    if(argc>2) {
+        if(!lv_img_cf_jsstr_to_const(ctx, argv[2], &color_format)) {
+            THROW_EXCEPTION("invalid color format")
+        }
+    }
+    size_t buff_len ;
+    if(color_format==LV_IMG_CF_TRUE_COLOR) {
+        buff_len = LV_CANVAS_BUF_SIZE_TRUE_COLOR(w, h) ;
+    }
+    else if(color_format==LV_IMG_CF_TRUE_COLOR_ALPHA) {
+        buff_len = LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(w, h) ;
+    }
+    else if(color_format==LV_IMG_CF_INDEXED_1BIT) {
+        buff_len = LV_CANVAS_BUF_SIZE_INDEXED_1BIT(w, h) ;
+    }
+    else if(color_format==LV_IMG_CF_INDEXED_2BIT) {
+        buff_len = LV_CANVAS_BUF_SIZE_INDEXED_2BIT(w, h) ;
+    }
+    else if(color_format==LV_IMG_CF_INDEXED_4BIT) {
+        buff_len = LV_CANVAS_BUF_SIZE_INDEXED_4BIT(w, h) ;
+    }
+    else if(color_format==LV_IMG_CF_INDEXED_8BIT) {
+        buff_len = LV_CANVAS_BUF_SIZE_INDEXED_8BIT(w, h) ;
+    }
+    else {
+        THROW_EXCEPTION("not supported color format")
+    }
+
+    const char * buff = malloc(buff_len) ;
+    if(!buff) {
+        THROW_EXCEPTION("out of memory?")
+    }
+
+    lv_canvas_set_buffer(thisobj, buff, w, h, color_format);
+
+    return JS_NewUint32(ctx, buff_len) ;
+}
+// JSValue js_lv_canvas_free(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+//     THIS_OBJ("Canvas","malloc", thisobj, lv_canvas_t)
+//     if(thisobj->dsc.data_size && thisobj->dsc.data) {
+//         free(thisobj->dsc.data) ;
+//     }
+//     return JS_UNDEFINED ;
+// }
+
 
 void require_vlgl_js_widgets(JSContext *ctx, JSValue lvgl) {
     JS_SetPropertyStr(ctx, lvgl, "isEventName", JS_NewCFunction(ctx, js_lvgl_is_event_name, "isEventName", 1));

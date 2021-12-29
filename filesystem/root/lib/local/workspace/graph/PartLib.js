@@ -85,6 +85,8 @@ class PartLib extends lv.CleanObj{
             let part = this.parent().model.createPart(partClass)
             part.repaint(this.parent().zoomer.value)
 
+            this.parent().graph.setActivePart(part)
+
             setTimeout(()=>{
 
                 let pos = lv.inputPoint()

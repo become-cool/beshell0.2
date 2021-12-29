@@ -36,7 +36,13 @@ const lstClasses = [
     "Bar",
     "Btn",
     "BtnMatrix",
-    "Canvas",
+    {
+        className: "Canvas" ,
+        cusMethods: {
+            "js_lv_canvas_malloc": "malloc" ,
+            // "js_lv_canvas_free": "free" ,
+        }
+    } ,
     "Checkbox",
     "Dropdown",
     {

@@ -2,9 +2,13 @@ const lv = require('lv')
 
 const RAD = 3
 
-class Port extends lv.CleanObj{
-    constructor(parent, conf) {
+class Port extends lv.Canvas{
+
+    female = false
+
+    constructor(parent, conf, female) {
         super(parent, conf)
+        this.female = !!female
 
         this.conf = conf
         // if(conf.x) {
@@ -48,12 +52,27 @@ class Port extends lv.CleanObj{
     }
 
 
-    repaint(zoom) {
+    repaint(zoom, dir) {
+        this.setStyle("radius", RAD*zoom)
         this.setWidth(RAD*2*zoom)
         this.setHeight(RAD*2*zoom)
-        this.setStyle("radius", RAD*zoom)
-        this.setX(this.conf.x*zoom)
-        this.setY(this.conf.y*zoom)
+
+        if(dir==1) {
+            this.setX(this.conf.x*zoom)
+            this.setY(this.conf.y*zoom)
+        }
+        else if(dir==2) {
+            this.setX(-this.conf.y*zoom)
+            this.setY(-this.conf.x*zoom)
+        }
+        else if(dir==3) {
+            this.setX(-this.conf.x*zoom)
+            this.setY(-this.conf.y*zoom)
+        }
+        else if(dir==4) {
+            this.setX(this.conf.y*zoom)
+            this.setY(this.conf.x*zoom)
+        }
     }
 }
 

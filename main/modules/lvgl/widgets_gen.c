@@ -1,6 +1,7 @@
 #include "widgets_gen.h"
 #include "widgets.h"
 #include "style.h"
+#include "be_lv_struct_wrapper.h"
 
 #include "utils.h"
 #include "cutils.h"
@@ -1463,11 +1464,160 @@ const char * lv_keyboard_mode_const_to_str(lv_keyboard_mode_t code) {
 JSValue lv_keyboard_mode_const_to_jsstr(JSContext *ctx, lv_keyboard_mode_t code) {
     return JS_NewString(ctx, lv_keyboard_mode_const_to_str(code));
 }
+
+bool lv_img_cf_str_to_const(const char * name, lv_img_cf_t* out) {
+        if(strcmp(name,"unknown")==0) {
+        (*out) = LV_IMG_CF_UNKNOWN ;
+    }
+    else if(strcmp(name,"raw")==0) {
+        (*out) = LV_IMG_CF_RAW ;
+    }
+    else if(strcmp(name,"raw-alpha")==0) {
+        (*out) = LV_IMG_CF_RAW_ALPHA ;
+    }
+    else if(strcmp(name,"raw-chroma-keyed")==0) {
+        (*out) = LV_IMG_CF_RAW_CHROMA_KEYED ;
+    }
+    else if(strcmp(name,"true-color")==0) {
+        (*out) = LV_IMG_CF_TRUE_COLOR ;
+    }
+    else if(strcmp(name,"true-color-alpha")==0) {
+        (*out) = LV_IMG_CF_TRUE_COLOR_ALPHA ;
+    }
+    else if(strcmp(name,"true-color-chroma-keyed")==0) {
+        (*out) = LV_IMG_CF_TRUE_COLOR_CHROMA_KEYED ;
+    }
+    else if(strcmp(name,"indexed-1bit")==0) {
+        (*out) = LV_IMG_CF_INDEXED_1BIT ;
+    }
+    else if(strcmp(name,"indexed-2bit")==0) {
+        (*out) = LV_IMG_CF_INDEXED_2BIT ;
+    }
+    else if(strcmp(name,"indexed-4bit")==0) {
+        (*out) = LV_IMG_CF_INDEXED_4BIT ;
+    }
+    else if(strcmp(name,"indexed-8bit")==0) {
+        (*out) = LV_IMG_CF_INDEXED_8BIT ;
+    }
+    else if(strcmp(name,"alpha-1bit")==0) {
+        (*out) = LV_IMG_CF_ALPHA_1BIT ;
+    }
+    else if(strcmp(name,"alpha-2bit")==0) {
+        (*out) = LV_IMG_CF_ALPHA_2BIT ;
+    }
+    else if(strcmp(name,"alpha-4bit")==0) {
+        (*out) = LV_IMG_CF_ALPHA_4BIT ;
+    }
+    else if(strcmp(name,"alpha-8bit")==0) {
+        (*out) = LV_IMG_CF_ALPHA_8BIT ;
+    }
+    else if(strcmp(name,"reserved-15")==0) {
+        (*out) = LV_IMG_CF_RESERVED_15 ;
+    }
+    else if(strcmp(name,"reserved-16")==0) {
+        (*out) = LV_IMG_CF_RESERVED_16 ;
+    }
+    else if(strcmp(name,"reserved-17")==0) {
+        (*out) = LV_IMG_CF_RESERVED_17 ;
+    }
+    else if(strcmp(name,"reserved-18")==0) {
+        (*out) = LV_IMG_CF_RESERVED_18 ;
+    }
+    else if(strcmp(name,"reserved-19")==0) {
+        (*out) = LV_IMG_CF_RESERVED_19 ;
+    }
+    else if(strcmp(name,"reserved-20")==0) {
+        (*out) = LV_IMG_CF_RESERVED_20 ;
+    }
+    else if(strcmp(name,"reserved-21")==0) {
+        (*out) = LV_IMG_CF_RESERVED_21 ;
+    }
+    else if(strcmp(name,"reserved-22")==0) {
+        (*out) = LV_IMG_CF_RESERVED_22 ;
+    }
+    else if(strcmp(name,"reserved-23")==0) {
+        (*out) = LV_IMG_CF_RESERVED_23 ;
+    }
+    else if(strcmp(name,"user-encoded-0")==0) {
+        (*out) = LV_IMG_CF_USER_ENCODED_0 ;
+    }
+    else if(strcmp(name,"user-encoded-1")==0) {
+        (*out) = LV_IMG_CF_USER_ENCODED_1 ;
+    }
+    else if(strcmp(name,"user-encoded-2")==0) {
+        (*out) = LV_IMG_CF_USER_ENCODED_2 ;
+    }
+    else if(strcmp(name,"user-encoded-3")==0) {
+        (*out) = LV_IMG_CF_USER_ENCODED_3 ;
+    }
+    else if(strcmp(name,"user-encoded-4")==0) {
+        (*out) = LV_IMG_CF_USER_ENCODED_4 ;
+    }
+    else if(strcmp(name,"user-encoded-5")==0) {
+        (*out) = LV_IMG_CF_USER_ENCODED_5 ;
+    }
+    else if(strcmp(name,"user-encoded-6")==0) {
+        (*out) = LV_IMG_CF_USER_ENCODED_6 ;
+    }
+    else if(strcmp(name,"user-encoded-7")==0) {
+        (*out) = LV_IMG_CF_USER_ENCODED_7 ;
+    }
+
+    else {
+        return false ;
+    }
+    return true ;
+}
+bool lv_img_cf_jsstr_to_const(JSContext *ctx, JSValue jsstr, lv_img_cf_t* out) {
+    char * cstr = (char *)JS_ToCString(ctx, jsstr) ;
+    bool suc = lv_img_cf_str_to_const(cstr, out) ;
+    JS_FreeCString(ctx, cstr) ;
+    return suc ;
+}
+const char * lv_img_cf_const_to_str(lv_img_cf_t code) {
+
+    switch(code) {
+        case LV_IMG_CF_UNKNOWN: return "unknown";
+        case LV_IMG_CF_RAW: return "raw";
+        case LV_IMG_CF_RAW_ALPHA: return "raw-alpha";
+        case LV_IMG_CF_RAW_CHROMA_KEYED: return "raw-chroma-keyed";
+        case LV_IMG_CF_TRUE_COLOR: return "true-color";
+        case LV_IMG_CF_TRUE_COLOR_ALPHA: return "true-color-alpha";
+        case LV_IMG_CF_TRUE_COLOR_CHROMA_KEYED: return "true-color-chroma-keyed";
+        case LV_IMG_CF_INDEXED_1BIT: return "indexed-1bit";
+        case LV_IMG_CF_INDEXED_2BIT: return "indexed-2bit";
+        case LV_IMG_CF_INDEXED_4BIT: return "indexed-4bit";
+        case LV_IMG_CF_INDEXED_8BIT: return "indexed-8bit";
+        case LV_IMG_CF_ALPHA_1BIT: return "alpha-1bit";
+        case LV_IMG_CF_ALPHA_2BIT: return "alpha-2bit";
+        case LV_IMG_CF_ALPHA_4BIT: return "alpha-4bit";
+        case LV_IMG_CF_ALPHA_8BIT: return "alpha-8bit";
+        case LV_IMG_CF_RESERVED_15: return "reserved-15";
+        case LV_IMG_CF_RESERVED_16: return "reserved-16";
+        case LV_IMG_CF_RESERVED_17: return "reserved-17";
+        case LV_IMG_CF_RESERVED_18: return "reserved-18";
+        case LV_IMG_CF_RESERVED_19: return "reserved-19";
+        case LV_IMG_CF_RESERVED_20: return "reserved-20";
+        case LV_IMG_CF_RESERVED_21: return "reserved-21";
+        case LV_IMG_CF_RESERVED_22: return "reserved-22";
+        case LV_IMG_CF_RESERVED_23: return "reserved-23";
+        case LV_IMG_CF_USER_ENCODED_0: return "user-encoded-0";
+        case LV_IMG_CF_USER_ENCODED_1: return "user-encoded-1";
+        case LV_IMG_CF_USER_ENCODED_2: return "user-encoded-2";
+        case LV_IMG_CF_USER_ENCODED_3: return "user-encoded-3";
+        case LV_IMG_CF_USER_ENCODED_4: return "user-encoded-4";
+        case LV_IMG_CF_USER_ENCODED_5: return "user-encoded-5";
+        case LV_IMG_CF_USER_ENCODED_6: return "user-encoded-6";
+        case LV_IMG_CF_USER_ENCODED_7: return "user-encoded-7";
+
+        default:
+            return "unkonw";
+    }
+}
+JSValue lv_img_cf_const_to_jsstr(JSContext *ctx, lv_img_cf_t code) {
+    return JS_NewString(ctx, lv_img_cf_const_to_str(code));
+}
 // AUTO GENERATE CODE END [CONST MAPPING] --------
-
-
-
-
 
 // AUTO GENERATE CODE START [DEFINE CLASS] --------
  // beapi.lvgl.Obj --
@@ -3627,7 +3777,6 @@ static const JSCFunctionListEntry js_lv_obj_proto_funcs[] = {
     JS_CFUNC_DEF("enableEvent", 0, js_lv_obj_enable_event),
     JS_CFUNC_DEF("disableEvent", 0, js_lv_obj_disable_event),
     JS_CFUNC_DEF("isScreen", 0, js_lv_obj_is_screen),
-    JS_CFUNC_DEF("ptr", 0, js_lv_obj_ptr),
     JS_CFUNC_DEF("coordX", 0, js_lv_obj_get_coord_x),
     JS_CFUNC_DEF("coordY", 0, js_lv_obj_get_coord_y),
     JS_CFUNC_DEF("coords", 0, js_lv_obj_get_coords),
@@ -3644,7 +3793,7 @@ static const JSCFunctionListEntry js_lv_obj_proto_funcs[] = {
     JS_CFUNC_DEF("localStyle", 0, js_lv_obj_get_local_style),
     JS_CFUNC_DEF("fontHeight", 0, js_lv_obj_get_font_height),
     JS_CFUNC_DEF("as", 0, js_lv_obj_as),
-    JS_CFUNC_DEF("fromPtr", 0, js_lv_obj_from_ptr),
+    JS_CFUNC_DEF("ptr", 0, js_lv_obj_ptr),
     JS_CFUNC_DEF("addFlag", 0, js_lv_obj_add_flag),
     JS_CFUNC_DEF("clearFlag", 0, js_lv_obj_clear_flag),
     JS_CFUNC_DEF("addState", 0, js_lv_obj_add_state),
@@ -4842,6 +4991,27 @@ static JSValue js_lv_canvas_set_palette(JSContext *ctx, JSValueConst this_val, i
     return retval ;
 }
 
+static JSValue js_lv_canvas_get_px(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    if(argc<2) {
+        THROW_EXCEPTION("Canvas.px() missing arg")
+    }
+    void * lv_userdata = JS_GetOpaqueInternal(this_val) ;
+    if(!lv_userdata) {
+        THROW_EXCEPTION("Canvas.px() must be called as a Canvas method")
+    }
+    lv_obj_t * thisobj = lv_userdata ;
+    int16_t x ;
+    if(JS_ToInt32(ctx, (int32_t *) &x, argv[0])!=0){
+        THROW_EXCEPTION("arg x of method Canvas.px() must be a number")
+    }
+    int16_t y ;
+    if(JS_ToInt32(ctx, (int32_t *) &y, argv[1])!=0){
+        THROW_EXCEPTION("arg y of method Canvas.px() must be a number")
+    }
+    JSValue retval = JS_NewUint32(ctx,lv_canvas_get_px(thisobj, x, y).full) ;
+    return retval ;
+}
+
 static JSValue js_lv_canvas_blur_hor(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     if(argc<2) {
         THROW_EXCEPTION("Canvas.blurHor() missing arg")
@@ -4964,15 +5134,91 @@ static JSValue js_lv_canvas_fill_bg(JSContext *ctx, JSValueConst this_val, int a
     return retval ;
 }
 
+static JSValue js_lv_canvas_draw_rect(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    if(argc<5) {
+        THROW_EXCEPTION("Canvas.drawRect() missing arg")
+    }
+    void * lv_userdata = JS_GetOpaqueInternal(this_val) ;
+    if(!lv_userdata) {
+        THROW_EXCEPTION("Canvas.drawRect() must be called as a Canvas method")
+    }
+    lv_obj_t * thisobj = lv_userdata ;
+    int16_t x ;
+    if(JS_ToInt32(ctx, (int32_t *) &x, argv[0])!=0){
+        THROW_EXCEPTION("arg x of method Canvas.drawRect() must be a number")
+    }
+    int16_t y ;
+    if(JS_ToInt32(ctx, (int32_t *) &y, argv[1])!=0){
+        THROW_EXCEPTION("arg y of method Canvas.drawRect() must be a number")
+    }
+    int16_t w ;
+    if(JS_ToInt32(ctx, (int32_t *) &w, argv[2])!=0){
+        THROW_EXCEPTION("arg w of method Canvas.drawRect() must be a number")
+    }
+    int16_t h ;
+    if(JS_ToInt32(ctx, (int32_t *) &h, argv[3])!=0){
+        THROW_EXCEPTION("arg h of method Canvas.drawRect() must be a number")
+    }
+    lv_draw_rect_dsc_t * draw_dsc = JS_GetOpaque(argv[4], js_lv_draw_rect_dsc_class_id);
+    if(!draw_dsc) {
+        THROW_EXCEPTION("arg draw_dsc of method Canvas.drawRect() must be a lv.DrawRectDsc object")
+    }
+    lv_canvas_draw_rect(thisobj, x, y, w, h, draw_dsc) ;
+    JSValue retval = JS_UNDEFINED ;
+    return retval ;
+}
+
+static JSValue js_lv_canvas_draw_arc(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    if(argc<6) {
+        THROW_EXCEPTION("Canvas.drawArc() missing arg")
+    }
+    void * lv_userdata = JS_GetOpaqueInternal(this_val) ;
+    if(!lv_userdata) {
+        THROW_EXCEPTION("Canvas.drawArc() must be called as a Canvas method")
+    }
+    lv_obj_t * thisobj = lv_userdata ;
+    int16_t x ;
+    if(JS_ToInt32(ctx, (int32_t *) &x, argv[0])!=0){
+        THROW_EXCEPTION("arg x of method Canvas.drawArc() must be a number")
+    }
+    int16_t y ;
+    if(JS_ToInt32(ctx, (int32_t *) &y, argv[1])!=0){
+        THROW_EXCEPTION("arg y of method Canvas.drawArc() must be a number")
+    }
+    int16_t r ;
+    if(JS_ToInt32(ctx, (int32_t *) &r, argv[2])!=0){
+        THROW_EXCEPTION("arg r of method Canvas.drawArc() must be a number")
+    }
+    int32_t start_angle ;
+    if(JS_ToInt32(ctx, (int32_t *) &start_angle, argv[3])!=0){
+        THROW_EXCEPTION("arg start_angle of method Canvas.drawArc() must be a number")
+    }
+    int32_t end_angle ;
+    if(JS_ToInt32(ctx, (int32_t *) &end_angle, argv[4])!=0){
+        THROW_EXCEPTION("arg end_angle of method Canvas.drawArc() must be a number")
+    }
+    lv_draw_arc_dsc_t * draw_dsc = JS_GetOpaque(argv[5], js_lv_draw_arc_dsc_class_id);
+    if(!draw_dsc) {
+        THROW_EXCEPTION("arg draw_dsc of method Canvas.drawArc() must be a lv.DrawArcDsc object")
+    }
+    lv_canvas_draw_arc(thisobj, x, y, r, start_angle, end_angle, draw_dsc) ;
+    JSValue retval = JS_UNDEFINED ;
+    return retval ;
+}
+
 
 static const JSCFunctionListEntry js_lv_canvas_proto_funcs[] = {
+    JS_CFUNC_DEF("malloc", 0, js_lv_canvas_malloc),
     JS_CFUNC_DEF("setPxColor", 0, js_lv_canvas_set_px_color),
     JS_CFUNC_DEF("setPx", 0, js_lv_canvas_set_px),
     JS_CFUNC_DEF("setPxOpa", 0, js_lv_canvas_set_px_opa),
     JS_CFUNC_DEF("setPalette", 0, js_lv_canvas_set_palette),
+    JS_CFUNC_DEF("px", 0, js_lv_canvas_get_px),
     JS_CFUNC_DEF("blurHor", 0, js_lv_canvas_blur_hor),
     JS_CFUNC_DEF("blurVer", 0, js_lv_canvas_blur_ver),
     JS_CFUNC_DEF("fillBg", 0, js_lv_canvas_fill_bg),
+    JS_CFUNC_DEF("drawRect", 0, js_lv_canvas_draw_rect),
+    JS_CFUNC_DEF("drawArc", 0, js_lv_canvas_draw_arc),
 } ;
 #define __def_js_lv_canvas_proto_funcs__
 

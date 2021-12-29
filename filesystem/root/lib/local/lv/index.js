@@ -16,6 +16,17 @@ beapi.lvgl.dir.VER = beapi.lvgl.dir.TOP | beapi.lvgl.dir.BOTTOM
 beapi.lvgl.dir.ALL = beapi.lvgl.dir.HOR | beapi.lvgl.dir.VER
 
 
+beapi.lvgl.side = {
+    none     : 0x00,
+    bottom   : 0x01,
+    top      : 0x02,
+    left     : 0x04,
+    right    : 0x08,
+    full     : 0x0F,
+}
+
+
+
 
 beapi.lvgl.part = {
     main : 0x000000 ,

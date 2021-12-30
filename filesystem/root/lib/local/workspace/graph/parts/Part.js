@@ -28,8 +28,6 @@ class Part extends lv.CleanObj{
                 "bg-opa": 255 ,
             } ,
             children: [] ,
-            // pressed(){
-            // }
         })
 
         this.draggable(null ,

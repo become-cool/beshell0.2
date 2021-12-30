@@ -393,6 +393,19 @@ static JSClassID js_${clzConf.typeName}_class_id ;
     }
     ${clzConf.ctypeName} cobj = ${clzConf.typeName}_create(cparent) ;
     JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, js_${clzConf.typeName}_class_id) ;
+    if(argc>1) {
+        if(!JS_IsObject(argv[1])) {
+            JS_FreeValue(ctx, jsobj) ;
+            THROW_EXCEPTION("arg json must be a object")
+        }
+        JSValue fromJson = JS_GetPropertyStr(ctx, jsobj, "fromJson") ;
+        JSValue ret = JS_Call(ctx,fromJson,jsobj,1,&argv[1]) ;
+        if(JS_IsException(ret)) {
+            return JS_EXCEPTION ; 
+        }
+        JS_FreeValue(ctx,ret) ;
+        JS_FreeValue(ctx,fromJson) ;
+    }
     JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }

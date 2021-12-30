@@ -7,11 +7,15 @@ class Zoomer extends lv.CleanObj{
 
     value = 2
 
-    constructor(parent) {
-        super(parent)
+    constructor(workspace) {
+        super(workspace)
 
         this.refs = this.fromJson({
             width: 20 ,
+            height: 180 ,
+            valueChanged: (value)=>{
+                workspace.activeView.setZoom( value )
+            } ,
             children: [
                 {
                     class: lv.CleanObj ,
@@ -36,10 +40,19 @@ class Zoomer extends lv.CleanObj{
                         "border-width": 1 ,
                         "border-color": lv.palette("grey") ,
                     } ,
-                    // text: lv.symbol.search ,
-                    // font: "s16" ,
                 } ,
             ]
+        })
+
+
+        workspace.on("ws-active-view-changed", (view)=>{
+            if(view && view!=workspace.ui){
+                this.show()
+                this.setZoom(view.zoom, true)
+            }
+            else {
+                this.hide()
+            }
         })
 
         this.refs.handle.setY( this.height() - this.refs.handle.height() )
@@ -84,12 +97,13 @@ class Zoomer extends lv.CleanObj{
         )
     }
     
-    setZoom(value) {
+    setZoom(value, dontEmit) {
         this.value = value
         let fullvalue = this.height()-this.refs.handle.height()
         let y = fullvalue - Math.round(((this.value-1)/3) * fullvalue)
         this.refs.handle.setY(y)
-        this.emit("value-changed", this.value)
+        if(!dontEmit)
+            this.emit("value-changed", this.value)
     }
 }
 

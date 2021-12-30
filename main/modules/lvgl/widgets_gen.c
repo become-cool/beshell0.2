@@ -1630,6 +1630,19 @@ static JSValue js_lv_obj_constructor(JSContext *ctx, JSValueConst new_target, in
     }
     lv_obj_t * cobj = lv_obj_create(cparent) ;
     JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, js_lv_obj_class_id) ;
+    if(argc>1) {
+        if(!JS_IsObject(argv[1])) {
+            JS_FreeValue(ctx, jsobj) ;
+            THROW_EXCEPTION("arg json must be a object")
+        }
+        JSValue fromJson = JS_GetPropertyStr(ctx, jsobj, "fromJson") ;
+        JSValue ret = JS_Call(ctx,fromJson,jsobj,1,&argv[1]) ;
+        if(JS_IsException(ret)) {
+            return JS_EXCEPTION ; 
+        }
+        JS_FreeValue(ctx,ret) ;
+        JS_FreeValue(ctx,fromJson) ;
+    }
     JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
@@ -1653,6 +1666,19 @@ static JSValue js_lv_label_constructor(JSContext *ctx, JSValueConst new_target, 
     }
     lv_label_t * cobj = lv_label_create(cparent) ;
     JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, js_lv_label_class_id) ;
+    if(argc>1) {
+        if(!JS_IsObject(argv[1])) {
+            JS_FreeValue(ctx, jsobj) ;
+            THROW_EXCEPTION("arg json must be a object")
+        }
+        JSValue fromJson = JS_GetPropertyStr(ctx, jsobj, "fromJson") ;
+        JSValue ret = JS_Call(ctx,fromJson,jsobj,1,&argv[1]) ;
+        if(JS_IsException(ret)) {
+            return JS_EXCEPTION ; 
+        }
+        JS_FreeValue(ctx,ret) ;
+        JS_FreeValue(ctx,fromJson) ;
+    }
     JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
@@ -1676,6 +1702,19 @@ static JSValue js_lv_arc_constructor(JSContext *ctx, JSValueConst new_target, in
     }
     lv_arc_t * cobj = lv_arc_create(cparent) ;
     JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, js_lv_arc_class_id) ;
+    if(argc>1) {
+        if(!JS_IsObject(argv[1])) {
+            JS_FreeValue(ctx, jsobj) ;
+            THROW_EXCEPTION("arg json must be a object")
+        }
+        JSValue fromJson = JS_GetPropertyStr(ctx, jsobj, "fromJson") ;
+        JSValue ret = JS_Call(ctx,fromJson,jsobj,1,&argv[1]) ;
+        if(JS_IsException(ret)) {
+            return JS_EXCEPTION ; 
+        }
+        JS_FreeValue(ctx,ret) ;
+        JS_FreeValue(ctx,fromJson) ;
+    }
     JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
@@ -1699,6 +1738,19 @@ static JSValue js_lv_bar_constructor(JSContext *ctx, JSValueConst new_target, in
     }
     lv_bar_t * cobj = lv_bar_create(cparent) ;
     JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, js_lv_bar_class_id) ;
+    if(argc>1) {
+        if(!JS_IsObject(argv[1])) {
+            JS_FreeValue(ctx, jsobj) ;
+            THROW_EXCEPTION("arg json must be a object")
+        }
+        JSValue fromJson = JS_GetPropertyStr(ctx, jsobj, "fromJson") ;
+        JSValue ret = JS_Call(ctx,fromJson,jsobj,1,&argv[1]) ;
+        if(JS_IsException(ret)) {
+            return JS_EXCEPTION ; 
+        }
+        JS_FreeValue(ctx,ret) ;
+        JS_FreeValue(ctx,fromJson) ;
+    }
     JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
@@ -1722,6 +1774,19 @@ static JSValue js_lv_btn_constructor(JSContext *ctx, JSValueConst new_target, in
     }
     lv_btn_t * cobj = lv_btn_create(cparent) ;
     JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, js_lv_btn_class_id) ;
+    if(argc>1) {
+        if(!JS_IsObject(argv[1])) {
+            JS_FreeValue(ctx, jsobj) ;
+            THROW_EXCEPTION("arg json must be a object")
+        }
+        JSValue fromJson = JS_GetPropertyStr(ctx, jsobj, "fromJson") ;
+        JSValue ret = JS_Call(ctx,fromJson,jsobj,1,&argv[1]) ;
+        if(JS_IsException(ret)) {
+            return JS_EXCEPTION ; 
+        }
+        JS_FreeValue(ctx,ret) ;
+        JS_FreeValue(ctx,fromJson) ;
+    }
     JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
@@ -1745,6 +1810,19 @@ static JSValue js_lv_btnmatrix_constructor(JSContext *ctx, JSValueConst new_targ
     }
     lv_btnmatrix_t * cobj = lv_btnmatrix_create(cparent) ;
     JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, js_lv_btnmatrix_class_id) ;
+    if(argc>1) {
+        if(!JS_IsObject(argv[1])) {
+            JS_FreeValue(ctx, jsobj) ;
+            THROW_EXCEPTION("arg json must be a object")
+        }
+        JSValue fromJson = JS_GetPropertyStr(ctx, jsobj, "fromJson") ;
+        JSValue ret = JS_Call(ctx,fromJson,jsobj,1,&argv[1]) ;
+        if(JS_IsException(ret)) {
+            return JS_EXCEPTION ; 
+        }
+        JS_FreeValue(ctx,ret) ;
+        JS_FreeValue(ctx,fromJson) ;
+    }
     JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
@@ -1768,6 +1846,19 @@ static JSValue js_lv_canvas_constructor(JSContext *ctx, JSValueConst new_target,
     }
     lv_canvas_t * cobj = lv_canvas_create(cparent) ;
     JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, js_lv_canvas_class_id) ;
+    if(argc>1) {
+        if(!JS_IsObject(argv[1])) {
+            JS_FreeValue(ctx, jsobj) ;
+            THROW_EXCEPTION("arg json must be a object")
+        }
+        JSValue fromJson = JS_GetPropertyStr(ctx, jsobj, "fromJson") ;
+        JSValue ret = JS_Call(ctx,fromJson,jsobj,1,&argv[1]) ;
+        if(JS_IsException(ret)) {
+            return JS_EXCEPTION ; 
+        }
+        JS_FreeValue(ctx,ret) ;
+        JS_FreeValue(ctx,fromJson) ;
+    }
     JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
@@ -1791,6 +1882,19 @@ static JSValue js_lv_checkbox_constructor(JSContext *ctx, JSValueConst new_targe
     }
     lv_checkbox_t * cobj = lv_checkbox_create(cparent) ;
     JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, js_lv_checkbox_class_id) ;
+    if(argc>1) {
+        if(!JS_IsObject(argv[1])) {
+            JS_FreeValue(ctx, jsobj) ;
+            THROW_EXCEPTION("arg json must be a object")
+        }
+        JSValue fromJson = JS_GetPropertyStr(ctx, jsobj, "fromJson") ;
+        JSValue ret = JS_Call(ctx,fromJson,jsobj,1,&argv[1]) ;
+        if(JS_IsException(ret)) {
+            return JS_EXCEPTION ; 
+        }
+        JS_FreeValue(ctx,ret) ;
+        JS_FreeValue(ctx,fromJson) ;
+    }
     JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
@@ -1814,6 +1918,19 @@ static JSValue js_lv_dropdown_constructor(JSContext *ctx, JSValueConst new_targe
     }
     lv_dropdown_t * cobj = lv_dropdown_create(cparent) ;
     JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, js_lv_dropdown_class_id) ;
+    if(argc>1) {
+        if(!JS_IsObject(argv[1])) {
+            JS_FreeValue(ctx, jsobj) ;
+            THROW_EXCEPTION("arg json must be a object")
+        }
+        JSValue fromJson = JS_GetPropertyStr(ctx, jsobj, "fromJson") ;
+        JSValue ret = JS_Call(ctx,fromJson,jsobj,1,&argv[1]) ;
+        if(JS_IsException(ret)) {
+            return JS_EXCEPTION ; 
+        }
+        JS_FreeValue(ctx,ret) ;
+        JS_FreeValue(ctx,fromJson) ;
+    }
     JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
@@ -1837,6 +1954,19 @@ static JSValue js_lv_img_constructor(JSContext *ctx, JSValueConst new_target, in
     }
     lv_img_t * cobj = lv_img_create(cparent) ;
     JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, js_lv_img_class_id) ;
+    if(argc>1) {
+        if(!JS_IsObject(argv[1])) {
+            JS_FreeValue(ctx, jsobj) ;
+            THROW_EXCEPTION("arg json must be a object")
+        }
+        JSValue fromJson = JS_GetPropertyStr(ctx, jsobj, "fromJson") ;
+        JSValue ret = JS_Call(ctx,fromJson,jsobj,1,&argv[1]) ;
+        if(JS_IsException(ret)) {
+            return JS_EXCEPTION ; 
+        }
+        JS_FreeValue(ctx,ret) ;
+        JS_FreeValue(ctx,fromJson) ;
+    }
     JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
@@ -1860,6 +1990,19 @@ static JSValue js_lv_line_constructor(JSContext *ctx, JSValueConst new_target, i
     }
     lv_line_t * cobj = lv_line_create(cparent) ;
     JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, js_lv_line_class_id) ;
+    if(argc>1) {
+        if(!JS_IsObject(argv[1])) {
+            JS_FreeValue(ctx, jsobj) ;
+            THROW_EXCEPTION("arg json must be a object")
+        }
+        JSValue fromJson = JS_GetPropertyStr(ctx, jsobj, "fromJson") ;
+        JSValue ret = JS_Call(ctx,fromJson,jsobj,1,&argv[1]) ;
+        if(JS_IsException(ret)) {
+            return JS_EXCEPTION ; 
+        }
+        JS_FreeValue(ctx,ret) ;
+        JS_FreeValue(ctx,fromJson) ;
+    }
     JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
@@ -1883,6 +2026,19 @@ static JSValue js_lv_roller_constructor(JSContext *ctx, JSValueConst new_target,
     }
     lv_roller_t * cobj = lv_roller_create(cparent) ;
     JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, js_lv_roller_class_id) ;
+    if(argc>1) {
+        if(!JS_IsObject(argv[1])) {
+            JS_FreeValue(ctx, jsobj) ;
+            THROW_EXCEPTION("arg json must be a object")
+        }
+        JSValue fromJson = JS_GetPropertyStr(ctx, jsobj, "fromJson") ;
+        JSValue ret = JS_Call(ctx,fromJson,jsobj,1,&argv[1]) ;
+        if(JS_IsException(ret)) {
+            return JS_EXCEPTION ; 
+        }
+        JS_FreeValue(ctx,ret) ;
+        JS_FreeValue(ctx,fromJson) ;
+    }
     JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
@@ -1906,6 +2062,19 @@ static JSValue js_lv_slider_constructor(JSContext *ctx, JSValueConst new_target,
     }
     lv_slider_t * cobj = lv_slider_create(cparent) ;
     JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, js_lv_slider_class_id) ;
+    if(argc>1) {
+        if(!JS_IsObject(argv[1])) {
+            JS_FreeValue(ctx, jsobj) ;
+            THROW_EXCEPTION("arg json must be a object")
+        }
+        JSValue fromJson = JS_GetPropertyStr(ctx, jsobj, "fromJson") ;
+        JSValue ret = JS_Call(ctx,fromJson,jsobj,1,&argv[1]) ;
+        if(JS_IsException(ret)) {
+            return JS_EXCEPTION ; 
+        }
+        JS_FreeValue(ctx,ret) ;
+        JS_FreeValue(ctx,fromJson) ;
+    }
     JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
@@ -1929,6 +2098,19 @@ static JSValue js_lv_switch_constructor(JSContext *ctx, JSValueConst new_target,
     }
     lv_switch_t * cobj = lv_switch_create(cparent) ;
     JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, js_lv_switch_class_id) ;
+    if(argc>1) {
+        if(!JS_IsObject(argv[1])) {
+            JS_FreeValue(ctx, jsobj) ;
+            THROW_EXCEPTION("arg json must be a object")
+        }
+        JSValue fromJson = JS_GetPropertyStr(ctx, jsobj, "fromJson") ;
+        JSValue ret = JS_Call(ctx,fromJson,jsobj,1,&argv[1]) ;
+        if(JS_IsException(ret)) {
+            return JS_EXCEPTION ; 
+        }
+        JS_FreeValue(ctx,ret) ;
+        JS_FreeValue(ctx,fromJson) ;
+    }
     JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
@@ -1952,6 +2134,19 @@ static JSValue js_lv_table_constructor(JSContext *ctx, JSValueConst new_target, 
     }
     lv_table_t * cobj = lv_table_create(cparent) ;
     JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, js_lv_table_class_id) ;
+    if(argc>1) {
+        if(!JS_IsObject(argv[1])) {
+            JS_FreeValue(ctx, jsobj) ;
+            THROW_EXCEPTION("arg json must be a object")
+        }
+        JSValue fromJson = JS_GetPropertyStr(ctx, jsobj, "fromJson") ;
+        JSValue ret = JS_Call(ctx,fromJson,jsobj,1,&argv[1]) ;
+        if(JS_IsException(ret)) {
+            return JS_EXCEPTION ; 
+        }
+        JS_FreeValue(ctx,ret) ;
+        JS_FreeValue(ctx,fromJson) ;
+    }
     JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
@@ -1975,6 +2170,19 @@ static JSValue js_lv_textarea_constructor(JSContext *ctx, JSValueConst new_targe
     }
     lv_textarea_t * cobj = lv_textarea_create(cparent) ;
     JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, js_lv_textarea_class_id) ;
+    if(argc>1) {
+        if(!JS_IsObject(argv[1])) {
+            JS_FreeValue(ctx, jsobj) ;
+            THROW_EXCEPTION("arg json must be a object")
+        }
+        JSValue fromJson = JS_GetPropertyStr(ctx, jsobj, "fromJson") ;
+        JSValue ret = JS_Call(ctx,fromJson,jsobj,1,&argv[1]) ;
+        if(JS_IsException(ret)) {
+            return JS_EXCEPTION ; 
+        }
+        JS_FreeValue(ctx,ret) ;
+        JS_FreeValue(ctx,fromJson) ;
+    }
     JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
@@ -2010,6 +2218,19 @@ static JSValue js_lv_keyboard_constructor(JSContext *ctx, JSValueConst new_targe
     }
     lv_keyboard_t * cobj = lv_keyboard_create(cparent) ;
     JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, js_lv_keyboard_class_id) ;
+    if(argc>1) {
+        if(!JS_IsObject(argv[1])) {
+            JS_FreeValue(ctx, jsobj) ;
+            THROW_EXCEPTION("arg json must be a object")
+        }
+        JSValue fromJson = JS_GetPropertyStr(ctx, jsobj, "fromJson") ;
+        JSValue ret = JS_Call(ctx,fromJson,jsobj,1,&argv[1]) ;
+        if(JS_IsException(ret)) {
+            return JS_EXCEPTION ; 
+        }
+        JS_FreeValue(ctx,ret) ;
+        JS_FreeValue(ctx,fromJson) ;
+    }
     JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
@@ -2033,6 +2254,19 @@ static JSValue js_lv_tileview_constructor(JSContext *ctx, JSValueConst new_targe
     }
     lv_tileview_t * cobj = lv_tileview_create(cparent) ;
     JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, js_lv_tileview_class_id) ;
+    if(argc>1) {
+        if(!JS_IsObject(argv[1])) {
+            JS_FreeValue(ctx, jsobj) ;
+            THROW_EXCEPTION("arg json must be a object")
+        }
+        JSValue fromJson = JS_GetPropertyStr(ctx, jsobj, "fromJson") ;
+        JSValue ret = JS_Call(ctx,fromJson,jsobj,1,&argv[1]) ;
+        if(JS_IsException(ret)) {
+            return JS_EXCEPTION ; 
+        }
+        JS_FreeValue(ctx,ret) ;
+        JS_FreeValue(ctx,fromJson) ;
+    }
     JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
@@ -2056,6 +2290,19 @@ static JSValue js_lv_list_constructor(JSContext *ctx, JSValueConst new_target, i
     }
     lv_obj_t * cobj = lv_list_create(cparent) ;
     JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, js_lv_list_class_id) ;
+    if(argc>1) {
+        if(!JS_IsObject(argv[1])) {
+            JS_FreeValue(ctx, jsobj) ;
+            THROW_EXCEPTION("arg json must be a object")
+        }
+        JSValue fromJson = JS_GetPropertyStr(ctx, jsobj, "fromJson") ;
+        JSValue ret = JS_Call(ctx,fromJson,jsobj,1,&argv[1]) ;
+        if(JS_IsException(ret)) {
+            return JS_EXCEPTION ; 
+        }
+        JS_FreeValue(ctx,ret) ;
+        JS_FreeValue(ctx,fromJson) ;
+    }
     JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }

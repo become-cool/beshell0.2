@@ -1,7 +1,33 @@
 const lv = require('lv')
-const PartLib = require('./PartLib')
+
+const CardStack = require("../comm/CardStack")
+const {BeMotor, BeServo} = require('./parts/BeMotor')
+const {BeScreen130, BeScreen096} = require('./parts/BeScreen')
+const lstPartLib = [
+    BeMotor, BeServo,
+    BeScreen096, BeScreen130,
+]
+// this.addCart(BeMotor)
+// this.addCart(BeServo)
+// this.addCart(BeScreen130)
+// this.addCart(BeScreen096)
+// // this.addCart("LED")
+// // this.addCart("RGB LED")
+// // this.addCart("姿态传感器")
+// // this.addCart("颜色传感器")
+// // this.addCart("气压计")
+// // this.addCart("红外线收发器")
+// // this.addCart("超声波")
+// // this.addCart("扬声器")
+// // this.addCart("麦克风")
+// // this.addCart("温度传感器")
+// // this.addCart("湿度传感器")
 
 class GraphTools extends lv.Column{
+    
+    // graph = null
+    partLib = null
+
     constructor(parent, workspace) {
         super(parent)
 
@@ -10,15 +36,15 @@ class GraphTools extends lv.Column{
         this.refs = this.fromJson({
             width: "100%" ,
             height: -1 ,
-            align: "top-right" ,
+            align: "top-mid" ,
             style: {
-                "pad-row": 5
+                "pad-row": 5 ,
+                "flex-cross-place": "center" ,
             }, 
             children: [
                 {
                     class: "Label" ,
                     text: lv.symbol.plus ,
-                    flag: ["clickable"] ,
                     clicked: ()=>{
                         this.partLib.isVisible()?
                             this.partLib.hide() :
@@ -26,12 +52,12 @@ class GraphTools extends lv.Column{
                     }
                 } ,
                 // {
-                //     class: "Label" ,
-                //     text: lv.symbol.list ,
+                //     class: "Img" ,
+                //     src: '/lib/icon/16/tree.png' ,
                 // } ,
                 {
-                    class: "Label" ,
-                    text: lv.symbol.edit ,
+                    class: "Img" ,
+                    src: '/lib/icon/16/props.png' ,
                     ref: "props" ,
                     visible: false ,
                 } ,
@@ -40,7 +66,6 @@ class GraphTools extends lv.Column{
                     text: lv.symbol.refresh ,
                     ref: "rotate" ,
                     visible: false ,
-                    flag: ["clickable"] ,
                     clicked: ()=>{
                         if(workspace.graph.activePart) {
                             workspace.graph.activePart.rotate()
@@ -56,11 +81,20 @@ class GraphTools extends lv.Column{
             ]
         })
 
-        this.partLib = new PartLib(workspace)
+        this.partLib = new CardStack(workspace, workspace)
         this.partLib.hide()
+        for(let clz of lstPartLib) {
+            this.partLib.addCart(clz.config.title, clz=>{
+                let part = workspace.model.createPart(clz)
+                part.repaint(workspace.zoomer.value)
+
+                workspace.graph.setActivePart(part)
+                return part
+            }, clz)
+        }
 
         
-        workspace.graph.on("graph-active-changed", (activePart)=>{
+        workspace.graph.on("graph.active.changed", (activePart)=>{
             if(activePart) {
                 this.refs.props.show()
                 this.refs.rotate.show()
@@ -75,9 +109,6 @@ class GraphTools extends lv.Column{
             }
         })
     }
-
-    // graph = null
-    partLib = null
 }
 
 module.exports = GraphTools

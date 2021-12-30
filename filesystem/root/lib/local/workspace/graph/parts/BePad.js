@@ -29,8 +29,13 @@ class BePad extends Part{
 
     repaint(zoom) {
         super.repaint(zoom)
-        this.refs.screen.setWidth(ScreenWidth*zoom)
-        this.refs.screen.setHeight(ScreenHeight*zoom)
+        if(this.dir==1||this.dir==3) {
+            this.refs.screen.setWidth(ScreenWidth*zoom)
+            this.refs.screen.setHeight(ScreenHeight*zoom)
+        }else{
+            this.refs.screen.setWidth(ScreenHeight*zoom)
+            this.refs.screen.setHeight(ScreenWidth*zoom)
+        }
     }
 }
 

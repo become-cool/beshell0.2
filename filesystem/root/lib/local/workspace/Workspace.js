@@ -3,60 +3,44 @@ const AppModel = require("./AppModel")
 const ToolBar = require("./ToolBar")
 const Zoomer = require("./Zoomer")
 const GraphCanvas = require("./graph/GraphCanvas")
+const UI = require("./ui/UI")
+const Program = require("./program/Program")
 
-let singleton = null
+let _singleton = null
 
 class Workspace extends lv.CleanObj {
-    constructor(parent) {
-        super(parent)
-
-        ; ({  graph: this.graph ,
-            zoomer: this.zoomer ,
-        } = this.fromJson({
-            style: {} ,
-            children: [
-                {
-                    class: GraphCanvas ,
-                    args: [this] ,
-                    ref: "graph" ,
-                } ,
-                {
-                    class: Zoomer ,
-                    ref: "zoomer" ,
-                    align: "right-mid" ,
-                    height:180 ,
-                    valueChanged: (value)=>{
-                        this.graph.setZoom( value )
-                    } ,
-                } ,
-            ]
-        }))
-
-
-        ; ({ toolbar: this.toolbar } = this.fromJson({
-            style: {} ,
-            children: [
-                {
-                    class: ToolBar , 
-                    args: [this] ,
-                    ref: "toolbar" ,
-                } ,
-            ]
-        }))
-
-
+    constructor() {
+        super()
+        this.fromJson({
+            style: {
+                "bg-color": lv.rgb(249,249,249) ,
+            }
+        })
+        
         this.model = new AppModel(this)
+        
+        this.graph = new GraphCanvas(this, this)
+        this.ui = new UI(this, this)
+        this.program = new Program(this, this)
+
+        this.zoomer = new Zoomer(this)
+        this.zoomer.setAlign("right-mid")
+
+        this.toolbar = new ToolBar(this)
+
         this.model.createHostFromDevice(this.graph)
 
         this.graph.setZoom(this.zoomer.value)
 
-        this.clearFlag("scrollable")
+        this.setActiveView(this.ui)   
     }
 
     model = null
     graph = null
     zoom = null
     toolbar = null
+
+    activeView = null
 
     appFolder = ""
 
@@ -65,10 +49,24 @@ class Workspace extends lv.CleanObj {
         lv.loadScreen(this)
     }
 
+    setActiveView(view) {
+        if(this.activeView==view) {
+            return
+        }
+        this.emit("ws-active-view-changed", view, this.activeView)
+        if(this.activeView) {
+            this.activeView.hide()
+        }
+        if(view) {
+            view.show()
+        }
+        this.activeView = view
+    }
+
     static singleton() {
-        if(!singleton)
-            singleton = new Workspace()
-        return singleton
+        if(!_singleton)
+            _singleton = new Workspace()
+        return _singleton
     }
 }
 

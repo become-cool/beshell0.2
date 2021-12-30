@@ -18,12 +18,15 @@ const MapPropFuncs = {
     value: 'setValue' ,
     leftValue: 'setLeftValue' ,
 }
-const MapEvents = {
+const MapPressEvents = {
     pressed:'pressed',
     pressing:'pressing',
     released:'released',
     clicked:'clicked',
+}
+const MapEvents = {
     valueChanged: 'value-changed',
+    __proto__: MapPressEvents ,
 }
 
 beapi.lvgl.fromJson = function fromJson(json, parent, refs){
@@ -84,6 +87,9 @@ beapi.lvgl.Obj.prototype.fromJson = function fromJson(json, refs){
                 }
                 if(MapEvents[propName] && typeof json[propName]=="function") {
                     this.on(MapEvents[propName], json[propName])
+                    if(MapPressEvents[propName]) {
+                        this.addFlag("clickable")
+                    }
                 }
             }
 

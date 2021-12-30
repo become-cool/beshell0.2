@@ -1,6 +1,6 @@
 const lv = require("lv")
 const AppIcon = require("./AppIcon")
-const DlgNewApp = require("workspace/DlgNewApp")
+const NewAppDialog = require("workspace/NewAppDialog")
 
 let selectedAppFolder = null
 
@@ -66,7 +66,7 @@ module.exports = class ScrApps extends lv.Obj {
 
     dlgNewApp() {
         if(!this._dlgNewApp) {
-            this._dlgNewApp = new DlgNewApp(lv.active())
+            this._dlgNewApp = new NewAppDialog(lv.active())
             this._dlgNewApp.on("new-app",(appPath)=>{
                 this.loadAppIcon(appPath)
             })
@@ -104,7 +104,7 @@ module.exports = class ScrApps extends lv.Obj {
             let longPressed = false
             appico.fromJson({
                 text: pkgjson.title||"Unname" ,
-                src: pkgjson.icon||"/lib/icon/folder.png" ,
+                src: pkgjson.icon||"/lib/icon/32/folder.png" ,
                 clicked: ()=>{
                     if(longPressed) {
                         longPressed = false

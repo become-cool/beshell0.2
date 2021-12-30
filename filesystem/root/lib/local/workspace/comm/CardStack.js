@@ -1,11 +1,9 @@
 const lv = require('lv')
-const {BeMotor, BeServo} = require('./parts/BeMotor')
-const {BeScreen130, BeScreen096} = require('./parts/BeScreen')
 
 const CardHeight = 30
 const CardPad =5
 
-class PartCard extends lv.Label {
+class Card extends lv.Label {
     constructor(parent){
         super(parent)
         this.fromJson({
@@ -13,9 +11,10 @@ class PartCard extends lv.Label {
             height: CardHeight ,
             font: "msyh" ,
             style: {
-                "bg-opa": 255 ,
+                "bg-opa": 180 ,
                 "pad-left": 5 ,
-                // "text-align": "center"
+                "bg-color": lv.rgb(220,220,220) ,
+                "text-color": lv.rgb(120,120,120) ,
             } ,
             flag: ["clickable"] ,
         })
@@ -36,7 +35,7 @@ class PartCard extends lv.Label {
     }
 }
 
-class PartLib extends lv.CleanObj{
+class CardStack extends lv.CleanObj{
     constructor(workspace) {
         super(workspace)
         this.setWidth(120)
@@ -50,48 +49,33 @@ class PartLib extends lv.CleanObj{
                 // "border-width": 1 ,
                 // "pad-row": 5,
             } ,
+            flag: ["scrollable"] ,
         })
         this.clearFlag("clickable")
         this.setScrollDir("ver")
-
-        this.addCart(BeMotor)
-        this.addCart(BeServo)
-        this.addCart(BeScreen130)
-        this.addCart(BeScreen096)
-        // this.addCart("LED")
-        // this.addCart("RGB LED")
-        // this.addCart("姿态传感器")
-        // this.addCart("颜色传感器")
-        // this.addCart("气压计")
-        // this.addCart("红外线收发器")
-        // this.addCart("超声波")
-        // this.addCart("扬声器")
-        // this.addCart("麦克风")
-        // this.addCart("温度传感器")
-        // this.addCart("湿度传感器")
     }
 
     cards = []
 
-    addCart(partClass) {
-        let card = new PartCard(this)
-        card.setText(partClass.config.title)
+    addCart(title, cb, cbData) {
+        let card = new Card(this)
+        card.setText(title)
 
         let y = (CardHeight + CardPad) * this.cards.length
         card.setY(y)
 
         card.on("new-part", ()=>{
             this.hide()
-            let part = this.parent().model.createPart(partClass)
-            part.repaint(this.parent().zoomer.value)
-
-            this.parent().graph.setActivePart(part)
+            let obj = cb && cb(cbData)
+            if(!obj) {
+                return
+            }
 
             setTimeout(()=>{
 
                 let pos = lv.inputPoint()
-                part.setCoords(pos.x-part.width()/2, pos.y-part.height()/2)
-                part.updateLayout()
+                obj.setCoords(pos.x-obj.width()/2, pos.y-obj.height()/2)
+                obj.updateLayout()
     
                 try{
                     lv.fakeIndev(pos.x, pos.y, false)
@@ -108,4 +92,4 @@ class PartLib extends lv.CleanObj{
     }
 }
 
-module.exports = PartLib
+module.exports = CardStack

@@ -1,6 +1,6 @@
 module.exports = function(){
     return prequire([
-        "./DlgNewApp" ,
+        "./NewAppDialog" ,
         "./ToolBar" ,
         "./AppModel" ,
         "./graph/parts/Port" ,

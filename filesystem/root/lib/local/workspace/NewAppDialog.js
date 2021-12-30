@@ -1,6 +1,6 @@
 const lv = require('lv')
 
-module.exports = class DlgNewApp extends lv.Obj {
+module.exports = class NewAppDialog extends lv.Obj {
     constructor(parent) {
         super(parent)
 
@@ -84,12 +84,12 @@ module.exports = class DlgNewApp extends lv.Obj {
 
         this.selectedIcon = null
 
-        for(let filename of beapi.fs.readdirSync("/lib/icon")) {
+        for(let filename of beapi.fs.readdirSync("/lib/icon/32")) {
             if(filename.substr(-4)!='.png') {
                 continue
             }
             let img = new lv.Img(this.refs.iconMenu)
-            img.src = "/lib/icon/"+filename
+            img.src = "/lib/icon/32/"+filename
             img.fromJson({
                 src: img.src ,
                 style: {
@@ -102,7 +102,6 @@ module.exports = class DlgNewApp extends lv.Obj {
                     "border-opa": 0 ,
                     "border-color": lv.palette("blue-grey")
                 } ,
-                flag: ["clickable"] ,
                 clicked:(e, icon)=>{
                     this.setSelectedIcon(icon)
                 } ,

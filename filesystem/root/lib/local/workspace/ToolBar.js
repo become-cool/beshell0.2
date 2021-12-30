@@ -1,9 +1,12 @@
 const lv = require("lv")
-const GraphTools = require("./graph/GraphTools")
 
 class ToolBar extends lv.Obj {
-    constructor(parent, workspace) {
-        super(parent)
+
+    workspace = null
+    viewTools = null
+
+    constructor(workspace) {
+        super(workspace)
 
         this.workspace = workspace
 
@@ -20,44 +23,62 @@ class ToolBar extends lv.Obj {
             } ,
             children: [
                 {
-                    ref: "graphTools" ,
-                    class: GraphTools ,
-                    args:[workspace]
-                } ,
-
-                {
                     class: "Column" ,
-                    width: "100%" ,
-                    height: -1 ,
-                    center: true ,
-                    children: [
-                        {
-                            class: "Label" ,
-                            text: lv.symbol.power
-                        } ,
-                    ]
-                } ,
-
-                {
-                    class: "Column" ,
-                    width: 18 ,
+                    width: 17 ,
                     height: -1 ,
                     align: "bottom-right" ,
                     style: {
-                        "pad-row": 5
+                        "pad-row": 5 ,
+                        "flex-cross-place": "center" ,
                     }, 
                     children: [
                         {
+                            class: "Img" ,
+                            src: '/lib/icon/16/plugins.png' ,
+                            clicked() {
+                                workspace.setActiveView(workspace.graph)
+                            }
+                        } ,
+                        {
+                            class: "Img" ,
+                            src: '/lib/icon/16/ui.png' ,
+                            clicked() {
+                                workspace.setActiveView(workspace.ui)
+                            }
+                        } ,
+                        {
+                            class: "Img" ,
+                            src: '/lib/icon/16/program.png' ,
+                            clicked() {
+                                workspace.setActiveView(workspace.program)
+                            }
+                        } ,
+                        {
                             class: "Label" ,
                             text: lv.symbol.settings ,
+                            clicked(){
+                                console.log("popup")
+                            }
                         } ,
                     ]
                 } ,
             ]
         })
-    }
+        
+        workspace.on("ws-active-view-changed", (view)=>{
+            let tools = view.viewTools(this)
+            if(this.viewTools == tools)
+                return
+            if(this.viewTools) {
+                this.viewTools.hide()
+            }
+            if(tools) {
+                tools.show()
+            }
+            this.viewTools = tools
+        })
 
-    workspace = null
+    }
 }
 
 module.exports = ToolBar

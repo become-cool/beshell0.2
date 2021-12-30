@@ -23,49 +23,49 @@ module.exports = class ScrSysApps extends lv.Obj {
                     class:AppIcon ,
                     "text": "文件" ,
                     ref: "app1" ,
-                    "src": "/lib/icon/folder.png"
+                    "src": "/lib/icon/32/folder.png"
                 }
                 , {
                     class:AppIcon ,
                     "text": "相册" ,
                     ref: "app2" ,
-                    "src": "/lib/icon/album.png"
+                    "src": "/lib/icon/32/album.png"
                 }
                 , {
                     class:AppIcon ,
                     "text": "音乐" ,
                     ref: "btn1" ,
-                    "src": "/lib/icon/music.png"
+                    "src": "/lib/icon/32/music.png"
                 }
                 , {
                     class:AppIcon ,
                     "text": "游戏" ,
                     ref: "btn1" ,
-                    "src": "/lib/icon/game.png"
+                    "src": "/lib/icon/32/game.png"
                 }
                 , {
                     class:AppIcon ,
                     "text": "设置" ,
                     ref: "btn1" ,
-                    "src": "/lib/icon/setting.png"
+                    "src": "/lib/icon/32/setting.png"
                 }
                 , {
                     class:AppIcon ,
                     "text": "相机" ,
                     ref: "btn1" ,
-                    "src": "/lib/icon/camera.png"
+                    "src": "/lib/icon/32/camera.png"
                 }
                 , {
                     class:AppIcon ,
                     "text": "示波器" ,
                     ref: "btn1" ,
-                    "src": "/lib/icon/oscilloscope.png"
+                    "src": "/lib/icon/32/oscilloscope.png"
                 }
                 , {
                     class:AppIcon ,
                     "text": "应用商店" ,
                     ref: "btn1" ,
-                    "src": "/lib/icon/store.png"
+                    "src": "/lib/icon/32/store.png"
                 }
             ]
         })

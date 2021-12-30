@@ -1,4 +1,5 @@
 const lv = require('lv')
+const GraphTools = require("./GraphTools")
 
 const GraphWidth = 300*2
 const GraphHeight = 200*2
@@ -13,14 +14,17 @@ class GraphCanvas extends lv.CleanObj{
     zoom = 2
 
     workspace = null
+    tools = null
 
     constructor(parent, workspace) {
         super(parent)
+        this.workspace = workspace
 
         this.fromJson({
             width: GraphWidth ,
             height: GraphHeight ,
             center: true ,
+            visible: false ,
             style: {
                 // "bg-color": lv.rgb(249,244,241)
                 "bg-color": lv.rgb(249,249,249) ,
@@ -40,11 +44,9 @@ class GraphCanvas extends lv.CleanObj{
             }
         })
 
-        this.workspace = workspace
-
         this.on("clicked", ()=>{
             if(this.activePart) {
-                this.emit("graph-active-changed", null, this.activePart)
+                this.emit("graph.active.changed", null, this.activePart)
                 this.activePart.setSelected(false)
                 this.activePart = null
             }
@@ -80,12 +82,19 @@ class GraphCanvas extends lv.CleanObj{
     }
 
     setActivePart(part) {
-        this.emit("graph-active-changed", part, this.activePart)
+        this.emit("graph.active.changed", part, this.activePart)
         if(this.activePart) {
             this.activePart.setSelected(false)
         }
         part.setSelected(true)
         this.activePart = part
+    }
+
+    viewTools(toolbar) {
+        if(!this.tools) {
+            this.tools = new GraphTools(toolbar, this.workspace)
+        }
+        return this.tools
     }
 }
 

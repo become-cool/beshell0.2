@@ -18,20 +18,6 @@ class Card extends lv.Label {
             } ,
             flag: ["clickable"] ,
         })
-        this.draggable(
-            null, pos=>{
-                pos.y = false
-                if(pos.x>70) {
-                    return false
-                }
-            } ,
-            (cusStop)=>{
-                this.setX(0)
-                if(cusStop) {
-                    this.emit("new-part")
-                }
-            }
-        )
     }
 }
 
@@ -53,17 +39,39 @@ class CardStack extends lv.CleanObj{
         })
         this.clearFlag("clickable")
         this.setScrollDir("ver")
+        this.hide()
     }
 
     cards = []
 
-    addCart(title, cb, cbData) {
+    contentHeight = 0
+
+    createCard(title, cb, cbData) {
         let card = new Card(this)
         card.setText(title)
+        this.addCard(card, cb, cbData)
+    }
 
-        let y = (CardHeight + CardPad) * this.cards.length
-        card.setY(y)
+    addCard(card, cb, cbData) {
 
+        card.setY(this.contentHeight)
+        this.contentHeight+= card.height() + CardPad
+
+        card.draggable(
+            null, pos=>{
+                pos.y = false
+                if(pos.x>70) {
+                    return false
+                }
+            } ,
+            (cusStop)=>{
+                card.setX(0)
+                if(cusStop) {
+                    card.emit("new-part")
+                }
+            }
+        )
+        
         card.on("new-part", ()=>{
             this.hide()
             let obj = cb && cb(cbData)

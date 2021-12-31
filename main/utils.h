@@ -103,6 +103,13 @@ void eval_code_len(JSContext *ctx, const char * str,size_t len,const char * file
     argv[1] = arg2 ;                                                                \
     argv[2] = arg3 ;
 
+#define MAKE_ARGV4(argv, arg1, arg2, arg3, arg4)                                    \
+    JSValueConst * argv = malloc(sizeof(JSValue)*4) ;                               \
+    argv[0] = arg1 ;                                                                \
+    argv[1] = arg2 ;                                                                \
+    argv[2] = arg3 ;                                                                \
+    argv[3] = arg4 ;
+
 #define STR1(R)  #R
 #define STR2(R)  STR1(R)
 

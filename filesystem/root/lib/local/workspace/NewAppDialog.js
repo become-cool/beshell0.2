@@ -42,8 +42,8 @@ module.exports = class NewAppDialog extends lv.Obj {
                                 font: "m12" ,
                                 oneLine: true ,
                                 grow: true ,
-                                clicked: ()=>{
-                                    lv.keyboard().popup(this.refs.appName)
+                                clicked (){
+                                    lv.keyboard().popup(this)
                                 }
                             } ,
                         ]

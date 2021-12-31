@@ -105,7 +105,6 @@ static void js_lv_event_cb(lv_event_t * event) {
         JS_SetOpaque(param, event->param) ;
     }
 
-
     MAKE_ARGV3( cbargv, jsname, jsname, param )
 
     JSValue func_emit = js_get_prop(ctx, jstarget, 1, "emit") ;

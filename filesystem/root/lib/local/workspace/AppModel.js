@@ -1,3 +1,4 @@
+const VM = require("./program/VM")
 const BePad = require("./graph/parts/BePad")
 
 class AppModel extends beapi.EventEmitter{
@@ -6,6 +7,7 @@ class AppModel extends beapi.EventEmitter{
     parts =[]
     widgets = []
     cards = []
+    vm= new VM
 
     constructor(workspace) {
         super()

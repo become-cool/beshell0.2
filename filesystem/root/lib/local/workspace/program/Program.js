@@ -1,26 +1,29 @@
 const lv = require('lv')
+const ProgramTools = require("./ProgramTools")
 
 class Program extends lv.CleanObj{
 
     zoom= 2
     tools = null
+    workspace = null
 
-    constructor(parent) {
-        super(parent)
+    constructor(workspace) {
+        super(workspace)
+        this.workspace = workspace
 
         this.fromJson({
             width: "100%" ,
             height: "100%" ,
             visible: false ,
             children: [
-                {
-                    class: 'Label' ,
-                    center: true ,
-                    text: 'Program' ,
-                    style: {
-                        "text-color": lv.rgb(80,80,80)
-                    }
-                }
+                // {
+                //     class: 'Label' ,
+                //     center: true ,
+                //     text: 'Program' ,
+                //     style: {
+                //         "text-color": lv.rgb(80,80,80)
+                //     }
+                // }
             ]
         })
     }
@@ -30,9 +33,18 @@ class Program extends lv.CleanObj{
     }
     viewTools(toolbar) {
         if(!this.tools) {
-            // this.tools = new GraphTools(toolbar, this.workspace)
+            this.tools = new ProgramTools(toolbar, this.workspace)
         }
         return this.tools
+    }
+
+    enter() {
+
+    }
+    leave() {
+        if(this.tools) {
+            this.tools.close()
+        }
     }
 }
 

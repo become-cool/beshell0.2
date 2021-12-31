@@ -25,7 +25,7 @@ beapi.lvgl.side = {
     full     : 0x0F,
 }
 
-
+beapi.lvgl.RADIUS_CIRCLE = 0x7FFF
 
 
 beapi.lvgl.part = {

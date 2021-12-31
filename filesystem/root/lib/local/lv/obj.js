@@ -6,7 +6,16 @@ beapi.lvgl.Obj.prototype.show = function show() {
 beapi.lvgl.Obj.prototype.hide = function hide() {
     this.addFlag("hidden")
 }
-
+beapi.lvgl.Obj.prototype.toggle = function hide() {
+    if(this.isVisible()) {
+        this.addFlag("hidden")
+        return false
+    }
+    else {
+        this.clearFlag("hidden")
+        return true
+    }
+}
 
 beapi.lvgl.Obj.prototype.asRow = function asRow() {
     this.removeStyleAll()

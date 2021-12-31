@@ -32,7 +32,7 @@ class Workspace extends lv.CleanObj {
 
         this.graph.setZoom(this.zoomer.value)
 
-        this.setActiveView(this.ui)   
+        this.setActiveView(this.program)   
     }
 
     model = null
@@ -55,9 +55,11 @@ class Workspace extends lv.CleanObj {
         }
         this.emit("ws-active-view-changed", view, this.activeView)
         if(this.activeView) {
+            this.activeView.leave()
             this.activeView.hide()
         }
         if(view) {
+            view.enter()
             view.show()
         }
         this.activeView = view

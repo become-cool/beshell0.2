@@ -7,21 +7,21 @@ const lstPartLib = [
     BeMotor, BeServo,
     BeScreen096, BeScreen130,
 ]
-// this.addCart(BeMotor)
-// this.addCart(BeServo)
-// this.addCart(BeScreen130)
-// this.addCart(BeScreen096)
-// // this.addCart("LED")
-// // this.addCart("RGB LED")
-// // this.addCart("姿态传感器")
-// // this.addCart("颜色传感器")
-// // this.addCart("气压计")
-// // this.addCart("红外线收发器")
-// // this.addCart("超声波")
-// // this.addCart("扬声器")
-// // this.addCart("麦克风")
-// // this.addCart("温度传感器")
-// // this.addCart("湿度传感器")
+// this.createCard(BeMotor)
+// this.createCard(BeServo)
+// this.createCard(BeScreen130)
+// this.createCard(BeScreen096)
+// // this.createCard("LED")
+// // this.createCard("RGB LED")
+// // this.createCard("姿态传感器")
+// // this.createCard("颜色传感器")
+// // this.createCard("气压计")
+// // this.createCard("红外线收发器")
+// // this.createCard("超声波")
+// // this.createCard("扬声器")
+// // this.createCard("麦克风")
+// // this.createCard("温度传感器")
+// // this.createCard("湿度传感器")
 
 class GraphTools extends lv.Column{
     
@@ -84,7 +84,7 @@ class GraphTools extends lv.Column{
         this.partLib = new CardStack(workspace, workspace)
         this.partLib.hide()
         for(let clz of lstPartLib) {
-            this.partLib.addCart(clz.config.title, clz=>{
+            this.partLib.createCard(clz.config.title, clz=>{
                 let part = workspace.model.createPart(clz)
                 part.repaint(workspace.zoomer.value)
 

@@ -83,6 +83,7 @@ beapi.lvgl.Obj.prototype.fromJson = function fromJson(json, refs){
                     let methodName = MapPropFuncs[propName]
                     if(typeof this[methodName]=='function') {
                         this[methodName]( json[propName] )
+                        continue
                     }
                 }
                 if(MapEvents[propName] && typeof json[propName]=="function") {
@@ -90,6 +91,12 @@ beapi.lvgl.Obj.prototype.fromJson = function fromJson(json, refs){
                     if(MapPressEvents[propName]) {
                         this.addFlag("clickable")
                     }
+                    continue
+                }
+                let setter = 'set' + propName[0] + propName.substr(1)
+                if(typeof this[setter]=='function') {
+                    this[setter](json[propName])
+                    continue
                 }
             }
 

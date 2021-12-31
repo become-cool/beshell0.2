@@ -186,7 +186,7 @@ static JSValue js_lv_draw_rect(JSContext *ctx, JSValueConst this_val, int argc, 
     }
     lv_area_t * clip = JS_GetOpaque(argv[1],js_lv_area_class_id) ;
     if(!clip) {
-        THROW_EXCEPTION("arg rect must a lv.Area object")
+        THROW_EXCEPTION("arg clip must a lv.Area object")
     }
     lv_draw_rect_dsc_t * dsc = JS_GetOpaque(argv[2],js_lv_draw_rect_dsc_class_id) ;
     if(!dsc) {
@@ -240,7 +240,7 @@ static JSValue js_lv_draw_polygon(JSContext *ctx, JSValueConst this_val, int arg
 
     lv_area_t * clip = JS_GetOpaque(argv[1],js_lv_area_class_id) ;
     if(!clip) {
-        THROW_EXCEPTION("arg rect must a lv.Area object")
+        THROW_EXCEPTION("arg clip must a lv.Area object")
     }
     lv_draw_rect_dsc_t * dsc = JS_GetOpaque(argv[2],js_lv_draw_rect_dsc_class_id) ;
     if(!dsc) {
@@ -263,6 +263,11 @@ static JSValue js_lvgl_tick(JSContext *ctx, JSValueConst this_val, int argc, JSV
     return JS_UNDEFINED ;
 }
 
+static JSValue js_lvgl_refresh(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(0)
+    lv_refr_now(lv_disp_get_default()) ;
+    return JS_UNDEFINED ;
+}
 
 #ifndef SIMULATION
 void lv_tick_task(void *arg) {
@@ -395,6 +400,7 @@ void be_module_lvgl_require(JSContext *ctx) {
 
     JS_SetPropertyStr(ctx, lvgl, "loop", JS_NewCFunction(ctx, js_lvgl_loop, "loop", 1));
     JS_SetPropertyStr(ctx, lvgl, "tick", JS_NewCFunction(ctx, js_lvgl_tick, "tick", 1));
+    JS_SetPropertyStr(ctx, lvgl, "refresh", JS_NewCFunction(ctx, js_lvgl_refresh, "refresh", 1));
     JS_SetPropertyStr(ctx, lvgl, "loadScreen", JS_NewCFunction(ctx, js_lvgl_load_screen, "loadScreen", 1));
     JS_SetPropertyStr(ctx, lvgl, "inputPoint", JS_NewCFunction(ctx, js_lvgl_input_point, "inputPoint", 1));
     JS_SetPropertyStr(ctx, lvgl, "pct", JS_NewCFunction(ctx, js_lv_coord_pct, "pct", 1));

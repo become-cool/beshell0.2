@@ -49,7 +49,7 @@ const mapWidgetLib = {
             text: "CheckBox" ,
         } ,
     } ,
-    '下拉':  {
+    '下拉菜单':  {
         class: lv.Dropdown ,
         opt: {} ,
     } ,
@@ -57,7 +57,7 @@ const mapWidgetLib = {
         class: lv.Img ,
         opt: {} ,
     } ,
-    '滚动条': {
+    '滚轮': {
         class: lv.Roller ,
         opt: {} ,
     } ,
@@ -71,7 +71,16 @@ const mapWidgetLib = {
     } ,
     '输入框': {
         class: lv.TextArea ,
-        opt: {} ,
+        style: {
+            "text-color": lv.rgb(220,220,220)
+        } ,
+        opt: {
+            oneLine: true ,
+            placeholderText: 'Press Here' ,
+            clicked() {
+                lv.keyboard().popup(this)
+            }
+        } ,
     } ,
     '列表': {
         class: lv.List ,
@@ -152,13 +161,14 @@ class UITools extends lv.Column{
                 workspace.ui.shadow.show()
                 workspace.toolbar.show()
                 this.edit.hide()
+                lv.keyboard().hide()
             }
         })
 
         this.widgetLib = new CardStack(workspace, workspace)
         this.widgetLib.hide()
         for(let title in mapWidgetLib) {
-            this.widgetLib.addCart(title, data=>{
+            this.widgetLib.createCard(title, data=>{
                 let widget = workspace.ui.createWidget(data.class, data.opt)
                 widget.addStyle(styleCommon)
                 widget.shadow = new WidgetShadow(widget, workspace.ui)

@@ -94,6 +94,15 @@ class UI extends lv.CleanObj{
         }
         return this.tools
     }
+    
+    enter() {
+
+    }
+    leave() {
+        if(this.tools) {
+            this.tools.widgetLib.hide()
+        }
+    }
 }
 
 module.exports = UI

@@ -96,6 +96,14 @@ class GraphCanvas extends lv.CleanObj{
         }
         return this.tools
     }
+    enter() {
+
+    }
+    leave() {
+        if(this.tools) {
+            this.tools.partLib.hide()
+        }
+    }
 }
 
 module.exports = GraphCanvas

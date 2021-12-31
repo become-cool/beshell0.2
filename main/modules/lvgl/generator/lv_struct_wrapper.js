@@ -96,6 +96,22 @@ const LstStuct = [
     } ,
 
 
+    // mask
+    // {
+    //     name: 'draw_mask_radius_param' ,
+    //     type: 'lv_draw_mask_radius_param_t' ,
+    //     jsclass: 'DrawMaskRadius' ,
+    //     members: [
+    //         ['lv_coord_t', 'x1'] ,
+    //         ['lv_coord_t', 'y1'] ,
+    //         ['lv_coord_t', 'x2'] ,
+    //         ['lv_coord_t', 'y2'] ,
+    //     ] ,
+    //     init: 'lv_draw_mask_radius_init'
+    // } ,
+
+    // 
+
     
 ]
 

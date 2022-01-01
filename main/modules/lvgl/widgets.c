@@ -189,20 +189,27 @@ JSValue js_lv_obj_is_screen(JSContext *ctx, JSValueConst this_val, int argc, JSV
     return lv_obj_get_parent(thisobj)==NULL? JS_TRUE: JS_FALSE ;
 }
 
+void lv_obj_set_coord_x(lv_obj_t * obj, lv_coord_t x) {
+    lv_coord_t dx = x - obj->coords.x1 ;
+    lv_obj_set_x(obj, lv_obj_get_x_aligned(obj) + dx) ;
+}
+void lv_obj_set_coord_y(lv_obj_t * obj, lv_coord_t y) {
+    lv_coord_t dy = y - obj->coords.y1 ;
+    lv_obj_set_y(obj, lv_obj_get_y_aligned(obj) + dy) ;
+}
+
 JSValue js_lv_obj_set_coord_x(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         CHECK_ARGC(1)
     ARGV_TO_INT16(0, x)
     THIS_LVOBJ("Obj", "setCoordX", thisobj)
-    int16_t dx = x - thisobj->coords.x1 ;
-    lv_obj_set_x(thisobj, lv_obj_get_x_aligned(thisobj) + dx) ;
+    lv_obj_set_coord_x(thisobj, x) ;
     return JS_UNDEFINED ;
 }
 JSValue js_lv_obj_set_coord_y(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(1)
     ARGV_TO_INT16(0, y)
     THIS_LVOBJ("Obj", "setCoordY", thisobj)
-    int16_t dy = y - thisobj->coords.y1 ;
-    lv_obj_set_y(thisobj, lv_obj_get_y_aligned(thisobj) + dy) ;
+    lv_obj_set_coord_x(thisobj, y) ;
     return JS_UNDEFINED ;
 }
 JSValue js_lv_obj_set_coords(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {

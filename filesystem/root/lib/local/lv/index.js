@@ -1,6 +1,5 @@
 require("./obj.js")
 require("./loader.js")
-require("./draggable.js")
 beapi.lvgl.Color = require("./color.js")
 
 

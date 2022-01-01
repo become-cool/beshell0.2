@@ -44,7 +44,6 @@ class ProgramTools extends lv.Column{
                 let card = new cardconf(category.stack)
                 category.stack.addCard(card, (cardconf)=>{
                     let card = new cardconf(workspace.program, workspace.model.vm)
-                    workspace.model.vm.addCard(card)
                     return card
                 }, cardconf)
             }

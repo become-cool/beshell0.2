@@ -4,6 +4,7 @@
 #include "widgets_gen.h"
 #include "style.h"
 #include "be_lv_struct_wrapper.h"
+#include "be_lv_draggable.h"
 #include "lvgl.h"
 #include "lv_conf.h"
 #include "utils.h"
@@ -357,6 +358,7 @@ void be_module_lvgl_init() {
     init_lvgl_widgets() ;
     init_lvgl_style() ;
     be_lv_structs_init() ;
+    be_be_lv_draggable_init() ;
 }
 
 void be_module_lvgl_require(JSContext *ctx) {
@@ -424,6 +426,7 @@ void be_module_lvgl_require(JSContext *ctx) {
     require_vlgl_js_style(ctx, lvgl) ;
     require_vlgl_js_font_symbol(ctx, lvgl) ;
     be_lv_structs_require(ctx, lvgl) ;
+    be_be_lv_draggable_require(ctx, lvgl) ;
 
     JS_FreeValue(ctx, global);
     JS_FreeValue(ctx, beapi);

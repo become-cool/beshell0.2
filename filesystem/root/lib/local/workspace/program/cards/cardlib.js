@@ -4,7 +4,7 @@ class Print extends base.CardStatement {
     constructor(parent, vm) {
         super(parent, vm)
         this.addLabel("print")
-        this.addExprSlot("txt")
+        this.addExprSlot("what")
     }
 }
 
@@ -12,7 +12,7 @@ class Hello extends base.CardStatement {
     constructor(parent, vm) {
         super(parent, vm)
         this.addLabel("say")
-        this.addExprSlot("sth", true)
+        this.addExprSlot("what", true)
     }
 }
 

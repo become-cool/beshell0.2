@@ -57,21 +57,20 @@ class CardStack extends lv.CleanObj{
         card.setY(this.contentHeight)
         this.contentHeight+= card.height() + CardPad
 
-        card.draggable(
-            null, pos=>{
-                pos.y = false
-                if(pos.x>70) {
-                    return false
-                }
-            } ,
-            (cusStop)=>{
-                card.setX(0)
-                if(cusStop) {
-                    card.emit("new-part")
-                }
+        let draggable = card.draggable()
+        draggable.setDragging((pos)=>{
+            pos.y = false
+            if(pos.x>70) {
+                return false
             }
-        )
-        
+        })
+        draggable.setStop((cusStop)=>{
+            card.setX(0)
+            if(cusStop) {
+                card.emit("new-part")
+            }
+        })
+
         card.on("new-part", ()=>{
             this.hide()
             let obj = cb && cb(cbData)

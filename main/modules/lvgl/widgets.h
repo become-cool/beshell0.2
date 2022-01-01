@@ -7,6 +7,9 @@ void require_vlgl_js_widgets(JSContext *ctx, JSValue lvgl) ;
 
 void js_lv_obj_init(JSContext *ctx, JSValue jsobj) ;
 
+inline void lv_obj_set_coord_x(lv_obj_t * obj, lv_coord_t x) ;
+inline void lv_obj_set_coord_y(lv_obj_t * obj, lv_coord_t y) ;
+
 JSValue js_lv_obj_wrapper(JSContext *ctx, lv_obj_t * cobj, JSValue cotr, JSClassID clsid) ;
 
 JSValue js_lv_obj_as(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;

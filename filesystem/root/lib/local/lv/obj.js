@@ -1,4 +1,14 @@
 
+beapi.lvgl.Obj.prototype.draggable = function(onstart, ondragging, onstop) {
+    if(!this._draggable) {
+        this._draggable = new beapi.lvgl.Draggable(this)
+        if(onstart) { this._draggable.setStart(onstart) }
+        if(ondragging) { this._draggable.setDragging(ondragging) }
+        if(onstop) { this._draggable.setStop(onstop) }
+    }
+    this._draggable.enable()
+    return this._draggable
+}
 
 beapi.lvgl.Obj.prototype.show = function show() {
     this.clearFlag("hidden")

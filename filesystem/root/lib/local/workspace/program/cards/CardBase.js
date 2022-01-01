@@ -120,19 +120,10 @@ class CardBase extends lv.Row{
             } ,
         })
 
+        this.draggable()
+
         if(vm) {
-            this.draggable(null, pos=>{
-                for(let other of vm.cards) {
-                    if(other==this) {
-                        continue
-                    }
-                    if(other.hittest(this, pos)) {
-                        pos.x=false
-                        pos.y=false
-                        return
-                    }
-                }
-            })
+            vm.addCard(this)
         }
     }
 
@@ -171,6 +162,9 @@ const SPortX4 = SPortX3 + SPortSlopeW
 const SPortSlopeH = 4
 
 class CardStatement extends CardBase{
+    prev = null
+    next = null
+    inner = null
     constructor(parent, vm) {
         super(parent, vm)
         
@@ -219,6 +213,48 @@ class CardStatement extends CardBase{
 
             // console.log(event, x,y,h)
         })
+
+        
+        let _insertTo = null
+        let draggable = this.draggable()
+        draggable.setStart(()=>{
+            let widget = this.next
+            let lst = []
+            while(widget) {
+                lst.push(widget)
+                widget = widget.next
+            }
+            draggable.setFollowers(lst)
+        })
+        draggable.setDragging((pos)=>{
+            for(let other of vm.cards) {
+                if(other==this || !(other instanceof CardStatement)) {
+                    continue
+                }
+                if(other._insertTest(this, pos)) {
+                    _insertTo = other
+                    // pos.x = pos.y = false
+                    return
+                }
+        
+            }
+            if(_insertTo) {
+                if(_insertTo.next) {
+                    _insertTo._placeNext(_insertTo.next)
+                }
+                _insertTo = null
+            }
+        })
+        // draggable.onafter = (pos)=>{
+        //     this._followMe(pos)
+        // }
+        draggable.setStop(()=>{
+            // draggable.setFollowers(null)
+            if(_insertTo) {
+                _insertTo.insert(this)
+                _insertTo = null
+            }
+        })
     }
 
     coordsPortPrev(x, y) {
@@ -234,36 +270,80 @@ class CardStatement extends CardBase{
         return [x+SPortX2_5, y+this.height()]
     }
 
-    
-    hittest(other, pos) {
-        if(other instanceof CardStatement) {
-            let [ox, oy] = other.coordsPortPrev(pos.x, pos.y)
-            let [x,y] = this.coordsPortNext()
-            if((x-ox)*(x-ox) + (y-oy)*(y-oy) < PortSnapDis) {
-                this.insertNext(other)
-                return true
-            }
-
-            [ox, oy] = other.coordsPortNext(pos.x, pos.y)
-            [x, y] = this.coordsPortPrev()
-            if((x-ox)*(x-ox) + (y-oy)*(y-oy) < PortSnapDis) {
-                this.insertPrev(other)
-                return true
-            }
-
-            return false
+    last() {
+        if(this.next) {
+            return this.next.last()
         }
+        return this
+    }
+
+    insert(statement) {
+        if(statement==this) {
+            throw new Error("insert() self ??")
+        }
+        if(this.next) {
+            statement.last().insert(this.next)
+        }
+        statement.prev = this
+        this.next = statement
+    }
+    
+    _insertTest(statement, pos) {
+
+        let [ox, oy] = statement.coordsPortPrev(pos.x, pos.y)
+        let [x,y] = this.coordsPortNext()
+        if((x-ox)*(x-ox) + (y-oy)*(y-oy) < PortSnapDis) {
+            this._placeNext(null, pos)
+            if(this.next) {
+                statement._placeNext(this.next)
+            }
+            return true
+        }
+
+        if(!this.prev) {
+            ; ([ox, oy] = statement.coordsPortNext(pos.x, pos.y))
+            ; ([x, y] = this.coordsPortPrev())
+            if((x-ox)*(x-ox) + (y-oy)*(y-oy) < PortSnapDis) {
+                this._placePrev(null, pos)
+                return true
+            }
+        }
+
         return false
     }
 
-    insertPrev(statement) {
-        let [x,y] = this.coords()
-        statement.setCoords(x, y-this.height()+SPortSlopeH)
+    
+    _placePrev(statement, out, x, y) {
+        if(x==undefined) {
+            ([x,y] = this.coords())
+        }
+        if(statement) {
+            statement.setCoords(x, y-this.height()+SPortSlopeH)
+        }
+        if(out) {
+            out.x = x
+            out.y = y-this.height()+SPortSlopeH
+        }
     }
-    insertNext(statement) {
-        let [x,y] = this.coords()
-        statement.setCoords(x, y+this.height()-SPortSlopeH)
-        // console.log(x,y, ...statement.coords())
+    _placeNext(statement, out, x, y) {
+        if(x==undefined) {
+            ([x,y] = this.coords())
+        }
+        if(statement) {
+            statement.setCoords(x, y+this.height()-SPortSlopeH)
+        }
+        if(out) {
+            out.x = x
+            out.y = y+this.height()-SPortSlopeH
+        }
+    }
+
+    _followMe(pos) {
+        if(!this.next){
+            return
+        }
+        this._placeNext(this.next, pos, pos.x, pos.y)
+        this.next._followMe(pos)
     }
 }
 

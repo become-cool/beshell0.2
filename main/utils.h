@@ -10,6 +10,10 @@ void echo_error(JSContext *) ;
 
 #endif
 
+
+#define JS_IsFalse(ctx, var) (JS_IsBool(var) && !JS_ToBool(ctx, var))
+#define JS_IsTrue(ctx, var) (JS_IsBool(var) && JS_ToBool(ctx, var))
+
 #define VAR_REFCNT(var) ((JSRefCountHeader *)JS_VALUE_GET_PTR(var))->ref_count
 #define P_VAR_REFCNT(var) printf(#var" ref count:%d @%d\n", VAR_REFCNT(var), __LINE__) ;
 

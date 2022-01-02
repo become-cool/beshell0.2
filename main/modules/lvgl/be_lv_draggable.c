@@ -64,8 +64,10 @@ static void js_lv_draggable_start(lv_event_t * event) {
 
     if( !JS_IsUndefined(draggable->callback_start) ) {
         JSValue ret = JS_Call(draggable->ctx, draggable->callback_start, draggable->jstarget, 0, NULL) ;   
-        
-        if( JS_IsFalse(draggable ->ctx, ret) ) {
+        if(JS_IsException(ret)) {
+            js_std_dump_error(draggable->ctx) ;
+        }
+        else if( JS_IsFalse(draggable ->ctx, ret) ) {
             JS_FreeValue(draggable->ctx, ret) ;
             return ;
         }
@@ -120,7 +122,10 @@ static void js_lv_draggable_dragging(lv_event_t * event) {
         JS_SetPropertyStr(draggable->ctx, draggable->pos, "y", JS_NewInt32(draggable->ctx, y)) ;
 
         JSValue ret = JS_Call(draggable->ctx, draggable->callback_dragging, draggable->jstarget, 1, &draggable->pos) ;
-        if( JS_IsFalse(draggable ->ctx, ret) ) {
+        if(JS_IsException(ret)) {
+            js_std_dump_error(draggable->ctx) ;
+        }
+        else if( JS_IsFalse(draggable ->ctx, ret) ) {
             JS_FreeValue(draggable->ctx, ret) ;
             // call onstop
             if( !JS_IsUndefined(draggable->callback_stop) ) {

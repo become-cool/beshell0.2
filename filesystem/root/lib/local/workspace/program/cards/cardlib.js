@@ -16,6 +16,15 @@ class Hello extends base.CardStatement {
     }
 }
 
+class OperatorTwo extends base.CardExpression {
+    constructor(parent, vm) {
+        super(parent, vm)
+        this.addExprSlot("left", true)
+        this.addLabel("+")
+        this.addExprSlot("right")
+    }
+}
+
 module.exports = [
     {
         name: 'control' ,
@@ -23,6 +32,7 @@ module.exports = [
         cards: [
             Print ,
             Hello ,
+            OperatorTwo ,
         ] ,
     } ,
     {

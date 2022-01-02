@@ -66,8 +66,12 @@ class Workspace extends lv.CleanObj {
     }
 
     static singleton() {
-        if(!_singleton)
+        if(!_singleton) {
             _singleton = new Workspace()
+
+            global.ws = _singleton
+            global.vm = _singleton.model.vm
+        }
         return _singleton
     }
 }

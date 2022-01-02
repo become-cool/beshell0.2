@@ -110,7 +110,6 @@ module.exports = class ScrApps extends lv.Obj {
                         longPressed = false
                         return
                     }
-                    console.log("xxx")
                     require("workspace").start( path )
                 } ,
                 longPressed: ()=>{

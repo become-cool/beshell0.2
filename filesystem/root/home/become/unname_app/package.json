@@ -1,0 +1,8 @@
+{
+    "name": "app3",
+    "version": "1.0.0",
+    "title": "app3",
+    "uuid": "589d06c7-425e-46fa-8deb-b6bc53d7fa87",
+    "icon": "/lib/icon/chart.png",
+    "main": "index.js"
+}

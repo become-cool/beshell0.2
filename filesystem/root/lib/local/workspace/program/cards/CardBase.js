@@ -91,13 +91,43 @@ class CardSlotExpression extends lv.CleanObj{
         }
     }
 
-    in(expr) {
-        this.expr = expr
-        this.input.hide()
+    desktop() {
+        for(let parent = this.parent(); parent; parent=parent.parent()){
+            if(parent instanceof CardStatement) {
+                return parent.parent()
+            }
+        }
     }
-    out() {
+
+    insert(expr) {
+        expr.setParent(this)
+        expr.center()
+        this.expr = expr
+        if(this.input)
+            this.input.hide()
+    }
+    remove() {
+        if(!this.expr) {
+            return
+        }
+        this.expr.setParent( this.desktop() )
         this.expr = null
-        this.input.show()
+        if(this.input)
+            this.input.show()
+    }
+
+    // extend 用于拖出时扩大范围，别面在边界上抖动
+    _testInsert(ex,ey, extend) {
+        let [x,y] = this.coords()
+        if(ey<y-extend)
+            return false
+        let h = this.height()
+        if(ey>y+h+extend)
+            return false
+        let w = this.width()
+        if(ex<x+h/2-extend || ex>x+w-h/2+extend) 
+            return false
+        return true
     }
 }
 
@@ -160,6 +190,14 @@ const SPortX2_5 = SPortX2 + 5
 const SPortX3 = SPortX2 + 10
 const SPortX4 = SPortX3 + SPortSlopeW
 const SPortSlopeH = 4
+/*
+      x1       x4
+    .____     _______________________
+    |    \___/                       |
+    |    x2  x3                      |
+    |____     _______________________|
+         \___/
+*/
 
 class CardStatement extends CardBase{
     prev = null
@@ -210,8 +248,6 @@ class CardStatement extends CardBase{
                 [x+SPortX2,y+h] ,
                 [x+SPortX1,y+h-SPortSlopeH] ,
             ], clip, bodyDsc)
-
-            // console.log(event, x,y,h)
         })
 
         
@@ -225,36 +261,42 @@ class CardStatement extends CardBase{
                 widget = widget.next
             }
             draggable.setFollowers(lst)
+            if(this.prev) {
+                this.prev.next = null
+                this.prev = null
+            }
         })
         draggable.setDragging((pos)=>{
-            for(let other of vm.cards) {
-                if(other==this || !(other instanceof CardStatement)) {
+            let [px, py] = this.coordsPortPrev(pos.x, pos.y)
+            for(let statement of vm.cards) {
+                if(statement==this || !(statement instanceof CardStatement || statement.next) ) {
                     continue
                 }
-                if(other._insertTest(this, pos)) {
-                    _insertTo = other
-                    // pos.x = pos.y = false
+                if(statement._testInsert(px, py)) {
+                    statement._placeNext(null, pos)                    
+                    _insertTo = statement
                     return
                 }
-        
             }
             if(_insertTo) {
-                if(_insertTo.next) {
-                    _insertTo._placeNext(_insertTo.next)
-                }
                 _insertTo = null
             }
         })
-        // draggable.onafter = (pos)=>{
-        //     this._followMe(pos)
-        // }
         draggable.setStop(()=>{
-            // draggable.setFollowers(null)
+            draggable.setFollowers(null)
+            if(this.prev) {
+
+            }
             if(_insertTo) {
                 _insertTo.insert(this)
                 _insertTo = null
             }
         })
+    }
+
+    _testInsert(px,py) {
+        let [x,y] = this.coordsPortNext()
+        return ((x-px)*(x-px) + (y-py)*(y-py)) < PortSnapDis
     }
 
     coordsPortPrev(x, y) {
@@ -287,44 +329,7 @@ class CardStatement extends CardBase{
         statement.prev = this
         this.next = statement
     }
-    
-    _insertTest(statement, pos) {
 
-        let [ox, oy] = statement.coordsPortPrev(pos.x, pos.y)
-        let [x,y] = this.coordsPortNext()
-        if((x-ox)*(x-ox) + (y-oy)*(y-oy) < PortSnapDis) {
-            this._placeNext(null, pos)
-            if(this.next) {
-                statement._placeNext(this.next)
-            }
-            return true
-        }
-
-        if(!this.prev) {
-            ; ([ox, oy] = statement.coordsPortNext(pos.x, pos.y))
-            ; ([x, y] = this.coordsPortPrev())
-            if((x-ox)*(x-ox) + (y-oy)*(y-oy) < PortSnapDis) {
-                this._placePrev(null, pos)
-                return true
-            }
-        }
-
-        return false
-    }
-
-    
-    _placePrev(statement, out, x, y) {
-        if(x==undefined) {
-            ([x,y] = this.coords())
-        }
-        if(statement) {
-            statement.setCoords(x, y-this.height()+SPortSlopeH)
-        }
-        if(out) {
-            out.x = x
-            out.y = y-this.height()+SPortSlopeH
-        }
-    }
     _placeNext(statement, out, x, y) {
         if(x==undefined) {
             ([x,y] = this.coords())
@@ -362,6 +367,38 @@ class CardExpression extends CardBase{
                 "radius": lv.RADIUS_CIRCLE ,
             }
         })
+
+        let draggable = this.draggable()
+        draggable.setDragging(pos=>{
+            let x = pos.x 
+            let y = pos.y + this.height()/2
+            let parent = this.parent()
+            if( parent instanceof CardSlotExpression ){
+                if(!parent._testInsert(x, y, 5)) {
+                    parent.remove()
+                }
+                else {
+                    pos.x = pos.y = false
+                    return
+                }
+            }
+            for(let statement of vm.cards) {
+                if(statement==this) {
+                    continue
+                }
+                for(let name in statement.slots) {
+                    let slot = statement.slots[name]
+                    if( !(slot instanceof CardSlotExpression) )
+                        continue
+                    if(!slot._testInsert(x, y, 0)) {
+                        continue
+                    }
+                    slot.insert(this)
+                    pos.x = pos.y = false
+                    return
+                }
+            }
+        })
     }
 }
 
@@ -369,19 +406,7 @@ class CardCompare extends CardBase{
     constructor(parent, vm) {
         super(parent, vm)
         
-        this.fromJson({
-            // style: {
-            //     "border-width": 1 ,
-            //     "border-color": lv.palette("orange") ,
-            //     "border-opa": 180 ,
-            //     "bg-color": lv.palette("orange") ,
-            //     "bg-opa": 255 ,
-            //     "radius": lv.RADIUS_CIRCLE ,
-            // } ,
-            // children: [
-
-            // ]
-        })
+        this.fromJson()
 
         this.on("draw-main", (e, clip)=>{
             let h = this.height()

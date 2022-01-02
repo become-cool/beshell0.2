@@ -13,12 +13,13 @@
 #include "tp_spi.h"
 #include "display_ws.h"
 #include "disp_st77xx.h"
+#include <freertos/queue.h>
 #else
 #include "http_lws.h"
 #endif
 
-uint8_t * dma_buff1 = NULL ;
-uint8_t * dma_buff2 = NULL ;
+uint8_t * disp_buff1 = NULL ;
+uint8_t * disp_buff2 = NULL ;
 
 lv_indev_drv_t indev_drv;
 bool indev_fake = false ;
@@ -40,17 +41,55 @@ bool be_lv_fake_indev(lv_indev_data_t *data) {
 
 #ifndef SIMULATION
 
+typedef struct {
+    lv_coord_t x1 ;
+    lv_coord_t x2 ;
+    lv_coord_t y1 ;
+    lv_coord_t y2 ;
+    uint8_t * buff ;
+    lv_disp_drv_t * disp ;
+} draw_param_t ;
+
+draw_param_t draw_param ;
+
+uint8_t * dma_buff = NULL ;
+
+QueueHandle_t disp_queue;
+
+static void task_disp(void *arg) {
+
+    draw_param_t * param ;
+    
+    while(1) {
+		xQueueReceive(disp_queue, &param, portMAX_DELAY);
+
+        printf("draw %d,%d - %d,%d \n", param->x1,param->y1, param->x2, param->y2) ;
+
+        memcpy(dma_buff, param->buff, DMA_BUFF_LEN) ;
+        
+        st77xx_draw_rect(param->disp->user_data, param->x1,param->y1, param->x2, param->y2, dma_buff) ;
+
+        lv_disp_flush_ready(param->disp) ;
+	}
+}
+
 void ws_disp_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color_p) {}
 
 void disp_st7789_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color_p) {
-    // printf("disp_st7789_flush()\n") ;
     if(!disp->user_data) {
         printf("spidev is NULL\n") ;
         return ;
     }
-    st77xx_draw_rect(disp->user_data, area->x1,area->y1, area->x2, area->y2, color_p) ;
-    // disp_virtual_flush(disp, area, color_p) ;
-    lv_disp_flush_ready(disp) ;
+
+    draw_param.x1 = area->x1 ;
+    draw_param.x2 = area->x2 ;
+    draw_param.y1 = area->y1 ;
+    draw_param.y2 = area->y2 ;
+    draw_param.buff = (uint8_t*)color_p ;
+    draw_param.disp = disp ;
+
+    draw_param_t * pp = &draw_param ;
+	xQueueSend(disp_queue, (void *)&pp, 0);
 }
 void input_driver_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
     // if(ws_driver_input_read(drv, data))
@@ -165,7 +204,7 @@ static JSValue js_lvgl_set_default_display(JSContext *ctx, JSValueConst this_val
  */
 JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
 
-    if(!dma_buff1) {
+    if(!disp_buff1) {
         THROW_EXCEPTION("DMA Buff is NULL")
     }
 
@@ -189,7 +228,12 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
         JS_ThrowReferenceError(ctx, "out of memory?");
         goto excp ;
     }
-    lv_disp_draw_buf_init(drawbuf, dma_buff1+DMA_BUFF_AUX_SIZE, NULL, buflen/2);
+    if(disp_buff2) {
+        lv_disp_draw_buf_init(drawbuf, disp_buff1+DMA_BUFF_AUX_SIZE, disp_buff2+DMA_BUFF_AUX_SIZE, buflen/2);
+    }
+    else {
+        lv_disp_draw_buf_init(drawbuf, disp_buff1+DMA_BUFF_AUX_SIZE, NULL, buflen/2);
+    }
 
     // 创建设备驱动对象
     dispdrv = malloc(sizeof(lv_disp_drv_t)) ;
@@ -275,27 +319,17 @@ excp:
     return JS_EXCEPTION ;
 }
 
-void be_module_lvgl_malloc_buffer() {
-    dma_buff1 = NULL ;
-    dma_buff2 = NULL ;
-    
+void be_module_lvgl_malloc_buffer() {    
 #ifndef SIMULATION
-    dma_buff1 = heap_caps_malloc( DMA_BUFF_LEN + DMA_BUFF_AUX_SIZE, MALLOC_CAP_DMA);
-    dp(dma_buff1)
-    // dma_buff2 = heap_caps_malloc( DMA_BUFF_LEN + DMA_BUFF_AUX_SIZE, MALLOC_CAP_DMA);
-    // if(!dma_buff2) {
-    //     printf("malloc dma_buff2 faild\n") ;
-    // }
-    // else {
-    //     dp(dma_buff2)
-    // }
-#else
-    dma_buff1 = malloc(DMA_BUFF_LEN + DMA_BUFF_AUX_SIZE) ;
-    dma_buff2 = malloc(DMA_BUFF_LEN + DMA_BUFF_AUX_SIZE) ;
-#endif
-    if(!dma_buff1) {
+    dma_buff = heap_caps_malloc( DMA_BUFF_LEN + DMA_BUFF_AUX_SIZE, MALLOC_CAP_DMA);
+    if(!dma_buff) {
         printf("heap_caps_malloc(%d) faild for display buff.\n", DMA_BUFF_LEN) ;
     }
+#endif
+
+    disp_buff1 = malloc(DMA_BUFF_LEN + DMA_BUFF_AUX_SIZE) ;
+    disp_buff2 = malloc(DMA_BUFF_LEN + DMA_BUFF_AUX_SIZE) ;
+
 }
 
 void init_lvgl_display() {
@@ -304,6 +338,9 @@ void init_lvgl_display() {
 
 #ifndef SIMULATION
     vlgl_js_display_ws_init() ;
+    
+	disp_queue = xQueueCreate(1, sizeof(draw_param_t *));
+	xTaskCreatePinnedToCore(task_disp, "task_disp", 2048, NULL, 5, NULL, 1);
 #endif
 }
 

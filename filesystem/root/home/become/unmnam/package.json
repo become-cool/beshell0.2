@@ -1,0 +1,8 @@
+{
+    "name": "app2",
+    "version": "1.0.0",
+    "title": "app2",
+    "uuid": "cc2ea301-adf7-48b8-ab63-2211c4ec70a6",
+    "icon": "/lib/icon/alarm.png",
+    "main": "index.js"
+}

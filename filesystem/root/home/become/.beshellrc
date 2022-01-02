@@ -1,0 +1,3 @@
+setTimeout(()=>{
+    require("./test.js")
+}, 1000)

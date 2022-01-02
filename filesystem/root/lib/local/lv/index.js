@@ -1,6 +1,7 @@
 require("./obj.js")
 require("./loader.js")
 beapi.lvgl.Color = require("./color.js")
+require("./animate.js")
 
 
 beapi.lvgl.dir = {

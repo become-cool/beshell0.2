@@ -86,7 +86,9 @@ class CardStack extends lv.CleanObj{
     
                 try{
                     lv.fakeIndev(pos.x, pos.y, false)
+                    lv.tickIndev()
                     lv.fakeIndev(pos.x, pos.y, true)
+                    lv.tickIndev()
                 }catch(e){
                     console.log(e)
                     console.log(e.stack)

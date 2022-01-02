@@ -24,6 +24,7 @@ const lstClasses = [
             "js_lv_obj_get_font_height": "fontHeight" ,
             "js_lv_obj_as": "as" ,
             "js_lv_obj_ptr": "ptr" ,
+            "js_lv_obj_abort_scroll": "abortScroll" ,
         }
     },
     {

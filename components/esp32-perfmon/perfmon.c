@@ -63,7 +63,7 @@ static void perfmon_task(void *args)
 
 esp_err_t perfmon_start()
 {
-	return ESP_OK ;
+	// return ESP_OK ;
 	ESP_ERROR_CHECK(esp_register_freertos_idle_hook_for_cpu(idle_task_0, 0));
 	ESP_ERROR_CHECK(esp_register_freertos_idle_hook_for_cpu(idle_task_1, 1));
 	// TODO calculate optimal stack size

@@ -138,7 +138,7 @@ const MapC2JS_Conver = {
     "lv_anim_enable_t": conver_bool,
     "lv_color_t": conver_uint16 ,
     "lv_scrollbar_mode_t": conver_uint8,
-    "lv_scroll_snap_t": conver_uint8,
+    "lv_scroll_snap_t": create_conver_mappingconst('lv_scroll_snap_t', 'lv_scroll_snap_jsstr_to_const'),
     "lv_area_t *": conver_area ,
     "lv_point_t *": conver_point ,
     "lv_obj_t *": conver_obj,

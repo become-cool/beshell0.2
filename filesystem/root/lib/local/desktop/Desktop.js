@@ -3,9 +3,15 @@ const Dashboard = require("./dashboard/Dashboard.js")
 const ScrApps = require("./ScrApps")
 const ScrSysApps = require("./ScrSysApps")
 
+
 class Desktop extends lv.Obj {
 
     _dashboard = null
+
+    activePanel = 1
+    scrollSnap = 40
+
+    _switchingPanel = false
 
     constructor(disp) {
         try{
@@ -14,24 +20,66 @@ class Desktop extends lv.Obj {
             console.log("Desktop")
             
             lv.loadScreen(this)
+            this.clearFlag("scrollable")
+            this.setStyle("bg-color", lv.rgb(242))
 
-            this._tv = new lv.TileView(this)
+            this.updateLayout()
+            let width = this.width()
 
-            this._sysApps = new ScrSysApps(this._tv.addTile(0,0,lv.dir.HOR))
+            this._wallpaperOuter = new lv.CleanObj(this)
+            this._wallpaperOuter.setWidth(width)
+            this._wallpaperOuter.setHeight("100%")
+            this._wallpaperOuter.setStyle("bg-opa",0)
+            this._wallpaper = new lv.Img(this._wallpaperOuter)
+            this._wallpaper.setSrc("/home/become/bg.png")
             
-            let tileDashboard = this._tv.addTile(1,0,lv.dir.HOR)
-            this._dashboard = new Dashboard(tileDashboard)
 
-            let tileApps = this._tv.addTile(2,0,lv.dir.HOR)
-            this._apps = new ScrApps(tileApps)
+            this._panels = new lv.CleanObj(this)
+            this._panels.setWidth(width)
+            this._panels.setHeight("100%")
+            this._panels.setStyle("bg-opa",0)
 
-            // setTimeout(() =>this._tv.setTile(tileApps,false), 1000)
+            
+            this._sysApps = new ScrSysApps(this._panels)
+            this._sysApps.setWidth(width)
+            this._sysApps.setHeight("100%")
 
-            global.desktop = this
+            this._dashboard = new Dashboard(this._panels)
+            this._dashboard.setWidth(width)
+            this._dashboard.setHeight("100%")
+            this._dashboard.setX(width)
+
+            this._apps = new ScrApps(this._panels)
+            this._apps.setWidth(width)
+            this._apps.setHeight("100%")
+            this._apps.setX(width*2)
+
+            this.on("gesture",(e, dir)=>{
+                if(dir=="left") {
+                    this.setActivePanel(this.activePanel+1, true)
+                }
+                else if(dir=="right") {
+                    this.setActivePanel(this.activePanel-1, true)
+                }
+            })
+
+            this.setActivePanel(1)
+
         }catch(e){
             console.log(e)
             console.log(e.stack)
         }
+    }
+    setActivePanel(i, anim) {
+        let width = this.width()
+        this.activePanel = i
+        this._panels.scrollToX(i*width, !!anim)
+
+        let ww = this._wallpaper.width() - this.width()
+        if(ww>0) {
+            this._wallpaperOuter.scrollToX(i*(ww/2), !!anim)
+        }
+        
     }
 }
 module.exports = Desktop

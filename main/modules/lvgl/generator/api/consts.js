@@ -484,11 +484,20 @@ module.exports = [
             "LV_IMG_CF_USER_ENCODED_6",
             "LV_IMG_CF_USER_ENCODED_7",
         ]
-    } ,
+    }
 
-    
-
-    
+    , {
+        prefix: 'LV_SCROLL_SNAP_' ,
+        type: 'lv_scroll_snap_t' ,
+        name: 'lv_scroll_snap' ,
+        end: 'LV_SCROLL_SNAP_CENTER+1' ,
+        def: [
+            'LV_SCROLL_SNAP_NONE' ,
+            'LV_SCROLL_SNAP_START' ,
+            'LV_SCROLL_SNAP_END' ,
+            'LV_SCROLL_SNAP_CENTER' ,
+        ]
+    }
 ]
 
 

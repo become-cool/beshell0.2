@@ -27,34 +27,26 @@ class Program extends lv.CleanObj{
                 // }
             ]
         })
+        
+        let menu = new lv.Menu(this)
+        menu.addItem("xxxx")
+        menu.popup(100,100)
+        global.m = menu
+
 
         let clz = cardlib[0].cards[1]
-        for(let i=1;i<=1; i++) {
+        for(let i=1;i<=5; i++) {
             let card = new clz(this, workspace.model.vm)
             card.setCoords(50, 5+i*50-50)
             // card.slots.what.input.setText(i)
         }
         clz = cardlib[0].cards[2]
-        for(let i=1;i<=1; i++) {
+        for(let i=1;i<=5; i++) {
             let card = new clz(this, workspace.model.vm)
             card.setCoords(150, 5+i*50-50)
             // card.slots.what.input.setText(i)
         }
 
-        // let parent = new lv.Obj(this)
-        // parent.setX(160)
-        // let child
-        // for(let i=1;i<=20; i++) {
-        //     parent.setWidth(-1)
-        //     parent.setHeight(-1)
-        //     parent.setStyle("pad",0)
-        //     parent.setStyle("pad-top",16)
-        //     parent.draggable()
-        //     child = new lv.Obj(parent)
-        //     parent = child
-        // }
-        // child.setWidth(100)
-        // child.setHeight(20)
     }
 
     setZoom(zoom) {

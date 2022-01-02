@@ -14,9 +14,6 @@ class Dashboard extends lv.Column {
                 class: 'Row' ,
                 grow: 1 ,
                 ref: "row1" ,
-                style: {
-                    "border-width": 2
-                } ,
                 width: "100%" ,
                 children: [
                     {

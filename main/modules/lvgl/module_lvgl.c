@@ -87,17 +87,26 @@ static JSValue js_lvgl_input_point(JSContext *ctx, JSValueConst this_val, int ar
 }
 
 static JSValue js_lv_rgb(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-    CHECK_ARGC(3)
+    CHECK_ARGC(1)
     lv_color_t color ;
     uint8_t r, g, b ;
     if(JS_ToUint32(ctx, &r, argv[0] ) ){
         THROW_EXCEPTION("arg red must be a int")
     }
-    if(JS_ToUint32(ctx, &g, argv[1] ) ){
-        THROW_EXCEPTION("arg green must be a int")
+    if(argc>=3) {
+        if(JS_ToUint32(ctx, &g, argv[1] ) ){
+            THROW_EXCEPTION("arg green must be a int")
+        }
+        if(JS_ToUint32(ctx, &b, argv[2] ) ){
+            THROW_EXCEPTION("arg blue must be a int")
+        }
     }
-    if(JS_ToUint32(ctx, &b, argv[2] ) ){
-        THROW_EXCEPTION("arg blue must be a int")
+    else if(argc==1) {
+        g = r;
+        b = r ;
+    }
+    else {
+        THROW_EXCEPTION("Missing argv")
     }
     
     color.ch.red = r * 31 / 255.0 + 0.5 ;
@@ -115,11 +124,18 @@ static JSValue js_lv_rgb(JSContext *ctx, JSValueConst this_val, int argc, JSValu
 
 static JSValue js_lv_set_indev_active_obj(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(1)
-    CHECK_INSOF_LVOBJ("Obj", argv[0], "arg widget of lvgl.setIndevActiveObj() must be a lvgl.Object method")
-    lv_obj_t * obj = JS_GetOpaqueInternal(argv[0]) ;
-    if(!obj) {
-        THROW_EXCEPTION("invalid lv widget obj")
-        // return JS_FALSE ;
+
+    lv_obj_t * obj ;
+    if( JS_IsNull(argv[0]) ) {
+        obj = NULL ;
+    }
+    else {
+        CHECK_INSOF_LVOBJ("Obj", argv[0], "arg widget of lvgl.setIndevActiveObj() must be a lvgl.Object method")
+        obj = JS_GetOpaqueInternal(argv[0]) ;
+        if(!obj) {
+            THROW_EXCEPTION("invalid lv widget obj")
+            // return JS_FALSE ;
+        }
     }
 
     lv_indev_t * indev = lv_indev_get_act() ;

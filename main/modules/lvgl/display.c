@@ -52,26 +52,29 @@ typedef struct {
 
 draw_param_t draw_param ;
 
+bool lock_spi_transfering = false ;
 uint8_t * dma_buff = NULL ;
 
 QueueHandle_t disp_queue;
 
-static void task_disp(void *arg) {
+// static void task_disp(void *arg) {
 
-    draw_param_t * param ;
+//     draw_param_t * param ;
     
-    while(1) {
-		xQueueReceive(disp_queue, &param, portMAX_DELAY);
+//     while(1) {
+// 		xQueueReceive(disp_queue, &param, portMAX_DELAY);
 
-        printf("draw %d,%d - %d,%d \n", param->x1,param->y1, param->x2, param->y2) ;
+//         // printf("draw %d,%d - %d,%d \n", param->x1,param->y1, param->x2, param->y2) ;
 
-        memcpy(dma_buff, param->buff, DMA_BUFF_LEN) ;
+//         memcpy(dma_buff, param->buff, DMA_BUFF_LEN) ;
         
-        st77xx_draw_rect(param->disp->user_data, param->x1,param->y1, param->x2, param->y2, dma_buff) ;
+//         lock_spi_transfering = true ;
+//         st77xx_draw_rect(param->disp->user_data, param->x1,param->y1, param->x2, param->y2, dma_buff) ;
+//         lock_spi_transfering = false ;
 
-        lv_disp_flush_ready(param->disp) ;
-	}
-}
+//         lv_disp_flush_ready(param->disp) ;
+// 	}
+// }
 
 void ws_disp_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color_p) {}
 
@@ -81,25 +84,40 @@ void disp_st7789_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t 
         return ;
     }
 
-    draw_param.x1 = area->x1 ;
-    draw_param.x2 = area->x2 ;
-    draw_param.y1 = area->y1 ;
-    draw_param.y2 = area->y2 ;
-    draw_param.buff = (uint8_t*)color_p ;
-    draw_param.disp = disp ;
+    // draw_param.x1 = area->x1 ;
+    // draw_param.x2 = area->x2 ;
+    // draw_param.y1 = area->y1 ;
+    // draw_param.y2 = area->y2 ;
+    // draw_param.buff = (uint8_t*)color_p ;
+    // draw_param.disp = disp ;
 
-    draw_param_t * pp = &draw_param ;
-	xQueueSend(disp_queue, (void *)&pp, 0);
+    // draw_param_t * pp = &draw_param ;
+	// xQueueSend(disp_queue, (void *)&pp, 0);
+
+    st77xx_draw_rect(disp->user_data, area->x1,area->y1, area->x2, area->y2, color_p) ;
+    lv_disp_flush_ready(disp) ;
 }
+
 void input_driver_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
     // if(ws_driver_input_read(drv, data))
     //     return ;
 
     if(!be_lv_fake_indev(data)) {
-        data->continue_reading = xpt2046_read(drv, data) ;
-        if(data->state == LV_INDEV_STATE_PRESSED) {
-            data->point.x -= 10 ;
+
+        if(lock_spi_transfering) {
+            // printf("spi lock") ;
+            data->point.x = indev_input_x ;
+            data->point.y = indev_input_y ;
+            data->state = indev_input_pressed? LV_INDEV_STATE_PRESSED: LV_INDEV_STATE_RELEASED ;
+            return ;
         }
+        else {
+            data->continue_reading = xpt2046_read(drv, data) ;
+            if(data->state == LV_INDEV_STATE_PRESSED) {
+                data->point.x -= 10 ;
+            }
+        }
+
     }
 
     indev_input_x = data->point.x ;
@@ -302,6 +320,7 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
 #endif
     indev_drv.type = LV_INDEV_TYPE_POINTER;
     lv_indev_t *indev = lv_indev_drv_register(&indev_drv);
+    indev->driver->gesture_limit = 30 ;
     if(!indev) {
         printf("Cound not create indev\n") ;
     }
@@ -325,10 +344,13 @@ void be_module_lvgl_malloc_buffer() {
     if(!dma_buff) {
         printf("heap_caps_malloc(%d) faild for display buff.\n", DMA_BUFF_LEN) ;
     }
-#endif
-
+    disp_buff1 = dma_buff ;
+    disp_buff2 = NULL ;
+#else
     disp_buff1 = malloc(DMA_BUFF_LEN + DMA_BUFF_AUX_SIZE) ;
     disp_buff2 = malloc(DMA_BUFF_LEN + DMA_BUFF_AUX_SIZE) ;
+#endif
+
 
 }
 
@@ -339,11 +361,15 @@ void init_lvgl_display() {
 #ifndef SIMULATION
     vlgl_js_display_ws_init() ;
     
-	disp_queue = xQueueCreate(1, sizeof(draw_param_t *));
-	xTaskCreatePinnedToCore(task_disp, "task_disp", 2048, NULL, 5, NULL, 1);
+	// disp_queue = xQueueCreate(1, sizeof(draw_param_t *));
+	// xTaskCreatePinnedToCore(task_disp, "task_disp", 2048, NULL, 5, NULL, 1);
 #endif
 }
 
+static JSValue js_lvgl_tick_indev(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    lv_indev_read_timer_cb(indev_drv.read_timer) ;
+    return JS_UNDEFINED ;
+}
 
 static JSValue js_lvgl_fake_indev(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(3)
@@ -360,7 +386,6 @@ static JSValue js_lvgl_fake_indev(JSContext *ctx, JSValueConst this_val, int arg
 
     indev_fake = true ;
 
-    lv_indev_read_timer_cb(indev_drv.read_timer) ;
 
     return JS_UNDEFINED ;
 }
@@ -376,4 +401,5 @@ void require_vlgl_js_display(JSContext *ctx, JSValue lvgl) {
     JS_SetPropertyStr(ctx, lvgl, "createDisplay", JS_NewCFunction(ctx, js_lvgl_create_display, "createDisplay", 1));
     JS_SetPropertyStr(ctx, lvgl, "actionDisplay", JS_NewCFunction(ctx, js_lvgl_set_default_display, "actionDisplay", 1));
     JS_SetPropertyStr(ctx, lvgl, "fakeIndev", JS_NewCFunction(ctx, js_lvgl_fake_indev, "fakeIndev", 1));
+    JS_SetPropertyStr(ctx, lvgl, "tickIndev", JS_NewCFunction(ctx, js_lvgl_tick_indev, "tickIndev", 1));
 }

@@ -26,7 +26,6 @@ module.exports = class ScrApps extends lv.Obj {
                     "pad-top": 8 ,
                     "pad-left": 8 ,
                 } ,
-    
                 children: [
                     {
                         class: "Obj" ,
@@ -91,7 +90,7 @@ module.exports = class ScrApps extends lv.Obj {
         }
         if(last) {
             setTimeout(()=>{
-                require("workspace").start( last )
+                // require("workspace").start( last )
             },500)
         }
     }
@@ -152,8 +151,8 @@ module.exports = class ScrApps extends lv.Obj {
 class AppMenu extends lv.List {
     constructor(parent) {
         super(parent)
-        this.setWidth(140)
-        this.setHeight(170)
+        this.setWidth(-1)
+        this.setStyle("max-width",170)
         this.addItem(lv.symbol.gps, "开机启动", ()=>{
         })
         this.addItem(lv.symbol.edit, "编辑", ()=>{
@@ -165,14 +164,5 @@ class AppMenu extends lv.List {
         this.addItem(lv.symbol.close, "取消", ()=>{
             this.hide()
         })
-    }
-
-    addItem(symbol, text, cb) {
-        let btn = this.addBtn(symbol, text)
-        btn.on("clicked", ()=>{
-            this.hide()
-            cb && cb()
-        })
-        btn.child(1).as(lv.Label).setFont("msyh")
     }
 }

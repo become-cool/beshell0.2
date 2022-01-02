@@ -20,7 +20,7 @@ class OperatorTwo extends base.CardExpression {
     constructor(parent, vm) {
         super(parent, vm)
         this.addExprSlot("left", true)
-        this.addLabel("+")
+        this.addMenu(["+","-","*","/","%","^","|","&"])
         this.addExprSlot("right")
     }
 }

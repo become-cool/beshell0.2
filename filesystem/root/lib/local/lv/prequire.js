@@ -4,6 +4,7 @@ module.exports = function(){
         "./list.js",
         "./color.js",
         "./loader.js",
+        "./animate.js",
         "./index.js",
     ], require)
 }

@@ -45,24 +45,8 @@ class Input extends lv.TextArea {
     }
 }
 
-class CardSlotCompare extends lv.CleanObj{
-    constructor(card) {
-        super(card)
-        this.fromJson({
-            width: 30 ,
-            height: 16 ,
-            style: {
-                radius: lv.RADIUS_CIRCLE ,
-                "border-width": 1 ,
-                "border-color": lv.palette("grey") ,
-                "border-opa": 180 ,
-                "bg-color": lv.palette("grey") ,
-                "bg-opa": 60 ,
-            }
-        })
-    }
-}
-
+const SlotMinWidth = 24
+const SlotMinHeight = 16
 
 class CardSlotExpression extends lv.CleanObj{
 
@@ -81,20 +65,19 @@ class CardSlotExpression extends lv.CleanObj{
                 "border-opa": 180 ,
                 "bg-color": lv.palette("grey") ,
                 "bg-opa": 60 ,
-                "min-width": 24 ,
-                "min-height": 16 ,
+                "min-width": SlotMinWidth ,
+                "min-height": SlotMinHeight ,
             }
         })
-
         if(!noInput) {
             this.input = new Input(this)
         }
     }
-
     desktop() {
+        const Program = require("../Program")
         for(let parent = this.parent(); parent; parent=parent.parent()){
-            if(parent instanceof CardStatement) {
-                return parent.parent()
+            if(parent instanceof Program) {
+                return parent
             }
         }
     }
@@ -121,13 +104,65 @@ class CardSlotExpression extends lv.CleanObj{
         let [x,y] = this.coords()
         if(ey<y-extend)
             return false
-        let h = this.height()
-        if(ey>y+h+extend)
+        // 按空 slot 计算
+        if(ey>y+SlotMinHeight+extend)
             return false
-        let w = this.width()
-        if(ex<x+h/2-extend || ex>x+w-h/2+extend) 
+        if(ex<x+SlotMinHeight/2-extend || ex>x+SlotMinWidth-SlotMinHeight/2+extend) 
             return false
         return true
+    }
+}
+
+class CardSlotCompare extends lv.CleanObj{
+    constructor(card) {
+        super(card)
+        this.fromJson({
+            width: 30 ,
+            height: 16 ,
+            style: {
+                radius: lv.RADIUS_CIRCLE ,
+                "border-width": 1 ,
+                "border-color": lv.palette("grey") ,
+                "border-opa": 180 ,
+                "bg-color": lv.palette("grey") ,
+                "bg-opa": 60 ,
+            }
+        })
+    }
+}
+
+class CardMenu extends lv.Label{
+    options = null
+    constructor(card, options) {
+        super(card) 
+        if( typeof options=="array" ) {
+            this.options = {}
+            for(let val of options) {
+                this.options[val] = val
+            }
+        }
+        else if( typeof options=="object" )
+            this.options = options
+        else {
+            throw new Error("arg options must be a array or object ")
+        }
+
+        this.fromJson({
+            width: -1 ,
+            font: "m10" ,
+            style: {
+                "min-width": 20
+            } ,
+            clicked: ()=>{
+                console.log("xxxxx")
+            }
+        })
+        let titles = Object.values(this.options)
+        this.setText(titles.length? titles[0]: '')
+    }
+
+    setText(title) {
+        super.setText(title + " " + lv.symbol.down)
     }
 }
 
@@ -141,8 +176,8 @@ class CardBase extends lv.Row{
             width: -1 ,
             height: -1 ,
             style: {
-                "pad-left":10 ,
-                "pad-right":10 ,
+                "pad-left":2 ,
+                "pad-right":2 ,
                 "flex-cross-place": "center" ,
                 "pad-column": 5 ,
                 "min-width": 60 ,
@@ -157,14 +192,27 @@ class CardBase extends lv.Row{
         }
     }
 
-    addLabel(text) {
+    addLabel(text, name) {
         let label = new lv.Label(this, {
             text ,
             width: -1 ,
             height: -1 ,
             font: "m10" ,
+            style: {
+                "text-color": lv.rgb(220,220,220)
+            }
         })
+        if(name) {
+            this[name] = label
+        }
         return label
+    }
+    addMenu(options, name) {
+        let menu = new CardMenu(this, options)
+        if(name) {
+            this[name] = label
+        }
+        return menu
     }
 
     addExprSlot(name, noInput) {
@@ -214,9 +262,12 @@ class CardStatement extends CardBase{
                 // "bg-color": lv.palette("orange") ,
                 // "bg-opa": 255 ,
                 // "radius": 2 ,
+                "pad-left":8 ,
+                "pad-right":8 ,
                 "pad-top":SPortSlopeH + 2 ,
                 "pad-bottom":SPortSlopeH + 3 ,
-            }
+            } ,
+            // flag: ["top"]
         })
         
         this.on("draw-main",(event,clip)=>{
@@ -265,6 +316,7 @@ class CardStatement extends CardBase{
                 this.prev.next = null
                 this.prev = null
             }
+            this.moveForeground()
         })
         draggable.setDragging((pos)=>{
             let [px, py] = this.coordsPortPrev(pos.x, pos.y)
@@ -292,8 +344,23 @@ class CardStatement extends CardBase{
                 _insertTo = null
             }
         })
+
+        let requireMoveNext = false 
+        this.on("size-changed", ()=>{
+            if(!this.next || requireMoveNext)
+                return
+            requireMoveNext = true
+            setTimeout(()=>{
+                for(let next=this.next, prev=this; next; prev=next, next=next.next) {
+                    prev._placeNext(next)
+                    next.updateLayout()
+                }
+                requireMoveNext = false
+            },0)
+        })
     }
 
+    // px, py 为 statement up port 的坐标(横线中点)
     _testInsert(px,py) {
         let [x,y] = this.coordsPortNext()
         return ((x-px)*(x-px) + (y-py)*(y-py)) < PortSnapDis
@@ -354,33 +421,29 @@ class CardStatement extends CardBase{
 
 
 class CardExpression extends CardBase{
+    _matchSlotClz = CardSlotExpression
     constructor(parent, vm) {
         super(parent, vm)
-        
-        this.fromJson({
-            style: {
-                "border-width": 1 ,
-                "border-color": lv.palette("orange") ,
-                "border-opa": 180 ,
-                "bg-color": lv.palette("orange") ,
-                "bg-opa": 255 ,
-                "radius": lv.RADIUS_CIRCLE ,
-            }
-        })
+        this.appearance()
 
         let draggable = this.draggable()
+        draggable.setStart(()=>{
+            this.moveForeground()
+        })
         draggable.setDragging(pos=>{
             let x = pos.x 
             let y = pos.y + this.height()/2
             let parent = this.parent()
-            if( parent instanceof CardSlotExpression ){
-                if(!parent._testInsert(x, y, 5)) {
+            if( parent instanceof this._matchSlotClz ){
+                if(!parent._testInsert(x, y, 10)) {
                     parent.remove()
+                    this.setCoords(pos.x, pos.y)
+                    this.updateLayout()
                 }
                 else {
                     pos.x = pos.y = false
-                    return
                 }
+                return
             }
             for(let statement of vm.cards) {
                 if(statement==this) {
@@ -388,7 +451,7 @@ class CardExpression extends CardBase{
                 }
                 for(let name in statement.slots) {
                     let slot = statement.slots[name]
-                    if( !(slot instanceof CardSlotExpression) )
+                    if( !(slot instanceof this._matchSlotClz) || slot.expr )
                         continue
                     if(!slot._testInsert(x, y, 0)) {
                         continue
@@ -400,14 +463,27 @@ class CardExpression extends CardBase{
             }
         })
     }
+
+    appearance() {
+        this.fromJson({
+            style: {
+                "border-width": 1 ,
+                "border-color": lv.palette("orange") ,
+                "border-opa": 180 ,
+                "bg-color": lv.palette("orange") ,
+                "bg-opa": 255 ,
+                "radius": lv.RADIUS_CIRCLE ,
+            }
+        })
+    }
 }
 
-class CardCompare extends CardBase{
+class CardCompare extends CardExpression{
     constructor(parent, vm) {
         super(parent, vm)
-        
-        this.fromJson()
-
+        this._matchSlotClz = CardSlotCompare
+    }
+    appearance() {
         this.on("draw-main", (e, clip)=>{
             let h = this.height()
             let half = h/2

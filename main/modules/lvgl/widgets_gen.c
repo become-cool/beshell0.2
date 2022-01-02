@@ -1617,6 +1617,47 @@ const char * lv_img_cf_const_to_str(lv_img_cf_t code) {
 JSValue lv_img_cf_const_to_jsstr(JSContext *ctx, lv_img_cf_t code) {
     return JS_NewString(ctx, lv_img_cf_const_to_str(code));
 }
+
+bool lv_scroll_snap_str_to_const(const char * name, lv_scroll_snap_t* out) {
+        if(strcmp(name,"none")==0) {
+        (*out) = LV_SCROLL_SNAP_NONE ;
+    }
+    else if(strcmp(name,"start")==0) {
+        (*out) = LV_SCROLL_SNAP_START ;
+    }
+    else if(strcmp(name,"end")==0) {
+        (*out) = LV_SCROLL_SNAP_END ;
+    }
+    else if(strcmp(name,"center")==0) {
+        (*out) = LV_SCROLL_SNAP_CENTER ;
+    }
+
+    else {
+        return false ;
+    }
+    return true ;
+}
+bool lv_scroll_snap_jsstr_to_const(JSContext *ctx, JSValue jsstr, lv_scroll_snap_t* out) {
+    char * cstr = (char *)JS_ToCString(ctx, jsstr) ;
+    bool suc = lv_scroll_snap_str_to_const(cstr, out) ;
+    JS_FreeCString(ctx, cstr) ;
+    return suc ;
+}
+const char * lv_scroll_snap_const_to_str(lv_scroll_snap_t code) {
+
+    switch(code) {
+        case LV_SCROLL_SNAP_NONE: return "none";
+        case LV_SCROLL_SNAP_START: return "start";
+        case LV_SCROLL_SNAP_END: return "end";
+        case LV_SCROLL_SNAP_CENTER: return "center";
+
+        default:
+            return "unkonw";
+    }
+}
+JSValue lv_scroll_snap_const_to_jsstr(JSContext *ctx, lv_scroll_snap_t code) {
+    return JS_NewString(ctx, lv_scroll_snap_const_to_str(code));
+}
 // AUTO GENERATE CODE END [CONST MAPPING] --------
 
 // AUTO GENERATE CODE START [DEFINE CLASS] --------
@@ -3264,9 +3305,9 @@ static JSValue js_lv_obj_set_scroll_snap_x(JSContext *ctx, JSValueConst this_val
         THROW_EXCEPTION("Obj.setScrollSnapX() must be called as a Obj method")
     }
     lv_obj_t * thisobj = lv_userdata ;
-    uint8_t align ;
-    if(JS_ToUint32(ctx, (uint32_t *) &align, argv[0])!=0){
-        THROW_EXCEPTION("arg align of method Obj.setScrollSnapX() must be a number")
+    lv_scroll_snap_t align ;
+    if(!lv_scroll_snap_jsstr_to_const(ctx, argv[0], &align)) {
+        return JS_EXCEPTION ;
     }
     lv_obj_set_scroll_snap_x(thisobj, align) ;
     JSValue retval = JS_UNDEFINED ;
@@ -3282,9 +3323,9 @@ static JSValue js_lv_obj_set_scroll_snap_y(JSContext *ctx, JSValueConst this_val
         THROW_EXCEPTION("Obj.setScrollSnapY() must be called as a Obj method")
     }
     lv_obj_t * thisobj = lv_userdata ;
-    uint8_t align ;
-    if(JS_ToUint32(ctx, (uint32_t *) &align, argv[0])!=0){
-        THROW_EXCEPTION("arg align of method Obj.setScrollSnapY() must be a number")
+    lv_scroll_snap_t align ;
+    if(!lv_scroll_snap_jsstr_to_const(ctx, argv[0], &align)) {
+        return JS_EXCEPTION ;
     }
     lv_obj_set_scroll_snap_y(thisobj, align) ;
     JSValue retval = JS_UNDEFINED ;
@@ -4041,6 +4082,7 @@ static const JSCFunctionListEntry js_lv_obj_proto_funcs[] = {
     JS_CFUNC_DEF("fontHeight", 0, js_lv_obj_get_font_height),
     JS_CFUNC_DEF("as", 0, js_lv_obj_as),
     JS_CFUNC_DEF("ptr", 0, js_lv_obj_ptr),
+    JS_CFUNC_DEF("abortScroll", 0, js_lv_obj_abort_scroll),
     JS_CFUNC_DEF("addFlag", 0, js_lv_obj_add_flag),
     JS_CFUNC_DEF("clearFlag", 0, js_lv_obj_clear_flag),
     JS_CFUNC_DEF("addState", 0, js_lv_obj_add_state),

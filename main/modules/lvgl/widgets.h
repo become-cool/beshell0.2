@@ -57,4 +57,6 @@ JSValue js_lv_msgbox_constructor(JSContext *ctx, JSValueConst new_target, int ar
 JSValue js_lv_canvas_malloc(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv) ;
 // JSValue js_lv_canvas_free(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv) ;
 
+JSValue js_lv_obj_abort_scroll(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
+
 #endif

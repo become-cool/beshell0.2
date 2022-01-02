@@ -104,6 +104,11 @@ static void js_lv_event_cb(lv_event_t * event) {
         param = JS_NewObjectClass(ctx, js_lv_area_class_id) ;
         JS_SetOpaque(param, event->param) ;
     }
+    else if(event->code==LV_EVENT_GESTURE && event->param) {
+        lv_dir_t dir = lv_indev_get_gesture_dir(event->param) ;
+        param = lv_dir_const_to_jsstr(ctx, dir) ;
+    }
+
 
     MAKE_ARGV3( cbargv, jsname, jsname, param )
 
@@ -394,6 +399,12 @@ JSValue js_lv_obj_get_local_style(JSContext *ctx, JSValueConst this_val, int arg
     return JS_UNDEFINED ;
 }
 
+JSValue js_lv_obj_is_style_name(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+    lv_style_prop_t prop ;
+    return JS_NewBool(ctx, lv_style_prop_jsstr_to_const(ctx, argv[0], &prop)) ;
+}
+
 
 JSValue js_lv_obj_refresh_style(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(1)
@@ -496,6 +507,10 @@ JSValue js_lv_img_set_src(JSContext *ctx, JSValueConst this_val, int argc, JSVal
 
     char * csrc = mallocf("%c:%s", LV_USE_FS_STDIO, _csrc) ;
     free(_csrc) ;
+
+    if(!csrc) {
+        THROW_EXCEPTION("out of memory?") ;
+    }
 
     lv_img_set_src(thisimg, csrc) ;
     free(csrc) ;
@@ -663,8 +678,26 @@ JSValue js_lv_canvas_malloc(JSContext *ctx, JSValueConst this_val, int argc, JSV
 // }
 
 
+JSValue js_lv_obj_abort_scroll(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    THIS_LVOBJ("Obj","abortScroll", thisobj)
+
+    lv_indev_t * indev = lv_indev_get_next(NULL);
+    while(indev) {
+        if(indev->driver->type == LV_INDEV_TYPE_POINTER) {
+            if(indev->proc.types.pointer.scroll_obj == thisobj) {
+                indev->proc.types.pointer.scroll_obj = NULL ;
+                return JS_TRUE ;
+            }
+        }
+        indev = lv_indev_get_next(indev);
+    }
+
+    return JS_FALSE ;
+}
+
 void require_vlgl_js_widgets(JSContext *ctx, JSValue lvgl) {
     JS_SetPropertyStr(ctx, lvgl, "isEventName", JS_NewCFunction(ctx, js_lvgl_is_event_name, "isEventName", 1));
+    JS_SetPropertyStr(ctx, lvgl, "isStyleName", JS_NewCFunction(ctx, js_lv_obj_is_style_name, "isStyleName", 1));
     JS_SetPropertyStr(ctx, lvgl, "fromPtr", JS_NewCFunction(ctx, js_lv_obj_from_ptr, "fromPtr", 1));
 #ifndef SIMULATION
     JS_SetPropertyStr(ctx, lvgl, "setDebugLog", JS_NewCFunction(ctx, js_lv_set_debug_log, "setDebugLog", 1));

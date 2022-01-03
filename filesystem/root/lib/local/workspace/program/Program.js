@@ -8,6 +8,8 @@ class Program extends lv.CleanObj{
     tools = null
     workspace = null
 
+    cardlib = cardlib
+
     constructor(workspace) {
         super(workspace)
         this.workspace = workspace
@@ -16,37 +18,21 @@ class Program extends lv.CleanObj{
             width: "100%" ,
             height: "100%" ,
             visible: false ,
-            children: [
-                // {
-                //     class: 'Label' ,
-                //     center: true ,
-                //     text: 'Program' ,
-                //     style: {
-                //         "text-color": lv.rgb(80,80,80)
-                //     }
-                // }
-            ]
+            children: []
         })
-        
-        let menu = new lv.Menu(this)
-        menu.addItem("xxxx")
-        menu.popup(100,100)
-        global.m = menu
-
 
         let clz = cardlib[0].cards[1]
-        for(let i=1;i<=5; i++) {
+        for(let i=1;i<=1; i++) {
             let card = new clz(this, workspace.model.vm)
             card.setCoords(50, 5+i*50-50)
             // card.slots.what.input.setText(i)
         }
         clz = cardlib[0].cards[2]
-        for(let i=1;i<=5; i++) {
+        for(let i=1;i<=1; i++) {
             let card = new clz(this, workspace.model.vm)
             card.setCoords(150, 5+i*50-50)
             // card.slots.what.input.setText(i)
         }
-
     }
 
     setZoom(zoom) {

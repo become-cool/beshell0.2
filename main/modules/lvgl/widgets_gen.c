@@ -7386,7 +7386,7 @@ static const JSCFunctionListEntry js_lv_list_proto_funcs[] = {
 
 
 
-void require_vlgl_js_widgets_gen(JSContext *ctx, JSValue lvgl) {
+void be_lv_widgets_gen_require(JSContext *ctx, JSValue lvgl) {
 
     JSValue EventEmitterProto = js_get_glob_prop(ctx, 3, "beapi", "EventEmitter", "prototype") ;
 
@@ -7482,7 +7482,7 @@ void require_vlgl_js_widgets_gen(JSContext *ctx, JSValue lvgl) {
 
 
 
-void init_lvgl_widgets() {
+void be_lv_widgets_gen_init() {
     // class id 全局, 分配一次
 // AUTO GENERATE CODE START [REGISTER CLASS ID] --------
     JS_NewClassID(&js_lv_obj_class_id);

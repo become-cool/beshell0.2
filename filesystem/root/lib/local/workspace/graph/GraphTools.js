@@ -86,7 +86,7 @@ class GraphTools extends lv.Column{
         for(let clz of lstPartLib) {
             this.partLib.createCard(clz.config.title, clz=>{
                 let part = workspace.model.createPart(clz)
-                part.repaint(workspace.zoomer.value)
+                part.repaint(workspace.graph.zoomer.value)
 
                 workspace.graph.setActivePart(part)
                 return part

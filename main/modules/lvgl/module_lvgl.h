@@ -14,5 +14,6 @@ void be_module_lvgl_init() ;
 void be_module_lvgl_loop(JSContext *ctx)  ;
 
 void be_module_lvgl_require(JSContext *ctx) ;
+void be_module_lvgl_reset(JSContext *ctx) ;
 
 #endif

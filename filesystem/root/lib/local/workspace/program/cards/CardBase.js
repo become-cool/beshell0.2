@@ -131,38 +131,66 @@ class CardSlotCompare extends lv.CleanObj{
     }
 }
 
-class CardMenu extends lv.Label{
-    options = null
-    constructor(card, options) {
+class CardMenu extends lv.Row{
+    menu = null
+    value = null
+    constructor(card, menu) {
         super(card) 
-        if( typeof options=="array" ) {
-            this.options = {}
-            for(let val of options) {
-                this.options[val] = val
-            }
-        }
-        else if( typeof options=="object" )
-            this.options = options
-        else {
-            throw new Error("arg options must be a array or object ")
-        }
+        this.menu = menu
 
         this.fromJson({
             width: -1 ,
-            font: "m10" ,
+            height: -1 ,
             style: {
-                "min-width": 20
+                "flex-cross-place": "center" ,
             } ,
+            children: [
+                {
+                    class: lv.Label ,
+                    ref: "title" ,
+                    width: -1 ,
+                    height: -1 ,
+                    font: "m12" ,
+                    text: '' ,
+                    style: {
+                        "min-width": 20 ,
+                        "text-align": "center" ,
+                    } ,
+                } , 
+                {
+                    class: lv.Label ,
+                    width: -1 ,
+                    height: -1 ,
+                    font: "m10" ,
+                    text: lv.symbol.down ,
+                    style: {
+                        "text-color": lv.rgb(220)
+                    }
+                }
+            ] ,
             clicked: ()=>{
-                console.log("xxxxx")
+                console.log(this.menu.popup)
+                if(this.menu){
+                    this.menu.setActive(this.value)
+                    this.menu.popup()
+                }
             }
-        })
-        let titles = Object.values(this.options)
-        this.setText(titles.length? titles[0]: '')
-    }
+        }, this)
 
-    setText(title) {
-        super.setText(title + " " + lv.symbol.down)
+        this.setValue(null)
+
+        menu.on("clicked",value=>{
+            this.setValue(value)
+        })
+    }
+    setValue(value) {
+        if(this.value==value) {
+            return
+        }
+        this.emit("value-change", value, this.value)
+        this.value = value
+        let title = this.menu?.findItem(value)?.text()
+        this.title.setText(title||value)
     }
 }
 
@@ -207,12 +235,12 @@ class CardBase extends lv.Row{
         }
         return label
     }
-    addMenu(options, name) {
-        let menu = new CardMenu(this, options)
+    addMenu(menu, name) {
+        let obj = new CardMenu(this, menu)
         if(name) {
-            this[name] = label
+            this[name] = obj
         }
-        return menu
+        return obj
     }
 
     addExprSlot(name, noInput) {

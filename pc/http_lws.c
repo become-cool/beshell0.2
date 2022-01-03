@@ -16,6 +16,8 @@
 #define WS_DISP_BUFF_JPEG 2
 
 
+void indev_global_cb_proc(lv_indev_data_t *data) ;
+
 void ws_driver_input_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
     // if(!ws_input_update) {
     //     return ;
@@ -29,9 +31,10 @@ void ws_driver_input_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
         else {
             data->state = LV_INDEV_STATE_RELEASED ;
         }
-
     }
     // ws_input_update = false ;
+
+    indev_global_cb_proc(data) ;
 }
 
 

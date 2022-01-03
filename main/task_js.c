@@ -222,6 +222,7 @@ void task_js_main(){
             be_module_repl_reset(ctx) ;
 #endif
             be_module_mg_reset(ctx) ;
+            be_module_lvgl_reset(ctx) ;
 
             quickjs_deinit() ;
             quickjs_init() ;

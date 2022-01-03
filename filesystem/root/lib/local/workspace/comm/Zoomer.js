@@ -13,9 +13,6 @@ class Zoomer extends lv.CleanObj{
         this.refs = this.fromJson({
             width: 20 ,
             height: 180 ,
-            valueChanged: (value)=>{
-                workspace.activeView.setZoom( value )
-            } ,
             children: [
                 {
                     class: lv.CleanObj ,
@@ -45,15 +42,15 @@ class Zoomer extends lv.CleanObj{
         })
 
 
-        workspace.on("ws-active-view-changed", (view)=>{
-            if(view && view!=workspace.ui){
-                this.show()
-                this.setZoom(view.zoom, true)
-            }
-            else {
-                this.hide()
-            }
-        })
+        // workspace.on("ws-active-view-changed", (view)=>{
+        //     if(view && view!=workspace.ui){
+        //         this.show()
+        //         this.setZoom(view.zoom, true)
+        //     }
+        //     else {
+        //         this.hide()
+        //     }
+        // })
 
         this.refs.handle.setY( this.height() - this.refs.handle.height() )
 

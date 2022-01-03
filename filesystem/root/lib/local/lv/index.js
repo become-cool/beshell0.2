@@ -94,5 +94,30 @@ beapi.lvgl.msg.sucess = beapi.lvgl.msg.info
 beapi.lvgl.msg.error = beapi.lvgl.msg.info
 beapi.lvgl.msg.warning = beapi.lvgl.msg.info
 
+
+const mapIndevCallbacks = {
+    pressed (target) {
+        beapi.lvgl.emit("pressed", "pressed", target)
+    } ,
+    pressing (target) {
+        beapi.lvgl.emit("pressing", "pressing", target)
+
+    } ,
+    released (target) {
+        beapi.lvgl.emit("released", "released", target)
+    } ,
+}
+beapi.lvgl.on("#EVENT.ADD#", (name)=>{
+    if(name=="pressed" || name=="pressing" || name=="released") {
+        beapi.lvgl.setIndevCallback(name, mapIndevCallbacks[name])
+    }
+})
+beapi.lvgl.on("#EVENT.CLEAR#", (name)=>{
+    if(name=="pressed" || name=="pressing" || name=="released") {
+        beapi.lvgl.clearIndevCallback(name)
+    }
+})
+
+
 module.exports = beapi.lvgl
 global.lv = beapi.lvgl

@@ -12,8 +12,10 @@
 
 bool be_lv_fake_indev(lv_indev_data_t *data) ;
 
-void init_lvgl_display() ;
+void be_lv_display_init() ;
 
-void require_vlgl_js_display(JSContext *ctx, JSValue lvgl) ;
+void be_lv_display_require(JSContext *ctx, JSValue lvgl) ;
+
+void be_lv_display_reset(ctx) ;
 
 #endif

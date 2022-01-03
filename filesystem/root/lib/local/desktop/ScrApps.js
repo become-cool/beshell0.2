@@ -90,7 +90,7 @@ module.exports = class ScrApps extends lv.Obj {
         }
         if(last) {
             setTimeout(()=>{
-                // require("workspace").start( last )
+                require("workspace").start( last )
             },500)
         }
     }

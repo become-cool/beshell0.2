@@ -1,4 +1,5 @@
 const lv = require('lv')
+const Zoomer = require("../comm/Zoomer")
 const GraphTools = require("./GraphTools")
 
 const GraphWidth = 300*2
@@ -11,7 +12,7 @@ class GraphCanvas extends lv.CleanObj{
     docOutterX = 20
     docOutterY = 20
 
-    zoom = 2
+    zoomer = null
 
     workspace = null
     tools = null
@@ -52,7 +53,12 @@ class GraphCanvas extends lv.CleanObj{
             }
         })
 
-        global.graph = this
+        this.zoomer = new Zoomer(workspace)
+        this.zoomer.setAlign("right-mid")
+        this.zoomer.on("value-changed",()=>{
+            this.setZoom(this.zoomer.value)
+        })
+        this.setZoom(this.zoomer.value)
     }
 
     setZoom(zoom) {
@@ -68,16 +74,16 @@ class GraphCanvas extends lv.CleanObj{
 
     // 为屏幕上的全局坐标 转换为 graph 的局部坐标
     globalToDoc(gx, gy) {
-        let doxX = (gx-this.coordX() - this.width()/2) / this.zoom
-        let doxY = (gy-this.coordY() - this.height()/2) / this.zoom
+        let doxX = (gx-this.coordX() - this.width()/2) / this.zoomer.value
+        let doxY = (gy-this.coordY() - this.height()/2) / this.zoomer.value
         doxX = Math.round(doxX)
         doxY = Math.round(doxY)
         return [ doxX, doxY ]
     }
     docToGlobal(docX, docY) {
         return [
-            Math.round(docX * this.zoom + this.width()/2 + this.coordX())  ,
-            Math.round(docY * this.zoom + this.height()/2 + this.coordY()) 
+            Math.round(docX * this.zoomer.value + this.width()/2 + this.coordX())  ,
+            Math.round(docY * this.zoomer.value + this.height()/2 + this.coordY()) 
         ]
     }
 
@@ -97,12 +103,13 @@ class GraphCanvas extends lv.CleanObj{
         return this.tools
     }
     enter() {
-
+        this.zoomer.show()
     }
     leave() {
         if(this.tools) {
             this.tools.partLib.hide()
         }
+        this.zoomer.hide()
     }
 }
 

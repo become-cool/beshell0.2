@@ -13,8 +13,8 @@ JSValue lv_style_wrapper(JSContext * ctx, lv_style_t * style) ;
 JSValue lv_style_value_to_js(JSContext * ctx, lv_style_prop_t prop, lv_style_value_t value) ;
 bool lv_style_js_to_value(JSContext * ctx, lv_style_prop_t prop, JSValue jsval, lv_style_value_t * value) ;
 
-void init_lvgl_style() ;
+void be_lv_styles_init() ;
 
-void require_vlgl_js_style(JSContext *ctx, JSValue lvgl) ;
+void be_lv_styles_require(JSContext *ctx, JSValue lvgl) ;
 
 #endif

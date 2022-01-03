@@ -462,12 +462,12 @@ static JSValue js_lv_palette_color(JSContext *ctx, JSValueConst this_val, int ar
 
 
 
-void init_lvgl_style() {
+void be_lv_styles_init() {
     LV_STYLE_JSVALUE = lv_style_register_prop() ;
     JS_NewClassID(&js_lv_style_class_id);
 }
 
-void require_vlgl_js_style(JSContext *ctx, JSValue lvgl) {
+void be_lv_styles_require(JSContext *ctx, JSValue lvgl) {
     QJS_DEF_CLASS(lv_style, "Style", "lvgl.Style", JS_UNDEFINED, lvgl)
 
     // JSValue palette = JS_NewObject(ctx) ;

@@ -39,6 +39,106 @@ bool be_lv_fake_indev(lv_indev_data_t *data) {
     return true ;
 }
 
+
+JSContext * js_indev_global_cb_ctx = NULL ;
+JSValue js_indev_global_cb_pressed ;
+JSValue js_indev_global_cb_released ;
+JSValue js_indev_global_cb_pressing ;
+
+static JSValue js_set_indev_global_cb(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(2)
+    ARGV_TO_STRING(0, event) ;
+    if( !JS_IsFunction(ctx, argv[1]) ) {
+        JS_FreeCString(ctx, event) ;
+        THROW_EXCEPTION("arg callback must be a function")
+    }
+    if( strcmp("pressed", event)==0 ) {
+        js_indev_global_cb_ctx = ctx ;
+        js_indev_global_cb_pressed = JS_DupValue(ctx, argv[1]) ;
+    }
+    else if( strcmp("pressing", event)==0 ) {
+        js_indev_global_cb_ctx = ctx ;
+        js_indev_global_cb_pressing = JS_DupValue(ctx, argv[1]) ;
+    }
+    else if( strcmp("released", event)==0 ) {
+        js_indev_global_cb_ctx = ctx ;
+        js_indev_global_cb_released = JS_DupValue(ctx, argv[1]) ;
+    }
+    else {
+        JS_FreeCString(ctx, event) ;
+        THROW_EXCEPTION("unknow event")
+    }
+
+    JS_FreeCString(ctx, event) ;
+
+    return JS_UNDEFINED ;
+}
+
+static JSValue js_clear_indev_global_cb(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+    ARGV_TO_STRING(0, event) ;
+    if( strcmp("pressed", event)==0 ) {
+        js_indev_global_cb_ctx = NULL ;
+        JS_FreeValue(ctx, js_indev_global_cb_pressed) ;
+        js_indev_global_cb_pressed = JS_UNDEFINED ;
+    }
+    else if( strcmp("pressing", event)==0 ) {
+        js_indev_global_cb_ctx = NULL ;
+        JS_FreeValue(ctx, js_indev_global_cb_pressing) ;
+        js_indev_global_cb_pressing = JS_UNDEFINED ;
+    }
+    else if( strcmp("released", event)==0 ) {
+        js_indev_global_cb_ctx = NULL ;
+        JS_FreeValue(ctx, js_indev_global_cb_released) ;
+        js_indev_global_cb_released = JS_UNDEFINED ;
+    }
+    else {
+        JS_FreeCString(ctx, event) ;
+        THROW_EXCEPTION("unknow event")
+    }
+
+    JS_FreeCString(ctx, event) ;
+    return JS_UNDEFINED ;
+}
+
+
+bool indev_last_pressed = false ;
+void indev_global_cb_proc(lv_indev_data_t *data) {
+    if( indev_last_pressed==false ) {
+        // pressed
+        if(data->state==LV_INDEV_STATE_PRESSED) {
+            if( !JS_IsUndefined(js_indev_global_cb_pressed) ) {
+                JSValue ret = JS_Call(js_indev_global_cb_ctx, js_indev_global_cb_pressed, JS_UNDEFINED, 0, NULL);
+                if(JS_IsException(ret)) {
+                    js_std_dump_error(js_indev_global_cb_ctx) ;
+                }
+                JS_FreeValue(js_indev_global_cb_ctx, ret) ;
+            }
+        }
+    }
+    else {
+        if(data->state == LV_INDEV_STATE_PRESSED) {
+            if( !JS_IsUndefined(js_indev_global_cb_pressing) ) {
+                JSValue ret = JS_Call(js_indev_global_cb_ctx, js_indev_global_cb_pressing, JS_UNDEFINED, 0, NULL);
+                if(JS_IsException(ret)) {
+                    js_std_dump_error(js_indev_global_cb_ctx) ;
+                }
+                JS_FreeValue(js_indev_global_cb_ctx, ret) ;
+            }
+        }
+        else {
+            if( !JS_IsUndefined(js_indev_global_cb_released) ) {
+                JSValue ret = JS_Call(js_indev_global_cb_ctx, js_indev_global_cb_released, JS_UNDEFINED, 0, NULL);
+                if(JS_IsException(ret)) {
+                    js_std_dump_error(js_indev_global_cb_ctx) ;
+                }
+                JS_FreeValue(js_indev_global_cb_ctx, ret) ;
+            }
+        }
+    }
+    indev_last_pressed = (data->state==LV_INDEV_STATE_PRESSED) ;
+}
+
 #ifndef SIMULATION
 
 typedef struct {
@@ -98,6 +198,7 @@ void disp_st7789_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t 
     lv_disp_flush_ready(disp) ;
 }
 
+
 void input_driver_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
     // if(ws_driver_input_read(drv, data))
     //     return ;
@@ -117,8 +218,9 @@ void input_driver_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
                 data->point.x -= 10 ;
             }
         }
-
     }
+
+    indev_global_cb_proc(data) ;
 
     indev_input_x = data->point.x ;
     indev_input_y = data->point.y ;
@@ -350,11 +452,10 @@ void be_module_lvgl_malloc_buffer() {
     disp_buff1 = malloc(DMA_BUFF_LEN + DMA_BUFF_AUX_SIZE) ;
     disp_buff2 = malloc(DMA_BUFF_LEN + DMA_BUFF_AUX_SIZE) ;
 #endif
-
-
 }
 
-void init_lvgl_display() {
+
+void be_lv_display_init() {
     // class id 全局, 分配一次
     JS_NewClassID(&js_lvgl_disp_class_id);
 
@@ -390,7 +491,14 @@ static JSValue js_lvgl_fake_indev(JSContext *ctx, JSValueConst this_val, int arg
     return JS_UNDEFINED ;
 }
 
-void require_vlgl_js_display(JSContext *ctx, JSValue lvgl) {
+
+
+void be_lv_display_require(JSContext *ctx, JSValue lvgl) {
+    
+    js_indev_global_cb_ctx = NULL ;
+    js_indev_global_cb_pressed = JS_UNDEFINED;
+    js_indev_global_cb_released = JS_UNDEFINED;
+    js_indev_global_cb_pressing = JS_UNDEFINED;
     
     // lvgl.Display
     JS_NewClass(JS_GetRuntime(ctx), js_lvgl_disp_class_id, &js_lvgl_disp_class);
@@ -402,4 +510,21 @@ void require_vlgl_js_display(JSContext *ctx, JSValue lvgl) {
     JS_SetPropertyStr(ctx, lvgl, "actionDisplay", JS_NewCFunction(ctx, js_lvgl_set_default_display, "actionDisplay", 1));
     JS_SetPropertyStr(ctx, lvgl, "fakeIndev", JS_NewCFunction(ctx, js_lvgl_fake_indev, "fakeIndev", 1));
     JS_SetPropertyStr(ctx, lvgl, "tickIndev", JS_NewCFunction(ctx, js_lvgl_tick_indev, "tickIndev", 1));
+
+    JS_SetPropertyStr(ctx, lvgl, "setIndevCallback", JS_NewCFunction(ctx, js_set_indev_global_cb, "setIndevCallback", 1));
+    JS_SetPropertyStr(ctx, lvgl, "clearIndevCallback", JS_NewCFunction(ctx, js_clear_indev_global_cb, "clearIndevCallback", 1));
+}
+
+void be_lv_display_reset(ctx) {
+
+    js_indev_global_cb_ctx = NULL ;
+
+    JS_FreeValue(ctx, js_indev_global_cb_pressed) ;
+    js_indev_global_cb_pressed = JS_UNDEFINED;
+    
+    JS_FreeValue(ctx, js_indev_global_cb_released) ;
+    js_indev_global_cb_released = JS_UNDEFINED;
+    
+    JS_FreeValue(ctx, js_indev_global_cb_pressing) ;
+    js_indev_global_cb_pressing = JS_UNDEFINED;
 }

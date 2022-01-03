@@ -356,11 +356,11 @@ static const JSCFunctionListEntry js_lv_draggable_proto_funcs[] = {
 
 
 
-void be_be_lv_draggable_init() {
+void be_lv_draggable_init() {
     JS_NewClassID(&js_lv_draggable_class_id);
 }
 
-void be_be_lv_draggable_require(JSContext *ctx, JSValue lvgl) {
+void be_lv_draggable_require(JSContext *ctx, JSValue lvgl) {
     QJS_DEF_CLASS(lv_draggable, "Draggable", "lv.Draggable", JS_UNDEFINED, lvgl) ;
 }
 

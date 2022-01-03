@@ -78,6 +78,7 @@ JSValue js_lv_obj_as(JSContext *ctx, JSValueConst this_val, int argc, JSValueCon
     return JS_DupValue( ctx, js_lv_obj_wrapper(ctx, thisobj, argv[0], classid) );
 }
 
+
 static void js_lv_event_cb(lv_event_t * event) {
 
     if(!event->user_data) {
@@ -109,6 +110,16 @@ static void js_lv_event_cb(lv_event_t * event) {
         param = lv_dir_const_to_jsstr(ctx, dir) ;
     }
 
+    // if( event->code==LV_EVENT_PRESSED && !JS_IsUndefined(js_indev_global_cb_pressed) ){
+    //     dd
+    //     CALLBACK(js_indev_global_cb_pressed, JS_UNDEFINED, 1, &jstarget)
+    // }
+    // else if( event->code==LV_EVENT_PRESSING && !JS_IsUndefined(js_indev_global_cb_pressing) ){
+    //     CALLBACK(js_indev_global_cb_pressing, JS_UNDEFINED, 1, &jstarget)
+    // }
+    // else if( event->code==LV_EVENT_RELEASED && !JS_IsUndefined(js_indev_global_cb_released) ){
+    //     CALLBACK(js_indev_global_cb_released, JS_UNDEFINED, 1, &jstarget)
+    // }
 
     MAKE_ARGV3( cbargv, jsname, jsname, param )
 
@@ -695,7 +706,12 @@ JSValue js_lv_obj_abort_scroll(JSContext *ctx, JSValueConst this_val, int argc, 
     return JS_FALSE ;
 }
 
-void require_vlgl_js_widgets(JSContext *ctx, JSValue lvgl) {
+void be_lv_widgets_init() {
+}
+void be_lv_widgets_reset(ctx) {
+}
+
+void be_lv_widgets_require(JSContext *ctx, JSValue lvgl) {
     JS_SetPropertyStr(ctx, lvgl, "isEventName", JS_NewCFunction(ctx, js_lvgl_is_event_name, "isEventName", 1));
     JS_SetPropertyStr(ctx, lvgl, "isStyleName", JS_NewCFunction(ctx, js_lv_obj_is_style_name, "isStyleName", 1));
     JS_SetPropertyStr(ctx, lvgl, "fromPtr", JS_NewCFunction(ctx, js_lv_obj_from_ptr, "fromPtr", 1));

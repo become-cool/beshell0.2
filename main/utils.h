@@ -80,17 +80,14 @@ void eval_code_len(JSContext *ctx, const char * str,size_t len,const char * file
 
 #define EVAL_CODE(str, filename) eval_code_len(ctx, str, strlen(str), filename) ;
 
-#define CALL_FUNC_EX(ctx, func, thisobj, argc, argv)                                \
+#define CALLBACK(func, thisobj, argc, argv)                                         \
     {                                                                               \
     JSValue ret = JS_Call(ctx, func, thisobj, argc, argv) ;                         \
     if( JS_IsException(ret) ) {                                                     \
-        echo_error(ctx) ;                                                           \
+        js_std_dump_error(ctx) ;                                                    \
     }                                                                               \
     JS_FreeValue(ctx, ret) ;                                                        \
     }
-
-#define CALL_FUNC(func, thisobj, argc, argv)                                        \
-    CALL_FUNC_EX(ctx, func, thisobj, argc, argv)
 
 #define MAKE_ARGV1(argv, arg1)                                                      \
     JSValueConst * argv = malloc(sizeof(JSValue)) ;                                 \

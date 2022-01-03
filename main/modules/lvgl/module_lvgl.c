@@ -300,7 +300,7 @@ void sig_alm_handler(int sig_num) {
 #endif
 
 
-void require_vlgl_js_font_symbol(JSContext *ctx, JSValue lvgl) {
+void be_lv_font_symbol_require(JSContext *ctx, JSValue lvgl) {
     JSValue symbol = JS_NewObject(ctx) ;
     JS_SetPropertyStr(ctx, lvgl, "symbol", symbol);  
 
@@ -370,11 +370,12 @@ void require_vlgl_js_font_symbol(JSContext *ctx, JSValue lvgl) {
 }
 
 void be_module_lvgl_init() {
-    init_lvgl_display() ;
-    init_lvgl_widgets() ;
-    init_lvgl_style() ;
+    be_lv_display_init() ;
+    be_lv_widgets_gen_init() ;
+    be_lv_widgets_init() ;
+    be_lv_styles_init() ;
     be_lv_structs_init() ;
-    be_be_lv_draggable_init() ;
+    be_lv_draggable_init() ;
 }
 
 void be_module_lvgl_require(JSContext *ctx) {
@@ -413,8 +414,13 @@ void be_module_lvgl_require(JSContext *ctx) {
 
     JSValue global = JS_GetGlobalObject(ctx);
     JSValue beapi = JS_GetPropertyStr(ctx, global, "beapi") ;
+
+    JSValue EventEmitterProto = js_get_glob_prop(ctx, 3, "beapi", "EventEmitter", "prototype") ;
     JSValue lvgl = JS_NewObject(ctx);
-    JS_SetPropertyStr(ctx, beapi, "lvgl", lvgl);  
+    JS_SetPropertyStr(ctx, beapi, "lvgl", lvgl);
+    JS_SetPropertyStr(ctx, lvgl, "__proto__", EventEmitterProto);
+    JS_SetPropertyStr(ctx, lvgl, "_handles", JS_NewObject(ctx));
+    
 
     JS_SetPropertyStr(ctx, lvgl, "loop", JS_NewCFunction(ctx, js_lvgl_loop, "loop", 1));
     JS_SetPropertyStr(ctx, lvgl, "tick", JS_NewCFunction(ctx, js_lvgl_tick, "tick", 1));
@@ -436,18 +442,23 @@ void be_module_lvgl_require(JSContext *ctx) {
     JS_SetPropertyStr(ctx, lvgl, "drawArc", JS_NewCFunction(ctx, js_lv_draw_arc, "drawArc", 1));
     JS_SetPropertyStr(ctx, lvgl, "drawLine", JS_NewCFunction(ctx, js_lv_draw_line, "drawLine", 1));
     
-    require_vlgl_js_display(ctx, lvgl) ;
-    require_vlgl_js_widgets(ctx, lvgl) ;
-    require_vlgl_js_widgets_gen(ctx, lvgl) ;
-    require_vlgl_js_style(ctx, lvgl) ;
-    require_vlgl_js_font_symbol(ctx, lvgl) ;
+    be_lv_display_require(ctx, lvgl) ;
+    be_lv_widgets_require(ctx, lvgl) ;
+    be_lv_widgets_gen_require(ctx, lvgl) ;
+    be_lv_styles_require(ctx, lvgl) ;
+    be_lv_font_symbol_require(ctx, lvgl) ;
     be_lv_structs_require(ctx, lvgl) ;
-    be_be_lv_draggable_require(ctx, lvgl) ;
+    be_lv_draggable_require(ctx, lvgl) ;
 
     JS_FreeValue(ctx, global);
     JS_FreeValue(ctx, beapi);
+    JS_FreeValue(ctx, EventEmitterProto);
 }
 
+void be_module_lvgl_reset(JSContext *ctx) {
+    be_lv_widgets_reset(ctx) ;
+    be_lv_display_reset(ctx) ;
+}
 
 void be_module_lvgl_loop(JSContext *ctx)  {
     if(lv_has_inited) {

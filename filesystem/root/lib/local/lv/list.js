@@ -9,6 +9,8 @@ class Menu extends beapi.lvgl.Obj {
         "pad-bottom": 2 ,
     })
     autoHide = true
+    indev_cb = null
+    popup_cb = null
 
     constructor(parent, json) {
         super(parent)
@@ -45,14 +47,14 @@ class Menu extends beapi.lvgl.Obj {
         }, this)
 
         this.column.on("pressed", ()=>{
-            let item = this._hittest()
+            let item = this._itemHitTest()
             if(!item) {
                 return
             }
             this.setActiveItem(item)
         })
         this.column.on("clicked", ()=>{
-            let item = this._hittest()
+            let item = this._itemHitTest()
             if(!item) {
                 return
             }
@@ -60,10 +62,14 @@ class Menu extends beapi.lvgl.Obj {
             if(item.callback) {
                 item.callback()
             }
+            this.emit("clicked", item.value, item)
+            if(this.popup_cb) {
+                this.popup_cb(item.value)
+                this.popup_cb = null
+            }
             if(this.autoHide) {
                 this.hide()
             }
-            this.emit("clicked", item.value, item)
         })
         
         if(json){
@@ -71,15 +77,13 @@ class Menu extends beapi.lvgl.Obj {
         }
 
         this.indev_cb = ()=>{
-            let {x,y} = lv.inputPoint()
-            let [x1,y1] = this.coords()
-            if( x<x1 || y<y1 || x>x1+this.width() || y>y1+this.height()) {
+            if(!this.hitTest()) {
                 this.hide()
             }
         }
     }
 
-    _hittest() {
+    _itemHitTest() {
         let {y} = lv.inputPoint()
         for(let i=0;i<this.column.childCnt();i++)  {
             let item = this.column.child(i)
@@ -148,8 +152,8 @@ class Menu extends beapi.lvgl.Obj {
         }
     }
 
-    popup(x , y) {
-        if(x==undefined || y==undefined) {
+    popup(x , y, callback) {
+        if(x==undefined || x==null || y==undefined || y==null) {
             ({x,y} = lv.inputPoint())
         }
         let screen = this.parent()
@@ -166,6 +170,7 @@ class Menu extends beapi.lvgl.Obj {
         this.updateLayout()
         this.show()
 
+        this.popup_cb = callback || null
         lv.on("pressed", this.indev_cb, true)
     }
 
@@ -185,6 +190,7 @@ class Menu extends beapi.lvgl.Obj {
     }
 
     hide() {
+        this.popup_cb = null
         lv.off("pressed", this.indev_cb, true)
         super.hide()
     }

@@ -10,6 +10,15 @@ beapi.lvgl.Obj.prototype.draggable = function(onstart, ondragging, onstop) {
     return this._draggable
 }
 
+beapi.lvgl.Obj.prototype.hitTest = function hitTest(x,y) {
+    if(x==undefined || x==null || y==undefined || y==null) {
+        ; ({x,y} = lv.inputPoint())
+    }
+    let [x1,y1] = this.coords()
+    console.log(x,y,x1,y1,this.width(),this.height())
+    return x>x1 && y>y1 && x<x1+this.width() && y<y1+this.height() 
+}
+
 beapi.lvgl.Obj.prototype.show = function show() {
     this.clearFlag("hidden")
 }
@@ -128,4 +137,5 @@ beapi.lvgl.Keyboard.prototype.popup = function(textarea, cb) {
     }
     this._popupCb = cb || null
     this.show()
+    return this
 }

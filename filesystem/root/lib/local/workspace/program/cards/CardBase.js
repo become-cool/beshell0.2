@@ -20,6 +20,7 @@ bodyDsc.setRadius(2)
 
 
 class Input extends lv.TextArea {
+    numeric = false
     constructor(parent) {
         super(parent)
         this.fromJson({
@@ -34,8 +35,8 @@ class Input extends lv.TextArea {
                 "pad-left": 8 ,
                 "pad-right": 8 ,
             } ,
-            clicked() {
-                lv.keyboard().popup(this)
+            clicked: ()=>{
+                lv.keyboard().popup(this).setMode(this.numeric? "number": "text-lower")
             } ,
         })
         let txt = this.child(0).as(lv.Label)
@@ -141,6 +142,7 @@ class CardMenu extends lv.Row{
         this.fromJson({
             width: -1 ,
             height: -1 ,
+            bubble: true ,
             style: {
                 "flex-cross-place": "center" ,
             } ,
@@ -155,33 +157,34 @@ class CardMenu extends lv.Row{
                     style: {
                         "min-width": 20 ,
                         "text-align": "center" ,
-                    } ,
+                    }
                 } , 
                 {
                     class: lv.Label ,
                     width: -1 ,
-                    height: -1 ,
+                    height: 17 ,
                     font: "m10" ,
                     text: lv.symbol.down ,
                     style: {
-                        "text-color": lv.rgb(220)
+                        "text-color": lv.rgb(220) ,
+                    } ,
+                    clicked: ()=>{
+                        if(this.menu){
+                            // release out of label
+                            if(!this.hitTest()) {
+                                return
+                            }
+                            this.menu.setActive(this.value)
+                            this.menu.popup(null, null, (value)=>{
+                                this.setValue(value)
+                            })
+                        }
                     }
                 }
             ] ,
-            clicked: ()=>{
-                console.log(this.menu.popup)
-                if(this.menu){
-                    this.menu.setActive(this.value)
-                    this.menu.popup()
-                }
-            }
         }, this)
 
         this.setValue(null)
-
-        menu.on("clicked",value=>{
-            this.setValue(value)
-        })
     }
     setValue(value) {
         if(this.value==value) {

@@ -5,7 +5,7 @@
 
 void be_lv_widgets_init() ;
 void be_lv_widgets_require(JSContext *ctx, JSValue lvgl) ;
-void be_lv_widgets_reset(ctx) ;
+void be_lv_widgets_reset(JSContext *ctx) ;
 
 void js_lv_obj_init(JSContext *ctx, JSValue jsobj) ;
 

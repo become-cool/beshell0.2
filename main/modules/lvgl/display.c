@@ -14,6 +14,9 @@
 #include "display_ws.h"
 #include "disp_st77xx.h"
 #include <freertos/queue.h>
+
+#define OFFSET_X 11
+
 #else
 #include "http_lws.h"
 #endif
@@ -214,17 +217,15 @@ void input_driver_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
         }
         else {
             data->continue_reading = xpt2046_read(drv, data) ;
-            if(data->state == LV_INDEV_STATE_PRESSED) {
-                data->point.x -= 10 ;
-            }
+            data->point.x -= OFFSET_X ;
         }
     }
-
-    indev_global_cb_proc(data) ;
 
     indev_input_x = data->point.x ;
     indev_input_y = data->point.y ;
     indev_input_pressed = (data->state == LV_INDEV_STATE_PRESSED) ;
+
+    indev_global_cb_proc(data) ;
 }
 #endif
 
@@ -515,7 +516,7 @@ void be_lv_display_require(JSContext *ctx, JSValue lvgl) {
     JS_SetPropertyStr(ctx, lvgl, "clearIndevCallback", JS_NewCFunction(ctx, js_clear_indev_global_cb, "clearIndevCallback", 1));
 }
 
-void be_lv_display_reset(ctx) {
+void be_lv_display_reset(JSContext * ctx) {
 
     js_indev_global_cb_ctx = NULL ;
 

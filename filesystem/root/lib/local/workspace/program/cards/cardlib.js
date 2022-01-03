@@ -13,7 +13,7 @@ class Hello extends base.CardStatement {
     constructor(parent, vm) {
         super(parent, vm)
         this.addLabel("say")
-        this.addExprSlot("what", true)
+        this.addExprSlot("what")
     }
 }
 
@@ -31,9 +31,9 @@ class OperatorTwo extends base.CardExpression {
 
     constructor(parent, vm) {
         super(parent, vm)
-        this.addExprSlot("left", true)
-        this.addMenu(OperatorTwo.menu(parent))
-        this.addExprSlot("right")
+        this.addExprSlot("left").input.numeric = true
+        this.addMenu(OperatorTwo.menu(parent), "op")
+        this.addExprSlot("right").input.numeric = true
     }
 }
 

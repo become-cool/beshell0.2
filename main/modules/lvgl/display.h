@@ -16,6 +16,6 @@ void be_lv_display_init() ;
 
 void be_lv_display_require(JSContext *ctx, JSValue lvgl) ;
 
-void be_lv_display_reset(ctx) ;
+void be_lv_display_reset(JSContext * ctx) ;
 
 #endif

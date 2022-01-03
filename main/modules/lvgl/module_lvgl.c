@@ -456,7 +456,6 @@ void be_module_lvgl_require(JSContext *ctx) {
 }
 
 void be_module_lvgl_reset(JSContext *ctx) {
-    be_lv_widgets_reset(ctx) ;
     be_lv_display_reset(ctx) ;
 }
 

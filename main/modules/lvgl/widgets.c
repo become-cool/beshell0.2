@@ -708,8 +708,6 @@ JSValue js_lv_obj_abort_scroll(JSContext *ctx, JSValueConst this_val, int argc, 
 
 void be_lv_widgets_init() {
 }
-void be_lv_widgets_reset(ctx) {
-}
 
 void be_lv_widgets_require(JSContext *ctx, JSValue lvgl) {
     JS_SetPropertyStr(ctx, lvgl, "isEventName", JS_NewCFunction(ctx, js_lvgl_is_event_name, "isEventName", 1));

@@ -14,6 +14,11 @@ module.exports = function(){
         "./graph/GraphTools" ,
         "./ui/WidgetHelper" ,
         "./ui/UITools" ,
+        "./program/cards/CardBase" ,
+        "./program/cards/basic" ,
+        "./program/cards/ui" ,
+        "./program/Program" ,
+        "./program/ProgramTools" ,
         "./Workspace" ,
     ], require)
 }

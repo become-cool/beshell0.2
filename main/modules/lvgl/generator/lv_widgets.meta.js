@@ -102,7 +102,7 @@ for(let clzconf of lstClasses) {
         clzconf.ctypeName = clzconf.typeName + "_t *"
     }
     if(!clzconf.fullClassName) {
-        clzconf.fullClassName = "lvgl."+clzconf.className
+        clzconf.fullClassName = clzconf.className
     }
 
     if(!clzconf.methods) {

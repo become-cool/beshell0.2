@@ -144,7 +144,7 @@ JSValue lv_flex_align_const_to_jsstr(JSContext *ctx, lv_flex_align_t code) {
 }
 
 bool lv_event_code_str_to_const(const char * name, lv_event_code_t* out) {
-        if(strcmp(name,"all")==0) {
+    if(strcmp(name,"all")==0) {
         (*out) = LV_EVENT_ALL ;
     }
     else if(strcmp(name,"pressed")==0) {
@@ -1693,7 +1693,7 @@ static void js_lv_obj_finalizer(JSRuntime *rt, JSValue val){
     // lv_obj_del(thisobj) ;
 }
 static JSClassDef js_lv_obj_class = {
-    "lvgl.Obj",
+    "Obj",
     .finalizer = js_lv_obj_finalizer,
 };
 
@@ -1729,7 +1729,7 @@ static void js_lv_label_finalizer(JSRuntime *rt, JSValue val){
     // lv_obj_del(thisobj) ;
 }
 static JSClassDef js_lv_label_class = {
-    "lvgl.Label",
+    "Label",
     .finalizer = js_lv_label_finalizer,
 };
 
@@ -1765,7 +1765,7 @@ static void js_lv_arc_finalizer(JSRuntime *rt, JSValue val){
     // lv_obj_del(thisobj) ;
 }
 static JSClassDef js_lv_arc_class = {
-    "lvgl.Arc",
+    "Arc",
     .finalizer = js_lv_arc_finalizer,
 };
 
@@ -1801,7 +1801,7 @@ static void js_lv_bar_finalizer(JSRuntime *rt, JSValue val){
     // lv_obj_del(thisobj) ;
 }
 static JSClassDef js_lv_bar_class = {
-    "lvgl.Bar",
+    "Bar",
     .finalizer = js_lv_bar_finalizer,
 };
 
@@ -1837,7 +1837,7 @@ static void js_lv_btn_finalizer(JSRuntime *rt, JSValue val){
     // lv_obj_del(thisobj) ;
 }
 static JSClassDef js_lv_btn_class = {
-    "lvgl.Btn",
+    "Btn",
     .finalizer = js_lv_btn_finalizer,
 };
 
@@ -1873,7 +1873,7 @@ static void js_lv_btnmatrix_finalizer(JSRuntime *rt, JSValue val){
     // lv_obj_del(thisobj) ;
 }
 static JSClassDef js_lv_btnmatrix_class = {
-    "lvgl.BtnMatrix",
+    "BtnMatrix",
     .finalizer = js_lv_btnmatrix_finalizer,
 };
 
@@ -1909,7 +1909,7 @@ static void js_lv_canvas_finalizer(JSRuntime *rt, JSValue val){
     // lv_obj_del(thisobj) ;
 }
 static JSClassDef js_lv_canvas_class = {
-    "lvgl.Canvas",
+    "Canvas",
     .finalizer = js_lv_canvas_finalizer,
 };
 
@@ -1945,7 +1945,7 @@ static void js_lv_checkbox_finalizer(JSRuntime *rt, JSValue val){
     // lv_obj_del(thisobj) ;
 }
 static JSClassDef js_lv_checkbox_class = {
-    "lvgl.Checkbox",
+    "Checkbox",
     .finalizer = js_lv_checkbox_finalizer,
 };
 
@@ -1981,7 +1981,7 @@ static void js_lv_dropdown_finalizer(JSRuntime *rt, JSValue val){
     // lv_obj_del(thisobj) ;
 }
 static JSClassDef js_lv_dropdown_class = {
-    "lvgl.Dropdown",
+    "Dropdown",
     .finalizer = js_lv_dropdown_finalizer,
 };
 
@@ -2017,7 +2017,7 @@ static void js_lv_img_finalizer(JSRuntime *rt, JSValue val){
     // lv_obj_del(thisobj) ;
 }
 static JSClassDef js_lv_img_class = {
-    "lvgl.Img",
+    "Img",
     .finalizer = js_lv_img_finalizer,
 };
 
@@ -2053,7 +2053,7 @@ static void js_lv_line_finalizer(JSRuntime *rt, JSValue val){
     // lv_obj_del(thisobj) ;
 }
 static JSClassDef js_lv_line_class = {
-    "lvgl.Line",
+    "Line",
     .finalizer = js_lv_line_finalizer,
 };
 
@@ -2089,7 +2089,7 @@ static void js_lv_roller_finalizer(JSRuntime *rt, JSValue val){
     // lv_obj_del(thisobj) ;
 }
 static JSClassDef js_lv_roller_class = {
-    "lvgl.Roller",
+    "Roller",
     .finalizer = js_lv_roller_finalizer,
 };
 
@@ -2125,7 +2125,7 @@ static void js_lv_slider_finalizer(JSRuntime *rt, JSValue val){
     // lv_obj_del(thisobj) ;
 }
 static JSClassDef js_lv_slider_class = {
-    "lvgl.Slider",
+    "Slider",
     .finalizer = js_lv_slider_finalizer,
 };
 
@@ -2161,7 +2161,7 @@ static void js_lv_switch_finalizer(JSRuntime *rt, JSValue val){
     // lv_obj_del(thisobj) ;
 }
 static JSClassDef js_lv_switch_class = {
-    "lvgl.Switch",
+    "Switch",
     .finalizer = js_lv_switch_finalizer,
 };
 
@@ -2197,7 +2197,7 @@ static void js_lv_table_finalizer(JSRuntime *rt, JSValue val){
     // lv_obj_del(thisobj) ;
 }
 static JSClassDef js_lv_table_class = {
-    "lvgl.Table",
+    "Table",
     .finalizer = js_lv_table_finalizer,
 };
 
@@ -2233,7 +2233,7 @@ static void js_lv_textarea_finalizer(JSRuntime *rt, JSValue val){
     // lv_obj_del(thisobj) ;
 }
 static JSClassDef js_lv_textarea_class = {
-    "lvgl.TextArea",
+    "TextArea",
     .finalizer = js_lv_textarea_finalizer,
 };
 
@@ -2245,7 +2245,7 @@ static void js_lv_msgbox_finalizer(JSRuntime *rt, JSValue val){
     // lv_obj_del(thisobj) ;
 }
 static JSClassDef js_lv_msgbox_class = {
-    "lvgl.MsgBox",
+    "MsgBox",
     .finalizer = js_lv_msgbox_finalizer,
 };
 
@@ -2281,7 +2281,7 @@ static void js_lv_keyboard_finalizer(JSRuntime *rt, JSValue val){
     // lv_obj_del(thisobj) ;
 }
 static JSClassDef js_lv_keyboard_class = {
-    "lvgl.Keyboard",
+    "Keyboard",
     .finalizer = js_lv_keyboard_finalizer,
 };
 
@@ -2317,7 +2317,7 @@ static void js_lv_tileview_finalizer(JSRuntime *rt, JSValue val){
     // lv_obj_del(thisobj) ;
 }
 static JSClassDef js_lv_tileview_class = {
-    "lvgl.TileView",
+    "TileView",
     .finalizer = js_lv_tileview_finalizer,
 };
 
@@ -2353,7 +2353,7 @@ static void js_lv_list_finalizer(JSRuntime *rt, JSValue val){
     // lv_obj_del(thisobj) ;
 }
 static JSClassDef js_lv_list_class = {
-    "lvgl.List",
+    "List",
     .finalizer = js_lv_list_finalizer,
 };
 
@@ -3816,6 +3816,39 @@ static JSValue js_lv_obj_fade_out(JSContext *ctx, JSValueConst this_val, int arg
     return retval ;
 }
 
+static JSValue js_lv_obj_del(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    void * lv_userdata = JS_GetOpaqueInternal(this_val) ;
+    if(!lv_userdata) {
+        THROW_EXCEPTION("Obj.del() must be called as a Obj method")
+    }
+    lv_obj_t * thisobj = lv_userdata ;
+    lv_obj_del(thisobj) ;
+    JSValue retval = JS_UNDEFINED ;
+    return retval ;
+}
+
+static JSValue js_lv_obj_clean(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    void * lv_userdata = JS_GetOpaqueInternal(this_val) ;
+    if(!lv_userdata) {
+        THROW_EXCEPTION("Obj.clean() must be called as a Obj method")
+    }
+    lv_obj_t * thisobj = lv_userdata ;
+    lv_obj_clean(thisobj) ;
+    JSValue retval = JS_UNDEFINED ;
+    return retval ;
+}
+
+static JSValue js_lv_obj_del_async(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    void * lv_userdata = JS_GetOpaqueInternal(this_val) ;
+    if(!lv_userdata) {
+        THROW_EXCEPTION("Obj.delAsync() must be called as a Obj method")
+    }
+    lv_obj_t * thisobj = lv_userdata ;
+    lv_obj_del_async(thisobj) ;
+    JSValue retval = JS_UNDEFINED ;
+    return retval ;
+}
+
 static JSValue js_lv_obj_set_parent(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     if(argc<1) {
         THROW_EXCEPTION("Obj.setParent() missing arg")
@@ -4165,6 +4198,9 @@ static const JSCFunctionListEntry js_lv_obj_proto_funcs[] = {
     JS_CFUNC_DEF("removeStyleAll", 0, js_lv_obj_remove_style_all),
     JS_CFUNC_DEF("fadeIn", 0, js_lv_obj_fade_in),
     JS_CFUNC_DEF("fadeOut", 0, js_lv_obj_fade_out),
+    JS_CFUNC_DEF("del", 0, js_lv_obj_del),
+    JS_CFUNC_DEF("clean", 0, js_lv_obj_clean),
+    JS_CFUNC_DEF("delAsync", 0, js_lv_obj_del_async),
     JS_CFUNC_DEF("setParent", 0, js_lv_obj_set_parent),
     JS_CFUNC_DEF("moveToIndex", 0, js_lv_obj_move_to_index),
     JS_CFUNC_DEF("screen", 0, js_lv_obj_get_screen),
@@ -7393,83 +7429,83 @@ void be_lv_widgets_gen_require(JSContext *ctx, JSValue lvgl) {
 // AUTO GENERATE CODE START [REGISTER CLASS] --------
     // define js class lvgl.lv_obj    
     JSValue proto_lv_obj = qjs_def_class(ctx, "Obj", js_lv_obj_class_id, &js_lv_obj_class
-                , "lvgl.Obj", js_lv_obj_constructor, js_lv_obj_proto_funcs, countof(js_lv_obj_proto_funcs), EventEmitterProto, lvgl) ;
+                , "Obj", js_lv_obj_constructor, js_lv_obj_proto_funcs, countof(js_lv_obj_proto_funcs), EventEmitterProto, lvgl) ;
 
     // define js class lvgl.lv_label    
     JSValue proto_lv_label = qjs_def_class(ctx, "Label", js_lv_label_class_id, &js_lv_label_class
-                , "lvgl.Label", js_lv_label_constructor, js_lv_label_proto_funcs, countof(js_lv_label_proto_funcs), proto_lv_obj, lvgl) ;
+                , "Label", js_lv_label_constructor, js_lv_label_proto_funcs, countof(js_lv_label_proto_funcs), proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_arc    
     JSValue proto_lv_arc = qjs_def_class(ctx, "Arc", js_lv_arc_class_id, &js_lv_arc_class
-                , "lvgl.Arc", js_lv_arc_constructor, js_lv_arc_proto_funcs, countof(js_lv_arc_proto_funcs), proto_lv_obj, lvgl) ;
+                , "Arc", js_lv_arc_constructor, js_lv_arc_proto_funcs, countof(js_lv_arc_proto_funcs), proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_bar    
     JSValue proto_lv_bar = qjs_def_class(ctx, "Bar", js_lv_bar_class_id, &js_lv_bar_class
-                , "lvgl.Bar", js_lv_bar_constructor, js_lv_bar_proto_funcs, countof(js_lv_bar_proto_funcs), proto_lv_obj, lvgl) ;
+                , "Bar", js_lv_bar_constructor, js_lv_bar_proto_funcs, countof(js_lv_bar_proto_funcs), proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_btn    
     JSValue proto_lv_btn = qjs_def_class(ctx, "Btn", js_lv_btn_class_id, &js_lv_btn_class
-                , "lvgl.Btn", js_lv_btn_constructor, js_lv_btn_proto_funcs, countof(js_lv_btn_proto_funcs), proto_lv_obj, lvgl) ;
+                , "Btn", js_lv_btn_constructor, js_lv_btn_proto_funcs, countof(js_lv_btn_proto_funcs), proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_btnmatrix    
     JSValue proto_lv_btnmatrix = qjs_def_class(ctx, "BtnMatrix", js_lv_btnmatrix_class_id, &js_lv_btnmatrix_class
-                , "lvgl.BtnMatrix", js_lv_btnmatrix_constructor, js_lv_btnmatrix_proto_funcs, countof(js_lv_btnmatrix_proto_funcs), proto_lv_obj, lvgl) ;
+                , "BtnMatrix", js_lv_btnmatrix_constructor, js_lv_btnmatrix_proto_funcs, countof(js_lv_btnmatrix_proto_funcs), proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_canvas    
     JSValue proto_lv_canvas = qjs_def_class(ctx, "Canvas", js_lv_canvas_class_id, &js_lv_canvas_class
-                , "lvgl.Canvas", js_lv_canvas_constructor, js_lv_canvas_proto_funcs, countof(js_lv_canvas_proto_funcs), proto_lv_obj, lvgl) ;
+                , "Canvas", js_lv_canvas_constructor, js_lv_canvas_proto_funcs, countof(js_lv_canvas_proto_funcs), proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_checkbox    
     JSValue proto_lv_checkbox = qjs_def_class(ctx, "Checkbox", js_lv_checkbox_class_id, &js_lv_checkbox_class
-                , "lvgl.Checkbox", js_lv_checkbox_constructor, js_lv_checkbox_proto_funcs, countof(js_lv_checkbox_proto_funcs), proto_lv_obj, lvgl) ;
+                , "Checkbox", js_lv_checkbox_constructor, js_lv_checkbox_proto_funcs, countof(js_lv_checkbox_proto_funcs), proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_dropdown    
     JSValue proto_lv_dropdown = qjs_def_class(ctx, "Dropdown", js_lv_dropdown_class_id, &js_lv_dropdown_class
-                , "lvgl.Dropdown", js_lv_dropdown_constructor, js_lv_dropdown_proto_funcs, countof(js_lv_dropdown_proto_funcs), proto_lv_obj, lvgl) ;
+                , "Dropdown", js_lv_dropdown_constructor, js_lv_dropdown_proto_funcs, countof(js_lv_dropdown_proto_funcs), proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_img    
     JSValue proto_lv_img = qjs_def_class(ctx, "Img", js_lv_img_class_id, &js_lv_img_class
-                , "lvgl.Img", js_lv_img_constructor, js_lv_img_proto_funcs, countof(js_lv_img_proto_funcs), proto_lv_obj, lvgl) ;
+                , "Img", js_lv_img_constructor, js_lv_img_proto_funcs, countof(js_lv_img_proto_funcs), proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_line    
     JSValue proto_lv_line = qjs_def_class(ctx, "Line", js_lv_line_class_id, &js_lv_line_class
-                , "lvgl.Line", js_lv_line_constructor, js_lv_line_proto_funcs, countof(js_lv_line_proto_funcs), proto_lv_obj, lvgl) ;
+                , "Line", js_lv_line_constructor, js_lv_line_proto_funcs, countof(js_lv_line_proto_funcs), proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_roller    
     JSValue proto_lv_roller = qjs_def_class(ctx, "Roller", js_lv_roller_class_id, &js_lv_roller_class
-                , "lvgl.Roller", js_lv_roller_constructor, js_lv_roller_proto_funcs, countof(js_lv_roller_proto_funcs), proto_lv_obj, lvgl) ;
+                , "Roller", js_lv_roller_constructor, js_lv_roller_proto_funcs, countof(js_lv_roller_proto_funcs), proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_slider    
     JSValue proto_lv_slider = qjs_def_class(ctx, "Slider", js_lv_slider_class_id, &js_lv_slider_class
-                , "lvgl.Slider", js_lv_slider_constructor, js_lv_slider_proto_funcs, countof(js_lv_slider_proto_funcs), proto_lv_obj, lvgl) ;
+                , "Slider", js_lv_slider_constructor, js_lv_slider_proto_funcs, countof(js_lv_slider_proto_funcs), proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_switch    
     JSValue proto_lv_switch = qjs_def_class(ctx, "Switch", js_lv_switch_class_id, &js_lv_switch_class
-                , "lvgl.Switch", js_lv_switch_constructor, js_lv_switch_proto_funcs, countof(js_lv_switch_proto_funcs), proto_lv_obj, lvgl) ;
+                , "Switch", js_lv_switch_constructor, js_lv_switch_proto_funcs, countof(js_lv_switch_proto_funcs), proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_table    
     JSValue proto_lv_table = qjs_def_class(ctx, "Table", js_lv_table_class_id, &js_lv_table_class
-                , "lvgl.Table", js_lv_table_constructor, js_lv_table_proto_funcs, countof(js_lv_table_proto_funcs), proto_lv_obj, lvgl) ;
+                , "Table", js_lv_table_constructor, js_lv_table_proto_funcs, countof(js_lv_table_proto_funcs), proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_textarea    
     JSValue proto_lv_textarea = qjs_def_class(ctx, "TextArea", js_lv_textarea_class_id, &js_lv_textarea_class
-                , "lvgl.TextArea", js_lv_textarea_constructor, js_lv_textarea_proto_funcs, countof(js_lv_textarea_proto_funcs), proto_lv_obj, lvgl) ;
+                , "TextArea", js_lv_textarea_constructor, js_lv_textarea_proto_funcs, countof(js_lv_textarea_proto_funcs), proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_msgbox    
     JSValue proto_lv_msgbox = qjs_def_class(ctx, "MsgBox", js_lv_msgbox_class_id, &js_lv_msgbox_class
-                , "lvgl.MsgBox", js_lv_msgbox_constructor, js_lv_msgbox_proto_funcs, countof(js_lv_msgbox_proto_funcs), proto_lv_obj, lvgl) ;
+                , "MsgBox", js_lv_msgbox_constructor, js_lv_msgbox_proto_funcs, countof(js_lv_msgbox_proto_funcs), proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_keyboard    
     JSValue proto_lv_keyboard = qjs_def_class(ctx, "Keyboard", js_lv_keyboard_class_id, &js_lv_keyboard_class
-                , "lvgl.Keyboard", js_lv_keyboard_constructor, js_lv_keyboard_proto_funcs, countof(js_lv_keyboard_proto_funcs), proto_lv_obj, lvgl) ;
+                , "Keyboard", js_lv_keyboard_constructor, js_lv_keyboard_proto_funcs, countof(js_lv_keyboard_proto_funcs), proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_tileview    
     JSValue proto_lv_tileview = qjs_def_class(ctx, "TileView", js_lv_tileview_class_id, &js_lv_tileview_class
-                , "lvgl.TileView", js_lv_tileview_constructor, js_lv_tileview_proto_funcs, countof(js_lv_tileview_proto_funcs), proto_lv_obj, lvgl) ;
+                , "TileView", js_lv_tileview_constructor, js_lv_tileview_proto_funcs, countof(js_lv_tileview_proto_funcs), proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_list    
     JSValue proto_lv_list = qjs_def_class(ctx, "List", js_lv_list_class_id, &js_lv_list_class
-                , "lvgl.List", js_lv_list_constructor, js_lv_list_proto_funcs, countof(js_lv_list_proto_funcs), proto_lv_obj, lvgl) ;
+                , "List", js_lv_list_constructor, js_lv_list_proto_funcs, countof(js_lv_list_proto_funcs), proto_lv_obj, lvgl) ;
 
 // AUTO GENERATE CODE END [REGISTER CLASS] --------
 

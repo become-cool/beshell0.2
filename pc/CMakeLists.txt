@@ -72,6 +72,7 @@ list(APPEND SRC_LIST ../main/modules/lvgl/be_lv_struct_wrapper.c)
 list(APPEND SRC_LIST ../main/modules/lvgl/be_lv_draggable.c)
 list(APPEND SRC_LIST ../main/modules/lvgl/widgets.c)
 list(APPEND SRC_LIST ../main/modules/lvgl/widgets_gen.c)
+list(APPEND SRC_LIST ../main/modules/lvgl/be_gl.c)
 list(APPEND SRC_LIST ../main/modules/lvgl/font/font_msyh.c)
 
 ADD_EXECUTABLE(beshell ${SRC_LIST})

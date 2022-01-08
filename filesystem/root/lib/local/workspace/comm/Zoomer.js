@@ -13,6 +13,7 @@ class Zoomer extends lv.CleanObj{
         this.refs = this.fromJson({
             width: 20 ,
             height: 180 ,
+            visible: false ,
             children: [
                 {
                     class: lv.CleanObj ,

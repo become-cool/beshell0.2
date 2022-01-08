@@ -192,8 +192,6 @@ static void fn(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
     (void)fn_data;
 }
 
-struct mg_mgr mgr;
-
 void be_module_httplws_init() {
     mg_http_listen(be_module_mg_mgr(), s_listen_on, fn, NULL); // Create HTTP listener
 }

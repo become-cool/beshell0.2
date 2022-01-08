@@ -8,7 +8,7 @@ styleCommon.set("text-color", lv.rgb(80,80,80))
 
 const mapWidgetLib = {
     '矩形':  {
-        class: lv.CleanObj ,
+        class: lv.Obj ,
         opt: {
             width: 80 ,
             height: 80 ,
@@ -176,7 +176,6 @@ class UITools extends lv.Column{
             }, mapWidgetLib[title])
         }
 
-        
         workspace.ui.on("ui.active.changed", (activePart)=>{
             if(activePart) {
                 this.props.show()

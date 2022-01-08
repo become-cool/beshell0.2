@@ -9,6 +9,7 @@
 #include "lv_conf.h"
 #include "utils.h"
 #include "cutils.h"
+#include "be_gl.h"
 
 #ifndef SIMULATION
 #include "freertos/FreeRTOS.h"
@@ -154,122 +155,6 @@ static JSValue js_lv_set_indev_active_obj(JSContext *ctx, JSValueConst this_val,
     return JS_UNDEFINED ;
 }
 
-#define JSARRAY_TO_POINT(arr, jsvar, cvar, tmp)     \
-    jsvar = JS_GetPropertyUint32(ctx, arr, 0) ;     \
-    if(JS_ToInt32(ctx, &tmp, jsvar)!=0) {           \
-        THROW_EXCEPTION("x is not a valid number")  \
-    }                                               \
-    cvar.x = tmp ;                                  \
-    JS_FreeValue(ctx, jsvar) ;                      \
-    jsvar = JS_GetPropertyUint32(ctx, arr, 1) ;     \
-    if(JS_ToInt32(ctx, &tmp, jsvar)!=0) {           \
-        THROW_EXCEPTION("y is not a valid number")  \
-    }                                               \
-    cvar.y = tmp ;                                  \
-    JS_FreeValue(ctx, jsvar) ;
-
-static JSValue js_lv_draw_line(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-    CHECK_ARGC(4)
-    if(!JS_IsArray(ctx, argv[0])) {
-        THROW_EXCEPTION("arg start must be a array")
-    }
-    if(!JS_IsArray(ctx, argv[1])) {
-        THROW_EXCEPTION("arg end must be a array")
-    }
-    
-    JSValue val ;
-    lv_point_t start, end ;
-    int32_t tmp ;
-
-    JSARRAY_TO_POINT(argv[0], val, start, tmp)
-    JSARRAY_TO_POINT(argv[1], val, end, tmp)
-
-    lv_area_t * clip = JS_GetOpaque(argv[2],js_lv_area_class_id) ;
-    if(!clip) {
-        THROW_EXCEPTION("arg rect must a lv.Area object")
-    }
-    lv_draw_line_dsc_t * dsc = JS_GetOpaque(argv[3],js_lv_draw_line_dsc_class_id) ;
-    if(!dsc) {
-        THROW_EXCEPTION("arg dsc must a lv.DrawRectDsc object")
-    }
-    lv_draw_line(&start, &end, clip, dsc) ;
-    return JS_UNDEFINED ;
-}
-static JSValue js_lv_draw_rect(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-    CHECK_ARGC(3)
-    lv_area_t * rect = JS_GetOpaque(argv[0],js_lv_area_class_id) ;
-    if(!rect) {
-        THROW_EXCEPTION("arg rect must a lv.Area object")
-    }
-    lv_area_t * clip = JS_GetOpaque(argv[1],js_lv_area_class_id) ;
-    if(!clip) {
-        THROW_EXCEPTION("arg clip must a lv.Area object")
-    }
-    lv_draw_rect_dsc_t * dsc = JS_GetOpaque(argv[2],js_lv_draw_rect_dsc_class_id) ;
-    if(!dsc) {
-        THROW_EXCEPTION("arg dsc must a lv.DrawRectDsc object")
-    }
-    lv_draw_rect(rect, clip, dsc) ;
-    return JS_UNDEFINED ;
-}
-static JSValue js_lv_draw_arc(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-    CHECK_ARGC(7)
-    ARGV_TO_INT16(0, x)
-    ARGV_TO_INT16(1, y)
-    ARGV_TO_UINT16(2, radius)
-    ARGV_TO_UINT16(3, startAngle)
-    ARGV_TO_UINT16(4, endAngle)
-    lv_area_t * clip = JS_GetOpaque(argv[5],js_lv_area_class_id) ;
-    if(!clip) {
-        THROW_EXCEPTION("arg rect must a lv.Area object")
-    }
-    lv_draw_rect_dsc_t * dsc = JS_GetOpaque(argv[6],js_lv_draw_arc_dsc_class_id) ;
-    if(!dsc) {
-        THROW_EXCEPTION("arg dsc must a lv.DrawRectDsc object")
-    }
-    lv_draw_arc(x, y, radius, startAngle, endAngle, clip, dsc) ;
-    return JS_UNDEFINED ;
-}
-static JSValue js_lv_draw_polygon(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-    CHECK_ARGC(3)
-
-    if(!JS_IsArray(ctx, argv[0])) {
-        THROW_EXCEPTION("arg points must be a array")
-    }
-    JSValue jslen = JS_GetPropertyStr(ctx, argv[0], "length") ;
-    uint32_t plen ;
-    if(0!=JS_ToUint32(ctx, &plen, jslen)) {
-        JS_FreeValue(ctx,jslen);
-        THROW_EXCEPTION("arg points is not a valid array")
-    }
-    JS_FreeValue(ctx,jslen);
-    lv_point_t * points = malloc(plen * sizeof(lv_point_t));
-    if(!points){
-        THROW_EXCEPTION("out of memor?")
-    }
-    JSValue val ;
-    int32_t tmp ;
-    for(int i=0; i<plen; i++) {
-        JSValue jspoint = JS_GetPropertyUint32(ctx, argv[0], i) ;
-        JSARRAY_TO_POINT(jspoint, val, points[i], tmp)
-        JS_FreeValue(ctx,jspoint);
-    }
-
-    lv_area_t * clip = JS_GetOpaque(argv[1],js_lv_area_class_id) ;
-    if(!clip) {
-        THROW_EXCEPTION("arg clip must a lv.Area object")
-    }
-    lv_draw_rect_dsc_t * dsc = JS_GetOpaque(argv[2],js_lv_draw_rect_dsc_class_id) ;
-    if(!dsc) {
-        THROW_EXCEPTION("arg dsc must a lv.DrawRectDsc object")
-    }
-
-    lv_draw_polygon(points, plen, clip, dsc) ;
-
-    free(points) ;
-    return JS_UNDEFINED ;
-}
-
 static JSValue js_lvgl_loop(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     lv_task_handler() ;
     return JS_UNDEFINED ;
@@ -376,6 +261,7 @@ void be_module_lvgl_init() {
     be_lv_styles_init() ;
     be_lv_structs_init() ;
     be_lv_draggable_init() ;
+    be_gl_init() ;
 }
 
 void be_module_lvgl_require(JSContext *ctx) {
@@ -436,12 +322,6 @@ void be_module_lvgl_require(JSContext *ctx) {
     JS_SetPropertyStr(ctx, lvgl, "MaxCoord", JS_NewUint32(ctx, LV_COORD_MAX));
     JS_SetPropertyStr(ctx, lvgl, "MinCoord", JS_NewUint32(ctx, LV_COORD_MIN));
 
-    // gl func
-    JS_SetPropertyStr(ctx, lvgl, "drawRect", JS_NewCFunction(ctx, js_lv_draw_rect, "drawRect", 1));
-    JS_SetPropertyStr(ctx, lvgl, "drawPolygon", JS_NewCFunction(ctx, js_lv_draw_polygon, "drawPolygon", 1));
-    JS_SetPropertyStr(ctx, lvgl, "drawArc", JS_NewCFunction(ctx, js_lv_draw_arc, "drawArc", 1));
-    JS_SetPropertyStr(ctx, lvgl, "drawLine", JS_NewCFunction(ctx, js_lv_draw_line, "drawLine", 1));
-    
     be_lv_display_require(ctx, lvgl) ;
     be_lv_widgets_require(ctx, lvgl) ;
     be_lv_widgets_gen_require(ctx, lvgl) ;
@@ -449,6 +329,7 @@ void be_module_lvgl_require(JSContext *ctx) {
     be_lv_font_symbol_require(ctx, lvgl) ;
     be_lv_structs_require(ctx, lvgl) ;
     be_lv_draggable_require(ctx, lvgl) ;
+    be_gl_require(ctx, lvgl) ;
 
     JS_FreeValue(ctx, global);
     JS_FreeValue(ctx, beapi);

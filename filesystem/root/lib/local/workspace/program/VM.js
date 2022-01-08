@@ -1,20 +1,29 @@
-const {CardStatement} = require("./cards/CardBase")
-
-class VM {
+class VM extends beapi.EventEmitter {
 
     cards = []
-    topStatments = []
 
     constructor() {
+        super()
     }
 
     addCard(card) {
         this.cards.push(card)
-
-        if(card instanceof CardStatement) {
-            this.topStatments.push(card)
-        }
+        // if(card instanceof CardEvent) {
+        //     let type = card.eventType()
+        //     if(type) {
+        //         if(!this.eventCards[type]) {
+        //             this.eventCards[type] = []
+        //         }
+        //         this.eventCards[type].push(card)
+        //     }
+        // }
     }
+
+    // emit(eventType, eventName) {
+    //     if(!this.eventCards[eventType]) {
+    //         return
+    //     }
+    // }
 }
 
 module.exports = VM

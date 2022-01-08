@@ -22,8 +22,8 @@ class Card extends lv.Label {
 }
 
 class CardStack extends lv.CleanObj{
-    constructor(workspace) {
-        super(workspace)
+    constructor(parent) {
+        super(parent)
         this.setWidth(120)
 
         this.fromJson({
@@ -34,6 +34,7 @@ class CardStack extends lv.CleanObj{
             style: {
                 // "border-width": 1 ,
                 // "pad-row": 5,
+                "pad-left": 8 ,
             } ,
             flag: ["scrollable"] ,
         })
@@ -57,8 +58,15 @@ class CardStack extends lv.CleanObj{
         card.setY(this.contentHeight)
         this.contentHeight+= card.height() + CardPad
 
+        let startx
         let draggable = card.draggable()
+        draggable.setStart(()=>{
+            [startx] = card.coords()
+        })
         draggable.setDragging((pos)=>{
+            if(pos.x<startx){
+                pos.x = startx
+            }
             pos.y = false
             if(pos.x>70) {
                 return false

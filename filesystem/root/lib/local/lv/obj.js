@@ -15,7 +15,6 @@ beapi.lvgl.Obj.prototype.hitTest = function hitTest(x,y) {
         ; ({x,y} = lv.inputPoint())
     }
     let [x1,y1] = this.coords()
-    console.log(x,y,x1,y1,this.width(),this.height())
     return x>x1 && y>y1 && x<x1+this.width() && y<y1+this.height() 
 }
 
@@ -45,6 +44,12 @@ beapi.lvgl.Obj.prototype.asColumn = function asColumn() {
     this.setFlexFlow("column")
 }
 
+beapi.lvgl.Btn.prototype.text = function text() {
+    if(!this.label) {
+        return null
+    }
+    return this.label.text()
+}
 beapi.lvgl.Btn.prototype.setText = function setText(text) {
     if(!this.label) {
         this.label = new beapi.lvgl.Label(this)
@@ -138,4 +143,51 @@ beapi.lvgl.Keyboard.prototype.popup = function(textarea, cb) {
     this._popupCb = cb || null
     this.show()
     return this
+}
+
+
+beapi.lvgl.Path.prototype.begin = function(x,y){
+    this.bx = x || 0
+    this.by = y || 0
+    this.wx = x || 0
+    this.wy = y || 0
+}
+beapi.lvgl.Path.prototype.end = function(){
+    if(this.wx!=undefined && this.bx!=undefined && this.wy!=undefined && this.by!=undefined) {
+        if(this.wx!=this.bx || this.wy!=this.by) {
+            this.addLine(this.wx, this.wy, this.bx, this.by)
+        }
+    }
+    delete this.bx, this.by, this.wx, this.wy
+}
+beapi.lvgl.Path.prototype.moveTo = function(x,y){
+    this.wx = x
+    this.wy = y
+}
+beapi.lvgl.Path.prototype.lineTo = function(x,y){
+    if(!this.wx) this.wx = 0
+    if(!this.wy) this.wy = 0
+    this.addLine(this.wx, this.wy, x, y)
+    this.wx = x
+    this.wy = y
+}
+beapi.lvgl.Path.prototype.arcTo = function(x,y,cx,cy,clockwish){
+    if(!this.wx) this.wx = 0
+    if(!this.wy) this.wy = 0
+    if(clockwish)
+        this.addArc(this.wx, this.wy, x, y, cx,cy)
+    else
+        this.addArc(x, y, this.wx, this.wy, cx,cy)
+    this.wx = x
+    this.wy = y
+}
+
+beapi.lvgl.__lv_obj_init = function () {
+    this._handles={}
+    this.on("#EVENT.ADD#",(eventName)=>{
+        this.enableEvent(eventName=='*'?'all':eventName)
+    })
+    this.on("#EVENT.CLEAR#",(eventName)=>{
+        this.disableEvent(eventName=='*'?'all':eventName)
+    })
 }

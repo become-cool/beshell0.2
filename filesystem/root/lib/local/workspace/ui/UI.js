@@ -8,8 +8,8 @@ class UI extends lv.CleanObj{
     activeWidget = null
     workspace = null
 
-    constructor(parent, workspace) {
-        super(parent)
+    constructor(workspace, ) {
+        super(workspace)
         this.workspace = workspace
 
         this.fromJson({
@@ -61,6 +61,13 @@ class UI extends lv.CleanObj{
                 this.holdspace.show()
             }
         })
+
+        
+
+        // for testing purposes
+        let widget = this.createWidget(lv.Btn, {text:"Bntnt"})
+        widget.setCoords(50,50)
+
     }
 
     createWidget(clz, json) {

@@ -19,8 +19,8 @@ class Workspace extends lv.CleanObj {
         this.model = new AppModel(this)
         
         this.graph = new GraphCanvas(this, this)
-        this.ui = new UI(this, this)
-        this.program = new Program(this, this)
+        this.ui = new UI(this)
+        this.program = new Program(this)
 
         this.toolbar = new ToolBar(this)
 

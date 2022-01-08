@@ -17,8 +17,8 @@ class GraphCanvas extends lv.CleanObj{
     workspace = null
     tools = null
 
-    constructor(parent, workspace) {
-        super(parent)
+    constructor(workspace) {
+        super(workspace)
         this.workspace = workspace
 
         this.fromJson({

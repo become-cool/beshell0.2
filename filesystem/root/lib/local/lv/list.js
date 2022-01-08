@@ -11,6 +11,8 @@ class Menu extends beapi.lvgl.Obj {
     autoHide = true
     indev_cb = null
     popup_cb = null
+    items_cb = null
+    value = null
 
     constructor(parent, json) {
         super(parent)
@@ -134,6 +136,7 @@ class Menu extends beapi.lvgl.Obj {
         this.pressed.setWidth(this.width()-this.style("border-width"))
         this.pressed.setCoords(x, y)
         this.pressed.show()
+        this.value = item.value
     }
     findItem(value) {
         for(let i=0;i<this.column.childCnt();i++)  {
@@ -152,7 +155,18 @@ class Menu extends beapi.lvgl.Obj {
         }
     }
 
+    clean() {
+        this.column.clean()
+    }
+
     popup(x , y, callback) {
+        if(this.items_cb) {
+            this.clean()
+            let items = this.items_cb()
+            if(items){
+                this.fromItemJson(items)
+            }
+        }
         if(x==undefined || x==null || y==undefined || y==null) {
             ({x,y} = lv.inputPoint())
         }
@@ -179,14 +193,23 @@ class Menu extends beapi.lvgl.Obj {
             this.autoHide = !!json.autoHide
         }
         if(json.items) {
-            for(let item of json.items) {
-                if(typeof item=="string") {
-                    item = {value: item}
-                }
-                this.addItem(item.value, item.title, item.callback, item.font)
+            if(json.items instanceof Array) {
+                this.fromItemJson(json.items)
+            }
+            else if (typeof json.items=="function"){
+                this.items_cb = json.items
             }
         }
         return beapi.lvgl.Obj.prototype.fromJson.call(this, json, refs)
+    }
+
+    fromItemJson(array) {
+        for(let item of array) {
+            if(typeof item=="string") {
+                item = {value: item}
+            }
+            this.addItem(item.value, item.title, item.callback, item.font)
+        }
     }
 
     hide() {

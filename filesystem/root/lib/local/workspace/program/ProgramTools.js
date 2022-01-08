@@ -1,7 +1,23 @@
 const lv = require('lv')
-
-const cardlib = require("./cards/cardlib")
 const CardStack = require("../comm/CardStack")
+
+const cardlib = [
+    {
+        name: 'basic' ,
+        icon: 'If' ,
+        cards: require("./cards/basic.js")
+    } ,
+    {
+        name: 'parts' ,
+        icon: 'H' ,
+        cards: [] ,
+    } ,
+    {
+        name: 'UI' ,
+        icon: 'ui' ,
+        cards: require("./cards/ui.js") ,
+    } ,
+]
 
 class ProgramTools extends lv.Column{
     
@@ -39,14 +55,15 @@ class ProgramTools extends lv.Column{
                     }
                 }
             })
-            category.stack = new CardStack(workspace, workspace)
-            for(let cardconf of catconf.cards) {
-                let card = new cardconf(category.stack)
-                category.stack.addCard(card, (cardconf)=>{
+            category.stack = new CardStack(workspace)
+            for(let name in catconf.cards) {
+                let clz = catconf.cards[name]
+                let card = new clz(category.stack, workspace.program)
+                category.stack.addCard(card, (clz)=>{
                     self.activeCategory = null
-                    let card = new cardconf(workspace.program, workspace.model.vm)
+                    let card = new clz(workspace.program, workspace.program)
                     return card
-                }, cardconf)
+                }, clz)
             }
             // category.stack.createCard(catconf.name)s
             category.stack.setStyle("pad-left",10)

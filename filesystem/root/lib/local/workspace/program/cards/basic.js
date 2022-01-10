@@ -163,6 +163,14 @@ class IsNumber extends base.CardCompare {
     }
 }
 
+class Setup extends base.CardEvent {
+    static pkgname = pkgname
+    constructor(parent, graph) {
+        super(parent, graph)
+        this.expr.addLabel("When app setup")
+    }
+}
+
 module.exports = {
     OperatorTwo ,
     If ,
@@ -172,4 +180,5 @@ module.exports = {
     IsTrue ,
     IsFalse ,
     MathFunctions ,
+    Setup ,
 }

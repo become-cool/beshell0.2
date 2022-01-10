@@ -677,12 +677,14 @@ class CardStatement extends lv.Column{
         }
         let parent = this.parent()
         if(parent instanceof CardStatementBody) {
-            parent.first = null
             this.setParent(this.graph)
             this.updateLayout()
 
             for(let next=this.next;next;next=next.next) {
                 next.setParent(this.graph)
+            }
+            if(parent.first==this) {
+                parent.first = null
             }
         }
         
@@ -808,6 +810,21 @@ class CardStatement extends lv.Column{
         }
         this.expr.unserialize(json, vm)
         this.updateLayout()
+
+        if(json.stack) {
+            let last = this
+            for(let uuid of json.stack) {
+                let card = vm.cards[uuid]
+                if(!card) {
+                    throw new Error("unknow card uuid: "+uuid)
+                }
+                last._placeNext(card)
+                card.updateLayout()
+                last.next = card
+                card.prev = last
+                last = card
+            }
+        }
     }
 }
 
@@ -857,7 +874,7 @@ class CardStatementBody extends lv.CleanObj {
 class CardControl extends CardStatement{
 
     proc1 = null
-    proc1 = null
+    proc2 = null
 
     constructor(parent, graph){
         super(parent, graph)

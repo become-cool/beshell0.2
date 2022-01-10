@@ -1,66 +1,175 @@
-const lv = require("lv")
 const base = require('./CardBase')
 
-class Print extends base.CardStatement {
+const bgColor = lv.palette("orange")
+const pkgname = 'basic'
+
+
+class Compare extends base.CardCompare {
+    static pkgname = pkgname
     constructor(parent, graph) {
         super(parent, graph)
-        this.expr.addLabel("print")
-        this.expr.addSlot("what")
+        this.addSlot("left").input.numeric = true
+        this.addMenu(base.shareMenu("compare-op", ["<","<=","==","=>",">"]), "op")
+        this.addSlot("right").input.numeric = true
     }
-    run() {
-        let waht = this.expr.slots.what.evaluate()
-        console.log(waht)
-        this.runNext()
+    bgColor() {
+        return bgColor
     }
 }
 
-class Hello extends base.CardStatement {
+class IsTrue extends base.CardCompare {
+    static pkgname = pkgname
     constructor(parent, graph) {
         super(parent, graph)
-        this.expr.addLabel("say")
-        this.expr.addSlot("what")
+        this.addSlot("expr", true)
+        this.addLabel("is true")
+    }
+    bgColor() {
+        return bgColor
+    }
+}
+class IsFalse extends base.CardCompare {
+    static pkgname = pkgname
+    constructor(parent, graph) {
+        super(parent, graph)
+        this.addSlot("expr", true)
+        this.addLabel("is false")
+    }
+    bgColor() {
+        return bgColor
     }
 }
 
 class OperatorTwo extends base.CardExpression {
+    static pkgname = pkgname
     constructor(parent, graph) {
         super(parent, graph)
         this.addSlot("left").input.numeric = true
-        this.addMenu(base.shareMenu(graph, "operators", ["+","-","*","/","^","|","&"]), "op")
+        this.addMenu(base.shareMenu("operators", ["+","-","*","/","**","^","|","&"]), "op")
         this.addSlot("right").input.numeric = true
+    }
+    evaluate() {
+        let left = new Number(this.slots.left.evaluate())
+        let right = new Number(this.slots.right.evaluate())
+        let op = this.slots.op.value
+        switch (op) {
+            case '+': {
+                return left + right
+            }
+            case '-': {
+                return left - right
+            }
+            case '*': {
+                return left * right
+            }
+            case '/': {
+                return left / right
+            }
+            case '**': {
+                return left ** right
+            }
+            case '^': {
+                return left ^ right
+            }
+            case '|': {
+                return left | right
+            }
+            case '&': {
+                return left & right
+            }
+        }
+        return NaN
+    }
+}
+
+class MathFunctions extends base.CardExpression {
+    static pkgname = pkgname
+    constructor(parent, graph) {
+        super(parent, graph)
+        this.addLabel("call math function")
+        this.addMenu(base.shareMenu("mathf", [
+            "sin","cos","tan","asin","acos","atan",
+            "cbrt", "sqrt",
+            "abs", "floor", "ceil", "round", "random", "trunc" ,
+            "log", "log10", "log2",
+
+        ]), "func")
+        this.addSlot("argv").input.numeric = true
+    }
+    evaluate() {
+        let argv = new Number(this.slots.argv.evaluate())
+        let func = this.slots.func.value
+        if(Math[func]) {
+            return Math[func](argv)
+        }
+        return NaN
     }
 }
 
 class If extends base.CardControl {
+    static pkgname = pkgname
     constructor(parent, graph) {
         super(parent, graph)
         this.expr.addLabel("If")
-        this.expr.addSlot("what")
+        this.expr.addCompareSlot("what")
+    }
+    run() {
+        let result = this.expr.slots.what.evaluate()
+        if(result) {
+            this.proc1.run()
+        }
+        this.runNext()
+    }
+    generate(indent) {
+        let what = this.expr.slots.what.generate()
+        let body = this.proc1.first? this.proc1.first.generateStack(indent+1): "" ;
+        indent = " ".repeat(indent*4)
+        return `${indent}if(${what}){
+${body}
+${indent}}`
     }
 }
 class IfElse extends base.CardControl {
+    static pkgname = pkgname
     constructor(parent, graph) {
         super(parent, graph)
         this.expr.addLabel("If-Else")
-        this.expr.addSlot("what")
+        this.expr.addCompareSlot("what")
 
         this.proc2 = this.createProcess()
+    }
+    run() {
+        let result = this.expr.slots.what.evaluate()
+        if(result) {
+            this.proc1.run()
+        }
+        else {
+            this.proc2.run()
+        }
+        this.runNext()
+    }
+    generate() {
+
     }
 }
 
 class IsNumber extends base.CardCompare {
+    static pkgname = pkgname
     constructor(parent, graph) {
         super(parent, graph)
-        this.addLabel("Is Number")
-        this.addCompareSlot("what")
+        this.addSlot("what")
+        this.addMenu(base.shareMenu("isornot", ["is","is not"]), "op")
+        this.addLabel("a number")
     }
 }
 
 module.exports = {
-    Print ,
-    Hello ,
     OperatorTwo ,
     If ,
     IfElse ,
     IsNumber ,
+    Compare ,
+    IsTrue ,
+    IsFalse ,
+    MathFunctions ,
 }

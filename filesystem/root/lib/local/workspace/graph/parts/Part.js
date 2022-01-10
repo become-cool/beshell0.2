@@ -151,6 +151,15 @@ class Part extends lv.CleanObj{
         }
         this.repaint()
     }
+
+    serialize() {
+        let json = {
+            clz: this.constructor.name ,
+            x: this.x ,
+            y: this.y ,
+        }
+        return json
+    }
 }
 
 Part.styleSelected.set("shadow-color", lv.palette("yellow"))

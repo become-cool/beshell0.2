@@ -1,29 +1,110 @@
+const base = require("./cards/CardBase")
+const basic = require("./cards/basic")
+
 class VM extends beapi.EventEmitter {
 
-    cards = []
+    cards = {}
 
     constructor() {
         super()
     }
 
-    addCard(card) {
-        this.cards.push(card)
-        // if(card instanceof CardEvent) {
-        //     let type = card.eventType()
-        //     if(type) {
-        //         if(!this.eventCards[type]) {
-        //             this.eventCards[type] = []
-        //         }
-        //         this.eventCards[type].push(card)
-        //     }
-        // }
+    newUUID() {
+        let uuid = beapi.utils.genUUID()
+        uuid = uuid.replace(/\-/g, '')
+        for(let l=4;l<uuid.length;l++) {
+            let seg = uuid.substr(0,l)
+            if(!this.cards[seg])
+                return seg
+        }
+        return this.newUUID()
     }
 
-    // emit(eventType, eventName) {
-    //     if(!this.eventCards[eventType]) {
-    //         return
-    //     }
-    // }
+    addCard(card) {
+        if(!card.uuid){
+            card.uuid = this.newUUID()
+        }
+        if(this.cards[card.uuid]) {
+            throw new Error("uuid of card has exsisted")
+        }
+        this.cards[card.uuid] = card
+    }
+
+    generate() {
+
+        let codeSetup = ''
+        let codeEvents = ''
+        let codeMain = ''
+
+        for(let uuid in this.cards) {
+            let card = this.cards[uuid]
+            if(card instanceof base.CardEvent) {
+                if(card instanceof basic.Setup) {
+                    codeSetup+= card.generateStack(1) + "\r\n\r\n"
+                }
+                else {
+                    codeEvents+= card.generateStack(1) + "\r\n\r\n"
+                }
+            }
+            else if(card instanceof base.CardStatement) {
+                if(card.prev || card.parent() instanceof base.CardStatement) {
+                    continue
+                }
+                codeMain+= card.generateStack(1) + "\r\n\r\n"
+            }
+        }
+
+        return `
+// 该文件由 Workspace 自动生成，所有修改都可能在下次保存时被还原
+if(!global.be) {
+    global.be = {}
+}
+const be = global.be
+exports.setup = function () {
+    be.var = {}
+    be.part = {}
+${codeSetup}
+}
+
+exports.main = function () {
+${codeEvents}
+
+${codeMain}
+}
+`
+    }
+
+    serialize() {
+        let json = {}
+        for(let uuid in this.cards) {
+            json[uuid] = this.cards[uuid].serialize()
+            if(this.cards[uuid].constructor.pkgname) {
+                json[uuid].clazz = this.cards[uuid].constructor.pkgname + '.' + json[uuid].clazz
+            }
+        }
+        return json
+    }
+
+    unserialize(json, libCardClass, workspace) {
+        // 创建所有 card
+        for(let uuid in json) {
+            let cardjson = json[uuid]
+            if(!cardjson.clazz) {
+                throw new Error("missing clazz for card")
+            }
+            if(!libCardClass[cardjson.clazz]){
+                throw new Error("unknow card class:"+cardjson.clazz)
+            }
+            let card = new libCardClass[cardjson.clazz](workspace.program, workspace.program)
+            card.uuid = uuid
+            this.addCard(card)
+        }
+        // 反序列化所有 card
+        for(let uuid in json) {
+            this.cards[uuid].unserialize(json[uuid], this)
+        }
+
+    }
 }
 
 module.exports = VM

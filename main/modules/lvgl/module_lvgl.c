@@ -10,6 +10,7 @@
 #include "utils.h"
 #include "cutils.h"
 #include "be_gl.h"
+#include "be_gl_js.h"
 
 #ifndef SIMULATION
 #include "freertos/FreeRTOS.h"
@@ -174,13 +175,17 @@ static JSValue js_lvgl_refresh(JSContext *ctx, JSValueConst this_val, int argc, 
 #ifndef SIMULATION
 void lv_tick_task(void *arg) {
     (void) arg;
-    lv_tick_inc(LV_TICK_PERIOD_MS);
+    if(lv_has_inited) {
+        lv_tick_inc(LV_TICK_PERIOD_MS);
+    }
 }
 #else
 struct sigaction tact;
 struct itimerval value;
 void sig_alm_handler(int sig_num) {
-    lv_tick_inc(LV_TICK_PERIOD_MS);
+    if(lv_has_inited) {
+        lv_tick_inc(LV_TICK_PERIOD_MS);
+    }
 }
 #endif
 
@@ -262,40 +267,36 @@ void be_module_lvgl_init() {
     be_lv_structs_init() ;
     be_lv_draggable_init() ;
     be_gl_init() ;
+
+#ifndef SIMULATION
+    // lvgl 时钟
+    const esp_timer_create_args_t periodic_timer_args = {
+        .callback = &lv_tick_task,
+        .name = "lvgl"
+    };
+    esp_timer_handle_t periodic_timer;
+    ESP_ERROR_CHECK(esp_timer_create(&periodic_timer_args, &periodic_timer));
+    ESP_ERROR_CHECK(esp_timer_start_periodic(periodic_timer, LV_TICK_PERIOD_MS * 1000));
+#else 
+    // lvgl 时钟
+    tact.sa_handler = sig_alm_handler;
+    tact.sa_flags = SA_RESTART ;  // SA_RESTART 在 select() 时遇到中断发生，在中断完成后自动恢复
+    sigemptyset(&tact.sa_mask);
+    sigaction(SIGALRM, &tact, NULL);
+    
+    value.it_value.tv_sec = 0;
+    value.it_value.tv_usec = 1000 * LV_TICK_PERIOD_MS;
+    value.it_interval = value.it_value;
+    setitimer(ITIMER_REAL, &value, NULL);
+#endif
 }
 
 void be_module_lvgl_require(JSContext *ctx) {
     if(!lv_has_inited) {
         lv_init();
-        
-#ifndef SIMULATION
-        // lvgl 时钟
-        const esp_timer_create_args_t periodic_timer_args = {
-            .callback = &lv_tick_task,
-            .name = "lvgl"
-        };
-        esp_timer_handle_t periodic_timer;
-        ESP_ERROR_CHECK(esp_timer_create(&periodic_timer_args, &periodic_timer));
-        ESP_ERROR_CHECK(esp_timer_start_periodic(periodic_timer, LV_TICK_PERIOD_MS * 1000));
-#else 
-        // lvgl 时钟
-        tact.sa_handler = sig_alm_handler;
-        tact.sa_flags = SA_RESTART ;  // SA_RESTART 在 select() 时遇到中断发生，在中断完成后自动恢复
-        sigemptyset(&tact.sa_mask);
-        sigaction(SIGALRM, &tact, NULL);
-        
-        value.it_value.tv_sec = 0;
-        value.it_value.tv_usec = 1000 * LV_TICK_PERIOD_MS;
-        value.it_interval = value.it_value;
-        setitimer(ITIMER_REAL, &value, NULL);
-#endif
-
         lv_png_init() ;
-        // png_decoder_init() ;
         
         lv_has_inited = true ;
-
-        // dn(LV_MEM_SIZE) ;
     }
 
     JSValue global = JS_GetGlobalObject(ctx);

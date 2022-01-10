@@ -1,7 +1,7 @@
 module.exports = function(){
     return prequire([
         "./obj.js",
-        "./list.js",
+        "./menu.js",
         "./color.js",
         "./loader.js",
         "./animate.js",

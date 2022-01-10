@@ -10,7 +10,7 @@ class ToolBar extends lv.Obj {
 
         this.workspace = workspace
 
-        this.refs = this.fromJson({
+        this.fromJson({
             clear: true ,
             width: 20 ,
             height: "100%" ,
@@ -56,14 +56,15 @@ class ToolBar extends lv.Obj {
                         {
                             class: "Label" ,
                             text: lv.symbol.settings ,
-                            clicked(){
-                                console.log("popup")
+                            ref: "setting" ,
+                            clicked: ()=>{
+                                this.menu.popup()
                             }
                         } ,
                     ]
                 } ,
             ]
-        })
+        }, this)
         
         workspace.on("ws-active-view-changed", (view)=>{
             let tools = view.viewTools(this)
@@ -78,6 +79,21 @@ class ToolBar extends lv.Obj {
             this.viewTools = tools
         })
 
+        this.menu = new lv.Menu({
+            items: [
+                { value:"设置", font:"msyh", callback:()=>{
+                }} ,
+                { value:"保存", font:"msyh", callback:()=>{
+                    workspace.loader.save()
+                }} ,
+                { value:"运行", font:"msyh", callback:()=>{
+                    
+                }} ,
+                { value:"退出", font:"msyh", callback:()=>{
+                    
+                }} ,
+            ]
+        })
     }
 }
 

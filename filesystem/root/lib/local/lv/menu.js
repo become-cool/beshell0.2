@@ -1,9 +1,4 @@
 class Menu extends beapi.lvgl.Obj {
-
-    // static styleItemPressed = new beapi.lvgl.Style({
-    //     "bg-color": beapi.lvgl.rgb(180) ,
-    //     "bg-opa": 255 ,
-    // })
     static styleItem = new beapi.lvgl.Style({
         "pad-top": 2 ,
         "pad-bottom": 2 ,
@@ -14,8 +9,9 @@ class Menu extends beapi.lvgl.Obj {
     items_cb = null
     value = null
 
-    constructor(parent, json) {
-        super(parent)
+    constructor(json) {
+        let sys = lv.sysLayer()
+        super(sys)
         this.fromJson({
             width: -1 ,
             height: -1 ,
@@ -153,6 +149,11 @@ class Menu extends beapi.lvgl.Obj {
                 return item
             }
         }
+    }
+
+    activeTitle() {
+        let item = this.findItem(this.value)
+        return item? item.text(): null
     }
 
     clean() {

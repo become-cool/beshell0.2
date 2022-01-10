@@ -3,6 +3,7 @@ const lv = require('lv')
 const PortSnapDis = 10
 
 
+
 class Input extends lv.TextArea {
     numeric = false
     constructor(parent) {
@@ -13,7 +14,7 @@ class Input extends lv.TextArea {
             center: true ,
             oneLine: true ,
             style: {
-                radius: lv.RADIUS_CIRCLE ,
+                // radius: lv.RADIUS_CIRCLE ,
                 "pad-top": 2 ,
                 "pad-bottom": 2 ,
                 "pad-left": 8 ,
@@ -51,7 +52,7 @@ class CardMenu extends lv.Row{
                     width: -1 ,
                     height: -1 ,
                     font: "m12" ,
-                    text: '' ,
+                    text: menu.activeTitle() || '' ,
                     style: {
                         "min-width": 20 ,
                         "text-align": "center" ,
@@ -69,14 +70,13 @@ class CardMenu extends lv.Row{
                     clicked: ()=>{
                         if(this.menu){
                             if(itemsCallback) {
-                                this.menu.clean()
                                 let items = itemsCallback(graph)
-                                if(items) {
-                                    this.menu.fromItemJson(items)
+                                if(!(items instanceof Array)) {
+                                    return
                                 }
+                                this.menu.clean()
+                                this.menu.fromItemJson(items)
                             }
-                            // console.log(this.menu.childCnt())
-                            // release out of label
                             if(!this.hitTest()) {
                                 return
                             }
@@ -90,7 +90,7 @@ class CardMenu extends lv.Row{
             ] ,
         }, this)
 
-        this.setValue(null)
+        this.setValue(menu.value)
     }
     setValue(value) {
         if(this.value==value) {
@@ -139,7 +139,7 @@ class CardSlotExpression extends lv.CleanObj {
             }
         })
     }
-    desktop() {
+    graph() {
         const Program = require("../Program")
         for(let parent = this.parent(); parent; parent=parent.parent()){
             if(parent instanceof Program) {
@@ -155,11 +155,11 @@ class CardSlotExpression extends lv.CleanObj {
         if(this.input)
             this.input.hide()
     }
-    remove() {
+    clean() {
         if(!this.expr) {
             return
         }
-        this.expr.setParent( this.desktop() )
+        this.expr.setParent( this.graph() )
         this.expr = null
         if(this.input)
             this.input.show()
@@ -187,14 +187,57 @@ class CardSlotExpression extends lv.CleanObj {
         }
         return null
     }
+    generate() {
+        return this.expr? this.expr.generate(): 'undefined'
+    }
 }
+
+
+const slotDsc = new lv.DrawRectDsc()
+slotDsc.setBgColor(lv.palette("grey"))
+slotDsc.setBgOpa(80)
+
+const slotBorderDsc = new lv.DrawLineDsc()
+slotBorderDsc.setColor(lv.palette("grey"))
+slotBorderDsc.setWidth(1)
+slotBorderDsc.setOpa(180)
 
 class CardSlotCompare extends CardSlotExpression {
     constructor(card) {
         super(card, true)
     }
     appearance() {
-        
+        this.setStyle("min-width", 30)
+        this.on("draw-main", (e, clip)=>{
+            if(this.expr) {
+                return
+            }
+            let h = this.height()
+            let half = h/2
+            h-=1
+            let w = this.width() - 1
+            let [x,y] = this.coords()
+
+            let points = [
+                [x, y+half] ,
+                [x+half, y] ,
+                [x+w-half, y] ,
+                [x+w, y+half] ,
+                [x+w-half, y+h] ,
+                [x+half, y+h] ,
+                [x, y+half] ,
+            ]
+            lv.drawPolygon(points, clip, slotDsc)
+            lv.drawLine(points[0],points[1], clip, slotBorderDsc)
+            lv.drawLine(points[1],points[2], clip, slotBorderDsc)
+            lv.drawLine(points[2],points[3], clip, slotBorderDsc)
+            lv.drawLine(points[3],points[4], clip, slotBorderDsc)
+            lv.drawLine(points[4],points[5], clip, slotBorderDsc)
+            lv.drawLine(points[5],points[0], clip, slotBorderDsc)
+        })
+    }
+    generate() {
+        return this.expr? this.expr.generate(): 'false'
     }
 }
 
@@ -261,11 +304,75 @@ class CardExpressionBase extends lv.Row {
     evaluate() {
         return null
     }
+
+    serialize(json) {
+        let slotjson = {}
+        for(let name in this.slots) {
+            let slot = this.slots[name]
+            if( slot instanceof CardSlotExpression ) {
+                let obj = {
+                    expr: undefined, input: undefined
+                }
+                if(slot.expr) {
+                    obj.expr = slot.expr.uuid
+                }
+                if(slot.input) {
+                    let text = slot.input.text()
+                    if(text) {
+                        obj.input = text
+                    }
+                }
+                if(obj.expr!=undefined || obj.input!=undefined) {
+                    slotjson[name] = obj
+                }
+            }
+            else if( slot instanceof CardMenu ){
+                slotjson[name] = slot.value
+            }
+            else if( slot instanceof lv.Label ){
+                slotjson[name] = slot.text()
+            }
+        }
+        if(Object.keys(slotjson).length) {
+            json.slots = slotjson
+        }
+        return json
+    }
+    unserialize(json, vm) {
+        if(json.slots) {
+            for(let name in this.slots) {
+                if(json.slots[name]==undefined){
+                    continue
+                }
+                let slot = this.slots[name]
+                if( slot instanceof CardSlotExpression ) {
+                    if(json.slots[name].input!=undefined) {
+                        this.slots[name].input.setText(json.slots[name].input)
+                    }
+                    if(json.slots[name].expr!=undefined) {
+
+                        let uuid = json.slots[name].expr
+                        if(!vm.cards[uuid]){
+                            throw new Error("unknow uuid of card: "+uuid)
+                        }
+                        this.slots[name].insert(vm.cards[uuid])
+                    }
+                }
+                else if( slot instanceof CardMenu ){
+                    slot.setValue(json.slots[name])
+                }
+                else if( slot instanceof lv.Label ){
+                    slot.setText(json.slots[name])
+                }
+            }
+        }
+    }
 }
 
 class CardExpression extends CardExpressionBase {
-    bgColor = lv.palette("orange")
-    borderColor = lv.palette("orange")
+
+    id = null
+
     _matchSlotClz = CardSlotExpression
     
     constructor(parent, graph) {
@@ -273,79 +380,119 @@ class CardExpression extends CardExpressionBase {
 
         this.draggable()
 
-        if(graph) {
-            graph.model.vm.addCard(this)
-        }
-
         this.appearance()
 
-        let draggable = this.draggable()
-        draggable.setStart(()=>{
-            this.moveForeground()
-        })
-        draggable.setDragging(pos=>{
-            let x = pos.x 
-            let y = pos.y + this.height()/2
-            let parent = this.parent()
-            if( parent instanceof this._matchSlotClz ){
-                if(!parent._testInsert(x, y, 10)) {
-                    parent.remove()
-                    this.setCoords(pos.x, pos.y)
-                    this.updateLayout()
-                }
-                else {
-                    pos.x = pos.y = false
-                }
-                return
-            }
-            for(let statement of graph.model.vm.cards) {
-                if(statement==this) {
-                    continue
-                }
-                let slots = statement.slots || statement.expr.slots
-                for(let name in slots) {
-                    let slot = slots[name]
-                    if( !(slot instanceof this._matchSlotClz) || slot.expr )
-                        continue
-                    if(!slot._testInsert(x, y, 0)) {
-                        continue
+        // 卡片堆里的卡片 graph == null
+        if(graph) {
+            let draggable = this.draggable()
+            draggable.setStart(()=>{
+                this.moveForeground()
+            })
+            draggable.setDragging(pos=>{
+                let x = pos.x 
+                let y = pos.y + this.height()/2
+                let parent = this.parent()
+                if( parent instanceof this._matchSlotClz ){
+                    if(!parent._testInsert(x, y, 10)) {
+                        parent.clean()
+                        this.setCoords(pos.x, pos.y)
+                        this.updateLayout()
                     }
-                    slot.insert(this)
-                    pos.x = pos.y = false
+                    else {
+                        pos.x = pos.y = false
+                    }
                     return
                 }
-            }
-        })
+                for(let uuid in graph.model.vm.cards) {
+                    let statement = graph.model.vm.cards[uuid]
+                    if(statement==this) {
+                        continue
+                    }
+                    let slots = statement.slots || statement.expr.slots
+                    for(let name in slots) {
+                        let slot = slots[name]
+                        if( !(slot instanceof this._matchSlotClz) || slot.expr )
+                            continue
+                        if(!slot._testInsert(x, y, 0)) {
+                            continue
+                        }
+                        slot.insert(this)
+                        pos.x = pos.y = false
+                        return
+                    }
+                }
+            })
+            
+        }
+    }
+
+    bgColor() {
+        return lv.palette("orange")
     }
 
     appearance() {
         this.fromJson({
             style: {
-                "border-width": 1 ,
-                "border-color": this.borderColor ,
+                // "border-width": 1 ,
+                // "border-color": this.borderColor ,
                 "border-opa": 180 ,
-                "bg-color": this.bgColor ,
+                "bg-color": this.bgColor() ,
                 "bg-opa": 255 ,
                 "radius": lv.RADIUS_CIRCLE ,
             }
         })
-    }    
+    }
+    
+    generate() {
+        console.log(this.constructor.name+".generate() not implemented")
+        return ''
+    }
+    
+    isTop() {
+        return this.parent() == this.graph
+    }
+    
+    serialize() {
+        let json = {
+            clazz: this.constructor.name ,
+        }
+        if(this.isTop()) {
+            json.x = this.x()
+            json.y = this.y()
+        }
+        super.serialize(json)
+        return json
+    }
+    unserialize(json, vm) {
+        if(json.x!=undefined) {
+            this.setX(json.x)
+        }
+        if(json.y!=undefined) {
+            this.setY(json.y)
+        }
+        this.updateLayout()
+        super.unserialize(json, vm)
+    }
 }
 
 class CardCompare extends CardExpression{
-    bgColor = lv.palette("purple")
-    borderColor = lv.palette("purple")
     constructor(parent, graph) {
         super(parent, graph)
         this._matchSlotClz = CardSlotCompare
     }
     appearance() {
+        this.fromJson({
+            style: {
+                "pad-left": 8 ,
+                "pad-right": 8 ,
+                "pad-top": 2 ,
+                "pad-bottom": 2 ,
+            }
+        })
         this.on("draw-main", (e, clip)=>{
             let h = this.height()
             let half = h/2
-            let w = this.width()
-
-            // console.log(h)
+            let w = this.width() - 1
             
             let path = new lv.Path()
             path.begin(0,half)
@@ -355,7 +502,7 @@ class CardCompare extends CardExpression{
             path.lineTo(w-half,h)
             path.lineTo(half,h)
             path.end()
-            path.fill( ...this.coords(), 1, this.bgColor, clip)
+            path.fill( ...this.coords(), 1, this.bgColor(), clip)
         })
     }
 }
@@ -385,18 +532,17 @@ const InnerPad = 8
 */
 
 class CardStatement extends lv.Column{
+
+    id = null
+
     prev = null
     next = null
-    bgColor = lv.palette("blue")
-    borderColor = lv.palette("blue")
 
     expr = null
     graph = null
 
     constructor(parent, graph) {
         super(parent)
-        this.graph = graph
-        graph?.model?.vm?.addCard(this)
 
         this.fromJson({
             width: -1 ,
@@ -418,59 +564,69 @@ class CardStatement extends lv.Column{
 
         this.appearance()
         
-        let draggable = this.draggable()
-        draggable.setStart(()=>{
-            this.moveForeground()
-            draggable.setFollowers(this.followers())
-        })
-        draggable.setDragging((pos)=>{
+        // 卡片堆里的卡片 graph == null
+        if(graph) {
 
-            let linked = this.linkedStatement()
-            if(linked) {
-                let [x,y] = this.coords()
-                if( Math.abs(x-pos.x) < PortSnapDis && Math.abs(y-pos.y) < PortSnapDis ) {
-                    pos.x = pos.y = false
+            this.graph = graph
+    
+            let draggable = this.draggable()
+            draggable.setStart(()=>{
+                this.moveForeground()
+                draggable.setFollowers(this.followers())
+            })
+            draggable.setDragging((pos)=>{
+    
+                let linked = this.linkedStatement()
+                if(linked) {
+                    let [x,y] = this.coords()
+                    if( Math.abs(x-pos.x) < PortSnapDis && Math.abs(y-pos.y) < PortSnapDis ) {
+                        pos.x = pos.y = false
+                        return
+                    }
+                    this.tearDown()
+                }
+    
+                let [px, py] = this.coordsPortPrev(pos.x, pos.y)
+                for(let uuid in graph.model.vm.cards) {
+                    let statement = graph.model.vm.cards[uuid]
+                    if(statement==this || !(statement instanceof CardStatement) ) {
+                        continue
+                    }
+                    if( statement._tryLinkin(this, pos, px, py) ) {
+                        return
+                    }
+                }
+            })
+            draggable.setStop(()=>{
+                draggable.setFollowers(null)
+            })
+    
+            // 当内部插入卡片，或其他原因导致高度发生变化，顺序移动后续开篇
+            let requireMoveNext = false 
+            this.on("size-changed", ()=>{
+                if(!this.next || requireMoveNext)
                     return
-                }
-                this.tearDown()
-            }
-
-            let [px, py] = this.coordsPortPrev(pos.x, pos.y)
-            for(let statement of graph.model.vm.cards) {
-                if(statement==this || !(statement instanceof CardStatement) ) {
-                    continue
-                }
-                if( statement._tryLinkin(this, pos, px, py) ) {
-                    return
-                }
-            }
-        })
-        draggable.setStop(()=>{
-            draggable.setFollowers(null)
-        })
-
-        // 当内部插入卡片，或其他原因导致高度发生变化，顺序移动后续开篇
-        let requireMoveNext = false 
-        this.on("size-changed", ()=>{
-            if(!this.next || requireMoveNext)
-                return
-            requireMoveNext = true
-            setTimeout(()=>{
-                for(let next=this.next, prev=this; next; prev=next, next=next.next) {
-                    prev._placeNext(next)
-                    next.updateLayout()
-                }
-                requireMoveNext = false
-            },0)
-        })
+                requireMoveNext = true
+                setTimeout(()=>{
+                    for(let next=this.next, prev=this; next; prev=next, next=next.next) {
+                        prev._placeNext(next)
+                        next.updateLayout()
+                    }
+                    requireMoveNext = false
+                },0)
+            })
+        }
     }
 
+    bgColor() {
+        return lv.palette("orange")
+    }
     appearance() {
         this.on("draw-main",(event,clip)=>{
             let [x,y] = this.coords()
             let h = this.height()
             let w = this.width()
-            bodyDsc.setBgColor(this.bgColor)
+            bodyDsc.setBgColor(this.bgColor())
             lv.drawPolygon([
                 [x,y] ,
                 [x+SPortX1,y] ,
@@ -519,7 +675,9 @@ class CardStatement extends lv.Column{
             this.prev.next = null
             this.prev = null
         }
-        if(this.parent() instanceof CardStatementBody) {
+        let parent = this.parent()
+        if(parent instanceof CardStatementBody) {
+            parent.first = null
             this.setParent(this.graph)
             this.updateLayout()
 
@@ -606,6 +764,51 @@ class CardStatement extends lv.Column{
             this.next.run()
         }
     }
+    generate(indent) {
+        console.log(this.constructor.name+".generate() not implemented")
+        return ''
+    }
+    generateStack(indent) {
+        let code = ''
+        for(let statement=this; statement; statement=statement.next) {
+            code+= this.generate(indent) + "\r\n"
+        }
+        return code
+    }
+    isTop() {
+        return this.parent()==this.graph && !this.prev
+    }
+    serialize() {
+        let json = {
+            clazz: this.constructor.name ,
+        }
+        this.expr.serialize(json)
+
+        if(this.isTop()) {
+            json.x = this.x()
+            json.y = this.y()
+
+            let stack = []
+            for(let next=this.next;next;next=next.next) {
+                stack.push(next.uuid)
+            }
+            if(stack.length) {
+                json.stack = stack
+            }
+        }
+
+        return json
+    }
+    unserialize(json, vm) {
+        if(json.x!=undefined) {
+            this.setX(json.x)
+        }
+        if(json.y!=undefined) {
+            this.setY(json.y)
+        }
+        this.expr.unserialize(json, vm)
+        this.updateLayout()
+    }
 }
 
 const ArcWidth = 30
@@ -615,6 +818,9 @@ const ArcCY = 25
 class CardEvent extends CardStatement{
     constructor(parent, graph){
         super(parent, graph)
+        if(graph) {
+            this.draggable().setDragging(null)
+        }
     }
     appearance() {
         this.on("draw-main", (e, clip)=>{
@@ -631,14 +837,20 @@ class CardEvent extends CardStatement{
             path.lineTo(SPortX1, height-SPortSlopeH)
             path.lineTo(0, height-SPortSlopeH)
             path.end()
-            path.fill( ...this.coords(), 1, this.bgColor, clip)
+            path.fill( ...this.coords(), 1, this.bgColor(), clip)
         })
     }
 }
 
 class CardStatementBody extends lv.CleanObj {
+    first = null
     constructor(statement){
         super(statement)
+    }
+    run() {
+        if(this.first) {
+            this.first.run()
+        }
     }
 }
 
@@ -719,7 +931,7 @@ class CardControl extends CardStatement{
             path.lineTo(SPortX1, height-SPortSlopeH)
             path.lineTo(0, height-SPortSlopeH)
             path.end()
-            path.fill( ...this.coords(), 1, this.bgColor, clip)
+            path.fill( ...this.coords(), 1, this.bgColor(), clip)
         })
     }
     createProcess() {
@@ -743,9 +955,11 @@ class CardControl extends CardStatement{
             return true
         }
         if(this._tryLinkinInner(this.proc1, statement, pos, px, py)){
+            this.proc1.first = statement
             return true
         }
         if(this._tryLinkinInner(this.proc2, statement, pos, px, py)){
+            this.proc2.first = statement
             return true
         }
         return false
@@ -766,6 +980,7 @@ class CardControl extends CardStatement{
                     next.setParent(proc)
                     next.updateLayout()
                     next.prev._placeNext(next)
+                    proc.first = next
                 }
                 
                 pos.x = pos.y = false
@@ -773,13 +988,59 @@ class CardControl extends CardStatement{
             }
         }
     }
+
+    _serializeProc(json, proc, name) {
+        let stack = []
+        for(let next=proc?.first; next; next=next.next) {
+            stack.push(next.uuid)
+        }
+        if(stack.length) {
+            json[name] = stack
+        }
+    }
+
+    serialize() {
+        let json = super.serialize()
+        this._serializeProc(json, this.proc1, "proc1")
+        this._serializeProc(json, this.proc2, "proc2")
+
+        return json
+    }
+    unserializeStack(proc, lstjson, vm) {
+        if( lstjson instanceof Array ) {
+            let last = null
+            for(let uuid of lstjson) {
+                let card = vm.cards[uuid]
+                if(!card) {
+                    throw new Error("unknow card uuid: "+uuid)
+                }
+                card.setParent(proc)
+                if(last) {
+                    last.next = card
+                    card.prev = last
+                }
+                if(!proc.first) {
+                    proc.first = card
+                }
+                last = card
+            }
+        }
+    }
+    unserialize(json, vm) {
+        super.unserialize(json, vm)
+        this.unserializeStack(this.proc1, json.proc1, vm)
+        this.unserializeStack(this.proc2, json.proc2, vm)
+    }
 }
 
 
 const mapShredMenu = {}
-exports.shareMenu = function(graph, name, items) {
+exports.shareMenu = function(name, items) {
     if(!mapShredMenu[name]) {
-        mapShredMenu[name] = new lv.Menu(graph, {items})
+        mapShredMenu[name] = new lv.Menu({items})
+        if((items instanceof Array) && items.length) {
+            mapShredMenu[name].setActive(items[0])
+        }
     }
     return mapShredMenu[name]
 }

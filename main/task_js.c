@@ -238,7 +238,6 @@ void task_js_main(){
         be_module_gpio_loop(ctx) ;
 #else
         be_module_repl_loop(ctx) ;
-        // be_module_httplws_loop(ctx) ;
 #endif
         be_module_mg_loop(ctx) ;
         be_module_lvgl_loop(ctx) ;

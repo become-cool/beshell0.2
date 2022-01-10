@@ -19,13 +19,12 @@ const mapWidgetNameTpl = {
 }
 
 
-class AppModel extends beapi.EventEmitter{
-    
+class AppModel extends beapi.EventEmitter {
     host = null
     parts =[]
     widgets = {}
-    cards = []
     vm= new VM(this)
+    folderPath = null
 
     _widgetsLastId = {}
 
@@ -80,6 +79,30 @@ class AppModel extends beapi.EventEmitter{
             this._widgetsLastId[clzname] = 0
         }
         widget.name = nameTpl.replace("%i", this._widgetsLastId[clzname] ++ )
+    }
+
+    serialize() {
+        let json = {
+            parts: [] ,
+            wires: [] ,
+            ui: [] ,
+            cards: this.vm.serialize() ,
+            graph: {
+                part: this.workspace.graph.serialize() ,
+                program: this.workspace.program.serialize() ,
+            } ,
+        }
+        for(let part of this.parts) {
+            json.parts.push(part.serialize())
+        }
+
+        return json
+    }
+
+    unserialize(json) {
+        if(json.cards) {
+            this.vm.unserialize(json.cards, this.workspace.program.tools.libCardClass, this.workspace)
+        }
     }
 }
 

@@ -297,8 +297,28 @@ static JSValue js_lvgl_disp_get_screens(JSContext *ctx, JSValueConst this_val, i
     return arr ;
 }
 
+static JSValue js_lvgl_disp_layer(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv, int layer_type) {
+    THIS_DISP
+    lv_obj_t * layer ;
+    if(layer_type==1) {
+        layer = lv_disp_get_layer_sys(thisdisp) ;
+    }
+    else if(layer_type==2) {
+        layer = lv_disp_get_layer_top(thisdisp) ;
+    }
+    else {
+        return JS_NULL ;
+    }
+    JSValue jslayer = js_lv_obj_wrapper(ctx, layer, JS_UNDEFINED, lv_obj_js_class_id()) ;
+    return JS_DupValue(ctx, jslayer) ;
+    // return js_lv_obj_wrapper(ctx, layer, JS_UNDEFINED, lv_obj_js_class_id()) ;
+}
+
+
 static const JSCFunctionListEntry js_display_proto_funcs[] = {
     JS_CFUNC_DEF("activeScreen", 0, js_lvgl_disp_active_screen),
+    JS_CFUNC_MAGIC_DEF("sysLayer", 0, js_lvgl_disp_layer, 1),
+    JS_CFUNC_MAGIC_DEF("topLayer", 0, js_lvgl_disp_layer, 2),
     JS_CFUNC_DEF("getScreens", 0, js_lvgl_disp_get_screens),
 };
 

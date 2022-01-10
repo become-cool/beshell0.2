@@ -62,7 +62,7 @@ static void js_lv_draggable_start(lv_event_t * event) {
     draggable->ox = coords.x1 - indev_input_x ;
     draggable->oy = coords.y1 - indev_input_y ;
 
-    if( !JS_IsUndefined(draggable->callback_start) ) {
+    if( JS_IsFunction(draggable->ctx, draggable->callback_start) ) {
         JSValue ret = JS_Call(draggable->ctx, draggable->callback_start, draggable->jstarget, 0, NULL) ;   
         if(JS_IsException(ret)) {
             js_std_dump_error(draggable->ctx) ;
@@ -87,7 +87,7 @@ static void js_lv_draggable_stop(lv_event_t * event) {
     }
 
     // call onstop
-    if( !JS_IsUndefined(draggable->callback_stop) ) {
+    if( JS_IsFunction(draggable->ctx, draggable->callback_stop) ) {
         JSValue jsfalse = JS_FALSE ;
         JSValue ret = JS_Call(draggable->ctx, draggable->callback_stop, draggable->jstarget, 1, &jsfalse) ;
         if(JS_IsException(ret)){
@@ -117,7 +117,7 @@ static void js_lv_draggable_dragging(lv_event_t * event) {
     y = indev_input_y + draggable->oy ;
 
     // call ondragging
-    if( !JS_IsUndefined(draggable->callback_dragging) ) {
+    if( JS_IsFunction(draggable->ctx, draggable->callback_dragging)  ) {
         JS_SetPropertyStr(draggable->ctx, draggable->pos, "x", JS_NewInt32(draggable->ctx, x)) ;
         JS_SetPropertyStr(draggable->ctx, draggable->pos, "y", JS_NewInt32(draggable->ctx, y)) ;
 
@@ -128,7 +128,7 @@ static void js_lv_draggable_dragging(lv_event_t * event) {
         else if( JS_IsFalse(draggable ->ctx, ret) ) {
             JS_FreeValue(draggable->ctx, ret) ;
             // call onstop
-            if( !JS_IsUndefined(draggable->callback_stop) ) {
+            if( JS_IsFunction(draggable->ctx, draggable->callback_stop) ) {
                 JSValue jstrue = JS_TRUE ;
                 ret = JS_Call(draggable->ctx, draggable->callback_stop, draggable->jstarget, 1, &jstrue) ;
                 if(JS_IsException(ret)){

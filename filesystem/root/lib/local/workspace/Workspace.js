@@ -4,6 +4,7 @@ const ToolBar = require("./ToolBar")
 const GraphCanvas = require("./graph/GraphCanvas")
 const UI = require("./ui/UI")
 const Program = require("./program/Program")
+const ModelLoader = require("./ModelLoader")
 
 let _singleton = null
 
@@ -27,18 +28,18 @@ class Workspace extends lv.CleanObj {
         this.model.createHostFromDevice(this.graph)
 
         this.setActiveView(this.program)   
+
+        this.loader = new ModelLoader(this)
     }
 
     model = null
     graph = null
     toolbar = null
-
     activeView = null
-
-    appFolder = ""
+    loader = null
 
     start( appFolder ) {
-        this.appFolder = appFolder
+        this.loader.load(appFolder, this.model)
         lv.loadScreen(this)
     }
 

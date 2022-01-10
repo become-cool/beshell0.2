@@ -182,12 +182,4 @@ beapi.lvgl.Path.prototype.arcTo = function(x,y,cx,cy,clockwish){
     this.wy = y
 }
 
-beapi.lvgl.__lv_obj_init = function () {
-    this._handles={}
-    this.on("#EVENT.ADD#",(eventName)=>{
-        this.enableEvent(eventName=='*'?'all':eventName)
-    })
-    this.on("#EVENT.CLEAR#",(eventName)=>{
-        this.disableEvent(eventName=='*'?'all':eventName)
-    })
-}
+

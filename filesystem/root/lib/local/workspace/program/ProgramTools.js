@@ -21,8 +21,10 @@ const cardlib = [
 
 class ProgramTools extends lv.Column{
     
+    libCardClass = {}
     categories = {}
     activeCategory = null
+    
 
     constructor(parent, workspace) {
         super(parent)
@@ -39,13 +41,15 @@ class ProgramTools extends lv.Column{
         })
 
         let self = this
+        this.libCardClass = {}
         for(let catconf of cardlib) {
             let category = new lv.Label(this, {
                 text: catconf.icon ,
                 font: 'm12' ,
                 clicked() {
+                    
                     if(this.stack.toggle()) {
-                        if(self.activeCategory) {
+                        if(self.activeCategory && self.activeCategory!=this) {
                             self.activeCategory.stack.hide()
                         }
                         self.activeCategory = this
@@ -58,15 +62,24 @@ class ProgramTools extends lv.Column{
             category.stack = new CardStack(workspace)
             for(let name in catconf.cards) {
                 let clz = catconf.cards[name]
-                let card = new clz(category.stack, workspace.program)
+                let card = new clz(category.stack, null)
                 category.stack.addCard(card, (clz)=>{
                     self.activeCategory = null
                     let card = new clz(workspace.program, workspace.program)
+                    workspace?.model?.vm?.addCard(card)
                     return card
                 }, clz)
             }
             // category.stack.createCard(catconf.name)s
             category.stack.setStyle("pad-left",10)
+
+            for(let className in catconf.cards) {
+                let clazz = catconf.cards[className]
+                if(clazz.pkgname) {
+                    className = clazz.pkgname + '.' + className
+                }
+                this.libCardClass[className] = clazz
+            }
 
             this.categories[catconf.name] = category
         }

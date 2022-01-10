@@ -414,7 +414,10 @@ static JSClassID js_${clzConf.typeName}_class_id ;
 
         code+= `static void js_${clzConf.typeName}_finalizer(JSRuntime *rt, JSValue val){
     printf("js_${clzConf.typeName}_finalizer()\\n") ;
-    // ${clzConf.typeName}_t * thisobj = JS_GetOpaque(val, js_${clzConf.typeName}_class_id) ;
+    ${clzConf.ctypeName} thisobj = JS_GetOpaqueInternal(val) ;
+    if( thisobj && lv_obj_get_user_data(thisobj) == JS_VALUE_GET_PTR(val) ){
+        lv_obj_set_user_data(thisobj, NULL) ;
+    }
     // lv_obj_del(thisobj) ;
 }
 static JSClassDef js_${clzConf.typeName}_class = {

@@ -7,32 +7,7 @@
 #include "cutils.h"
 #include "lvgl.h"
 #include "lv_conf.h"
-
-
-unsigned char lv_obj_init_js[] = {
-  0x62, 0x65, 0x61, 0x70, 0x69, 0x2e, 0x6c, 0x76, 0x67, 0x6c, 0x2e, 0x5f,
-  0x5f, 0x6c, 0x76, 0x5f, 0x6f, 0x62, 0x6a, 0x5f, 0x69, 0x6e, 0x69, 0x74,
-  0x20, 0x3d, 0x20, 0x66, 0x75, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x20,
-  0x28, 0x29, 0x20, 0x7b, 0x0d, 0x0a, 0x20, 0x20, 0x20, 0x20, 0x74, 0x68,
-  0x69, 0x73, 0x2e, 0x5f, 0x68, 0x61, 0x6e, 0x64, 0x6c, 0x65, 0x73, 0x3d,
-  0x7b, 0x7d, 0x0d, 0x0a, 0x20, 0x20, 0x20, 0x20, 0x74, 0x68, 0x69, 0x73,
-  0x2e, 0x6f, 0x6e, 0x28, 0x22, 0x23, 0x45, 0x56, 0x45, 0x4e, 0x54, 0x2e,
-  0x41, 0x44, 0x44, 0x23, 0x22, 0x2c, 0x28, 0x65, 0x76, 0x65, 0x6e, 0x74,
-  0x4e, 0x61, 0x6d, 0x65, 0x29, 0x3d, 0x3e, 0x7b, 0x0d, 0x0a, 0x20, 0x20,
-  0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x74, 0x68, 0x69, 0x73, 0x2e, 0x65,
-  0x6e, 0x61, 0x62, 0x6c, 0x65, 0x45, 0x76, 0x65, 0x6e, 0x74, 0x28, 0x65,
-  0x76, 0x65, 0x6e, 0x74, 0x4e, 0x61, 0x6d, 0x65, 0x29, 0x0d, 0x0a, 0x20,
-  0x20, 0x20, 0x20, 0x7d, 0x29, 0x0d, 0x0a, 0x20, 0x20, 0x20, 0x20, 0x74,
-  0x68, 0x69, 0x73, 0x2e, 0x6f, 0x6e, 0x28, 0x22, 0x23, 0x45, 0x56, 0x45,
-  0x4e, 0x54, 0x2e, 0x43, 0x4c, 0x45, 0x41, 0x52, 0x23, 0x22, 0x2c, 0x28,
-  0x65, 0x76, 0x65, 0x6e, 0x74, 0x4e, 0x61, 0x6d, 0x65, 0x29, 0x3d, 0x3e,
-  0x7b, 0x0d, 0x0a, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x74,
-  0x68, 0x69, 0x73, 0x2e, 0x64, 0x69, 0x73, 0x61, 0x62, 0x6c, 0x65, 0x45,
-  0x76, 0x65, 0x6e, 0x74, 0x28, 0x65, 0x76, 0x65, 0x6e, 0x74, 0x4e, 0x61,
-  0x6d, 0x65, 0x29, 0x0d, 0x0a, 0x20, 0x20, 0x20, 0x20, 0x7d, 0x29, 0x0d,
-  0x0a, 0x7d
-};
-unsigned int lv_obj_init_js_len = 242;
+#include "lv_obj_init.js.h"
 
 
 // AUTO GENERATE CODE START [CONST MAPPING] --------
@@ -144,7 +119,7 @@ JSValue lv_flex_align_const_to_jsstr(JSContext *ctx, lv_flex_align_t code) {
 }
 
 bool lv_event_code_str_to_const(const char * name, lv_event_code_t* out) {
-    if(strcmp(name,"all")==0) {
+        if(strcmp(name,"all")==0) {
         (*out) = LV_EVENT_ALL ;
     }
     else if(strcmp(name,"pressed")==0) {
@@ -1689,7 +1664,10 @@ static JSValue js_lv_obj_constructor(JSContext *ctx, JSValueConst new_target, in
 }
 static void js_lv_obj_finalizer(JSRuntime *rt, JSValue val){
     printf("js_lv_obj_finalizer()\n") ;
-    // lv_obj_t * thisobj = JS_GetOpaque(val, js_lv_obj_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(val) ;
+    if( thisobj && lv_obj_get_user_data(thisobj) == JS_VALUE_GET_PTR(val) ){
+        lv_obj_set_user_data(thisobj, NULL) ;
+    }
     // lv_obj_del(thisobj) ;
 }
 static JSClassDef js_lv_obj_class = {
@@ -1725,7 +1703,10 @@ static JSValue js_lv_label_constructor(JSContext *ctx, JSValueConst new_target, 
 }
 static void js_lv_label_finalizer(JSRuntime *rt, JSValue val){
     printf("js_lv_label_finalizer()\n") ;
-    // lv_label_t * thisobj = JS_GetOpaque(val, js_lv_label_class_id) ;
+    lv_label_t * thisobj = JS_GetOpaqueInternal(val) ;
+    if( thisobj && lv_obj_get_user_data(thisobj) == JS_VALUE_GET_PTR(val) ){
+        lv_obj_set_user_data(thisobj, NULL) ;
+    }
     // lv_obj_del(thisobj) ;
 }
 static JSClassDef js_lv_label_class = {
@@ -1761,7 +1742,10 @@ static JSValue js_lv_arc_constructor(JSContext *ctx, JSValueConst new_target, in
 }
 static void js_lv_arc_finalizer(JSRuntime *rt, JSValue val){
     printf("js_lv_arc_finalizer()\n") ;
-    // lv_arc_t * thisobj = JS_GetOpaque(val, js_lv_arc_class_id) ;
+    lv_arc_t * thisobj = JS_GetOpaqueInternal(val) ;
+    if( thisobj && lv_obj_get_user_data(thisobj) == JS_VALUE_GET_PTR(val) ){
+        lv_obj_set_user_data(thisobj, NULL) ;
+    }
     // lv_obj_del(thisobj) ;
 }
 static JSClassDef js_lv_arc_class = {
@@ -1797,7 +1781,10 @@ static JSValue js_lv_bar_constructor(JSContext *ctx, JSValueConst new_target, in
 }
 static void js_lv_bar_finalizer(JSRuntime *rt, JSValue val){
     printf("js_lv_bar_finalizer()\n") ;
-    // lv_bar_t * thisobj = JS_GetOpaque(val, js_lv_bar_class_id) ;
+    lv_bar_t * thisobj = JS_GetOpaqueInternal(val) ;
+    if( thisobj && lv_obj_get_user_data(thisobj) == JS_VALUE_GET_PTR(val) ){
+        lv_obj_set_user_data(thisobj, NULL) ;
+    }
     // lv_obj_del(thisobj) ;
 }
 static JSClassDef js_lv_bar_class = {
@@ -1833,7 +1820,10 @@ static JSValue js_lv_btn_constructor(JSContext *ctx, JSValueConst new_target, in
 }
 static void js_lv_btn_finalizer(JSRuntime *rt, JSValue val){
     printf("js_lv_btn_finalizer()\n") ;
-    // lv_btn_t * thisobj = JS_GetOpaque(val, js_lv_btn_class_id) ;
+    lv_btn_t * thisobj = JS_GetOpaqueInternal(val) ;
+    if( thisobj && lv_obj_get_user_data(thisobj) == JS_VALUE_GET_PTR(val) ){
+        lv_obj_set_user_data(thisobj, NULL) ;
+    }
     // lv_obj_del(thisobj) ;
 }
 static JSClassDef js_lv_btn_class = {
@@ -1869,7 +1859,10 @@ static JSValue js_lv_btnmatrix_constructor(JSContext *ctx, JSValueConst new_targ
 }
 static void js_lv_btnmatrix_finalizer(JSRuntime *rt, JSValue val){
     printf("js_lv_btnmatrix_finalizer()\n") ;
-    // lv_btnmatrix_t * thisobj = JS_GetOpaque(val, js_lv_btnmatrix_class_id) ;
+    lv_btnmatrix_t * thisobj = JS_GetOpaqueInternal(val) ;
+    if( thisobj && lv_obj_get_user_data(thisobj) == JS_VALUE_GET_PTR(val) ){
+        lv_obj_set_user_data(thisobj, NULL) ;
+    }
     // lv_obj_del(thisobj) ;
 }
 static JSClassDef js_lv_btnmatrix_class = {
@@ -1905,7 +1898,10 @@ static JSValue js_lv_canvas_constructor(JSContext *ctx, JSValueConst new_target,
 }
 static void js_lv_canvas_finalizer(JSRuntime *rt, JSValue val){
     printf("js_lv_canvas_finalizer()\n") ;
-    // lv_canvas_t * thisobj = JS_GetOpaque(val, js_lv_canvas_class_id) ;
+    lv_canvas_t * thisobj = JS_GetOpaqueInternal(val) ;
+    if( thisobj && lv_obj_get_user_data(thisobj) == JS_VALUE_GET_PTR(val) ){
+        lv_obj_set_user_data(thisobj, NULL) ;
+    }
     // lv_obj_del(thisobj) ;
 }
 static JSClassDef js_lv_canvas_class = {
@@ -1941,7 +1937,10 @@ static JSValue js_lv_checkbox_constructor(JSContext *ctx, JSValueConst new_targe
 }
 static void js_lv_checkbox_finalizer(JSRuntime *rt, JSValue val){
     printf("js_lv_checkbox_finalizer()\n") ;
-    // lv_checkbox_t * thisobj = JS_GetOpaque(val, js_lv_checkbox_class_id) ;
+    lv_checkbox_t * thisobj = JS_GetOpaqueInternal(val) ;
+    if( thisobj && lv_obj_get_user_data(thisobj) == JS_VALUE_GET_PTR(val) ){
+        lv_obj_set_user_data(thisobj, NULL) ;
+    }
     // lv_obj_del(thisobj) ;
 }
 static JSClassDef js_lv_checkbox_class = {
@@ -1977,7 +1976,10 @@ static JSValue js_lv_dropdown_constructor(JSContext *ctx, JSValueConst new_targe
 }
 static void js_lv_dropdown_finalizer(JSRuntime *rt, JSValue val){
     printf("js_lv_dropdown_finalizer()\n") ;
-    // lv_dropdown_t * thisobj = JS_GetOpaque(val, js_lv_dropdown_class_id) ;
+    lv_dropdown_t * thisobj = JS_GetOpaqueInternal(val) ;
+    if( thisobj && lv_obj_get_user_data(thisobj) == JS_VALUE_GET_PTR(val) ){
+        lv_obj_set_user_data(thisobj, NULL) ;
+    }
     // lv_obj_del(thisobj) ;
 }
 static JSClassDef js_lv_dropdown_class = {
@@ -2013,7 +2015,10 @@ static JSValue js_lv_img_constructor(JSContext *ctx, JSValueConst new_target, in
 }
 static void js_lv_img_finalizer(JSRuntime *rt, JSValue val){
     printf("js_lv_img_finalizer()\n") ;
-    // lv_img_t * thisobj = JS_GetOpaque(val, js_lv_img_class_id) ;
+    lv_img_t * thisobj = JS_GetOpaqueInternal(val) ;
+    if( thisobj && lv_obj_get_user_data(thisobj) == JS_VALUE_GET_PTR(val) ){
+        lv_obj_set_user_data(thisobj, NULL) ;
+    }
     // lv_obj_del(thisobj) ;
 }
 static JSClassDef js_lv_img_class = {
@@ -2049,7 +2054,10 @@ static JSValue js_lv_line_constructor(JSContext *ctx, JSValueConst new_target, i
 }
 static void js_lv_line_finalizer(JSRuntime *rt, JSValue val){
     printf("js_lv_line_finalizer()\n") ;
-    // lv_line_t * thisobj = JS_GetOpaque(val, js_lv_line_class_id) ;
+    lv_line_t * thisobj = JS_GetOpaqueInternal(val) ;
+    if( thisobj && lv_obj_get_user_data(thisobj) == JS_VALUE_GET_PTR(val) ){
+        lv_obj_set_user_data(thisobj, NULL) ;
+    }
     // lv_obj_del(thisobj) ;
 }
 static JSClassDef js_lv_line_class = {
@@ -2085,7 +2093,10 @@ static JSValue js_lv_roller_constructor(JSContext *ctx, JSValueConst new_target,
 }
 static void js_lv_roller_finalizer(JSRuntime *rt, JSValue val){
     printf("js_lv_roller_finalizer()\n") ;
-    // lv_roller_t * thisobj = JS_GetOpaque(val, js_lv_roller_class_id) ;
+    lv_roller_t * thisobj = JS_GetOpaqueInternal(val) ;
+    if( thisobj && lv_obj_get_user_data(thisobj) == JS_VALUE_GET_PTR(val) ){
+        lv_obj_set_user_data(thisobj, NULL) ;
+    }
     // lv_obj_del(thisobj) ;
 }
 static JSClassDef js_lv_roller_class = {
@@ -2121,7 +2132,10 @@ static JSValue js_lv_slider_constructor(JSContext *ctx, JSValueConst new_target,
 }
 static void js_lv_slider_finalizer(JSRuntime *rt, JSValue val){
     printf("js_lv_slider_finalizer()\n") ;
-    // lv_slider_t * thisobj = JS_GetOpaque(val, js_lv_slider_class_id) ;
+    lv_slider_t * thisobj = JS_GetOpaqueInternal(val) ;
+    if( thisobj && lv_obj_get_user_data(thisobj) == JS_VALUE_GET_PTR(val) ){
+        lv_obj_set_user_data(thisobj, NULL) ;
+    }
     // lv_obj_del(thisobj) ;
 }
 static JSClassDef js_lv_slider_class = {
@@ -2157,7 +2171,10 @@ static JSValue js_lv_switch_constructor(JSContext *ctx, JSValueConst new_target,
 }
 static void js_lv_switch_finalizer(JSRuntime *rt, JSValue val){
     printf("js_lv_switch_finalizer()\n") ;
-    // lv_switch_t * thisobj = JS_GetOpaque(val, js_lv_switch_class_id) ;
+    lv_switch_t * thisobj = JS_GetOpaqueInternal(val) ;
+    if( thisobj && lv_obj_get_user_data(thisobj) == JS_VALUE_GET_PTR(val) ){
+        lv_obj_set_user_data(thisobj, NULL) ;
+    }
     // lv_obj_del(thisobj) ;
 }
 static JSClassDef js_lv_switch_class = {
@@ -2193,7 +2210,10 @@ static JSValue js_lv_table_constructor(JSContext *ctx, JSValueConst new_target, 
 }
 static void js_lv_table_finalizer(JSRuntime *rt, JSValue val){
     printf("js_lv_table_finalizer()\n") ;
-    // lv_table_t * thisobj = JS_GetOpaque(val, js_lv_table_class_id) ;
+    lv_table_t * thisobj = JS_GetOpaqueInternal(val) ;
+    if( thisobj && lv_obj_get_user_data(thisobj) == JS_VALUE_GET_PTR(val) ){
+        lv_obj_set_user_data(thisobj, NULL) ;
+    }
     // lv_obj_del(thisobj) ;
 }
 static JSClassDef js_lv_table_class = {
@@ -2229,7 +2249,10 @@ static JSValue js_lv_textarea_constructor(JSContext *ctx, JSValueConst new_targe
 }
 static void js_lv_textarea_finalizer(JSRuntime *rt, JSValue val){
     printf("js_lv_textarea_finalizer()\n") ;
-    // lv_textarea_t * thisobj = JS_GetOpaque(val, js_lv_textarea_class_id) ;
+    lv_textarea_t * thisobj = JS_GetOpaqueInternal(val) ;
+    if( thisobj && lv_obj_get_user_data(thisobj) == JS_VALUE_GET_PTR(val) ){
+        lv_obj_set_user_data(thisobj, NULL) ;
+    }
     // lv_obj_del(thisobj) ;
 }
 static JSClassDef js_lv_textarea_class = {
@@ -2241,7 +2264,10 @@ static JSClassDef js_lv_textarea_class = {
 static JSClassID js_lv_msgbox_class_id ;
 static void js_lv_msgbox_finalizer(JSRuntime *rt, JSValue val){
     printf("js_lv_msgbox_finalizer()\n") ;
-    // lv_msgbox_t * thisobj = JS_GetOpaque(val, js_lv_msgbox_class_id) ;
+    lv_msgbox_t * thisobj = JS_GetOpaqueInternal(val) ;
+    if( thisobj && lv_obj_get_user_data(thisobj) == JS_VALUE_GET_PTR(val) ){
+        lv_obj_set_user_data(thisobj, NULL) ;
+    }
     // lv_obj_del(thisobj) ;
 }
 static JSClassDef js_lv_msgbox_class = {
@@ -2277,7 +2303,10 @@ static JSValue js_lv_keyboard_constructor(JSContext *ctx, JSValueConst new_targe
 }
 static void js_lv_keyboard_finalizer(JSRuntime *rt, JSValue val){
     printf("js_lv_keyboard_finalizer()\n") ;
-    // lv_keyboard_t * thisobj = JS_GetOpaque(val, js_lv_keyboard_class_id) ;
+    lv_keyboard_t * thisobj = JS_GetOpaqueInternal(val) ;
+    if( thisobj && lv_obj_get_user_data(thisobj) == JS_VALUE_GET_PTR(val) ){
+        lv_obj_set_user_data(thisobj, NULL) ;
+    }
     // lv_obj_del(thisobj) ;
 }
 static JSClassDef js_lv_keyboard_class = {
@@ -2313,7 +2342,10 @@ static JSValue js_lv_tileview_constructor(JSContext *ctx, JSValueConst new_targe
 }
 static void js_lv_tileview_finalizer(JSRuntime *rt, JSValue val){
     printf("js_lv_tileview_finalizer()\n") ;
-    // lv_tileview_t * thisobj = JS_GetOpaque(val, js_lv_tileview_class_id) ;
+    lv_tileview_t * thisobj = JS_GetOpaqueInternal(val) ;
+    if( thisobj && lv_obj_get_user_data(thisobj) == JS_VALUE_GET_PTR(val) ){
+        lv_obj_set_user_data(thisobj, NULL) ;
+    }
     // lv_obj_del(thisobj) ;
 }
 static JSClassDef js_lv_tileview_class = {
@@ -2349,7 +2381,10 @@ static JSValue js_lv_list_constructor(JSContext *ctx, JSValueConst new_target, i
 }
 static void js_lv_list_finalizer(JSRuntime *rt, JSValue val){
     printf("js_lv_list_finalizer()\n") ;
-    // lv_list_t * thisobj = JS_GetOpaque(val, js_lv_list_class_id) ;
+    lv_obj_t * thisobj = JS_GetOpaqueInternal(val) ;
+    if( thisobj && lv_obj_get_user_data(thisobj) == JS_VALUE_GET_PTR(val) ){
+        lv_obj_set_user_data(thisobj, NULL) ;
+    }
     // lv_obj_del(thisobj) ;
 }
 static JSClassDef js_lv_list_class = {

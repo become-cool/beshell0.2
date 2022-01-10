@@ -1,4 +1,5 @@
 require("./obj.js")
+require("./menu.js")
 require("./loader.js")
 beapi.lvgl.Color = require("./color.js")
 require("./animate.js")
@@ -57,12 +58,18 @@ beapi.lvgl.state = {
     any : 0xFFFF ,
 }
 
-beapi.lvgl.active = function active() {
+beapi.lvgl.active = function () {
     return beapi.lvgl.defaultDisplay().activeScreen()
+}
+beapi.lvgl.sysLayer = function () {
+    return beapi.lvgl.defaultDisplay().sysLayer()
+}
+beapi.lvgl.topLayer = function () {
+    return beapi.lvgl.defaultDisplay().topLayer()
 }
 
 let sharedKeyboard = null
-beapi.lvgl.keyboard = function keyboard() {
+beapi.lvgl.keyboard = function () {
     if(!sharedKeyboard){
         sharedKeyboard = new lv.Keyboard(beapi.lvgl.active())
     }

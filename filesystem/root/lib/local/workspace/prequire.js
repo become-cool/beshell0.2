@@ -3,6 +3,7 @@ module.exports = function(){
         "./NewAppDialog" ,
         "./ToolBar" ,
         "./AppModel" ,
+        "./ModelLoader" ,
         "./comm/Zoomer" ,
         "./comm/CardStack" ,
         "./graph/parts/Port" ,

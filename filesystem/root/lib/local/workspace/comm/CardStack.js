@@ -27,18 +27,20 @@ class CardStack extends lv.CleanObj{
         this.setWidth(120)
 
         this.fromJson({
-            width: 200 ,
+            width: parent.width() - 20 ,
             height: "100%" ,
             x: 20, y: 0 , 
             autoHide: true ,
             style: {
-                // "border-width": 1 ,
-                // "pad-row": 5,
                 "pad-left": 8 ,
+                "bg-opa": 220 ,
+                "bg-color": lv.palette("grey") ,
             } ,
             flag: ["scrollable"] ,
+            click: () =>{
+                this.toggle()
+            }
         })
-        this.clearFlag("clickable")
         this.setScrollDir("ver")
         this.hide()
     }

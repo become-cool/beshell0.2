@@ -26,9 +26,9 @@
 
 
 
-JSClassID lv_obj_js_class_id() ;
-JSClassID lv_label_js_class_id() ;
-JSClassID lv_btn_js_class_id() ;
+inline JSClassID lv_obj_js_class_id() ;
+inline JSClassID lv_label_js_class_id() ;
+inline JSClassID lv_btn_js_class_id() ;
 
 void be_lv_widgets_gen_init() ;
 void be_lv_widgets_gen_require(JSContext *ctx, JSValue lvgl) ;

@@ -548,7 +548,8 @@ void be_module_mg_loop(JSContext *ctx) {
 }
 
 void be_module_mg_reset(JSContext *ctx) {
-    mg_mgr_free(&mgr) ;
+    // @todo
+    // 关闭所有的 server_t.conn
 }
 
 

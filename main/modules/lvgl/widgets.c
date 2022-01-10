@@ -6,77 +6,6 @@
 #include "module_fs.h"
 
 
-void js_lv_obj_init(JSContext *ctx, JSValue jsobj) {
-    
-    JSValue jsFuncLvObjInit = js_get_glob_prop(ctx, 3, "beapi", "lvgl", "__lv_obj_init") ;
-
-    JS_Call(ctx, jsFuncLvObjInit, jsobj, 0, NULL) ;
-
-    JS_FreeValue(ctx, jsFuncLvObjInit) ;
-}
-
-JSValue js_lv_obj_wrapper(JSContext *ctx, lv_obj_t * cobj, JSValue cotr, JSClassID clsid) {
-
-    JSValue jsobj = JS_UNDEFINED ;
-
-    void * _jsobj = lv_obj_get_user_data(cobj) ;
-    if(_jsobj) {
-        jsobj = JS_MKPTR(JS_TAG_OBJECT, _jsobj) ;
-    }
-    else {
-
-        if(JS_IsUndefined(cotr)) {
-            jsobj = JS_NewObjectClass(ctx, clsid) ;
-        }
-        else {
-            JSValue proto = JS_GetPropertyStr(ctx, cotr, "prototype");
-            if (JS_IsException(proto)) {
-                JS_FreeValue(ctx, proto) ;
-                return JS_EXCEPTION ;
-            }
-            jsobj = JS_NewObjectProtoClass(ctx, proto, clsid) ;
-            JS_FreeValue(ctx, proto) ;
-        }
-
-        lv_obj_set_user_data(cobj, JS_VALUE_GET_PTR(jsobj)) ;
-        JS_SetOpaque(jsobj, cobj) ;        
-        
-        js_lv_obj_init(ctx, jsobj) ;
-
-        // JS_DupValue(ctx, jsobj) ;
-    }
-    
-    return jsobj ;
-}
-
-
-JSValue js_lv_obj_as(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-    CHECK_ARGC(1)
-    if( !JS_IsFunction(ctx, argv[0]) ) {
-        THROW_EXCEPTION("arg class must be a function")
-    }
-    THIS_LVOBJ("Obj", "as", thisobj)
-    
-    JSValue prototype = JS_GetPropertyStr(ctx, argv[0], "prototype") ;
-    if(! JS_IsObject(prototype) ){
-        THROW_EXCEPTION("invalid class")
-    }
-    JSClassID classid ;
-    if( !JS_GetClassIDFromProto(ctx, prototype, &classid) ){
-        JS_FreeValue(ctx, prototype) ;
-        THROW_EXCEPTION("invalid class")
-    }
-
-    void * _jsobj = lv_obj_get_user_data(thisobj) ;
-    JSValue jsobj ;
-    if(_jsobj) {
-        jsobj = JS_MKPTR(JS_TAG_OBJECT, _jsobj) ;
-        JS_FreeValue(ctx, jsobj) ;
-        lv_obj_set_user_data(thisobj, NULL) ;
-    }
-    
-    return JS_DupValue( ctx, js_lv_obj_wrapper(ctx, thisobj, argv[0], classid) );
-}
 
 
 static void js_lv_event_cb(lv_event_t * event) {
@@ -128,6 +57,85 @@ static void js_lv_event_cb(lv_event_t * event) {
 
     free(cbargv) ;
     JS_FreeValue(ctx, func_emit) ;
+
+    // 引用计数 -1
+    if(event->code==LV_EVENT_DELETE){
+        // JS_FreeValue(ctx, jstarget) ;
+    }
+}
+
+void js_lv_obj_init(JSContext *ctx, JSValue jsobj) {
+    
+    JSValue jsFuncLvObjInit = js_get_glob_prop(ctx, 3, "beapi", "lvgl", "__lv_obj_init") ;
+
+    JS_Call(ctx, jsFuncLvObjInit, jsobj, 0, NULL) ;
+
+    JS_FreeValue(ctx, jsFuncLvObjInit) ;
+}
+
+JSValue js_lv_obj_wrapper(JSContext *ctx, lv_obj_t * cobj, JSValue cotr, JSClassID clsid) {
+
+    JSValue jsobj = JS_UNDEFINED ;
+
+    void * _jsobj = lv_obj_get_user_data(cobj) ;
+    if(_jsobj) {
+        jsobj = JS_MKPTR(JS_TAG_OBJECT, _jsobj) ;
+    }
+    else {
+        
+        if(JS_IsUndefined(cotr)) {
+            jsobj = JS_NewObjectClass(ctx, clsid) ;
+        }
+        else {
+            JSValue proto = JS_GetPropertyStr(ctx, cotr, "prototype");
+            if (JS_IsException(proto)) {
+                JS_FreeValue(ctx, proto) ;
+                return JS_EXCEPTION ;
+            }
+            jsobj = JS_NewObjectProtoClass(ctx, proto, clsid) ;
+            JS_FreeValue(ctx, proto) ;
+        }
+
+        lv_obj_set_user_data(cobj, JS_VALUE_GET_PTR(jsobj)) ;
+        JS_SetOpaque(jsobj, cobj) ;        
+        
+        js_lv_obj_init(ctx, jsobj) ;
+        
+        // 引用计数 +1 , 触发 LV_EVENT_DELETE 时 -1
+        // JS_DupValue(ctx, jsobj) ;
+        // lv_obj_add_event_cb(cobj, js_lv_event_cb, LV_EVENT_DELETE, ctx) ;
+    }
+    
+    return jsobj ;
+}
+
+
+JSValue js_lv_obj_as(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+    if( !JS_IsFunction(ctx, argv[0]) ) {
+        THROW_EXCEPTION("arg class must be a function")
+    }
+    THIS_LVOBJ("Obj", "as", thisobj)
+    
+    JSValue prototype = JS_GetPropertyStr(ctx, argv[0], "prototype") ;
+    if(! JS_IsObject(prototype) ){
+        THROW_EXCEPTION("invalid class")
+    }
+    JSClassID classid ;
+    if( !JS_GetClassIDFromProto(ctx, prototype, &classid) ){
+        JS_FreeValue(ctx, prototype) ;
+        THROW_EXCEPTION("invalid class")
+    }
+
+    void * _jsobj = lv_obj_get_user_data(thisobj) ;
+    JSValue jsobj ;
+    if(_jsobj) {
+        jsobj = JS_MKPTR(JS_TAG_OBJECT, _jsobj) ;
+        JS_FreeValue(ctx, jsobj) ;
+        lv_obj_set_user_data(thisobj, NULL) ;
+    }
+    
+    return JS_DupValue( ctx, js_lv_obj_wrapper(ctx, thisobj, argv[0], classid) );
 }
 
 typedef struct _lv_event_dsc_t {

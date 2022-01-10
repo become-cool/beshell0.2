@@ -111,6 +111,14 @@ class GraphCanvas extends lv.CleanObj{
         }
         this.zoomer.hide()
     }
+
+    serialize() {
+        return {
+            x: this.x(),
+            y: this.y(),
+            zoom: this.zoom,
+        }
+    }
 }
 
 module.exports = GraphCanvas

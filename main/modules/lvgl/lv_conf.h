@@ -251,7 +251,7 @@ e.g. "stm32f769xx.h" or "stm32f429xx.h"*/
  *Used if lvgl is bound to higher level language and the memory is managed by that language*/
 #define LV_ENABLE_GC 0
 #if LV_ENABLE_GC != 0
-#  define LV_GC_INCLUDE "gc.h"                           /*Include Garbage Collector related things*/
+#  define LV_GC_INCLUDE "be_lv_gc.h"                           /*Include Garbage Collector related things*/
 #endif /*LV_ENABLE_GC*/
 
 /*=====================

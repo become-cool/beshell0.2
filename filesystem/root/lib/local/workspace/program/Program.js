@@ -54,9 +54,22 @@ class Program extends lv.CleanObj{
     }
     
     serialize() {
-        return {
+        let json = {
             x: this.x(),
             y: this.y(),
+        }
+        let cards = this.workspace.model?.vm?.serialize()
+        if(cards) {
+            json.cards = cards
+        }
+        return json
+    }
+
+    unserialize(json) {
+        // json.x
+        // json.y
+        if(json.cards) {
+            this.workspace.model?.vm?.unserialize(json.cards, this.tools.libCardClass, this.workspace)
         }
     }
 }

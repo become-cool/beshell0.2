@@ -1,9 +1,5 @@
 const lv = require('lv')
 const CardStack = require("../comm/CardStack")
-const {WidgetShadow} = require('./WidgetHelper')
-
-const styleCommon = new lv.Style()
-styleCommon.set("text-color", lv.rgb(80,80,80))
 
 
 const mapWidgetLib = {
@@ -170,8 +166,7 @@ class UITools extends lv.Column{
         for(let title in mapWidgetLib) {
             this.widgetLib.createCard(title, data=>{
                 let widget = workspace.ui.createWidget(data.class, data.opt)
-                widget.addStyle(styleCommon)
-                widget.shadow = new WidgetShadow(widget, workspace.ui)
+                workspace.ui.setActiveWidget(widget)
                 return widget.shadow
             }, mapWidgetLib[title])
         }

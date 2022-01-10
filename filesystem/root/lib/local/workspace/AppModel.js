@@ -1,5 +1,6 @@
 const VM = require("./program/VM")
 const BePad = require("./graph/parts/BePad")
+const utils = require("./comm/utils")
 
 const mapWidgetNameTpl = {
     TextArea:'input%i',
@@ -21,7 +22,7 @@ const mapWidgetNameTpl = {
 
 class AppModel extends beapi.EventEmitter {
     host = null
-    parts =[]
+    parts = {}
     widgets = {}
     vm= new VM(this)
     folderPath = null
@@ -35,18 +36,19 @@ class AppModel extends beapi.EventEmitter {
 
     createHostFromDevice(){
         this.host = new BePad(this.workspace.graph)
-        this.parts.push(this.host)  
-        
-        this.emit("model.part.new", this.host)
+        this.addPart(this.host)
     }
 
     createPart(partClass) {
         let part = new partClass(this.workspace.graph)
-        this.parts.push(part)
-        
-        this.emit("model.part.new", part)
-
+        this.addPart(part)
         return part
+    }
+
+    addPart(part) {
+        part.uuid = utils.newUUID(this.parts)
+        this.parts[part.uuid ] = part
+        this.emit("model.part.new", part)
     }
 
     widgetNames(classFilter) {
@@ -83,27 +85,25 @@ class AppModel extends beapi.EventEmitter {
 
     serialize() {
         let json = {
-            parts: [] ,
-            wires: [] ,
-            ui: [] ,
-            cards: this.vm.serialize() ,
-            graph: {
-                part: this.workspace.graph.serialize() ,
-                program: this.workspace.program.serialize() ,
-            } ,
-        }
-        for(let part of this.parts) {
-            json.parts.push(part.serialize())
+            graph: this.workspace.graph.serialize() ,
+            ui: this.workspace.ui.serialize() ,
+            program: this.workspace.program.serialize() ,
         }
 
         return json
     }
 
+
     unserialize(json) {
-        if(json.cards) {
-            this.vm.unserialize(json.cards, this.workspace.program.tools.libCardClass, this.workspace)
+        if(json.program) {
+            this.workspace.program.unserialize(json.program)
+        }
+
+        if(json.ui) {
+            this.workspace.ui.unserialize(json.ui)
         }
     }
 }
+
 
 module.exports = AppModel

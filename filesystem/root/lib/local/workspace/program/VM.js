@@ -1,5 +1,6 @@
 const base = require("./cards/CardBase")
 const basic = require("./cards/basic")
+const utils = require("../comm/utils")
 
 class VM extends beapi.EventEmitter {
 
@@ -9,20 +10,9 @@ class VM extends beapi.EventEmitter {
         super()
     }
 
-    newUUID() {
-        let uuid = beapi.utils.genUUID()
-        uuid = uuid.replace(/\-/g, '')
-        for(let l=4;l<uuid.length;l++) {
-            let seg = uuid.substr(0,l)
-            if(!this.cards[seg])
-                return seg
-        }
-        return this.newUUID()
-    }
-
     addCard(card) {
         if(!card.uuid){
-            card.uuid = this.newUUID()
+            card.uuid = utils.newUUID(this.cards)
         }
         if(this.cards[card.uuid]) {
             throw new Error("uuid of card has exsisted")

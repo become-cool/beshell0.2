@@ -62,7 +62,7 @@ const char * lv_flex_flow_const_to_str(lv_flex_flow_t code) {
         case LV_FLEX_FLOW_COLUMN_WRAP_REVERSE: return "column-wrap-reverse";
 
         default:
-            return "unkonw";
+            return "unknow";
     }
 }
 JSValue lv_flex_flow_const_to_jsstr(JSContext *ctx, lv_flex_flow_t code) {
@@ -111,7 +111,7 @@ const char * lv_flex_align_const_to_str(lv_flex_align_t code) {
         case LV_FLEX_ALIGN_SPACE_BETWEEN: return "space-between";
 
         default:
-            return "unkonw";
+            return "unknow";
     }
 }
 JSValue lv_flex_align_const_to_jsstr(JSContext *ctx, lv_flex_align_t code) {
@@ -316,7 +316,7 @@ const char * lv_event_code_const_to_str(lv_event_code_t code) {
         case LV_EVENT_GET_SELF_SIZE: return "get-self-size";
 
         default:
-            return "unkonw";
+            return "unknow";
     }
 }
 JSValue lv_event_code_const_to_jsstr(JSContext *ctx, lv_event_code_t code) {
@@ -373,7 +373,7 @@ const char * lv_dir_const_to_str(lv_dir_t code) {
         case LV_DIR_ALL: return "all";
 
         default:
-            return "unkonw";
+            return "unknow";
     }
 }
 JSValue lv_dir_const_to_jsstr(JSContext *ctx, lv_dir_t code) {
@@ -486,7 +486,7 @@ const char * lv_align_const_to_str(lv_align_t code) {
         case LV_ALIGN_OUT_RIGHT_BOTTOM: return "out-right-bottom";
 
         default:
-            return "unkonw";
+            return "unknow";
     }
 }
 JSValue lv_align_const_to_jsstr(JSContext *ctx, lv_align_t code) {
@@ -539,7 +539,7 @@ const char * lv_border_side_const_to_str(lv_border_side_t code) {
         case LV_BORDER_SIDE_INTERNAL: return "internal";
 
         default:
-            return "unkonw";
+            return "unknow";
     }
 }
 JSValue lv_border_side_const_to_jsstr(JSContext *ctx, lv_border_side_t code) {
@@ -584,7 +584,7 @@ const char * lv_base_dir_const_to_str(lv_base_dir_t code) {
         case LV_BASE_DIR_WEAK: return "weak";
 
         default:
-            return "unkonw";
+            return "unknow";
     }
 }
 JSValue lv_base_dir_const_to_jsstr(JSContext *ctx, lv_base_dir_t code) {
@@ -991,7 +991,7 @@ const char * lv_style_prop_const_to_str(lv_style_prop_t code) {
         case _LV_STYLE_LAST_BUILT_IN_PROP: return "-last-built-in-prop";
 
         default:
-            return "unkonw";
+            return "unknow";
     }
 }
 JSValue lv_style_prop_const_to_jsstr(JSContext *ctx, lv_style_prop_t code) {
@@ -1056,7 +1056,7 @@ const char * lv_scr_load_anim_const_to_str(lv_scr_load_anim_t code) {
         case LV_SCR_LOAD_ANIM_FADE_ON: return "fade-on";
 
         default:
-            return "unkonw";
+            return "unknow";
     }
 }
 JSValue lv_scr_load_anim_const_to_jsstr(JSContext *ctx, lv_scr_load_anim_t code) {
@@ -1181,7 +1181,7 @@ const char * lv_obj_flag_const_to_str(lv_obj_flag_t code) {
         case LV_OBJ_FLAG_USER_4: return "user-4";
 
         default:
-            return "unkonw";
+            return "unknow";
     }
 }
 JSValue lv_obj_flag_const_to_jsstr(JSContext *ctx, lv_obj_flag_t code) {
@@ -1222,7 +1222,7 @@ const char * lv_text_align_const_to_str(lv_text_align_t code) {
         case LV_TEXT_ALIGN_RIGHT: return "right";
 
         default:
-            return "unkonw";
+            return "unknow";
     }
 }
 JSValue lv_text_align_const_to_jsstr(JSContext *ctx, lv_text_align_t code) {
@@ -1331,7 +1331,7 @@ const char * lv_palette_const_to_str(lv_palette_t code) {
         case LV_PALETTE_NONE: return "none";
 
         default:
-            return "unkonw";
+            return "unknow";
     }
 }
 JSValue lv_palette_const_to_jsstr(JSContext *ctx, lv_palette_t code) {
@@ -1376,7 +1376,7 @@ const char * lv_label_long_mode_const_to_str(lv_label_long_mode_t code) {
         case LV_LABEL_LONG_CLIP: return "clip";
 
         default:
-            return "unkonw";
+            return "unknow";
     }
 }
 JSValue lv_label_long_mode_const_to_jsstr(JSContext *ctx, lv_label_long_mode_t code) {
@@ -1433,7 +1433,7 @@ const char * lv_keyboard_mode_const_to_str(lv_keyboard_mode_t code) {
         case LV_KEYBOARD_MODE_USER_4: return "user-4";
 
         default:
-            return "unkonw";
+            return "unknow";
     }
 }
 JSValue lv_keyboard_mode_const_to_jsstr(JSContext *ctx, lv_keyboard_mode_t code) {
@@ -1586,7 +1586,7 @@ const char * lv_img_cf_const_to_str(lv_img_cf_t code) {
         case LV_IMG_CF_USER_ENCODED_7: return "user-encoded-7";
 
         default:
-            return "unkonw";
+            return "unknow";
     }
 }
 JSValue lv_img_cf_const_to_jsstr(JSContext *ctx, lv_img_cf_t code) {
@@ -1627,7 +1627,7 @@ const char * lv_scroll_snap_const_to_str(lv_scroll_snap_t code) {
         case LV_SCROLL_SNAP_CENTER: return "center";
 
         default:
-            return "unkonw";
+            return "unknow";
     }
 }
 JSValue lv_scroll_snap_const_to_jsstr(JSContext *ctx, lv_scroll_snap_t code) {

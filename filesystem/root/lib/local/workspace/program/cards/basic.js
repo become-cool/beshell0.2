@@ -6,8 +6,8 @@ const pkgname = 'basic'
 
 class Compare extends base.CardCompare {
     static pkgname = pkgname
-    constructor(parent, graph) {
-        super(parent, graph)
+    constructor(parent, program) {
+        super(parent, program)
         this.addSlot("left").input.numeric = true
         this.addMenu(base.shareMenu("compare-op", ["<","<=","==","=>",">"]), "op")
         this.addSlot("right").input.numeric = true
@@ -19,8 +19,8 @@ class Compare extends base.CardCompare {
 
 class IsTrue extends base.CardCompare {
     static pkgname = pkgname
-    constructor(parent, graph) {
-        super(parent, graph)
+    constructor(parent, program) {
+        super(parent, program)
         this.addSlot("expr", true)
         this.addLabel("is true")
     }
@@ -30,8 +30,8 @@ class IsTrue extends base.CardCompare {
 }
 class IsFalse extends base.CardCompare {
     static pkgname = pkgname
-    constructor(parent, graph) {
-        super(parent, graph)
+    constructor(parent, program) {
+        super(parent, program)
         this.addSlot("expr", true)
         this.addLabel("is false")
     }
@@ -42,8 +42,8 @@ class IsFalse extends base.CardCompare {
 
 class OperatorTwo extends base.CardExpression {
     static pkgname = pkgname
-    constructor(parent, graph) {
-        super(parent, graph)
+    constructor(parent, program) {
+        super(parent, program)
         this.addSlot("left").input.numeric = true
         this.addMenu(base.shareMenu("operators", ["+","-","*","/","**","^","|","&"]), "op")
         this.addSlot("right").input.numeric = true
@@ -84,8 +84,8 @@ class OperatorTwo extends base.CardExpression {
 
 class MathFunctions extends base.CardExpression {
     static pkgname = pkgname
-    constructor(parent, graph) {
-        super(parent, graph)
+    constructor(parent, program) {
+        super(parent, program)
         this.addLabel("call math function")
         this.addMenu(base.shareMenu("mathf", [
             "sin","cos","tan","asin","acos","atan",
@@ -108,8 +108,8 @@ class MathFunctions extends base.CardExpression {
 
 class If extends base.CardControl {
     static pkgname = pkgname
-    constructor(parent, graph) {
-        super(parent, graph)
+    constructor(parent, program) {
+        super(parent, program)
         this.expr.addLabel("If")
         this.expr.addCompareSlot("what")
     }
@@ -131,8 +131,8 @@ ${indent}}`
 }
 class IfElse extends base.CardControl {
     static pkgname = pkgname
-    constructor(parent, graph) {
-        super(parent, graph)
+    constructor(parent, program) {
+        super(parent, program)
         this.expr.addLabel("If-Else")
         this.expr.addCompareSlot("what")
 
@@ -155,8 +155,8 @@ class IfElse extends base.CardControl {
 
 class IsNumber extends base.CardCompare {
     static pkgname = pkgname
-    constructor(parent, graph) {
-        super(parent, graph)
+    constructor(parent, program) {
+        super(parent, program)
         this.addSlot("what")
         this.addMenu(base.shareMenu("isornot", ["is","is not"]), "op")
         this.addLabel("a number")
@@ -165,8 +165,8 @@ class IsNumber extends base.CardCompare {
 
 class Setup extends base.CardEvent {
     static pkgname = pkgname
-    constructor(parent, graph) {
-        super(parent, graph)
+    constructor(parent, program) {
+        super(parent, program)
         this.expr.addLabel("When app setup")
     }
 }

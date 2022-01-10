@@ -6,6 +6,7 @@ module.exports = function(){
         "./ModelLoader" ,
         "./comm/Zoomer" ,
         "./comm/CardStack" ,
+        "./comm/utils" ,
         "./graph/parts/Port" ,
         "./graph/parts/Part" ,
         "./graph/parts/BePad" ,

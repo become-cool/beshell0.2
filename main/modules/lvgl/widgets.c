@@ -284,7 +284,7 @@ JSValue js_lv_obj_move_y(JSContext *ctx, JSValueConst this_val, int argc, JSValu
 
 
 JSValue js_lv_obj_get_all_style_values(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-    THIS_LVOBJ("Obj", "getAllStyles", thisobj)
+    THIS_LVOBJ("Obj", "allStyleValues", thisobj)
     JSValue jsstyles = JS_NewObject(ctx) ;
     for(int i = 0; i < thisobj->style_cnt; i++) {
 
@@ -398,7 +398,6 @@ JSValue js_lv_obj_get_local_style(JSContext *ctx, JSValueConst this_val, int arg
 
     for(int i = 0; i < thisobj->style_cnt; i++) {
         if(thisobj->styles[i].is_local && thisobj->styles[i].selector == selector) {
-            dn(i)
             JSValue jsstyle = lv_style_wrapper(ctx, thisobj->styles[i].style) ;
             JS_DupValue(ctx,jsstyle) ;
             return jsstyle ;

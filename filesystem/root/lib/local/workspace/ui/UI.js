@@ -1,6 +1,6 @@
 const lv = require('lv')
 const UITools = require('./UITools')
-const {WidgetHelper} = require('./WidgetHelper')
+const {WidgetHelper, WidgetShadow} = require('./WidgetHelper')
 
 class UI extends lv.CleanObj{
 
@@ -47,6 +47,7 @@ class UI extends lv.CleanObj{
                 } ,
                 {
                     class: WidgetHelper ,
+                    visible: false ,
                     ref: "helper" ,
                 } ,
                  
@@ -61,13 +62,6 @@ class UI extends lv.CleanObj{
                 this.holdspace.show()
             }
         })
-
-        
-
-        // for testing purposes
-        let widget = this.createWidget(lv.Btn, {text:"Bntnt"})
-        widget.setCoords(50,50)
-
     }
 
     createWidget(clz, json) {
@@ -76,9 +70,7 @@ class UI extends lv.CleanObj{
             widget.fromJson(json)
         }
         this.workspace.model.addWidget(widget)
-
-        this.setActiveWidget(widget)
-
+        widget.shadow = new WidgetShadow(widget, this.workspace.ui)
         return widget
     }
 
@@ -110,6 +102,55 @@ class UI extends lv.CleanObj{
             this.tools.widgetLib.hide()
         }
     }
+
+    serialize() {
+        let json = []
+        for(let wname in this.workspace.model.widgets) {
+            json.push(this.serialzeWidget(this.workspace.model.widgets[wname]))
+        }
+        return json
+    }
+    serialzeWidget(widget) {
+        let json = {
+            clazz: widget.constructor.name ,
+            x: widget.x() ,
+            y: widget.y() ,
+            width: widget.width() ,
+            height: widget.height() ,
+        }
+
+        if( typeof widget.text=="function") {
+            json.text = widget.text()
+        }
+
+        let style = widget.localStyle()
+        if(style) {
+            let stylejson = {}
+            let props = style.props()
+            for(let propName of props) {
+                if(ignoreStyles.includes(propName)) {
+                    continue
+                }
+                stylejson[propName] = style.get(propName)
+            }
+            if(stylejson.length) {
+                json.style = stylejson
+            }
+        }
+
+        return json
+    }
+
+    unserialize(json) {
+        for(let wjson of json) {
+            let clazz = lv[wjson.clazz]
+            if(typeof clazz!='function') {
+                throw new Error('unknow widget class: '+wjson.clazz)
+            }
+            this.createWidget(lv[wjson.clazz], wjson)
+        }
+    }
 }
 
+const ignoreStyles = ["x", "y", "width", "height", "unknow"]
 module.exports = UI

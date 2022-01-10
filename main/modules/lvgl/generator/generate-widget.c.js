@@ -519,7 +519,7 @@ ${mappingByVar}
     switch(code) {
 ${mappingName}
         default:
-            return "unkonw";
+            return "unknow";
     }
 }
 JSValue ${defConst.name}_const_to_jsstr(JSContext *ctx, ${defConst.type} code) {

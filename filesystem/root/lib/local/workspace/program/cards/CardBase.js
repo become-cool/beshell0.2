@@ -34,7 +34,7 @@ class Input extends lv.TextArea {
 class CardMenu extends lv.Row{
     menu = null
     value = null
-    constructor(card, menu, itemsCallback, graph) {
+    constructor(card, menu, itemsCallback, program) {
         super(card) 
         this.menu = menu
 
@@ -70,7 +70,7 @@ class CardMenu extends lv.Row{
                     clicked: ()=>{
                         if(this.menu){
                             if(itemsCallback) {
-                                let items = itemsCallback(graph)
+                                let items = itemsCallback(program)
                                 if(!(items instanceof Array)) {
                                     return
                                 }
@@ -139,7 +139,7 @@ class CardSlotExpression extends lv.CleanObj {
             }
         })
     }
-    graph() {
+    program() {
         const Program = require("../Program")
         for(let parent = this.parent(); parent; parent=parent.parent()){
             if(parent instanceof Program) {
@@ -159,7 +159,7 @@ class CardSlotExpression extends lv.CleanObj {
         if(!this.expr) {
             return
         }
-        this.expr.setParent( this.graph() )
+        this.expr.setParent( this.program() )
         this.expr = null
         if(this.input)
             this.input.show()
@@ -244,10 +244,10 @@ class CardSlotCompare extends CardSlotExpression {
 
 class CardExpressionBase extends lv.Row {
     slots = {}
-    graph = null
-    constructor(parent, graph) {
+    program = null
+    constructor(parent, program) {
         super(parent)
-        this.graph = graph
+        this.program = program
 
         this.fromJson({
             width: -1 ,
@@ -279,7 +279,7 @@ class CardExpressionBase extends lv.Row {
         return label
     }
     addMenu(menu, name, itemsCallback) {
-        let obj = new CardMenu(this, menu, itemsCallback, this.graph)
+        let obj = new CardMenu(this, menu, itemsCallback, this.program)
         if(name) {
             this.slots[name] = obj
         }
@@ -375,15 +375,15 @@ class CardExpression extends CardExpressionBase {
 
     _matchSlotClz = CardSlotExpression
     
-    constructor(parent, graph) {
-        super(parent, graph)
+    constructor(parent, program) {
+        super(parent, program)
 
         this.draggable()
 
         this.appearance()
 
-        // 卡片堆里的卡片 graph == null
-        if(graph) {
+        // 卡片堆里的卡片 program == null
+        if(program) {
             let draggable = this.draggable()
             draggable.setStart(()=>{
                 this.moveForeground()
@@ -403,8 +403,8 @@ class CardExpression extends CardExpressionBase {
                     }
                     return
                 }
-                for(let uuid in graph.model.vm.cards) {
-                    let statement = graph.model.vm.cards[uuid]
+                for(let uuid in program.model.vm.cards) {
+                    let statement = program.model.vm.cards[uuid]
                     if(statement==this) {
                         continue
                     }
@@ -449,7 +449,7 @@ class CardExpression extends CardExpressionBase {
     }
     
     isTop() {
-        return this.parent() == this.graph
+        return this.parent() == this.program
     }
     
     serialize() {
@@ -476,8 +476,8 @@ class CardExpression extends CardExpressionBase {
 }
 
 class CardCompare extends CardExpression{
-    constructor(parent, graph) {
-        super(parent, graph)
+    constructor(parent, program) {
+        super(parent, program)
         this._matchSlotClz = CardSlotCompare
     }
     appearance() {
@@ -539,9 +539,9 @@ class CardStatement extends lv.Column{
     next = null
 
     expr = null
-    graph = null
+    program = null
 
-    constructor(parent, graph) {
+    constructor(parent, program) {
         super(parent)
 
         this.fromJson({
@@ -559,15 +559,15 @@ class CardStatement extends lv.Column{
             } ,
         })
 
-        this.expr = new CardExpressionBase(this, graph)
+        this.expr = new CardExpressionBase(this, program)
         this.expr.addFlag("event-bubble")
 
         this.appearance()
         
-        // 卡片堆里的卡片 graph == null
-        if(graph) {
+        // 卡片堆里的卡片 program == null
+        if(program) {
 
-            this.graph = graph
+            this.program = program
     
             let draggable = this.draggable()
             draggable.setStart(()=>{
@@ -587,8 +587,8 @@ class CardStatement extends lv.Column{
                 }
     
                 let [px, py] = this.coordsPortPrev(pos.x, pos.y)
-                for(let uuid in graph.model.vm.cards) {
-                    let statement = graph.model.vm.cards[uuid]
+                for(let uuid in program.model.vm.cards) {
+                    let statement = program.model.vm.cards[uuid]
                     if(statement==this || !(statement instanceof CardStatement) ) {
                         continue
                     }
@@ -677,11 +677,11 @@ class CardStatement extends lv.Column{
         }
         let parent = this.parent()
         if(parent instanceof CardStatementBody) {
-            this.setParent(this.graph)
+            this.setParent(this.program)
             this.updateLayout()
 
             for(let next=this.next;next;next=next.next) {
-                next.setParent(this.graph)
+                next.setParent(this.program)
             }
             if(parent.first==this) {
                 parent.first = null
@@ -778,7 +778,7 @@ class CardStatement extends lv.Column{
         return code
     }
     isTop() {
-        return this.parent()==this.graph && !this.prev
+        return this.parent()==this.program && !this.prev
     }
     serialize() {
         let json = {
@@ -833,9 +833,9 @@ const ArcHeight = SPortSlopeH
 const ArcCX = ArcWidth/2
 const ArcCY = 25
 class CardEvent extends CardStatement{
-    constructor(parent, graph){
-        super(parent, graph)
-        if(graph) {
+    constructor(parent, program){
+        super(parent, program)
+        if(program) {
             this.draggable().setDragging(null)
         }
     }
@@ -876,8 +876,8 @@ class CardControl extends CardStatement{
     proc1 = null
     proc2 = null
 
-    constructor(parent, graph){
-        super(parent, graph)
+    constructor(parent, program){
+        super(parent, program)
         this.setStyle("pad-bottom", SPortSlopeH + 11)
         this.proc1 = this.createProcess()
 

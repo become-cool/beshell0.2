@@ -67,8 +67,9 @@ class GraphCanvas extends lv.CleanObj{
         this.setWidth(GraphWidth * zoom)
         this.setHeight(GraphHeight * zoom)
 
-        for(let part of this.workspace.model.parts) {
-            part.repaint(zoom)
+        let parts = this.workspace.model.parts
+        for(let uuid in parts) {
+            parts[uuid].repaint(zoom)
         }
     }
 
@@ -113,12 +114,22 @@ class GraphCanvas extends lv.CleanObj{
     }
 
     serialize() {
-        return {
+        let json = {
             x: this.x(),
             y: this.y(),
             zoom: this.zoom,
+            parts: {}
         }
+
+        let model = this.workspace.model
+        for(let uuid in model.parts) {
+            json.parts[uuid] = model.parts[uuid].serialize()
+        }
+
+        return json
     }
+
+
 }
 
 module.exports = GraphCanvas

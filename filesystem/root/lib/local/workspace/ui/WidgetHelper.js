@@ -169,23 +169,28 @@ class WidgetShadow extends lv.CleanObj{
     constructor(widget, ui) {
         super(ui.shadow)
         this.target = widget
+        widget.updateLayout()
         this.fromJson({
+            width: widget.width() ,
+            height: widget.height() ,
             style: {
                 // "bg-color": lv.palette("blue") ,
                 // "bg-opa": 100 ,
+            } ,
+            clicked: ()=>{
+                console.log("shadow clicked")
+                ui.setActiveWidget(widget)
             }
         })
 
-        this.setHeight(widget.height())
-        this.setWidth(widget.width())
+        this.setCoords(... widget.coords())
+        this.updateLayout()
+
         this.draggable(null, pos=>{
             widget.setCoords(pos.x, pos.y)
             if(ui.activeWidget==widget){
                 ui.helper.setCoords(pos.x, pos.y)
             }
-        })
-        this.on("clicked",()=>{
-            ui.setActiveWidget(widget)
         })
     }
     setCoords(x, y) {

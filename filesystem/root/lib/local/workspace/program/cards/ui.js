@@ -4,16 +4,16 @@ const base = require('./CardBase')
 const pkgname = 'ui'
 const bgColor = lv.palette("green")
 
-function lstWidgets (graph){
-    return graph?.model?.widgetNames()
+function lstWidgets (program){
+    return program?.model?.widgetNames()
 }
 
 class UIEvent extends base.CardEvent {
     static pkgname = pkgname
-    constructor(parent, graph) {
-        super(parent, graph)
+    constructor(parent, program) {
+        super(parent, program)
         this.expr.addLabel("UI")
-        graph?.model?.vm?.on("ui", (widgetName, eventName)=>{
+        program?.model?.vm?.on("ui", (widgetName, eventName)=>{
             // console.log(widgetName, eventName, this.expr.slots.widget.value, this.expr.slots.event.value)
             if(widgetName!=this.expr.slots.widget.value || eventName!=this.expr.slots.event.value ) {
                 return
@@ -33,14 +33,14 @@ class UIEvent extends base.CardEvent {
 
 class UIGetText extends base.CardExpression {
     static pkgname = pkgname
-    constructor(parent, graph) {
-        super(parent, graph)
+    constructor(parent, program) {
+        super(parent, program)
         this.addLabel("text of")
         this.addMenu(base.shareMenu("widgets"), "widget", lstWidgets)
     }
     evaluate() {
         let value = this.slots.widget.value
-        let widget = this.graph.model.widgets[value]
+        let widget = this.program.model.widgets[value]
         if(!widget) {
             return null
         }
@@ -59,8 +59,8 @@ class UIGetText extends base.CardExpression {
 }
 class UISetText extends base.CardStatement {
     static pkgname = pkgname
-    constructor(parent, graph) {
-        super(parent, graph)
+    constructor(parent, program) {
+        super(parent, program)
         this.expr.addLabel("set")
         this.expr.addMenu(base.shareMenu("widgets"), "widget", lstWidgets)
         this.expr.addLabel("text to")
@@ -68,7 +68,7 @@ class UISetText extends base.CardStatement {
     }
     run() {
         let wname = this.expr.slots.widget.value
-        let widget = this.graph.model.widgets[wname]
+        let widget = this.program.model.widgets[wname]
         if(!widget) {
             this.runNext()
             return

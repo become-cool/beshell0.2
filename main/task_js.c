@@ -211,6 +211,8 @@ void task_js_main(){
         if(requst_reset) {
 
             be_module_eventloop_reset(ctx) ;
+            be_module_mg_reset(ctx) ;
+            be_module_lvgl_reset(ctx) ;
 #ifndef SIMULATION
             be_module_telnet_reset(ctx) ;
             be_module_gpio_reset(ctx) ;
@@ -221,8 +223,6 @@ void task_js_main(){
 #else
             be_module_repl_reset(ctx) ;
 #endif
-            be_module_mg_reset(ctx) ;
-            be_module_lvgl_reset(ctx) ;
 
             quickjs_deinit() ;
             quickjs_init() ;

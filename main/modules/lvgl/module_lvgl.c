@@ -337,6 +337,8 @@ void be_module_lvgl_require(JSContext *ctx) {
     JS_FreeValue(ctx, EventEmitterProto);
 }
 
+
+
 void be_module_lvgl_reset(JSContext *ctx) {
     be_lv_display_reset(ctx) ;
 }

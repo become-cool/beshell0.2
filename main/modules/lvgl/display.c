@@ -24,7 +24,8 @@
 uint8_t * disp_buff1 = NULL ;
 uint8_t * disp_buff2 = NULL ;
 
-lv_indev_drv_t indev_drv;
+lv_indev_drv_t indev_drv ;
+lv_indev_t * indev = NULL ;
 bool indev_fake = false ;
 lv_coord_t indev_fake_x = 0 ;
 lv_coord_t indev_fake_y = 0 ;
@@ -160,6 +161,9 @@ uint8_t * dma_buff = NULL ;
 
 QueueHandle_t disp_queue;
 
+
+spi_device_handle_t device_touch = NULL;
+
 // static void task_disp(void *arg) {
 
 //     draw_param_t * param ;
@@ -217,7 +221,9 @@ void input_driver_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
         }
         else {
             data->continue_reading = xpt2046_read(drv, data) ;
-            data->point.x -= OFFSET_X ;
+            if( data->point.x > OFFSET_X ) {
+                data->point.x -= OFFSET_X ;
+            }
         }
     }
 
@@ -240,6 +246,7 @@ static void js_lvgl_disp_finalizer(JSRuntime *rt, JSValue val) {
 
     // spi 设备
 #ifndef SIMULATION
+
     if(disp->driver->user_data) {
         st77xx_dev_t * dev = (st77xx_dev_t*)disp->driver->user_data ;
         spi_bus_remove_device(dev->spi_dev) ;
@@ -248,17 +255,17 @@ static void js_lvgl_disp_finalizer(JSRuntime *rt, JSValue val) {
 #endif
 
     if(disp->driver->draw_buf) {
-        if(disp->driver->draw_buf->buf1) {
-            free(disp->driver->draw_buf->buf1) ;
-        }
-        if(disp->driver->draw_buf->buf2) {
-            free(disp->driver->draw_buf->buf2) ;
-        }
+        // if(disp->driver->draw_buf->buf1) {
+        //     free(disp->driver->draw_buf->buf1) ;
+        // }
+        // if(disp->driver->draw_buf->buf2) {
+        //     free(disp->driver->draw_buf->buf2) ;
+        // }
         free(disp->driver->draw_buf) ;
     }
 
-    free(disp->driver) ;
-    free(disp) ;
+    // free(disp->driver) ;
+    // free(disp) ;
 }
 
 static JSClassDef js_lvgl_disp_class = {
@@ -430,7 +437,7 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
 
     // 触摸设备
 #ifndef SIMULATION
-    tp_spi_add_device(1, 18);
+    tp_spi_add_device(1, 18, &device_touch);
     xpt2046_init();
 #endif
 
@@ -442,7 +449,7 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
     indev_drv.read_cb = ws_driver_input_read ;
 #endif
     indev_drv.type = LV_INDEV_TYPE_POINTER;
-    lv_indev_t *indev = lv_indev_drv_register(&indev_drv);
+    indev = lv_indev_drv_register(&indev_drv);
     indev->driver->gesture_limit = 30 ;
     if(!indev) {
         printf("Cound not create indev\n") ;
@@ -548,4 +555,33 @@ void be_lv_display_reset(JSContext * ctx) {
     
     JS_FreeValue(ctx, js_indev_global_cb_pressing) ;
     js_indev_global_cb_pressing = JS_UNDEFINED;
+    
+
+    // 清理 disp (timer,indev,lv_obj_t) / driver 
+    lv_disp_t * disp = NULL ;
+    while((disp=lv_disp_get_default())!=false) {
+        if(disp->driver){
+            if(disp->driver->draw_buf) {
+                free(disp->driver->draw_buf) ;
+            }
+#ifndef SIMULATION
+            st77xx_dev_t * dev = (st77xx_dev_t*)disp->driver->user_data ;
+            if(dev) {
+                spi_bus_remove_device(dev->spi_dev) ;
+                free(dev) ;
+            }
+            if(device_touch) {
+                spi_bus_remove_device(device_touch) ;
+                device_touch = NULL ;
+            }
+#endif
+            free(disp->driver) ;
+        }
+        lv_disp_remove(disp) ;
+    }
+
+    if(indev) {
+        lv_indev_remove(indev) ;
+        indev = NULL ;
+    }
 }

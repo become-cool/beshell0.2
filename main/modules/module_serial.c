@@ -834,8 +834,8 @@ void be_module_serial_require(JSContext *ctx) {
     JS_FreeValue(ctx, beapi);
 }
 
-#define FREE_BUS_SPI(busnum)    if(_spi_bus_setup&(1<<(busnum))){ spi_bus_free(busnum); }
-#define FREE_BUS_I2C(busnum)    if(_i2c_bus_setup&(1<<(busnum))){ i2c_driver_delete(busnum); }
+#define FREE_BUS_SPI(busnum)    if(_spi_bus_setup&(1<<(busnum))){ dn(busnum); spi_bus_free(busnum); }
+#define FREE_BUS_I2C(busnum)    if(_i2c_bus_setup&(1<<(busnum))){ dn(busnum); i2c_driver_delete(busnum); }
 void be_module_serial_reset(JSContext *ctx) {
     // 回收 SPI 资源
     for(uint8_t h=0; h<8; h++) {

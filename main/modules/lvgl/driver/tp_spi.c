@@ -7,7 +7,6 @@
  *      INCLUDES
  *********************/
 #include "tp_spi.h"
-#include "touch_driver.h"
 #include "esp_system.h"
 #include "driver/gpio.h"
 #include "driver/spi_master.h"
@@ -36,7 +35,6 @@
 /**********************
  *  STATIC PROTOTYPES
  **********************/
-static spi_device_handle_t spi;
 
 /**********************
  *  STATIC VARIABLES
@@ -49,13 +47,16 @@ static spi_device_handle_t spi;
 /**********************
  *   GLOBAL FUNCTIONS
  **********************/
-void tp_spi_add_device_config(spi_host_device_t host, spi_device_interface_config_t *devcfg)
-{
-	esp_err_t ret=spi_bus_add_device(host, devcfg, &spi);
-	// assert(ret==ESP_OK);
-}
+// void tp_spi_add_device_config(spi_host_device_t host, spi_device_interface_config_t *devcfg)
+// {
+// 	esp_err_t ret=spi_bus_add_device(host, devcfg, &spi);
+// 	// assert(ret==ESP_OK);
+// }
 
-void tp_spi_add_device(spi_host_device_t host, uint8_t cs)
+
+spi_device_handle_t spi = NULL;
+
+esp_err_t tp_spi_add_device(spi_host_device_t host, uint8_t cs, spi_device_handle_t * device)
 {
 	spi_device_interface_config_t devcfg={
                 .clock_speed_hz = SPI_TOUCH_CLOCK_SPEED_HZ,
@@ -71,7 +72,14 @@ void tp_spi_add_device(spi_host_device_t host, uint8_t cs)
 	};
 	
 	//Attach the Touch controller to the SPI bus
-	tp_spi_add_device_config(host, &devcfg);
+	esp_err_t err = spi_bus_add_device(host, &devcfg, device) ;
+	if(err!=ESP_OK) {
+		return err ;
+	}
+
+	spi = *device ;
+
+	return err ;
 }
 
 void tp_spi_xchg(uint8_t* data_send, uint8_t* data_recv, uint8_t byte_count)

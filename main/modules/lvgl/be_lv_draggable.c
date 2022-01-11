@@ -161,6 +161,9 @@ static void js_lv_draggable_dragging(lv_event_t * event) {
     if(use_y) {
         lv_obj_set_coord_y(draggable->target, y) ;
     }
+    // if(use_x || use_y) {
+    //     lv_obj_update_layout(draggable->target) ;
+    // }
 
     // followers
     for(int i=0; i<draggable->follower_cnt; i++) {

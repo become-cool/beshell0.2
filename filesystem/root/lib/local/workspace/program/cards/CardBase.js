@@ -574,8 +574,7 @@ class CardStatement extends lv.Column{
                 this.moveForeground()
                 draggable.setFollowers(this.followers())
             })
-            draggable.setDragging((pos)=>{
-    
+            draggable.setDragging((pos)=>{    
                 let linked = this.linkedStatement()
                 if(linked) {
                     let [x,y] = this.coords()

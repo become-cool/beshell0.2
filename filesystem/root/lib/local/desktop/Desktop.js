@@ -32,7 +32,7 @@ class Desktop extends lv.Obj {
             this._wallpaperOuter.setStyle("bg-opa",0)
             this._wallpaper = new lv.Img(this._wallpaperOuter)
             this._wallpaper.setSrc("/home/become/bg.png")
-            
+
 
             this._panels = new lv.CleanObj(this)
             this._panels.setWidth(width)
@@ -75,9 +75,11 @@ class Desktop extends lv.Obj {
         this.activePanel = i
         this._panels.scrollToX(i*width, !!anim)
 
-        let ww = this._wallpaper.width() - this.width()
-        if(ww>0) {
-            this._wallpaperOuter.scrollToX(i*(ww/2), !!anim)
+        if(this._wallpaper) {
+            let ww = this._wallpaper.width() - this.width()
+            if(ww>0) {
+                this._wallpaperOuter.scrollToX(i*(ww/2), !!anim)
+            }
         }
         
     }

@@ -60,6 +60,7 @@ static void js_lv_event_cb(lv_event_t * event) {
 
     // 引用计数 -1
     if(event->code==LV_EVENT_DELETE){
+        JS_SetOpaque(jstarget, NULL) ;
         // JS_FreeValue(ctx, jstarget) ;
     }
 }
@@ -101,9 +102,10 @@ JSValue js_lv_obj_wrapper(JSContext *ctx, lv_obj_t * cobj, JSValue cotr, JSClass
         
         js_lv_obj_init(ctx, jsobj) ;
         
+        lv_obj_add_event_cb(cobj, js_lv_event_cb, LV_EVENT_DELETE, ctx) ;
+
         // 引用计数 +1 , 触发 LV_EVENT_DELETE 时 -1
         // JS_DupValue(ctx, jsobj) ;
-        // lv_obj_add_event_cb(cobj, js_lv_event_cb, LV_EVENT_DELETE, ctx) ;
     }
     
     return jsobj ;

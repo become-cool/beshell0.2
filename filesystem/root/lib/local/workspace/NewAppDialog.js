@@ -183,7 +183,6 @@ function createApp(title, iconpath) {
         let folderPath = process.env.HOME + '/' + folderName
 
         mkDir(folderPath)
-        mkDir(folderPath+"/.workspace")
 
         let pkgjson = JSON.stringify({
             name: folderName ,
@@ -194,6 +193,17 @@ function createApp(title, iconpath) {
             main: 'index.js' ,
         },null,4)
         writeFile(folderPath+"/package.json", pkgjson)
+
+        let wsjson = JSON.stringify({
+            graph: {
+                parts: {
+                    "0000": {
+                        "class": "BePad"
+                    },
+                }
+            }
+        },null,4)
+        writeFile(folderPath+"/workspace.json", wsjson)
 
         return folderPath
     }catch(e){

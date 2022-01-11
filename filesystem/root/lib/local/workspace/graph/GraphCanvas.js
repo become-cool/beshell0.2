@@ -1,6 +1,6 @@
 const lv = require('lv')
 const Zoomer = require("../comm/Zoomer")
-const GraphTools = require("./GraphTools")
+const {GraphTools, mapPartLib} = require("./GraphTools")
 
 const GraphWidth = 300*2
 const GraphHeight = 200*2
@@ -12,6 +12,7 @@ class GraphCanvas extends lv.CleanObj{
     docOutterX = 20
     docOutterY = 20
 
+    zoom = 1
     zoomer = null
 
     workspace = null
@@ -30,7 +31,13 @@ class GraphCanvas extends lv.CleanObj{
                 // "bg-color": lv.rgb(249,244,241)
                 "bg-color": lv.rgb(249,249,249) ,
                 "bg-opa": 255 ,
-            }
+            } ,
+            children: [{
+                class: lv.Label ,
+                text: "+" ,
+                center: true ,
+                font: "m48" ,
+            }]
         })
 
         this.draggable(null, (newpos)=>{
@@ -73,7 +80,7 @@ class GraphCanvas extends lv.CleanObj{
         }
     }
 
-    // 为屏幕上的全局坐标 转换为 graph 的局部坐标
+    // 屏幕上的全局坐标 转换为 graph 的局部坐标
     globalToDoc(gx, gy) {
         let doxX = (gx-this.coordX() - this.width()/2) / this.zoomer.value
         let doxY = (gy-this.coordY() - this.height()/2) / this.zoomer.value
@@ -115,8 +122,8 @@ class GraphCanvas extends lv.CleanObj{
 
     serialize() {
         let json = {
-            x: this.x(),
-            y: this.y(),
+            x: this.xAligned(),
+            y: this.yAligned(),
             zoom: this.zoom,
             parts: {}
         }
@@ -129,6 +136,29 @@ class GraphCanvas extends lv.CleanObj{
         return json
     }
 
+    unserialize(json, model) {
+        if(json.x) {
+            this.setX(json.x)
+        }
+        if(json.y) {
+            this.setY(json.y)
+        }
+        if(json.zoom) {
+            this.zoom = json.zoom
+        }
+        this.updateLayout()
+        if(json.parts) {
+            for(let uuid in json.parts) {
+                let partjson = json.parts[uuid]
+                let clz = mapPartLib[partjson.class]
+                if(!clz) {
+                    throw new Error("unknow part class: "+partjson.class)
+                }
+                let part = model.createPart(clz)
+                part.unserialize(partjson)
+            }
+        }
+    }
 
 }
 

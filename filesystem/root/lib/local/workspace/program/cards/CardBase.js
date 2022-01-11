@@ -454,7 +454,7 @@ class CardExpression extends CardExpressionBase {
     
     serialize() {
         let json = {
-            clazz: this.constructor.name ,
+            class: this.constructor.name ,
         }
         if(this.isTop()) {
             json.x = this.x()
@@ -781,7 +781,7 @@ class CardStatement extends lv.Column{
     }
     serialize() {
         let json = {
-            clazz: this.constructor.name ,
+            class: this.constructor.name ,
         }
         this.expr.serialize(json)
 

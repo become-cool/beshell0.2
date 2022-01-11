@@ -1,6 +1,7 @@
 const VM = require("./program/VM")
 const BePad = require("./graph/parts/BePad")
 const utils = require("./comm/utils")
+const HostPart = require("./graph/parts/HostPart")
 
 const mapWidgetNameTpl = {
     TextArea:'input%i',
@@ -34,11 +35,6 @@ class AppModel extends beapi.EventEmitter {
         this.workspace = workspace
     }
 
-    createHostFromDevice(){
-        this.host = new BePad(this.workspace.graph)
-        this.addPart(this.host)
-    }
-
     createPart(partClass) {
         let part = new partClass(this.workspace.graph)
         this.addPart(part)
@@ -47,9 +43,18 @@ class AppModel extends beapi.EventEmitter {
 
     addPart(part) {
         part.uuid = utils.newUUID(this.parts)
-        this.parts[part.uuid ] = part
+        this.parts[part.uuid] = part
+        if( !this.host && part instanceof HostPart ) {
+            this.host = part
+        }
         this.emit("model.part.new", part)
     }
+
+    removePart(part) {
+        delete this.parts[part.uuid]
+        part.del()
+    }
+
 
     widgetNames(classFilter) {
         if(!classFilter){
@@ -95,12 +100,15 @@ class AppModel extends beapi.EventEmitter {
 
 
     unserialize(json) {
-        if(json.program) {
-            this.workspace.program.unserialize(json.program)
-        }
 
+        if(json.graph) {
+            this.workspace.graph.unserialize(json.graph,this)
+        }
         if(json.ui) {
             this.workspace.ui.unserialize(json.ui)
+        }
+        if(json.program) {
+            this.workspace.program.unserialize(json.program)
         }
     }
 }

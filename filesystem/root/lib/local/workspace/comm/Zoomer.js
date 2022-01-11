@@ -5,7 +5,7 @@ const ZoomSnap = 0.15
 
 class Zoomer extends lv.CleanObj{
 
-    value = 2
+    value = 1
 
     constructor(workspace) {
         super(workspace)

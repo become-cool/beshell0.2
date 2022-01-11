@@ -171,11 +171,24 @@ void quickjs_init() {
 }
 
 void quickjs_deinit() {
+
+#ifndef SIMULATION
+    multi_heap_info_t info;
+    heap_caps_get_info(&info, MALLOC_CAP_SPIRAM);
+    printf("quickjs_deinit()\n") ;
+    dn2(info.total_free_bytes, info.total_allocated_bytes)
+#endif
+
     js_std_free_handlers(rt);
     JS_FreeContext(ctx);
     JS_FreeRuntime(rt);
     rt = NULL ;
     ctx = NULL ;
+
+#ifndef SIMULATION
+    heap_caps_get_info(&info, MALLOC_CAP_SPIRAM);
+    dn2(info.total_free_bytes, info.total_allocated_bytes)
+#endif
 }
 
 void task_js_main(){

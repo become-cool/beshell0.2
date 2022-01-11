@@ -25,9 +25,7 @@ class Workspace extends lv.CleanObj {
 
         this.toolbar = new ToolBar(this)
 
-        this.model.createHostFromDevice(this.graph)
-
-        this.setActiveView(this.program)   
+        this.setActiveView(this.graph)   
 
         this.loader = new ModelLoader(this)
     }

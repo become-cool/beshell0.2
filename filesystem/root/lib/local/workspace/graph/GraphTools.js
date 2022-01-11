@@ -1,12 +1,15 @@
 const lv = require('lv')
 
 const CardStack = require("../comm/CardStack")
+const HostPart = require('./parts/HostPart')
+const BePad = require('./parts/BePad')
 const {BeMotor, BeServo} = require('./parts/BeMotor')
 const {BeScreen130, BeScreen096} = require('./parts/BeScreen')
-const lstPartLib = [
+const mapPartLib = {
+    BePad,
     BeMotor, BeServo,
     BeScreen096, BeScreen130,
-]
+}
 // this.createCard(BeMotor)
 // this.createCard(BeServo)
 // this.createCard(BeScreen130)
@@ -77,13 +80,27 @@ class GraphTools extends lv.Column{
                     text: lv.symbol.trash ,
                     ref: "remove" ,
                     visible: false ,
+                    clicked: ()=>{
+                        if(!workspace.graph.activePart || !workspace.model) {
+                            return
+                        }
+                        workspace.model.removePart(workspace.graph.activePart)
+                        console.log("part ref count:", beapi.utils.varRefCnt(workspace.graph.activePart))
+                        workspace.graph.activePart = null
+
+                    }
                 } ,
             ]
         })
 
         this.partLib = new CardStack(workspace, workspace)
         this.partLib.hide()
-        for(let clz of lstPartLib) {
+        for(let clzname in mapPartLib) {
+            let clz = mapPartLib[clzname]
+            // 忽略 HostPart
+            if( HostPart.isPrototypeOf(clz) ) {
+                continue
+            }
             this.partLib.createCard(clz.config.title, clz=>{
                 let part = workspace.model.createPart(clz)
                 part.repaint(workspace.graph.zoomer.value)
@@ -111,4 +128,5 @@ class GraphTools extends lv.Column{
     }
 }
 
-module.exports = GraphTools
+exports.GraphTools = GraphTools
+exports.mapPartLib = mapPartLib

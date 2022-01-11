@@ -123,6 +123,7 @@ class Part extends lv.CleanObj{
 
         this.setX(this.docX*zoom)
         this.setY(this.docY*zoom)
+        this.updateLayout()
         
         for(let port of this.ports) {
             port.repaint(zoom, this.dir)
@@ -154,11 +155,25 @@ class Part extends lv.CleanObj{
 
     serialize() {
         let json = {
-            clz: this.constructor.name ,
-            x: this.x ,
-            y: this.y ,
+            class: this.constructor.name ,
+            x: this.docX ,
+            y: this.docY ,
+            dir: this.dir ,
         }
         return json
+    }
+    
+    unserialize(json) {
+        if(json.x!=undefined) {
+            this.docX = json.x
+        }
+        if(json.y!=undefined) {
+            this.docY = json.y
+        }
+        if(json.dir!=undefined) {
+            this.dir = json.dir
+        }
+        this.repaint()
     }
 }
 

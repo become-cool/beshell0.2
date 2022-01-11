@@ -1,10 +1,10 @@
 const lv = require('lv')
-const Part = require('./Part')
+const HostPart = require('./HostPart')
 
 const ScreenWidth = 77.6
 const ScreenHeight = 58 // 54
 
-class BePad extends Part{
+class BePad extends HostPart {
     static config = require("./part.lib/003.js")
     constructor(parent) {
         super(parent)

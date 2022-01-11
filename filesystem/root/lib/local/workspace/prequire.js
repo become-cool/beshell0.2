@@ -9,6 +9,7 @@ module.exports = function(){
         "./comm/utils" ,
         "./graph/parts/Port" ,
         "./graph/parts/Part" ,
+        "./graph/parts/HostPart" ,
         "./graph/parts/BePad" ,
         "./graph/parts/BeMotor" ,
         "./graph/parts/BeScreen" ,

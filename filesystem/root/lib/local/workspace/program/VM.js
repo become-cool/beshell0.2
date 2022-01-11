@@ -69,7 +69,7 @@ ${codeMain}
         for(let uuid in this.cards) {
             json[uuid] = this.cards[uuid].serialize()
             if(this.cards[uuid].constructor.pkgname) {
-                json[uuid].clazz = this.cards[uuid].constructor.pkgname + '.' + json[uuid].clazz
+                json[uuid].class = this.cards[uuid].constructor.pkgname + '.' + json[uuid].class
             }
         }
         return json
@@ -79,13 +79,13 @@ ${codeMain}
         // 创建所有 card
         for(let uuid in json) {
             let cardjson = json[uuid]
-            if(!cardjson.clazz) {
-                throw new Error("missing clazz for card")
+            if(!cardjson.class) {
+                throw new Error("missing class for card")
             }
-            if(!libCardClass[cardjson.clazz]){
-                throw new Error("unknow card class:"+cardjson.clazz)
+            if(!libCardClass[cardjson.class]){
+                throw new Error("unknow card class:"+cardjson.class)
             }
-            let card = new libCardClass[cardjson.clazz](workspace.program, workspace.program)
+            let card = new libCardClass[cardjson.class](workspace.program, workspace.program)
             card.uuid = uuid
             this.addCard(card)
         }

@@ -112,7 +112,7 @@ class UI extends lv.CleanObj{
     }
     serialzeWidget(widget) {
         let json = {
-            clazz: widget.constructor.name ,
+            class: widget.constructor.name ,
             x: widget.x() ,
             y: widget.y() ,
             width: widget.width() ,
@@ -143,11 +143,11 @@ class UI extends lv.CleanObj{
 
     unserialize(json) {
         for(let wjson of json) {
-            let clazz = lv[wjson.clazz]
+            let clazz = lv[wjson.class]
             if(typeof clazz!='function') {
-                throw new Error('unknow widget class: '+wjson.clazz)
+                throw new Error('unknow widget class: '+wjson.class)
             }
-            this.createWidget(lv[wjson.clazz], wjson)
+            this.createWidget(clazz, wjson)
         }
     }
 }

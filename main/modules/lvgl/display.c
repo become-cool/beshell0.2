@@ -468,7 +468,7 @@ excp:
     return JS_EXCEPTION ;
 }
 
-void be_module_lvgl_malloc_buffer() {    
+void be_module_lvgl_malloc_buffer() {
 #ifndef SIMULATION
     dma_buff = heap_caps_malloc( DMA_BUFF_LEN + DMA_BUFF_AUX_SIZE, MALLOC_CAP_DMA);
     if(!dma_buff) {
@@ -556,6 +556,11 @@ void be_lv_display_reset(JSContext * ctx) {
     JS_FreeValue(ctx, js_indev_global_cb_pressing) ;
     js_indev_global_cb_pressing = JS_UNDEFINED;
     
+#ifndef SIMULATION
+    multi_heap_info_t info;
+    heap_caps_get_info(&info, MALLOC_CAP_SPIRAM);
+    dn2(info.total_free_bytes, info.total_allocated_bytes)
+#endif
 
     // 清理 disp (timer,indev,lv_obj_t) / driver 
     lv_disp_t * disp = NULL ;
@@ -584,4 +589,10 @@ void be_lv_display_reset(JSContext * ctx) {
         lv_indev_remove(indev) ;
         indev = NULL ;
     }
+
+    
+#ifndef SIMULATION
+    heap_caps_get_info(&info, MALLOC_CAP_SPIRAM);
+    dn2(info.total_free_bytes, info.total_allocated_bytes)
+#endif
 }

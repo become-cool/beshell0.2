@@ -67,7 +67,7 @@ module.exports = class NewAppDialog extends lv.Obj {
                         children: [
                             {
                                 class: lv.Checkbox ,
-                                text: "进入控制台" ,
+                                text: "进入工作台" ,
                                 font: "msyh" , 
                                 style: {
                                     "text-color": lv.rgb(160)

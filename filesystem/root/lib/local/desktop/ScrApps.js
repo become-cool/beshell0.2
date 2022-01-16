@@ -97,11 +97,7 @@ module.exports = class ScrApps extends lv.Obj {
         if(last) {
             setTimeout(()=>{
                 // require("workspace").start( last )
-<<<<<<< Updated upstream
             },500)
-=======
-            }, 0)
->>>>>>> Stashed changes
         }
     }
 

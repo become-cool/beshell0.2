@@ -39,11 +39,11 @@ static void js_lv_event_cb(lv_event_t * event) {
         param = lv_dir_const_to_jsstr(ctx, dir) ;
     }
 
-    MAKE_ARGV3( cbargv, jsname, jsname, param )
+    MAKE_ARGV4( cbargv, jsname, jsname, jstarget, param )
 
     JSValue func_emit = js_get_prop(ctx, jstarget, 1, "emit") ;
     
-    JSValue ret = JS_Call(ctx, func_emit, jstarget, 3, cbargv) ;
+    JSValue ret = JS_Call(ctx, func_emit, jstarget, 4, cbargv) ;
     if(JS_IsException(ret)) {
         js_std_dump_error(ctx) ;
     }

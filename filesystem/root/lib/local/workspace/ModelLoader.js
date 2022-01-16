@@ -114,8 +114,13 @@ class Saver extends lv.CleanObj{
             model.unserialize(json)
             // setTimeout(() =>this.hide(), 1000)
 
-            json = JSON.load(folderPath + '/ui.json')
-            this.workspace.ui.unserialize(json)
+            try{
+                json = JSON.load(folderPath + '/ui.json')
+                this.workspace.ui.unserialize(json)
+            }catch(e) {
+                console.error(e)
+                console.error(e.stack)
+            }
 
             model.folderPath = folderPath
 

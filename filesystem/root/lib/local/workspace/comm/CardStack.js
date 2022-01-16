@@ -33,7 +33,7 @@ class CardStack extends lv.CleanObj{
             autoHide: true ,
             style: {
                 "pad-left": 8 ,
-                "bg-opa": 220 ,
+                "bg-opa": 255 ,
                 "bg-color": lv.palette("grey") ,
             } ,
             flag: ["scrollable"] ,
@@ -49,6 +49,8 @@ class CardStack extends lv.CleanObj{
 
     contentHeight = 0
 
+    dragCenter = true
+
     createCard(title, cb, cbData) {
         let card = new Card(this)
         card.setText(title)
@@ -60,10 +62,14 @@ class CardStack extends lv.CleanObj{
         card.setY(this.contentHeight)
         this.contentHeight+= card.height() + CardPad
 
-        let startx
+        let startx, locx, locy
         let draggable = card.draggable()
         draggable.setStart(()=>{
-            [startx] = card.coords()
+            let {x,y} = lv.inputPoint()
+            let [_x,_y] = card.coords()
+            startx = _x
+            locx = x - _x
+            locy = y - _y
         })
         draggable.setDragging((pos)=>{
             if(pos.x<startx){
@@ -77,34 +83,33 @@ class CardStack extends lv.CleanObj{
         draggable.setStop((cusStop)=>{
             card.setX(0)
             if(cusStop) {
-                card.emit("new-part")
-            }
-        })
-
-        card.on("new-part", ()=>{
-            this.hide()
-            let obj = cb && cb(cbData)
-            if(!obj) {
-                return
-            }
-
-            setTimeout(()=>{
-
-                let pos = lv.inputPoint()
-                obj.setCoords(pos.x-obj.width()/2, pos.y-obj.height()/2)
-                obj.updateLayout()
-    
-                try{
-                    lv.fakeIndev(pos.x, pos.y, false)
-                    lv.tickIndev()
-                    lv.fakeIndev(pos.x, pos.y, true)
-                    lv.tickIndev()
-                }catch(e){
-                    console.log(e)
-                    console.log(e.stack)
+                this.hide()
+                let obj = cb && cb(cbData)
+                if(!obj) {
+                    return
                 }
-
-            }, 0)
+                let pos = lv.inputPoint()
+                if(this.dragCenter) {
+                    obj.updateLayout()
+                    obj.setCoords(pos.x-obj.width()/2, pos.y-obj.height()/2)
+                }
+                else {
+                    obj.setCoords(pos.x-locx, pos.y-locy)
+                }
+                
+    
+                setTimeout(()=>{        
+                    try{
+                        lv.fakeIndev(pos.x, pos.y, false)
+                        lv.tickIndev()
+                        lv.fakeIndev(pos.x, pos.y, true)
+                        lv.tickIndev()
+                    }catch(e){
+                        console.log(e)
+                        console.log(e.stack)
+                    }
+                }, 0)
+            }
         })
 
         this.cards.push(card)

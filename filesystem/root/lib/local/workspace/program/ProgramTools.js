@@ -47,7 +47,6 @@ class ProgramTools extends lv.Column{
                 text: catconf.icon ,
                 font: 'm12' ,
                 clicked() {
-                    
                     if(this.stack.toggle()) {
                         if(self.activeCategory && self.activeCategory!=this) {
                             self.activeCategory.stack.hide()
@@ -60,6 +59,7 @@ class ProgramTools extends lv.Column{
                 }
             })
             category.stack = new CardStack(workspace)
+            category.stack.dragCenter = false
             for(let name in catconf.cards) {
                 let clz = catconf.cards[name]
                 let card = new clz(category.stack, null)

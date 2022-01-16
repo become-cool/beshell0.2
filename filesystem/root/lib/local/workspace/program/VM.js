@@ -1,6 +1,7 @@
 const base = require("./cards/CardBase")
 const basic = require("./cards/basic")
 const utils = require("../comm/utils")
+const appTpl = require("../app_tpl")
 
 class VM extends beapi.EventEmitter {
 
@@ -28,40 +29,29 @@ class VM extends beapi.EventEmitter {
 
         for(let uuid in this.cards) {
             let card = this.cards[uuid]
+            if(!card.isTop()) {
+                continue
+            }
             if(card instanceof base.CardEvent) {
                 if(card instanceof basic.Setup) {
-                    codeSetup+= card.generateStack(1) + "\r\n\r\n"
+                    codeSetup+= card.generate(2) + "\r\n\r\n"
                 }
                 else {
-                    codeEvents+= card.generateStack(1) + "\r\n\r\n"
+                    codeEvents+= card.generate(2) + "\r\n\r\n"
                 }
             }
             else if(card instanceof base.CardStatement) {
                 if(card.prev || card.parent() instanceof base.CardStatement) {
                     continue
                 }
-                codeMain+= card.generateStack(1) + "\r\n\r\n"
+                codeMain+= card.generateQueue(2) + "\r\n\r\n"
             }
         }
 
-        return `
-// 该文件由 Workspace 自动生成，所有修改都可能在下次保存时被还原
-if(!global.be) {
-    global.be = {}
-}
-const be = global.be
-exports.setup = function () {
-    be.var = {}
-    be.part = {}
-${codeSetup}
-}
-
-exports.main = function () {
-${codeEvents}
-
-${codeMain}
-}
-`
+        return appTpl.appjs
+                    .replace("%{codeSetup}",codeSetup)
+                    .replace("%{codeEvents}",codeEvents)
+                    .replace("%{codeMain}",codeMain)
     }
 
     serialize() {

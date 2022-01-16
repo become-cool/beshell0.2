@@ -1,8 +1,8 @@
 {
-    "name": "app3",
+    "name": "unname_app",
     "version": "1.0.0",
-    "title": "app3",
-    "uuid": "589d06c7-425e-46fa-8deb-b6bc53d7fa87",
-    "icon": "/lib/icon/chart.png",
+    "title": "unname app",
+    "uuid": "5f9ad980-ff3e-43d5-891a-295ed35861ac",
+    "icon": "/lib/icon/32/alarm.png",
     "main": "index.js"
 }

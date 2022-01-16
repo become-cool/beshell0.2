@@ -26,12 +26,12 @@ class Desktop extends lv.Obj {
             this.updateLayout()
             let width = this.width()
 
-            this._wallpaperOuter = new lv.CleanObj(this)
-            this._wallpaperOuter.setWidth(width)
-            this._wallpaperOuter.setHeight("100%")
-            this._wallpaperOuter.setStyle("bg-opa",0)
-            this._wallpaper = new lv.Img(this._wallpaperOuter)
-            this._wallpaper.setSrc("/home/become/bg.png")
+            // this._wallpaperOuter = new lv.CleanObj(this)
+            // this._wallpaperOuter.setWidth(width)
+            // this._wallpaperOuter.setHeight("100%")
+            // this._wallpaperOuter.setStyle("bg-opa",0)
+            // this._wallpaper = new lv.Img(this._wallpaperOuter)
+            // this._wallpaper.setSrc("/home/become/bg.png")
 
 
             this._panels = new lv.CleanObj(this)
@@ -54,7 +54,8 @@ class Desktop extends lv.Obj {
             this._apps.setHeight("100%")
             this._apps.setX(width*2)
 
-            this.on("gesture",(e, dir)=>{
+            this.on("gesture",(e, target, dir)=>{
+                console.log("<<<------------>>>", e, target, dir)
                 if(dir=="left") {
                     this.setActivePanel(this.activePanel+1, true)
                 }
@@ -81,6 +82,8 @@ class Desktop extends lv.Obj {
                 this._wallpaperOuter.scrollToX(i*(ww/2), !!anim)
             }
         }
+
+        console.log(444)
         
     }
 }

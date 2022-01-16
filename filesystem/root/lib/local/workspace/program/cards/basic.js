@@ -80,6 +80,12 @@ class OperatorTwo extends base.CardExpression {
         }
         return NaN
     }
+    generate() {
+        let left = this.slots.left.generate()
+        let right = this.slots.right.generate()
+        let op = this.slots.op.value
+        return `Number(${left}) ${op} Number(${right})`
+    }
 }
 
 class MathFunctions extends base.CardExpression {
@@ -122,7 +128,7 @@ class If extends base.CardControl {
     }
     generate(indent) {
         let what = this.expr.slots.what.generate()
-        let body = this.proc1.first? this.proc1.first.generateStack(indent+1): "" ;
+        let body = this.proc1.first? this.proc1.first.generateQueue(indent+1): "" ;
         indent = " ".repeat(indent*4)
         return `${indent}if(${what}){
 ${body}
@@ -149,7 +155,15 @@ class IfElse extends base.CardControl {
         this.runNext()
     }
     generate() {
-
+        let what = this.expr.slots.what.generate()
+        let body1 = this.proc1.first? this.proc1.first.generateQueue(indent+1): "" ;
+        let body12 = this.proc2?.first? this.proc2.first.generateQueue(indent+1): "" ;
+        indent = " ".repeat(indent*4)
+        return `${indent}if(${what}){
+${body1}
+${indent}} else {
+${body2}
+${indent}}`
     }
 }
 
@@ -160,6 +174,21 @@ class IsNumber extends base.CardCompare {
         this.addSlot("what")
         this.addMenu(base.shareMenu("isornot", ["is","is not"]), "op")
         this.addLabel("a number")
+    }
+    evaluate() {
+        let what = this.slots.what.evaluate()
+        if(this.slots.op.value=='is') {
+            return ! isNaN(what)
+        }
+        else if(this.slots.op.value=='is not') {
+            return isNaN(what)
+        }
+        return false
+    }
+    
+    generate() {
+        let is = this.slots.op.value=='is'? "!": ""
+        return `${is}isNaN(${this.slots.what.generate()})`
     }
 }
 

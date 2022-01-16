@@ -66,8 +66,13 @@ module.exports = class ScrApps extends lv.Obj {
     dlgNewApp() {
         if(!this._dlgNewApp) {
             this._dlgNewApp = new NewAppDialog(lv.active())
-            this._dlgNewApp.on("new-app",(appPath)=>{
+            this._dlgNewApp.on("new-app",(appPath, startWorkspace)=>{
                 this.loadAppIcon(appPath)
+                if(startWorkspace) {
+                    setTimeout(()=>{
+                        require("workspace").start( appPath )
+                    }, 0)
+                }
             })
         }
         else {
@@ -88,10 +93,15 @@ module.exports = class ScrApps extends lv.Obj {
                 last = folder
             }
         }
+
         if(last) {
             setTimeout(()=>{
-                require("workspace").start( last )
+                // require("workspace").start( last )
+<<<<<<< Updated upstream
             },500)
+=======
+            }, 0)
+>>>>>>> Stashed changes
         }
     }
 
@@ -112,12 +122,12 @@ module.exports = class ScrApps extends lv.Obj {
                     require("workspace").start( path )
                 } ,
                 longPressed: ()=>{
-                    this.popupAppMenu(appico, path)
+                    this.popupAppMenu(path)
                     longPressed = true
                 }
             })
 
-            console.log("load app icon",path)
+            // console.log("load app icon",path)
 
             this.refs.btnNew.moveToIndex(this.refs.appPad.childCnt()-1)
 
@@ -127,42 +137,27 @@ module.exports = class ScrApps extends lv.Obj {
         }
     }
 
-    popupAppMenu(appico, path) {
+    popupAppMenu(path) {
 
         selectedAppFolder = path
 
         if(!this._appMenu) {
-            this._appMenu = new AppMenu(this)
+            this._appMenu = new lv.Menu(null, {
+                items: [
+                    { value:"运行", font:"msyh", callback:()=>{
+                    }} ,
+                    { value:"开机时运行", font:"msyh", callback:()=>{
+                    }} ,
+                    { value:"工作台", font:"msyh", callback:()=>{
+                        require("workspace").start( path )
+                    }} ,
+                    { value:"删除", font:"msyh", callback:()=>{
+                        
+                    }} ,
+                ]
+            })
             this._appMenu.hide()
         }
-        let {x,y} = lv.inputPoint()
-
-        this._appMenu.updateLayout()
-
-        this._appMenu.show()
-        let mx = this.width() - this._appMenu.width()
-        let my = this.height() - this._appMenu.height()
-        if(x>mx) x = mx
-        if(y>my) y = my
-        this._appMenu.setCoords(x, y)
-    }
-}
-
-class AppMenu extends lv.List {
-    constructor(parent) {
-        super(parent)
-        this.setWidth(-1)
-        this.setStyle("max-width",170)
-        this.addItem(lv.symbol.gps, "开机启动", ()=>{
-        })
-        this.addItem(lv.symbol.edit, "编辑", ()=>{
-            require("workspace").start( selectedAppFolder )
-        })
-        this.addItem(lv.symbol.trash, "删除", ()=>{
-            console.log("ccc")
-        })
-        this.addItem(lv.symbol.close, "取消", ()=>{
-            this.hide()
-        })
+        this._appMenu.popup()
     }
 }

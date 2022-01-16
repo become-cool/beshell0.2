@@ -106,8 +106,10 @@ void be_module_repl_loop(JSContext * ctx) {
             JSValue jsstr = JS_NewStringLen(ctx, buf, num_bytes) ;
             MAKE_ARGV1(jsargv, jsstr);
 
-            JS_Call(ctx, js_stdin_callback, JS_UNDEFINED, 1, jsargv) ;
+            JSValue ret = JS_Call(ctx, js_stdin_callback, JS_UNDEFINED, 1, jsargv) ;
+            JS_FreeValue(ctx, ret) ;
             free(jsargv) ;
+            JS_FreeValue(ctx, jsstr) ;
         }
     }
 }

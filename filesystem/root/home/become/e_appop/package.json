@@ -1,8 +1,0 @@
-{
-    "name": "app1",
-    "version": "1.0.0",
-    "title": "app1",
-    "uuid": "c107a40f-7dd4-4192-93db-73aea5561e81",
-    "icon": "/lib/icon/folder.png",
-    "main": "index.js"
-}

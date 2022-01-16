@@ -28,6 +28,18 @@ class UIEvent extends base.CardEvent {
     bgColor() {
         return bgColor
     }
+    generate(indent) {
+        let wname = JSON.stringify(this.expr.slots.widget.value)
+        let event = this.expr.slots.event.value
+        let body = ""
+        if(this.next) {
+            body = this.next.generateQueue(indent+1)
+        }
+        indent = " ".repeat(indent*4)
+        return `${indent}app.ui[${wname}].on("${event}",()=>{
+${body}
+${indent}})`
+    }
 }
 
 
@@ -53,8 +65,8 @@ class UIGetText extends base.CardExpression {
         return bgColor
     }
     generate() {
-        let strname = JSON.stringify(this.expr.slots.widget.value)
-        return `be.ui[${strname}].text()`
+        let strname = JSON.stringify(this.slots.widget.value)
+        return `this.ui[${strname}].text()`
     }
 }
 class UISetText extends base.CardStatement {
@@ -86,7 +98,7 @@ class UISetText extends base.CardStatement {
         let strname = JSON.stringify(this.expr.slots.widget.value)
         let what = this.expr.slots.what.generate()
         indent = " ".repeat(indent*4)
-        return `${indent}be.ui[${strname}].setText(${what})`
+        return `${indent}this.ui[${strname}].setText(${what})`
     }
 }
 

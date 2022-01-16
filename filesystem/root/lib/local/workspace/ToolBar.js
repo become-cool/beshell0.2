@@ -36,6 +36,7 @@ class ToolBar extends lv.Obj {
                             class: "Img" ,
                             src: '/lib/icon/16/plugins.png' ,
                             clicked() {
+                                console.log("graph")
                                 workspace.setActiveView(workspace.graph)
                             }
                         } ,
@@ -43,6 +44,7 @@ class ToolBar extends lv.Obj {
                             class: "Img" ,
                             src: '/lib/icon/16/ui.png' ,
                             clicked() {
+                                console.log("ui")
                                 workspace.setActiveView(workspace.ui)
                             }
                         } ,
@@ -50,6 +52,7 @@ class ToolBar extends lv.Obj {
                             class: "Img" ,
                             src: '/lib/icon/16/program.png' ,
                             clicked() {
+                                console.log("program")
                                 workspace.setActiveView(workspace.program)
                             }
                         } ,
@@ -64,6 +67,7 @@ class ToolBar extends lv.Obj {
                     ]
                 } ,
             ]
+
         }, this)
         
         workspace.on("ws-active-view-changed", (view)=>{
@@ -79,7 +83,7 @@ class ToolBar extends lv.Obj {
             this.viewTools = tools
         })
 
-        this.menu = new lv.Menu({
+        this.menu = new lv.Menu(null, {
             items: [
                 { value:"设置", font:"msyh", callback:()=>{
                 }} ,
@@ -87,10 +91,10 @@ class ToolBar extends lv.Obj {
                     workspace.loader.save()
                 }} ,
                 { value:"运行", font:"msyh", callback:()=>{
-                    
+                    process.reset(3, workspace.model.folderPath)
                 }} ,
                 { value:"退出", font:"msyh", callback:()=>{
-                    
+                    process.reboot()
                 }} ,
             ]
         })

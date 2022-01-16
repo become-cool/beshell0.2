@@ -111,6 +111,11 @@ beapi.lvgl.Obj.prototype.fromJson = function fromJson(json, refs){
                     this.addFlag(flag)
                 }
             }
+            if(json.state) {
+                for(let state of json.state) {
+                    this.addState(state)
+                }
+            }
 
             if(json.bubble) {
                 this.addFlag("event-bubble")

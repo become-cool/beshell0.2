@@ -69,6 +69,7 @@ class UI extends lv.CleanObj{
         if(json) {
             widget.fromJson(json)
         }
+        widget.name = json.ref || undefined
         this.workspace.model.addWidget(widget)
         widget.shadow = new WidgetShadow(widget, this.workspace.ui)
         return widget
@@ -113,10 +114,7 @@ class UI extends lv.CleanObj{
     serialzeWidget(widget) {
         let json = {
             class: widget.constructor.name ,
-            x: widget.x() ,
-            y: widget.y() ,
-            width: widget.width() ,
-            height: widget.height() ,
+            ref: widget.name,
         }
 
         if( typeof widget.text=="function") {
@@ -128,10 +126,15 @@ class UI extends lv.CleanObj{
             let stylejson = {}
             let props = style.props()
             for(let propName of props) {
-                if(ignoreStyles.includes(propName)) {
+                if("unknow"==propName) {
                     continue
                 }
-                stylejson[propName] = style.get(propName)
+                if( styleToProp.includes(propName) ) {
+                    json[propName] = style.get(propName)
+                }
+                else {
+                    stylejson[propName] = style.get(propName)
+                }
             }
             if(stylejson.length) {
                 json.style = stylejson
@@ -152,5 +155,5 @@ class UI extends lv.CleanObj{
     }
 }
 
-const ignoreStyles = ["x", "y", "width", "height", "unknow"]
+const styleToProp = ['x', 'y', 'width', 'height']
 module.exports = UI

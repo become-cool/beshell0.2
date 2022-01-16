@@ -9,9 +9,11 @@ class Menu extends beapi.lvgl.Obj {
     items_cb = null
     value = null
 
-    constructor(json) {
-        let sys = lv.sysLayer()
-        super(sys)
+    constructor(parent, json) {
+        if(!parent) {
+            parent = lv.sysLayer()
+        }
+        super(parent)
         this.fromJson({
             width: -1 ,
             height: -1 ,

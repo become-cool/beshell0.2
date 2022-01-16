@@ -24,7 +24,7 @@ class BeMotor extends Part{
         // dscAxie.setBorderSide( lv.side.top|lv.side.left|lv.side.right )
         dscAxie.setBgColor(lv.rgb(255,255,255))
 
-        this.on("draw-main",(ename, clip)=>{
+        this.on("draw-main",(ename, target, clip)=>{
             let zoom = graph.zoom
             this.updateCenterCoords()
 

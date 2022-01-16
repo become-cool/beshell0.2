@@ -88,7 +88,13 @@ class Saver extends lv.CleanObj{
             let code = this.workspace.model.vm.generate()
             fs.writeFileSync(appjsPath, code)
 
-            setTimeout(() =>this.hide(), 1000)
+            let uijsonPath = folderPath + '/ui.json'
+            this.desc.setText(uijsonPath)
+            let uijson = this.workspace.ui.serialize()
+            fs.writeFileSync(uijsonPath, JSON.stringify(uijson,null,4))
+
+            // setTimeout(() =>this.hide(), 1000)
+            this.hide()
             
         }catch(e){
 
@@ -98,26 +104,29 @@ class Saver extends lv.CleanObj{
         }
     }
 
-        
     load(folderPath, model) {
         
         this.title.setText("正在加载APP ...")
         this.show()
         
         try{
-            let wsjsonPath = folderPath + '/workspace.json'
-            let json = JSON.load(wsjsonPath)
+            let json = JSON.load(folderPath + '/workspace.json')
             model.unserialize(json)
+            // setTimeout(() =>this.hide(), 1000)
+
+            json = JSON.load(folderPath + '/ui.json')
+            this.workspace.ui.unserialize(json)
 
             model.folderPath = folderPath
-            setTimeout(() =>this.hide(), 1000)
 
+            this.hide()
         }catch(e){
 
             this.title.setText("加载APP时遇到错误")
             console.error(e)
             console.error(e.stack)
         }
+        
     }
 
 }

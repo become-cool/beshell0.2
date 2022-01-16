@@ -45,7 +45,6 @@ extern "C" {
 #endif
 
 #define JS_BOOL int
-
 typedef struct JSRuntime JSRuntime;
 typedef struct JSContext JSContext;
 typedef struct JSObject JSObject;
@@ -761,6 +760,7 @@ JSValue JS_GetPrototype(JSContext *ctx, JSValueConst val);
 /* set theJSPropertyEnum.is_enumerable field */
 #define JS_GPN_SET_ENUM     (1 << 5)
 
+void js_free_prop_enum(JSContext *ctx, JSPropertyEnum *tab, uint32_t len) ;
 int JS_GetOwnPropertyNames(JSContext *ctx, JSPropertyEnum **ptab,
                            uint32_t *plen, JSValueConst obj, int flags);
 int JS_GetOwnProperty(JSContext *ctx, JSPropertyDescriptor *desc,
@@ -1040,6 +1040,8 @@ int JS_SetModuleExportList(JSContext *ctx, JSModuleDef *m,
 
 
 int JS_GetClassIDFromProto(JSContext *ctx, JSValue proto, JSClassID * out) ;
+
+void JS_FreeLeaks(JSRuntime *rt,JSContext * ctx) ;
 
 #ifdef __cplusplus
 } /* extern "C" { */

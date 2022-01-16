@@ -188,7 +188,15 @@ class CardSlotExpression extends lv.CleanObj {
         return null
     }
     generate() {
-        return this.expr? this.expr.generate(): 'undefined'
+        if(this.expr) {
+            return this.expr.generate()
+        }
+        else if (this.input) {
+            return this.input.text() || ""
+        }
+        else {
+            return 'undefined'
+        }
     }
 }
 
@@ -208,7 +216,7 @@ class CardSlotCompare extends CardSlotExpression {
     }
     appearance() {
         this.setStyle("min-width", 30)
-        this.on("draw-main", (e, clip)=>{
+        this.on("draw-main", (e, target, clip)=>{
             if(this.expr) {
                 return
             }
@@ -489,7 +497,7 @@ class CardCompare extends CardExpression{
                 "pad-bottom": 2 ,
             }
         })
-        this.on("draw-main", (e, clip)=>{
+        this.on("draw-main", (e, target, clip)=>{
             let h = this.height()
             let half = h/2
             let w = this.width() - 1
@@ -621,7 +629,7 @@ class CardStatement extends lv.Column{
         return lv.palette("orange")
     }
     appearance() {
-        this.on("draw-main",(event,clip)=>{
+        this.on("draw-main",(e, target, clip)=>{
             let [x,y] = this.coords()
             let h = this.height()
             let w = this.width()
@@ -769,10 +777,13 @@ class CardStatement extends lv.Column{
         console.log(this.constructor.name+".generate() not implemented")
         return ''
     }
-    generateStack(indent) {
+    generateQueue(indent) {
         let code = ''
         for(let statement=this; statement; statement=statement.next) {
-            code+= this.generate(indent) + "\r\n"
+            if(code) {
+                code+= "\r\n"
+            }
+            code+= statement.generate(indent)
         }
         return code
     }
@@ -839,7 +850,7 @@ class CardEvent extends CardStatement{
         }
     }
     appearance() {
-        this.on("draw-main", (e, clip)=>{
+        this.on("draw-main", (e, target, clip)=>{
             let width = this.width() - 1 ;
             let height = this.height() - 1 ;
             let path = new lv.Path()
@@ -893,7 +904,7 @@ class CardControl extends CardStatement{
     }
 
     appearance() {
-        this.on("draw-main", (e, clip)=>{
+        this.on("draw-main", (e, target, clip)=>{
             let width = this.width() - 1 ;
             let y1 = this._innerCeil(this.proc1)
             let y2 = this._innerFloor(this.proc1)
@@ -1053,7 +1064,7 @@ class CardControl extends CardStatement{
 const mapShredMenu = {}
 exports.shareMenu = function(name, items) {
     if(!mapShredMenu[name]) {
-        mapShredMenu[name] = new lv.Menu({items})
+        mapShredMenu[name] = new lv.Menu(null, {items})
         if((items instanceof Array) && items.length) {
             mapShredMenu[name].setActive(items[0])
         }

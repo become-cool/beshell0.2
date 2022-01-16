@@ -91,7 +91,6 @@ class AppModel extends beapi.EventEmitter {
     serialize() {
         let json = {
             graph: this.workspace.graph.serialize() ,
-            ui: this.workspace.ui.serialize() ,
             program: this.workspace.program.serialize() ,
         }
 
@@ -104,9 +103,9 @@ class AppModel extends beapi.EventEmitter {
         if(json.graph) {
             this.workspace.graph.unserialize(json.graph,this)
         }
-        if(json.ui) {
-            this.workspace.ui.unserialize(json.ui)
-        }
+        // if(json.ui) {
+        //     this.workspace.ui.unserialize(json.ui)
+        // }
         if(json.program) {
             this.workspace.program.unserialize(json.program)
         }

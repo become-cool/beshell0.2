@@ -1,5 +1,5 @@
-module.exports = function(){
-    return prequire([
+module.exports = [
+    [
         "./NewAppDialog" ,
         "./ToolBar" ,
         "./AppModel" ,
@@ -23,5 +23,6 @@ module.exports = function(){
         "./program/Program" ,
         "./program/ProgramTools" ,
         "./Workspace" ,
-    ], require)
-}
+    ]
+    , require
+]

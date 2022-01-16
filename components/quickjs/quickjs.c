@@ -39,6 +39,8 @@
 #include <malloc.h>
 #endif
 
+// #include "utils.h"
+
 #include "cutils.h"
 #include "list.h"
 #include "quickjs.h"
@@ -95,7 +97,7 @@
 /* dump objects freed by the garbage collector */
 //#define DUMP_GC_FREE
 /* dump objects leaking when freeing the runtime */
-//#define DUMP_LEAKS  1
+#define DUMP_LEAKS 1
 /* dump memory usage before running the garbage collector */
 //#define DUMP_MEM
 //#define DUMP_OBJECTS    /* dump objects in JS_FreeContext */
@@ -125,7 +127,7 @@ enum {
     JS_CLASS_SYMBOL,            /* u.object_data */
     JS_CLASS_ARGUMENTS,         /* u.array       | length */
     JS_CLASS_MAPPED_ARGUMENTS,  /*               | length */
-    JS_CLASS_DATE,              /* u.object_data */
+    JS_CLASS_DATE,              /* u.object_data 10 */
     JS_CLASS_MODULE_NS,
     JS_CLASS_C_FUNCTION,        /* u.cfunc */
     JS_CLASS_BYTECODE_FUNCTION, /* u.func */
@@ -2257,8 +2259,10 @@ void JS_FreeContext(JSContext *ctx)
     JSRuntime *rt = ctx->rt;
     int i;
 
-    if (--ctx->header.ref_count > 0)
+    if (--ctx->header.ref_count > 0) {
+        // printf("ctx->header.ref_count = %d\n", ctx->header.ref_count) ;
         return;
+    }
     assert(ctx->header.ref_count == 0);
     
 #ifdef DUMP_ATOMS
@@ -3407,6 +3411,8 @@ int JS_NewClass(JSRuntime *rt, JSClassID class_id, const JSClassDef *class_def)
 {
     int ret, len;
     JSAtom name;
+
+    // printf("class id:%d, class name %s \n", class_id, class_def->class_name) ;
 
     len = strlen(class_def->class_name);
     name = __JS_FindAtom(rt, class_def->class_name, len, JS_ATOM_TYPE_STRING);
@@ -5269,7 +5275,6 @@ static void js_bytecode_function_finalizer(JSRuntime *rt, JSValue val)
     JSFunctionBytecode *b;
     JSVarRef **var_refs;
     int i;
-
     p1 = p->u.func.home_object;
     if (p1) {
         JS_FreeValueRT(rt, JS_MKPTR(JS_TAG_OBJECT, p1));
@@ -5278,8 +5283,9 @@ static void js_bytecode_function_finalizer(JSRuntime *rt, JSValue val)
     if (b) {
         var_refs = p->u.func.var_refs;
         if (var_refs) {
-            for(i = 0; i < b->closure_var_count; i++)
+            for(i = 0; i < b->closure_var_count; i++){
                 free_var_ref(rt, var_refs[i]);
+            }
             js_free_rt(rt, var_refs);
         }
         JS_FreeValueRT(rt, JS_MKPTR(JS_TAG_FUNCTION_BYTECODE, b));
@@ -7357,7 +7363,7 @@ static int num_keys_cmp(const void *p1, const void *p2, void *opaque)
         return 1;
 }
 
-static void js_free_prop_enum(JSContext *ctx, JSPropertyEnum *tab, uint32_t len)
+void js_free_prop_enum(JSContext *ctx, JSPropertyEnum *tab, uint32_t len)
 {
     uint32_t i;
     if (tab) {
@@ -53602,10 +53608,6 @@ void JS_AddIntrinsicTypedArrays(JSContext *ctx)
 }
 
 
-
-
-
-
 int JS_GetClassIDFromProto(JSContext *ctx, JSValue proto, JSClassID * out) {
     void * p = JS_VALUE_GET_PTR(proto) ;
     for(uint32_t i=0;i<ctx->rt->class_count;i++){
@@ -53616,3 +53618,144 @@ int JS_GetClassIDFromProto(JSContext *ctx, JSValue proto, JSClassID * out) {
     }
     return 0 ;
 }
+
+
+
+
+// static void free_object2(JSRuntime *rt, JSObject *p)
+// {
+//     int i;
+//     JSClassFinalizer *finalizer;
+//     JSShape *sh;
+//     JSShapeProperty *pr;
+
+//     p->free_mark = 1; /* used to tell the object is invalid when
+//                          freeing cycles */
+//     /* free all the fields */
+//     sh = p->shape;
+//     pr = get_shape_prop(sh);
+
+//     // 仅 free 非 gc object 属性
+//     dn(sh->prop_count) ;
+//     if ((pr->flags & JS_PROP_TMASK) == JS_PROP_NORMAL) {
+//         for(i = 0; i < sh->prop_count; i++) {
+//             if( !JS_IsObject(p->prop[i].u.value) ){
+//                 free_property(rt, &p->prop[i], pr->flags);
+//             }
+//             pr++;
+//         }
+//     }
+
+//     js_free_rt(rt, p->prop);
+
+//     // free object 时跳过 shape
+//     // js_free_shape(rt, sh);
+
+//     /* fail safe */
+//     p->shape = NULL;
+//     p->prop = NULL;
+
+//     if (unlikely(p->first_weak_ref)) {
+//         reset_weak_ref(rt, p);
+//     }
+
+//     dn(p->class_id)
+//     finalizer = rt->class_array[p->class_id].finalizer;
+//     if (finalizer) {
+//         (*finalizer)(rt, JS_MKPTR(JS_TAG_OBJECT, p));
+//     }
+
+//     /* fail safe */
+//     p->class_id = 0;
+//     p->u.opaque = NULL;
+//     p->u.func.var_refs = NULL;
+//     p->u.func.home_object = NULL;
+
+//     remove_gc_object(&p->header);
+
+//     if (rt->gc_phase == JS_GC_PHASE_REMOVE_CYCLES && p->header.ref_count != 0) {
+//         list_add_tail(&p->header.link, &rt->gc_zero_ref_count_list);
+//     } else {
+        
+//         js_free_rt(rt, p);
+//     }
+// }
+
+
+// void JS_FreeLeaks(JSRuntime *rt, JSContext * ctx) {
+//     JSGCObjectHeader * gcobj ;
+//     JSObject * obj ;
+//     struct list_head * el,* el1 ;
+
+//     int total = 0 ;
+//     list_for_each_safe(el, el1, &rt->gc_obj_list) {
+//         gcobj = list_entry(el, JSGCObjectHeader, link);
+//         obj = (JSObject *)gcobj ;
+//         JSValue jsobj = JS_MKPTR(JS_TAG_OBJECT,obj) ;
+//         gcobj->ref_count = 1 ;
+//     }
+
+//     dn2(rt->malloc_state.malloc_size, rt->malloc_state.malloc_count)
+//     JS_RunGC(rt) ;
+//     dn2(rt->malloc_state.malloc_size, rt->malloc_state.malloc_count)
+
+//     for(int i = 0; i < rt->atom_size; i++) {
+//         JSAtomStruct *p = rt->atom_array[i];
+//         if( i<JS_ATOM_END || atom_is_free(p)) {
+//             continue ;
+//         }
+//         p->header.ref_count = 1 ;
+//     }
+//     JS_RunGC(rt) ;
+
+//     dn2(rt->malloc_state.malloc_size, rt->malloc_state.malloc_count)
+//     return ;
+    
+
+//     int count = 0 ;
+//     list_for_each_safe(el, el1, &rt->gc_obj_list) {
+//         gcobj = list_entry(el, JSGCObjectHeader, link);
+        
+//         switch(gcobj->gc_obj_type) {
+//         case JS_GC_OBJ_TYPE_JS_OBJECT:
+//             // gcobj->ref_count = 0 ;
+//             // rt->class_array[((JSObject *)gcobj)->class_id]
+
+//             obj = (JSObject *)gcobj ;
+//             // printf("free obj ref:%d; class id: %d; %d/%d; @%p\n", gcobj->ref_count, obj->class_id,count,total, obj) ;
+//             JS_DumpGCObject(rt, gcobj) ;
+//             dn(count)
+
+//             if(obj->class_id==59) {
+//                 JSValue jsobj = JS_MKPTR(JS_TAG_OBJECT,obj) ;
+                
+//                 // JS_SetPropertyStr(ctx, jsobj, "_handles", JS_UNDEFINED) ;
+                
+//                 // JSValue _handles = JS_GetPropertyStr(ctx, jsobj, "_handles") ;
+
+//                 // void * opaque = JS_GetOpaqueInternal(jsobj) ;
+//                 // dp(opaque)
+
+//                 // JS_DumpObject(rt, JS_VALUE_GET_OBJ(_handles)) ;
+
+//                 // JS_FreeValue(ctx, _handles) ;
+
+//                 // free_object2(rt, (JSObject *)gcobj);
+//             }
+
+//             else {
+//                 // free_object2(rt, (JSObject *)gcobj);
+//                 // printf("xx\n") ;
+//                 count ++ ;
+
+//             }
+//             break;
+//         case JS_GC_OBJ_TYPE_FUNCTION_BYTECODE:
+//             // gcobj->ref_count = 0 ;
+//             printf("free func\n") ;
+//             free_function_bytecode(rt, (JSFunctionBytecode *)gcobj);
+//             count ++ ;
+//             break;
+//         }
+//     }
+// }

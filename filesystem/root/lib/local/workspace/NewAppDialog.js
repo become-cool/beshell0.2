@@ -1,12 +1,13 @@
 const lv = require('lv')
+const appTpl = require("./app_tpl")
 
 module.exports = class NewAppDialog extends lv.Obj {
     constructor(parent) {
         super(parent)
 
-        this.refs = this.fromJson({
+        this.fromJson({
             width: "100%" ,
-            height: 200 ,
+            height: 220 ,
             center: true ,
             
             children:[{
@@ -65,6 +66,21 @@ module.exports = class NewAppDialog extends lv.Obj {
                         } ,
                         children: [
                             {
+                                class: lv.Checkbox ,
+                                text: "进入控制台" ,
+                                font: "msyh" , 
+                                style: {
+                                    "text-color": lv.rgb(160)
+                                } ,
+                                state: ["checked"] ,
+                                ref: "startWorkspace" ,
+                            } ,
+                            {
+                                class: lv.CleanObj ,
+                                grow: true ,
+                                height: 10 ,
+                            } ,
+                            {
                                 class: "Btn" ,
                                 font: "m12" ,
                                 text: "Cancel" ,
@@ -80,7 +96,7 @@ module.exports = class NewAppDialog extends lv.Obj {
                     }
                 ]
             }]
-        })
+        }, this)
 
         this.selectedIcon = null
 
@@ -88,7 +104,7 @@ module.exports = class NewAppDialog extends lv.Obj {
             if(filename.substr(-4)!='.png') {
                 continue
             }
-            let img = new lv.Img(this.refs.iconMenu)
+            let img = new lv.Img(this.iconMenu)
             img.src = "/lib/icon/32/"+filename
             img.fromJson({
                 src: img.src ,
@@ -128,12 +144,12 @@ module.exports = class NewAppDialog extends lv.Obj {
         lv.keyboard().hide()
         this.hide()
 
-        let path = createApp(this.refs.appName.text(), this.selectedIcon.src)
+        let path = createApp(this.appName.text(), this.selectedIcon.src)
         if(!path){
             return
         }
         
-        this.emit("new-app", path)
+        this.emit("new-app", path, this.startWorkspace.hasState("checked"))
         // lv.msg.sucess("suuccccc!")
     }
 
@@ -204,6 +220,10 @@ function createApp(title, iconpath) {
             }
         },null,4)
         writeFile(folderPath+"/workspace.json", wsjson)
+        writeFile(folderPath+"/ui.json", '[]')
+        
+        writeFile(folderPath+"/app.js", appTpl.appjs.replace(/%\{\w+\}/g, ''))
+        writeFile(folderPath+"/index.js", appTpl.indexjs)
 
         return folderPath
     }catch(e){

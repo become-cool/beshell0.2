@@ -12,19 +12,11 @@
 
         if(!process.simulate) {
             global.WiFi = require("besdk/wifi")
-            try{
-                // WiFi.restore()
-            }catch(e) {
-                console.error(e)
-            }
             require("./init.d/beconsoled.js")
             sleep(0)
-
-            // require("/lib/local/telweb/main.js")
-            // sleep(0)
         }
         
-        require("./init.d/display.js")
+        await require("./init.d/display.js")()
         sleep(0)
         
         require("./init.d/desktop.js")

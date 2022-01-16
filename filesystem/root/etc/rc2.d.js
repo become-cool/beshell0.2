@@ -5,14 +5,14 @@ try{
 
     require("./init.d/banner.js")()
 
-    global.WiFi = require("besdk/wifi")
-    try{
-        WiFi.restore()
-    }catch(e) {
-        console.error(e)
-    }
+    // global.WiFi = require("besdk/wifi")
+    // try{
+    //     WiFi.restore()
+    // }catch(e) {
+    //     console.error(e)
+    // }
 
-    require("./init.d/app.js").autoBoot()
+    // require("./init.d/app.js").autoBoot()
 
     console.log('BeShell is ready.')
 }

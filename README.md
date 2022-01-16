@@ -22,6 +22,13 @@ JSValue 是多种类型的联合体，按值传递，在 c 语言里记录 JSVal
 
 ##  quickjs / c 内存管理
 
+* `JS_NewObject` 创建一个 js 对象，确保有js变量指向这个对象，例如：可以 JS_SetPropertyStr(ctx, other, "xx", newobj) 设为其他对象的属性。否则 gc 无法自动回收，会造成内存邪路
+
+* `JS_Eval` 返回值必须 JS_FreeValue ，否则可能内存泄漏
+```
+JSValue ret = JS_Eval(ctx, code, len, "filepath", JS_EVAL_TYPE_XXX)
+JS_FreeValue(ctx, ret)
+```
 
 
 

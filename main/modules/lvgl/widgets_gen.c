@@ -5626,6 +5626,7 @@ static JSValue js_lv_checkbox_get_text(JSContext *ctx, JSValueConst this_val, in
 
 
 static const JSCFunctionListEntry js_lv_checkbox_proto_funcs[] = {
+    JS_CFUNC_DEF("setFont", 0, js_lv_label_set_font),
     JS_CFUNC_DEF("setText", 0, js_lv_checkbox_set_text),
     JS_CFUNC_DEF("setTextStatic", 0, js_lv_checkbox_set_text_static),
     JS_CFUNC_DEF("text", 0, js_lv_checkbox_get_text),

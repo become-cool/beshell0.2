@@ -44,7 +44,12 @@ const lstClasses = [
             // "js_lv_canvas_free": "free" ,
         }
     } ,
-    "Checkbox",
+    {
+        className: "Checkbox" ,
+        cusMethods: {
+            "js_lv_label_set_font": "setFont" ,
+        }
+    } ,
     "Dropdown",
     {
         className: "Img" ,

@@ -288,8 +288,14 @@ static JSValue js_lvgl_disp_active_screen(JSContext *ctx, JSValueConst this_val,
         return JS_NULL ;
     }
 
+    JSValue jsobj = JS_UNDEFINED ;
     void * objptr = lv_obj_get_user_data(scr) ;
-    JSValue jsobj = JS_MKPTR(JS_TAG_OBJECT, objptr) ;
+    if(objptr) {
+        jsobj = JS_MKPTR(JS_TAG_OBJECT, objptr) ;
+    }
+    else {
+        jsobj = js_lv_obj_wrapper(ctx,scr,JS_UNDEFINED,lv_obj_js_class_id()) ;
+    }
 
     return JS_DupValue(ctx,jsobj) ;
 }

@@ -7,8 +7,6 @@ void be_lv_widgets_init() ;
 void be_lv_widgets_require(JSContext *ctx, JSValue lvgl) ;
 void be_lv_widgets_reset(JSContext *ctx) ;
 
-void js_lv_obj_init(JSContext *ctx, JSValue jsobj) ;
-
 inline void lv_obj_set_coord_x(lv_obj_t * obj, lv_coord_t x) ;
 inline void lv_obj_set_coord_y(lv_obj_t * obj, lv_coord_t y) ;
 

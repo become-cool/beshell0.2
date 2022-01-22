@@ -129,7 +129,6 @@ const MapC2JS_Conver = {
     "uint32_t": conver_uint32 ,
     "lv_coord_t": conver_int16 ,
     "lv_obj_flag_t": conver_uint32 ,
-    "lv_state_t": conver_uint16 ,
     "lv_align_t": create_conver_mappingconst('lv_align_t', 'lv_align_jsstr_to_const') ,
     "lv_dir_t": create_conver_mappingconst('lv_dir_t', 'lv_dir_jsstr_to_const'),
     "bool": conver_bool ,
@@ -158,7 +157,7 @@ const MapC2JS_Conver = {
     "lv_btnmatrix_ctrl_t": conver_uint8,
     "lv_img_src_t": conver_uint8,
     "lv_opa_t": conver_uint8,
-    "lv_state_t": conver_uint32,
+    "lv_state_t": create_conver_mappingconst('lv_state_t', 'lv_state_jsstr_to_const'),
     "lv_part_t": conver_uint32,
     "lv_style_selector_t": conver_uint32,
     "lv_base_dir_t": create_conver_mappingconst('lv_base_dir_t', 'lv_base_dir_jsstr_to_const'),
@@ -248,7 +247,7 @@ function mk_lvobj_converfunc(type) {
         return `    JSValue retval = JS_NULL ;
     void * lvobj = ${cfunc}(thisobj${cargvLst});
     if(lvobj) {
-        retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, js_lv_${type}_class_id) ;
+        retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, 0) ;
         JS_DupValue(ctx, retval) ;
     }
 `
@@ -406,14 +405,14 @@ static JSClassID js_${clzConf.typeName}_class_id ;
         JS_FreeValue(ctx,ret) ;
         JS_FreeValue(ctx,fromJson) ;
     }
-    JS_DupValue(ctx, jsobj) ;
+    // JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
 `
         }
 
         code+= `static void js_${clzConf.typeName}_finalizer(JSRuntime *rt, JSValue val){
-    printf("js_${clzConf.typeName}_finalizer()\\n") ;
+    // printf("js_${clzConf.typeName}_finalizer()\\n") ;
     ${clzConf.ctypeName} thisobj = JS_GetOpaqueInternal(val) ;
     if( thisobj && lv_obj_get_user_data(thisobj) == JS_VALUE_GET_PTR(val) ){
         lv_obj_set_user_data(thisobj, NULL) ;
@@ -429,6 +428,27 @@ static JSClassDef js_${clzConf.typeName}_class = {
     }
     return code
 }
+
+function generateMapTypeToProto() {
+    let code = '' 
+
+    for(let clzConf of WidgetsMeta) {
+        code+= `    ${code?'else ':''}if(lv_obj_check_type(obj, & ${clzConf.typeName}_class)) {
+        return js_${clzConf.typeName}_class_id ;
+    }
+`
+    }
+
+
+    return code
+}
+// function generateDefProtos() {
+//     let code = ""
+//     for(let clzConf of WidgetsMeta) {
+//         code+= `JSValue proto_${clzConf.typeName} ;\r\n`
+//     }
+//     return code
+// }
 function generateClassRegister() {
 
     let code = ""
@@ -597,6 +617,10 @@ function main() {
     src = srcInsert(src, generateClassIDRegister(), registerclass_id_mark_start, registerclass_id_mark_end)
 
     src = srcInsert(src, generateConsts(), const_mapping_mark_start, const_mapping_mark_end)
+    // src = srcInsert(src, generateDefProtos(), start('DEF PROTOS'), end('DEF PROTOS'))
+    src = srcInsert(src, generateMapTypeToProto(), start('TYPE TO PROTO'), end('TYPE TO PROTO'))
+
+    
 
     fs.writeFileSync(dist_src_path, src)
 

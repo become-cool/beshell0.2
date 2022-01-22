@@ -1063,6 +1063,87 @@ JSValue lv_scr_load_anim_const_to_jsstr(JSContext *ctx, lv_scr_load_anim_t code)
     return JS_NewString(ctx, lv_scr_load_anim_const_to_str(code));
 }
 
+bool lv_state_str_to_const(const char * name, lv_state_t* out) {
+        if(strcmp(name,"default")==0) {
+        (*out) = LV_STATE_DEFAULT ;
+    }
+    else if(strcmp(name,"checked")==0) {
+        (*out) = LV_STATE_CHECKED ;
+    }
+    else if(strcmp(name,"focused")==0) {
+        (*out) = LV_STATE_FOCUSED ;
+    }
+    else if(strcmp(name,"focus-key")==0) {
+        (*out) = LV_STATE_FOCUS_KEY ;
+    }
+    else if(strcmp(name,"edited")==0) {
+        (*out) = LV_STATE_EDITED ;
+    }
+    else if(strcmp(name,"hovered")==0) {
+        (*out) = LV_STATE_HOVERED ;
+    }
+    else if(strcmp(name,"pressed")==0) {
+        (*out) = LV_STATE_PRESSED ;
+    }
+    else if(strcmp(name,"scrolled")==0) {
+        (*out) = LV_STATE_SCROLLED ;
+    }
+    else if(strcmp(name,"disabled")==0) {
+        (*out) = LV_STATE_DISABLED ;
+    }
+    else if(strcmp(name,"user-1")==0) {
+        (*out) = LV_STATE_USER_1 ;
+    }
+    else if(strcmp(name,"user-2")==0) {
+        (*out) = LV_STATE_USER_2 ;
+    }
+    else if(strcmp(name,"user-3")==0) {
+        (*out) = LV_STATE_USER_3 ;
+    }
+    else if(strcmp(name,"user-4")==0) {
+        (*out) = LV_STATE_USER_4 ;
+    }
+    else if(strcmp(name,"any")==0) {
+        (*out) = LV_STATE_ANY ;
+    }
+
+    else {
+        return false ;
+    }
+    return true ;
+}
+bool lv_state_jsstr_to_const(JSContext *ctx, JSValue jsstr, lv_state_t* out) {
+    char * cstr = (char *)JS_ToCString(ctx, jsstr) ;
+    bool suc = lv_state_str_to_const(cstr, out) ;
+    JS_FreeCString(ctx, cstr) ;
+    return suc ;
+}
+const char * lv_state_const_to_str(lv_state_t code) {
+
+    switch(code) {
+        case LV_STATE_DEFAULT: return "default";
+        case LV_STATE_CHECKED: return "checked";
+        case LV_STATE_FOCUSED: return "focused";
+        case LV_STATE_FOCUS_KEY: return "focus-key";
+        case LV_STATE_EDITED: return "edited";
+        case LV_STATE_HOVERED: return "hovered";
+        case LV_STATE_PRESSED: return "pressed";
+        case LV_STATE_SCROLLED: return "scrolled";
+        case LV_STATE_DISABLED: return "disabled";
+        case LV_STATE_USER_1: return "user-1";
+        case LV_STATE_USER_2: return "user-2";
+        case LV_STATE_USER_3: return "user-3";
+        case LV_STATE_USER_4: return "user-4";
+        case LV_STATE_ANY: return "any";
+
+        default:
+            return "unknow";
+    }
+}
+JSValue lv_state_const_to_jsstr(JSContext *ctx, lv_state_t code) {
+    return JS_NewString(ctx, lv_state_const_to_str(code));
+}
+
 bool lv_obj_flag_str_to_const(const char * name, lv_obj_flag_t* out) {
         if(strcmp(name,"hidden")==0) {
         (*out) = LV_OBJ_FLAG_HIDDEN ;
@@ -1659,7 +1740,7 @@ static JSValue js_lv_obj_constructor(JSContext *ctx, JSValueConst new_target, in
         JS_FreeValue(ctx,ret) ;
         JS_FreeValue(ctx,fromJson) ;
     }
-    JS_DupValue(ctx, jsobj) ;
+    // JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
 static void js_lv_obj_finalizer(JSRuntime *rt, JSValue val){
@@ -1698,11 +1779,11 @@ static JSValue js_lv_label_constructor(JSContext *ctx, JSValueConst new_target, 
         JS_FreeValue(ctx,ret) ;
         JS_FreeValue(ctx,fromJson) ;
     }
-    JS_DupValue(ctx, jsobj) ;
+    // JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
 static void js_lv_label_finalizer(JSRuntime *rt, JSValue val){
-    printf("js_lv_label_finalizer()\n") ;
+    // printf("js_lv_label_finalizer()\n") ;
     lv_label_t * thisobj = JS_GetOpaqueInternal(val) ;
     if( thisobj && lv_obj_get_user_data(thisobj) == JS_VALUE_GET_PTR(val) ){
         lv_obj_set_user_data(thisobj, NULL) ;
@@ -1737,11 +1818,11 @@ static JSValue js_lv_arc_constructor(JSContext *ctx, JSValueConst new_target, in
         JS_FreeValue(ctx,ret) ;
         JS_FreeValue(ctx,fromJson) ;
     }
-    JS_DupValue(ctx, jsobj) ;
+    // JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
 static void js_lv_arc_finalizer(JSRuntime *rt, JSValue val){
-    printf("js_lv_arc_finalizer()\n") ;
+    // printf("js_lv_arc_finalizer()\n") ;
     lv_arc_t * thisobj = JS_GetOpaqueInternal(val) ;
     if( thisobj && lv_obj_get_user_data(thisobj) == JS_VALUE_GET_PTR(val) ){
         lv_obj_set_user_data(thisobj, NULL) ;
@@ -1776,11 +1857,11 @@ static JSValue js_lv_bar_constructor(JSContext *ctx, JSValueConst new_target, in
         JS_FreeValue(ctx,ret) ;
         JS_FreeValue(ctx,fromJson) ;
     }
-    JS_DupValue(ctx, jsobj) ;
+    // JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
 static void js_lv_bar_finalizer(JSRuntime *rt, JSValue val){
-    printf("js_lv_bar_finalizer()\n") ;
+    // printf("js_lv_bar_finalizer()\n") ;
     lv_bar_t * thisobj = JS_GetOpaqueInternal(val) ;
     if( thisobj && lv_obj_get_user_data(thisobj) == JS_VALUE_GET_PTR(val) ){
         lv_obj_set_user_data(thisobj, NULL) ;
@@ -1815,11 +1896,11 @@ static JSValue js_lv_btn_constructor(JSContext *ctx, JSValueConst new_target, in
         JS_FreeValue(ctx,ret) ;
         JS_FreeValue(ctx,fromJson) ;
     }
-    JS_DupValue(ctx, jsobj) ;
+    // JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
 static void js_lv_btn_finalizer(JSRuntime *rt, JSValue val){
-    printf("js_lv_btn_finalizer()\n") ;
+    // printf("js_lv_btn_finalizer()\n") ;
     lv_btn_t * thisobj = JS_GetOpaqueInternal(val) ;
     if( thisobj && lv_obj_get_user_data(thisobj) == JS_VALUE_GET_PTR(val) ){
         lv_obj_set_user_data(thisobj, NULL) ;
@@ -1854,11 +1935,11 @@ static JSValue js_lv_btnmatrix_constructor(JSContext *ctx, JSValueConst new_targ
         JS_FreeValue(ctx,ret) ;
         JS_FreeValue(ctx,fromJson) ;
     }
-    JS_DupValue(ctx, jsobj) ;
+    // JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
 static void js_lv_btnmatrix_finalizer(JSRuntime *rt, JSValue val){
-    printf("js_lv_btnmatrix_finalizer()\n") ;
+    // printf("js_lv_btnmatrix_finalizer()\n") ;
     lv_btnmatrix_t * thisobj = JS_GetOpaqueInternal(val) ;
     if( thisobj && lv_obj_get_user_data(thisobj) == JS_VALUE_GET_PTR(val) ){
         lv_obj_set_user_data(thisobj, NULL) ;
@@ -1893,11 +1974,11 @@ static JSValue js_lv_canvas_constructor(JSContext *ctx, JSValueConst new_target,
         JS_FreeValue(ctx,ret) ;
         JS_FreeValue(ctx,fromJson) ;
     }
-    JS_DupValue(ctx, jsobj) ;
+    // JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
 static void js_lv_canvas_finalizer(JSRuntime *rt, JSValue val){
-    printf("js_lv_canvas_finalizer()\n") ;
+    // printf("js_lv_canvas_finalizer()\n") ;
     lv_canvas_t * thisobj = JS_GetOpaqueInternal(val) ;
     if( thisobj && lv_obj_get_user_data(thisobj) == JS_VALUE_GET_PTR(val) ){
         lv_obj_set_user_data(thisobj, NULL) ;
@@ -1932,11 +2013,11 @@ static JSValue js_lv_checkbox_constructor(JSContext *ctx, JSValueConst new_targe
         JS_FreeValue(ctx,ret) ;
         JS_FreeValue(ctx,fromJson) ;
     }
-    JS_DupValue(ctx, jsobj) ;
+    // JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
 static void js_lv_checkbox_finalizer(JSRuntime *rt, JSValue val){
-    printf("js_lv_checkbox_finalizer()\n") ;
+    // printf("js_lv_checkbox_finalizer()\n") ;
     lv_checkbox_t * thisobj = JS_GetOpaqueInternal(val) ;
     if( thisobj && lv_obj_get_user_data(thisobj) == JS_VALUE_GET_PTR(val) ){
         lv_obj_set_user_data(thisobj, NULL) ;
@@ -1971,11 +2052,11 @@ static JSValue js_lv_dropdown_constructor(JSContext *ctx, JSValueConst new_targe
         JS_FreeValue(ctx,ret) ;
         JS_FreeValue(ctx,fromJson) ;
     }
-    JS_DupValue(ctx, jsobj) ;
+    // JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
 static void js_lv_dropdown_finalizer(JSRuntime *rt, JSValue val){
-    printf("js_lv_dropdown_finalizer()\n") ;
+    // printf("js_lv_dropdown_finalizer()\n") ;
     lv_dropdown_t * thisobj = JS_GetOpaqueInternal(val) ;
     if( thisobj && lv_obj_get_user_data(thisobj) == JS_VALUE_GET_PTR(val) ){
         lv_obj_set_user_data(thisobj, NULL) ;
@@ -2010,11 +2091,11 @@ static JSValue js_lv_img_constructor(JSContext *ctx, JSValueConst new_target, in
         JS_FreeValue(ctx,ret) ;
         JS_FreeValue(ctx,fromJson) ;
     }
-    JS_DupValue(ctx, jsobj) ;
+    // JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
 static void js_lv_img_finalizer(JSRuntime *rt, JSValue val){
-    printf("js_lv_img_finalizer()\n") ;
+    // printf("js_lv_img_finalizer()\n") ;
     lv_img_t * thisobj = JS_GetOpaqueInternal(val) ;
     if( thisobj && lv_obj_get_user_data(thisobj) == JS_VALUE_GET_PTR(val) ){
         lv_obj_set_user_data(thisobj, NULL) ;
@@ -2049,11 +2130,11 @@ static JSValue js_lv_line_constructor(JSContext *ctx, JSValueConst new_target, i
         JS_FreeValue(ctx,ret) ;
         JS_FreeValue(ctx,fromJson) ;
     }
-    JS_DupValue(ctx, jsobj) ;
+    // JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
 static void js_lv_line_finalizer(JSRuntime *rt, JSValue val){
-    printf("js_lv_line_finalizer()\n") ;
+    // printf("js_lv_line_finalizer()\n") ;
     lv_line_t * thisobj = JS_GetOpaqueInternal(val) ;
     if( thisobj && lv_obj_get_user_data(thisobj) == JS_VALUE_GET_PTR(val) ){
         lv_obj_set_user_data(thisobj, NULL) ;
@@ -2088,11 +2169,11 @@ static JSValue js_lv_roller_constructor(JSContext *ctx, JSValueConst new_target,
         JS_FreeValue(ctx,ret) ;
         JS_FreeValue(ctx,fromJson) ;
     }
-    JS_DupValue(ctx, jsobj) ;
+    // JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
 static void js_lv_roller_finalizer(JSRuntime *rt, JSValue val){
-    printf("js_lv_roller_finalizer()\n") ;
+    // printf("js_lv_roller_finalizer()\n") ;
     lv_roller_t * thisobj = JS_GetOpaqueInternal(val) ;
     if( thisobj && lv_obj_get_user_data(thisobj) == JS_VALUE_GET_PTR(val) ){
         lv_obj_set_user_data(thisobj, NULL) ;
@@ -2127,11 +2208,11 @@ static JSValue js_lv_slider_constructor(JSContext *ctx, JSValueConst new_target,
         JS_FreeValue(ctx,ret) ;
         JS_FreeValue(ctx,fromJson) ;
     }
-    JS_DupValue(ctx, jsobj) ;
+    // JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
 static void js_lv_slider_finalizer(JSRuntime *rt, JSValue val){
-    printf("js_lv_slider_finalizer()\n") ;
+    // printf("js_lv_slider_finalizer()\n") ;
     lv_slider_t * thisobj = JS_GetOpaqueInternal(val) ;
     if( thisobj && lv_obj_get_user_data(thisobj) == JS_VALUE_GET_PTR(val) ){
         lv_obj_set_user_data(thisobj, NULL) ;
@@ -2166,11 +2247,11 @@ static JSValue js_lv_switch_constructor(JSContext *ctx, JSValueConst new_target,
         JS_FreeValue(ctx,ret) ;
         JS_FreeValue(ctx,fromJson) ;
     }
-    JS_DupValue(ctx, jsobj) ;
+    // JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
 static void js_lv_switch_finalizer(JSRuntime *rt, JSValue val){
-    printf("js_lv_switch_finalizer()\n") ;
+    // printf("js_lv_switch_finalizer()\n") ;
     lv_switch_t * thisobj = JS_GetOpaqueInternal(val) ;
     if( thisobj && lv_obj_get_user_data(thisobj) == JS_VALUE_GET_PTR(val) ){
         lv_obj_set_user_data(thisobj, NULL) ;
@@ -2205,11 +2286,11 @@ static JSValue js_lv_table_constructor(JSContext *ctx, JSValueConst new_target, 
         JS_FreeValue(ctx,ret) ;
         JS_FreeValue(ctx,fromJson) ;
     }
-    JS_DupValue(ctx, jsobj) ;
+    // JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
 static void js_lv_table_finalizer(JSRuntime *rt, JSValue val){
-    printf("js_lv_table_finalizer()\n") ;
+    // printf("js_lv_table_finalizer()\n") ;
     lv_table_t * thisobj = JS_GetOpaqueInternal(val) ;
     if( thisobj && lv_obj_get_user_data(thisobj) == JS_VALUE_GET_PTR(val) ){
         lv_obj_set_user_data(thisobj, NULL) ;
@@ -2244,11 +2325,11 @@ static JSValue js_lv_textarea_constructor(JSContext *ctx, JSValueConst new_targe
         JS_FreeValue(ctx,ret) ;
         JS_FreeValue(ctx,fromJson) ;
     }
-    JS_DupValue(ctx, jsobj) ;
+    // JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
 static void js_lv_textarea_finalizer(JSRuntime *rt, JSValue val){
-    printf("js_lv_textarea_finalizer()\n") ;
+    // printf("js_lv_textarea_finalizer()\n") ;
     lv_textarea_t * thisobj = JS_GetOpaqueInternal(val) ;
     if( thisobj && lv_obj_get_user_data(thisobj) == JS_VALUE_GET_PTR(val) ){
         lv_obj_set_user_data(thisobj, NULL) ;
@@ -2263,7 +2344,7 @@ static JSClassDef js_lv_textarea_class = {
  // beapi.lvgl.MsgBox --
 static JSClassID js_lv_msgbox_class_id ;
 static void js_lv_msgbox_finalizer(JSRuntime *rt, JSValue val){
-    printf("js_lv_msgbox_finalizer()\n") ;
+    // printf("js_lv_msgbox_finalizer()\n") ;
     lv_msgbox_t * thisobj = JS_GetOpaqueInternal(val) ;
     if( thisobj && lv_obj_get_user_data(thisobj) == JS_VALUE_GET_PTR(val) ){
         lv_obj_set_user_data(thisobj, NULL) ;
@@ -2298,11 +2379,11 @@ static JSValue js_lv_keyboard_constructor(JSContext *ctx, JSValueConst new_targe
         JS_FreeValue(ctx,ret) ;
         JS_FreeValue(ctx,fromJson) ;
     }
-    JS_DupValue(ctx, jsobj) ;
+    // JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
 static void js_lv_keyboard_finalizer(JSRuntime *rt, JSValue val){
-    printf("js_lv_keyboard_finalizer()\n") ;
+    // printf("js_lv_keyboard_finalizer()\n") ;
     lv_keyboard_t * thisobj = JS_GetOpaqueInternal(val) ;
     if( thisobj && lv_obj_get_user_data(thisobj) == JS_VALUE_GET_PTR(val) ){
         lv_obj_set_user_data(thisobj, NULL) ;
@@ -2337,11 +2418,11 @@ static JSValue js_lv_tileview_constructor(JSContext *ctx, JSValueConst new_targe
         JS_FreeValue(ctx,ret) ;
         JS_FreeValue(ctx,fromJson) ;
     }
-    JS_DupValue(ctx, jsobj) ;
+    // JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
 static void js_lv_tileview_finalizer(JSRuntime *rt, JSValue val){
-    printf("js_lv_tileview_finalizer()\n") ;
+    // printf("js_lv_tileview_finalizer()\n") ;
     lv_tileview_t * thisobj = JS_GetOpaqueInternal(val) ;
     if( thisobj && lv_obj_get_user_data(thisobj) == JS_VALUE_GET_PTR(val) ){
         lv_obj_set_user_data(thisobj, NULL) ;
@@ -2376,11 +2457,11 @@ static JSValue js_lv_list_constructor(JSContext *ctx, JSValueConst new_target, i
         JS_FreeValue(ctx,ret) ;
         JS_FreeValue(ctx,fromJson) ;
     }
-    JS_DupValue(ctx, jsobj) ;
+    // JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
 static void js_lv_list_finalizer(JSRuntime *rt, JSValue val){
-    printf("js_lv_list_finalizer()\n") ;
+    // printf("js_lv_list_finalizer()\n") ;
     lv_obj_t * thisobj = JS_GetOpaqueInternal(val) ;
     if( thisobj && lv_obj_get_user_data(thisobj) == JS_VALUE_GET_PTR(val) ){
         lv_obj_set_user_data(thisobj, NULL) ;
@@ -2443,9 +2524,9 @@ static JSValue js_lv_obj_add_state(JSContext *ctx, JSValueConst this_val, int ar
         THROW_EXCEPTION("Obj.addState() must be called as a Obj method")
     }
     lv_obj_t * thisobj = lv_userdata ;
-    uint32_t state ;
-    if(JS_ToUint32(ctx, (uint32_t *) &state, argv[0])!=0){
-        THROW_EXCEPTION("arg state of method Obj.addState() must be a number")
+    lv_state_t state ;
+    if(!lv_state_jsstr_to_const(ctx, argv[0], &state)) {
+        return JS_EXCEPTION ;
     }
     lv_obj_add_state(thisobj, state) ;
     JSValue retval = JS_UNDEFINED ;
@@ -2461,9 +2542,9 @@ static JSValue js_lv_obj_clear_state(JSContext *ctx, JSValueConst this_val, int 
         THROW_EXCEPTION("Obj.clearState() must be called as a Obj method")
     }
     lv_obj_t * thisobj = lv_userdata ;
-    uint32_t state ;
-    if(JS_ToUint32(ctx, (uint32_t *) &state, argv[0])!=0){
-        THROW_EXCEPTION("arg state of method Obj.clearState() must be a number")
+    lv_state_t state ;
+    if(!lv_state_jsstr_to_const(ctx, argv[0], &state)) {
+        return JS_EXCEPTION ;
     }
     lv_obj_clear_state(thisobj, state) ;
     JSValue retval = JS_UNDEFINED ;
@@ -2523,9 +2604,9 @@ static JSValue js_lv_obj_has_state(JSContext *ctx, JSValueConst this_val, int ar
         THROW_EXCEPTION("Obj.hasState() must be called as a Obj method")
     }
     lv_obj_t * thisobj = lv_userdata ;
-    uint32_t state ;
-    if(JS_ToUint32(ctx, (uint32_t *) &state, argv[0])!=0){
-        THROW_EXCEPTION("arg state of method Obj.hasState() must be a number")
+    lv_state_t state ;
+    if(!lv_state_jsstr_to_const(ctx, argv[0], &state)) {
+        return JS_EXCEPTION ;
     }
     JSValue retval = JS_NewBool(ctx,lv_obj_has_state(thisobj, state)) ;
     return retval ;
@@ -3929,7 +4010,7 @@ static JSValue js_lv_obj_get_screen(JSContext *ctx, JSValueConst this_val, int a
     JSValue retval = JS_NULL ;
     void * lvobj = lv_obj_get_screen(thisobj);
     if(lvobj) {
-        retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, js_lv_obj_class_id) ;
+        retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, 0) ;
         JS_DupValue(ctx, retval) ;
     }
     return retval ;
@@ -3944,7 +4025,7 @@ static JSValue js_lv_obj_get_parent(JSContext *ctx, JSValueConst this_val, int a
     JSValue retval = JS_NULL ;
     void * lvobj = lv_obj_get_parent(thisobj);
     if(lvobj) {
-        retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, js_lv_obj_class_id) ;
+        retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, 0) ;
         JS_DupValue(ctx, retval) ;
     }
     return retval ;
@@ -3966,7 +4047,7 @@ static JSValue js_lv_obj_get_child(JSContext *ctx, JSValueConst this_val, int ar
     JSValue retval = JS_NULL ;
     void * lvobj = lv_obj_get_child(thisobj, id);
     if(lvobj) {
-        retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, js_lv_obj_class_id) ;
+        retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, 0) ;
         JS_DupValue(ctx, retval) ;
     }
     return retval ;
@@ -6950,7 +7031,7 @@ static JSValue js_lv_textarea_get_label(JSContext *ctx, JSValueConst this_val, i
     JSValue retval = JS_NULL ;
     void * lvobj = lv_textarea_get_label(thisobj);
     if(lvobj) {
-        retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, js_lv_obj_class_id) ;
+        retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, 0) ;
         JS_DupValue(ctx, retval) ;
     }
     return retval ;
@@ -7147,7 +7228,7 @@ static JSValue js_lv_msgbox_get_title(JSContext *ctx, JSValueConst this_val, int
     JSValue retval = JS_NULL ;
     void * lvobj = lv_msgbox_get_title(thisobj);
     if(lvobj) {
-        retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, js_lv_label_class_id) ;
+        retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, 0) ;
         JS_DupValue(ctx, retval) ;
     }
     return retval ;
@@ -7162,7 +7243,7 @@ static JSValue js_lv_msgbox_get_close_btn(JSContext *ctx, JSValueConst this_val,
     JSValue retval = JS_NULL ;
     void * lvobj = lv_msgbox_get_close_btn(thisobj);
     if(lvobj) {
-        retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, js_lv_btn_class_id) ;
+        retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, 0) ;
         JS_DupValue(ctx, retval) ;
     }
     return retval ;
@@ -7177,7 +7258,7 @@ static JSValue js_lv_msgbox_get_text(JSContext *ctx, JSValueConst this_val, int 
     JSValue retval = JS_NULL ;
     void * lvobj = lv_msgbox_get_text(thisobj);
     if(lvobj) {
-        retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, js_lv_label_class_id) ;
+        retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, 0) ;
         JS_DupValue(ctx, retval) ;
     }
     return retval ;
@@ -7192,7 +7273,7 @@ static JSValue js_lv_msgbox_get_content(JSContext *ctx, JSValueConst this_val, i
     JSValue retval = JS_NULL ;
     void * lvobj = lv_msgbox_get_content(thisobj);
     if(lvobj) {
-        retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, js_lv_obj_class_id) ;
+        retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, 0) ;
         JS_DupValue(ctx, retval) ;
     }
     return retval ;
@@ -7207,7 +7288,7 @@ static JSValue js_lv_msgbox_get_btns(JSContext *ctx, JSValueConst this_val, int 
     JSValue retval = JS_NULL ;
     void * lvobj = lv_msgbox_get_btns(thisobj);
     if(lvobj) {
-        retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, js_lv_obj_class_id) ;
+        retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, 0) ;
         JS_DupValue(ctx, retval) ;
     }
     return retval ;
@@ -7329,7 +7410,7 @@ static JSValue js_lv_keyboard_get_textarea(JSContext *ctx, JSValueConst this_val
     JSValue retval = JS_NULL ;
     void * lvobj = lv_keyboard_get_textarea(thisobj);
     if(lvobj) {
-        retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, js_lv_obj_class_id) ;
+        retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, 0) ;
         JS_DupValue(ctx, retval) ;
     }
     return retval ;
@@ -7379,7 +7460,7 @@ static JSValue js_lv_tileview_add_tile(JSContext *ctx, JSValueConst this_val, in
     JSValue retval = JS_NULL ;
     void * lvobj = lv_tileview_add_tile(thisobj, col_id, row_id, dir);
     if(lvobj) {
-        retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, js_lv_obj_class_id) ;
+        retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, 0) ;
         JS_DupValue(ctx, retval) ;
     }
     return retval ;
@@ -7394,7 +7475,7 @@ static JSValue js_lv_tileview_get_tile_act(JSContext *ctx, JSValueConst this_val
     JSValue retval = JS_NULL ;
     void * lvobj = lv_tileview_get_tile_act(thisobj);
     if(lvobj) {
-        retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, js_lv_obj_class_id) ;
+        retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, 0) ;
         JS_DupValue(ctx, retval) ;
     }
     return retval ;
@@ -7420,7 +7501,7 @@ static JSValue js_lv_list_add_text(JSContext *ctx, JSValueConst this_val, int ar
     JSValue retval = JS_NULL ;
     void * lvobj = lv_list_add_text(thisobj, txt);
     if(lvobj) {
-        retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, js_lv_obj_class_id) ;
+        retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, 0) ;
         JS_DupValue(ctx, retval) ;
     }
     JS_FreeCString(ctx, txt) ;
@@ -7455,6 +7536,99 @@ static const JSCFunctionListEntry js_lv_list_proto_funcs[] = {
 // AUTO GENERATE CODE END [METHOD LIST] --------
 
 
+
+
+// AUTO GENERATE CODE START [DEF PROTOS] --------
+// JSValue proto_lv_obj ;
+// JSValue proto_lv_label ;
+// JSValue proto_lv_arc ;
+// JSValue proto_lv_bar ;
+// JSValue proto_lv_btn ;
+// JSValue proto_lv_btnmatrix ;
+// JSValue proto_lv_canvas ;
+// JSValue proto_lv_checkbox ;
+// JSValue proto_lv_dropdown ;
+// JSValue proto_lv_img ;
+// JSValue proto_lv_line ;
+// JSValue proto_lv_roller ;
+// JSValue proto_lv_slider ;
+// JSValue proto_lv_switch ;
+// JSValue proto_lv_table ;
+// JSValue proto_lv_textarea ;
+// JSValue proto_lv_msgbox ;
+// JSValue proto_lv_keyboard ;
+// JSValue proto_lv_tileview ;
+// JSValue proto_lv_list ;
+// AUTO GENERATE CODE END [DEF PROTOS] --------
+
+JSClassID be_lv_type_to_js_class(lv_obj_t * obj) {
+    
+// AUTO GENERATE CODE START [TYPE TO PROTO] --------
+    if(lv_obj_check_type(obj, & lv_obj_class)) {
+        return js_lv_obj_class_id ;
+    }
+    else if(lv_obj_check_type(obj, & lv_label_class)) {
+        return js_lv_label_class_id ;
+    }
+    else if(lv_obj_check_type(obj, & lv_arc_class)) {
+        return js_lv_arc_class_id ;
+    }
+    else if(lv_obj_check_type(obj, & lv_bar_class)) {
+        return js_lv_bar_class_id ;
+    }
+    else if(lv_obj_check_type(obj, & lv_btn_class)) {
+        return js_lv_btn_class_id ;
+    }
+    else if(lv_obj_check_type(obj, & lv_btnmatrix_class)) {
+        return js_lv_btnmatrix_class_id ;
+    }
+    else if(lv_obj_check_type(obj, & lv_canvas_class)) {
+        return js_lv_canvas_class_id ;
+    }
+    else if(lv_obj_check_type(obj, & lv_checkbox_class)) {
+        return js_lv_checkbox_class_id ;
+    }
+    else if(lv_obj_check_type(obj, & lv_dropdown_class)) {
+        return js_lv_dropdown_class_id ;
+    }
+    else if(lv_obj_check_type(obj, & lv_img_class)) {
+        return js_lv_img_class_id ;
+    }
+    else if(lv_obj_check_type(obj, & lv_line_class)) {
+        return js_lv_line_class_id ;
+    }
+    else if(lv_obj_check_type(obj, & lv_roller_class)) {
+        return js_lv_roller_class_id ;
+    }
+    else if(lv_obj_check_type(obj, & lv_slider_class)) {
+        return js_lv_slider_class_id ;
+    }
+    else if(lv_obj_check_type(obj, & lv_switch_class)) {
+        return js_lv_switch_class_id ;
+    }
+    else if(lv_obj_check_type(obj, & lv_table_class)) {
+        return js_lv_table_class_id ;
+    }
+    else if(lv_obj_check_type(obj, & lv_textarea_class)) {
+        return js_lv_textarea_class_id ;
+    }
+    else if(lv_obj_check_type(obj, & lv_msgbox_class)) {
+        return js_lv_msgbox_class_id ;
+    }
+    else if(lv_obj_check_type(obj, & lv_keyboard_class)) {
+        return js_lv_keyboard_class_id ;
+    }
+    else if(lv_obj_check_type(obj, & lv_tileview_class)) {
+        return js_lv_tileview_class_id ;
+    }
+    else if(lv_obj_check_type(obj, & lv_list_class)) {
+        return js_lv_list_class_id ;
+    }
+// AUTO GENERATE CODE END [TYPE TO PROTO] --------
+
+    printf("unknow lv_obj_t class\n") ;
+    return js_lv_obj_class_id ;
+}
 
 
 
@@ -7545,7 +7719,8 @@ void be_lv_widgets_gen_require(JSContext *ctx, JSValue lvgl) {
 
 // AUTO GENERATE CODE END [REGISTER CLASS] --------
 
-    JS_Eval(ctx, (const char *)lv_obj_init_js, lv_obj_init_js_len, "[native]lv_obj_init", JS_EVAL_TYPE_GLOBAL|JS_EVAL_FLAG_STRIP) ;
+    JSValue ret = JS_Eval(ctx, (const char *)lv_obj_init_js, lv_obj_init_js_len, "[native]lv_obj_init", JS_EVAL_TYPE_GLOBAL|JS_EVAL_FLAG_STRIP) ;
+    JS_FreeValue(ctx, ret);
 
 
 

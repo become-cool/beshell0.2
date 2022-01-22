@@ -331,6 +331,34 @@ module.exports = [
         ]
     }
 
+
+    , {
+        prefix: 'LV_STATE_' ,
+        type: 'lv_state_t' ,
+        name: 'lv_state' ,
+        def: parseCSource(`
+        enum {
+            LV_STATE_DEFAULT     =  0x0000,
+            LV_STATE_CHECKED     =  0x0001,
+            LV_STATE_FOCUSED     =  0x0002,
+            LV_STATE_FOCUS_KEY   =  0x0004,
+            LV_STATE_EDITED      =  0x0008,
+            LV_STATE_HOVERED     =  0x0010,
+            LV_STATE_PRESSED     =  0x0020,
+            LV_STATE_SCROLLED    =  0x0040,
+            LV_STATE_DISABLED    =  0x0080,
+        
+            LV_STATE_USER_1      =  0x1000,
+            LV_STATE_USER_2      =  0x2000,
+            LV_STATE_USER_3      =  0x4000,
+            LV_STATE_USER_4      =  0x8000,
+        
+            LV_STATE_ANY = 0xFFFF,
+        };
+        `)
+    }
+
+
     , {
         prefix: 'LV_OBJ_FLAG_' ,
         type: 'lv_obj_flag_t' ,

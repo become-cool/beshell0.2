@@ -6,6 +6,8 @@
 
 struct mg_mgr mgr ;
 
+JSValue pkgShadow ;
+
 static JSClassID js_mg_server_class_id ;
 static JSClassID js_mg_http_message_class_id ;
 static JSClassID js_mg_ws_message_class_id ;
@@ -526,6 +528,8 @@ void be_module_mg_init() {
     JS_NewClassID(&js_mg_server_class_id);
     JS_NewClassID(&js_mg_http_message_class_id);
     JS_NewClassID(&js_mg_http_rspn_class_id);
+
+    pkgShadow = JS_UNDEFINED ;
 }
 
 void be_module_mg_require(JSContext *ctx) {
@@ -533,13 +537,16 @@ void be_module_mg_require(JSContext *ctx) {
     JSValue mg = JS_NewObject(ctx);
     JS_SetPropertyStr(ctx, beapi, "mg", mg);
 
-    QJS_DEF_CLASS(mg_server, "Server", "mg.Server", JS_UNDEFINED, JS_UNDEFINED)
-    QJS_DEF_CLASS(mg_http_message, "HttpMessage", "mg.HttpMessage", JS_UNDEFINED, JS_UNDEFINED)
-    QJS_DEF_CLASS(mg_http_rspn, "HttpResponse", "mg.HttpResponse", JS_UNDEFINED, JS_UNDEFINED)
+    pkgShadow = JS_NewObject(ctx);
+
+    QJS_DEF_CLASS(mg_server, "Server", "mg.Server", JS_UNDEFINED, pkgShadow)
+    QJS_DEF_CLASS(mg_http_message, "HttpMessage", "mg.HttpMessage", JS_UNDEFINED, pkgShadow)
+    QJS_DEF_CLASS(mg_http_rspn, "HttpResponse", "mg.HttpResponse", JS_UNDEFINED, pkgShadow)
 
     JS_SetPropertyStr(ctx, mg, "httpListen", JS_NewCFunction(ctx, js_mg_mgr_http_listen, "httpListen", 1));
     JS_SetPropertyStr(ctx, mg, "sntpConnect", JS_NewCFunction(ctx, js_mg_sntp_connect, "sntpConnect", 1));
     
+    // JS_FreeValue(ctx, mg);
     JS_FreeValue(ctx, beapi);
 }
 
@@ -548,6 +555,9 @@ void be_module_mg_loop(JSContext *ctx) {
 }
 
 void be_module_mg_reset(JSContext *ctx) {
+    JS_FreeValue(ctx, pkgShadow) ;
+    // assert(VAR_REFCNT(pkgShadow)==0) ;
+
     // @todo
     // 关闭所有的 server_t.conn
 }

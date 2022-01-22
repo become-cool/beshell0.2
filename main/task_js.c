@@ -37,17 +37,26 @@
 
 JSRuntime *rt;
 JSContext *ctx;
-uint8_t boot_level = 5 ;
+uint8_t boot_level = 3 ;
 bool requst_reset = false ;
+char * requst_app = NULL ;
 
 
 uint8_t task_boot_level() {
     return boot_level ;
 }
 
-void task_reset(int level) {
+void task_reset(int level, char * script) {
     if(level>-1 && level<256)
         boot_level = (uint8_t)level ;
+    if(script) {
+        if(requst_app) {
+            free(requst_app) ;
+        }
+        size_t size = strlen(script)+1 ;
+        requst_app = malloc( size ) ;
+        memcpy(requst_app, script, size) ;
+    }
     requst_reset = true ;
 }
 
@@ -107,9 +116,6 @@ static JSContext * JS_NewCustomContext(JSRuntime *rt)
     JS_AddIntrinsicBigInt(ctx);
 #endif
 
-    // js_init_module_std(ctx, "std") ;
-    // js_init_module_os(ctx, "os") ;
-
     // global 对象
     JSValue global = JS_GetGlobalObject(ctx);
     JS_SetPropertyStr(ctx, global, "global", global);
@@ -159,6 +165,16 @@ void quickjs_init() {
 #else
         printf("init level: %d\n", boot_level) ;
 #endif
+        if(requst_app) {
+
+            JSValue beapi = js_get_glob_prop(ctx, 1, "beapi") ;
+            JS_SetPropertyStr(ctx, beapi, "reset_app", JS_NewString(ctx, requst_app)) ;
+            JS_FreeValue(ctx, beapi) ;
+
+            free(requst_app) ;
+            requst_app = NULL ;
+        }
+
         char * initScriptCodeBuff = mallocf(InitScriptTpl, boot_level) ;
         EVAL_CODE(initScriptCodeBuff, ":init.d")
         free(initScriptCodeBuff) ;
@@ -180,6 +196,8 @@ void quickjs_deinit() {
 #endif
 
     js_std_free_handlers(rt);
+
+    // JS_FreeLeaks(rt,ctx) ;
     JS_FreeContext(ctx);
     JS_FreeRuntime(rt);
     rt = NULL ;
@@ -236,10 +254,9 @@ void task_js_main(){
 #else
             be_module_repl_reset(ctx) ;
 #endif
-
             quickjs_deinit() ;
             quickjs_init() ;
-            
+
             requst_reset = false ;
         }
 

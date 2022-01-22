@@ -21,6 +21,39 @@
 #include "http_lws.h"
 #endif
 
+typedef struct {
+    void * spi_dev ;
+    JSValue jsobj ;
+} disp_drv_data_t ;
+
+
+void free_disp_drv(JSContext * ctx, lv_disp_t * disp) {
+    if(disp->driver){
+        if(disp->driver->draw_buf) {
+            free(disp->driver->draw_buf) ;
+        }
+
+        if(disp->driver->user_data) {
+            disp_drv_data_t * drvdata = (disp_drv_data_t*)disp->driver->user_data ;
+#ifndef SIMULATION
+            st77xx_dev_t * dev = drvdata->spi_dev ;
+            if(dev) {
+                spi_bus_remove_device(dev->spi_dev) ;
+                free(dev) ;
+            }
+#endif
+            JS_SetOpaque(drvdata->jsobj, NULL) ;
+            if(ctx) {
+                dn(VAR_REFCNT(drvdata->jsobj))
+                JS_FreeValue(ctx,drvdata->jsobj) ;
+            }
+            free(disp->driver->user_data) ;
+            disp->driver->user_data = NULL ;
+        }
+    }
+}
+
+
 uint8_t * disp_buff1 = NULL ;
 uint8_t * disp_buff2 = NULL ;
 
@@ -201,7 +234,7 @@ void disp_st7789_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t 
     // draw_param_t * pp = &draw_param ;
 	// xQueueSend(disp_queue, (void *)&pp, 0);
 
-    st77xx_draw_rect(disp->user_data, area->x1,area->y1, area->x2, area->y2, color_p) ;
+    st77xx_draw_rect(((disp_drv_data_t*)disp->user_data)->spi_dev, area->x1,area->y1, area->x2, area->y2, color_p) ;
     lv_disp_flush_ready(disp) ;
 }
 
@@ -238,34 +271,14 @@ void input_driver_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
 static JSClassID js_lvgl_disp_class_id ;
 
 static void js_lvgl_disp_finalizer(JSRuntime *rt, JSValue val) {
-
-    printf("js_lvgl_disp_finalizer()\n") ;
-
+    printf("js_lvgl_disp_finalizer\n") ;
     lv_disp_t * disp = (lv_disp_t *)JS_GetOpaque(val, js_lvgl_disp_class_id) ;
+    if(!disp) {
+        printf("disp is NULL\n") ;
+        return ;
+    }
+    free_disp_drv(NULL, disp) ;
     lv_disp_remove(disp) ;
-
-    // spi 设备
-#ifndef SIMULATION
-
-    if(disp->driver->user_data) {
-        st77xx_dev_t * dev = (st77xx_dev_t*)disp->driver->user_data ;
-        spi_bus_remove_device(dev->spi_dev) ;
-        free(dev) ;
-    }
-#endif
-
-    if(disp->driver->draw_buf) {
-        // if(disp->driver->draw_buf->buf1) {
-        //     free(disp->driver->draw_buf->buf1) ;
-        // }
-        // if(disp->driver->draw_buf->buf2) {
-        //     free(disp->driver->draw_buf->buf2) ;
-        // }
-        free(disp->driver->draw_buf) ;
-    }
-
-    // free(disp->driver) ;
-    // free(disp) ;
 }
 
 static JSClassDef js_lvgl_disp_class = {
@@ -277,7 +290,7 @@ static JSClassDef js_lvgl_disp_class = {
 #define THIS_DISP                                                                               \
     lv_disp_t * thisdisp = JS_GetOpaque(this_val, js_lvgl_disp_class_id);                       \
     if(!thisdisp) {                                                                             \
-        THROW_EXCEPTION("lvgl.Display.activeScreen() must be called as a lvgl.Display method")  \
+        THROW_EXCEPTION("must be called as a lvgl.Display method")  \
     }
 
 
@@ -297,7 +310,7 @@ static JSValue js_lvgl_disp_active_screen(JSContext *ctx, JSValueConst this_val,
         jsobj = js_lv_obj_wrapper(ctx,scr,JS_UNDEFINED,lv_obj_js_class_id()) ;
     }
 
-    return JS_DupValue(ctx,jsobj) ;
+    return jsobj ;
 }
 
 static JSValue js_lvgl_disp_get_screens(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
@@ -322,8 +335,8 @@ static JSValue js_lvgl_disp_layer(JSContext *ctx, JSValueConst this_val, int arg
     else {
         return JS_NULL ;
     }
-    JSValue jslayer = js_lv_obj_wrapper(ctx, layer, JS_UNDEFINED, lv_obj_js_class_id()) ;
-    return JS_DupValue(ctx, jslayer) ;
+    JSValue jslayer = js_lv_obj_wrapper(ctx, layer, JS_UNDEFINED, 0) ;
+    return jslayer ;
     // return js_lv_obj_wrapper(ctx, layer, JS_UNDEFINED, lv_obj_js_class_id()) ;
 }
 
@@ -337,17 +350,17 @@ static const JSCFunctionListEntry js_display_proto_funcs[] = {
 
 
 
-static JSValue js_lvgl_get_default_display(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-    lv_disp_t * disp = lv_disp_get_default() ;
-    if(!disp) {
+// static JSValue js_lvgl_get_default_display(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+//     lv_disp_t * disp = lv_disp_get_default() ;
+//     if(!disp) {
         
-    }
-    return JS_UNDEFINED ;
-}
-static JSValue js_lvgl_set_default_display(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-    // lv_disp_set_default
-    return JS_UNDEFINED ;
-}
+//     }
+//     return JS_UNDEFINED ;
+// }
+// static JSValue js_lvgl_set_default_display(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+//     // lv_disp_set_default
+//     return JS_UNDEFINED ;
+// }
 
 
 /**
@@ -400,6 +413,9 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
     dispdrv->hor_res = width;
     dispdrv->ver_res = height;
 
+    disp_drv_data_t * dvrdata = malloc(sizeof(disp_drv_data_t)) ;
+    dispdrv->user_data = dvrdata ;
+
     if( strcmp(typestr, "ST7789")==0 ) {
 
 #ifndef SIMULATION
@@ -419,7 +435,7 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
 
         // 注册设备驱动对象
         dispdrv->flush_cb = disp_st7789_flush ;
-        dispdrv->user_data = spidev ;
+        dvrdata->spi_dev = spidev ;
 #endif
     }
 
@@ -440,6 +456,8 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
     JS_SetPropertyStr(ctx, jsdisp, "type", argv[0]) ;
     // JS_SetPropertyStr(ctx, jsdisp, "options", argv[1]) ;
     JS_SetOpaque(jsdisp, disp);
+
+    dvrdata->jsobj = JS_DupValue(ctx, jsdisp) ;
 
     // 触摸设备
 #ifndef SIMULATION
@@ -463,7 +481,9 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
 
     lv_task_handler() ;
 
-    return JS_DupValue(ctx,jsdisp) ;
+    dn(VAR_REFCNT(jsdisp))
+
+    return jsdisp ;
 
 excp:
     if(drawbuf)
@@ -541,7 +561,7 @@ void be_lv_display_require(JSContext *ctx, JSValue lvgl) {
     JS_SetClassProto(ctx, js_lvgl_disp_class_id, dispDriverProto);
 
     JS_SetPropertyStr(ctx, lvgl, "createDisplay", JS_NewCFunction(ctx, js_lvgl_create_display, "createDisplay", 1));
-    JS_SetPropertyStr(ctx, lvgl, "actionDisplay", JS_NewCFunction(ctx, js_lvgl_set_default_display, "actionDisplay", 1));
+    // JS_SetPropertyStr(ctx, lvgl, "actionDisplay", JS_NewCFunction(ctx, js_lvgl_set_default_display, "actionDisplay", 1));
     JS_SetPropertyStr(ctx, lvgl, "fakeIndev", JS_NewCFunction(ctx, js_lvgl_fake_indev, "fakeIndev", 1));
     JS_SetPropertyStr(ctx, lvgl, "tickIndev", JS_NewCFunction(ctx, js_lvgl_tick_indev, "tickIndev", 1));
 
@@ -571,26 +591,15 @@ void be_lv_display_reset(JSContext * ctx) {
     // 清理 disp (timer,indev,lv_obj_t) / driver 
     lv_disp_t * disp = NULL ;
     while((disp=lv_disp_get_default())!=false) {
-        if(disp->driver){
-            if(disp->driver->draw_buf) {
-                free(disp->driver->draw_buf) ;
-            }
-#ifndef SIMULATION
-            st77xx_dev_t * dev = (st77xx_dev_t*)disp->driver->user_data ;
-            if(dev) {
-                spi_bus_remove_device(dev->spi_dev) ;
-                free(dev) ;
-            }
-            if(device_touch) {
-                spi_bus_remove_device(device_touch) ;
-                device_touch = NULL ;
-            }
-#endif
-            free(disp->driver) ;
-        }
+        free_disp_drv(ctx, disp) ;
         lv_disp_remove(disp) ;
     }
-
+#ifndef SIMULATION
+    if(device_touch) {
+        spi_bus_remove_device(device_touch) ;
+        device_touch = NULL ;
+    }
+#endif
     if(indev) {
         lv_indev_remove(indev) ;
         indev = NULL ;

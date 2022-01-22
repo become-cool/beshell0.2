@@ -33,6 +33,7 @@ inline JSClassID lv_btn_js_class_id() ;
 void be_lv_widgets_gen_init() ;
 void be_lv_widgets_gen_require(JSContext *ctx, JSValue lvgl) ;
 
+JSClassID be_lv_type_to_js_class(lv_obj_t * obj) ;
 
 // AUTO GENERATE CODE START [CONST CONVERT] --------
 
@@ -80,6 +81,11 @@ bool lv_scr_load_anim_str_to_const(const char * str, lv_scr_load_anim_t* out) ;
 bool lv_scr_load_anim_jsstr_to_const(JSContext *ctx, JSValue jsstr, lv_scr_load_anim_t* out) ;
 const char *  lv_scr_load_anim_const_to_str(lv_scr_load_anim_t code) ;
 JSValue lv_scr_load_anim_const_to_jsstr(JSContext *ctx, lv_scr_load_anim_t code) ;
+
+bool lv_state_str_to_const(const char * str, lv_state_t* out) ;
+bool lv_state_jsstr_to_const(JSContext *ctx, JSValue jsstr, lv_state_t* out) ;
+const char *  lv_state_const_to_str(lv_state_t code) ;
+JSValue lv_state_const_to_jsstr(JSContext *ctx, lv_state_t code) ;
 
 bool lv_obj_flag_str_to_const(const char * str, lv_obj_flag_t* out) ;
 bool lv_obj_flag_jsstr_to_const(JSContext *ctx, JSValue jsstr, lv_obj_flag_t* out) ;

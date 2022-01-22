@@ -75,15 +75,22 @@ static JSValue js_process_cpu_usage(JSContext *ctx, JSValueConst this_val, int a
 
 
 JSValue js_process_reset(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    int level = -1 ;
     if(argc>0 && JS_IsNumber(argv[0])) {
-        int level = 0 ;
-        if(JS_ToInt32(ctx, &level, argv[0])>=0) {
-            task_reset(level) ;
-            return JS_UNDEFINED ;
+        if(JS_ToInt32(ctx, &level, argv[0])!=0) {
+            level = -1 ;
         }
     }
+    char * script = NULL ;
+    if(argc>1) {
+        script = JS_ToCString(ctx, argv[1]) ;
+    }
 
-    task_reset(-1) ;
+    task_reset(level, script) ;
+
+    if(script) {
+        JS_FreeCString(ctx, script) ;
+    }
     return JS_UNDEFINED ;
 }
 JSValue js_process_reboot(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){

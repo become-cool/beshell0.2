@@ -35,9 +35,11 @@ static void js_lv_event_cb(lv_event_t * event) {
         JS_SetOpaque(param, event->param) ;
     }
     else if(event->code==LV_EVENT_GESTURE && event->param) {
+        // printf("--------- gesture\n") ;
         lv_dir_t dir = lv_indev_get_gesture_dir(event->param) ;
         param = lv_dir_const_to_jsstr(ctx, dir) ;
     }
+    
 
     MAKE_ARGV4( cbargv, jsname, jsname, jstarget, param )
 
@@ -51,12 +53,16 @@ static void js_lv_event_cb(lv_event_t * event) {
 
     // 解除 opaque 后释放 param
     if( !JS_IsUndefined(param) ) {
-        JS_SetOpaque(param, NULL) ;
+        if( JS_IsObject(param) ) {
+            JS_SetOpaque(param, NULL) ;
+        }
         JS_FreeValue(ctx, param) ;
     }
 
     free(cbargv) ;
     JS_FreeValue(ctx, func_emit) ;
+    JS_FreeValue(ctx, jsname) ;
+
 
     // 引用计数 -1
     if(event->code==LV_EVENT_DELETE){
@@ -65,15 +71,15 @@ static void js_lv_event_cb(lv_event_t * event) {
     }
 }
 
-void js_lv_obj_init(JSContext *ctx, JSValue jsobj) {
-    
-    JSValue jsFuncLvObjInit = js_get_glob_prop(ctx, 3, "beapi", "lvgl", "__lv_obj_init") ;
-
-    JS_Call(ctx, jsFuncLvObjInit, jsobj, 0, NULL) ;
-
-    JS_FreeValue(ctx, jsFuncLvObjInit) ;
-}
-
+/**
+ * 3种调用方法：
+ *  1. js_lv_obj_wrapper(ctx, obj, Cotr, 0)
+ *      js 中派生的 类需要提供 构造函数
+ *  2. js_lv_obj_wrapper(ctx, obj, JS_UNDEFINED, clsid)
+ *      lv 原生对象
+ *  3. js_lv_obj_wrapper(ctx, obj, JS_UNDEFINED, 0)
+ *      根据 obj 类型确定 clsid
+ */
 JSValue js_lv_obj_wrapper(JSContext *ctx, lv_obj_t * cobj, JSValue cotr, JSClassID clsid) {
 
     JSValue jsobj = JS_UNDEFINED ;
@@ -81,26 +87,35 @@ JSValue js_lv_obj_wrapper(JSContext *ctx, lv_obj_t * cobj, JSValue cotr, JSClass
     void * _jsobj = lv_obj_get_user_data(cobj) ;
     if(_jsobj) {
         jsobj = JS_MKPTR(JS_TAG_OBJECT, _jsobj) ;
+        JS_DupValue(ctx, jsobj) ;
     }
     else {
-        
-        if(JS_IsUndefined(cotr)) {
-            jsobj = JS_NewObjectClass(ctx, clsid) ;
+        if(clsid) {
+            if(JS_IsUndefined(cotr)) {
+                jsobj = JS_NewObjectClass(ctx, clsid) ;
+            }
+            else {
+                JSValue proto = JS_GetPropertyStr(ctx, cotr, "prototype");
+                if (JS_IsException(proto)) {
+                    JS_FreeValue(ctx, proto) ;
+                    return JS_EXCEPTION ;
+                }
+                jsobj = JS_NewObjectProtoClass(ctx, proto, clsid) ;
+                JS_FreeValue(ctx, proto) ;
+            }
         }
         else {
-            JSValue proto = JS_GetPropertyStr(ctx, cotr, "prototype");
-            if (JS_IsException(proto)) {
-                JS_FreeValue(ctx, proto) ;
-                return JS_EXCEPTION ;
-            }
-            jsobj = JS_NewObjectProtoClass(ctx, proto, clsid) ;
-            JS_FreeValue(ctx, proto) ;
+            clsid = be_lv_type_to_js_class(cobj);
+            jsobj = JS_NewObjectClass(ctx, clsid) ;
         }
 
         lv_obj_set_user_data(cobj, JS_VALUE_GET_PTR(jsobj)) ;
-        JS_SetOpaque(jsobj, cobj) ;        
+        JS_SetOpaque(jsobj, cobj) ;
         
-        js_lv_obj_init(ctx, jsobj) ;
+        JSValue jsFuncLvObjInit = js_get_glob_prop(ctx, 3, "beapi", "lvgl", "__lv_obj_init") ;
+        JSValue ret = JS_Call(ctx, jsFuncLvObjInit, jsobj, 0, NULL) ;
+        JS_FreeValue(ctx, ret) ;
+        JS_FreeValue(ctx, jsFuncLvObjInit) ;
         
         lv_obj_add_event_cb(cobj, js_lv_event_cb, LV_EVENT_DELETE, ctx) ;
 
@@ -296,6 +311,7 @@ JSValue js_lv_obj_get_all_style_values(JSContext *ctx, JSValueConst this_val, in
             const char * propName = lv_style_prop_const_to_str(style->prop1) ;
             JSValue jsval = lv_style_value_to_js(ctx, style->prop1, style->v_p.value1) ;
             JS_SetPropertyStr(ctx, jsstyles, propName, jsval) ;
+            JS_FreeValue(ctx,jsval) ;
         }
         else {
             lv_style_value_t * values = (lv_style_value_t *)style->v_p.values_and_props;
@@ -306,6 +322,7 @@ JSValue js_lv_obj_get_all_style_values(JSContext *ctx, JSValueConst this_val, in
                 const char * propName = lv_style_prop_const_to_str(props[j]) ;
                 JSValue jsval = lv_style_value_to_js(ctx, props[j], values[j]) ;
                 JS_SetPropertyStr(ctx, jsstyles, propName, jsval) ;
+                JS_FreeValue(ctx,jsval) ;
             }
         }
     }
@@ -455,7 +472,7 @@ JSValue js_lv_obj_get_font_height(JSContext *ctx, JSValueConst this_val, int arg
 
 JSValue js_lv_label_set_font(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(1)
-    THIS_LVOBJ("Obj", "style", thisobj)
+    THIS_LVOBJ("Obj", "setFont", thisobj)
     ARGV_TO_STRING(0, fontname)
 
     lv_font_t * font = NULL ;

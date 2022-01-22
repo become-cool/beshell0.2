@@ -1246,9 +1246,9 @@ static const JSCFunctionListEntry js_lv_area_proto_funcs[] = {
 void be_lv_structs_init() {
 // AUTO GENERATE CODE START [CLASS ID INIT] --------
     JS_NewClassID(&js_lv_draw_rect_dsc_class_id);
-    JS_NewClassID(&js_lv_draw_rect_dsc_class_id);
-    JS_NewClassID(&js_lv_draw_rect_dsc_class_id);
-    JS_NewClassID(&js_lv_draw_rect_dsc_class_id);
+    JS_NewClassID(&js_lv_draw_arc_dsc_class_id);
+    JS_NewClassID(&js_lv_draw_line_dsc_class_id);
+    JS_NewClassID(&js_lv_area_class_id);
 // AUTO GENERATE CODE END [CLASS ID INIT] --------
 }
 

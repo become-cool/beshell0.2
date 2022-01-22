@@ -224,6 +224,8 @@ JSValue js_eval_as_file(JSContext *ctx, JSValueConst this_val, int argc, JSValue
 
     JS_FreeCString(ctx, code) ;
 	JS_FreeCString(ctx, path) ;
+
+    // JS_DupValue(ctx, ret) ;
     return ret ;
 }
 

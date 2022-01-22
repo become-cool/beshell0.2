@@ -310,15 +310,22 @@ static JSValue js_lv_style_constructor(JSContext *ctx, JSValueConst new_target, 
         if (JS_GetOwnPropertyNames(ctx, &tab, &len, argv[0], JS_GPN_STRING_MASK | JS_GPN_ENUM_ONLY) < 0) {
             THROW_EXCEPTION("invalid styles object") ;
         }
+        JSValue key, val ;
         for(uint32_t i = 0; i < len; i++) {
-            JSValue key = JS_AtomToValue(ctx, tab[i].atom);
-            JSValue val = JS_GetProperty(ctx, argv[0], tab[i].atom);
+            key = JS_AtomToValue(ctx, tab[i].atom);
+            val = JS_GetProperty(ctx, argv[0], tab[i].atom);
 
             if( JS_IsException(_js_lv_style_set_prop(ctx, style, key, val)) ) {
                 free(style) ;
+                JS_FreeValue(ctx, key) ;
+                JS_FreeValue(ctx, val) ;
+                js_free_prop_enum(ctx, tab, len) ;
                 return JS_EXCEPTION ;
             }
+            JS_FreeValue(ctx, key) ;
+            JS_FreeValue(ctx, val) ;
         }
+        js_free_prop_enum(ctx, tab, len) ;
     }
 
     return create_js_style(ctx, style) ;
@@ -407,8 +414,10 @@ static JSValue js_lv_style_props(JSContext *ctx, JSValueConst this_val, int argc
 }
 
 
-// static JSValue js_lv_style_setFont(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-//     THIS_OBJ("Style", "props", style, lv_style_t)
+// static JSValue js_lv_style_set_font(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+//     CHECK_ARGC(1)
+//     THIS_OBJ("Style", "setFont", style, lv_style_t)
+
 //     lv_style_set_text_font(style, &lv_font_montserrat_48) ;
 //     return JS_UNDEFINED ;
 // }
@@ -428,7 +437,7 @@ static const JSCFunctionListEntry js_lv_style_proto_funcs[] = {
     JS_CFUNC_DEF("set", 0, js_lv_style_set_prop),
     JS_CFUNC_DEF("props", 0, js_lv_style_props),
     JS_CFUNC_DEF("setPadAll", 0, js_lv_style_set_pad_all),
-    // JS_CFUNC_DEF("setFont", 0, js_lv_style_setFont),
+    // JS_CFUNC_DEF("setFont", 0, js_lv_style_set_font),
 } ;
 
 

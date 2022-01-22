@@ -287,7 +287,7 @@ exports.generateRequire = function() {
 exports.generateInit = function() {
     let code = ''
     for(let meta of LstStuct) {
-        code+= `    JS_NewClassID(&js_lv_draw_rect_dsc_class_id);\r\n`
+        code+= `    JS_NewClassID(&js_lv_${meta.name}_class_id);\r\n`
     }
     return code
 }

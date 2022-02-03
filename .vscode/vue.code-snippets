@@ -2,8 +2,8 @@
 	"c-header": {
 		"prefix": "c-header",
 		"body": [
-			"#ifndef __H_${TM_FILENAME_BASE/(.*)$/${1:/upcase}/}__" ,
-			"#define __H_${TM_FILENAME_BASE/(.*)$/${1:/upcase}/}__",
+			"#ifndef ONCE_H_${TM_FILENAME_BASE/(.*)$/${1:/upcase}/}" ,
+			"#define ONCE_H_${TM_FILENAME_BASE/(.*)$/${1:/upcase}/}",
 			"",
 			"",
 			"#endif",

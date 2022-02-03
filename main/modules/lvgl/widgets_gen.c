@@ -1744,7 +1744,7 @@ static JSValue js_lv_obj_constructor(JSContext *ctx, JSValueConst new_target, in
     return jsobj ;
 }
 static void js_lv_obj_finalizer(JSRuntime *rt, JSValue val){
-    printf("js_lv_obj_finalizer()\n") ;
+    // printf("js_lv_obj_finalizer()\n") ;
     lv_obj_t * thisobj = JS_GetOpaqueInternal(val) ;
     if( thisobj && lv_obj_get_user_data(thisobj) == JS_VALUE_GET_PTR(val) ){
         lv_obj_set_user_data(thisobj, NULL) ;

@@ -1,6 +1,7 @@
 #ifndef _UTILS_H
 #define _UTILS_H
 
+#include "debug.h"
 #include "quickjs-libc.h"
 #include <stdbool.h>
 
@@ -120,21 +121,6 @@ void eval_code_len(JSContext *ctx, const char * str,size_t len,const char * file
 
 
 
-#define pf(...) printf(__VA_ARGS__) ;printf("\n") ;
-#define dd printf("@%d\n", __LINE__) ;
-#define df(msg) printf("@%d %s\n", __LINE__, msg) ;
-#define dm(msg) printf("%s: %dKB\n", msg, esp_get_free_heap_size()/1024);
-#define dp(p)   printf(#p"@%p\n", p) ;
-#define ds(s)   printf(#s"=%s\n", s) ;
-#define dn(v)   printf(#v"=%d\n", v) ;
-#define dn64(v)   printf(#v"=%lld\n", v) ;
-#define dn2(v1,v2)              printf(#v1"=%d, "#v2"=%d\n", v1, v2) ;
-#define dn3(v1,v2,v3)           printf(#v1"=%d, "#v2"=%d, "#v3"=%d\n", v1, v2, v3) ;
-#define dn4(v1,v2,v3,v4)        printf(#v1"=%d, "#v2"=%d, "#v3"=%d, "#v4"=%d\n", v1, v2, v3, v4) ;
-#define dn5(v1,v2,v3,v4,v5)     printf(#v1"=%d, "#v2"=%d, "#v3"=%d, "#v4"=%d, "#v5"=%d\n", v1, v2, v3, v4, v5) ;
-
-#define YES_OR_NO(exp) printf(#exp"? %s\n", (exp)? "yes": "no") ;
-#define IS_NULL(exp) YES_OR_NO((exp)==NULL)
 
 #define dref(var,when) printf( "[%s]" #var " ref:%d\n", when, VAR_REFCNT(var)) ;
 
@@ -177,8 +163,6 @@ void freeArrayBuffer(JSRuntime *rt, void *opaque, void *ptr) ;
         }                                                                               \
     }
 
-#endif
-
 JSValue js_get_prop(JSContext *ctx, JSValue obj, int depth, ...)  ;
 JSValue js_get_glob_prop(JSContext *ctx, int depth, ...)  ;
 
@@ -200,3 +184,6 @@ bool qjs_instanceof(JSContext *ctx, JSValue obj, JSClassID clz_id) ;
 #define QJS_DEF_CLASS(typeName, clzName, fullClzName, parentProto, pkgVar)                          \
     qjs_def_class(ctx, clzName, js_##typeName##_class_id, &js_##typeName##_class     \
                 , fullClzName, js_##typeName##_constructor, js_##typeName##_proto_funcs, countof(js_##typeName##_proto_funcs), parentProto, pkgVar) ;
+
+
+#endif

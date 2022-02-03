@@ -1,0 +1,16 @@
+module.exports = {
+    // "lv_table_create": [null, [], "lv_obj_t *"],
+    "lv_table_set_cell_value": [null, [["uint16_t","row"],["uint16_t","col"],["char *","txt"]], "void"],
+    // "lv_table_set_cell_value_fmt": [null, [["uint16_t","row"],["uint16_t","col"],["char *","fmt"],["","..."]], "void"],
+    "lv_table_set_row_cnt": [null, [["uint16_t","row_cnt"]], "void"],
+    "lv_table_set_col_cnt": [null, [["uint16_t","col_cnt"]], "void"],
+    "lv_table_set_col_width": [null, [["uint16_t","col_id"],["lv_coord_t","w"]], "void"],
+    "lv_table_add_cell_ctrl": [null, [["uint16_t","row"],["uint16_t","col"],["lv_table_cell_ctrl_t","ctrl"]], "void"],
+    "lv_table_clear_cell_ctrl": [null, [["uint16_t","row"],["uint16_t","col"],["lv_table_cell_ctrl_t","ctrl"]], "void"],
+    "lv_table_get_cell_value": [null, [["uint16_t","row"],["uint16_t","col"]], "char *"],
+    "lv_table_get_row_cnt": [null, [], "uint16_t"],
+    "lv_table_get_col_cnt": [null, [], "uint16_t"],
+    "lv_table_get_col_width": [null, [["uint16_t","col"]], "lv_coord_t"],
+    "lv_table_has_cell_ctrl": [null, [["uint16_t","row"],["uint16_t","col"],["lv_table_cell_ctrl_t","ctrl"]], "bool"],
+    // "lv_table_get_selected_cell": [null, [["uint16_t *","row"],["uint16_t *","col"]], "void"],
+}

@@ -88,6 +88,18 @@ const lstClasses = [
     },
 ]
 
+/*
+{
+    className: 'Obj',
+    typeName: 'lv_obj',
+    ctypeName: 'lv_obj_t *',
+    fullClassName: 'Obj',
+    methods: {
+        "lv_obj_set_flex_align": [null, [ ["lv_flex_align_t","main_place"],["lv_flex_align_t","cross_place"],["lv_flex_align_t","track_cross_place"] ], "void"],
+    } ,
+    cusMethods: []
+}
+*/
 const WidgetsMeta = []
 
 for(let clzconf of lstClasses) {

@@ -481,7 +481,7 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
 
     lv_task_handler() ;
 
-    dn(VAR_REFCNT(jsdisp))
+    // dn(VAR_REFCNT(jsdisp))
 
     return jsdisp ;
 

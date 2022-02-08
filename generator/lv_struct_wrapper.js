@@ -298,7 +298,7 @@ exports.generateDeclare = function() {
     return code
 }
 
-
+exports.LstStuct = LstStuct
 
 
 

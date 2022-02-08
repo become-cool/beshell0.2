@@ -2,286 +2,366 @@
     "lv_res_t": {
         "jsname": "RES",
         "nameFunc": "lv_res_to_name",
-        "valueFunc": "lv_res_to_const"
+        "valueFunc": "lv_res_to_value"
     },
     "lv_anim_enable_t": {
         "jsname": "ANIM_ENABLE",
         "nameFunc": "lv_anim_enable_to_name",
-        "valueFunc": "lv_anim_enable_to_const"
+        "valueFunc": "lv_anim_enable_to_value"
     },
     "lv_palette_t": {
         "jsname": "PALETTE",
         "nameFunc": "lv_palette_to_name",
-        "valueFunc": "lv_palette_to_const"
+        "valueFunc": "lv_palette_to_value"
     },
     "lv_align_t": {
         "jsname": "ALIGN",
         "nameFunc": "lv_align_to_name",
-        "valueFunc": "lv_align_to_const"
+        "valueFunc": "lv_align_to_value"
     },
     "lv_dir_t": {
         "jsname": "DIR",
         "nameFunc": "lv_dir_to_name",
-        "valueFunc": "lv_dir_to_const"
+        "valueFunc": "lv_dir_to_value"
     },
     "lv_img_cf_t": {
         "jsname": "IMG_CF",
         "nameFunc": "lv_img_cf_to_name",
-        "valueFunc": "lv_img_cf_to_const"
+        "valueFunc": "lv_img_cf_to_value"
     },
     "lv_disp_rot_t": {
         "jsname": "DISP_ROT",
         "nameFunc": "lv_disp_rot_to_name",
-        "valueFunc": "lv_disp_rot_to_const"
+        "valueFunc": "lv_disp_rot_to_value"
     },
     "lv_indev_type_t": {
         "jsname": "INDEV_TYPE",
         "nameFunc": "lv_indev_type_to_name",
-        "valueFunc": "lv_indev_type_to_const"
+        "valueFunc": "lv_indev_type_to_value"
     },
     "lv_indev_state_t": {
         "jsname": "INDEV_STATE",
         "nameFunc": "lv_indev_state_to_name",
-        "valueFunc": "lv_indev_state_to_const"
+        "valueFunc": "lv_indev_state_to_value"
+    },
+    "lv_font_subpx_t": {
+        "jsname": "FONT_SUBPX",
+        "nameFunc": "lv_font_subpx_to_name",
+        "valueFunc": "lv_font_subpx_to_value"
     },
     "lv_text_flag_t": {
         "jsname": "TEXT_FLAG",
         "nameFunc": "lv_text_flag_to_name",
-        "valueFunc": "lv_text_flag_to_const"
+        "valueFunc": "lv_text_flag_to_value"
     },
     "lv_text_cmd_state_t": {
         "jsname": "TEXT_CMD_STATE",
         "nameFunc": "lv_text_cmd_state_to_name",
-        "valueFunc": "lv_text_cmd_state_to_const"
+        "valueFunc": "lv_text_cmd_state_to_value"
     },
     "lv_text_align_t": {
         "jsname": "TEXT_ALIGN",
         "nameFunc": "lv_text_align_to_name",
-        "valueFunc": "lv_text_align_to_const"
+        "valueFunc": "lv_text_align_to_value"
     },
     "lv_base_dir_t": {
         "jsname": "BASE_DIR",
         "nameFunc": "lv_base_dir_to_name",
-        "valueFunc": "lv_base_dir_to_const"
+        "valueFunc": "lv_base_dir_to_value"
     },
     "lv_blend_mode_t": {
         "jsname": "BLEND_MODE",
         "nameFunc": "lv_blend_mode_to_name",
-        "valueFunc": "lv_blend_mode_to_const"
+        "valueFunc": "lv_blend_mode_to_value"
     },
     "lv_text_decor_t": {
         "jsname": "TEXT_DECOR",
         "nameFunc": "lv_text_decor_to_name",
-        "valueFunc": "lv_text_decor_to_const"
+        "valueFunc": "lv_text_decor_to_value"
     },
     "lv_border_side_t": {
         "jsname": "BORDER_SIDE",
         "nameFunc": "lv_border_side_to_name",
-        "valueFunc": "lv_border_side_to_const"
+        "valueFunc": "lv_border_side_to_value"
     },
     "lv_grad_dir_t": {
         "jsname": "GRAD_DIR",
         "nameFunc": "lv_grad_dir_to_name",
-        "valueFunc": "lv_grad_dir_to_const"
+        "valueFunc": "lv_grad_dir_to_value"
     },
     "lv_style_prop_t": {
         "jsname": "STYLE_PROP",
         "nameFunc": "lv_style_prop_to_name",
-        "valueFunc": "lv_style_prop_to_const"
+        "valueFunc": "lv_style_prop_to_value"
     },
     "lv_state_t": {
         "jsname": "STATE",
         "nameFunc": "lv_state_to_name",
-        "valueFunc": "lv_state_to_const"
+        "valueFunc": "lv_state_to_value"
     },
     "lv_part_t": {
         "jsname": "PART",
         "nameFunc": "lv_part_to_name",
-        "valueFunc": "lv_part_to_const"
+        "valueFunc": "lv_part_to_value"
     },
     "lv_obj_flag_t": {
         "jsname": "OBJ_FLAG",
         "nameFunc": "lv_obj_flag_to_name",
-        "valueFunc": "lv_obj_flag_to_const"
+        "valueFunc": "lv_obj_flag_to_value"
+    },
+    "lv_obj_draw_part_type_t": {
+        "jsname": "OBJ_DRAW_PART_TYPE",
+        "nameFunc": "lv_obj_draw_part_type_to_name",
+        "valueFunc": "lv_obj_draw_part_type_to_value"
     },
     "lv_obj_tree_walk_res_t": {
         "jsname": "OBJ_TREE_WALK_RES",
         "nameFunc": "lv_obj_tree_walk_res_to_name",
-        "valueFunc": "lv_obj_tree_walk_res_to_const"
+        "valueFunc": "lv_obj_tree_walk_res_to_value"
     },
     "lv_scrollbar_mode_t": {
         "jsname": "SCROLLBAR_MODE",
         "nameFunc": "lv_scrollbar_mode_to_name",
-        "valueFunc": "lv_scrollbar_mode_to_const"
+        "valueFunc": "lv_scrollbar_mode_to_value"
     },
     "lv_scroll_snap_t": {
         "jsname": "SCROLL_SNAP",
         "nameFunc": "lv_scroll_snap_to_name",
-        "valueFunc": "lv_scroll_snap_to_const"
+        "valueFunc": "lv_scroll_snap_to_value"
     },
     "_lv_style_state_cmp_t": {
         "jsname": "_STYLE_STATE_CMP",
         "nameFunc": "lv__style_state_cmp_to_name",
-        "valueFunc": "lv__style_state_cmp_to_const"
+        "valueFunc": "lv__style_state_cmp_to_value"
     },
     "lv_fs_res_t": {
         "jsname": "FS_RES",
         "nameFunc": "lv_fs_res_to_name",
-        "valueFunc": "lv_fs_res_to_const"
+        "valueFunc": "lv_fs_res_to_value"
     },
     "lv_fs_mode_t": {
         "jsname": "FS_MODE",
         "nameFunc": "lv_fs_mode_to_name",
-        "valueFunc": "lv_fs_mode_to_const"
+        "valueFunc": "lv_fs_mode_to_value"
     },
     "lv_fs_whence_t": {
         "jsname": "FS_WHENCE",
         "nameFunc": "lv_fs_whence_to_name",
-        "valueFunc": "lv_fs_whence_to_const"
+        "valueFunc": "lv_fs_whence_to_value"
     },
     "lv_img_src_t": {
         "jsname": "IMG_SRC",
         "nameFunc": "lv_img_src_to_name",
-        "valueFunc": "lv_img_src_to_const"
+        "valueFunc": "lv_img_src_to_value"
     },
     "lv_draw_mask_res_t": {
         "jsname": "DRAW_MASK_RES",
         "nameFunc": "lv_draw_mask_res_to_name",
-        "valueFunc": "lv_draw_mask_res_to_const"
+        "valueFunc": "lv_draw_mask_res_to_value"
     },
     "lv_draw_mask_type_t": {
         "jsname": "DRAW_MASK_TYPE",
         "nameFunc": "lv_draw_mask_type_to_name",
-        "valueFunc": "lv_draw_mask_type_to_const"
+        "valueFunc": "lv_draw_mask_type_to_value"
     },
     "lv_draw_mask_xcb_t": {
         "jsname": "DRAW_MASK_XCB",
         "nameFunc": "lv_draw_mask_xcb_to_name",
-        "valueFunc": "lv_draw_mask_xcb_to_const"
+        "valueFunc": "lv_draw_mask_xcb_to_value"
     },
     "lv_cover_res_t": {
         "jsname": "COVER_RES",
         "nameFunc": "lv_cover_res_to_name",
-        "valueFunc": "lv_cover_res_to_const"
+        "valueFunc": "lv_cover_res_to_value"
+    },
+    "lv_obj_class_editable_t": {
+        "jsname": "OBJ_CLASS_EDITABLE",
+        "nameFunc": "lv_obj_class_editable_to_name",
+        "valueFunc": "lv_obj_class_editable_to_value"
+    },
+    "lv_obj_class_group_def_t": {
+        "jsname": "OBJ_CLASS_GROUP_DEF",
+        "nameFunc": "lv_obj_class_group_def_to_name",
+        "valueFunc": "lv_obj_class_group_def_to_value"
     },
     "lv_event_code_t": {
         "jsname": "EVENT_CODE",
         "nameFunc": "lv_event_code_to_name",
-        "valueFunc": "lv_event_code_to_const"
+        "valueFunc": "lv_event_code_to_value"
+    },
+    "lv_key_t": {
+        "jsname": "KEY",
+        "nameFunc": "lv_key_to_name",
+        "valueFunc": "lv_key_to_value"
     },
     "lv_group_refocus_policy_t": {
         "jsname": "GROUP_REFOCUS_POLICY",
         "nameFunc": "lv_group_refocus_policy_to_name",
-        "valueFunc": "lv_group_refocus_policy_to_const"
+        "valueFunc": "lv_group_refocus_policy_to_value"
     },
     "lv_scr_load_anim_t": {
         "jsname": "SCR_LOAD_ANIM",
         "nameFunc": "lv_scr_load_anim_to_name",
-        "valueFunc": "lv_scr_load_anim_to_const"
+        "valueFunc": "lv_scr_load_anim_to_value"
     },
     "lv_font_fmt_txt_cmap_type_t": {
         "jsname": "FONT_FMT_TXT_CMAP_TYPE",
         "nameFunc": "lv_font_fmt_txt_cmap_type_to_name",
-        "valueFunc": "lv_font_fmt_txt_cmap_type_to_const"
+        "valueFunc": "lv_font_fmt_txt_cmap_type_to_value"
+    },
+    "lv_font_fmt_txt_bitmap_format_t": {
+        "jsname": "FONT_FMT_TXT_BITMAP_FORMAT",
+        "nameFunc": "lv_font_fmt_txt_bitmap_format_to_name",
+        "valueFunc": "lv_font_fmt_txt_bitmap_format_to_value"
     },
     "lv_arc_mode_t": {
         "jsname": "ARC_MODE",
         "nameFunc": "lv_arc_mode_to_name",
-        "valueFunc": "lv_arc_mode_to_const"
+        "valueFunc": "lv_arc_mode_to_value"
+    },
+    "lv_arc_draw_part_type_t": {
+        "jsname": "ARC_DRAW_PART_TYPE",
+        "nameFunc": "lv_arc_draw_part_type_to_name",
+        "valueFunc": "lv_arc_draw_part_type_to_value"
     },
     "lv_img_size_mode_t": {
         "jsname": "IMG_SIZE_MODE",
         "nameFunc": "lv_img_size_mode_to_name",
-        "valueFunc": "lv_img_size_mode_to_const"
+        "valueFunc": "lv_img_size_mode_to_value"
     },
     "lv_label_long_mode_t": {
         "jsname": "LABEL_LONG_MODE",
         "nameFunc": "lv_label_long_mode_to_name",
-        "valueFunc": "lv_label_long_mode_to_const"
+        "valueFunc": "lv_label_long_mode_to_value"
     },
     "lv_table_cell_ctrl_t": {
         "jsname": "TABLE_CELL_CTRL",
         "nameFunc": "lv_table_cell_ctrl_to_name",
-        "valueFunc": "lv_table_cell_ctrl_to_const"
+        "valueFunc": "lv_table_cell_ctrl_to_value"
+    },
+    "lv_table_draw_part_type_t": {
+        "jsname": "TABLE_DRAW_PART_TYPE",
+        "nameFunc": "lv_table_draw_part_type_to_name",
+        "valueFunc": "lv_table_draw_part_type_to_value"
+    },
+    "lv_checkbox_draw_part_type_t": {
+        "jsname": "CHECKBOX_DRAW_PART_TYPE",
+        "nameFunc": "lv_checkbox_draw_part_type_to_name",
+        "valueFunc": "lv_checkbox_draw_part_type_to_value"
     },
     "lv_bar_mode_t": {
         "jsname": "BAR_MODE",
         "nameFunc": "lv_bar_mode_to_name",
-        "valueFunc": "lv_bar_mode_to_const"
+        "valueFunc": "lv_bar_mode_to_value"
+    },
+    "lv_bar_draw_part_type_t": {
+        "jsname": "BAR_DRAW_PART_TYPE",
+        "nameFunc": "lv_bar_draw_part_type_to_name",
+        "valueFunc": "lv_bar_draw_part_type_to_value"
     },
     "lv_slider_mode_t": {
         "jsname": "SLIDER_MODE",
         "nameFunc": "lv_slider_mode_to_name",
-        "valueFunc": "lv_slider_mode_to_const"
+        "valueFunc": "lv_slider_mode_to_value"
+    },
+    "lv_slider_draw_part_type_t": {
+        "jsname": "SLIDER_DRAW_PART_TYPE",
+        "nameFunc": "lv_slider_draw_part_type_to_name",
+        "valueFunc": "lv_slider_draw_part_type_to_value"
     },
     "lv_btnmatrix_ctrl_t": {
         "jsname": "BTNMATRIX_CTRL",
         "nameFunc": "lv_btnmatrix_ctrl_to_name",
-        "valueFunc": "lv_btnmatrix_ctrl_to_const"
+        "valueFunc": "lv_btnmatrix_ctrl_to_value"
+    },
+    "lv_btnmatrix_draw_part_type_t": {
+        "jsname": "BTNMATRIX_DRAW_PART_TYPE",
+        "nameFunc": "lv_btnmatrix_draw_part_type_to_name",
+        "valueFunc": "lv_btnmatrix_draw_part_type_to_value"
     },
     "lv_roller_mode_t": {
         "jsname": "ROLLER_MODE",
         "nameFunc": "lv_roller_mode_to_name",
-        "valueFunc": "lv_roller_mode_to_const"
+        "valueFunc": "lv_roller_mode_to_value"
+    },
+    "lv_animimg_part_t": {
+        "jsname": "ANIMIMG_PART",
+        "nameFunc": "lv_animimg_part_to_name",
+        "valueFunc": "lv_animimg_part_to_value"
     },
     "lv_chart_type_t": {
         "jsname": "CHART_TYPE",
         "nameFunc": "lv_chart_type_to_name",
-        "valueFunc": "lv_chart_type_to_const"
+        "valueFunc": "lv_chart_type_to_value"
     },
     "lv_chart_update_mode_t": {
         "jsname": "CHART_UPDATE_MODE",
         "nameFunc": "lv_chart_update_mode_to_name",
-        "valueFunc": "lv_chart_update_mode_to_const"
+        "valueFunc": "lv_chart_update_mode_to_value"
     },
     "lv_chart_axis_t": {
         "jsname": "CHART_AXIS",
         "nameFunc": "lv_chart_axis_to_name",
-        "valueFunc": "lv_chart_axis_to_const"
+        "valueFunc": "lv_chart_axis_to_value"
+    },
+    "lv_chart_draw_part_type_t": {
+        "jsname": "CHART_DRAW_PART_TYPE",
+        "nameFunc": "lv_chart_draw_part_type_to_name",
+        "valueFunc": "lv_chart_draw_part_type_to_value"
     },
     "lv_keyboard_mode_t": {
         "jsname": "KEYBOARD_MODE",
         "nameFunc": "lv_keyboard_mode_to_name",
-        "valueFunc": "lv_keyboard_mode_to_const"
+        "valueFunc": "lv_keyboard_mode_to_value"
     },
     "lv_flex_align_t": {
         "jsname": "FLEX_ALIGN",
         "nameFunc": "lv_flex_align_to_name",
-        "valueFunc": "lv_flex_align_to_const"
+        "valueFunc": "lv_flex_align_to_value"
     },
     "lv_flex_flow_t": {
         "jsname": "FLEX_FLOW",
         "nameFunc": "lv_flex_flow_to_name",
-        "valueFunc": "lv_flex_flow_to_const"
+        "valueFunc": "lv_flex_flow_to_value"
     },
     "lv_meter_indicator_type_t": {
         "jsname": "METER_INDICATOR_TYPE",
         "nameFunc": "lv_meter_indicator_type_to_name",
-        "valueFunc": "lv_meter_indicator_type_to_const"
+        "valueFunc": "lv_meter_indicator_type_to_value"
+    },
+    "lv_meter_draw_part_type_t": {
+        "jsname": "METER_DRAW_PART_TYPE",
+        "nameFunc": "lv_meter_draw_part_type_to_name",
+        "valueFunc": "lv_meter_draw_part_type_to_value"
     },
     "lv_colorwheel_mode_t": {
         "jsname": "COLORWHEEL_MODE",
         "nameFunc": "lv_colorwheel_mode_to_name",
-        "valueFunc": "lv_colorwheel_mode_to_const"
+        "valueFunc": "lv_colorwheel_mode_to_value"
+    },
+    "lv_led_draw_part_type_t": {
+        "jsname": "LED_DRAW_PART_TYPE",
+        "nameFunc": "lv_led_draw_part_type_to_name",
+        "valueFunc": "lv_led_draw_part_type_to_value"
     },
     "lv_imgbtn_state_t": {
         "jsname": "IMGBTN_STATE",
         "nameFunc": "lv_imgbtn_state_to_name",
-        "valueFunc": "lv_imgbtn_state_to_const"
+        "valueFunc": "lv_imgbtn_state_to_value"
     },
     "lv_span_overflow_t": {
         "jsname": "SPAN_OVERFLOW",
         "nameFunc": "lv_span_overflow_to_name",
-        "valueFunc": "lv_span_overflow_to_const"
+        "valueFunc": "lv_span_overflow_to_value"
     },
     "lv_span_mode_t": {
         "jsname": "SPAN_MODE",
         "nameFunc": "lv_span_mode_to_name",
-        "valueFunc": "lv_span_mode_to_const"
+        "valueFunc": "lv_span_mode_to_value"
     },
     "lv_grid_align_t": {
         "jsname": "GRID_ALIGN",
         "nameFunc": "lv_grid_align_to_name",
-        "valueFunc": "lv_grid_align_to_const"
+        "valueFunc": "lv_grid_align_to_value"
     }
 }

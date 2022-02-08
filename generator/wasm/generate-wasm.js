@@ -10,13 +10,13 @@ const mapExportStructs = {
     'lv_disp_drv_t': 'DispDrv' ,
     'lv_disp_t': 'Disp' ,
     'lv_obj_class_t': 'ObjClass' ,
+    'lv_indev_drv_t': 'IndevDrv' ,
+    'lv_indev_data_t': 'IndevData' ,
 }
 const mapCTypeAlias = {
     'struct _lv_obj_t': 'Obj'
 }
 let codeExports = ''
-
-let collectArgTypes = []
 
 const redefineFunctions = {
     lv_obj_set_width(width) {
@@ -70,6 +70,7 @@ function generateMethod(methodDef, ctypePrefix, thisType) {
         argTypes.push('"number"')
     }
     let needCCall = false
+
     for(let argDef of methodDef.args.slice(1)) {
         // struct pointer
         if( !! ctypeToJSClass(argDef.type) ) {
@@ -133,6 +134,9 @@ function generateMethod(methodDef, ctypePrefix, thisType) {
     else if(returnWrapperClass) {
         code+= `\r\n        return WASMObject.wrap(${returnWrapperClass}, ${codeCall})\r\n`
     }
+    else if(lvConstDef[methodDef.returnType]){
+        code+= `\r\n        return constMapping.${lvConstDef[methodDef.returnType].jsname}.name(${codeCall})\r\n`
+    }
     else {
         code+= `\r\n        return ${codeCall}\r\n`
     }
@@ -193,7 +197,7 @@ function generateWidgets() {
 
 function generateStructs() {
     let code = ""
-    for(let ctype of Object.keys(mapExportStructs)) {
+    for(let ctype in mapExportStructs) {
         if(!lvStructDef[ctype]) {
             throw new Error("unknow type "+ctype)
         }

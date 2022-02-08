@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.12)
 project (lvgl_api)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0 -D ASMJS -gsource-map")
-add_definitions(-DLV_CONF_INCLUDE_SIMPLE)
 
 include_directories(${PROJECT_SOURCE_DIR})
 include_directories(../components/lvgl/src)
@@ -28,7 +27,7 @@ configure_file(./src/lvgl.js ./ COPYONLY)
 
 # set(LINK_FLAGS "${LINK_FLAGS} --shell-file ${PROJECT_SOURCE_DIR}/src/lvgl_shell.html")
 set(LINK_FLAGS "${LINK_FLAGS} -s WASM=1")
-set(LINK_FLAGS "${LINK_FLAGS} -s EXPORTED_RUNTIME_METHODS='[ccall, cwrap, writeStringToMemory]'")
+set(LINK_FLAGS "${LINK_FLAGS} -s EXPORTED_RUNTIME_METHODS='[ccall, cwrap, writeStringToMemory, UTF8ToString, stringToUTF8]'")
 
 include(wasm_wrapper.cmake)
 

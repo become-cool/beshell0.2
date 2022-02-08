@@ -15,3 +15,19 @@ static void _cb_adapter_disp_drv_flush(lv_disp_drv_t * drv, const lv_area_t * ar
 EMSCRIPTEN_KEEPALIVE void * cb_adapter_disp_drv_flush() {
     return (void *)_cb_adapter_disp_drv_flush;
 }
+
+
+static void _cb_adapter_indev_drv_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
+    if(drv->user_data) {
+        lv_indev_data_t * input_data = (lv_indev_data_t *) drv->user_data ;
+        data->point.x = input_data->point.x ;
+        data->point.y = input_data->point.y ;
+        data->state = input_data->state ;
+        // printf("cb_adapter_indev_drv_read(), %d, %d, %d\n", data->point.x, data->point.y, data->state) ;
+    }
+}
+
+EMSCRIPTEN_KEEPALIVE void * cb_adapter_indev_drv_read(){
+    return (void *)_cb_adapter_indev_drv_read;
+}
+

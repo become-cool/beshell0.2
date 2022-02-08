@@ -1,7 +1,19 @@
-class WAMSObject {
+class WASMObject {
     ptr = 0
+    static wrap(clz, ptr) {
+        if(!ptr) {
+            return null
+        }
+        if(!WASMObject.isPrototypeOf(clz)) {
+            throw new Error("arg clz must be a child of WASMObject")
+        }
+        return {
+            ptr, 
+            __proto__: clz.prototype
+        }
+    }
 }
-class EventEmitter extends WAMSObject {
+class EventEmitter extends WASMObject {
     _handles = {}
     /**
      * 
@@ -101,5107 +113,2278 @@ class EventEmitter extends WAMSObject {
     }
 }
 
-class DispDrawBuf extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_disp_draw_buf_create()
-    }
-// AUTO GENERATE CODE START [DispDrawBuf METHODS] --------
-    init(buf1, buf2, size_in_px_cnt){
-        return Module._lv_disp_draw_buf_init(this.ptr, buf1, buf2, size_in_px_cnt)
-    }
-    buf1(){
-        return Module._lv_disp_draw_buf_get_buf1(this.ptr)
-    }
-    setBuf1(buf1){
-        return Module._lv_disp_draw_buf_set_buf1(this.ptr, buf1)
-    }
-    buf2(){
-        return Module._lv_disp_draw_buf_get_buf2(this.ptr)
-    }
-    setBuf2(buf2){
-        return Module._lv_disp_draw_buf_set_buf2(this.ptr, buf2)
-    }
-    bufAct(){
-        return Module._lv_disp_draw_buf_get_buf_act(this.ptr)
-    }
-    setBufAct(buf_act){
-        return Module._lv_disp_draw_buf_set_buf_act(this.ptr, buf_act)
-    }
-    size(){
-        return Module._lv_disp_draw_buf_get_size(this.ptr)
-    }
-    setSize(size){
-        return Module._lv_disp_draw_buf_set_size(this.ptr, size)
-    }
-    area(){
-        return Module._lv_disp_draw_buf_get_area(this.ptr)
-    }
-    setArea(area){
-        return Module._lv_disp_draw_buf_set_area(this.ptr, area)
-    }
-    flushing(){
-        return Module._lv_disp_draw_buf_get_flushing(this.ptr)
-    }
-    setFlushing(flushing){
-        return Module._lv_disp_draw_buf_set_flushing(this.ptr, flushing)
-    }
-    flushingLast(){
-        return Module._lv_disp_draw_buf_get_flushing_last(this.ptr)
-    }
-    setFlushingLast(flushing_last){
-        return Module._lv_disp_draw_buf_set_flushing_last(this.ptr, flushing_last)
-    }
-    lastArea(){
-        return Module._lv_disp_draw_buf_get_last_area(this.ptr)
-    }
-    setLastArea(last_area){
-        return Module._lv_disp_draw_buf_set_last_area(this.ptr, last_area)
-    }
-    lastPart(){
-        return Module._lv_disp_draw_buf_get_last_part(this.ptr)
-    }
-    setLastPart(last_part){
-        return Module._lv_disp_draw_buf_set_last_part(this.ptr, last_part)
-    }
-// AUTO GENERATE CODE END [DispDrawBuf METHODS] --------
-}
 
-class DispDrv extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_disp_drv_create()
-        Module._lv_disp_drv_init(this.ptr)
-    }
-// AUTO GENERATE CODE START [DispDrv METHODS] --------
-    init(){
-        return Module._lv_disp_drv_init(this.ptr)
-    }
-    register(){
-        return Module._lv_disp_drv_register(this.ptr)
-    }
-    useGenericSetPxCb(cf){
-        return Module._lv_disp_drv_use_generic_set_px_cb(this.ptr, cf)
-    }
-    horRes(){
-        return Module._lv_disp_drv_get_hor_res(this.ptr)
-    }
-    setHorRes(hor_res){
-        return Module._lv_disp_drv_set_hor_res(this.ptr, hor_res)
-    }
-    verRes(){
-        return Module._lv_disp_drv_get_ver_res(this.ptr)
-    }
-    setVerRes(ver_res){
-        return Module._lv_disp_drv_set_ver_res(this.ptr, ver_res)
-    }
-    physicalHorRes(){
-        return Module._lv_disp_drv_get_physical_hor_res(this.ptr)
-    }
-    setPhysicalHorRes(physical_hor_res){
-        return Module._lv_disp_drv_set_physical_hor_res(this.ptr, physical_hor_res)
-    }
-    physicalVerRes(){
-        return Module._lv_disp_drv_get_physical_ver_res(this.ptr)
-    }
-    setPhysicalVerRes(physical_ver_res){
-        return Module._lv_disp_drv_set_physical_ver_res(this.ptr, physical_ver_res)
-    }
-    offsetX(){
-        return Module._lv_disp_drv_get_offset_x(this.ptr)
-    }
-    setOffsetX(offset_x){
-        return Module._lv_disp_drv_set_offset_x(this.ptr, offset_x)
-    }
-    offsetY(){
-        return Module._lv_disp_drv_get_offset_y(this.ptr)
-    }
-    setOffsetY(offset_y){
-        return Module._lv_disp_drv_set_offset_y(this.ptr, offset_y)
-    }
-    drawBuf(){
-        return Module._lv_disp_drv_get_draw_buf(this.ptr)
-    }
-    setDrawBuf(draw_buf){
-        return Module._lv_disp_drv_set_draw_buf(this.ptr, draw_buf)
-    }
-    directMode(){
-        return Module._lv_disp_drv_get_direct_mode(this.ptr)
-    }
-    setDirectMode(direct_mode){
-        return Module._lv_disp_drv_set_direct_mode(this.ptr, direct_mode)
-    }
-    fullRefresh(){
-        return Module._lv_disp_drv_get_full_refresh(this.ptr)
-    }
-    setFullRefresh(full_refresh){
-        return Module._lv_disp_drv_set_full_refresh(this.ptr, full_refresh)
-    }
-    swRotate(){
-        return Module._lv_disp_drv_get_sw_rotate(this.ptr)
-    }
-    setSwRotate(sw_rotate){
-        return Module._lv_disp_drv_set_sw_rotate(this.ptr, sw_rotate)
-    }
-    antialiasing(){
-        return Module._lv_disp_drv_get_antialiasing(this.ptr)
-    }
-    setAntialiasing(antialiasing){
-        return Module._lv_disp_drv_set_antialiasing(this.ptr, antialiasing)
-    }
-    rotated(){
-        return Module._lv_disp_drv_get_rotated(this.ptr)
-    }
-    setRotated(rotated){
-        return Module._lv_disp_drv_set_rotated(this.ptr, rotated)
-    }
-    screenTransp(){
-        return Module._lv_disp_drv_get_screen_transp(this.ptr)
-    }
-    setScreenTransp(screen_transp){
-        return Module._lv_disp_drv_set_screen_transp(this.ptr, screen_transp)
-    }
-    dpi(){
-        return Module._lv_disp_drv_get_dpi(this.ptr)
-    }
-    setDpi(dpi){
-        return Module._lv_disp_drv_set_dpi(this.ptr, dpi)
-    }
-    flushCb(){
-        return Module._lv_disp_drv_get_flush_cb(this.ptr)
-    }
-    setFlushCb(flush_cb){
-        return Module._lv_disp_drv_set_flush_cb(this.ptr, flush_cb)
-    }
-    rounderCb(){
-        return Module._lv_disp_drv_get_rounder_cb(this.ptr)
-    }
-    setRounderCb(rounder_cb){
-        return Module._lv_disp_drv_set_rounder_cb(this.ptr, rounder_cb)
-    }
-    setPxCb(){
-        return Module._lv_disp_drv_get_set_px_cb(this.ptr)
-    }
-    setSetPxCb(set_px_cb){
-        return Module._lv_disp_drv_set_set_px_cb(this.ptr, set_px_cb)
-    }
-    monitorCb(){
-        return Module._lv_disp_drv_get_monitor_cb(this.ptr)
-    }
-    setMonitorCb(monitor_cb){
-        return Module._lv_disp_drv_set_monitor_cb(this.ptr, monitor_cb)
-    }
-    waitCb(){
-        return Module._lv_disp_drv_get_wait_cb(this.ptr)
-    }
-    setWaitCb(wait_cb){
-        return Module._lv_disp_drv_set_wait_cb(this.ptr, wait_cb)
-    }
-    cleanDcacheCb(){
-        return Module._lv_disp_drv_get_clean_dcache_cb(this.ptr)
-    }
-    setCleanDcacheCb(clean_dcache_cb){
-        return Module._lv_disp_drv_set_clean_dcache_cb(this.ptr, clean_dcache_cb)
-    }
-    gpuWaitCb(){
-        return Module._lv_disp_drv_get_gpu_wait_cb(this.ptr)
-    }
-    setGpuWaitCb(gpu_wait_cb){
-        return Module._lv_disp_drv_set_gpu_wait_cb(this.ptr, gpu_wait_cb)
-    }
-    drvUpdateCb(){
-        return Module._lv_disp_drv_get_drv_update_cb(this.ptr)
-    }
-    setDrvUpdateCb(drv_update_cb){
-        return Module._lv_disp_drv_set_drv_update_cb(this.ptr, drv_update_cb)
-    }
-    gpuFillCb(){
-        return Module._lv_disp_drv_get_gpu_fill_cb(this.ptr)
-    }
-    setGpuFillCb(gpu_fill_cb){
-        return Module._lv_disp_drv_set_gpu_fill_cb(this.ptr, gpu_fill_cb)
-    }
-    colorChromaKey(){
-        return Module._lv_disp_drv_get_color_chroma_key(this.ptr)
-    }
-    setColorChromaKey(color_chroma_key){
-        return Module._lv_disp_drv_set_color_chroma_key(this.ptr, color_chroma_key)
-    }
-    userData(){
-        return Module._lv_disp_drv_get_user_data(this.ptr)
-    }
-    setUserData(user_data){
-        return Module._lv_disp_drv_set_user_data(this.ptr, user_data)
-    }
-// AUTO GENERATE CODE END [DispDrv METHODS] --------
-}
-
-class Disp extends WAMSObject {
-    constructor(drv) {
-        super()
-        this.ptr = Module._lv_disp_drv_register(drv.ptr)
-    }
-// AUTO GENERATE CODE START [Disp METHODS] --------
-    remove(){
-        return Module._lv_disp_remove(this.ptr)
-    }
-    setDefault(){
-        return Module._lv_disp_set_default(this.ptr)
-    }
-    horRes(){
-        return Module._lv_disp_get_hor_res(this.ptr)
-    }
-    verRes(){
-        return Module._lv_disp_get_ver_res(this.ptr)
-    }
-    physicalHorRes(){
-        return Module._lv_disp_get_physical_hor_res(this.ptr)
-    }
-    physicalVerRes(){
-        return Module._lv_disp_get_physical_ver_res(this.ptr)
-    }
-    offsetX(){
-        return Module._lv_disp_get_offset_x(this.ptr)
-    }
-    offsetY(){
-        return Module._lv_disp_get_offset_y(this.ptr)
-    }
-    antialiasing(){
-        return Module._lv_disp_get_antialiasing(this.ptr)
-    }
-    setRotation(rotation){
-        return Module._lv_disp_set_rotation(this.ptr, rotation)
-    }
-    rotation(){
-        return Module._lv_disp_get_rotation(this.ptr)
-    }
-    next(){
-        return Module._lv_disp_get_next(this.ptr)
-    }
-    drawBuf(){
-        return Module._lv_disp_get_draw_buf(this.ptr)
-    }
-    scrAct(){
-        return Module._lv_disp_get_scr_act(this.ptr)
-    }
-    scrPrev(){
-        return Module._lv_disp_get_scr_prev(this.ptr)
-    }
-    layerTop(){
-        return Module._lv_disp_get_layer_top(this.ptr)
-    }
-    layerSys(){
-        return Module._lv_disp_get_layer_sys(this.ptr)
-    }
-    setTheme(th){
-        return Module._lv_disp_set_theme(this.ptr, th)
-    }
-    theme(){
-        return Module._lv_disp_get_theme(this.ptr)
-    }
-    setBgColor(color){
-        return Module._lv_disp_set_bg_color(this.ptr, color)
-    }
-    setBgImage(img_src){
-        return Module._lv_disp_set_bg_image(this.ptr, img_src)
-    }
-    setBgOpa(opa){
-        return Module._lv_disp_set_bg_opa(this.ptr, opa)
-    }
-    trigActivity(){
-        return Module._lv_disp_trig_activity(this.ptr)
-    }
-    cleanDcache(){
-        return Module._lv_disp_clean_dcache(this.ptr)
-    }
-    driver(){
-        return Module._lv_disp_get_driver(this.ptr)
-    }
-    setDriver(driver){
-        return Module._lv_disp_set_driver(this.ptr, driver)
-    }
-    refrTimer(){
-        return Module._lv_disp_get_refr_timer(this.ptr)
-    }
-    setRefrTimer(refr_timer){
-        return Module._lv_disp_set_refr_timer(this.ptr, refr_timer)
-    }
-    screens(){
-        return Module._lv_disp_get_screens(this.ptr)
-    }
-    setScreens(screens){
-        return Module._lv_disp_set_screens(this.ptr, screens)
-    }
-    actScr(){
-        return Module._lv_disp_get_act_scr(this.ptr)
-    }
-    setActScr(act_scr){
-        return Module._lv_disp_set_act_scr(this.ptr, act_scr)
-    }
-    prevScr(){
-        return Module._lv_disp_get_prev_scr(this.ptr)
-    }
-    setPrevScr(prev_scr){
-        return Module._lv_disp_set_prev_scr(this.ptr, prev_scr)
-    }
-    scrToLoad(){
-        return Module._lv_disp_get_scr_to_load(this.ptr)
-    }
-    setScrToLoad(scr_to_load){
-        return Module._lv_disp_set_scr_to_load(this.ptr, scr_to_load)
-    }
-    topLayer(){
-        return Module._lv_disp_get_top_layer(this.ptr)
-    }
-    setTopLayer(top_layer){
-        return Module._lv_disp_set_top_layer(this.ptr, top_layer)
-    }
-    sysLayer(){
-        return Module._lv_disp_get_sys_layer(this.ptr)
-    }
-    setSysLayer(sys_layer){
-        return Module._lv_disp_set_sys_layer(this.ptr, sys_layer)
-    }
-    screenCnt(){
-        return Module._lv_disp_get_screen_cnt(this.ptr)
-    }
-    setScreenCnt(screen_cnt){
-        return Module._lv_disp_set_screen_cnt(this.ptr, screen_cnt)
-    }
-    delPrev(){
-        return Module._lv_disp_get_del_prev(this.ptr)
-    }
-    setDelPrev(del_prev){
-        return Module._lv_disp_set_del_prev(this.ptr, del_prev)
-    }
-    bgOpa(){
-        return Module._lv_disp_get_bg_opa(this.ptr)
-    }
-    bgColor(){
-        return Module._lv_disp_get_bg_color(this.ptr)
-    }
-    bgImg(){
-        return Module._lv_disp_get_bg_img(this.ptr)
-    }
-    setBgImg(bg_img){
-        return Module._lv_disp_set_bg_img(this.ptr, bg_img)
-    }
-    bgFn(){
-        return Module._lv_disp_get_bg_fn(this.ptr)
-    }
-    setBgFn(bg_fn){
-        return Module._lv_disp_set_bg_fn(this.ptr, bg_fn)
-    }
-    invAreas(){
-        return Module._lv_disp_get_inv_areas(this.ptr)
-    }
-    setInvAreas(inv_areas){
-        return Module._lv_disp_set_inv_areas(this.ptr, inv_areas)
-    }
-    invAreaJoined(){
-        return Module._lv_disp_get_inv_area_joined(this.ptr)
-    }
-    setInvAreaJoined(inv_area_joined){
-        return Module._lv_disp_set_inv_area_joined(this.ptr, inv_area_joined)
-    }
-    invP(){
-        return Module._lv_disp_get_inv_p(this.ptr)
-    }
-    setInvP(inv_p){
-        return Module._lv_disp_set_inv_p(this.ptr, inv_p)
-    }
-    lastActivityTime(){
-        return Module._lv_disp_get_last_activity_time(this.ptr)
-    }
-    setLastActivityTime(last_activity_time){
-        return Module._lv_disp_set_last_activity_time(this.ptr, last_activity_time)
-    }
-// AUTO GENERATE CODE END [Disp METHODS] --------
-}
-class Obj extends WAMSObject {
+// AUTO GENERATE CODE START [LVGL.JS WIDGETS] --------
+class Obj extends EventEmitter {
     constructor(parent) {
         super()
-        this.ptr = Module._lv_obj_create(parent?(parent.ptr||0):0)
+        this._createWidget(parent)
     }
-// AUTO GENERATE CODE START [Obj METHODS] --------
-    del(){
-        return Module._lv_obj_del(this.ptr)
+    _createWidget(parent) {
+        if(!parent instanceof Obj) {
+            throw new Error("parent must be a lv.Obj")
+        }
+        this.ptr = Module._lv_obj_create(parent?parent.ptr:null)
     }
-    clean(){
-        return Module._lv_obj_clean(this.ptr)
+    addFlag(f) {
+        Module._lv_obj_add_flag(this.ptr, constMapping.OBJ_FLAG.value(f))
     }
-    delDelayed(delay_ms){
-        return Module._lv_obj_del_delayed(this.ptr, delay_ms)
+    clearFlag(f) {
+        Module._lv_obj_clear_flag(this.ptr, constMapping.OBJ_FLAG.value(f))
     }
-    delAsync(){
-        return Module._lv_obj_del_async(this.ptr)
+    addState(state) {
+        Module._lv_obj_add_state(this.ptr, constMapping.STATE.value(state))
     }
-    setParent(parent){
-        return Module._lv_obj_set_parent(this.ptr, parent)
+    clearState(state) {
+        Module._lv_obj_clear_state(this.ptr, constMapping.STATE.value(state))
     }
-    swap(obj2){
-        return Module._lv_obj_swap(this.ptr, obj2)
+    hasFlag(f) {
+        return Module.ccall("lv_obj_has_flag", "bool", ["number", "number"], [this.ptr, constMapping.OBJ_FLAG.value(f)])
     }
-    moveToIndex(index){
-        return Module._lv_obj_move_to_index(this.ptr, index)
+    hasFlagAny(f) {
+        return Module.ccall("lv_obj_has_flag_any", "bool", ["number", "number"], [this.ptr, constMapping.OBJ_FLAG.value(f)])
     }
-    treeWalk(cb, user_data){
-        return Module._lv_obj_tree_walk(this.ptr, cb, user_data)
+    state() {
+        return constMapping.STATE.name(Module._lv_obj_get_state(this.ptr))
     }
-    setPos(x, y){
-        return Module._lv_obj_set_pos(this.ptr, x, y)
+    hasState(state) {
+        return Module.ccall("lv_obj_has_state", "bool", ["number", "number"], [this.ptr, constMapping.STATE.value(state)])
     }
-    setX(x){
-        return Module._lv_obj_set_x(this.ptr, x)
+    allocateSpecAttr() {
+        Module._lv_obj_allocate_spec_attr(this.ptr)
     }
-    setY(y){
-        return Module._lv_obj_set_y(this.ptr, y)
+    isValid() {
+        return Module.ccall("lv_obj_is_valid", "bool", ["number"], [this.ptr])
     }
-    setSize(w, h){
-        return Module._lv_obj_set_size(this.ptr, w, h)
+    dpx(n) {
+        return Module._lv_obj_dpx(this.ptr, n)
     }
-    refrSize(){
-        return Module._lv_obj_refr_size(this.ptr)
+    isEditable() {
+        return Module.ccall("lv_obj_is_editable", "bool", ["number"], [this.ptr])
     }
-    setWidth(w){
-        return Module._lv_obj_set_width(this.ptr, w)
+    setPos(x, y) {
+        Module._lv_obj_set_pos(this.ptr, x, y)
     }
-    setHeight(h){
-        return Module._lv_obj_set_height(this.ptr, h)
+    setX(x) {
+        Module._lv_obj_set_x(this.ptr, x)
     }
-    setContentWidth(w){
-        return Module._lv_obj_set_content_width(this.ptr, w)
+    setY(y) {
+        Module._lv_obj_set_y(this.ptr, y)
     }
-    setContentHeight(h){
-        return Module._lv_obj_set_content_height(this.ptr, h)
+    setSize(w, h) {
+        Module._lv_obj_set_size(this.ptr, w, h)
     }
-    setLayout(layout){
-        return Module._lv_obj_set_layout(this.ptr, layout)
+    refrSize() {
+        return Module.ccall("lv_obj_refr_size", "bool", ["number"], [this.ptr])
     }
-    markLayoutAsDirty(){
-        return Module._lv_obj_mark_layout_as_dirty(this.ptr)
+    setWidth(width) {
+        Module._lv_obj_set_width(this.ptr, size(width))
     }
-    setAlign(align){
-        return Module._lv_obj_set_align(this.ptr, align)
+    setHeight(height) {
+        Module._lv_obj_set_height(this.ptr, size(height))
     }
-    align(align, x_ofs, y_ofs){
-        return Module._lv_obj_align(this.ptr, align, x_ofs, y_ofs)
+    setContentWidth(w) {
+        Module._lv_obj_set_content_width(this.ptr, w)
     }
-    alignTo(base, align, x_ofs, y_ofs){
-        return Module._lv_obj_align_to(this.ptr, base, align, x_ofs, y_ofs)
+    setContentHeight(h) {
+        Module._lv_obj_set_content_height(this.ptr, h)
     }
-    refreshSelfSize(){
-        return Module._lv_obj_refresh_self_size(this.ptr)
+    setLayout(layout) {
+        Module._lv_obj_set_layout(this.ptr, layout)
     }
-    refrPos(){
-        return Module._lv_obj_refr_pos(this.ptr)
+    isLayoutPositioned() {
+        return Module.ccall("lv_obj_is_layout_positioned", "bool", ["number"], [this.ptr])
     }
-    moveTo(x, y){
-        return Module._lv_obj_move_to(this.ptr, x, y)
+    markLayoutAsDirty() {
+        Module._lv_obj_mark_layout_as_dirty(this.ptr)
     }
-    moveChildrenBy(x_diff, y_diff, ignore_floating){
-        return Module._lv_obj_move_children_by(this.ptr, x_diff, y_diff, ignore_floating)
+    updateLayout() {
+        Module._lv_obj_update_layout(this.ptr)
     }
-    setExtClickArea(size){
-        return Module._lv_obj_set_ext_click_area(this.ptr, size)
+    setAlign(align) {
+        Module._lv_obj_set_align(this.ptr, constMapping.ALIGN.value(align))
     }
-    hitTest(point){
-        return Module._lv_obj_hit_test(this.ptr, point)
+    align(align, x_ofs, y_ofs) {
+        Module._lv_obj_align(this.ptr, constMapping.ALIGN.value(align), x_ofs, y_ofs)
     }
-    setScrollbarMode(mode){
-        return Module._lv_obj_set_scrollbar_mode(this.ptr, mode)
+    alignTo(base, align, x_ofs, y_ofs) {
+        Module._lv_obj_align_to(this.ptr, base.ptr, constMapping.ALIGN.value(align), x_ofs, y_ofs)
     }
-    setScrollDir(dir){
-        return Module._lv_obj_set_scroll_dir(this.ptr, dir)
+    center() {
+        Module._lv_obj_center(this.ptr)
     }
-    setScrollSnapX(align){
-        return Module._lv_obj_set_scroll_snap_x(this.ptr, align)
+    x() {
+        return Module._lv_obj_get_x(this.ptr)
     }
-    setScrollSnapY(align){
-        return Module._lv_obj_set_scroll_snap_y(this.ptr, align)
+    y() {
+        return Module._lv_obj_get_y(this.ptr)
     }
-    scrollTop(){
+    xAligned() {
+        return Module._lv_obj_get_x_aligned(this.ptr)
+    }
+    yAligned() {
+        return Module._lv_obj_get_y_aligned(this.ptr)
+    }
+    width() {
+        return Module._lv_obj_get_width(this.ptr)
+    }
+    height() {
+        return Module._lv_obj_get_height(this.ptr)
+    }
+    contentWidth() {
+        return Module._lv_obj_get_content_width(this.ptr)
+    }
+    contentHeight() {
+        return Module._lv_obj_get_content_height(this.ptr)
+    }
+    contentCoords(area) {
+        Module._lv_obj_get_content_coords(this.ptr, area)
+    }
+    selfWidth() {
+        return Module._lv_obj_get_self_width(this.ptr)
+    }
+    selfHeight() {
+        return Module._lv_obj_get_self_height(this.ptr)
+    }
+    refreshSelfSize() {
+        return Module.ccall("lv_obj_refresh_self_size", "bool", ["number"], [this.ptr])
+    }
+    refrPos() {
+        Module._lv_obj_refr_pos(this.ptr)
+    }
+    moveTo(x, y) {
+        Module._lv_obj_move_to(this.ptr, x, y)
+    }
+    moveChildrenBy(x_diff, y_diff, ignore_floating) {
+        Module._lv_obj_move_children_by(this.ptr, x_diff, y_diff, ignore_floating)
+    }
+    invalidateArea(area) {
+        Module._lv_obj_invalidate_area(this.ptr, area)
+    }
+    invalidate() {
+        Module._lv_obj_invalidate(this.ptr)
+    }
+    areaIsVisible(area) {
+        return Module.ccall("lv_obj_area_is_visible", "bool", ["number", "number"], [this.ptr, area])
+    }
+    isVisible() {
+        return Module.ccall("lv_obj_is_visible", "bool", ["number"], [this.ptr])
+    }
+    setExtClickArea(size) {
+        Module._lv_obj_set_ext_click_area(this.ptr, size)
+    }
+    clickArea(area) {
+        Module._lv_obj_get_click_area(this.ptr, area)
+    }
+    hitTest(point) {
+        return Module.ccall("lv_obj_hit_test", "bool", ["number", "number"], [this.ptr, point])
+    }
+    setScrollbarMode(mode) {
+        Module._lv_obj_set_scrollbar_mode(this.ptr, constMapping.SCROLLBAR_MODE.value(mode))
+    }
+    setScrollDir(dir) {
+        Module._lv_obj_set_scroll_dir(this.ptr, constMapping.DIR.value(dir))
+    }
+    setScrollSnapX(align) {
+        Module._lv_obj_set_scroll_snap_x(this.ptr, constMapping.SCROLL_SNAP.value(align))
+    }
+    setScrollSnapY(align) {
+        Module._lv_obj_set_scroll_snap_y(this.ptr, constMapping.SCROLL_SNAP.value(align))
+    }
+    scrollbarMode() {
+        return constMapping.SCROLLBAR_MODE.name(Module._lv_obj_get_scrollbar_mode(this.ptr))
+    }
+    scrollDir() {
+        return constMapping.DIR.name(Module._lv_obj_get_scroll_dir(this.ptr))
+    }
+    scrollSnapX() {
+        return constMapping.SCROLL_SNAP.name(Module._lv_obj_get_scroll_snap_x(this.ptr))
+    }
+    scrollSnapY() {
+        return constMapping.SCROLL_SNAP.name(Module._lv_obj_get_scroll_snap_y(this.ptr))
+    }
+    scrollX() {
+        return Module._lv_obj_get_scroll_x(this.ptr)
+    }
+    scrollY() {
+        return Module._lv_obj_get_scroll_y(this.ptr)
+    }
+    scrollTop() {
         return Module._lv_obj_get_scroll_top(this.ptr)
     }
-    scrollBottom(){
+    scrollBottom() {
         return Module._lv_obj_get_scroll_bottom(this.ptr)
     }
-    scrollLeft(){
+    scrollLeft() {
         return Module._lv_obj_get_scroll_left(this.ptr)
     }
-    scrollRight(){
+    scrollRight() {
         return Module._lv_obj_get_scroll_right(this.ptr)
     }
-    scrollEnd(end){
-        return Module._lv_obj_get_scroll_end(this.ptr, end)
+    scrollEnd(end) {
+        Module._lv_obj_get_scroll_end(this.ptr, end)
     }
-    scrollBy(x, y, anim_en){
-        return Module._lv_obj_scroll_by(this.ptr, x, y, anim_en)
+    scrollBy(x, y, anim_en) {
+        Module._lv_obj_scroll_by(this.ptr, x, y, constMapping.ANIM_ENABLE.value(anim_en))
     }
-    scrollTo(x, y, anim_en){
-        return Module._lv_obj_scroll_to(this.ptr, x, y, anim_en)
+    scrollTo(x, y, anim_en) {
+        Module._lv_obj_scroll_to(this.ptr, x, y, constMapping.ANIM_ENABLE.value(anim_en))
     }
-    scrollToX(x, anim_en){
-        return Module._lv_obj_scroll_to_x(this.ptr, x, anim_en)
+    scrollToX(x, anim_en) {
+        Module._lv_obj_scroll_to_x(this.ptr, x, constMapping.ANIM_ENABLE.value(anim_en))
     }
-    scrollToY(y, anim_en){
-        return Module._lv_obj_scroll_to_y(this.ptr, y, anim_en)
+    scrollToY(y, anim_en) {
+        Module._lv_obj_scroll_to_y(this.ptr, y, constMapping.ANIM_ENABLE.value(anim_en))
     }
-    scrollToView(anim_en){
-        return Module._lv_obj_scroll_to_view(this.ptr, anim_en)
+    scrollToView(anim_en) {
+        Module._lv_obj_scroll_to_view(this.ptr, constMapping.ANIM_ENABLE.value(anim_en))
     }
-    scrollToViewRecursive(anim_en){
-        return Module._lv_obj_scroll_to_view_recursive(this.ptr, anim_en)
+    scrollToViewRecursive(anim_en) {
+        Module._lv_obj_scroll_to_view_recursive(this.ptr, constMapping.ANIM_ENABLE.value(anim_en))
     }
-    updateSnap(anim_en){
-        return Module._lv_obj_update_snap(this.ptr, anim_en)
+    isScrolling() {
+        return Module.ccall("lv_obj_is_scrolling", "bool", ["number"], [this.ptr])
     }
-    scrollbarArea(hor, ver){
-        return Module._lv_obj_get_scrollbar_area(this.ptr, hor, ver)
+    updateSnap(anim_en) {
+        Module._lv_obj_update_snap(this.ptr, constMapping.ANIM_ENABLE.value(anim_en))
     }
-    scrollbarInvalidate(){
-        return Module._lv_obj_scrollbar_invalidate(this.ptr)
+    scrollbarArea(hor, ver) {
+        Module._lv_obj_get_scrollbar_area(this.ptr, hor, ver)
     }
-    readjustScroll(anim_en){
-        return Module._lv_obj_readjust_scroll(this.ptr, anim_en)
+    scrollbarInvalidate() {
+        Module._lv_obj_scrollbar_invalidate(this.ptr)
     }
-    addStyle(style, selector){
-        return Module._lv_obj_add_style(this.ptr, style, selector)
+    readjustScroll(anim_en) {
+        Module._lv_obj_readjust_scroll(this.ptr, constMapping.ANIM_ENABLE.value(anim_en))
     }
-    removeStyle(style, selector){
-        return Module._lv_obj_remove_style(this.ptr, style, selector)
+    addStyle(style, selector) {
+        Module._lv_obj_add_style(this.ptr, style, selector)
     }
-    refreshStyle(part, prop){
-        return Module._lv_obj_refresh_style(this.ptr, part, prop)
+    removeStyle(style, selector) {
+        Module._lv_obj_remove_style(this.ptr, style, selector)
     }
-    setLocalStyleProp(prop, value, selector){
-        return Module._lv_obj_set_local_style_prop(this.ptr, prop, value, selector)
+    removeStyleAll() {
+        Module._lv_obj_remove_style_all(this.ptr)
     }
-    localStyleProp(prop, value, selector){
-        return Module._lv_obj_get_local_style_prop(this.ptr, prop, value, selector)
+    fadeIn(time, delay) {
+        Module._lv_obj_fade_in(this.ptr, time, delay)
     }
-    removeLocalStyleProp(prop, selector){
-        return Module._lv_obj_remove_local_style_prop(this.ptr, prop, selector)
+    fadeOut(time, delay) {
+        Module._lv_obj_fade_out(this.ptr, time, delay)
     }
-    fadeIn(time, delay){
-        return Module._lv_obj_fade_in(this.ptr, time, delay)
+    del() {
+        Module._lv_obj_del(this.ptr)
     }
-    fadeOut(time, delay){
-        return Module._lv_obj_fade_out(this.ptr, time, delay)
+    clean() {
+        Module._lv_obj_clean(this.ptr)
     }
-    setStyleWidth(value, selector){
-        return Module._lv_obj_set_style_width(this.ptr, value, selector)
+    delAsync() {
+        Module._lv_obj_del_async(this.ptr)
     }
-    setStyleMinWidth(value, selector){
-        return Module._lv_obj_set_style_min_width(this.ptr, value, selector)
+    setParent(parent) {
+        Module._lv_obj_set_parent(this.ptr, parent.ptr)
     }
-    setStyleMaxWidth(value, selector){
-        return Module._lv_obj_set_style_max_width(this.ptr, value, selector)
+    moveToIndex(index) {
+        Module._lv_obj_move_to_index(this.ptr, index)
     }
-    setStyleHeight(value, selector){
-        return Module._lv_obj_set_style_height(this.ptr, value, selector)
+    screen() {
+        return Module._lv_obj_get_screen(this.ptr)
     }
-    setStyleMinHeight(value, selector){
-        return Module._lv_obj_set_style_min_height(this.ptr, value, selector)
+    parent() {
+        return Module._lv_obj_get_parent(this.ptr)
     }
-    setStyleMaxHeight(value, selector){
-        return Module._lv_obj_set_style_max_height(this.ptr, value, selector)
+    child(id) {
+        return Module._lv_obj_get_child(this.ptr, id)
     }
-    setStyleX(value, selector){
-        return Module._lv_obj_set_style_x(this.ptr, value, selector)
+    childCnt() {
+        return Module._lv_obj_get_child_cnt(this.ptr)
     }
-    setStyleY(value, selector){
-        return Module._lv_obj_set_style_y(this.ptr, value, selector)
+    index() {
+        return Module._lv_obj_get_index(this.ptr)
     }
-    setStyleAlign(value, selector){
-        return Module._lv_obj_set_style_align(this.ptr, value, selector)
+    setFlexFlow(flow) {
+        Module._lv_obj_set_flex_flow(this.ptr, constMapping.FLEX_FLOW.value(flow))
     }
-    setStyleTransformWidth(value, selector){
-        return Module._lv_obj_set_style_transform_width(this.ptr, value, selector)
+    setFlexAlign(main_place, cross_place, track_cross_place) {
+        Module._lv_obj_set_flex_align(this.ptr, constMapping.FLEX_ALIGN.value(main_place), constMapping.FLEX_ALIGN.value(cross_place), constMapping.FLEX_ALIGN.value(track_cross_place))
     }
-    setStyleTransformHeight(value, selector){
-        return Module._lv_obj_set_style_transform_height(this.ptr, value, selector)
+    setFlexGrow(grow) {
+        Module._lv_obj_set_flex_grow(this.ptr, grow)
     }
-    setStyleTranslateX(value, selector){
-        return Module._lv_obj_set_style_translate_x(this.ptr, value, selector)
+    setTile(tile_obj, anim_en) {
+        Module._lv_obj_set_tile(this.ptr, tile_obj.ptr, constMapping.ANIM_ENABLE.value(anim_en))
     }
-    setStyleTranslateY(value, selector){
-        return Module._lv_obj_set_style_translate_y(this.ptr, value, selector)
+    setTileId(col_id, row_id, anim_en) {
+        Module._lv_obj_set_tile_id(this.ptr, col_id, row_id, constMapping.ANIM_ENABLE.value(anim_en))
     }
-    setStyleTransformZoom(value, selector){
-        return Module._lv_obj_set_style_transform_zoom(this.ptr, value, selector)
+    moveForeground() {
+        Module._lv_obj_move_foreground(this.ptr)
     }
-    setStyleTransformAngle(value, selector){
-        return Module._lv_obj_set_style_transform_angle(this.ptr, value, selector)
+    moveBackground() {
+        Module._lv_obj_move_background(this.ptr)
     }
-    setStylePadTop(value, selector){
-        return Module._lv_obj_set_style_pad_top(this.ptr, value, selector)
+    childId() {
+        return Module._lv_obj_get_child_id(this.ptr)
     }
-    setStylePadBottom(value, selector){
-        return Module._lv_obj_set_style_pad_bottom(this.ptr, value, selector)
-    }
-    setStylePadLeft(value, selector){
-        return Module._lv_obj_set_style_pad_left(this.ptr, value, selector)
-    }
-    setStylePadRight(value, selector){
-        return Module._lv_obj_set_style_pad_right(this.ptr, value, selector)
-    }
-    setStylePadRow(value, selector){
-        return Module._lv_obj_set_style_pad_row(this.ptr, value, selector)
-    }
-    setStylePadColumn(value, selector){
-        return Module._lv_obj_set_style_pad_column(this.ptr, value, selector)
-    }
-    setStyleRadius(value, selector){
-        return Module._lv_obj_set_style_radius(this.ptr, value, selector)
-    }
-    setStyleClipCorner(value, selector){
-        return Module._lv_obj_set_style_clip_corner(this.ptr, value, selector)
-    }
-    setStyleOpa(value, selector){
-        return Module._lv_obj_set_style_opa(this.ptr, value, selector)
-    }
-    setStyleColorFilterDsc(value, selector){
-        return Module._lv_obj_set_style_color_filter_dsc(this.ptr, value, selector)
-    }
-    setStyleColorFilterOpa(value, selector){
-        return Module._lv_obj_set_style_color_filter_opa(this.ptr, value, selector)
-    }
-    setStyleAnimTime(value, selector){
-        return Module._lv_obj_set_style_anim_time(this.ptr, value, selector)
-    }
-    setStyleAnimSpeed(value, selector){
-        return Module._lv_obj_set_style_anim_speed(this.ptr, value, selector)
-    }
-    setStyleTransition(value, selector){
-        return Module._lv_obj_set_style_transition(this.ptr, value, selector)
-    }
-    setStyleBlendMode(value, selector){
-        return Module._lv_obj_set_style_blend_mode(this.ptr, value, selector)
-    }
-    setStyleLayout(value, selector){
-        return Module._lv_obj_set_style_layout(this.ptr, value, selector)
-    }
-    setStyleBaseDir(value, selector){
-        return Module._lv_obj_set_style_base_dir(this.ptr, value, selector)
-    }
-    setStyleBgColor(value, selector){
-        return Module._lv_obj_set_style_bg_color(this.ptr, value, selector)
-    }
-    setStyleBgColorFiltered(value, selector){
-        return Module._lv_obj_set_style_bg_color_filtered(this.ptr, value, selector)
-    }
-    setStyleBgOpa(value, selector){
-        return Module._lv_obj_set_style_bg_opa(this.ptr, value, selector)
-    }
-    setStyleBgGradColor(value, selector){
-        return Module._lv_obj_set_style_bg_grad_color(this.ptr, value, selector)
-    }
-    setStyleBgGradColorFiltered(value, selector){
-        return Module._lv_obj_set_style_bg_grad_color_filtered(this.ptr, value, selector)
-    }
-    setStyleBgGradDir(value, selector){
-        return Module._lv_obj_set_style_bg_grad_dir(this.ptr, value, selector)
-    }
-    setStyleBgMainStop(value, selector){
-        return Module._lv_obj_set_style_bg_main_stop(this.ptr, value, selector)
-    }
-    setStyleBgGradStop(value, selector){
-        return Module._lv_obj_set_style_bg_grad_stop(this.ptr, value, selector)
-    }
-    setStyleBgImgSrc(value, selector){
-        return Module._lv_obj_set_style_bg_img_src(this.ptr, value, selector)
-    }
-    setStyleBgImgOpa(value, selector){
-        return Module._lv_obj_set_style_bg_img_opa(this.ptr, value, selector)
-    }
-    setStyleBgImgRecolor(value, selector){
-        return Module._lv_obj_set_style_bg_img_recolor(this.ptr, value, selector)
-    }
-    setStyleBgImgRecolorFiltered(value, selector){
-        return Module._lv_obj_set_style_bg_img_recolor_filtered(this.ptr, value, selector)
-    }
-    setStyleBgImgRecolorOpa(value, selector){
-        return Module._lv_obj_set_style_bg_img_recolor_opa(this.ptr, value, selector)
-    }
-    setStyleBgImgTiled(value, selector){
-        return Module._lv_obj_set_style_bg_img_tiled(this.ptr, value, selector)
-    }
-    setStyleBorderColor(value, selector){
-        return Module._lv_obj_set_style_border_color(this.ptr, value, selector)
-    }
-    setStyleBorderColorFiltered(value, selector){
-        return Module._lv_obj_set_style_border_color_filtered(this.ptr, value, selector)
-    }
-    setStyleBorderOpa(value, selector){
-        return Module._lv_obj_set_style_border_opa(this.ptr, value, selector)
-    }
-    setStyleBorderWidth(value, selector){
-        return Module._lv_obj_set_style_border_width(this.ptr, value, selector)
-    }
-    setStyleBorderSide(value, selector){
-        return Module._lv_obj_set_style_border_side(this.ptr, value, selector)
-    }
-    setStyleBorderPost(value, selector){
-        return Module._lv_obj_set_style_border_post(this.ptr, value, selector)
-    }
-    setStyleTextColor(value, selector){
-        return Module._lv_obj_set_style_text_color(this.ptr, value, selector)
-    }
-    setStyleTextColorFiltered(value, selector){
-        return Module._lv_obj_set_style_text_color_filtered(this.ptr, value, selector)
-    }
-    setStyleTextOpa(value, selector){
-        return Module._lv_obj_set_style_text_opa(this.ptr, value, selector)
-    }
-    setStyleTextFont(value, selector){
-        return Module._lv_obj_set_style_text_font(this.ptr, value, selector)
-    }
-    setStyleTextLetterSpace(value, selector){
-        return Module._lv_obj_set_style_text_letter_space(this.ptr, value, selector)
-    }
-    setStyleTextLineSpace(value, selector){
-        return Module._lv_obj_set_style_text_line_space(this.ptr, value, selector)
-    }
-    setStyleTextDecor(value, selector){
-        return Module._lv_obj_set_style_text_decor(this.ptr, value, selector)
-    }
-    setStyleTextAlign(value, selector){
-        return Module._lv_obj_set_style_text_align(this.ptr, value, selector)
-    }
-    setStyleImgOpa(value, selector){
-        return Module._lv_obj_set_style_img_opa(this.ptr, value, selector)
-    }
-    setStyleImgRecolor(value, selector){
-        return Module._lv_obj_set_style_img_recolor(this.ptr, value, selector)
-    }
-    setStyleImgRecolorFiltered(value, selector){
-        return Module._lv_obj_set_style_img_recolor_filtered(this.ptr, value, selector)
-    }
-    setStyleImgRecolorOpa(value, selector){
-        return Module._lv_obj_set_style_img_recolor_opa(this.ptr, value, selector)
-    }
-    setStyleOutlineWidth(value, selector){
-        return Module._lv_obj_set_style_outline_width(this.ptr, value, selector)
-    }
-    setStyleOutlineColor(value, selector){
-        return Module._lv_obj_set_style_outline_color(this.ptr, value, selector)
-    }
-    setStyleOutlineColorFiltered(value, selector){
-        return Module._lv_obj_set_style_outline_color_filtered(this.ptr, value, selector)
-    }
-    setStyleOutlineOpa(value, selector){
-        return Module._lv_obj_set_style_outline_opa(this.ptr, value, selector)
-    }
-    setStyleOutlinePad(value, selector){
-        return Module._lv_obj_set_style_outline_pad(this.ptr, value, selector)
-    }
-    setStyleShadowWidth(value, selector){
-        return Module._lv_obj_set_style_shadow_width(this.ptr, value, selector)
-    }
-    setStyleShadowOfsX(value, selector){
-        return Module._lv_obj_set_style_shadow_ofs_x(this.ptr, value, selector)
-    }
-    setStyleShadowOfsY(value, selector){
-        return Module._lv_obj_set_style_shadow_ofs_y(this.ptr, value, selector)
-    }
-    setStyleShadowSpread(value, selector){
-        return Module._lv_obj_set_style_shadow_spread(this.ptr, value, selector)
-    }
-    setStyleShadowColor(value, selector){
-        return Module._lv_obj_set_style_shadow_color(this.ptr, value, selector)
-    }
-    setStyleShadowColorFiltered(value, selector){
-        return Module._lv_obj_set_style_shadow_color_filtered(this.ptr, value, selector)
-    }
-    setStyleShadowOpa(value, selector){
-        return Module._lv_obj_set_style_shadow_opa(this.ptr, value, selector)
-    }
-    setStyleLineWidth(value, selector){
-        return Module._lv_obj_set_style_line_width(this.ptr, value, selector)
-    }
-    setStyleLineDashWidth(value, selector){
-        return Module._lv_obj_set_style_line_dash_width(this.ptr, value, selector)
-    }
-    setStyleLineDashGap(value, selector){
-        return Module._lv_obj_set_style_line_dash_gap(this.ptr, value, selector)
-    }
-    setStyleLineRounded(value, selector){
-        return Module._lv_obj_set_style_line_rounded(this.ptr, value, selector)
-    }
-    setStyleLineColor(value, selector){
-        return Module._lv_obj_set_style_line_color(this.ptr, value, selector)
-    }
-    setStyleLineColorFiltered(value, selector){
-        return Module._lv_obj_set_style_line_color_filtered(this.ptr, value, selector)
-    }
-    setStyleLineOpa(value, selector){
-        return Module._lv_obj_set_style_line_opa(this.ptr, value, selector)
-    }
-    setStyleArcWidth(value, selector){
-        return Module._lv_obj_set_style_arc_width(this.ptr, value, selector)
-    }
-    setStyleArcRounded(value, selector){
-        return Module._lv_obj_set_style_arc_rounded(this.ptr, value, selector)
-    }
-    setStyleArcColor(value, selector){
-        return Module._lv_obj_set_style_arc_color(this.ptr, value, selector)
-    }
-    setStyleArcColorFiltered(value, selector){
-        return Module._lv_obj_set_style_arc_color_filtered(this.ptr, value, selector)
-    }
-    setStyleArcOpa(value, selector){
-        return Module._lv_obj_set_style_arc_opa(this.ptr, value, selector)
-    }
-    setStyleArcImgSrc(value, selector){
-        return Module._lv_obj_set_style_arc_img_src(this.ptr, value, selector)
-    }
-    initDrawRectDsc(part, draw_dsc){
-        return Module._lv_obj_init_draw_rect_dsc(this.ptr, part, draw_dsc)
-    }
-    initDrawLabelDsc(part, draw_dsc){
-        return Module._lv_obj_init_draw_label_dsc(this.ptr, part, draw_dsc)
-    }
-    initDrawImgDsc(part, draw_dsc){
-        return Module._lv_obj_init_draw_img_dsc(this.ptr, part, draw_dsc)
-    }
-    initDrawLineDsc(part, draw_dsc){
-        return Module._lv_obj_init_draw_line_dsc(this.ptr, part, draw_dsc)
-    }
-    initDrawArcDsc(part, draw_dsc){
-        return Module._lv_obj_init_draw_arc_dsc(this.ptr, part, draw_dsc)
-    }
-    calculateExtDrawSize(part){
-        return Module._lv_obj_calculate_ext_draw_size(this.ptr, part)
-    }
-    refreshExtDrawSize(){
-        return Module._lv_obj_refresh_ext_draw_size(this.ptr)
-    }
-    classInitObj(){
-        return Module._lv_obj_class_init_obj(this.ptr)
-    }
-    isEditable(){
-        return Module._lv_obj_is_editable(this.ptr)
-    }
-    isGroupDef(){
-        return Module._lv_obj_is_group_def(this.ptr)
-    }
-    addEventCb(event_cb, filter, user_data){
-        return Module._lv_obj_add_event_cb(this.ptr, event_cb, filter, user_data)
-    }
-    removeEventCb(event_cb){
-        return Module._lv_obj_remove_event_cb(this.ptr, event_cb)
-    }
-    removeEventCbWithUserData(event_cb, event_user_data){
-        return Module._lv_obj_remove_event_cb_with_user_data(this.ptr, event_cb, event_user_data)
-    }
-    removeEventDsc(event_dsc){
-        return Module._lv_obj_remove_event_dsc(this.ptr, event_dsc)
-    }
-    create(){
-        return Module._lv_obj_create(this.ptr)
-    }
-    addFlag(f){
-        return Module._lv_obj_add_flag(this.ptr, f)
-    }
-    clearFlag(f){
-        return Module._lv_obj_clear_flag(this.ptr, f)
-    }
-    addState(state){
-        return Module._lv_obj_add_state(this.ptr, state)
-    }
-    clearState(state){
-        return Module._lv_obj_clear_state(this.ptr, state)
-    }
-    allocateSpecAttr(){
-        return Module._lv_obj_allocate_spec_attr(this.ptr)
-    }
-    setFlexFlow(flow){
-        return Module._lv_obj_set_flex_flow(this.ptr, flow)
-    }
-    setFlexAlign(main_place, cross_place, track_cross_place){
-        return Module._lv_obj_set_flex_align(this.ptr, main_place, cross_place, track_cross_place)
-    }
-    setFlexGrow(grow){
-        return Module._lv_obj_set_flex_grow(this.ptr, grow)
-    }
-    setStyleFlexFlow(value, selector){
-        return Module._lv_obj_set_style_flex_flow(this.ptr, value, selector)
-    }
-    setStyleFlexMainPlace(value, selector){
-        return Module._lv_obj_set_style_flex_main_place(this.ptr, value, selector)
-    }
-    setStyleFlexCrossPlace(value, selector){
-        return Module._lv_obj_set_style_flex_cross_place(this.ptr, value, selector)
-    }
-    setStyleFlexTrackPlace(value, selector){
-        return Module._lv_obj_set_style_flex_track_place(this.ptr, value, selector)
-    }
-    setStyleFlexGrow(value, selector){
-        return Module._lv_obj_set_style_flex_grow(this.ptr, value, selector)
-    }
-    setTile(tile_obj, anim_en){
-        return Module._lv_obj_set_tile(this.ptr, tile_obj, anim_en)
-    }
-    setTileId(col_id, row_id, anim_en){
-        return Module._lv_obj_set_tile_id(this.ptr, col_id, row_id, anim_en)
-    }
-    setGridDscArray(col_dsc, row_dsc){
-        return Module._lv_obj_set_grid_dsc_array(this.ptr, col_dsc, row_dsc)
-    }
-    setGridAlign(column_align, row_align){
-        return Module._lv_obj_set_grid_align(this.ptr, column_align, row_align)
-    }
-    setGridCell(column_align, col_pos, col_span, row_align, row_pos, row_span){
-        return Module._lv_obj_set_grid_cell(this.ptr, column_align, col_pos, col_span, row_align, row_pos, row_span)
-    }
-    setStyleGridRowDscArray(value, selector){
-        return Module._lv_obj_set_style_grid_row_dsc_array(this.ptr, value, selector)
-    }
-    setStyleGridColumnDscArray(value, selector){
-        return Module._lv_obj_set_style_grid_column_dsc_array(this.ptr, value, selector)
-    }
-    setStyleGridRowAlign(value, selector){
-        return Module._lv_obj_set_style_grid_row_align(this.ptr, value, selector)
-    }
-    setStyleGridColumnAlign(value, selector){
-        return Module._lv_obj_set_style_grid_column_align(this.ptr, value, selector)
-    }
-    setStyleGridCellColumnPos(value, selector){
-        return Module._lv_obj_set_style_grid_cell_column_pos(this.ptr, value, selector)
-    }
-    setStyleGridCellColumnSpan(value, selector){
-        return Module._lv_obj_set_style_grid_cell_column_span(this.ptr, value, selector)
-    }
-    setStyleGridCellRowPos(value, selector){
-        return Module._lv_obj_set_style_grid_cell_row_pos(this.ptr, value, selector)
-    }
-    setStyleGridCellRowSpan(value, selector){
-        return Module._lv_obj_set_style_grid_cell_row_span(this.ptr, value, selector)
-    }
-    setStyleGridCellXAlign(value, selector){
-        return Module._lv_obj_set_style_grid_cell_x_align(this.ptr, value, selector)
-    }
-    setStyleGridCellYAlign(value, selector){
-        return Module._lv_obj_set_style_grid_cell_y_align(this.ptr, value, selector)
-    }
-    classP(){
-        return Module._lv_obj_get_class_p(this.ptr)
-    }
-    setClassP(class_p){
-        return Module._lv_obj_set_class_p(this.ptr, class_p)
-    }
-    specAttr(){
-        return Module._lv_obj_get_spec_attr(this.ptr)
-    }
-    setSpecAttr(spec_attr){
-        return Module._lv_obj_set_spec_attr(this.ptr, spec_attr)
-    }
-    styles(){
-        return Module._lv_obj_get_styles(this.ptr)
-    }
-    setStyles(styles){
-        return Module._lv_obj_set_styles(this.ptr, styles)
-    }
-    setCoords(coords){
-        return Module._lv_obj_set_coords(this.ptr, coords)
-    }
-    flags(){
-        return Module._lv_obj_get_flags(this.ptr)
-    }
-    setFlags(flags){
-        return Module._lv_obj_set_flags(this.ptr, flags)
-    }
-    setState(state){
-        return Module._lv_obj_set_state(this.ptr, state)
-    }
-    layoutInv(){
-        return Module._lv_obj_get_layout_inv(this.ptr)
-    }
-    setLayoutInv(layout_inv){
-        return Module._lv_obj_set_layout_inv(this.ptr, layout_inv)
-    }
-    scrLayoutInv(){
-        return Module._lv_obj_get_scr_layout_inv(this.ptr)
-    }
-    setScrLayoutInv(scr_layout_inv){
-        return Module._lv_obj_set_scr_layout_inv(this.ptr, scr_layout_inv)
-    }
-    skipTrans(){
-        return Module._lv_obj_get_skip_trans(this.ptr)
-    }
-    setSkipTrans(skip_trans){
-        return Module._lv_obj_set_skip_trans(this.ptr, skip_trans)
-    }
-    styleCnt(){
-        return Module._lv_obj_get_style_cnt(this.ptr)
-    }
-    setStyleCnt(style_cnt){
-        return Module._lv_obj_set_style_cnt(this.ptr, style_cnt)
-    }
-    hLayout(){
-        return Module._lv_obj_get_h_layout(this.ptr)
-    }
-    setHLayout(h_layout){
-        return Module._lv_obj_set_h_layout(this.ptr, h_layout)
-    }
-    wLayout(){
-        return Module._lv_obj_get_w_layout(this.ptr)
-    }
-    setWLayout(w_layout){
-        return Module._lv_obj_set_w_layout(this.ptr, w_layout)
-    }
-// AUTO GENERATE CODE END [Obj METHODS] --------
 }
 class Label extends Obj {
-    constructor(parent) {
-        super()
-        this.ptr = Module._lv_label_create(parent?(parent.ptr||0):0)
+    _createWidget(parent) {
+        if(!parent instanceof Obj) {
+            throw new Error("parent must be a lv.Obj")
+        }
+        this.ptr = Module._lv_label_create(parent?parent.ptr:null)
     }
-// AUTO GENERATE CODE START [Label METHODS] --------
-    create(){
-        return Module._lv_label_create(this.ptr)
+    setText(text) {
+        Module.ccall("lv_label_set_text", "number", ["number", "string"], [this.ptr, text])
     }
-    setText(text){
-        return Module._lv_label_set_text(this.ptr, text)
+    setTextStatic(text) {
+        Module.ccall("lv_label_set_text_static", "number", ["number", "string"], [this.ptr, text])
     }
-    setTextFmt(fmt){
-        return Module._lv_label_set_text_fmt(this.ptr, fmt)
+    setLongMode(long_mode) {
+        Module._lv_label_set_long_mode(this.ptr, constMapping.LABEL_LONG_MODE.value(long_mode))
     }
-    setTextStatic(text){
-        return Module._lv_label_set_text_static(this.ptr, text)
+    setRecolor(en) {
+        Module._lv_label_set_recolor(this.ptr, en)
     }
-    setLongMode(long_mode){
-        return Module._lv_label_set_long_mode(this.ptr, long_mode)
+    setTextSelStart(index) {
+        Module._lv_label_set_text_sel_start(this.ptr, index)
     }
-    setRecolor(en){
-        return Module._lv_label_set_recolor(this.ptr, en)
+    setTextSelEnd(index) {
+        Module._lv_label_set_text_sel_end(this.ptr, index)
     }
-    setTextSelStart(index){
-        return Module._lv_label_set_text_sel_start(this.ptr, index)
+    text() {
+        return Module.ccall("lv_label_get_text", "string", ["number"], [this.ptr])
     }
-    setTextSelEnd(index){
-        return Module._lv_label_set_text_sel_end(this.ptr, index)
+    longMode() {
+        return constMapping.LABEL_LONG_MODE.name(Module._lv_label_get_long_mode(this.ptr))
     }
-    insText(pos, txt){
-        return Module._lv_label_ins_text(this.ptr, pos, txt)
+    recolor() {
+        return Module.ccall("lv_label_get_recolor", "bool", ["number"], [this.ptr])
     }
-    cutText(pos, cnt){
-        return Module._lv_label_cut_text(this.ptr, pos, cnt)
+    letterPos(char_id, pos) {
+        Module._lv_label_get_letter_pos(this.ptr, char_id, pos)
     }
-// AUTO GENERATE CODE END [Label METHODS] --------
+    letterOn(pos_in) {
+        return Module._lv_label_get_letter_on(this.ptr, pos_in)
+    }
+    isCharUnderPos(pos) {
+        return Module.ccall("lv_label_is_char_under_pos", "bool", ["number", "number"], [this.ptr, pos])
+    }
+    textSelectionStart() {
+        return Module._lv_label_get_text_selection_start(this.ptr)
+    }
+    textSelectionEnd() {
+        return Module._lv_label_get_text_selection_end(this.ptr)
+    }
+    insText(pos, txt) {
+        Module.ccall("lv_label_ins_text", "number", ["number", "number", "string"], [this.ptr, pos, txt])
+    }
+    cutText(pos, cnt) {
+        Module._lv_label_cut_text(this.ptr, pos, cnt)
+    }
 }
 class Arc extends Obj {
-    constructor(parent) {
-        super()
-        this.ptr = Module._lv_arc_create(parent?(parent.ptr||0):0)
+    _createWidget(parent) {
+        if(!parent instanceof Obj) {
+            throw new Error("parent must be a lv.Obj")
+        }
+        this.ptr = Module._lv_arc_create(parent?parent.ptr:null)
     }
-// AUTO GENERATE CODE START [Arc METHODS] --------
-    create(){
-        return Module._lv_arc_create(this.ptr)
+    setStartAngle(start) {
+        Module._lv_arc_set_start_angle(this.ptr, start)
     }
-    setStartAngle(start){
-        return Module._lv_arc_set_start_angle(this.ptr, start)
+    setEndAngle(end) {
+        Module._lv_arc_set_end_angle(this.ptr, end)
     }
-    setEndAngle(end){
-        return Module._lv_arc_set_end_angle(this.ptr, end)
+    setAngles(start, end) {
+        Module._lv_arc_set_angles(this.ptr, start, end)
     }
-    setAngles(start, end){
-        return Module._lv_arc_set_angles(this.ptr, start, end)
+    setBgStartAngle(start) {
+        Module._lv_arc_set_bg_start_angle(this.ptr, start)
     }
-    setBgStartAngle(start){
-        return Module._lv_arc_set_bg_start_angle(this.ptr, start)
+    setBgEndAngle(end) {
+        Module._lv_arc_set_bg_end_angle(this.ptr, end)
     }
-    setBgEndAngle(end){
-        return Module._lv_arc_set_bg_end_angle(this.ptr, end)
+    setBgAngles(start, end) {
+        Module._lv_arc_set_bg_angles(this.ptr, start, end)
     }
-    setBgAngles(start, end){
-        return Module._lv_arc_set_bg_angles(this.ptr, start, end)
+    setRotation(rotation) {
+        Module._lv_arc_set_rotation(this.ptr, rotation)
     }
-    setRotation(rotation){
-        return Module._lv_arc_set_rotation(this.ptr, rotation)
+    setMode(type) {
+        Module._lv_arc_set_mode(this.ptr, constMapping.ARC_MODE.value(type))
     }
-    setMode(type){
-        return Module._lv_arc_set_mode(this.ptr, type)
+    setValue(value) {
+        Module._lv_arc_set_value(this.ptr, value)
     }
-    setValue(value){
-        return Module._lv_arc_set_value(this.ptr, value)
+    setRange(min, max) {
+        Module._lv_arc_set_range(this.ptr, min, max)
     }
-    setRange(min, max){
-        return Module._lv_arc_set_range(this.ptr, min, max)
+    setChangeRate(rate) {
+        Module._lv_arc_set_change_rate(this.ptr, rate)
     }
-    setChangeRate(rate){
-        return Module._lv_arc_set_change_rate(this.ptr, rate)
-    }
-    angleStart(){
+    angleStart() {
         return Module._lv_arc_get_angle_start(this.ptr)
     }
-    angleEnd(){
+    angleEnd() {
         return Module._lv_arc_get_angle_end(this.ptr)
     }
-    bgAngleStart(){
+    bgAngleStart() {
         return Module._lv_arc_get_bg_angle_start(this.ptr)
     }
-    bgAngleEnd(){
+    bgAngleEnd() {
         return Module._lv_arc_get_bg_angle_end(this.ptr)
     }
-// AUTO GENERATE CODE END [Arc METHODS] --------
+    value() {
+        return Module._lv_arc_get_value(this.ptr)
+    }
+    minValue() {
+        return Module._lv_arc_get_min_value(this.ptr)
+    }
+    maxValue() {
+        return Module._lv_arc_get_max_value(this.ptr)
+    }
+    mode() {
+        return constMapping.ARC_MODE.name(Module._lv_arc_get_mode(this.ptr))
+    }
 }
 class Bar extends Obj {
-    constructor(parent) {
-        super()
-        this.ptr = Module._lv_bar_create(parent?(parent.ptr||0):0)
+    _createWidget(parent) {
+        if(!parent instanceof Obj) {
+            throw new Error("parent must be a lv.Obj")
+        }
+        this.ptr = Module._lv_bar_create(parent?parent.ptr:null)
     }
-// AUTO GENERATE CODE START [Bar METHODS] --------
-    create(){
-        return Module._lv_bar_create(this.ptr)
+    setValue(value, anim) {
+        Module._lv_bar_set_value(this.ptr, value, constMapping.ANIM_ENABLE.value(anim))
     }
-    setValue(value, anim){
-        return Module._lv_bar_set_value(this.ptr, value, anim)
+    setStartValue(start_value, anim) {
+        Module._lv_bar_set_start_value(this.ptr, start_value, constMapping.ANIM_ENABLE.value(anim))
     }
-    setStartValue(start_value, anim){
-        return Module._lv_bar_set_start_value(this.ptr, start_value, anim)
+    setRange(min, max) {
+        Module._lv_bar_set_range(this.ptr, min, max)
     }
-    setRange(min, max){
-        return Module._lv_bar_set_range(this.ptr, min, max)
+    setMode(mode) {
+        Module._lv_bar_set_mode(this.ptr, constMapping.BAR_MODE.value(mode))
     }
-    setMode(mode){
-        return Module._lv_bar_set_mode(this.ptr, mode)
+    value() {
+        return Module._lv_bar_get_value(this.ptr)
     }
-    mode(){
-        return Module._lv_bar_get_mode(this.ptr)
+    startValue() {
+        return Module._lv_bar_get_start_value(this.ptr)
     }
-    obj(){
-        return Module._lv_bar_get_obj(this.ptr)
+    minValue() {
+        return Module._lv_bar_get_min_value(this.ptr)
     }
-    setObj(obj){
-        return Module._lv_bar_set_obj(this.ptr, obj)
+    maxValue() {
+        return Module._lv_bar_get_max_value(this.ptr)
     }
-    curValue(){
-        return Module._lv_bar_get_cur_value(this.ptr)
+    mode() {
+        return constMapping.BAR_MODE.name(Module._lv_bar_get_mode(this.ptr))
     }
-    setCurValue(cur_value){
-        return Module._lv_bar_set_cur_value(this.ptr, cur_value)
-    }
-    setMinValue(min_value){
-        return Module._lv_bar_set_min_value(this.ptr, min_value)
-    }
-    setMaxValue(max_value){
-        return Module._lv_bar_set_max_value(this.ptr, max_value)
-    }
-    indicArea(){
-        return Module._lv_bar_get_indic_area(this.ptr)
-    }
-    setIndicArea(indic_area){
-        return Module._lv_bar_set_indic_area(this.ptr, indic_area)
-    }
-    curValueAnim(){
-        return Module._lv_bar_get_cur_value_anim(this.ptr)
-    }
-    setCurValueAnim(cur_value_anim){
-        return Module._lv_bar_set_cur_value_anim(this.ptr, cur_value_anim)
-    }
-    startValueAnim(){
-        return Module._lv_bar_get_start_value_anim(this.ptr)
-    }
-    setStartValueAnim(start_value_anim){
-        return Module._lv_bar_set_start_value_anim(this.ptr, start_value_anim)
-    }
-// AUTO GENERATE CODE END [Bar METHODS] --------
 }
 class Btn extends Obj {
-    constructor(parent) {
-        super()
-        this.ptr = Module._lv_btn_create(parent?(parent.ptr||0):0)
+    _createWidget(parent) {
+        if(!parent instanceof Obj) {
+            throw new Error("parent must be a lv.Obj")
+        }
+        this.ptr = Module._lv_btn_create(parent?parent.ptr:null)
     }
-// AUTO GENERATE CODE START [Btn METHODS] --------
-    create(){
-        return Module._lv_btn_create(this.ptr)
-    }
-// AUTO GENERATE CODE END [Btn METHODS] --------
 }
 class BtnMatrix extends Obj {
-    constructor(parent) {
-        super()
-        this.ptr = Module._lv_btnmatrix_create(parent?(parent.ptr||0):0)
+    _createWidget(parent) {
+        if(!parent instanceof Obj) {
+            throw new Error("parent must be a lv.Obj")
+        }
+        this.ptr = Module._lv_btnmatrix_create(parent?parent.ptr:null)
     }
-// AUTO GENERATE CODE START [BtnMatrix METHODS] --------
-    create(){
-        return Module._lv_btnmatrix_create(this.ptr)
+    popovers() {
+        return Module.ccall("lv_btnmatrix_get_popovers", "bool", ["number"], [this.ptr])
     }
-    setMap(map){
-        return Module._lv_btnmatrix_set_map(this.ptr, map)
+    setSelectedBtn(btn_id) {
+        Module._lv_btnmatrix_set_selected_btn(this.ptr, btn_id)
     }
-    setCtrlMap(ctrl_map){
-        return Module._lv_btnmatrix_set_ctrl_map(this.ptr, ctrl_map)
+    setBtnCtrl(btn_id, ctrl) {
+        Module._lv_btnmatrix_set_btn_ctrl(this.ptr, btn_id, constMapping.BTNMATRIX_CTRL.value(ctrl))
     }
-    setSelectedBtn(btn_id){
-        return Module._lv_btnmatrix_set_selected_btn(this.ptr, btn_id)
+    clearBtnCtrl(btn_id, ctrl) {
+        Module._lv_btnmatrix_clear_btn_ctrl(this.ptr, btn_id, constMapping.BTNMATRIX_CTRL.value(ctrl))
     }
-    setBtnCtrl(btn_id, ctrl){
-        return Module._lv_btnmatrix_set_btn_ctrl(this.ptr, btn_id, ctrl)
+    setBtnCtrlAll(ctrl) {
+        Module._lv_btnmatrix_set_btn_ctrl_all(this.ptr, constMapping.BTNMATRIX_CTRL.value(ctrl))
     }
-    clearBtnCtrl(btn_id, ctrl){
-        return Module._lv_btnmatrix_clear_btn_ctrl(this.ptr, btn_id, ctrl)
+    clearBtnCtrlAll(ctrl) {
+        Module._lv_btnmatrix_clear_btn_ctrl_all(this.ptr, constMapping.BTNMATRIX_CTRL.value(ctrl))
     }
-    setBtnCtrlAll(ctrl){
-        return Module._lv_btnmatrix_set_btn_ctrl_all(this.ptr, ctrl)
+    setBtnWidth(btn_id, width) {
+        Module._lv_btnmatrix_set_btn_width(this.ptr, btn_id, width)
     }
-    clearBtnCtrlAll(ctrl){
-        return Module._lv_btnmatrix_clear_btn_ctrl_all(this.ptr, ctrl)
+    setOneChecked(en) {
+        Module._lv_btnmatrix_set_one_checked(this.ptr, en)
     }
-    setBtnWidth(btn_id, width){
-        return Module._lv_btnmatrix_set_btn_width(this.ptr, btn_id, width)
+    selectedBtn() {
+        return Module._lv_btnmatrix_get_selected_btn(this.ptr)
     }
-    setOneChecked(en){
-        return Module._lv_btnmatrix_set_one_checked(this.ptr, en)
+    btnText(btn_id) {
+        return Module.ccall("lv_btnmatrix_get_btn_text", "string", ["number", "number"], [this.ptr, btn_id])
     }
-    hasBtnCtrl(btn_id, ctrl){
-        return Module._lv_btnmatrix_has_btn_ctrl(this.ptr, btn_id, ctrl)
+    hasBtnCtrl(btn_id, ctrl) {
+        return Module.ccall("lv_btnmatrix_has_btn_ctrl", "bool", ["number", "number", "number"], [this.ptr, btn_id, constMapping.BTNMATRIX_CTRL.value(ctrl)])
     }
-    obj(){
-        return Module._lv_btnmatrix_get_obj(this.ptr)
+    oneChecked() {
+        return Module.ccall("lv_btnmatrix_get_one_checked", "bool", ["number"], [this.ptr])
     }
-    setObj(obj){
-        return Module._lv_btnmatrix_set_obj(this.ptr, obj)
-    }
-    mapP(){
-        return Module._lv_btnmatrix_get_map_p(this.ptr)
-    }
-    setMapP(map_p){
-        return Module._lv_btnmatrix_set_map_p(this.ptr, map_p)
-    }
-    buttonAreas(){
-        return Module._lv_btnmatrix_get_button_areas(this.ptr)
-    }
-    setButtonAreas(button_areas){
-        return Module._lv_btnmatrix_set_button_areas(this.ptr, button_areas)
-    }
-    ctrlBits(){
-        return Module._lv_btnmatrix_get_ctrl_bits(this.ptr)
-    }
-    setCtrlBits(ctrl_bits){
-        return Module._lv_btnmatrix_set_ctrl_bits(this.ptr, ctrl_bits)
-    }
-    btnCnt(){
-        return Module._lv_btnmatrix_get_btn_cnt(this.ptr)
-    }
-    setBtnCnt(btn_cnt){
-        return Module._lv_btnmatrix_set_btn_cnt(this.ptr, btn_cnt)
-    }
-    rowCnt(){
-        return Module._lv_btnmatrix_get_row_cnt(this.ptr)
-    }
-    setRowCnt(row_cnt){
-        return Module._lv_btnmatrix_set_row_cnt(this.ptr, row_cnt)
-    }
-    btnIdSel(){
-        return Module._lv_btnmatrix_get_btn_id_sel(this.ptr)
-    }
-    setBtnIdSel(btn_id_sel){
-        return Module._lv_btnmatrix_set_btn_id_sel(this.ptr, btn_id_sel)
-    }
-    oneCheck(){
-        return Module._lv_btnmatrix_get_one_check(this.ptr)
-    }
-    setOneCheck(one_check){
-        return Module._lv_btnmatrix_set_one_check(this.ptr, one_check)
-    }
-// AUTO GENERATE CODE END [BtnMatrix METHODS] --------
 }
 class Canvas extends Obj {
-    constructor(parent) {
-        super()
-        this.ptr = Module._lv_canvas_create(parent?(parent.ptr||0):0)
+    _createWidget(parent) {
+        if(!parent instanceof Obj) {
+            throw new Error("parent must be a lv.Obj")
+        }
+        this.ptr = Module._lv_canvas_create(parent?parent.ptr:null)
     }
-// AUTO GENERATE CODE START [Canvas METHODS] --------
-    create(){
-        return Module._lv_canvas_create(this.ptr)
+    setPxColor(x, y, c) {
+        Module._lv_canvas_set_px_color(this.ptr, x, y, c)
     }
-    setBuffer(buf, w, h, cf){
-        return Module._lv_canvas_set_buffer(this.ptr, buf, w, h, cf)
+    setPx(x, y, c) {
+        Module._lv_canvas_set_px(this.ptr, x, y, c)
     }
-    setPxColor(x, y, c){
-        return Module._lv_canvas_set_px_color(this.ptr, x, y, c)
+    setPxOpa(x, y, opa) {
+        Module._lv_canvas_set_px_opa(this.ptr, x, y, opa)
     }
-    setPxOpa(x, y, opa){
-        return Module._lv_canvas_set_px_opa(this.ptr, x, y, opa)
+    setPalette(id, c) {
+        Module._lv_canvas_set_palette(this.ptr, id, c)
     }
-    setPalette(id, c){
-        return Module._lv_canvas_set_palette(this.ptr, id, c)
-    }
-    px(x, y){
+    px(x, y) {
         return Module._lv_canvas_get_px(this.ptr, x, y)
     }
-    img(){
-        return Module._lv_canvas_get_img(this.ptr)
+    blurHor(area, r) {
+        Module._lv_canvas_blur_hor(this.ptr, area, r)
     }
-    copyBuf(to_copy, x, y, w, h){
-        return Module._lv_canvas_copy_buf(this.ptr, to_copy, x, y, w, h)
+    blurVer(area, r) {
+        Module._lv_canvas_blur_ver(this.ptr, area, r)
     }
-    transform(img, angle, zoom, offset_x, offset_y, pivot_x, pivot_y, antialias){
-        return Module._lv_canvas_transform(this.ptr, img, angle, zoom, offset_x, offset_y, pivot_x, pivot_y, antialias)
+    fillBg(color, opa) {
+        Module._lv_canvas_fill_bg(this.ptr, color, opa)
     }
-    blurHor(area, r){
-        return Module._lv_canvas_blur_hor(this.ptr, area, r)
+    drawRect(x, y, w, h, draw_dsc) {
+        Module._lv_canvas_draw_rect(this.ptr, x, y, w, h, draw_dsc)
     }
-    blurVer(area, r){
-        return Module._lv_canvas_blur_ver(this.ptr, area, r)
+    drawArc(x, y, r, start_angle, end_angle, draw_dsc) {
+        Module._lv_canvas_draw_arc(this.ptr, x, y, r, start_angle, end_angle, draw_dsc)
     }
-    fillBg(color, opa){
-        return Module._lv_canvas_fill_bg(this.ptr, color, opa)
-    }
-    drawRect(x, y, w, h, draw_dsc){
-        return Module._lv_canvas_draw_rect(this.ptr, x, y, w, h, draw_dsc)
-    }
-    drawText(x, y, max_w, draw_dsc, txt){
-        return Module._lv_canvas_draw_text(this.ptr, x, y, max_w, draw_dsc, txt)
-    }
-    drawImg(x, y, src, draw_dsc){
-        return Module._lv_canvas_draw_img(this.ptr, x, y, src, draw_dsc)
-    }
-    drawLine(points, point_cnt, draw_dsc){
-        return Module._lv_canvas_draw_line(this.ptr, points, point_cnt, draw_dsc)
-    }
-    drawPolygon(points, point_cnt, draw_dsc){
-        return Module._lv_canvas_draw_polygon(this.ptr, points, point_cnt, draw_dsc)
-    }
-    drawArc(x, y, r, start_angle, end_angle, draw_dsc){
-        return Module._lv_canvas_draw_arc(this.ptr, x, y, r, start_angle, end_angle, draw_dsc)
-    }
-// AUTO GENERATE CODE END [Canvas METHODS] --------
 }
 class Checkbox extends Obj {
-    constructor(parent) {
-        super()
-        this.ptr = Module._lv_checkbox_create(parent?(parent.ptr||0):0)
+    _createWidget(parent) {
+        if(!parent instanceof Obj) {
+            throw new Error("parent must be a lv.Obj")
+        }
+        this.ptr = Module._lv_checkbox_create(parent?parent.ptr:null)
     }
-// AUTO GENERATE CODE START [Checkbox METHODS] --------
-    create(){
-        return Module._lv_checkbox_create(this.ptr)
+    setText(txt) {
+        Module.ccall("lv_checkbox_set_text", "number", ["number", "string"], [this.ptr, txt])
     }
-    setText(txt){
-        return Module._lv_checkbox_set_text(this.ptr, txt)
+    setTextStatic(txt) {
+        Module.ccall("lv_checkbox_set_text_static", "number", ["number", "string"], [this.ptr, txt])
     }
-    setTextStatic(txt){
-        return Module._lv_checkbox_set_text_static(this.ptr, txt)
+    text() {
+        return Module.ccall("lv_checkbox_get_text", "string", ["number"], [this.ptr])
     }
-// AUTO GENERATE CODE END [Checkbox METHODS] --------
 }
 class Dropdown extends Obj {
-    constructor(parent) {
-        super()
-        this.ptr = Module._lv_dropdown_create(parent?(parent.ptr||0):0)
+    _createWidget(parent) {
+        if(!parent instanceof Obj) {
+            throw new Error("parent must be a lv.Obj")
+        }
+        this.ptr = Module._lv_dropdown_create(parent?parent.ptr:null)
     }
-// AUTO GENERATE CODE START [Dropdown METHODS] --------
-    create(){
-        return Module._lv_dropdown_create(this.ptr)
+    setText(txt) {
+        Module.ccall("lv_dropdown_set_text", "number", ["number", "string"], [this.ptr, txt])
     }
-    setText(txt){
-        return Module._lv_dropdown_set_text(this.ptr, txt)
+    setOptions(options) {
+        Module.ccall("lv_dropdown_set_options", "number", ["number", "string"], [this.ptr, options])
     }
-    setOptions(options){
-        return Module._lv_dropdown_set_options(this.ptr, options)
+    setOptionsStatic(options) {
+        Module.ccall("lv_dropdown_set_options_static", "number", ["number", "string"], [this.ptr, options])
     }
-    setOptionsStatic(options){
-        return Module._lv_dropdown_set_options_static(this.ptr, options)
+    addOption(option, pos) {
+        Module.ccall("lv_dropdown_add_option", "number", ["number", "string", "number"], [this.ptr, option, pos])
     }
-    addOption(option, pos){
-        return Module._lv_dropdown_add_option(this.ptr, option, pos)
+    clearOptions() {
+        Module._lv_dropdown_clear_options(this.ptr)
     }
-    clearOptions(){
-        return Module._lv_dropdown_clear_options(this.ptr)
+    setSelected(sel_opt) {
+        Module._lv_dropdown_set_selected(this.ptr, sel_opt)
     }
-    setSelected(sel_opt){
-        return Module._lv_dropdown_set_selected(this.ptr, sel_opt)
+    setDir(dir) {
+        Module._lv_dropdown_set_dir(this.ptr, constMapping.DIR.value(dir))
     }
-    setDir(dir){
-        return Module._lv_dropdown_set_dir(this.ptr, dir)
+    setSelectedHighlight(en) {
+        Module._lv_dropdown_set_selected_highlight(this.ptr, en)
     }
-    setSymbol(symbol){
-        return Module._lv_dropdown_set_symbol(this.ptr, symbol)
+    text() {
+        return Module.ccall("lv_dropdown_get_text", "string", ["number"], [this.ptr])
     }
-    setSelectedHighlight(en){
-        return Module._lv_dropdown_set_selected_highlight(this.ptr, en)
+    options() {
+        return Module.ccall("lv_dropdown_get_options", "string", ["number"], [this.ptr])
     }
-    list(){
-        return Module._lv_dropdown_get_list(this.ptr)
+    selected() {
+        return Module._lv_dropdown_get_selected(this.ptr)
     }
-    text(){
-        return Module._lv_dropdown_get_text(this.ptr)
+    optionCnt() {
+        return Module._lv_dropdown_get_option_cnt(this.ptr)
     }
-    symbol(){
-        return Module._lv_dropdown_get_symbol(this.ptr)
+    selectedStr(buf, buf_size) {
+        Module.ccall("lv_dropdown_get_selected_str", "number", ["number", "string", "number"], [this.ptr, buf, buf_size])
     }
-    selectedHighlight(){
-        return Module._lv_dropdown_get_selected_highlight(this.ptr)
+    symbol() {
+        return Module.ccall("lv_dropdown_get_symbol", "string", ["number"], [this.ptr])
     }
-    open(){
-        return Module._lv_dropdown_open(this.ptr)
+    selectedHighlight() {
+        return Module.ccall("lv_dropdown_get_selected_highlight", "bool", ["number"], [this.ptr])
     }
-    close(){
-        return Module._lv_dropdown_close(this.ptr)
+    dir() {
+        return constMapping.DIR.name(Module._lv_dropdown_get_dir(this.ptr))
     }
-// AUTO GENERATE CODE END [Dropdown METHODS] --------
+    open() {
+        Module._lv_dropdown_open(this.ptr)
+    }
+    close() {
+        Module._lv_dropdown_close(this.ptr)
+    }
 }
 class Img extends Obj {
-    constructor(parent) {
-        super()
-        this.ptr = Module._lv_img_create(parent?(parent.ptr||0):0)
+    _createWidget(parent) {
+        if(!parent instanceof Obj) {
+            throw new Error("parent must be a lv.Obj")
+        }
+        this.ptr = Module._lv_img_create(parent?parent.ptr:null)
     }
-// AUTO GENERATE CODE START [Img METHODS] --------
-    create(){
-        return Module._lv_img_create(this.ptr)
+    setOffsetX(x) {
+        Module._lv_img_set_offset_x(this.ptr, x)
     }
-    setSrc(src){
-        return Module._lv_img_set_src(this.ptr, src)
+    setOffsetY(y) {
+        Module._lv_img_set_offset_y(this.ptr, y)
     }
-    setOffsetX(x){
-        return Module._lv_img_set_offset_x(this.ptr, x)
+    setAngle(angle) {
+        Module._lv_img_set_angle(this.ptr, angle)
     }
-    setOffsetY(y){
-        return Module._lv_img_set_offset_y(this.ptr, y)
+    setPivot(x, y) {
+        Module._lv_img_set_pivot(this.ptr, x, y)
     }
-    setAngle(angle){
-        return Module._lv_img_set_angle(this.ptr, angle)
+    setZoom(zoom) {
+        Module._lv_img_set_zoom(this.ptr, zoom)
     }
-    setPivot(x, y){
-        return Module._lv_img_set_pivot(this.ptr, x, y)
+    setAntialias(antialias) {
+        Module._lv_img_set_antialias(this.ptr, antialias)
     }
-    setZoom(zoom){
-        return Module._lv_img_set_zoom(this.ptr, zoom)
+    setSizeMode(mode) {
+        Module._lv_img_set_size_mode(this.ptr, constMapping.IMG_SIZE_MODE.value(mode))
     }
-    setAntialias(antialias){
-        return Module._lv_img_set_antialias(this.ptr, antialias)
-    }
-    setSizeMode(mode){
-        return Module._lv_img_set_size_mode(this.ptr, mode)
-    }
-    src(){
-        return Module._lv_img_get_src(this.ptr)
-    }
-    offsetX(){
+    offsetX() {
         return Module._lv_img_get_offset_x(this.ptr)
     }
-    offsetY(){
+    offsetY() {
         return Module._lv_img_get_offset_y(this.ptr)
     }
-    angle(){
+    angle() {
         return Module._lv_img_get_angle(this.ptr)
     }
-    pivot(pivot){
-        return Module._lv_img_get_pivot(this.ptr, pivot)
+    pivot(pivot) {
+        Module._lv_img_get_pivot(this.ptr, pivot)
     }
-    zoom(){
+    zoom() {
         return Module._lv_img_get_zoom(this.ptr)
     }
-    antialias(){
-        return Module._lv_img_get_antialias(this.ptr)
+    antialias() {
+        return Module.ccall("lv_img_get_antialias", "bool", ["number"], [this.ptr])
     }
-    sizeMode(){
-        return Module._lv_img_get_size_mode(this.ptr)
+    sizeMode() {
+        return constMapping.IMG_SIZE_MODE.name(Module._lv_img_get_size_mode(this.ptr))
     }
-    obj(){
-        return Module._lv_img_get_obj(this.ptr)
-    }
-    setObj(obj){
-        return Module._lv_img_set_obj(this.ptr, obj)
-    }
-    offset(){
-        return Module._lv_img_get_offset(this.ptr)
-    }
-    setOffset(offset){
-        return Module._lv_img_set_offset(this.ptr, offset)
-    }
-    w(){
-        return Module._lv_img_get_w(this.ptr)
-    }
-    setW(w){
-        return Module._lv_img_set_w(this.ptr, w)
-    }
-    h(){
-        return Module._lv_img_get_h(this.ptr)
-    }
-    setH(h){
-        return Module._lv_img_set_h(this.ptr, h)
-    }
-    srcType(){
-        return Module._lv_img_get_src_type(this.ptr)
-    }
-    setSrcType(src_type){
-        return Module._lv_img_set_src_type(this.ptr, src_type)
-    }
-    cf(){
-        return Module._lv_img_get_cf(this.ptr)
-    }
-    setCf(cf){
-        return Module._lv_img_set_cf(this.ptr, cf)
-    }
-    objSizeMode(){
-        return Module._lv_img_get_obj_size_mode(this.ptr)
-    }
-    setObjSizeMode(obj_size_mode){
-        return Module._lv_img_set_obj_size_mode(this.ptr, obj_size_mode)
-    }
-// AUTO GENERATE CODE END [Img METHODS] --------
 }
 class Line extends Obj {
-    constructor(parent) {
-        super()
-        this.ptr = Module._lv_line_create(parent?(parent.ptr||0):0)
+    _createWidget(parent) {
+        if(!parent instanceof Obj) {
+            throw new Error("parent must be a lv.Obj")
+        }
+        this.ptr = Module._lv_line_create(parent?parent.ptr:null)
     }
-// AUTO GENERATE CODE START [Line METHODS] --------
-    create(){
-        return Module._lv_line_create(this.ptr)
+    setYInvert(en) {
+        Module._lv_line_set_y_invert(this.ptr, en)
     }
-    setPoints(points, point_num){
-        return Module._lv_line_set_points(this.ptr, points, point_num)
+    yInvert() {
+        return Module.ccall("lv_line_get_y_invert", "bool", ["number"], [this.ptr])
     }
-    setYInvert(en){
-        return Module._lv_line_set_y_invert(this.ptr, en)
-    }
-// AUTO GENERATE CODE END [Line METHODS] --------
 }
 class Roller extends Obj {
-    constructor(parent) {
-        super()
-        this.ptr = Module._lv_roller_create(parent?(parent.ptr||0):0)
+    _createWidget(parent) {
+        if(!parent instanceof Obj) {
+            throw new Error("parent must be a lv.Obj")
+        }
+        this.ptr = Module._lv_roller_create(parent?parent.ptr:null)
     }
-// AUTO GENERATE CODE START [Roller METHODS] --------
-    create(){
-        return Module._lv_roller_create(this.ptr)
+    setOptions(options, mode) {
+        Module.ccall("lv_roller_set_options", "number", ["number", "string", "number"], [this.ptr, options, constMapping.ROLLER_MODE.value(mode)])
     }
-    setOptions(options, mode){
-        return Module._lv_roller_set_options(this.ptr, options, mode)
+    setSelected(sel_opt, anim) {
+        Module._lv_roller_set_selected(this.ptr, sel_opt, constMapping.ANIM_ENABLE.value(anim))
     }
-    setSelected(sel_opt, anim){
-        return Module._lv_roller_set_selected(this.ptr, sel_opt, anim)
+    setVisibleRowCount(row_cnt) {
+        Module._lv_roller_set_visible_row_count(this.ptr, row_cnt)
     }
-    setVisibleRowCount(row_cnt){
-        return Module._lv_roller_set_visible_row_count(this.ptr, row_cnt)
+    selected() {
+        return Module._lv_roller_get_selected(this.ptr)
     }
-// AUTO GENERATE CODE END [Roller METHODS] --------
+    selectedStr(buf, buf_size) {
+        Module.ccall("lv_roller_get_selected_str", "number", ["number", "string", "number"], [this.ptr, buf, buf_size])
+    }
+    options() {
+        return Module.ccall("lv_roller_get_options", "string", ["number"], [this.ptr])
+    }
+    optionCnt() {
+        return Module._lv_roller_get_option_cnt(this.ptr)
+    }
 }
 class Slider extends Obj {
-    constructor(parent) {
-        super()
-        this.ptr = Module._lv_slider_create(parent?(parent.ptr||0):0)
+    _createWidget(parent) {
+        if(!parent instanceof Obj) {
+            throw new Error("parent must be a lv.Obj")
+        }
+        this.ptr = Module._lv_slider_create(parent?parent.ptr:null)
     }
-// AUTO GENERATE CODE START [Slider METHODS] --------
-    create(){
-        return Module._lv_slider_create(this.ptr)
+    setValue(value, anim) {
+        Module._lv_slider_set_value(this.ptr, value, constMapping.ANIM_ENABLE.value(anim))
     }
-// AUTO GENERATE CODE END [Slider METHODS] --------
+    setLeftValue(value, anim) {
+        Module._lv_slider_set_left_value(this.ptr, value, constMapping.ANIM_ENABLE.value(anim))
+    }
+    setRange(min, max) {
+        Module._lv_slider_set_range(this.ptr, min, max)
+    }
+    setMode(mode) {
+        Module._lv_slider_set_mode(this.ptr, constMapping.SLIDER_MODE.value(mode))
+    }
+    value() {
+        return Module._lv_slider_get_value(this.ptr)
+    }
+    leftValue() {
+        return Module._lv_slider_get_left_value(this.ptr)
+    }
+    minValue() {
+        return Module._lv_slider_get_min_value(this.ptr)
+    }
+    maxValue() {
+        return Module._lv_slider_get_max_value(this.ptr)
+    }
+    isDragged() {
+        return Module.ccall("lv_slider_is_dragged", "bool", ["number"], [this.ptr])
+    }
+    mode() {
+        return constMapping.SLIDER_MODE.name(Module._lv_slider_get_mode(this.ptr))
+    }
 }
 class Switch extends Obj {
-    constructor(parent) {
-        super()
-        this.ptr = Module._lv_switch_create(parent?(parent.ptr||0):0)
+    _createWidget(parent) {
+        if(!parent instanceof Obj) {
+            throw new Error("parent must be a lv.Obj")
+        }
+        this.ptr = Module._lv_switch_create(parent?parent.ptr:null)
     }
-// AUTO GENERATE CODE START [Switch METHODS] --------
-    create(){
-        return Module._lv_switch_create(this.ptr)
-    }
-// AUTO GENERATE CODE END [Switch METHODS] --------
 }
 class Table extends Obj {
-    constructor(parent) {
-        super()
-        this.ptr = Module._lv_table_create(parent?(parent.ptr||0):0)
+    _createWidget(parent) {
+        if(!parent instanceof Obj) {
+            throw new Error("parent must be a lv.Obj")
+        }
+        this.ptr = Module._lv_table_create(parent?parent.ptr:null)
     }
-// AUTO GENERATE CODE START [Table METHODS] --------
-    create(){
-        return Module._lv_table_create(this.ptr)
+    setCellValue(row, col, txt) {
+        Module.ccall("lv_table_set_cell_value", "number", ["number", "number", "number", "string"], [this.ptr, row, col, txt])
     }
-    setCellValue(row, col, txt){
-        return Module._lv_table_set_cell_value(this.ptr, row, col, txt)
+    setRowCnt(row_cnt) {
+        Module._lv_table_set_row_cnt(this.ptr, row_cnt)
     }
-    setCellValueFmt(row, col, fmt){
-        return Module._lv_table_set_cell_value_fmt(this.ptr, row, col, fmt)
+    setColCnt(col_cnt) {
+        Module._lv_table_set_col_cnt(this.ptr, col_cnt)
     }
-    setRowCnt(row_cnt){
-        return Module._lv_table_set_row_cnt(this.ptr, row_cnt)
+    setColWidth(col_id, w) {
+        Module._lv_table_set_col_width(this.ptr, col_id, w)
     }
-    setColCnt(col_cnt){
-        return Module._lv_table_set_col_cnt(this.ptr, col_cnt)
+    addCellCtrl(row, col, ctrl) {
+        Module._lv_table_add_cell_ctrl(this.ptr, row, col, constMapping.TABLE_CELL_CTRL.value(ctrl))
     }
-    setColWidth(col_id, w){
-        return Module._lv_table_set_col_width(this.ptr, col_id, w)
+    clearCellCtrl(row, col, ctrl) {
+        Module._lv_table_clear_cell_ctrl(this.ptr, row, col, constMapping.TABLE_CELL_CTRL.value(ctrl))
     }
-    addCellCtrl(row, col, ctrl){
-        return Module._lv_table_add_cell_ctrl(this.ptr, row, col, ctrl)
+    cellValue(row, col) {
+        return Module.ccall("lv_table_get_cell_value", "string", ["number", "number", "number"], [this.ptr, row, col])
     }
-    clearCellCtrl(row, col, ctrl){
-        return Module._lv_table_clear_cell_ctrl(this.ptr, row, col, ctrl)
-    }
-    cellValue(row, col){
-        return Module._lv_table_get_cell_value(this.ptr, row, col)
-    }
-    rowCnt(){
+    rowCnt() {
         return Module._lv_table_get_row_cnt(this.ptr)
     }
-    colCnt(){
+    colCnt() {
         return Module._lv_table_get_col_cnt(this.ptr)
     }
-    colWidth(col){
+    colWidth(col) {
         return Module._lv_table_get_col_width(this.ptr, col)
     }
-    hasCellCtrl(row, col, ctrl){
-        return Module._lv_table_has_cell_ctrl(this.ptr, row, col, ctrl)
+    hasCellCtrl(row, col, ctrl) {
+        return Module.ccall("lv_table_has_cell_ctrl", "bool", ["number", "number", "number", "number"], [this.ptr, row, col, constMapping.TABLE_CELL_CTRL.value(ctrl)])
     }
-    selectedCell(row, col){
-        return Module._lv_table_get_selected_cell(this.ptr, row, col)
-    }
-// AUTO GENERATE CODE END [Table METHODS] --------
 }
 class TextArea extends Obj {
-    constructor(parent) {
-        super()
-        this.ptr = Module._lv_textarea_create(parent?(parent.ptr||0):0)
+    _createWidget(parent) {
+        if(!parent instanceof Obj) {
+            throw new Error("parent must be a lv.Obj")
+        }
+        this.ptr = Module._lv_textarea_create(parent?parent.ptr:null)
     }
-// AUTO GENERATE CODE START [TextArea METHODS] --------
-    create(){
-        return Module._lv_textarea_create(this.ptr)
+    addText(txt) {
+        Module.ccall("lv_textarea_add_text", "number", ["number", "string"], [this.ptr, txt])
     }
-    addChar(c){
-        return Module._lv_textarea_add_char(this.ptr, c)
+    delChar() {
+        Module._lv_textarea_del_char(this.ptr)
     }
-    addText(txt){
-        return Module._lv_textarea_add_text(this.ptr, txt)
+    delCharForward() {
+        Module._lv_textarea_del_char_forward(this.ptr)
     }
-    delChar(){
-        return Module._lv_textarea_del_char(this.ptr)
+    setText(txt) {
+        Module.ccall("lv_textarea_set_text", "number", ["number", "string"], [this.ptr, txt])
     }
-    delCharForward(){
-        return Module._lv_textarea_del_char_forward(this.ptr)
+    setPlaceholderText(txt) {
+        Module.ccall("lv_textarea_set_placeholder_text", "number", ["number", "string"], [this.ptr, txt])
     }
-    setText(txt){
-        return Module._lv_textarea_set_text(this.ptr, txt)
+    setCursorPos(pos) {
+        Module._lv_textarea_set_cursor_pos(this.ptr, pos)
     }
-    setPlaceholderText(txt){
-        return Module._lv_textarea_set_placeholder_text(this.ptr, txt)
+    setCursorClickPos(en) {
+        Module._lv_textarea_set_cursor_click_pos(this.ptr, en)
     }
-    setCursorPos(pos){
-        return Module._lv_textarea_set_cursor_pos(this.ptr, pos)
+    setPasswordMode(en) {
+        Module._lv_textarea_set_password_mode(this.ptr, en)
     }
-    setCursorClickPos(en){
-        return Module._lv_textarea_set_cursor_click_pos(this.ptr, en)
+    setOneLine(en) {
+        Module._lv_textarea_set_one_line(this.ptr, en)
     }
-    setPasswordMode(en){
-        return Module._lv_textarea_set_password_mode(this.ptr, en)
+    setAcceptedChars(list) {
+        Module.ccall("lv_textarea_set_accepted_chars", "number", ["number", "string"], [this.ptr, list])
     }
-    setOneLine(en){
-        return Module._lv_textarea_set_one_line(this.ptr, en)
+    setMaxLength(num) {
+        Module._lv_textarea_set_max_length(this.ptr, num)
     }
-    setAcceptedChars(list){
-        return Module._lv_textarea_set_accepted_chars(this.ptr, list)
+    setInsertReplace(txt) {
+        Module.ccall("lv_textarea_set_insert_replace", "number", ["number", "string"], [this.ptr, txt])
     }
-    setMaxLength(num){
-        return Module._lv_textarea_set_max_length(this.ptr, num)
+    setTextSelection(en) {
+        Module._lv_textarea_set_text_selection(this.ptr, en)
     }
-    setInsertReplace(txt){
-        return Module._lv_textarea_set_insert_replace(this.ptr, txt)
+    setPasswordShowTime(time) {
+        Module._lv_textarea_set_password_show_time(this.ptr, time)
     }
-    setTextSelection(en){
-        return Module._lv_textarea_set_text_selection(this.ptr, en)
+    setAlign(align) {
+        Module._lv_textarea_set_align(this.ptr, constMapping.TEXT_ALIGN.value(align))
     }
-    setPasswordShowTime(time){
-        return Module._lv_textarea_set_password_show_time(this.ptr, time)
+    text() {
+        return Module.ccall("lv_textarea_get_text", "string", ["number"], [this.ptr])
     }
-    setAlign(align){
-        return Module._lv_textarea_set_align(this.ptr, align)
+    placeholderText() {
+        return Module.ccall("lv_textarea_get_placeholder_text", "string", ["number"], [this.ptr])
     }
-    placeholderText(){
-        return Module._lv_textarea_get_placeholder_text(this.ptr)
+    label() {
+        return WASMObject.wrap(Obj, Module._lv_textarea_get_label(this.ptr))
     }
-    cursorClickPos(){
-        return Module._lv_textarea_get_cursor_click_pos(this.ptr)
+    cursorPos() {
+        return Module._lv_textarea_get_cursor_pos(this.ptr)
     }
-    acceptedChars(){
-        return Module._lv_textarea_get_accepted_chars(this.ptr)
+    cursorClickPos() {
+        return Module.ccall("lv_textarea_get_cursor_click_pos", "bool", ["number"], [this.ptr])
     }
-    maxLength(){
+    passwordMode() {
+        return Module.ccall("lv_textarea_get_password_mode", "bool", ["number"], [this.ptr])
+    }
+    oneLine() {
+        return Module.ccall("lv_textarea_get_one_line", "bool", ["number"], [this.ptr])
+    }
+    acceptedChars() {
+        return Module.ccall("lv_textarea_get_accepted_chars", "string", ["number"], [this.ptr])
+    }
+    maxLength() {
         return Module._lv_textarea_get_max_length(this.ptr)
     }
-    textSelection(){
-        return Module._lv_textarea_get_text_selection(this.ptr)
+    textIsSelected() {
+        return Module.ccall("lv_textarea_text_is_selected", "bool", ["number"], [this.ptr])
     }
-    passwordShowTime(){
+    textSelection() {
+        return Module.ccall("lv_textarea_get_text_selection", "bool", ["number"], [this.ptr])
+    }
+    passwordShowTime() {
         return Module._lv_textarea_get_password_show_time(this.ptr)
     }
-    clearSelection(){
-        return Module._lv_textarea_clear_selection(this.ptr)
+    clearSelection() {
+        Module._lv_textarea_clear_selection(this.ptr)
     }
-    cursorRight(){
-        return Module._lv_textarea_cursor_right(this.ptr)
+    cursorRight() {
+        Module._lv_textarea_cursor_right(this.ptr)
     }
-    cursorLeft(){
-        return Module._lv_textarea_cursor_left(this.ptr)
+    cursorLeft() {
+        Module._lv_textarea_cursor_left(this.ptr)
     }
-    cursorDown(){
-        return Module._lv_textarea_cursor_down(this.ptr)
+    cursorDown() {
+        Module._lv_textarea_cursor_down(this.ptr)
     }
-    cursorUp(){
-        return Module._lv_textarea_cursor_up(this.ptr)
+    cursorUp() {
+        Module._lv_textarea_cursor_up(this.ptr)
     }
-    obj(){
-        return Module._lv_textarea_get_obj(this.ptr)
-    }
-    setObj(obj){
-        return Module._lv_textarea_set_obj(this.ptr, obj)
-    }
-    setLabel(label){
-        return Module._lv_textarea_set_label(this.ptr, label)
-    }
-    placeholderTxt(){
-        return Module._lv_textarea_get_placeholder_txt(this.ptr)
-    }
-    setPlaceholderTxt(placeholder_txt){
-        return Module._lv_textarea_set_placeholder_txt(this.ptr, placeholder_txt)
-    }
-    pwdTmp(){
-        return Module._lv_textarea_get_pwd_tmp(this.ptr)
-    }
-    setPwdTmp(pwd_tmp){
-        return Module._lv_textarea_set_pwd_tmp(this.ptr, pwd_tmp)
-    }
-    pwdShowTime(){
-        return Module._lv_textarea_get_pwd_show_time(this.ptr)
-    }
-    setPwdShowTime(pwd_show_time){
-        return Module._lv_textarea_set_pwd_show_time(this.ptr, pwd_show_time)
-    }
-    selStart(){
-        return Module._lv_textarea_get_sel_start(this.ptr)
-    }
-    setSelStart(sel_start){
-        return Module._lv_textarea_set_sel_start(this.ptr, sel_start)
-    }
-    selEnd(){
-        return Module._lv_textarea_get_sel_end(this.ptr)
-    }
-    setSelEnd(sel_end){
-        return Module._lv_textarea_set_sel_end(this.ptr, sel_end)
-    }
-    textSelInProg(){
-        return Module._lv_textarea_get_text_sel_in_prog(this.ptr)
-    }
-    setTextSelInProg(text_sel_in_prog){
-        return Module._lv_textarea_set_text_sel_in_prog(this.ptr, text_sel_in_prog)
-    }
-    textSelEn(){
-        return Module._lv_textarea_get_text_sel_en(this.ptr)
-    }
-    setTextSelEn(text_sel_en){
-        return Module._lv_textarea_set_text_sel_en(this.ptr, text_sel_en)
-    }
-    pwdMode(){
-        return Module._lv_textarea_get_pwd_mode(this.ptr)
-    }
-    setPwdMode(pwd_mode){
-        return Module._lv_textarea_set_pwd_mode(this.ptr, pwd_mode)
-    }
-// AUTO GENERATE CODE END [TextArea METHODS] --------
 }
 class MsgBox extends Obj {
-    constructor(parent) {
-        super()
-        this.ptr = Module._lv_msgbox_create(parent?(parent.ptr||0):0)
+    _createWidget(parent) {
+        if(!parent instanceof Obj) {
+            throw new Error("parent must be a lv.Obj")
+        }
+        this.ptr = Module._lv_msgbox_create(parent?parent.ptr:null)
     }
-// AUTO GENERATE CODE START [MsgBox METHODS] --------
-    create(title, txt, btn_txts, add_close_btn){
-        return Module._lv_msgbox_create(this.ptr, title, txt, btn_txts, add_close_btn)
+    title() {
+        return WASMObject.wrap(Label, Module._lv_msgbox_get_title(this.ptr))
     }
-    title(){
-        return Module._lv_msgbox_get_title(this.ptr)
+    closeBtn() {
+        return WASMObject.wrap(Btn, Module._lv_msgbox_get_close_btn(this.ptr))
     }
-    closeBtn(){
-        return Module._lv_msgbox_get_close_btn(this.ptr)
+    text() {
+        return WASMObject.wrap(Label, Module._lv_msgbox_get_text(this.ptr))
     }
-    text(){
-        return Module._lv_msgbox_get_text(this.ptr)
+    content() {
+        return WASMObject.wrap(Obj, Module._lv_msgbox_get_content(this.ptr))
     }
-    content(){
-        return Module._lv_msgbox_get_content(this.ptr)
+    btns() {
+        return WASMObject.wrap(Obj, Module._lv_msgbox_get_btns(this.ptr))
     }
-    btns(){
-        return Module._lv_msgbox_get_btns(this.ptr)
-    }
-    activeBtn(){
+    activeBtn() {
         return Module._lv_msgbox_get_active_btn(this.ptr)
     }
-    activeBtnText(){
-        return Module._lv_msgbox_get_active_btn_text(this.ptr)
+    activeBtnText() {
+        return Module.ccall("lv_msgbox_get_active_btn_text", "string", ["number"], [this.ptr])
     }
-    close(){
-        return Module._lv_msgbox_close(this.ptr)
+    close() {
+        Module._lv_msgbox_close(this.ptr)
     }
-    closeAsync(){
-        return Module._lv_msgbox_close_async(this.ptr)
+    closeAsync() {
+        Module._lv_msgbox_close_async(this.ptr)
     }
-// AUTO GENERATE CODE END [MsgBox METHODS] --------
 }
 class Keyboard extends Obj {
-    constructor(parent) {
-        super()
-        this.ptr = Module._lv_keyboard_create(parent?(parent.ptr||0):0)
+    _createWidget(parent) {
+        if(!parent instanceof Obj) {
+            throw new Error("parent must be a lv.Obj")
+        }
+        this.ptr = Module._lv_keyboard_create(parent?parent.ptr:null)
     }
-// AUTO GENERATE CODE START [Keyboard METHODS] --------
-    create(){
-        return Module._lv_keyboard_create(this.ptr)
+    setTextarea(textarea) {
+        Module._lv_keyboard_set_textarea(this.ptr, textarea.ptr)
     }
-    setTextarea(ta){
-        return Module._lv_keyboard_set_textarea(this.ptr, ta)
+    setMode(mode) {
+        Module._lv_keyboard_set_mode(this.ptr, constMapping.KEYBOARD_MODE.value(mode))
     }
-    setMode(mode){
-        return Module._lv_keyboard_set_mode(this.ptr, mode)
+    setPopovers(en) {
+        Module._lv_keyboard_set_popovers(this.ptr, en)
     }
-    setPopovers(en){
-        return Module._lv_keyboard_set_popovers(this.ptr, en)
+    textarea() {
+        return WASMObject.wrap(Obj, Module._lv_keyboard_get_textarea(this.ptr))
     }
-    setMap(mode, map, ctrl_map){
-        return Module._lv_keyboard_set_map(this.ptr, mode, map, ctrl_map)
+    mode() {
+        return constMapping.KEYBOARD_MODE.name(Module._lv_keyboard_get_mode(this.ptr))
     }
-// AUTO GENERATE CODE END [Keyboard METHODS] --------
 }
 class TileView extends Obj {
-    constructor(parent) {
-        super()
-        this.ptr = Module._lv_tileview_create(parent?(parent.ptr||0):0)
+    _createWidget(parent) {
+        if(!parent instanceof Obj) {
+            throw new Error("parent must be a lv.Obj")
+        }
+        this.ptr = Module._lv_tileview_create(parent?parent.ptr:null)
     }
-// AUTO GENERATE CODE START [TileView METHODS] --------
-    create(){
-        return Module._lv_tileview_create(this.ptr)
+    addTile(col_id, row_id, dir) {
+        return WASMObject.wrap(Obj, Module._lv_tileview_add_tile(this.ptr, col_id, row_id, dir))
     }
-    addTile(row_id, col_id, dir){
-        return Module._lv_tileview_add_tile(this.ptr, row_id, col_id, dir)
+    tileAct() {
+        return WASMObject.wrap(Obj, Module._lv_tileview_get_tile_act(this.ptr))
     }
-    tileAct(){
-        return Module._lv_tileview_get_tile_act(this.ptr)
-    }
-// AUTO GENERATE CODE END [TileView METHODS] --------
 }
 class List extends Obj {
-    constructor(parent) {
-        super()
-        this.ptr = Module._lv_list_create(parent?(parent.ptr||0):0)
+    _createWidget(parent) {
+        if(!parent instanceof Obj) {
+            throw new Error("parent must be a lv.Obj")
+        }
+        this.ptr = Module._lv_list_create(parent?parent.ptr:null)
     }
-// AUTO GENERATE CODE START [List METHODS] --------
-    create(){
-        return Module._lv_list_create(this.ptr)
+    addText(txt) {
+        return WASMObject.wrap(Obj, Module.ccall("lv_list_add_text", "number", ["number", "string"], [this.ptr, txt]))
     }
-    addText(txt){
-        return Module._lv_list_add_text(this.ptr, txt)
+    btnText(btn) {
+        return Module.ccall("lv_list_get_btn_text", "string", ["number", "pointer"], [this.ptr, btn.ptr])
     }
-    addBtn(icon, txt){
-        return Module._lv_list_add_btn(this.ptr, icon, txt)
-    }
-    btnText(btn){
-        return Module._lv_list_get_btn_text(this.ptr, btn)
-    }
-// AUTO GENERATE CODE END [List METHODS] --------
 }
+// AUTO GENERATE CODE END [LVGL.JS WIDGETS] --------
 
-class Animimg extends EventEmitter {
-    constructor(parent) {
-        super()
-        this.ptr = Module._lv_animimg_create(parent.ptr)
-    }
-// AUTO GENERATE CODE START [Animimg METHODS] --------
-    create(){
-        return Module._lv_animimg_create(this.ptr)
-    }
-    setSrc(dsc, num){
-        return Module._lv_animimg_set_src(this.ptr, dsc, num)
-    }
-    start(){
-        return Module._lv_animimg_start(this.ptr)
-    }
-    setDuration(duration){
-        return Module._lv_animimg_set_duration(this.ptr, duration)
-    }
-    setRepeatCount(count){
-        return Module._lv_animimg_set_repeat_count(this.ptr, count)
-    }
-// AUTO GENERATE CODE END [Animimg METHODS] --------
-}
 
-class Calendar extends EventEmitter {
-    constructor(parent) {
-        super()
-        this.ptr = Module._lv_calendar_create(parent.ptr)
-    }
-// AUTO GENERATE CODE START [Calendar METHODS] --------
-    create(){
-        return Module._lv_calendar_create(this.ptr)
-    }
-    setTodayDate(year, month, day){
-        return Module._lv_calendar_set_today_date(this.ptr, year, month, day)
-    }
-    setShowedDate(year, month){
-        return Module._lv_calendar_set_showed_date(this.ptr, year, month)
-    }
-    setHighlightedDates(highlighted, date_num){
-        return Module._lv_calendar_set_highlighted_dates(this.ptr, highlighted, date_num)
-    }
-    setDayNames(day_names){
-        return Module._lv_calendar_set_day_names(this.ptr, day_names)
-    }
-    headerArrowCreate(){
-        return Module._lv_calendar_header_arrow_create(this.ptr)
-    }
-    headerDropdownCreate(){
-        return Module._lv_calendar_header_dropdown_create(this.ptr)
-    }
-// AUTO GENERATE CODE END [Calendar METHODS] --------
-}
 
-class Chart extends EventEmitter {
-    constructor(parent) {
-        super()
-        this.ptr = Module._lv_chart_create(parent.ptr)
-    }
-// AUTO GENERATE CODE START [Chart METHODS] --------
-    create(){
-        return Module._lv_chart_create(this.ptr)
-    }
-    setType(type){
-        return Module._lv_chart_set_type(this.ptr, type)
-    }
-    setPointCount(cnt){
-        return Module._lv_chart_set_point_count(this.ptr, cnt)
-    }
-    setRange(axis, min, max){
-        return Module._lv_chart_set_range(this.ptr, axis, min, max)
-    }
-    setUpdateMode(update_mode){
-        return Module._lv_chart_set_update_mode(this.ptr, update_mode)
-    }
-    setDivLineCount(hdiv, vdiv){
-        return Module._lv_chart_set_div_line_count(this.ptr, hdiv, vdiv)
-    }
-    setZoomX(zoom_x){
-        return Module._lv_chart_set_zoom_x(this.ptr, zoom_x)
-    }
-    setZoomY(zoom_y){
-        return Module._lv_chart_set_zoom_y(this.ptr, zoom_y)
-    }
-    setAxisTick(axis, major_len, minor_len, major_cnt, minor_cnt, label_en, draw_size){
-        return Module._lv_chart_set_axis_tick(this.ptr, axis, major_len, minor_len, major_cnt, minor_cnt, label_en, draw_size)
-    }
-    pointPosById(ser, id, p_out){
-        return Module._lv_chart_get_point_pos_by_id(this.ptr, ser, id, p_out)
-    }
-    refresh(){
-        return Module._lv_chart_refresh(this.ptr)
-    }
-    addSeries(color, axis){
-        return Module._lv_chart_add_series(this.ptr, color, axis)
-    }
-    removeSeries(series){
-        return Module._lv_chart_remove_series(this.ptr, series)
-    }
-    hideSeries(series, hide){
-        return Module._lv_chart_hide_series(this.ptr, series, hide)
-    }
-    setSeriesColor(series, color){
-        return Module._lv_chart_set_series_color(this.ptr, series, color)
-    }
-    setXStartPoint(ser, id){
-        return Module._lv_chart_set_x_start_point(this.ptr, ser, id)
-    }
-    addCursor(color, dir){
-        return Module._lv_chart_add_cursor(this.ptr, color, dir)
-    }
-    setCursorPos(cursor, pos){
-        return Module._lv_chart_set_cursor_pos(this.ptr, cursor, pos)
-    }
-    setCursorPoint(cursor, ser, point_id){
-        return Module._lv_chart_set_cursor_point(this.ptr, cursor, ser, point_id)
-    }
-    cursorPoint(cursor){
-        return Module._lv_chart_get_cursor_point(this.ptr, cursor)
-    }
-    setAllValue(ser, value){
-        return Module._lv_chart_set_all_value(this.ptr, ser, value)
-    }
-    setNextValue(ser, value){
-        return Module._lv_chart_set_next_value(this.ptr, ser, value)
-    }
-    setNextValue2(ser, x_value, y_value){
-        return Module._lv_chart_set_next_value2(this.ptr, ser, x_value, y_value)
-    }
-    setValueById(ser, id, value){
-        return Module._lv_chart_set_value_by_id(this.ptr, ser, id, value)
-    }
-    setValueById2(ser, id, x_value, y_value){
-        return Module._lv_chart_set_value_by_id2(this.ptr, ser, id, x_value, y_value)
-    }
-    setExtYArray(ser, array){
-        return Module._lv_chart_set_ext_y_array(this.ptr, ser, array)
-    }
-    setExtXArray(ser, array){
-        return Module._lv_chart_set_ext_x_array(this.ptr, ser, array)
-    }
-// AUTO GENERATE CODE END [Chart METHODS] --------
-}
 
-class Colorwheel extends EventEmitter {
-    constructor(parent) {
-        super()
-        this.ptr = Module._lv_colorwheel_create(parent.ptr)
-    }
-// AUTO GENERATE CODE START [Colorwheel METHODS] --------
-    create(knob_recolor){
-        return Module._lv_colorwheel_create(this.ptr, knob_recolor)
-    }
-    setHsv(hsv){
-        return Module._lv_colorwheel_set_hsv(this.ptr, hsv)
-    }
-    setRgb(color){
-        return Module._lv_colorwheel_set_rgb(this.ptr, color)
-    }
-    setMode(mode){
-        return Module._lv_colorwheel_set_mode(this.ptr, mode)
-    }
-    setModeFixed(fixed){
-        return Module._lv_colorwheel_set_mode_fixed(this.ptr, fixed)
-    }
-    hsv(){
-        return Module._lv_colorwheel_get_hsv(this.ptr)
-    }
-    rgb(){
-        return Module._lv_colorwheel_get_rgb(this.ptr)
-    }
-    colorMode(){
-        return Module._lv_colorwheel_get_color_mode(this.ptr)
-    }
-    colorModeFixed(){
-        return Module._lv_colorwheel_get_color_mode_fixed(this.ptr)
-    }
-// AUTO GENERATE CODE END [Colorwheel METHODS] --------
-}
-
-class Imgbtn extends EventEmitter {
-    constructor(parent) {
-        super()
-        this.ptr = Module._lv_imgbtn_create(parent.ptr)
-    }
-// AUTO GENERATE CODE START [Imgbtn METHODS] --------
-    create(){
-        return Module._lv_imgbtn_create(this.ptr)
-    }
-    setSrc(state, src_left, src_mid, src_right){
-        return Module._lv_imgbtn_set_src(this.ptr, state, src_left, src_mid, src_right)
-    }
-    setState(state){
-        return Module._lv_imgbtn_set_state(this.ptr, state)
-    }
-    srcLeft(state){
-        return Module._lv_imgbtn_get_src_left(this.ptr, state)
-    }
-    srcMiddle(state){
-        return Module._lv_imgbtn_get_src_middle(this.ptr, state)
-    }
-    srcRight(state){
-        return Module._lv_imgbtn_get_src_right(this.ptr, state)
-    }
-// AUTO GENERATE CODE END [Imgbtn METHODS] --------
-}
-
-class Led extends EventEmitter {
-    constructor(parent) {
-        super()
-        this.ptr = Module._lv_led_create(parent.ptr)
-    }
-// AUTO GENERATE CODE START [Led METHODS] --------
-    create(){
-        return Module._lv_led_create(this.ptr)
-    }
-    setColor(color){
-        return Module._lv_led_set_color(this.ptr, color)
-    }
-    setBrightness(bright){
-        return Module._lv_led_set_brightness(this.ptr, bright)
-    }
-    on(){
-        return Module._lv_led_on(this.ptr)
-    }
-    off(){
-        return Module._lv_led_off(this.ptr)
-    }
-    toggle(){
-        return Module._lv_led_toggle(this.ptr)
-    }
-// AUTO GENERATE CODE END [Led METHODS] --------
-}
-
-class Menu extends EventEmitter {
-    constructor(parent) {
-        super()
-        this.ptr = Module._lv_menu_create(parent.ptr)
-    }
-// AUTO GENERATE CODE START [Menu METHODS] --------
-// AUTO GENERATE CODE END [Menu METHODS] --------
-}
-
-class Meter extends EventEmitter {
-    constructor(parent) {
-        super()
-        this.ptr = Module._lv_meter_create(parent.ptr)
-    }
-// AUTO GENERATE CODE START [Meter METHODS] --------
-    create(){
-        return Module._lv_meter_create(this.ptr)
-    }
-    addScale(){
-        return Module._lv_meter_add_scale(this.ptr)
-    }
-    setScaleTicks(scale, cnt, width, len, color){
-        return Module._lv_meter_set_scale_ticks(this.ptr, scale, cnt, width, len, color)
-    }
-    setScaleMajorTicks(scale, nth, width, len, color, label_gap){
-        return Module._lv_meter_set_scale_major_ticks(this.ptr, scale, nth, width, len, color, label_gap)
-    }
-    setScaleRange(scale, min, max, angle_range, rotation){
-        return Module._lv_meter_set_scale_range(this.ptr, scale, min, max, angle_range, rotation)
-    }
-    addNeedleLine(scale, width, color, r_mod){
-        return Module._lv_meter_add_needle_line(this.ptr, scale, width, color, r_mod)
-    }
-    addNeedleImg(scale, src, pivot_x, pivot_y){
-        return Module._lv_meter_add_needle_img(this.ptr, scale, src, pivot_x, pivot_y)
-    }
-    addArc(scale, width, color, r_mod){
-        return Module._lv_meter_add_arc(this.ptr, scale, width, color, r_mod)
-    }
-    addScaleLines(scale, color_start, color_end, local, width_mod){
-        return Module._lv_meter_add_scale_lines(this.ptr, scale, color_start, color_end, local, width_mod)
-    }
-    setIndicatorValue(indic, value){
-        return Module._lv_meter_set_indicator_value(this.ptr, indic, value)
-    }
-    setIndicatorStartValue(indic, value){
-        return Module._lv_meter_set_indicator_start_value(this.ptr, indic, value)
-    }
-    setIndicatorEndValue(indic, value){
-        return Module._lv_meter_set_indicator_end_value(this.ptr, indic, value)
-    }
-// AUTO GENERATE CODE END [Meter METHODS] --------
-}
-
-class Span extends EventEmitter {
-    constructor(parent) {
-        super()
-        this.ptr = Module._lv_span_create(parent.ptr)
-    }
-// AUTO GENERATE CODE START [Span METHODS] --------
-    txt(){
-        return Module._lv_span_get_txt(this.ptr)
-    }
-    setTxt(txt){
-        return Module._lv_span_set_txt(this.ptr, txt)
-    }
-    spangroup(){
-        return Module._lv_span_get_spangroup(this.ptr)
-    }
-    setSpangroup(spangroup){
-        return Module._lv_span_set_spangroup(this.ptr, spangroup)
-    }
-    style(){
-        return Module._lv_span_get_style(this.ptr)
-    }
-    setStyle(style){
-        return Module._lv_span_set_style(this.ptr, style)
-    }
-    staticFlag(){
-        return Module._lv_span_get_static_flag(this.ptr)
-    }
-    setStaticFlag(static_flag){
-        return Module._lv_span_set_static_flag(this.ptr, static_flag)
-    }
-// AUTO GENERATE CODE END [Span METHODS] --------
-}
-
-class Spinbox extends EventEmitter {
-    constructor(parent) {
-        super()
-        this.ptr = Module._lv_spinbox_create(parent.ptr)
-    }
-// AUTO GENERATE CODE START [Spinbox METHODS] --------
-    create(){
-        return Module._lv_spinbox_create(this.ptr)
-    }
-    setValue(i){
-        return Module._lv_spinbox_set_value(this.ptr, i)
-    }
-    setRollover(b){
-        return Module._lv_spinbox_set_rollover(this.ptr, b)
-    }
-    setDigitFormat(digit_count, separator_position){
-        return Module._lv_spinbox_set_digit_format(this.ptr, digit_count, separator_position)
-    }
-    setStep(step){
-        return Module._lv_spinbox_set_step(this.ptr, step)
-    }
-    setRange(range_min, range_max){
-        return Module._lv_spinbox_set_range(this.ptr, range_min, range_max)
-    }
-    setPos(pos){
-        return Module._lv_spinbox_set_pos(this.ptr, pos)
-    }
-    setDigitStepDirection(direction){
-        return Module._lv_spinbox_set_digit_step_direction(this.ptr, direction)
-    }
-    rollover(){
-        return Module._lv_spinbox_get_rollover(this.ptr)
-    }
-    value(){
-        return Module._lv_spinbox_get_value(this.ptr)
-    }
-    step(){
-        return Module._lv_spinbox_get_step(this.ptr)
-    }
-    stepNext(){
-        return Module._lv_spinbox_step_next(this.ptr)
-    }
-    stepPrev(){
-        return Module._lv_spinbox_step_prev(this.ptr)
-    }
-    increment(){
-        return Module._lv_spinbox_increment(this.ptr)
-    }
-    decrement(){
-        return Module._lv_spinbox_decrement(this.ptr)
-    }
-// AUTO GENERATE CODE END [Spinbox METHODS] --------
-}
-
-class Spinner extends EventEmitter {
-    constructor(parent) {
-        super()
-        this.ptr = Module._lv_spinner_create(parent.ptr)
-    }
-// AUTO GENERATE CODE START [Spinner METHODS] --------
-    create(time, arc_length){
-        return Module._lv_spinner_create(this.ptr, time, arc_length)
-    }
-// AUTO GENERATE CODE END [Spinner METHODS] --------
-}
-
-class Tabview extends EventEmitter {
-    constructor(parent) {
-        super()
-        this.ptr = Module._lv_tabview_create(parent.ptr)
-    }
-// AUTO GENERATE CODE START [Tabview METHODS] --------
-    create(tab_pos, tab_size){
-        return Module._lv_tabview_create(this.ptr, tab_pos, tab_size)
-    }
-    addTab(name){
-        return Module._lv_tabview_add_tab(this.ptr, name)
-    }
-    content(){
-        return Module._lv_tabview_get_content(this.ptr)
-    }
-    tabBtns(){
-        return Module._lv_tabview_get_tab_btns(this.ptr)
-    }
-    setAct(id, anim_en){
-        return Module._lv_tabview_set_act(this.ptr, id, anim_en)
-    }
-    tabAct(){
-        return Module._lv_tabview_get_tab_act(this.ptr)
-    }
-// AUTO GENERATE CODE END [Tabview METHODS] --------
-}
-
-class Win extends EventEmitter {
-    constructor(parent) {
-        super()
-        this.ptr = Module._lv_win_create(parent.ptr)
-    }
-// AUTO GENERATE CODE START [Win METHODS] --------
-    create(header_height){
-        return Module._lv_win_create(this.ptr, header_height)
-    }
-    addTitle(txt){
-        return Module._lv_win_add_title(this.ptr, txt)
-    }
-    addBtn(icon, btn_w){
-        return Module._lv_win_add_btn(this.ptr, icon, btn_w)
-    }
-    header(){
-        return Module._lv_win_get_header(this.ptr)
-    }
-    content(){
-        return Module._lv_win_get_content(this.ptr)
-    }
-// AUTO GENERATE CODE END [Win METHODS] --------
-}
-
-class Timer extends WAMSObject {
+// AUTO GENERATE CODE START [LVGL.JS STRUCTS] --------
+class DispDrawBuf extends WASMObject {
     constructor() {
         super()
-        this.ptr = Module._lv_timer_create()
+        this.ptr=Module._lv_disp_draw_buf_create()
     }
-// AUTO GENERATE CODE START [Timer METHODS] --------
-    period(){
-        return Module._lv_timer_get_period(this.ptr)
+    buf1() {
+        return Module._lv_disp_draw_buf_get_buf1(this.ptr)
     }
-    lastRun(){
-        return Module._lv_timer_get_last_run(this.ptr)
+    setBuf1(buf1) {
+        Module._lv_disp_draw_buf_set_buf1(this.ptr, buf1)
     }
-    setLastRun(last_run){
-        return Module._lv_timer_set_last_run(this.ptr, last_run)
+    buf2() {
+        return Module._lv_disp_draw_buf_get_buf2(this.ptr)
     }
-    timerCb(){
-        return Module._lv_timer_get_timer_cb(this.ptr)
+    setBuf2(buf2) {
+        Module._lv_disp_draw_buf_set_buf2(this.ptr, buf2)
     }
-    setTimerCb(timer_cb){
-        return Module._lv_timer_set_timer_cb(this.ptr, timer_cb)
+    bufAct() {
+        return Module._lv_disp_draw_buf_get_buf_act(this.ptr)
     }
-    userData(){
-        return Module._lv_timer_get_user_data(this.ptr)
+    setBufAct(buf_act) {
+        Module._lv_disp_draw_buf_set_buf_act(this.ptr, buf_act)
     }
-    setUserData(user_data){
-        return Module._lv_timer_set_user_data(this.ptr, user_data)
+    size() {
+        return Module._lv_disp_draw_buf_get_size(this.ptr)
     }
-    repeatCount(){
-        return Module._lv_timer_get_repeat_count(this.ptr)
+    setSize(size) {
+        Module._lv_disp_draw_buf_set_size(this.ptr, size)
     }
-    paused(){
-        return Module._lv_timer_get_paused(this.ptr)
+    area() {
+        return Module._lv_disp_draw_buf_get_area(this.ptr)
     }
-    setPaused(paused){
-        return Module._lv_timer_set_paused(this.ptr, paused)
+    setArea(area) {
+        Module._lv_disp_draw_buf_set_area(this.ptr, area)
     }
-// AUTO GENERATE CODE END [Timer METHODS] --------
+    flushing() {
+        return Module._lv_disp_draw_buf_get_flushing(this.ptr)
+    }
+    setFlushing(flushing) {
+        Module._lv_disp_draw_buf_set_flushing(this.ptr, flushing)
+    }
+    flushingLast() {
+        return Module._lv_disp_draw_buf_get_flushing_last(this.ptr)
+    }
+    setFlushingLast(flushing_last) {
+        Module._lv_disp_draw_buf_set_flushing_last(this.ptr, flushing_last)
+    }
+    lastArea() {
+        return Module._lv_disp_draw_buf_get_last_area(this.ptr)
+    }
+    setLastArea(last_area) {
+        Module._lv_disp_draw_buf_set_last_area(this.ptr, last_area)
+    }
+    lastPart() {
+        return Module._lv_disp_draw_buf_get_last_part(this.ptr)
+    }
+    setLastPart(last_part) {
+        Module._lv_disp_draw_buf_set_last_part(this.ptr, last_part)
+    }
+    init(buf1, buf2, size_in_px_cnt) {
+        Module._lv_disp_draw_buf_init(this.ptr, buf1, buf2, size_in_px_cnt)
+    }
 }
-
-class SqrtRes extends WAMSObject {
+class DispDrv extends WASMObject {
     constructor() {
         super()
-        this.ptr = Module._lv_sqrt_res_create()
+        this.ptr=Module._lv_disp_drv_create()
     }
-// AUTO GENERATE CODE START [SqrtRes METHODS] --------
-    i(){
-        return Module._lv_sqrt_res_get_i(this.ptr)
+    horRes() {
+        return Module._lv_disp_drv_get_hor_res(this.ptr)
     }
-    setI(i){
-        return Module._lv_sqrt_res_set_i(this.ptr, i)
+    setHorRes(hor_res) {
+        Module._lv_disp_drv_set_hor_res(this.ptr, hor_res)
     }
-    f(){
-        return Module._lv_sqrt_res_get_f(this.ptr)
+    verRes() {
+        return Module._lv_disp_drv_get_ver_res(this.ptr)
     }
-    setF(f){
-        return Module._lv_sqrt_res_set_f(this.ptr, f)
+    setVerRes(ver_res) {
+        Module._lv_disp_drv_set_ver_res(this.ptr, ver_res)
     }
-// AUTO GENERATE CODE END [SqrtRes METHODS] --------
+    physicalHorRes() {
+        return Module._lv_disp_drv_get_physical_hor_res(this.ptr)
+    }
+    setPhysicalHorRes(physical_hor_res) {
+        Module._lv_disp_drv_set_physical_hor_res(this.ptr, physical_hor_res)
+    }
+    physicalVerRes() {
+        return Module._lv_disp_drv_get_physical_ver_res(this.ptr)
+    }
+    setPhysicalVerRes(physical_ver_res) {
+        Module._lv_disp_drv_set_physical_ver_res(this.ptr, physical_ver_res)
+    }
+    offsetX() {
+        return Module._lv_disp_drv_get_offset_x(this.ptr)
+    }
+    setOffsetX(offset_x) {
+        Module._lv_disp_drv_set_offset_x(this.ptr, offset_x)
+    }
+    offsetY() {
+        return Module._lv_disp_drv_get_offset_y(this.ptr)
+    }
+    setOffsetY(offset_y) {
+        Module._lv_disp_drv_set_offset_y(this.ptr, offset_y)
+    }
+    drawBuf() {
+        return WASMObject.wrap(DispDrawBuf, Module._lv_disp_drv_get_draw_buf(this.ptr))
+    }
+    setDrawBuf(draw_buf) {
+        Module._lv_disp_drv_set_draw_buf(this.ptr, draw_buf.ptr)
+    }
+    directMode() {
+        return Module._lv_disp_drv_get_direct_mode(this.ptr)
+    }
+    setDirectMode(direct_mode) {
+        Module._lv_disp_drv_set_direct_mode(this.ptr, direct_mode)
+    }
+    fullRefresh() {
+        return Module._lv_disp_drv_get_full_refresh(this.ptr)
+    }
+    setFullRefresh(full_refresh) {
+        Module._lv_disp_drv_set_full_refresh(this.ptr, full_refresh)
+    }
+    swRotate() {
+        return Module._lv_disp_drv_get_sw_rotate(this.ptr)
+    }
+    setSwRotate(sw_rotate) {
+        Module._lv_disp_drv_set_sw_rotate(this.ptr, sw_rotate)
+    }
+    antialiasing() {
+        return Module._lv_disp_drv_get_antialiasing(this.ptr)
+    }
+    setAntialiasing(antialiasing) {
+        Module._lv_disp_drv_set_antialiasing(this.ptr, antialiasing)
+    }
+    rotated() {
+        return Module._lv_disp_drv_get_rotated(this.ptr)
+    }
+    setRotated(rotated) {
+        Module._lv_disp_drv_set_rotated(this.ptr, rotated)
+    }
+    screenTransp() {
+        return Module._lv_disp_drv_get_screen_transp(this.ptr)
+    }
+    setScreenTransp(screen_transp) {
+        Module._lv_disp_drv_set_screen_transp(this.ptr, screen_transp)
+    }
+    dpi() {
+        return Module._lv_disp_drv_get_dpi(this.ptr)
+    }
+    setDpi(dpi) {
+        Module._lv_disp_drv_set_dpi(this.ptr, dpi)
+    }
+    flushCb() {
+        return Module._lv_disp_drv_get_flush_cb(this.ptr)
+    }
+    setFlushCb(flush_cb) {
+        Module._lv_disp_drv_set_flush_cb(this.ptr, flush_cb)
+    }
+    rounderCb() {
+        return Module._lv_disp_drv_get_rounder_cb(this.ptr)
+    }
+    setRounderCb(rounder_cb) {
+        Module._lv_disp_drv_set_rounder_cb(this.ptr, rounder_cb)
+    }
+    setPxCb() {
+        return Module._lv_disp_drv_get_set_px_cb(this.ptr)
+    }
+    setSetPxCb(set_px_cb) {
+        Module._lv_disp_drv_set_set_px_cb(this.ptr, set_px_cb)
+    }
+    monitorCb() {
+        return Module._lv_disp_drv_get_monitor_cb(this.ptr)
+    }
+    setMonitorCb(monitor_cb) {
+        Module._lv_disp_drv_set_monitor_cb(this.ptr, monitor_cb)
+    }
+    waitCb() {
+        return Module._lv_disp_drv_get_wait_cb(this.ptr)
+    }
+    setWaitCb(wait_cb) {
+        Module._lv_disp_drv_set_wait_cb(this.ptr, wait_cb)
+    }
+    cleanDcacheCb() {
+        return Module._lv_disp_drv_get_clean_dcache_cb(this.ptr)
+    }
+    setCleanDcacheCb(clean_dcache_cb) {
+        Module._lv_disp_drv_set_clean_dcache_cb(this.ptr, clean_dcache_cb)
+    }
+    gpuWaitCb() {
+        return Module._lv_disp_drv_get_gpu_wait_cb(this.ptr)
+    }
+    setGpuWaitCb(gpu_wait_cb) {
+        Module._lv_disp_drv_set_gpu_wait_cb(this.ptr, gpu_wait_cb)
+    }
+    drvUpdateCb() {
+        return Module._lv_disp_drv_get_drv_update_cb(this.ptr)
+    }
+    setDrvUpdateCb(drv_update_cb) {
+        Module._lv_disp_drv_set_drv_update_cb(this.ptr, drv_update_cb)
+    }
+    gpuFillCb() {
+        return Module._lv_disp_drv_get_gpu_fill_cb(this.ptr)
+    }
+    setGpuFillCb(gpu_fill_cb) {
+        Module._lv_disp_drv_set_gpu_fill_cb(this.ptr, gpu_fill_cb)
+    }
+    colorChromaKey() {
+        return Module._lv_disp_drv_get_color_chroma_key(this.ptr)
+    }
+    setColorChromaKey(color_chroma_key) {
+        Module._lv_disp_drv_set_color_chroma_key(this.ptr, color_chroma_key)
+    }
+    userData() {
+        return Module._lv_disp_drv_get_user_data(this.ptr)
+    }
+    setUserData(user_data) {
+        Module._lv_disp_drv_set_user_data(this.ptr, user_data)
+    }
+    init() {
+        Module._lv_disp_drv_init(this.ptr)
+    }
+    register() {
+        return WASMObject.wrap(Disp, Module._lv_disp_drv_register(this.ptr))
+    }
+    useGenericSetPxCb(cf) {
+        Module._lv_disp_drv_use_generic_set_px_cb(this.ptr, constMapping.IMG_CF.value(cf))
+    }
 }
-
-class MemMonitor extends WAMSObject {
+class Disp extends WASMObject {
     constructor() {
         super()
-        this.ptr = Module._lv_mem_monitor_create()
+        this.ptr=Module._lv_disp_create()
     }
-// AUTO GENERATE CODE START [MemMonitor METHODS] --------
-    totalSize(){
-        return Module._lv_mem_monitor_get_total_size(this.ptr)
+    driver() {
+        return Module._lv_disp_get_driver(this.ptr)
     }
-    setTotalSize(total_size){
-        return Module._lv_mem_monitor_set_total_size(this.ptr, total_size)
+    setDriver(driver) {
+        Module._lv_disp_set_driver(this.ptr, driver)
     }
-    freeCnt(){
-        return Module._lv_mem_monitor_get_free_cnt(this.ptr)
+    refrTimer() {
+        return Module._lv_disp_get_refr_timer(this.ptr)
     }
-    setFreeCnt(free_cnt){
-        return Module._lv_mem_monitor_set_free_cnt(this.ptr, free_cnt)
+    setRefrTimer(refr_timer) {
+        Module._lv_disp_set_refr_timer(this.ptr, refr_timer)
     }
-    freeSize(){
-        return Module._lv_mem_monitor_get_free_size(this.ptr)
+    screens() {
+        return Module._lv_disp_get_screens(this.ptr)
     }
-    setFreeSize(free_size){
-        return Module._lv_mem_monitor_set_free_size(this.ptr, free_size)
+    setScreens(screens) {
+        Module._lv_disp_set_screens(this.ptr, screens)
     }
-    freeBiggestSize(){
-        return Module._lv_mem_monitor_get_free_biggest_size(this.ptr)
+    actScr() {
+        return WASMObject.wrap(Obj, Module._lv_disp_get_act_scr(this.ptr))
     }
-    setFreeBiggestSize(free_biggest_size){
-        return Module._lv_mem_monitor_set_free_biggest_size(this.ptr, free_biggest_size)
+    setActScr(act_scr) {
+        Module._lv_disp_set_act_scr(this.ptr, act_scr.ptr)
     }
-    usedCnt(){
-        return Module._lv_mem_monitor_get_used_cnt(this.ptr)
+    prevScr() {
+        return WASMObject.wrap(Obj, Module._lv_disp_get_prev_scr(this.ptr))
     }
-    setUsedCnt(used_cnt){
-        return Module._lv_mem_monitor_set_used_cnt(this.ptr, used_cnt)
+    setPrevScr(prev_scr) {
+        Module._lv_disp_set_prev_scr(this.ptr, prev_scr.ptr)
     }
-    maxUsed(){
-        return Module._lv_mem_monitor_get_max_used(this.ptr)
+    scrToLoad() {
+        return WASMObject.wrap(Obj, Module._lv_disp_get_scr_to_load(this.ptr))
     }
-    setMaxUsed(max_used){
-        return Module._lv_mem_monitor_set_max_used(this.ptr, max_used)
+    setScrToLoad(scr_to_load) {
+        Module._lv_disp_set_scr_to_load(this.ptr, scr_to_load.ptr)
     }
-    usedPct(){
-        return Module._lv_mem_monitor_get_used_pct(this.ptr)
+    topLayer() {
+        return WASMObject.wrap(Obj, Module._lv_disp_get_top_layer(this.ptr))
     }
-    setUsedPct(used_pct){
-        return Module._lv_mem_monitor_set_used_pct(this.ptr, used_pct)
+    setTopLayer(top_layer) {
+        Module._lv_disp_set_top_layer(this.ptr, top_layer.ptr)
     }
-    fragPct(){
-        return Module._lv_mem_monitor_get_frag_pct(this.ptr)
+    sysLayer() {
+        return WASMObject.wrap(Obj, Module._lv_disp_get_sys_layer(this.ptr))
     }
-    setFragPct(frag_pct){
-        return Module._lv_mem_monitor_set_frag_pct(this.ptr, frag_pct)
+    setSysLayer(sys_layer) {
+        Module._lv_disp_set_sys_layer(this.ptr, sys_layer.ptr)
     }
-// AUTO GENERATE CODE END [MemMonitor METHODS] --------
+    screenCnt() {
+        return Module._lv_disp_get_screen_cnt(this.ptr)
+    }
+    setScreenCnt(screen_cnt) {
+        Module._lv_disp_set_screen_cnt(this.ptr, screen_cnt)
+    }
+    delPrev() {
+        return Module._lv_disp_get_del_prev(this.ptr)
+    }
+    setDelPrev(del_prev) {
+        Module._lv_disp_set_del_prev(this.ptr, del_prev)
+    }
+    bgOpa() {
+        return Module._lv_disp_get_bg_opa(this.ptr)
+    }
+    bgColor() {
+        return Module._lv_disp_get_bg_color(this.ptr)
+    }
+    bgImg() {
+        return Module._lv_disp_get_bg_img(this.ptr)
+    }
+    setBgImg(bg_img) {
+        Module._lv_disp_set_bg_img(this.ptr, bg_img)
+    }
+    bgFn() {
+        return Module._lv_disp_get_bg_fn(this.ptr)
+    }
+    setBgFn(bg_fn) {
+        Module._lv_disp_set_bg_fn(this.ptr, bg_fn)
+    }
+    invAreas() {
+        return Module._lv_disp_get_inv_areas(this.ptr)
+    }
+    setInvAreas(inv_areas) {
+        Module._lv_disp_set_inv_areas(this.ptr, inv_areas)
+    }
+    invAreaJoined() {
+        return Module._lv_disp_get_inv_area_joined(this.ptr)
+    }
+    setInvAreaJoined(inv_area_joined) {
+        Module._lv_disp_set_inv_area_joined(this.ptr, inv_area_joined)
+    }
+    invP() {
+        return Module._lv_disp_get_inv_p(this.ptr)
+    }
+    setInvP(inv_p) {
+        Module._lv_disp_set_inv_p(this.ptr, inv_p)
+    }
+    lastActivityTime() {
+        return Module._lv_disp_get_last_activity_time(this.ptr)
+    }
+    setLastActivityTime(last_activity_time) {
+        Module._lv_disp_set_last_activity_time(this.ptr, last_activity_time)
+    }
+    remove() {
+        Module._lv_disp_remove(this.ptr)
+    }
+    setDefault() {
+        Module._lv_disp_set_default(this.ptr)
+    }
+    horRes() {
+        return Module._lv_disp_get_hor_res(this.ptr)
+    }
+    verRes() {
+        return Module._lv_disp_get_ver_res(this.ptr)
+    }
+    physicalHorRes() {
+        return Module._lv_disp_get_physical_hor_res(this.ptr)
+    }
+    physicalVerRes() {
+        return Module._lv_disp_get_physical_ver_res(this.ptr)
+    }
+    offsetX() {
+        return Module._lv_disp_get_offset_x(this.ptr)
+    }
+    offsetY() {
+        return Module._lv_disp_get_offset_y(this.ptr)
+    }
+    antialiasing() {
+        return Module.ccall("lv_disp_get_antialiasing", "bool", ["number"], [this.ptr])
+    }
+    setRotation(rotation) {
+        Module._lv_disp_set_rotation(this.ptr, constMapping.DISP_ROT.value(rotation))
+    }
+    rotation() {
+        return constMapping.DISP_ROT.name(Module._lv_disp_get_rotation(this.ptr))
+    }
+    next() {
+        return WASMObject.wrap(Disp, Module._lv_disp_get_next(this.ptr))
+    }
+    drawBuf() {
+        return WASMObject.wrap(DispDrawBuf, Module._lv_disp_get_draw_buf(this.ptr))
+    }
+    scrAct() {
+        return WASMObject.wrap(Obj, Module._lv_disp_get_scr_act(this.ptr))
+    }
+    scrPrev() {
+        return WASMObject.wrap(Obj, Module._lv_disp_get_scr_prev(this.ptr))
+    }
+    layerTop() {
+        return WASMObject.wrap(Obj, Module._lv_disp_get_layer_top(this.ptr))
+    }
+    layerSys() {
+        return WASMObject.wrap(Obj, Module._lv_disp_get_layer_sys(this.ptr))
+    }
+    setTheme(th) {
+        Module._lv_disp_set_theme(this.ptr, th)
+    }
+    theme() {
+        return Module._lv_disp_get_theme(this.ptr)
+    }
+    setBgColor(color) {
+        Module._lv_disp_set_bg_color(this.ptr, color)
+    }
+    setBgImage(img_src) {
+        Module._lv_disp_set_bg_image(this.ptr, img_src)
+    }
+    setBgOpa(opa) {
+        Module._lv_disp_set_bg_opa(this.ptr, opa)
+    }
+    trigActivity() {
+        Module._lv_disp_trig_activity(this.ptr)
+    }
+    cleanDcache() {
+        Module._lv_disp_clean_dcache(this.ptr)
+    }
 }
-
-class MemBuf extends WAMSObject {
+class ObjClass extends WASMObject {
     constructor() {
         super()
-        this.ptr = Module._lv_mem_buf_create()
+        this.ptr=Module._lv_obj_class_create()
     }
-// AUTO GENERATE CODE START [MemBuf METHODS] --------
-    p(){
-        return Module._lv_mem_buf_get_p(this.ptr)
-    }
-    setP(p){
-        return Module._lv_mem_buf_set_p(this.ptr, p)
-    }
-    size(){
-        return Module._lv_mem_buf_get_size(this.ptr)
-    }
-    setSize(size){
-        return Module._lv_mem_buf_set_size(this.ptr, size)
-    }
-    used(){
-        return Module._lv_mem_buf_get_used(this.ptr)
-    }
-    setUsed(used){
-        return Module._lv_mem_buf_set_used(this.ptr, used)
-    }
-// AUTO GENERATE CODE END [MemBuf METHODS] --------
-}
-
-class Anim extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_anim_create()
-    }
-// AUTO GENERATE CODE START [Anim METHODS] --------
-    var(){
-        return Module._lv_anim_get_var(this.ptr)
-    }
-    execCb(){
-        return Module._lv_anim_get_exec_cb(this.ptr)
-    }
-    startCb(){
-        return Module._lv_anim_get_start_cb(this.ptr)
-    }
-    readyCb(){
-        return Module._lv_anim_get_ready_cb(this.ptr)
-    }
-    getValueCb(){
-        return Module._lv_anim_get_get_value_cb(this.ptr)
-    }
-    pathCb(){
-        return Module._lv_anim_get_path_cb(this.ptr)
-    }
-    startValue(){
-        return Module._lv_anim_get_start_value(this.ptr)
-    }
-    setStartValue(start_value){
-        return Module._lv_anim_set_start_value(this.ptr, start_value)
-    }
-    currentValue(){
-        return Module._lv_anim_get_current_value(this.ptr)
-    }
-    setCurrentValue(current_value){
-        return Module._lv_anim_set_current_value(this.ptr, current_value)
-    }
-    endValue(){
-        return Module._lv_anim_get_end_value(this.ptr)
-    }
-    setEndValue(end_value){
-        return Module._lv_anim_set_end_value(this.ptr, end_value)
-    }
-    time(){
-        return Module._lv_anim_get_time(this.ptr)
-    }
-    actTime(){
-        return Module._lv_anim_get_act_time(this.ptr)
-    }
-    setActTime(act_time){
-        return Module._lv_anim_set_act_time(this.ptr, act_time)
-    }
-    playbackDelay(){
-        return Module._lv_anim_get_playback_delay(this.ptr)
-    }
-    playbackTime(){
-        return Module._lv_anim_get_playback_time(this.ptr)
-    }
-    repeatDelay(){
-        return Module._lv_anim_get_repeat_delay(this.ptr)
-    }
-    repeatCnt(){
-        return Module._lv_anim_get_repeat_cnt(this.ptr)
-    }
-    setRepeatCnt(repeat_cnt){
-        return Module._lv_anim_set_repeat_cnt(this.ptr, repeat_cnt)
-    }
-    earlyApply(){
-        return Module._lv_anim_get_early_apply(this.ptr)
-    }
-    playbackNow(){
-        return Module._lv_anim_get_playback_now(this.ptr)
-    }
-    setPlaybackNow(playback_now){
-        return Module._lv_anim_set_playback_now(this.ptr, playback_now)
-    }
-    runRound(){
-        return Module._lv_anim_get_run_round(this.ptr)
-    }
-    setRunRound(run_round){
-        return Module._lv_anim_set_run_round(this.ptr, run_round)
-    }
-    startCbCalled(){
-        return Module._lv_anim_get_start_cb_called(this.ptr)
-    }
-    setStartCbCalled(start_cb_called){
-        return Module._lv_anim_set_start_cb_called(this.ptr, start_cb_called)
-    }
-// AUTO GENERATE CODE END [Anim METHODS] --------
-}
-
-class Color8 extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_color8_create()
-    }
-// AUTO GENERATE CODE START [Color8 METHODS] --------
-    full(){
-        return Module._lv_color8_get_full(this.ptr)
-    }
-    setFull(full){
-        return Module._lv_color8_set_full(this.ptr, full)
-    }
-// AUTO GENERATE CODE END [Color8 METHODS] --------
-}
-
-class Color16 extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_color16_create()
-    }
-// AUTO GENERATE CODE START [Color16 METHODS] --------
-    full(){
-        return Module._lv_color16_get_full(this.ptr)
-    }
-    setFull(full){
-        return Module._lv_color16_set_full(this.ptr, full)
-    }
-// AUTO GENERATE CODE END [Color16 METHODS] --------
-}
-
-class Color32 extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_color32_create()
-    }
-// AUTO GENERATE CODE START [Color32 METHODS] --------
-    full(){
-        return Module._lv_color32_get_full(this.ptr)
-    }
-    setFull(full){
-        return Module._lv_color32_set_full(this.ptr, full)
-    }
-// AUTO GENERATE CODE END [Color32 METHODS] --------
-}
-
-class ColorHsv extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_color_hsv_create()
-    }
-// AUTO GENERATE CODE START [ColorHsv METHODS] --------
-    h(){
-        return Module._lv_color_hsv_get_h(this.ptr)
-    }
-    setH(h){
-        return Module._lv_color_hsv_set_h(this.ptr, h)
-    }
-    s(){
-        return Module._lv_color_hsv_get_s(this.ptr)
-    }
-    setS(s){
-        return Module._lv_color_hsv_set_s(this.ptr, s)
-    }
-    v(){
-        return Module._lv_color_hsv_get_v(this.ptr)
-    }
-    setV(v){
-        return Module._lv_color_hsv_set_v(this.ptr, v)
-    }
-// AUTO GENERATE CODE END [ColorHsv METHODS] --------
-}
-
-class ColorFilterDsc extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_color_filter_dsc_create()
-    }
-// AUTO GENERATE CODE START [ColorFilterDsc METHODS] --------
-    filterCb(){
-        return Module._lv_color_filter_dsc_get_filter_cb(this.ptr)
-    }
-    setFilterCb(filter_cb){
-        return Module._lv_color_filter_dsc_set_filter_cb(this.ptr, filter_cb)
-    }
-    userData(){
-        return Module._lv_color_filter_dsc_get_user_data(this.ptr)
-    }
-    setUserData(user_data){
-        return Module._lv_color_filter_dsc_set_user_data(this.ptr, user_data)
-    }
-// AUTO GENERATE CODE END [ColorFilterDsc METHODS] --------
-}
-
-class Point extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_point_create()
-    }
-// AUTO GENERATE CODE START [Point METHODS] --------
-    x(){
-        return Module._lv_point_get_x(this.ptr)
-    }
-    setX(x){
-        return Module._lv_point_set_x(this.ptr, x)
-    }
-    y(){
-        return Module._lv_point_get_y(this.ptr)
-    }
-    setY(y){
-        return Module._lv_point_set_y(this.ptr, y)
-    }
-// AUTO GENERATE CODE END [Point METHODS] --------
-}
-
-class Area extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_area_create()
-    }
-// AUTO GENERATE CODE START [Area METHODS] --------
-    x1(){
-        return Module._lv_area_get_x1(this.ptr)
-    }
-    setX1(x1){
-        return Module._lv_area_set_x1(this.ptr, x1)
-    }
-    y1(){
-        return Module._lv_area_get_y1(this.ptr)
-    }
-    setY1(y1){
-        return Module._lv_area_set_y1(this.ptr, y1)
-    }
-    x2(){
-        return Module._lv_area_get_x2(this.ptr)
-    }
-    setX2(x2){
-        return Module._lv_area_set_x2(this.ptr, x2)
-    }
-    y2(){
-        return Module._lv_area_get_y2(this.ptr)
-    }
-    setY2(y2){
-        return Module._lv_area_set_y2(this.ptr, y2)
-    }
-// AUTO GENERATE CODE END [Area METHODS] --------
-}
-
-class ImgHeader extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_img_header_create()
-    }
-// AUTO GENERATE CODE START [ImgHeader METHODS] --------
-    cf(){
-        return Module._lv_img_header_get_cf(this.ptr)
-    }
-    setCf(cf){
-        return Module._lv_img_header_set_cf(this.ptr, cf)
-    }
-    alwaysZero(){
-        return Module._lv_img_header_get_always_zero(this.ptr)
-    }
-    setAlwaysZero(always_zero){
-        return Module._lv_img_header_set_always_zero(this.ptr, always_zero)
-    }
-    reserved(){
-        return Module._lv_img_header_get_reserved(this.ptr)
-    }
-    setReserved(reserved){
-        return Module._lv_img_header_set_reserved(this.ptr, reserved)
-    }
-    w(){
-        return Module._lv_img_header_get_w(this.ptr)
-    }
-    setW(w){
-        return Module._lv_img_header_set_w(this.ptr, w)
-    }
-    h(){
-        return Module._lv_img_header_get_h(this.ptr)
-    }
-    setH(h){
-        return Module._lv_img_header_set_h(this.ptr, h)
-    }
-// AUTO GENERATE CODE END [ImgHeader METHODS] --------
-}
-
-class ImgDsc extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_img_dsc_create()
-    }
-// AUTO GENERATE CODE START [ImgDsc METHODS] --------
-    header(){
-        return Module._lv_img_dsc_get_header(this.ptr)
-    }
-    setHeader(header){
-        return Module._lv_img_dsc_set_header(this.ptr, header)
-    }
-    dataSize(){
-        return Module._lv_img_dsc_get_data_size(this.ptr)
-    }
-    setDataSize(data_size){
-        return Module._lv_img_dsc_set_data_size(this.ptr, data_size)
-    }
-    data(){
-        return Module._lv_img_dsc_get_data(this.ptr)
-    }
-    setData(data){
-        return Module._lv_img_dsc_set_data(this.ptr, data)
-    }
-// AUTO GENERATE CODE END [ImgDsc METHODS] --------
-}
-
-class ImgTransformDsc extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_img_transform_dsc_create()
-    }
-// AUTO GENERATE CODE START [ImgTransformDsc METHODS] --------
-// AUTO GENERATE CODE END [ImgTransformDsc METHODS] --------
-}
-
-class Ll extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_ll_create()
-    }
-// AUTO GENERATE CODE START [Ll METHODS] --------
-    nSize(){
-        return Module._lv_ll_get_n_size(this.ptr)
-    }
-    setNSize(n_size){
-        return Module._lv_ll_set_n_size(this.ptr, n_size)
-    }
-    head(){
-        return Module._lv_ll_get_head(this.ptr)
-    }
-    setHead(head){
-        return Module._lv_ll_set_head(this.ptr, head)
-    }
-    tail(){
-        return Module._lv_ll_get_tail(this.ptr)
-    }
-    setTail(tail){
-        return Module._lv_ll_set_tail(this.ptr, tail)
-    }
-// AUTO GENERATE CODE END [Ll METHODS] --------
-}
-
-class IndevData extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_indev_data_create()
-    }
-// AUTO GENERATE CODE START [IndevData METHODS] --------
-    point(){
-        return Module._lv_indev_data_get_point(this.ptr)
-    }
-    setPoint(point){
-        return Module._lv_indev_data_set_point(this.ptr, point)
-    }
-    key(){
-        return Module._lv_indev_data_get_key(this.ptr)
-    }
-    setKey(key){
-        return Module._lv_indev_data_set_key(this.ptr, key)
-    }
-    btnId(){
-        return Module._lv_indev_data_get_btn_id(this.ptr)
-    }
-    setBtnId(btn_id){
-        return Module._lv_indev_data_set_btn_id(this.ptr, btn_id)
-    }
-    encDiff(){
-        return Module._lv_indev_data_get_enc_diff(this.ptr)
-    }
-    setEncDiff(enc_diff){
-        return Module._lv_indev_data_set_enc_diff(this.ptr, enc_diff)
-    }
-    state(){
-        return Module._lv_indev_data_get_state(this.ptr)
-    }
-    setState(state){
-        return Module._lv_indev_data_set_state(this.ptr, state)
-    }
-    continueReading(){
-        return Module._lv_indev_data_get_continue_reading(this.ptr)
-    }
-    setContinueReading(continue_reading){
-        return Module._lv_indev_data_set_continue_reading(this.ptr, continue_reading)
-    }
-// AUTO GENERATE CODE END [IndevData METHODS] --------
-}
-
-class _IndevProc extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv__indev_proc_create()
-    }
-// AUTO GENERATE CODE START [_IndevProc METHODS] --------
-    state(){
-        return Module.__lv_indev_proc_get_state(this.ptr)
-    }
-    setState(state){
-        return Module.__lv_indev_proc_set_state(this.ptr, state)
-    }
-    longPrSent(){
-        return Module.__lv_indev_proc_get_long_pr_sent(this.ptr)
-    }
-    setLongPrSent(long_pr_sent){
-        return Module.__lv_indev_proc_set_long_pr_sent(this.ptr, long_pr_sent)
-    }
-    resetQuery(){
-        return Module.__lv_indev_proc_get_reset_query(this.ptr)
-    }
-    setResetQuery(reset_query){
-        return Module.__lv_indev_proc_set_reset_query(this.ptr, reset_query)
-    }
-    disabled(){
-        return Module.__lv_indev_proc_get_disabled(this.ptr)
-    }
-    setDisabled(disabled){
-        return Module.__lv_indev_proc_set_disabled(this.ptr, disabled)
-    }
-    waitUntilRelease(){
-        return Module.__lv_indev_proc_get_wait_until_release(this.ptr)
-    }
-    setWaitUntilRelease(wait_until_release){
-        return Module.__lv_indev_proc_set_wait_until_release(this.ptr, wait_until_release)
-    }
-    prTimestamp(){
-        return Module.__lv_indev_proc_get_pr_timestamp(this.ptr)
-    }
-    setPrTimestamp(pr_timestamp){
-        return Module.__lv_indev_proc_set_pr_timestamp(this.ptr, pr_timestamp)
-    }
-    longprRepTimestamp(){
-        return Module.__lv_indev_proc_get_longpr_rep_timestamp(this.ptr)
-    }
-    setLongprRepTimestamp(longpr_rep_timestamp){
-        return Module.__lv_indev_proc_set_longpr_rep_timestamp(this.ptr, longpr_rep_timestamp)
-    }
-// AUTO GENERATE CODE END [_IndevProc METHODS] --------
-}
-
-class Indev extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_indev_create()
-    }
-// AUTO GENERATE CODE START [Indev METHODS] --------
-    driver(){
-        return Module._lv_indev_get_driver(this.ptr)
-    }
-    setDriver(driver){
-        return Module._lv_indev_set_driver(this.ptr, driver)
-    }
-    proc(){
-        return Module._lv_indev_get_proc(this.ptr)
-    }
-    setProc(proc){
-        return Module._lv_indev_set_proc(this.ptr, proc)
-    }
-    cursor(){
-        return Module._lv_indev_get_cursor(this.ptr)
-    }
-    group(){
-        return Module._lv_indev_get_group(this.ptr)
-    }
-    btnPoints(){
-        return Module._lv_indev_get_btn_points(this.ptr)
-    }
-    setBtnPoints(btn_points){
-        return Module._lv_indev_set_btn_points(this.ptr, btn_points)
-    }
-// AUTO GENERATE CODE END [Indev METHODS] --------
-}
-
-class FontGlyphDsc extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_font_glyph_dsc_create()
-    }
-// AUTO GENERATE CODE START [FontGlyphDsc METHODS] --------
-    advW(){
-        return Module._lv_font_glyph_dsc_get_adv_w(this.ptr)
-    }
-    setAdvW(adv_w){
-        return Module._lv_font_glyph_dsc_set_adv_w(this.ptr, adv_w)
-    }
-    boxW(){
-        return Module._lv_font_glyph_dsc_get_box_w(this.ptr)
-    }
-    setBoxW(box_w){
-        return Module._lv_font_glyph_dsc_set_box_w(this.ptr, box_w)
-    }
-    boxH(){
-        return Module._lv_font_glyph_dsc_get_box_h(this.ptr)
-    }
-    setBoxH(box_h){
-        return Module._lv_font_glyph_dsc_set_box_h(this.ptr, box_h)
-    }
-    ofsX(){
-        return Module._lv_font_glyph_dsc_get_ofs_x(this.ptr)
-    }
-    setOfsX(ofs_x){
-        return Module._lv_font_glyph_dsc_set_ofs_x(this.ptr, ofs_x)
-    }
-    ofsY(){
-        return Module._lv_font_glyph_dsc_get_ofs_y(this.ptr)
-    }
-    setOfsY(ofs_y){
-        return Module._lv_font_glyph_dsc_set_ofs_y(this.ptr, ofs_y)
-    }
-    bpp(){
-        return Module._lv_font_glyph_dsc_get_bpp(this.ptr)
-    }
-    setBpp(bpp){
-        return Module._lv_font_glyph_dsc_set_bpp(this.ptr, bpp)
-    }
-// AUTO GENERATE CODE END [FontGlyphDsc METHODS] --------
-}
-
-class Font extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_font_create()
-    }
-// AUTO GENERATE CODE START [Font METHODS] --------
-    getGlyphDsc(){
-        return Module._lv_font_get_get_glyph_dsc(this.ptr)
-    }
-    setGetGlyphDsc(get_glyph_dsc){
-        return Module._lv_font_set_get_glyph_dsc(this.ptr, get_glyph_dsc)
-    }
-    getGlyphBitmap(){
-        return Module._lv_font_get_get_glyph_bitmap(this.ptr)
-    }
-    setGetGlyphBitmap(get_glyph_bitmap){
-        return Module._lv_font_set_get_glyph_bitmap(this.ptr, get_glyph_bitmap)
-    }
-    setLineHeight(line_height){
-        return Module._lv_font_set_line_height(this.ptr, line_height)
-    }
-    baseLine(){
-        return Module._lv_font_get_base_line(this.ptr)
-    }
-    setBaseLine(base_line){
-        return Module._lv_font_set_base_line(this.ptr, base_line)
-    }
-    subpx(){
-        return Module._lv_font_get_subpx(this.ptr)
-    }
-    setSubpx(subpx){
-        return Module._lv_font_set_subpx(this.ptr, subpx)
-    }
-    underlinePosition(){
-        return Module._lv_font_get_underline_position(this.ptr)
-    }
-    setUnderlinePosition(underline_position){
-        return Module._lv_font_set_underline_position(this.ptr, underline_position)
-    }
-    underlineThickness(){
-        return Module._lv_font_get_underline_thickness(this.ptr)
-    }
-    setUnderlineThickness(underline_thickness){
-        return Module._lv_font_set_underline_thickness(this.ptr, underline_thickness)
-    }
-    dsc(){
-        return Module._lv_font_get_dsc(this.ptr)
-    }
-    setDsc(dsc){
-        return Module._lv_font_set_dsc(this.ptr, dsc)
-    }
-    userData(){
-        return Module._lv_font_get_user_data(this.ptr)
-    }
-    setUserData(user_data){
-        return Module._lv_font_set_user_data(this.ptr, user_data)
-    }
-// AUTO GENERATE CODE END [Font METHODS] --------
-}
-
-class StyleValue extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_style_value_create()
-    }
-// AUTO GENERATE CODE START [StyleValue METHODS] --------
-    num(){
-        return Module._lv_style_value_get_num(this.ptr)
-    }
-    setNum(num){
-        return Module._lv_style_value_set_num(this.ptr, num)
-    }
-    ptr(){
-        return Module._lv_style_value_get_ptr(this.ptr)
-    }
-    setPtr(ptr){
-        return Module._lv_style_value_set_ptr(this.ptr, ptr)
-    }
-    color(){
-        return Module._lv_style_value_get_color(this.ptr)
-    }
-    setColor(color){
-        return Module._lv_style_value_set_color(this.ptr, color)
-    }
-// AUTO GENERATE CODE END [StyleValue METHODS] --------
-}
-
-class StyleTransitionDsc extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_style_transition_dsc_create()
-    }
-// AUTO GENERATE CODE START [StyleTransitionDsc METHODS] --------
-    props(){
-        return Module._lv_style_transition_dsc_get_props(this.ptr)
-    }
-    setProps(props){
-        return Module._lv_style_transition_dsc_set_props(this.ptr, props)
-    }
-    userData(){
-        return Module._lv_style_transition_dsc_get_user_data(this.ptr)
-    }
-    setUserData(user_data){
-        return Module._lv_style_transition_dsc_set_user_data(this.ptr, user_data)
-    }
-    pathXcb(){
-        return Module._lv_style_transition_dsc_get_path_xcb(this.ptr)
-    }
-    setPathXcb(path_xcb){
-        return Module._lv_style_transition_dsc_set_path_xcb(this.ptr, path_xcb)
-    }
-    time(){
-        return Module._lv_style_transition_dsc_get_time(this.ptr)
-    }
-    setTime(time){
-        return Module._lv_style_transition_dsc_set_time(this.ptr, time)
-    }
-    delay(){
-        return Module._lv_style_transition_dsc_get_delay(this.ptr)
-    }
-    setDelay(delay){
-        return Module._lv_style_transition_dsc_set_delay(this.ptr, delay)
-    }
-// AUTO GENERATE CODE END [StyleTransitionDsc METHODS] --------
-}
-
-class StyleConstProp extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_style_const_prop_create()
-    }
-// AUTO GENERATE CODE START [StyleConstProp METHODS] --------
-    prop(){
-        return Module._lv_style_const_prop_get_prop(this.ptr)
-    }
-    setProp(prop){
-        return Module._lv_style_const_prop_set_prop(this.ptr, prop)
-    }
-    value(){
-        return Module._lv_style_const_prop_get_value(this.ptr)
-    }
-    setValue(value){
-        return Module._lv_style_const_prop_set_value(this.ptr, value)
-    }
-// AUTO GENERATE CODE END [StyleConstProp METHODS] --------
-}
-
-class Style extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_style_create()
-    }
-// AUTO GENERATE CODE START [Style METHODS] --------
-    prop1(){
-        return Module._lv_style_get_prop1(this.ptr)
-    }
-    setProp1(prop1){
-        return Module._lv_style_set_prop1(this.ptr, prop1)
-    }
-    isConst(){
-        return Module._lv_style_get_is_const(this.ptr)
-    }
-    setIsConst(is_const){
-        return Module._lv_style_set_is_const(this.ptr, is_const)
-    }
-    hasGroup(){
-        return Module._lv_style_get_has_group(this.ptr)
-    }
-    setHasGroup(has_group){
-        return Module._lv_style_set_has_group(this.ptr, has_group)
-    }
-    propCnt(){
-        return Module._lv_style_get_prop_cnt(this.ptr)
-    }
-    setPropCnt(prop_cnt){
-        return Module._lv_style_set_prop_cnt(this.ptr, prop_cnt)
-    }
-// AUTO GENERATE CODE END [Style METHODS] --------
-}
-
-class _ObjStyle extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv__obj_style_create()
-    }
-// AUTO GENERATE CODE START [_ObjStyle METHODS] --------
-    style(){
-        return Module.__lv_obj_style_get_style(this.ptr)
-    }
-    setStyle(style){
-        return Module.__lv_obj_style_set_style(this.ptr, style)
-    }
-    selector(){
-        return Module.__lv_obj_style_get_selector(this.ptr)
-    }
-    setSelector(selector){
-        return Module.__lv_obj_style_set_selector(this.ptr, selector)
-    }
-    isLocal(){
-        return Module.__lv_obj_style_get_is_local(this.ptr)
-    }
-    setIsLocal(is_local){
-        return Module.__lv_obj_style_set_is_local(this.ptr, is_local)
-    }
-    isTrans(){
-        return Module.__lv_obj_style_get_is_trans(this.ptr)
-    }
-    setIsTrans(is_trans){
-        return Module.__lv_obj_style_set_is_trans(this.ptr, is_trans)
-    }
-// AUTO GENERATE CODE END [_ObjStyle METHODS] --------
-}
-
-class _ObjStyleTransitionDsc extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv__obj_style_transition_dsc_create()
-    }
-// AUTO GENERATE CODE START [_ObjStyleTransitionDsc METHODS] --------
-    time(){
-        return Module.__lv_obj_style_transition_dsc_get_time(this.ptr)
-    }
-    setTime(time){
-        return Module.__lv_obj_style_transition_dsc_set_time(this.ptr, time)
-    }
-    delay(){
-        return Module.__lv_obj_style_transition_dsc_get_delay(this.ptr)
-    }
-    setDelay(delay){
-        return Module.__lv_obj_style_transition_dsc_set_delay(this.ptr, delay)
-    }
-    selector(){
-        return Module.__lv_obj_style_transition_dsc_get_selector(this.ptr)
-    }
-    setSelector(selector){
-        return Module.__lv_obj_style_transition_dsc_set_selector(this.ptr, selector)
-    }
-    prop(){
-        return Module.__lv_obj_style_transition_dsc_get_prop(this.ptr)
-    }
-    setProp(prop){
-        return Module.__lv_obj_style_transition_dsc_set_prop(this.ptr, prop)
-    }
-    pathCb(){
-        return Module.__lv_obj_style_transition_dsc_get_path_cb(this.ptr)
-    }
-    setPathCb(path_cb){
-        return Module.__lv_obj_style_transition_dsc_set_path_cb(this.ptr, path_cb)
-    }
-    userData(){
-        return Module.__lv_obj_style_transition_dsc_get_user_data(this.ptr)
-    }
-    setUserData(user_data){
-        return Module.__lv_obj_style_transition_dsc_set_user_data(this.ptr, user_data)
-    }
-// AUTO GENERATE CODE END [_ObjStyleTransitionDsc METHODS] --------
-}
-
-class FsDrv extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_fs_drv_create()
-    }
-// AUTO GENERATE CODE START [FsDrv METHODS] --------
-    letter(){
-        return Module._lv_fs_drv_get_letter(this.ptr)
-    }
-    setLetter(letter){
-        return Module._lv_fs_drv_set_letter(this.ptr, letter)
-    }
-    readyCb(){
-        return Module._lv_fs_drv_get_ready_cb(this.ptr)
-    }
-    setReadyCb(ready_cb){
-        return Module._lv_fs_drv_set_ready_cb(this.ptr, ready_cb)
-    }
-    openCb(){
-        return Module._lv_fs_drv_get_open_cb(this.ptr)
-    }
-    setOpenCb(open_cb){
-        return Module._lv_fs_drv_set_open_cb(this.ptr, open_cb)
-    }
-    closeCb(){
-        return Module._lv_fs_drv_get_close_cb(this.ptr)
-    }
-    setCloseCb(close_cb){
-        return Module._lv_fs_drv_set_close_cb(this.ptr, close_cb)
-    }
-    readCb(){
-        return Module._lv_fs_drv_get_read_cb(this.ptr)
-    }
-    setReadCb(read_cb){
-        return Module._lv_fs_drv_set_read_cb(this.ptr, read_cb)
-    }
-    writeCb(){
-        return Module._lv_fs_drv_get_write_cb(this.ptr)
-    }
-    setWriteCb(write_cb){
-        return Module._lv_fs_drv_set_write_cb(this.ptr, write_cb)
-    }
-    seekCb(){
-        return Module._lv_fs_drv_get_seek_cb(this.ptr)
-    }
-    setSeekCb(seek_cb){
-        return Module._lv_fs_drv_set_seek_cb(this.ptr, seek_cb)
-    }
-    tellCb(){
-        return Module._lv_fs_drv_get_tell_cb(this.ptr)
-    }
-    setTellCb(tell_cb){
-        return Module._lv_fs_drv_set_tell_cb(this.ptr, tell_cb)
-    }
-    dirOpenCb(){
-        return Module._lv_fs_drv_get_dir_open_cb(this.ptr)
-    }
-    setDirOpenCb(dir_open_cb){
-        return Module._lv_fs_drv_set_dir_open_cb(this.ptr, dir_open_cb)
-    }
-    dirReadCb(){
-        return Module._lv_fs_drv_get_dir_read_cb(this.ptr)
-    }
-    setDirReadCb(dir_read_cb){
-        return Module._lv_fs_drv_set_dir_read_cb(this.ptr, dir_read_cb)
-    }
-    dirCloseCb(){
-        return Module._lv_fs_drv_get_dir_close_cb(this.ptr)
-    }
-    setDirCloseCb(dir_close_cb){
-        return Module._lv_fs_drv_set_dir_close_cb(this.ptr, dir_close_cb)
-    }
-    userData(){
-        return Module._lv_fs_drv_get_user_data(this.ptr)
-    }
-    setUserData(user_data){
-        return Module._lv_fs_drv_set_user_data(this.ptr, user_data)
-    }
-// AUTO GENERATE CODE END [FsDrv METHODS] --------
-}
-
-class FsFile extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_fs_file_create()
-    }
-// AUTO GENERATE CODE START [FsFile METHODS] --------
-    fileD(){
-        return Module._lv_fs_file_get_file_d(this.ptr)
-    }
-    setFileD(file_d){
-        return Module._lv_fs_file_set_file_d(this.ptr, file_d)
-    }
-    drv(){
-        return Module._lv_fs_file_get_drv(this.ptr)
-    }
-    setDrv(drv){
-        return Module._lv_fs_file_set_drv(this.ptr, drv)
-    }
-// AUTO GENERATE CODE END [FsFile METHODS] --------
-}
-
-class FsDir extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_fs_dir_create()
-    }
-// AUTO GENERATE CODE START [FsDir METHODS] --------
-    dirD(){
-        return Module._lv_fs_dir_get_dir_d(this.ptr)
-    }
-    setDirD(dir_d){
-        return Module._lv_fs_dir_set_dir_d(this.ptr, dir_d)
-    }
-    drv(){
-        return Module._lv_fs_dir_get_drv(this.ptr)
-    }
-    setDrv(drv){
-        return Module._lv_fs_dir_set_drv(this.ptr, drv)
-    }
-// AUTO GENERATE CODE END [FsDir METHODS] --------
-}
-
-class ImgDecoder extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_img_decoder_create()
-    }
-// AUTO GENERATE CODE START [ImgDecoder METHODS] --------
-    infoCb(){
-        return Module._lv_img_decoder_get_info_cb(this.ptr)
-    }
-    openCb(){
-        return Module._lv_img_decoder_get_open_cb(this.ptr)
-    }
-    readLineCb(){
-        return Module._lv_img_decoder_get_read_line_cb(this.ptr)
-    }
-    closeCb(){
-        return Module._lv_img_decoder_get_close_cb(this.ptr)
-    }
-    userData(){
-        return Module._lv_img_decoder_get_user_data(this.ptr)
-    }
-    setUserData(user_data){
-        return Module._lv_img_decoder_set_user_data(this.ptr, user_data)
-    }
-// AUTO GENERATE CODE END [ImgDecoder METHODS] --------
-}
-
-class ImgDecoderDsc extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_img_decoder_dsc_create()
-    }
-// AUTO GENERATE CODE START [ImgDecoderDsc METHODS] --------
-    decoder(){
-        return Module._lv_img_decoder_dsc_get_decoder(this.ptr)
-    }
-    setDecoder(decoder){
-        return Module._lv_img_decoder_dsc_set_decoder(this.ptr, decoder)
-    }
-    src(){
-        return Module._lv_img_decoder_dsc_get_src(this.ptr)
-    }
-    setSrc(src){
-        return Module._lv_img_decoder_dsc_set_src(this.ptr, src)
-    }
-    color(){
-        return Module._lv_img_decoder_dsc_get_color(this.ptr)
-    }
-    setColor(color){
-        return Module._lv_img_decoder_dsc_set_color(this.ptr, color)
-    }
-    frameId(){
-        return Module._lv_img_decoder_dsc_get_frame_id(this.ptr)
-    }
-    setFrameId(frame_id){
-        return Module._lv_img_decoder_dsc_set_frame_id(this.ptr, frame_id)
-    }
-    srcType(){
-        return Module._lv_img_decoder_dsc_get_src_type(this.ptr)
-    }
-    setSrcType(src_type){
-        return Module._lv_img_decoder_dsc_set_src_type(this.ptr, src_type)
-    }
-    header(){
-        return Module._lv_img_decoder_dsc_get_header(this.ptr)
-    }
-    setHeader(header){
-        return Module._lv_img_decoder_dsc_set_header(this.ptr, header)
-    }
-    imgData(){
-        return Module._lv_img_decoder_dsc_get_img_data(this.ptr)
-    }
-    setImgData(img_data){
-        return Module._lv_img_decoder_dsc_set_img_data(this.ptr, img_data)
-    }
-    timeToOpen(){
-        return Module._lv_img_decoder_dsc_get_time_to_open(this.ptr)
-    }
-    setTimeToOpen(time_to_open){
-        return Module._lv_img_decoder_dsc_set_time_to_open(this.ptr, time_to_open)
-    }
-    errorMsg(){
-        return Module._lv_img_decoder_dsc_get_error_msg(this.ptr)
-    }
-    setErrorMsg(error_msg){
-        return Module._lv_img_decoder_dsc_set_error_msg(this.ptr, error_msg)
-    }
-    userData(){
-        return Module._lv_img_decoder_dsc_get_user_data(this.ptr)
-    }
-    setUserData(user_data){
-        return Module._lv_img_decoder_dsc_set_user_data(this.ptr, user_data)
-    }
-// AUTO GENERATE CODE END [ImgDecoderDsc METHODS] --------
-}
-
-class _ImgCacheEntry extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv__img_cache_entry_create()
-    }
-// AUTO GENERATE CODE START [_ImgCacheEntry METHODS] --------
-    decDsc(){
-        return Module.__lv_img_cache_entry_get_dec_dsc(this.ptr)
-    }
-    setDecDsc(dec_dsc){
-        return Module.__lv_img_cache_entry_set_dec_dsc(this.ptr, dec_dsc)
-    }
-    life(){
-        return Module.__lv_img_cache_entry_get_life(this.ptr)
-    }
-    setLife(life){
-        return Module.__lv_img_cache_entry_set_life(this.ptr, life)
-    }
-// AUTO GENERATE CODE END [_ImgCacheEntry METHODS] --------
-}
-
-class _DrawMaskSaved extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv__draw_mask_saved_create()
-    }
-// AUTO GENERATE CODE START [_DrawMaskSaved METHODS] --------
-    param(){
-        return Module.__lv_draw_mask_saved_get_param(this.ptr)
-    }
-    setParam(param){
-        return Module.__lv_draw_mask_saved_set_param(this.ptr, param)
-    }
-    customId(){
-        return Module.__lv_draw_mask_saved_get_custom_id(this.ptr)
-    }
-    setCustomId(custom_id){
-        return Module.__lv_draw_mask_saved_set_custom_id(this.ptr, custom_id)
-    }
-// AUTO GENERATE CODE END [_DrawMaskSaved METHODS] --------
-}
-
-class _DrawMaskCommonDsc extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv__draw_mask_common_dsc_create()
-    }
-// AUTO GENERATE CODE START [_DrawMaskCommonDsc METHODS] --------
-    cb(){
-        return Module.__lv_draw_mask_common_dsc_get_cb(this.ptr)
-    }
-    setCb(cb){
-        return Module.__lv_draw_mask_common_dsc_set_cb(this.ptr, cb)
-    }
-    type(){
-        return Module.__lv_draw_mask_common_dsc_get_type(this.ptr)
-    }
-    setType(type){
-        return Module.__lv_draw_mask_common_dsc_set_type(this.ptr, type)
-    }
-// AUTO GENERATE CODE END [_DrawMaskCommonDsc METHODS] --------
-}
-
-class DrawMaskLineParam extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_draw_mask_line_param_create()
-    }
-// AUTO GENERATE CODE START [DrawMaskLineParam METHODS] --------
-    dsc(){
-        return Module._lv_draw_mask_line_param_get_dsc(this.ptr)
-    }
-    setDsc(dsc){
-        return Module._lv_draw_mask_line_param_set_dsc(this.ptr, dsc)
-    }
-    origo(){
-        return Module._lv_draw_mask_line_param_get_origo(this.ptr)
-    }
-    setOrigo(origo){
-        return Module._lv_draw_mask_line_param_set_origo(this.ptr, origo)
-    }
-    xySteep(){
-        return Module._lv_draw_mask_line_param_get_xy_steep(this.ptr)
-    }
-    setXySteep(xy_steep){
-        return Module._lv_draw_mask_line_param_set_xy_steep(this.ptr, xy_steep)
-    }
-    yxSteep(){
-        return Module._lv_draw_mask_line_param_get_yx_steep(this.ptr)
-    }
-    setYxSteep(yx_steep){
-        return Module._lv_draw_mask_line_param_set_yx_steep(this.ptr, yx_steep)
-    }
-    steep(){
-        return Module._lv_draw_mask_line_param_get_steep(this.ptr)
-    }
-    setSteep(steep){
-        return Module._lv_draw_mask_line_param_set_steep(this.ptr, steep)
-    }
-    spx(){
-        return Module._lv_draw_mask_line_param_get_spx(this.ptr)
-    }
-    setSpx(spx){
-        return Module._lv_draw_mask_line_param_set_spx(this.ptr, spx)
-    }
-    flat(){
-        return Module._lv_draw_mask_line_param_get_flat(this.ptr)
-    }
-    setFlat(flat){
-        return Module._lv_draw_mask_line_param_set_flat(this.ptr, flat)
-    }
-    inv(){
-        return Module._lv_draw_mask_line_param_get_inv(this.ptr)
-    }
-    setInv(inv){
-        return Module._lv_draw_mask_line_param_set_inv(this.ptr, inv)
-    }
-// AUTO GENERATE CODE END [DrawMaskLineParam METHODS] --------
-}
-
-class DrawMaskAngleParam extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_draw_mask_angle_param_create()
-    }
-// AUTO GENERATE CODE START [DrawMaskAngleParam METHODS] --------
-    dsc(){
-        return Module._lv_draw_mask_angle_param_get_dsc(this.ptr)
-    }
-    setDsc(dsc){
-        return Module._lv_draw_mask_angle_param_set_dsc(this.ptr, dsc)
-    }
-    startLine(){
-        return Module._lv_draw_mask_angle_param_get_start_line(this.ptr)
-    }
-    setStartLine(start_line){
-        return Module._lv_draw_mask_angle_param_set_start_line(this.ptr, start_line)
-    }
-    endLine(){
-        return Module._lv_draw_mask_angle_param_get_end_line(this.ptr)
-    }
-    setEndLine(end_line){
-        return Module._lv_draw_mask_angle_param_set_end_line(this.ptr, end_line)
-    }
-    deltaDeg(){
-        return Module._lv_draw_mask_angle_param_get_delta_deg(this.ptr)
-    }
-    setDeltaDeg(delta_deg){
-        return Module._lv_draw_mask_angle_param_set_delta_deg(this.ptr, delta_deg)
-    }
-// AUTO GENERATE CODE END [DrawMaskAngleParam METHODS] --------
-}
-
-class _DrawMaskRadiusCircleDsc extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv__draw_mask_radius_circle_dsc_create()
-    }
-// AUTO GENERATE CODE START [_DrawMaskRadiusCircleDsc METHODS] --------
-    buf(){
-        return Module.__lv_draw_mask_radius_circle_dsc_get_buf(this.ptr)
-    }
-    setBuf(buf){
-        return Module.__lv_draw_mask_radius_circle_dsc_set_buf(this.ptr, buf)
-    }
-    cirOpa(){
-        return Module.__lv_draw_mask_radius_circle_dsc_get_cir_opa(this.ptr)
-    }
-    setCirOpa(cir_opa){
-        return Module.__lv_draw_mask_radius_circle_dsc_set_cir_opa(this.ptr, cir_opa)
-    }
-    xStartOnY(){
-        return Module.__lv_draw_mask_radius_circle_dsc_get_x_start_on_y(this.ptr)
-    }
-    setXStartOnY(x_start_on_y){
-        return Module.__lv_draw_mask_radius_circle_dsc_set_x_start_on_y(this.ptr, x_start_on_y)
-    }
-    opaStartOnY(){
-        return Module.__lv_draw_mask_radius_circle_dsc_get_opa_start_on_y(this.ptr)
-    }
-    setOpaStartOnY(opa_start_on_y){
-        return Module.__lv_draw_mask_radius_circle_dsc_set_opa_start_on_y(this.ptr, opa_start_on_y)
-    }
-    life(){
-        return Module.__lv_draw_mask_radius_circle_dsc_get_life(this.ptr)
-    }
-    setLife(life){
-        return Module.__lv_draw_mask_radius_circle_dsc_set_life(this.ptr, life)
-    }
-    usedCnt(){
-        return Module.__lv_draw_mask_radius_circle_dsc_get_used_cnt(this.ptr)
-    }
-    setUsedCnt(used_cnt){
-        return Module.__lv_draw_mask_radius_circle_dsc_set_used_cnt(this.ptr, used_cnt)
-    }
-    radius(){
-        return Module.__lv_draw_mask_radius_circle_dsc_get_radius(this.ptr)
-    }
-    setRadius(radius){
-        return Module.__lv_draw_mask_radius_circle_dsc_set_radius(this.ptr, radius)
-    }
-// AUTO GENERATE CODE END [_DrawMaskRadiusCircleDsc METHODS] --------
-}
-
-class DrawMaskRadiusParam extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_draw_mask_radius_param_create()
-    }
-// AUTO GENERATE CODE START [DrawMaskRadiusParam METHODS] --------
-    dsc(){
-        return Module._lv_draw_mask_radius_param_get_dsc(this.ptr)
-    }
-    setDsc(dsc){
-        return Module._lv_draw_mask_radius_param_set_dsc(this.ptr, dsc)
-    }
-    circle(){
-        return Module._lv_draw_mask_radius_param_get_circle(this.ptr)
-    }
-    setCircle(circle){
-        return Module._lv_draw_mask_radius_param_set_circle(this.ptr, circle)
-    }
-// AUTO GENERATE CODE END [DrawMaskRadiusParam METHODS] --------
-}
-
-class DrawMaskFadeParam extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_draw_mask_fade_param_create()
-    }
-// AUTO GENERATE CODE START [DrawMaskFadeParam METHODS] --------
-    dsc(){
-        return Module._lv_draw_mask_fade_param_get_dsc(this.ptr)
-    }
-    setDsc(dsc){
-        return Module._lv_draw_mask_fade_param_set_dsc(this.ptr, dsc)
-    }
-// AUTO GENERATE CODE END [DrawMaskFadeParam METHODS] --------
-}
-
-class DrawMaskMapParam extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_draw_mask_map_param_create()
-    }
-// AUTO GENERATE CODE START [DrawMaskMapParam METHODS] --------
-    dsc(){
-        return Module._lv_draw_mask_map_param_get_dsc(this.ptr)
-    }
-    setDsc(dsc){
-        return Module._lv_draw_mask_map_param_set_dsc(this.ptr, dsc)
-    }
-// AUTO GENERATE CODE END [DrawMaskMapParam METHODS] --------
-}
-
-class DrawRectDsc extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_draw_rect_dsc_create()
-    }
-// AUTO GENERATE CODE START [DrawRectDsc METHODS] --------
-    radius(){
-        return Module._lv_draw_rect_dsc_get_radius(this.ptr)
-    }
-    setRadius(radius){
-        return Module._lv_draw_rect_dsc_set_radius(this.ptr, radius)
-    }
-    blendMode(){
-        return Module._lv_draw_rect_dsc_get_blend_mode(this.ptr)
-    }
-    setBlendMode(blend_mode){
-        return Module._lv_draw_rect_dsc_set_blend_mode(this.ptr, blend_mode)
-    }
-    bgColor(){
-        return Module._lv_draw_rect_dsc_get_bg_color(this.ptr)
-    }
-    setBgColor(bg_color){
-        return Module._lv_draw_rect_dsc_set_bg_color(this.ptr, bg_color)
-    }
-    bgGradColor(){
-        return Module._lv_draw_rect_dsc_get_bg_grad_color(this.ptr)
-    }
-    setBgGradColor(bg_grad_color){
-        return Module._lv_draw_rect_dsc_set_bg_grad_color(this.ptr, bg_grad_color)
-    }
-    bgMainColorStop(){
-        return Module._lv_draw_rect_dsc_get_bg_main_color_stop(this.ptr)
-    }
-    setBgMainColorStop(bg_main_color_stop){
-        return Module._lv_draw_rect_dsc_set_bg_main_color_stop(this.ptr, bg_main_color_stop)
-    }
-    bgGradColorStop(){
-        return Module._lv_draw_rect_dsc_get_bg_grad_color_stop(this.ptr)
-    }
-    setBgGradColorStop(bg_grad_color_stop){
-        return Module._lv_draw_rect_dsc_set_bg_grad_color_stop(this.ptr, bg_grad_color_stop)
-    }
-    bgOpa(){
-        return Module._lv_draw_rect_dsc_get_bg_opa(this.ptr)
-    }
-    setBgOpa(bg_opa){
-        return Module._lv_draw_rect_dsc_set_bg_opa(this.ptr, bg_opa)
-    }
-    bgGradDir(){
-        return Module._lv_draw_rect_dsc_get_bg_grad_dir(this.ptr)
-    }
-    setBgGradDir(bg_grad_dir){
-        return Module._lv_draw_rect_dsc_set_bg_grad_dir(this.ptr, bg_grad_dir)
-    }
-    bgImgSrc(){
-        return Module._lv_draw_rect_dsc_get_bg_img_src(this.ptr)
-    }
-    setBgImgSrc(bg_img_src){
-        return Module._lv_draw_rect_dsc_set_bg_img_src(this.ptr, bg_img_src)
-    }
-    bgImgSymbolFont(){
-        return Module._lv_draw_rect_dsc_get_bg_img_symbol_font(this.ptr)
-    }
-    setBgImgSymbolFont(bg_img_symbol_font){
-        return Module._lv_draw_rect_dsc_set_bg_img_symbol_font(this.ptr, bg_img_symbol_font)
-    }
-    bgImgRecolor(){
-        return Module._lv_draw_rect_dsc_get_bg_img_recolor(this.ptr)
-    }
-    setBgImgRecolor(bg_img_recolor){
-        return Module._lv_draw_rect_dsc_set_bg_img_recolor(this.ptr, bg_img_recolor)
-    }
-    bgImgOpa(){
-        return Module._lv_draw_rect_dsc_get_bg_img_opa(this.ptr)
-    }
-    setBgImgOpa(bg_img_opa){
-        return Module._lv_draw_rect_dsc_set_bg_img_opa(this.ptr, bg_img_opa)
-    }
-    bgImgRecolorOpa(){
-        return Module._lv_draw_rect_dsc_get_bg_img_recolor_opa(this.ptr)
-    }
-    setBgImgRecolorOpa(bg_img_recolor_opa){
-        return Module._lv_draw_rect_dsc_set_bg_img_recolor_opa(this.ptr, bg_img_recolor_opa)
-    }
-    bgImgTiled(){
-        return Module._lv_draw_rect_dsc_get_bg_img_tiled(this.ptr)
-    }
-    setBgImgTiled(bg_img_tiled){
-        return Module._lv_draw_rect_dsc_set_bg_img_tiled(this.ptr, bg_img_tiled)
-    }
-    borderColor(){
-        return Module._lv_draw_rect_dsc_get_border_color(this.ptr)
-    }
-    setBorderColor(border_color){
-        return Module._lv_draw_rect_dsc_set_border_color(this.ptr, border_color)
-    }
-    borderWidth(){
-        return Module._lv_draw_rect_dsc_get_border_width(this.ptr)
-    }
-    setBorderWidth(border_width){
-        return Module._lv_draw_rect_dsc_set_border_width(this.ptr, border_width)
-    }
-    borderOpa(){
-        return Module._lv_draw_rect_dsc_get_border_opa(this.ptr)
-    }
-    setBorderOpa(border_opa){
-        return Module._lv_draw_rect_dsc_set_border_opa(this.ptr, border_opa)
-    }
-    borderPost(){
-        return Module._lv_draw_rect_dsc_get_border_post(this.ptr)
-    }
-    setBorderPost(border_post){
-        return Module._lv_draw_rect_dsc_set_border_post(this.ptr, border_post)
-    }
-    borderSide(){
-        return Module._lv_draw_rect_dsc_get_border_side(this.ptr)
-    }
-    setBorderSide(border_side){
-        return Module._lv_draw_rect_dsc_set_border_side(this.ptr, border_side)
-    }
-    outlineColor(){
-        return Module._lv_draw_rect_dsc_get_outline_color(this.ptr)
-    }
-    setOutlineColor(outline_color){
-        return Module._lv_draw_rect_dsc_set_outline_color(this.ptr, outline_color)
-    }
-    outlineWidth(){
-        return Module._lv_draw_rect_dsc_get_outline_width(this.ptr)
-    }
-    setOutlineWidth(outline_width){
-        return Module._lv_draw_rect_dsc_set_outline_width(this.ptr, outline_width)
-    }
-    outlinePad(){
-        return Module._lv_draw_rect_dsc_get_outline_pad(this.ptr)
-    }
-    setOutlinePad(outline_pad){
-        return Module._lv_draw_rect_dsc_set_outline_pad(this.ptr, outline_pad)
-    }
-    outlineOpa(){
-        return Module._lv_draw_rect_dsc_get_outline_opa(this.ptr)
-    }
-    setOutlineOpa(outline_opa){
-        return Module._lv_draw_rect_dsc_set_outline_opa(this.ptr, outline_opa)
-    }
-    shadowColor(){
-        return Module._lv_draw_rect_dsc_get_shadow_color(this.ptr)
-    }
-    setShadowColor(shadow_color){
-        return Module._lv_draw_rect_dsc_set_shadow_color(this.ptr, shadow_color)
-    }
-    shadowWidth(){
-        return Module._lv_draw_rect_dsc_get_shadow_width(this.ptr)
-    }
-    setShadowWidth(shadow_width){
-        return Module._lv_draw_rect_dsc_set_shadow_width(this.ptr, shadow_width)
-    }
-    shadowOfsX(){
-        return Module._lv_draw_rect_dsc_get_shadow_ofs_x(this.ptr)
-    }
-    setShadowOfsX(shadow_ofs_x){
-        return Module._lv_draw_rect_dsc_set_shadow_ofs_x(this.ptr, shadow_ofs_x)
-    }
-    shadowOfsY(){
-        return Module._lv_draw_rect_dsc_get_shadow_ofs_y(this.ptr)
-    }
-    setShadowOfsY(shadow_ofs_y){
-        return Module._lv_draw_rect_dsc_set_shadow_ofs_y(this.ptr, shadow_ofs_y)
-    }
-    shadowSpread(){
-        return Module._lv_draw_rect_dsc_get_shadow_spread(this.ptr)
-    }
-    setShadowSpread(shadow_spread){
-        return Module._lv_draw_rect_dsc_set_shadow_spread(this.ptr, shadow_spread)
-    }
-    shadowOpa(){
-        return Module._lv_draw_rect_dsc_get_shadow_opa(this.ptr)
-    }
-    setShadowOpa(shadow_opa){
-        return Module._lv_draw_rect_dsc_set_shadow_opa(this.ptr, shadow_opa)
-    }
-// AUTO GENERATE CODE END [DrawRectDsc METHODS] --------
-}
-
-class DrawLabelDsc extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_draw_label_dsc_create()
-    }
-// AUTO GENERATE CODE START [DrawLabelDsc METHODS] --------
-    font(){
-        return Module._lv_draw_label_dsc_get_font(this.ptr)
-    }
-    setFont(font){
-        return Module._lv_draw_label_dsc_set_font(this.ptr, font)
-    }
-    selStart(){
-        return Module._lv_draw_label_dsc_get_sel_start(this.ptr)
-    }
-    setSelStart(sel_start){
-        return Module._lv_draw_label_dsc_set_sel_start(this.ptr, sel_start)
-    }
-    selEnd(){
-        return Module._lv_draw_label_dsc_get_sel_end(this.ptr)
-    }
-    setSelEnd(sel_end){
-        return Module._lv_draw_label_dsc_set_sel_end(this.ptr, sel_end)
-    }
-    color(){
-        return Module._lv_draw_label_dsc_get_color(this.ptr)
-    }
-    setColor(color){
-        return Module._lv_draw_label_dsc_set_color(this.ptr, color)
-    }
-    selColor(){
-        return Module._lv_draw_label_dsc_get_sel_color(this.ptr)
-    }
-    setSelColor(sel_color){
-        return Module._lv_draw_label_dsc_set_sel_color(this.ptr, sel_color)
-    }
-    selBgColor(){
-        return Module._lv_draw_label_dsc_get_sel_bg_color(this.ptr)
-    }
-    setSelBgColor(sel_bg_color){
-        return Module._lv_draw_label_dsc_set_sel_bg_color(this.ptr, sel_bg_color)
-    }
-    lineSpace(){
-        return Module._lv_draw_label_dsc_get_line_space(this.ptr)
-    }
-    setLineSpace(line_space){
-        return Module._lv_draw_label_dsc_set_line_space(this.ptr, line_space)
-    }
-    letterSpace(){
-        return Module._lv_draw_label_dsc_get_letter_space(this.ptr)
-    }
-    setLetterSpace(letter_space){
-        return Module._lv_draw_label_dsc_set_letter_space(this.ptr, letter_space)
-    }
-    ofsX(){
-        return Module._lv_draw_label_dsc_get_ofs_x(this.ptr)
-    }
-    setOfsX(ofs_x){
-        return Module._lv_draw_label_dsc_set_ofs_x(this.ptr, ofs_x)
-    }
-    ofsY(){
-        return Module._lv_draw_label_dsc_get_ofs_y(this.ptr)
-    }
-    setOfsY(ofs_y){
-        return Module._lv_draw_label_dsc_set_ofs_y(this.ptr, ofs_y)
-    }
-    opa(){
-        return Module._lv_draw_label_dsc_get_opa(this.ptr)
-    }
-    setOpa(opa){
-        return Module._lv_draw_label_dsc_set_opa(this.ptr, opa)
-    }
-    bidiDir(){
-        return Module._lv_draw_label_dsc_get_bidi_dir(this.ptr)
-    }
-    setBidiDir(bidi_dir){
-        return Module._lv_draw_label_dsc_set_bidi_dir(this.ptr, bidi_dir)
-    }
-    align(){
-        return Module._lv_draw_label_dsc_get_align(this.ptr)
-    }
-    setAlign(align){
-        return Module._lv_draw_label_dsc_set_align(this.ptr, align)
-    }
-    flag(){
-        return Module._lv_draw_label_dsc_get_flag(this.ptr)
-    }
-    setFlag(flag){
-        return Module._lv_draw_label_dsc_set_flag(this.ptr, flag)
-    }
-    decor(){
-        return Module._lv_draw_label_dsc_get_decor(this.ptr)
-    }
-    setDecor(decor){
-        return Module._lv_draw_label_dsc_set_decor(this.ptr, decor)
-    }
-    blendMode(){
-        return Module._lv_draw_label_dsc_get_blend_mode(this.ptr)
-    }
-    setBlendMode(blend_mode){
-        return Module._lv_draw_label_dsc_set_blend_mode(this.ptr, blend_mode)
-    }
-// AUTO GENERATE CODE END [DrawLabelDsc METHODS] --------
-}
-
-class DrawLabelHint extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_draw_label_hint_create()
-    }
-// AUTO GENERATE CODE START [DrawLabelHint METHODS] --------
-    lineStart(){
-        return Module._lv_draw_label_hint_get_line_start(this.ptr)
-    }
-    setLineStart(line_start){
-        return Module._lv_draw_label_hint_set_line_start(this.ptr, line_start)
-    }
-    y(){
-        return Module._lv_draw_label_hint_get_y(this.ptr)
-    }
-    setY(y){
-        return Module._lv_draw_label_hint_set_y(this.ptr, y)
-    }
-    coordY(){
-        return Module._lv_draw_label_hint_get_coord_y(this.ptr)
-    }
-    setCoordY(coord_y){
-        return Module._lv_draw_label_hint_set_coord_y(this.ptr, coord_y)
-    }
-// AUTO GENERATE CODE END [DrawLabelHint METHODS] --------
-}
-
-class DrawImgDsc extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_draw_img_dsc_create()
-    }
-// AUTO GENERATE CODE START [DrawImgDsc METHODS] --------
-    angle(){
-        return Module._lv_draw_img_dsc_get_angle(this.ptr)
-    }
-    setAngle(angle){
-        return Module._lv_draw_img_dsc_set_angle(this.ptr, angle)
-    }
-    zoom(){
-        return Module._lv_draw_img_dsc_get_zoom(this.ptr)
-    }
-    setZoom(zoom){
-        return Module._lv_draw_img_dsc_set_zoom(this.ptr, zoom)
-    }
-    pivot(){
-        return Module._lv_draw_img_dsc_get_pivot(this.ptr)
-    }
-    setPivot(pivot){
-        return Module._lv_draw_img_dsc_set_pivot(this.ptr, pivot)
-    }
-    recolor(){
-        return Module._lv_draw_img_dsc_get_recolor(this.ptr)
-    }
-    setRecolor(recolor){
-        return Module._lv_draw_img_dsc_set_recolor(this.ptr, recolor)
-    }
-    recolorOpa(){
-        return Module._lv_draw_img_dsc_get_recolor_opa(this.ptr)
-    }
-    setRecolorOpa(recolor_opa){
-        return Module._lv_draw_img_dsc_set_recolor_opa(this.ptr, recolor_opa)
-    }
-    opa(){
-        return Module._lv_draw_img_dsc_get_opa(this.ptr)
-    }
-    setOpa(opa){
-        return Module._lv_draw_img_dsc_set_opa(this.ptr, opa)
-    }
-    blendMode(){
-        return Module._lv_draw_img_dsc_get_blend_mode(this.ptr)
-    }
-    setBlendMode(blend_mode){
-        return Module._lv_draw_img_dsc_set_blend_mode(this.ptr, blend_mode)
-    }
-    frameId(){
-        return Module._lv_draw_img_dsc_get_frame_id(this.ptr)
-    }
-    setFrameId(frame_id){
-        return Module._lv_draw_img_dsc_set_frame_id(this.ptr, frame_id)
-    }
-    antialias(){
-        return Module._lv_draw_img_dsc_get_antialias(this.ptr)
-    }
-    setAntialias(antialias){
-        return Module._lv_draw_img_dsc_set_antialias(this.ptr, antialias)
-    }
-// AUTO GENERATE CODE END [DrawImgDsc METHODS] --------
-}
-
-class DrawLineDsc extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_draw_line_dsc_create()
-    }
-// AUTO GENERATE CODE START [DrawLineDsc METHODS] --------
-    color(){
-        return Module._lv_draw_line_dsc_get_color(this.ptr)
-    }
-    setColor(color){
-        return Module._lv_draw_line_dsc_set_color(this.ptr, color)
-    }
-    width(){
-        return Module._lv_draw_line_dsc_get_width(this.ptr)
-    }
-    setWidth(width){
-        return Module._lv_draw_line_dsc_set_width(this.ptr, width)
-    }
-    dashWidth(){
-        return Module._lv_draw_line_dsc_get_dash_width(this.ptr)
-    }
-    setDashWidth(dash_width){
-        return Module._lv_draw_line_dsc_set_dash_width(this.ptr, dash_width)
-    }
-    dashGap(){
-        return Module._lv_draw_line_dsc_get_dash_gap(this.ptr)
-    }
-    setDashGap(dash_gap){
-        return Module._lv_draw_line_dsc_set_dash_gap(this.ptr, dash_gap)
-    }
-    opa(){
-        return Module._lv_draw_line_dsc_get_opa(this.ptr)
-    }
-    setOpa(opa){
-        return Module._lv_draw_line_dsc_set_opa(this.ptr, opa)
-    }
-    blendMode(){
-        return Module._lv_draw_line_dsc_get_blend_mode(this.ptr)
-    }
-    setBlendMode(blend_mode){
-        return Module._lv_draw_line_dsc_set_blend_mode(this.ptr, blend_mode)
-    }
-    roundStart(){
-        return Module._lv_draw_line_dsc_get_round_start(this.ptr)
-    }
-    setRoundStart(round_start){
-        return Module._lv_draw_line_dsc_set_round_start(this.ptr, round_start)
-    }
-    roundEnd(){
-        return Module._lv_draw_line_dsc_get_round_end(this.ptr)
-    }
-    setRoundEnd(round_end){
-        return Module._lv_draw_line_dsc_set_round_end(this.ptr, round_end)
-    }
-    rawEnd(){
-        return Module._lv_draw_line_dsc_get_raw_end(this.ptr)
-    }
-    setRawEnd(raw_end){
-        return Module._lv_draw_line_dsc_set_raw_end(this.ptr, raw_end)
-    }
-// AUTO GENERATE CODE END [DrawLineDsc METHODS] --------
-}
-
-class DrawArcDsc extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_draw_arc_dsc_create()
-    }
-// AUTO GENERATE CODE START [DrawArcDsc METHODS] --------
-    color(){
-        return Module._lv_draw_arc_dsc_get_color(this.ptr)
-    }
-    setColor(color){
-        return Module._lv_draw_arc_dsc_set_color(this.ptr, color)
-    }
-    width(){
-        return Module._lv_draw_arc_dsc_get_width(this.ptr)
-    }
-    setWidth(width){
-        return Module._lv_draw_arc_dsc_set_width(this.ptr, width)
-    }
-    imgSrc(){
-        return Module._lv_draw_arc_dsc_get_img_src(this.ptr)
-    }
-    setImgSrc(img_src){
-        return Module._lv_draw_arc_dsc_set_img_src(this.ptr, img_src)
-    }
-    opa(){
-        return Module._lv_draw_arc_dsc_get_opa(this.ptr)
-    }
-    setOpa(opa){
-        return Module._lv_draw_arc_dsc_set_opa(this.ptr, opa)
-    }
-    blendMode(){
-        return Module._lv_draw_arc_dsc_get_blend_mode(this.ptr)
-    }
-    setBlendMode(blend_mode){
-        return Module._lv_draw_arc_dsc_set_blend_mode(this.ptr, blend_mode)
-    }
-    rounded(){
-        return Module._lv_draw_arc_dsc_get_rounded(this.ptr)
-    }
-    setRounded(rounded){
-        return Module._lv_draw_arc_dsc_set_rounded(this.ptr, rounded)
-    }
-// AUTO GENERATE CODE END [DrawArcDsc METHODS] --------
-}
-
-class ObjDrawPartDsc extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_obj_draw_part_dsc_create()
-    }
-// AUTO GENERATE CODE START [ObjDrawPartDsc METHODS] --------
-    clipArea(){
-        return Module._lv_obj_draw_part_dsc_get_clip_area(this.ptr)
-    }
-    setClipArea(clip_area){
-        return Module._lv_obj_draw_part_dsc_set_clip_area(this.ptr, clip_area)
-    }
-    classP(){
-        return Module._lv_obj_draw_part_dsc_get_class_p(this.ptr)
-    }
-    setClassP(class_p){
-        return Module._lv_obj_draw_part_dsc_set_class_p(this.ptr, class_p)
-    }
-    type(){
-        return Module._lv_obj_draw_part_dsc_get_type(this.ptr)
-    }
-    setType(type){
-        return Module._lv_obj_draw_part_dsc_set_type(this.ptr, type)
-    }
-    drawArea(){
-        return Module._lv_obj_draw_part_dsc_get_draw_area(this.ptr)
-    }
-    setDrawArea(draw_area){
-        return Module._lv_obj_draw_part_dsc_set_draw_area(this.ptr, draw_area)
-    }
-    rectDsc(){
-        return Module._lv_obj_draw_part_dsc_get_rect_dsc(this.ptr)
-    }
-    setRectDsc(rect_dsc){
-        return Module._lv_obj_draw_part_dsc_set_rect_dsc(this.ptr, rect_dsc)
-    }
-    labelDsc(){
-        return Module._lv_obj_draw_part_dsc_get_label_dsc(this.ptr)
-    }
-    setLabelDsc(label_dsc){
-        return Module._lv_obj_draw_part_dsc_set_label_dsc(this.ptr, label_dsc)
-    }
-    lineDsc(){
-        return Module._lv_obj_draw_part_dsc_get_line_dsc(this.ptr)
-    }
-    setLineDsc(line_dsc){
-        return Module._lv_obj_draw_part_dsc_set_line_dsc(this.ptr, line_dsc)
-    }
-    imgDsc(){
-        return Module._lv_obj_draw_part_dsc_get_img_dsc(this.ptr)
-    }
-    setImgDsc(img_dsc){
-        return Module._lv_obj_draw_part_dsc_set_img_dsc(this.ptr, img_dsc)
-    }
-    arcDsc(){
-        return Module._lv_obj_draw_part_dsc_get_arc_dsc(this.ptr)
-    }
-    setArcDsc(arc_dsc){
-        return Module._lv_obj_draw_part_dsc_set_arc_dsc(this.ptr, arc_dsc)
-    }
-    p1(){
-        return Module._lv_obj_draw_part_dsc_get_p1(this.ptr)
-    }
-    setP1(p1){
-        return Module._lv_obj_draw_part_dsc_set_p1(this.ptr, p1)
-    }
-    p2(){
-        return Module._lv_obj_draw_part_dsc_get_p2(this.ptr)
-    }
-    setP2(p2){
-        return Module._lv_obj_draw_part_dsc_set_p2(this.ptr, p2)
-    }
-    text(){
-        return Module._lv_obj_draw_part_dsc_get_text(this.ptr)
-    }
-    setText(text){
-        return Module._lv_obj_draw_part_dsc_set_text(this.ptr, text)
-    }
-    textLength(){
-        return Module._lv_obj_draw_part_dsc_get_text_length(this.ptr)
-    }
-    setTextLength(text_length){
-        return Module._lv_obj_draw_part_dsc_set_text_length(this.ptr, text_length)
-    }
-    part(){
-        return Module._lv_obj_draw_part_dsc_get_part(this.ptr)
-    }
-    setPart(part){
-        return Module._lv_obj_draw_part_dsc_set_part(this.ptr, part)
-    }
-    id(){
-        return Module._lv_obj_draw_part_dsc_get_id(this.ptr)
-    }
-    setId(id){
-        return Module._lv_obj_draw_part_dsc_set_id(this.ptr, id)
-    }
-    radius(){
-        return Module._lv_obj_draw_part_dsc_get_radius(this.ptr)
-    }
-    setRadius(radius){
-        return Module._lv_obj_draw_part_dsc_set_radius(this.ptr, radius)
-    }
-    value(){
-        return Module._lv_obj_draw_part_dsc_get_value(this.ptr)
-    }
-    setValue(value){
-        return Module._lv_obj_draw_part_dsc_set_value(this.ptr, value)
-    }
-    subPartPtr(){
-        return Module._lv_obj_draw_part_dsc_get_sub_part_ptr(this.ptr)
-    }
-    setSubPartPtr(sub_part_ptr){
-        return Module._lv_obj_draw_part_dsc_set_sub_part_ptr(this.ptr, sub_part_ptr)
-    }
-// AUTO GENERATE CODE END [ObjDrawPartDsc METHODS] --------
-}
-
-class ObjClass extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_obj_class_create()
-    }
-// AUTO GENERATE CODE START [ObjClass METHODS] --------
-    baseClass(){
+    baseClass() {
         return Module._lv_obj_class_get_base_class(this.ptr)
     }
-    setBaseClass(base_class){
-        return Module._lv_obj_class_set_base_class(this.ptr, base_class)
+    setBaseClass(base_class) {
+        Module._lv_obj_class_set_base_class(this.ptr, base_class)
     }
-    constructorCb(){
+    constructorCb() {
         return Module._lv_obj_class_get_constructor_cb(this.ptr)
     }
-    setConstructorCb(constructor_cb){
-        return Module._lv_obj_class_set_constructor_cb(this.ptr, constructor_cb)
+    setConstructorCb(constructor_cb) {
+        Module._lv_obj_class_set_constructor_cb(this.ptr, constructor_cb)
     }
-    destructorCb(){
+    destructorCb() {
         return Module._lv_obj_class_get_destructor_cb(this.ptr)
     }
-    setDestructorCb(destructor_cb){
-        return Module._lv_obj_class_set_destructor_cb(this.ptr, destructor_cb)
+    setDestructorCb(destructor_cb) {
+        Module._lv_obj_class_set_destructor_cb(this.ptr, destructor_cb)
     }
-    userData(){
+    userData() {
         return Module._lv_obj_class_get_user_data(this.ptr)
     }
-    setUserData(user_data){
-        return Module._lv_obj_class_set_user_data(this.ptr, user_data)
+    setUserData(user_data) {
+        Module._lv_obj_class_set_user_data(this.ptr, user_data)
     }
-    eventCb(){
+    eventCb() {
         return Module._lv_obj_class_get_event_cb(this.ptr)
     }
-    setEventCb(event_cb){
-        return Module._lv_obj_class_set_event_cb(this.ptr, event_cb)
+    setEventCb(event_cb) {
+        Module._lv_obj_class_set_event_cb(this.ptr, event_cb)
     }
-    widthDef(){
+    widthDef() {
         return Module._lv_obj_class_get_width_def(this.ptr)
     }
-    setWidthDef(width_def){
-        return Module._lv_obj_class_set_width_def(this.ptr, width_def)
+    setWidthDef(width_def) {
+        Module._lv_obj_class_set_width_def(this.ptr, width_def)
     }
-    heightDef(){
+    heightDef() {
         return Module._lv_obj_class_get_height_def(this.ptr)
     }
-    setHeightDef(height_def){
-        return Module._lv_obj_class_set_height_def(this.ptr, height_def)
+    setHeightDef(height_def) {
+        Module._lv_obj_class_set_height_def(this.ptr, height_def)
     }
-    editable(){
+    editable() {
         return Module._lv_obj_class_get_editable(this.ptr)
     }
-    setEditable(editable){
-        return Module._lv_obj_class_set_editable(this.ptr, editable)
+    setEditable(editable) {
+        Module._lv_obj_class_set_editable(this.ptr, editable)
     }
-    groupDef(){
+    groupDef() {
         return Module._lv_obj_class_get_group_def(this.ptr)
     }
-    setGroupDef(group_def){
-        return Module._lv_obj_class_set_group_def(this.ptr, group_def)
+    setGroupDef(group_def) {
+        Module._lv_obj_class_set_group_def(this.ptr, group_def)
     }
-    instanceSize(){
+    instanceSize() {
         return Module._lv_obj_class_get_instance_size(this.ptr)
     }
-    setInstanceSize(instance_size){
-        return Module._lv_obj_class_set_instance_size(this.ptr, instance_size)
+    setInstanceSize(instance_size) {
+        Module._lv_obj_class_set_instance_size(this.ptr, instance_size)
     }
-// AUTO GENERATE CODE END [ObjClass METHODS] --------
 }
-
-class Event extends WAMSObject {
+class IndevDrv extends WASMObject {
     constructor() {
         super()
-        this.ptr = Module._lv_event_create()
+        this.ptr=Module._lv_indev_drv_create()
     }
-// AUTO GENERATE CODE START [Event METHODS] --------
-    setTarget(target){
-        return Module._lv_event_set_target(this.ptr, target)
+    type() {
+        return constMapping.INDEV_TYPE.name(Module._lv_indev_drv_get_type(this.ptr))
     }
-    setCurrentTarget(current_target){
-        return Module._lv_event_set_current_target(this.ptr, current_target)
+    setType(type) {
+        Module._lv_indev_drv_set_type(this.ptr, constMapping.INDEV_TYPE.value(type))
     }
-    setCode(code){
-        return Module._lv_event_set_code(this.ptr, code)
+    readCb() {
+        return Module._lv_indev_drv_get_read_cb(this.ptr)
     }
-    setUserData(user_data){
-        return Module._lv_event_set_user_data(this.ptr, user_data)
+    setReadCb(read_cb) {
+        Module._lv_indev_drv_set_read_cb(this.ptr, read_cb)
     }
-    setParam(param){
-        return Module._lv_event_set_param(this.ptr, param)
+    feedbackCb() {
+        return Module._lv_indev_drv_get_feedback_cb(this.ptr)
     }
-    prev(){
-        return Module._lv_event_get_prev(this.ptr)
+    setFeedbackCb(feedback_cb) {
+        Module._lv_indev_drv_set_feedback_cb(this.ptr, feedback_cb)
     }
-    setPrev(prev){
-        return Module._lv_event_set_prev(this.ptr, prev)
+    userData() {
+        return Module._lv_indev_drv_get_user_data(this.ptr)
     }
-    deleted(){
-        return Module._lv_event_get_deleted(this.ptr)
+    setUserData(user_data) {
+        Module._lv_indev_drv_set_user_data(this.ptr, user_data)
     }
-    setDeleted(deleted){
-        return Module._lv_event_set_deleted(this.ptr, deleted)
+    disp() {
+        return Module._lv_indev_drv_get_disp(this.ptr)
     }
-// AUTO GENERATE CODE END [Event METHODS] --------
+    setDisp(disp) {
+        Module._lv_indev_drv_set_disp(this.ptr, disp)
+    }
+    readTimer() {
+        return Module._lv_indev_drv_get_read_timer(this.ptr)
+    }
+    setReadTimer(read_timer) {
+        Module._lv_indev_drv_set_read_timer(this.ptr, read_timer)
+    }
+    scrollLimit() {
+        return Module._lv_indev_drv_get_scroll_limit(this.ptr)
+    }
+    setScrollLimit(scroll_limit) {
+        Module._lv_indev_drv_set_scroll_limit(this.ptr, scroll_limit)
+    }
+    scrollThrow() {
+        return Module._lv_indev_drv_get_scroll_throw(this.ptr)
+    }
+    setScrollThrow(scroll_throw) {
+        Module._lv_indev_drv_set_scroll_throw(this.ptr, scroll_throw)
+    }
+    gestureMinVelocity() {
+        return Module._lv_indev_drv_get_gesture_min_velocity(this.ptr)
+    }
+    setGestureMinVelocity(gesture_min_velocity) {
+        Module._lv_indev_drv_set_gesture_min_velocity(this.ptr, gesture_min_velocity)
+    }
+    gestureLimit() {
+        return Module._lv_indev_drv_get_gesture_limit(this.ptr)
+    }
+    setGestureLimit(gesture_limit) {
+        Module._lv_indev_drv_set_gesture_limit(this.ptr, gesture_limit)
+    }
+    longPressTime() {
+        return Module._lv_indev_drv_get_long_press_time(this.ptr)
+    }
+    setLongPressTime(long_press_time) {
+        Module._lv_indev_drv_set_long_press_time(this.ptr, long_press_time)
+    }
+    longPressRepeatTime() {
+        return Module._lv_indev_drv_get_long_press_repeat_time(this.ptr)
+    }
+    setLongPressRepeatTime(long_press_repeat_time) {
+        Module._lv_indev_drv_set_long_press_repeat_time(this.ptr, long_press_repeat_time)
+    }
+    init() {
+        Module._lv_indev_drv_init(this.ptr)
+    }
+    register() {
+        return Module._lv_indev_drv_register(this.ptr)
+    }
 }
-
-class HitTestInfo extends WAMSObject {
+class IndevData extends WASMObject {
     constructor() {
         super()
-        this.ptr = Module._lv_hit_test_info_create()
+        this.ptr=Module._lv_indev_data_create()
     }
-// AUTO GENERATE CODE START [HitTestInfo METHODS] --------
-    point(){
-        return Module._lv_hit_test_info_get_point(this.ptr)
+    point() {
+        return Module._lv_indev_data_get_point(this.ptr)
     }
-    setPoint(point){
-        return Module._lv_hit_test_info_set_point(this.ptr, point)
+    setPoint(point) {
+        Module._lv_indev_data_set_point(this.ptr, point)
     }
-    res(){
-        return Module._lv_hit_test_info_get_res(this.ptr)
+    key() {
+        return Module._lv_indev_data_get_key(this.ptr)
     }
-    setRes(res){
-        return Module._lv_hit_test_info_set_res(this.ptr, res)
+    setKey(key) {
+        Module._lv_indev_data_set_key(this.ptr, key)
     }
-// AUTO GENERATE CODE END [HitTestInfo METHODS] --------
+    btnId() {
+        return Module._lv_indev_data_get_btn_id(this.ptr)
+    }
+    setBtnId(btn_id) {
+        Module._lv_indev_data_set_btn_id(this.ptr, btn_id)
+    }
+    encDiff() {
+        return Module._lv_indev_data_get_enc_diff(this.ptr)
+    }
+    setEncDiff(enc_diff) {
+        Module._lv_indev_data_set_enc_diff(this.ptr, enc_diff)
+    }
+    state() {
+        return constMapping.INDEV_STATE.name(Module._lv_indev_data_get_state(this.ptr))
+    }
+    setState(state) {
+        Module._lv_indev_data_set_state(this.ptr, constMapping.INDEV_STATE.value(state))
+    }
+    continueReading() {
+        return Module.ccall("lv_indev_data_get_continue_reading", "bool", ["number"], [this.ptr])
+    }
+    setContinueReading(continue_reading) {
+        Module._lv_indev_data_set_continue_reading(this.ptr, continue_reading)
+    }
+}
+// AUTO GENERATE CODE END [LVGL.JS STRUCTS] --------
+
+
+const constMapping = {
+// AUTO GENERATE CODE START [LVGL.JS CONST MAPPING] --------
+    RES : {
+        value(name) {
+            return Module.ccall("lv_res_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_res_to_name", "string", ["number"], [value])
+        }
+    } ,
+    ANIM_ENABLE : {
+        value(name) {
+            return Module.ccall("lv_anim_enable_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_anim_enable_to_name", "string", ["number"], [value])
+        }
+    } ,
+    PALETTE : {
+        value(name) {
+            return Module.ccall("lv_palette_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_palette_to_name", "string", ["number"], [value])
+        }
+    } ,
+    ALIGN : {
+        value(name) {
+            return Module.ccall("lv_align_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_align_to_name", "string", ["number"], [value])
+        }
+    } ,
+    DIR : {
+        value(name) {
+            return Module.ccall("lv_dir_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_dir_to_name", "string", ["number"], [value])
+        }
+    } ,
+    IMG_CF : {
+        value(name) {
+            return Module.ccall("lv_img_cf_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_img_cf_to_name", "string", ["number"], [value])
+        }
+    } ,
+    DISP_ROT : {
+        value(name) {
+            return Module.ccall("lv_disp_rot_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_disp_rot_to_name", "string", ["number"], [value])
+        }
+    } ,
+    INDEV_TYPE : {
+        value(name) {
+            return Module.ccall("lv_indev_type_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_indev_type_to_name", "string", ["number"], [value])
+        }
+    } ,
+    INDEV_STATE : {
+        value(name) {
+            return Module.ccall("lv_indev_state_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_indev_state_to_name", "string", ["number"], [value])
+        }
+    } ,
+    FONT_SUBPX : {
+        value(name) {
+            return Module.ccall("lv_font_subpx_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_font_subpx_to_name", "string", ["number"], [value])
+        }
+    } ,
+    TEXT_FLAG : {
+        value(name) {
+            return Module.ccall("lv_text_flag_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_text_flag_to_name", "string", ["number"], [value])
+        }
+    } ,
+    TEXT_CMD_STATE : {
+        value(name) {
+            return Module.ccall("lv_text_cmd_state_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_text_cmd_state_to_name", "string", ["number"], [value])
+        }
+    } ,
+    TEXT_ALIGN : {
+        value(name) {
+            return Module.ccall("lv_text_align_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_text_align_to_name", "string", ["number"], [value])
+        }
+    } ,
+    BASE_DIR : {
+        value(name) {
+            return Module.ccall("lv_base_dir_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_base_dir_to_name", "string", ["number"], [value])
+        }
+    } ,
+    BLEND_MODE : {
+        value(name) {
+            return Module.ccall("lv_blend_mode_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_blend_mode_to_name", "string", ["number"], [value])
+        }
+    } ,
+    TEXT_DECOR : {
+        value(name) {
+            return Module.ccall("lv_text_decor_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_text_decor_to_name", "string", ["number"], [value])
+        }
+    } ,
+    BORDER_SIDE : {
+        value(name) {
+            return Module.ccall("lv_border_side_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_border_side_to_name", "string", ["number"], [value])
+        }
+    } ,
+    GRAD_DIR : {
+        value(name) {
+            return Module.ccall("lv_grad_dir_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_grad_dir_to_name", "string", ["number"], [value])
+        }
+    } ,
+    STYLE_PROP : {
+        value(name) {
+            return Module.ccall("lv_style_prop_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_style_prop_to_name", "string", ["number"], [value])
+        }
+    } ,
+    STATE : {
+        value(name) {
+            return Module.ccall("lv_state_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_state_to_name", "string", ["number"], [value])
+        }
+    } ,
+    PART : {
+        value(name) {
+            return Module.ccall("lv_part_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_part_to_name", "string", ["number"], [value])
+        }
+    } ,
+    OBJ_FLAG : {
+        value(name) {
+            return Module.ccall("lv_obj_flag_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_obj_flag_to_name", "string", ["number"], [value])
+        }
+    } ,
+    OBJ_DRAW_PART_TYPE : {
+        value(name) {
+            return Module.ccall("lv_obj_draw_part_type_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_obj_draw_part_type_to_name", "string", ["number"], [value])
+        }
+    } ,
+    OBJ_TREE_WALK_RES : {
+        value(name) {
+            return Module.ccall("lv_obj_tree_walk_res_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_obj_tree_walk_res_to_name", "string", ["number"], [value])
+        }
+    } ,
+    SCROLLBAR_MODE : {
+        value(name) {
+            return Module.ccall("lv_scrollbar_mode_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_scrollbar_mode_to_name", "string", ["number"], [value])
+        }
+    } ,
+    SCROLL_SNAP : {
+        value(name) {
+            return Module.ccall("lv_scroll_snap_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_scroll_snap_to_name", "string", ["number"], [value])
+        }
+    } ,
+    _STYLE_STATE_CMP : {
+        value(name) {
+            return Module.ccall("lv__style_state_cmp_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv__style_state_cmp_to_name", "string", ["number"], [value])
+        }
+    } ,
+    FS_RES : {
+        value(name) {
+            return Module.ccall("lv_fs_res_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_fs_res_to_name", "string", ["number"], [value])
+        }
+    } ,
+    FS_MODE : {
+        value(name) {
+            return Module.ccall("lv_fs_mode_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_fs_mode_to_name", "string", ["number"], [value])
+        }
+    } ,
+    FS_WHENCE : {
+        value(name) {
+            return Module.ccall("lv_fs_whence_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_fs_whence_to_name", "string", ["number"], [value])
+        }
+    } ,
+    IMG_SRC : {
+        value(name) {
+            return Module.ccall("lv_img_src_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_img_src_to_name", "string", ["number"], [value])
+        }
+    } ,
+    DRAW_MASK_RES : {
+        value(name) {
+            return Module.ccall("lv_draw_mask_res_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_draw_mask_res_to_name", "string", ["number"], [value])
+        }
+    } ,
+    DRAW_MASK_TYPE : {
+        value(name) {
+            return Module.ccall("lv_draw_mask_type_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_draw_mask_type_to_name", "string", ["number"], [value])
+        }
+    } ,
+    DRAW_MASK_XCB : {
+        value(name) {
+            return Module.ccall("lv_draw_mask_xcb_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_draw_mask_xcb_to_name", "string", ["number"], [value])
+        }
+    } ,
+    COVER_RES : {
+        value(name) {
+            return Module.ccall("lv_cover_res_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_cover_res_to_name", "string", ["number"], [value])
+        }
+    } ,
+    OBJ_CLASS_EDITABLE : {
+        value(name) {
+            return Module.ccall("lv_obj_class_editable_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_obj_class_editable_to_name", "string", ["number"], [value])
+        }
+    } ,
+    OBJ_CLASS_GROUP_DEF : {
+        value(name) {
+            return Module.ccall("lv_obj_class_group_def_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_obj_class_group_def_to_name", "string", ["number"], [value])
+        }
+    } ,
+    EVENT_CODE : {
+        value(name) {
+            return Module.ccall("lv_event_code_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_event_code_to_name", "string", ["number"], [value])
+        }
+    } ,
+    KEY : {
+        value(name) {
+            return Module.ccall("lv_key_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_key_to_name", "string", ["number"], [value])
+        }
+    } ,
+    GROUP_REFOCUS_POLICY : {
+        value(name) {
+            return Module.ccall("lv_group_refocus_policy_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_group_refocus_policy_to_name", "string", ["number"], [value])
+        }
+    } ,
+    SCR_LOAD_ANIM : {
+        value(name) {
+            return Module.ccall("lv_scr_load_anim_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_scr_load_anim_to_name", "string", ["number"], [value])
+        }
+    } ,
+    FONT_FMT_TXT_CMAP_TYPE : {
+        value(name) {
+            return Module.ccall("lv_font_fmt_txt_cmap_type_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_font_fmt_txt_cmap_type_to_name", "string", ["number"], [value])
+        }
+    } ,
+    FONT_FMT_TXT_BITMAP_FORMAT : {
+        value(name) {
+            return Module.ccall("lv_font_fmt_txt_bitmap_format_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_font_fmt_txt_bitmap_format_to_name", "string", ["number"], [value])
+        }
+    } ,
+    ARC_MODE : {
+        value(name) {
+            return Module.ccall("lv_arc_mode_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_arc_mode_to_name", "string", ["number"], [value])
+        }
+    } ,
+    ARC_DRAW_PART_TYPE : {
+        value(name) {
+            return Module.ccall("lv_arc_draw_part_type_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_arc_draw_part_type_to_name", "string", ["number"], [value])
+        }
+    } ,
+    IMG_SIZE_MODE : {
+        value(name) {
+            return Module.ccall("lv_img_size_mode_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_img_size_mode_to_name", "string", ["number"], [value])
+        }
+    } ,
+    LABEL_LONG_MODE : {
+        value(name) {
+            return Module.ccall("lv_label_long_mode_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_label_long_mode_to_name", "string", ["number"], [value])
+        }
+    } ,
+    TABLE_CELL_CTRL : {
+        value(name) {
+            return Module.ccall("lv_table_cell_ctrl_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_table_cell_ctrl_to_name", "string", ["number"], [value])
+        }
+    } ,
+    TABLE_DRAW_PART_TYPE : {
+        value(name) {
+            return Module.ccall("lv_table_draw_part_type_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_table_draw_part_type_to_name", "string", ["number"], [value])
+        }
+    } ,
+    CHECKBOX_DRAW_PART_TYPE : {
+        value(name) {
+            return Module.ccall("lv_checkbox_draw_part_type_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_checkbox_draw_part_type_to_name", "string", ["number"], [value])
+        }
+    } ,
+    BAR_MODE : {
+        value(name) {
+            return Module.ccall("lv_bar_mode_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_bar_mode_to_name", "string", ["number"], [value])
+        }
+    } ,
+    BAR_DRAW_PART_TYPE : {
+        value(name) {
+            return Module.ccall("lv_bar_draw_part_type_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_bar_draw_part_type_to_name", "string", ["number"], [value])
+        }
+    } ,
+    SLIDER_MODE : {
+        value(name) {
+            return Module.ccall("lv_slider_mode_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_slider_mode_to_name", "string", ["number"], [value])
+        }
+    } ,
+    SLIDER_DRAW_PART_TYPE : {
+        value(name) {
+            return Module.ccall("lv_slider_draw_part_type_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_slider_draw_part_type_to_name", "string", ["number"], [value])
+        }
+    } ,
+    BTNMATRIX_CTRL : {
+        value(name) {
+            return Module.ccall("lv_btnmatrix_ctrl_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_btnmatrix_ctrl_to_name", "string", ["number"], [value])
+        }
+    } ,
+    BTNMATRIX_DRAW_PART_TYPE : {
+        value(name) {
+            return Module.ccall("lv_btnmatrix_draw_part_type_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_btnmatrix_draw_part_type_to_name", "string", ["number"], [value])
+        }
+    } ,
+    ROLLER_MODE : {
+        value(name) {
+            return Module.ccall("lv_roller_mode_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_roller_mode_to_name", "string", ["number"], [value])
+        }
+    } ,
+    ANIMIMG_PART : {
+        value(name) {
+            return Module.ccall("lv_animimg_part_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_animimg_part_to_name", "string", ["number"], [value])
+        }
+    } ,
+    CHART_TYPE : {
+        value(name) {
+            return Module.ccall("lv_chart_type_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_chart_type_to_name", "string", ["number"], [value])
+        }
+    } ,
+    CHART_UPDATE_MODE : {
+        value(name) {
+            return Module.ccall("lv_chart_update_mode_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_chart_update_mode_to_name", "string", ["number"], [value])
+        }
+    } ,
+    CHART_AXIS : {
+        value(name) {
+            return Module.ccall("lv_chart_axis_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_chart_axis_to_name", "string", ["number"], [value])
+        }
+    } ,
+    CHART_DRAW_PART_TYPE : {
+        value(name) {
+            return Module.ccall("lv_chart_draw_part_type_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_chart_draw_part_type_to_name", "string", ["number"], [value])
+        }
+    } ,
+    KEYBOARD_MODE : {
+        value(name) {
+            return Module.ccall("lv_keyboard_mode_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_keyboard_mode_to_name", "string", ["number"], [value])
+        }
+    } ,
+    FLEX_ALIGN : {
+        value(name) {
+            return Module.ccall("lv_flex_align_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_flex_align_to_name", "string", ["number"], [value])
+        }
+    } ,
+    FLEX_FLOW : {
+        value(name) {
+            return Module.ccall("lv_flex_flow_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_flex_flow_to_name", "string", ["number"], [value])
+        }
+    } ,
+    METER_INDICATOR_TYPE : {
+        value(name) {
+            return Module.ccall("lv_meter_indicator_type_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_meter_indicator_type_to_name", "string", ["number"], [value])
+        }
+    } ,
+    METER_DRAW_PART_TYPE : {
+        value(name) {
+            return Module.ccall("lv_meter_draw_part_type_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_meter_draw_part_type_to_name", "string", ["number"], [value])
+        }
+    } ,
+    COLORWHEEL_MODE : {
+        value(name) {
+            return Module.ccall("lv_colorwheel_mode_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_colorwheel_mode_to_name", "string", ["number"], [value])
+        }
+    } ,
+    LED_DRAW_PART_TYPE : {
+        value(name) {
+            return Module.ccall("lv_led_draw_part_type_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_led_draw_part_type_to_name", "string", ["number"], [value])
+        }
+    } ,
+    IMGBTN_STATE : {
+        value(name) {
+            return Module.ccall("lv_imgbtn_state_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_imgbtn_state_to_name", "string", ["number"], [value])
+        }
+    } ,
+    SPAN_OVERFLOW : {
+        value(name) {
+            return Module.ccall("lv_span_overflow_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_span_overflow_to_name", "string", ["number"], [value])
+        }
+    } ,
+    SPAN_MODE : {
+        value(name) {
+            return Module.ccall("lv_span_mode_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_span_mode_to_name", "string", ["number"], [value])
+        }
+    } ,
+    GRID_ALIGN : {
+        value(name) {
+            return Module.ccall("lv_grid_align_to_value", "number", ["string"], [name])
+        } ,
+        name(value) {
+            return Module.ccall("lv_grid_align_to_name", "string", ["number"], [value])
+        }
+    } ,
+// AUTO GENERATE CODE END [LVGL.JS CONST MAPPING] --------
 }
 
-class Group extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_group_create()
-    }
-// AUTO GENERATE CODE START [Group METHODS] --------
-    objLl(){
-        return Module._lv_group_get_obj_ll(this.ptr)
-    }
-    setObjLl(obj_ll){
-        return Module._lv_group_set_obj_ll(this.ptr, obj_ll)
-    }
-    objFocus(){
-        return Module._lv_group_get_obj_focus(this.ptr)
-    }
-    setObjFocus(obj_focus){
-        return Module._lv_group_set_obj_focus(this.ptr, obj_focus)
-    }
-    userData(){
-        return Module._lv_group_get_user_data(this.ptr)
-    }
-    setUserData(user_data){
-        return Module._lv_group_set_user_data(this.ptr, user_data)
-    }
-    frozen(){
-        return Module._lv_group_get_frozen(this.ptr)
-    }
-    setFrozen(frozen){
-        return Module._lv_group_set_frozen(this.ptr, frozen)
-    }
-    refocusPolicy(){
-        return Module._lv_group_get_refocus_policy(this.ptr)
-    }
-// AUTO GENERATE CODE END [Group METHODS] --------
+
+IndevData.prototype.x = function() {
+    return Module._lv_indev_data_get_point_x(this.ptr)
+}
+IndevData.prototype.setX = function(x) {
+    Module._lv_indev_data_set_point_x(this.ptr,x)
+}
+IndevData.prototype.y = function() {
+    return Module._lv_indev_data_get_point_y(this.ptr)
+}
+IndevData.prototype.setY = function(y) {
+    Module._lv_indev_data_set_point_y(this.ptr,y)
 }
 
-class _ObjSpecAttr extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv__obj_spec_attr_create()
+let SizeContent = -1
+
+function size(val) {
+    if(typeof val=='string' && val[val.length-1]=='%') {
+        let _val = Math.round(val.substr(0,val.length-1))
+        if(isNaN(_val)) {
+            throw new Error ("invalid percent number: "+val)
+        }
+        val = Module._lv_coord_pct(_val)
     }
-// AUTO GENERATE CODE START [_ObjSpecAttr METHODS] --------
-    children(){
-        return Module.__lv_obj_spec_attr_get_children(this.ptr)
+    if(val==-1) {
+        val = SizeContent
     }
-    setChildren(children){
-        return Module.__lv_obj_spec_attr_set_children(this.ptr, children)
-    }
-    childCnt(){
-        return Module.__lv_obj_spec_attr_get_child_cnt(this.ptr)
-    }
-    setChildCnt(child_cnt){
-        return Module.__lv_obj_spec_attr_set_child_cnt(this.ptr, child_cnt)
-    }
-    groupP(){
-        return Module.__lv_obj_spec_attr_get_group_p(this.ptr)
-    }
-    setGroupP(group_p){
-        return Module.__lv_obj_spec_attr_set_group_p(this.ptr, group_p)
-    }
-    eventDsc(){
-        return Module.__lv_obj_spec_attr_get_event_dsc(this.ptr)
-    }
-    setEventDsc(event_dsc){
-        return Module.__lv_obj_spec_attr_set_event_dsc(this.ptr, event_dsc)
-    }
-    scroll(){
-        return Module.__lv_obj_spec_attr_get_scroll(this.ptr)
-    }
-    setScroll(scroll){
-        return Module.__lv_obj_spec_attr_set_scroll(this.ptr, scroll)
-    }
-    extClickPad(){
-        return Module.__lv_obj_spec_attr_get_ext_click_pad(this.ptr)
-    }
-    setExtClickPad(ext_click_pad){
-        return Module.__lv_obj_spec_attr_set_ext_click_pad(this.ptr, ext_click_pad)
-    }
-    extDrawSize(){
-        return Module.__lv_obj_spec_attr_get_ext_draw_size(this.ptr)
-    }
-    setExtDrawSize(ext_draw_size){
-        return Module.__lv_obj_spec_attr_set_ext_draw_size(this.ptr, ext_draw_size)
-    }
-    scrollbarMode(){
-        return Module.__lv_obj_spec_attr_get_scrollbar_mode(this.ptr)
-    }
-    setScrollbarMode(scrollbar_mode){
-        return Module.__lv_obj_spec_attr_set_scrollbar_mode(this.ptr, scrollbar_mode)
-    }
-    scrollSnapX(){
-        return Module.__lv_obj_spec_attr_get_scroll_snap_x(this.ptr)
-    }
-    setScrollSnapX(scroll_snap_x){
-        return Module.__lv_obj_spec_attr_set_scroll_snap_x(this.ptr, scroll_snap_x)
-    }
-    scrollSnapY(){
-        return Module.__lv_obj_spec_attr_get_scroll_snap_y(this.ptr)
-    }
-    setScrollSnapY(scroll_snap_y){
-        return Module.__lv_obj_spec_attr_set_scroll_snap_y(this.ptr, scroll_snap_y)
-    }
-    scrollDir(){
-        return Module.__lv_obj_spec_attr_get_scroll_dir(this.ptr)
-    }
-    setScrollDir(scroll_dir){
-        return Module.__lv_obj_spec_attr_set_scroll_dir(this.ptr, scroll_dir)
-    }
-    eventDscCnt(){
-        return Module.__lv_obj_spec_attr_get_event_dsc_cnt(this.ptr)
-    }
-    setEventDscCnt(event_dsc_cnt){
-        return Module.__lv_obj_spec_attr_set_event_dsc_cnt(this.ptr, event_dsc_cnt)
-    }
-// AUTO GENERATE CODE END [_ObjSpecAttr METHODS] --------
+    return val
 }
 
-class Theme extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_theme_create()
+// pad for beapi.lvgl
+Obj.prototype.show = function show() {
+    this.clearFlag("hidden")
+}
+Obj.prototype.hide = function hide() {
+    this.addFlag("hidden")
+}
+Obj.prototype.toggle = function hide() {
+    if(this.isVisible()) {
+        this.addFlag("hidden")
+        return false
     }
-// AUTO GENERATE CODE START [Theme METHODS] --------
-    applyCb(){
-        return Module._lv_theme_get_apply_cb(this.ptr)
+    else {
+        this.clearFlag("hidden")
+        return true
     }
-    parent(){
-        return Module._lv_theme_get_parent(this.ptr)
-    }
-    userData(){
-        return Module._lv_theme_get_user_data(this.ptr)
-    }
-    setUserData(user_data){
-        return Module._lv_theme_set_user_data(this.ptr, user_data)
-    }
-    disp(){
-        return Module._lv_theme_get_disp(this.ptr)
-    }
-    setDisp(disp){
-        return Module._lv_theme_set_disp(this.ptr, disp)
-    }
-    setColorPrimary(color_primary){
-        return Module._lv_theme_set_color_primary(this.ptr, color_primary)
-    }
-    setColorSecondary(color_secondary){
-        return Module._lv_theme_set_color_secondary(this.ptr, color_secondary)
-    }
-    setFontSmall(font_small){
-        return Module._lv_theme_set_font_small(this.ptr, font_small)
-    }
-    setFontNormal(font_normal){
-        return Module._lv_theme_set_font_normal(this.ptr, font_normal)
-    }
-    setFontLarge(font_large){
-        return Module._lv_theme_set_font_large(this.ptr, font_large)
-    }
-    flags(){
-        return Module._lv_theme_get_flags(this.ptr)
-    }
-    setFlags(flags){
-        return Module._lv_theme_set_flags(this.ptr, flags)
-    }
-// AUTO GENERATE CODE END [Theme METHODS] --------
 }
 
-class FontFmtTxtGlyphDsc extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_font_fmt_txt_glyph_dsc_create()
-    }
-// AUTO GENERATE CODE START [FontFmtTxtGlyphDsc METHODS] --------
-    bitmapIndex(){
-        return Module._lv_font_fmt_txt_glyph_dsc_get_bitmap_index(this.ptr)
-    }
-    setBitmapIndex(bitmap_index){
-        return Module._lv_font_fmt_txt_glyph_dsc_set_bitmap_index(this.ptr, bitmap_index)
-    }
-    advW(){
-        return Module._lv_font_fmt_txt_glyph_dsc_get_adv_w(this.ptr)
-    }
-    setAdvW(adv_w){
-        return Module._lv_font_fmt_txt_glyph_dsc_set_adv_w(this.ptr, adv_w)
-    }
-    boxW(){
-        return Module._lv_font_fmt_txt_glyph_dsc_get_box_w(this.ptr)
-    }
-    setBoxW(box_w){
-        return Module._lv_font_fmt_txt_glyph_dsc_set_box_w(this.ptr, box_w)
-    }
-    boxH(){
-        return Module._lv_font_fmt_txt_glyph_dsc_get_box_h(this.ptr)
-    }
-    setBoxH(box_h){
-        return Module._lv_font_fmt_txt_glyph_dsc_set_box_h(this.ptr, box_h)
-    }
-    ofsX(){
-        return Module._lv_font_fmt_txt_glyph_dsc_get_ofs_x(this.ptr)
-    }
-    setOfsX(ofs_x){
-        return Module._lv_font_fmt_txt_glyph_dsc_set_ofs_x(this.ptr, ofs_x)
-    }
-    ofsY(){
-        return Module._lv_font_fmt_txt_glyph_dsc_get_ofs_y(this.ptr)
-    }
-    setOfsY(ofs_y){
-        return Module._lv_font_fmt_txt_glyph_dsc_set_ofs_y(this.ptr, ofs_y)
-    }
-// AUTO GENERATE CODE END [FontFmtTxtGlyphDsc METHODS] --------
-}
-
-class FontFmtTxtCmap extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_font_fmt_txt_cmap_create()
-    }
-// AUTO GENERATE CODE START [FontFmtTxtCmap METHODS] --------
-    rangeStart(){
-        return Module._lv_font_fmt_txt_cmap_get_range_start(this.ptr)
-    }
-    setRangeStart(range_start){
-        return Module._lv_font_fmt_txt_cmap_set_range_start(this.ptr, range_start)
-    }
-    rangeLength(){
-        return Module._lv_font_fmt_txt_cmap_get_range_length(this.ptr)
-    }
-    setRangeLength(range_length){
-        return Module._lv_font_fmt_txt_cmap_set_range_length(this.ptr, range_length)
-    }
-    glyphIdStart(){
-        return Module._lv_font_fmt_txt_cmap_get_glyph_id_start(this.ptr)
-    }
-    setGlyphIdStart(glyph_id_start){
-        return Module._lv_font_fmt_txt_cmap_set_glyph_id_start(this.ptr, glyph_id_start)
-    }
-    unicodeList(){
-        return Module._lv_font_fmt_txt_cmap_get_unicode_list(this.ptr)
-    }
-    setUnicodeList(unicode_list){
-        return Module._lv_font_fmt_txt_cmap_set_unicode_list(this.ptr, unicode_list)
-    }
-    glyphIdOfsList(){
-        return Module._lv_font_fmt_txt_cmap_get_glyph_id_ofs_list(this.ptr)
-    }
-    setGlyphIdOfsList(glyph_id_ofs_list){
-        return Module._lv_font_fmt_txt_cmap_set_glyph_id_ofs_list(this.ptr, glyph_id_ofs_list)
-    }
-    listLength(){
-        return Module._lv_font_fmt_txt_cmap_get_list_length(this.ptr)
-    }
-    setListLength(list_length){
-        return Module._lv_font_fmt_txt_cmap_set_list_length(this.ptr, list_length)
-    }
-    type(){
-        return Module._lv_font_fmt_txt_cmap_get_type(this.ptr)
-    }
-    setType(type){
-        return Module._lv_font_fmt_txt_cmap_set_type(this.ptr, type)
-    }
-// AUTO GENERATE CODE END [FontFmtTxtCmap METHODS] --------
-}
-
-class FontFmtTxtGlyphCache extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_font_fmt_txt_glyph_cache_create()
-    }
-// AUTO GENERATE CODE START [FontFmtTxtGlyphCache METHODS] --------
-    lastLetter(){
-        return Module._lv_font_fmt_txt_glyph_cache_get_last_letter(this.ptr)
-    }
-    setLastLetter(last_letter){
-        return Module._lv_font_fmt_txt_glyph_cache_set_last_letter(this.ptr, last_letter)
-    }
-    lastGlyphId(){
-        return Module._lv_font_fmt_txt_glyph_cache_get_last_glyph_id(this.ptr)
-    }
-    setLastGlyphId(last_glyph_id){
-        return Module._lv_font_fmt_txt_glyph_cache_set_last_glyph_id(this.ptr, last_glyph_id)
-    }
-// AUTO GENERATE CODE END [FontFmtTxtGlyphCache METHODS] --------
-}
-
-class _BarAnim extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv__bar_anim_create()
-    }
-// AUTO GENERATE CODE START [_BarAnim METHODS] --------
-    bar(){
-        return Module.__lv_bar_anim_get_bar(this.ptr)
-    }
-    setBar(bar){
-        return Module.__lv_bar_anim_set_bar(this.ptr, bar)
-    }
-    animStart(){
-        return Module.__lv_bar_anim_get_anim_start(this.ptr)
-    }
-    setAnimStart(anim_start){
-        return Module.__lv_bar_anim_set_anim_start(this.ptr, anim_start)
-    }
-    animEnd(){
-        return Module.__lv_bar_anim_get_anim_end(this.ptr)
-    }
-    setAnimEnd(anim_end){
-        return Module.__lv_bar_anim_set_anim_end(this.ptr, anim_end)
-    }
-    animState(){
-        return Module.__lv_bar_anim_get_anim_state(this.ptr)
-    }
-    setAnimState(anim_state){
-        return Module.__lv_bar_anim_set_anim_state(this.ptr, anim_state)
-    }
-// AUTO GENERATE CODE END [_BarAnim METHODS] --------
-}
-
-class CalendarDate extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_calendar_date_create()
-    }
-// AUTO GENERATE CODE START [CalendarDate METHODS] --------
-    year(){
-        return Module._lv_calendar_date_get_year(this.ptr)
-    }
-    setYear(year){
-        return Module._lv_calendar_date_set_year(this.ptr, year)
-    }
-    month(){
-        return Module._lv_calendar_date_get_month(this.ptr)
-    }
-    setMonth(month){
-        return Module._lv_calendar_date_set_month(this.ptr, month)
-    }
-    day(){
-        return Module._lv_calendar_date_get_day(this.ptr)
-    }
-    setDay(day){
-        return Module._lv_calendar_date_set_day(this.ptr, day)
-    }
-// AUTO GENERATE CODE END [CalendarDate METHODS] --------
-}
-
-class ChartSeries extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_chart_series_create()
-    }
-// AUTO GENERATE CODE START [ChartSeries METHODS] --------
-    xPoints(){
-        return Module._lv_chart_series_get_x_points(this.ptr)
-    }
-    setXPoints(x_points){
-        return Module._lv_chart_series_set_x_points(this.ptr, x_points)
-    }
-    yPoints(){
-        return Module._lv_chart_series_get_y_points(this.ptr)
-    }
-    setYPoints(y_points){
-        return Module._lv_chart_series_set_y_points(this.ptr, y_points)
-    }
-    color(){
-        return Module._lv_chart_series_get_color(this.ptr)
-    }
-    setColor(color){
-        return Module._lv_chart_series_set_color(this.ptr, color)
-    }
-    startPoint(){
-        return Module._lv_chart_series_get_start_point(this.ptr)
-    }
-    setStartPoint(start_point){
-        return Module._lv_chart_series_set_start_point(this.ptr, start_point)
-    }
-    hidden(){
-        return Module._lv_chart_series_get_hidden(this.ptr)
-    }
-    setHidden(hidden){
-        return Module._lv_chart_series_set_hidden(this.ptr, hidden)
-    }
-    xExtBufAssigned(){
-        return Module._lv_chart_series_get_x_ext_buf_assigned(this.ptr)
-    }
-    setXExtBufAssigned(x_ext_buf_assigned){
-        return Module._lv_chart_series_set_x_ext_buf_assigned(this.ptr, x_ext_buf_assigned)
-    }
-    yExtBufAssigned(){
-        return Module._lv_chart_series_get_y_ext_buf_assigned(this.ptr)
-    }
-    setYExtBufAssigned(y_ext_buf_assigned){
-        return Module._lv_chart_series_set_y_ext_buf_assigned(this.ptr, y_ext_buf_assigned)
-    }
-    xAxisSec(){
-        return Module._lv_chart_series_get_x_axis_sec(this.ptr)
-    }
-    setXAxisSec(x_axis_sec){
-        return Module._lv_chart_series_set_x_axis_sec(this.ptr, x_axis_sec)
-    }
-    yAxisSec(){
-        return Module._lv_chart_series_get_y_axis_sec(this.ptr)
-    }
-    setYAxisSec(y_axis_sec){
-        return Module._lv_chart_series_set_y_axis_sec(this.ptr, y_axis_sec)
-    }
-// AUTO GENERATE CODE END [ChartSeries METHODS] --------
-}
-
-class ChartCursor extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_chart_cursor_create()
-    }
-// AUTO GENERATE CODE START [ChartCursor METHODS] --------
-    pos(){
-        return Module._lv_chart_cursor_get_pos(this.ptr)
-    }
-    setPos(pos){
-        return Module._lv_chart_cursor_set_pos(this.ptr, pos)
-    }
-    pointId(){
-        return Module._lv_chart_cursor_get_point_id(this.ptr)
-    }
-    setPointId(point_id){
-        return Module._lv_chart_cursor_set_point_id(this.ptr, point_id)
-    }
-    color(){
-        return Module._lv_chart_cursor_get_color(this.ptr)
-    }
-    setColor(color){
-        return Module._lv_chart_cursor_set_color(this.ptr, color)
-    }
-    ser(){
-        return Module._lv_chart_cursor_get_ser(this.ptr)
-    }
-    setSer(ser){
-        return Module._lv_chart_cursor_set_ser(this.ptr, ser)
-    }
-    dir(){
-        return Module._lv_chart_cursor_get_dir(this.ptr)
-    }
-    setDir(dir){
-        return Module._lv_chart_cursor_set_dir(this.ptr, dir)
-    }
-    posSet(){
-        return Module._lv_chart_cursor_get_pos_set(this.ptr)
-    }
-    setPosSet(pos_set){
-        return Module._lv_chart_cursor_set_pos_set(this.ptr, pos_set)
-    }
-// AUTO GENERATE CODE END [ChartCursor METHODS] --------
-}
-
-class ChartTickDsc extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_chart_tick_dsc_create()
-    }
-// AUTO GENERATE CODE START [ChartTickDsc METHODS] --------
-    majorLen(){
-        return Module._lv_chart_tick_dsc_get_major_len(this.ptr)
-    }
-    setMajorLen(major_len){
-        return Module._lv_chart_tick_dsc_set_major_len(this.ptr, major_len)
-    }
-    minorLen(){
-        return Module._lv_chart_tick_dsc_get_minor_len(this.ptr)
-    }
-    setMinorLen(minor_len){
-        return Module._lv_chart_tick_dsc_set_minor_len(this.ptr, minor_len)
-    }
-    drawSize(){
-        return Module._lv_chart_tick_dsc_get_draw_size(this.ptr)
-    }
-    setDrawSize(draw_size){
-        return Module._lv_chart_tick_dsc_set_draw_size(this.ptr, draw_size)
-    }
-    minorCnt(){
-        return Module._lv_chart_tick_dsc_get_minor_cnt(this.ptr)
-    }
-    setMinorCnt(minor_cnt){
-        return Module._lv_chart_tick_dsc_set_minor_cnt(this.ptr, minor_cnt)
-    }
-    majorCnt(){
-        return Module._lv_chart_tick_dsc_get_major_cnt(this.ptr)
-    }
-    setMajorCnt(major_cnt){
-        return Module._lv_chart_tick_dsc_set_major_cnt(this.ptr, major_cnt)
-    }
-    labelEn(){
-        return Module._lv_chart_tick_dsc_get_label_en(this.ptr)
-    }
-    setLabelEn(label_en){
-        return Module._lv_chart_tick_dsc_set_label_en(this.ptr, label_en)
-    }
-// AUTO GENERATE CODE END [ChartTickDsc METHODS] --------
-}
-
-class MeterScale extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_meter_scale_create()
-    }
-// AUTO GENERATE CODE START [MeterScale METHODS] --------
-    tickColor(){
-        return Module._lv_meter_scale_get_tick_color(this.ptr)
-    }
-    setTickColor(tick_color){
-        return Module._lv_meter_scale_set_tick_color(this.ptr, tick_color)
-    }
-    tickCnt(){
-        return Module._lv_meter_scale_get_tick_cnt(this.ptr)
-    }
-    setTickCnt(tick_cnt){
-        return Module._lv_meter_scale_set_tick_cnt(this.ptr, tick_cnt)
-    }
-    tickLength(){
-        return Module._lv_meter_scale_get_tick_length(this.ptr)
-    }
-    setTickLength(tick_length){
-        return Module._lv_meter_scale_set_tick_length(this.ptr, tick_length)
-    }
-    tickWidth(){
-        return Module._lv_meter_scale_get_tick_width(this.ptr)
-    }
-    setTickWidth(tick_width){
-        return Module._lv_meter_scale_set_tick_width(this.ptr, tick_width)
-    }
-    tickMajorColor(){
-        return Module._lv_meter_scale_get_tick_major_color(this.ptr)
-    }
-    setTickMajorColor(tick_major_color){
-        return Module._lv_meter_scale_set_tick_major_color(this.ptr, tick_major_color)
-    }
-    tickMajorNth(){
-        return Module._lv_meter_scale_get_tick_major_nth(this.ptr)
-    }
-    setTickMajorNth(tick_major_nth){
-        return Module._lv_meter_scale_set_tick_major_nth(this.ptr, tick_major_nth)
-    }
-    tickMajorLength(){
-        return Module._lv_meter_scale_get_tick_major_length(this.ptr)
-    }
-    setTickMajorLength(tick_major_length){
-        return Module._lv_meter_scale_set_tick_major_length(this.ptr, tick_major_length)
-    }
-    tickMajorWidth(){
-        return Module._lv_meter_scale_get_tick_major_width(this.ptr)
-    }
-    setTickMajorWidth(tick_major_width){
-        return Module._lv_meter_scale_set_tick_major_width(this.ptr, tick_major_width)
-    }
-    labelGap(){
-        return Module._lv_meter_scale_get_label_gap(this.ptr)
-    }
-    setLabelGap(label_gap){
-        return Module._lv_meter_scale_set_label_gap(this.ptr, label_gap)
-    }
-    labelColor(){
-        return Module._lv_meter_scale_get_label_color(this.ptr)
-    }
-    setLabelColor(label_color){
-        return Module._lv_meter_scale_set_label_color(this.ptr, label_color)
-    }
-    min(){
-        return Module._lv_meter_scale_get_min(this.ptr)
-    }
-    setMin(min){
-        return Module._lv_meter_scale_set_min(this.ptr, min)
-    }
-    max(){
-        return Module._lv_meter_scale_get_max(this.ptr)
-    }
-    setMax(max){
-        return Module._lv_meter_scale_set_max(this.ptr, max)
-    }
-    rMod(){
-        return Module._lv_meter_scale_get_r_mod(this.ptr)
-    }
-    setRMod(r_mod){
-        return Module._lv_meter_scale_set_r_mod(this.ptr, r_mod)
-    }
-    angleRange(){
-        return Module._lv_meter_scale_get_angle_range(this.ptr)
-    }
-    setAngleRange(angle_range){
-        return Module._lv_meter_scale_set_angle_range(this.ptr, angle_range)
-    }
-    rotation(){
-        return Module._lv_meter_scale_get_rotation(this.ptr)
-    }
-    setRotation(rotation){
-        return Module._lv_meter_scale_set_rotation(this.ptr, rotation)
-    }
-// AUTO GENERATE CODE END [MeterScale METHODS] --------
-}
-
-class MeterIndicator extends WAMSObject {
-    constructor() {
-        super()
-        this.ptr = Module._lv_meter_indicator_create()
-    }
-// AUTO GENERATE CODE START [MeterIndicator METHODS] --------
-    scale(){
-        return Module._lv_meter_indicator_get_scale(this.ptr)
-    }
-    setScale(scale){
-        return Module._lv_meter_indicator_set_scale(this.ptr, scale)
-    }
-    type(){
-        return Module._lv_meter_indicator_get_type(this.ptr)
-    }
-    setType(type){
-        return Module._lv_meter_indicator_set_type(this.ptr, type)
-    }
-    opa(){
-        return Module._lv_meter_indicator_get_opa(this.ptr)
-    }
-    setOpa(opa){
-        return Module._lv_meter_indicator_set_opa(this.ptr, opa)
-    }
-    startValue(){
-        return Module._lv_meter_indicator_get_start_value(this.ptr)
-    }
-    setStartValue(start_value){
-        return Module._lv_meter_indicator_set_start_value(this.ptr, start_value)
-    }
-    endValue(){
-        return Module._lv_meter_indicator_get_end_value(this.ptr)
-    }
-    setEndValue(end_value){
-        return Module._lv_meter_indicator_set_end_value(this.ptr, end_value)
-    }
-// AUTO GENERATE CODE END [MeterIndicator METHODS] --------
-}
 
 function requireLVGL(exports) {
     if(!exports) {
         exports = {}
     }
 
+    SizeContent = Module._lv_coord_size_content()
+
     exports.EventEmitter = EventEmitter
-    exports.WAMSObject = WAMSObject
+    exports.WASMObject = WASMObject
 
     exports.init = function() {
         Module._lv_init()
     }
+
+    exports.SizeContent = SizeContent
+    exports.constMapping = constMapping
 
 // AUTO GENERATE CODE START [EXPORT JS CLASS] --------
     exports.Obj = Obj
@@ -5227,83 +2410,9 @@ function requireLVGL(exports) {
     exports.DispDrawBuf = DispDrawBuf
     exports.DispDrv = DispDrv
     exports.Disp = Disp
-    exports.Animimg = Animimg
-    exports.Calendar = Calendar
-    exports.Chart = Chart
-    exports.Colorwheel = Colorwheel
-    exports.Imgbtn = Imgbtn
-    exports.Led = Led
-    exports.Menu = Menu
-    exports.Meter = Meter
-    exports.Span = Span
-    exports.Spinbox = Spinbox
-    exports.Spinner = Spinner
-    exports.Tabview = Tabview
-    exports.Win = Win
-    exports.Timer = Timer
-    exports.SqrtRes = SqrtRes
-    exports.MemMonitor = MemMonitor
-    exports.MemBuf = MemBuf
-    exports.Anim = Anim
-    exports.Color8 = Color8
-    exports.Color16 = Color16
-    exports.Color32 = Color32
-    exports.ColorHsv = ColorHsv
-    exports.ColorFilterDsc = ColorFilterDsc
-    exports.Point = Point
-    exports.Area = Area
-    exports.ImgHeader = ImgHeader
-    exports.ImgDsc = ImgDsc
-    exports.ImgTransformDsc = ImgTransformDsc
-    exports.Ll = Ll
-    exports.IndevData = IndevData
-    exports._IndevProc = _IndevProc
-    exports.Indev = Indev
-    exports.FontGlyphDsc = FontGlyphDsc
-    exports.Font = Font
-    exports.StyleValue = StyleValue
-    exports.StyleTransitionDsc = StyleTransitionDsc
-    exports.StyleConstProp = StyleConstProp
-    exports.Style = Style
-    exports._ObjStyle = _ObjStyle
-    exports._ObjStyleTransitionDsc = _ObjStyleTransitionDsc
-    exports.FsDrv = FsDrv
-    exports.FsFile = FsFile
-    exports.FsDir = FsDir
-    exports.ImgDecoder = ImgDecoder
-    exports.ImgDecoderDsc = ImgDecoderDsc
-    exports._ImgCacheEntry = _ImgCacheEntry
-    exports._DrawMaskSaved = _DrawMaskSaved
-    exports._DrawMaskCommonDsc = _DrawMaskCommonDsc
-    exports.DrawMaskLineParam = DrawMaskLineParam
-    exports.DrawMaskAngleParam = DrawMaskAngleParam
-    exports._DrawMaskRadiusCircleDsc = _DrawMaskRadiusCircleDsc
-    exports.DrawMaskRadiusParam = DrawMaskRadiusParam
-    exports.DrawMaskFadeParam = DrawMaskFadeParam
-    exports.DrawMaskMapParam = DrawMaskMapParam
-    exports.DrawRectDsc = DrawRectDsc
-    exports.DrawLabelDsc = DrawLabelDsc
-    exports.DrawLabelHint = DrawLabelHint
-    exports.DrawImgDsc = DrawImgDsc
-    exports.DrawLineDsc = DrawLineDsc
-    exports.DrawArcDsc = DrawArcDsc
-    exports.ObjDrawPartDsc = ObjDrawPartDsc
     exports.ObjClass = ObjClass
-    exports.Event = Event
-    exports.HitTestInfo = HitTestInfo
-    exports.Group = Group
-    exports._ObjSpecAttr = _ObjSpecAttr
-    exports.Theme = Theme
-    exports.FontFmtTxtGlyphDsc = FontFmtTxtGlyphDsc
-    exports.FontFmtTxtCmap = FontFmtTxtCmap
-    exports.FontFmtTxtGlyphCache = FontFmtTxtGlyphCache
-    exports._BarAnim = _BarAnim
-    exports.CalendarDate = CalendarDate
-    exports.ChartSeries = ChartSeries
-    exports.ChartCursor = ChartCursor
-    exports.ChartTickDsc = ChartTickDsc
-    exports.MeterScale = MeterScale
-    exports.MeterIndicator = MeterIndicator
+    exports.IndevDrv = IndevDrv
+    exports.IndevData = IndevData
 // AUTO GENERATE CODE END [EXPORT JS CLASS] --------
 
     return exports

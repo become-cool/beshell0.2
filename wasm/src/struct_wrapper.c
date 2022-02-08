@@ -22,11 +22,11 @@ EMSCRIPTEN_KEEPALIVE void lv_timer_set_paused(lv_timer_t * p, uint32_t v) { p->p
 
 // struct lv_sqrt_res_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_sqrt_res_t * lv_sqrt_res_create() {
-        lv_sqrt_res_t * p = malloc(sizeof(lv_sqrt_res_t)) ;
-        memset(p, 0, sizeof(lv_sqrt_res_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_sqrt_res_t * p = malloc(sizeof(lv_sqrt_res_t)) ;
+    memset(p, 0, sizeof(lv_sqrt_res_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE uint16_t lv_sqrt_res_get_i(lv_sqrt_res_t * p) { return p->i ; }
 EMSCRIPTEN_KEEPALIVE uint16_t lv_sqrt_res_get_f(lv_sqrt_res_t * p) { return p->f ; }
 // fields setter
@@ -36,11 +36,11 @@ EMSCRIPTEN_KEEPALIVE void lv_sqrt_res_set_f(lv_sqrt_res_t * p, uint16_t v) { p->
 
 // struct lv_mem_monitor_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_mem_monitor_t * lv_mem_monitor_create() {
-        lv_mem_monitor_t * p = malloc(sizeof(lv_mem_monitor_t)) ;
-        memset(p, 0, sizeof(lv_mem_monitor_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_mem_monitor_t * p = malloc(sizeof(lv_mem_monitor_t)) ;
+    memset(p, 0, sizeof(lv_mem_monitor_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE uint32_t lv_mem_monitor_get_total_size(lv_mem_monitor_t * p) { return p->total_size ; }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_mem_monitor_get_free_cnt(lv_mem_monitor_t * p) { return p->free_cnt ; }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_mem_monitor_get_free_size(lv_mem_monitor_t * p) { return p->free_size ; }
@@ -62,11 +62,11 @@ EMSCRIPTEN_KEEPALIVE void lv_mem_monitor_set_frag_pct(lv_mem_monitor_t * p, uint
 
 // struct lv_mem_buf_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_mem_buf_t * lv_mem_buf_create() {
-        lv_mem_buf_t * p = malloc(sizeof(lv_mem_buf_t)) ;
-        memset(p, 0, sizeof(lv_mem_buf_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_mem_buf_t * p = malloc(sizeof(lv_mem_buf_t)) ;
+    memset(p, 0, sizeof(lv_mem_buf_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE void * lv_mem_buf_get_p(lv_mem_buf_t * p) { return p->p ; }
 EMSCRIPTEN_KEEPALIVE uint16_t lv_mem_buf_get_size(lv_mem_buf_t * p) { return p->size ; }
 EMSCRIPTEN_KEEPALIVE uint8_t lv_mem_buf_get_used(lv_mem_buf_t * p) { return p->used ; }
@@ -78,11 +78,11 @@ EMSCRIPTEN_KEEPALIVE void lv_mem_buf_set_used(lv_mem_buf_t * p, uint8_t v) { p->
 
 // struct lv_anim_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_anim_t * lv_anim_create() {
-        lv_anim_t * p = malloc(sizeof(lv_anim_t)) ;
-        memset(p, 0, sizeof(lv_anim_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_anim_t * p = malloc(sizeof(lv_anim_t)) ;
+    memset(p, 0, sizeof(lv_anim_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE void * lv_anim_get_var(lv_anim_t * p) { return p->var ; }
 EMSCRIPTEN_KEEPALIVE lv_anim_exec_xcb_t lv_anim_get_exec_cb(lv_anim_t * p) { return p->exec_cb ; }
 EMSCRIPTEN_KEEPALIVE lv_anim_start_cb_t lv_anim_get_start_cb(lv_anim_t * p) { return p->start_cb ; }
@@ -113,49 +113,27 @@ EMSCRIPTEN_KEEPALIVE void lv_anim_set_run_round(lv_anim_t * p, uint8_t v) { p->r
 EMSCRIPTEN_KEEPALIVE void lv_anim_set_start_cb_called(lv_anim_t * p, uint8_t v) { p->start_cb_called = v ; }
 
 
-// struct lv_color8_t wasm api ----------
-EMSCRIPTEN_KEEPALIVE lv_color8_t * lv_color8_create() {
-        lv_color8_t * p = malloc(sizeof(lv_color8_t)) ;
-        memset(p, 0, sizeof(lv_color8_t)) ;
-        return p ;
-    }
-    // fields getter
-EMSCRIPTEN_KEEPALIVE uint8_t lv_color8_get_full(lv_color8_t * p) { return p->full ; }
+// struct lv_vaformat_t wasm api ----------
+EMSCRIPTEN_KEEPALIVE lv_vaformat_t * lv_vaformat_create() {
+    lv_vaformat_t * p = malloc(sizeof(lv_vaformat_t)) ;
+    memset(p, 0, sizeof(lv_vaformat_t)) ;
+    return p ;
+}
+// fields getter
+EMSCRIPTEN_KEEPALIVE const char * lv_vaformat_get_fmt(lv_vaformat_t * p) { return p->fmt ; }
+EMSCRIPTEN_KEEPALIVE va_list * lv_vaformat_get_va(lv_vaformat_t * p) { return p->va ; }
 // fields setter
-EMSCRIPTEN_KEEPALIVE void lv_color8_set_full(lv_color8_t * p, uint8_t v) { p->full = v ; }
-
-
-// struct lv_color16_t wasm api ----------
-EMSCRIPTEN_KEEPALIVE lv_color16_t * lv_color16_create() {
-        lv_color16_t * p = malloc(sizeof(lv_color16_t)) ;
-        memset(p, 0, sizeof(lv_color16_t)) ;
-        return p ;
-    }
-    // fields getter
-EMSCRIPTEN_KEEPALIVE uint16_t lv_color16_get_full(lv_color16_t * p) { return p->full ; }
-// fields setter
-EMSCRIPTEN_KEEPALIVE void lv_color16_set_full(lv_color16_t * p, uint16_t v) { p->full = v ; }
-
-
-// struct lv_color32_t wasm api ----------
-EMSCRIPTEN_KEEPALIVE lv_color32_t * lv_color32_create() {
-        lv_color32_t * p = malloc(sizeof(lv_color32_t)) ;
-        memset(p, 0, sizeof(lv_color32_t)) ;
-        return p ;
-    }
-    // fields getter
-EMSCRIPTEN_KEEPALIVE uint32_t lv_color32_get_full(lv_color32_t * p) { return p->full ; }
-// fields setter
-EMSCRIPTEN_KEEPALIVE void lv_color32_set_full(lv_color32_t * p, uint32_t v) { p->full = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_vaformat_set_fmt(lv_vaformat_t * p, const char * v) { p->fmt = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_vaformat_set_va(lv_vaformat_t * p, va_list * v) { p->va = v ; }
 
 
 // struct lv_color_hsv_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_color_hsv_t * lv_color_hsv_create() {
-        lv_color_hsv_t * p = malloc(sizeof(lv_color_hsv_t)) ;
-        memset(p, 0, sizeof(lv_color_hsv_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_color_hsv_t * p = malloc(sizeof(lv_color_hsv_t)) ;
+    memset(p, 0, sizeof(lv_color_hsv_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE uint16_t lv_color_hsv_get_h(lv_color_hsv_t * p) { return p->h ; }
 EMSCRIPTEN_KEEPALIVE uint8_t lv_color_hsv_get_s(lv_color_hsv_t * p) { return p->s ; }
 EMSCRIPTEN_KEEPALIVE uint8_t lv_color_hsv_get_v(lv_color_hsv_t * p) { return p->v ; }
@@ -167,11 +145,11 @@ EMSCRIPTEN_KEEPALIVE void lv_color_hsv_set_v(lv_color_hsv_t * p, uint8_t v) { p-
 
 // struct lv_color_filter_dsc_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_color_filter_dsc_t * lv_color_filter_dsc_create() {
-        lv_color_filter_dsc_t * p = malloc(sizeof(lv_color_filter_dsc_t)) ;
-        memset(p, 0, sizeof(lv_color_filter_dsc_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_color_filter_dsc_t * p = malloc(sizeof(lv_color_filter_dsc_t)) ;
+    memset(p, 0, sizeof(lv_color_filter_dsc_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE lv_color_filter_cb_t lv_color_filter_dsc_get_filter_cb(lv_color_filter_dsc_t * p) { return p->filter_cb ; }
 EMSCRIPTEN_KEEPALIVE void * lv_color_filter_dsc_get_user_data(lv_color_filter_dsc_t * p) { return p->user_data ; }
 // fields setter
@@ -181,11 +159,11 @@ EMSCRIPTEN_KEEPALIVE void lv_color_filter_dsc_set_user_data(lv_color_filter_dsc_
 
 // struct lv_point_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_point_t * lv_point_create() {
-        lv_point_t * p = malloc(sizeof(lv_point_t)) ;
-        memset(p, 0, sizeof(lv_point_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_point_t * p = malloc(sizeof(lv_point_t)) ;
+    memset(p, 0, sizeof(lv_point_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE lv_coord_t lv_point_get_x(lv_point_t * p) { return p->x ; }
 EMSCRIPTEN_KEEPALIVE lv_coord_t lv_point_get_y(lv_point_t * p) { return p->y ; }
 // fields setter
@@ -195,11 +173,11 @@ EMSCRIPTEN_KEEPALIVE void lv_point_set_y(lv_point_t * p, lv_coord_t v) { p->y = 
 
 // struct lv_area_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_area_t * lv_area_create() {
-        lv_area_t * p = malloc(sizeof(lv_area_t)) ;
-        memset(p, 0, sizeof(lv_area_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_area_t * p = malloc(sizeof(lv_area_t)) ;
+    memset(p, 0, sizeof(lv_area_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE lv_coord_t lv_area_get_x1(lv_area_t * p) { return p->x1 ; }
 EMSCRIPTEN_KEEPALIVE lv_coord_t lv_area_get_y1(lv_area_t * p) { return p->y1 ; }
 EMSCRIPTEN_KEEPALIVE lv_coord_t lv_area_get_x2(lv_area_t * p) { return p->x2 ; }
@@ -213,11 +191,11 @@ EMSCRIPTEN_KEEPALIVE void lv_area_set_y2(lv_area_t * p, lv_coord_t v) { p->y2 = 
 
 // struct lv_img_header_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_img_header_t * lv_img_header_create() {
-        lv_img_header_t * p = malloc(sizeof(lv_img_header_t)) ;
-        memset(p, 0, sizeof(lv_img_header_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_img_header_t * p = malloc(sizeof(lv_img_header_t)) ;
+    memset(p, 0, sizeof(lv_img_header_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE uint32_t lv_img_header_get_cf(lv_img_header_t * p) { return p->cf ; }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_img_header_get_always_zero(lv_img_header_t * p) { return p->always_zero ; }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_img_header_get_reserved(lv_img_header_t * p) { return p->reserved ; }
@@ -233,11 +211,11 @@ EMSCRIPTEN_KEEPALIVE void lv_img_header_set_h(lv_img_header_t * p, uint32_t v) {
 
 // struct lv_img_dsc_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_img_dsc_t * lv_img_dsc_create() {
-        lv_img_dsc_t * p = malloc(sizeof(lv_img_dsc_t)) ;
-        memset(p, 0, sizeof(lv_img_dsc_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_img_dsc_t * p = malloc(sizeof(lv_img_dsc_t)) ;
+    memset(p, 0, sizeof(lv_img_dsc_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE lv_img_header_t lv_img_dsc_get_header(lv_img_dsc_t * p) { return p->header ; }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_img_dsc_get_data_size(lv_img_dsc_t * p) { return p->data_size ; }
 EMSCRIPTEN_KEEPALIVE const uint8_t * lv_img_dsc_get_data(lv_img_dsc_t * p) { return p->data ; }
@@ -249,19 +227,19 @@ EMSCRIPTEN_KEEPALIVE void lv_img_dsc_set_data(lv_img_dsc_t * p, const uint8_t * 
 
 // struct lv_img_transform_dsc_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_img_transform_dsc_t * lv_img_transform_dsc_create() {
-        lv_img_transform_dsc_t * p = malloc(sizeof(lv_img_transform_dsc_t)) ;
-        memset(p, 0, sizeof(lv_img_transform_dsc_t)) ;
-        return p ;
-    }
-    
+    lv_img_transform_dsc_t * p = malloc(sizeof(lv_img_transform_dsc_t)) ;
+    memset(p, 0, sizeof(lv_img_transform_dsc_t)) ;
+    return p ;
+}
+
 
 // struct lv_ll_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_ll_t * lv_ll_create() {
-        lv_ll_t * p = malloc(sizeof(lv_ll_t)) ;
-        memset(p, 0, sizeof(lv_ll_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_ll_t * p = malloc(sizeof(lv_ll_t)) ;
+    memset(p, 0, sizeof(lv_ll_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE uint32_t lv_ll_get_n_size(lv_ll_t * p) { return p->n_size ; }
 EMSCRIPTEN_KEEPALIVE lv_ll_node_t * lv_ll_get_head(lv_ll_t * p) { return p->head ; }
 EMSCRIPTEN_KEEPALIVE lv_ll_node_t * lv_ll_get_tail(lv_ll_t * p) { return p->tail ; }
@@ -273,11 +251,11 @@ EMSCRIPTEN_KEEPALIVE void lv_ll_set_tail(lv_ll_t * p, lv_ll_node_t * v) { p->tai
 
 // struct lv_disp_draw_buf_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_disp_draw_buf_t * lv_disp_draw_buf_create() {
-        lv_disp_draw_buf_t * p = malloc(sizeof(lv_disp_draw_buf_t)) ;
-        memset(p, 0, sizeof(lv_disp_draw_buf_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_disp_draw_buf_t * p = malloc(sizeof(lv_disp_draw_buf_t)) ;
+    memset(p, 0, sizeof(lv_disp_draw_buf_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE void * lv_disp_draw_buf_get_buf1(lv_disp_draw_buf_t * p) { return p->buf1 ; }
 EMSCRIPTEN_KEEPALIVE void * lv_disp_draw_buf_get_buf2(lv_disp_draw_buf_t * p) { return p->buf2 ; }
 EMSCRIPTEN_KEEPALIVE void * lv_disp_draw_buf_get_buf_act(lv_disp_draw_buf_t * p) { return p->buf_act ; }
@@ -301,11 +279,11 @@ EMSCRIPTEN_KEEPALIVE void lv_disp_draw_buf_set_last_part(lv_disp_draw_buf_t * p,
 
 // struct lv_disp_drv_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_disp_drv_t * lv_disp_drv_create() {
-        lv_disp_drv_t * p = malloc(sizeof(lv_disp_drv_t)) ;
-        memset(p, 0, sizeof(lv_disp_drv_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_disp_drv_t * p = malloc(sizeof(lv_disp_drv_t)) ;
+    memset(p, 0, sizeof(lv_disp_drv_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE lv_coord_t lv_disp_drv_get_hor_res(lv_disp_drv_t * p) { return p->hor_res ; }
 EMSCRIPTEN_KEEPALIVE lv_coord_t lv_disp_drv_get_ver_res(lv_disp_drv_t * p) { return p->ver_res ; }
 EMSCRIPTEN_KEEPALIVE lv_coord_t lv_disp_drv_get_physical_hor_res(lv_disp_drv_t * p) { return p->physical_hor_res ; }
@@ -361,11 +339,11 @@ EMSCRIPTEN_KEEPALIVE void lv_disp_drv_set_user_data(lv_disp_drv_t * p, void * v)
 
 // struct lv_disp_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_disp_t * lv_disp_create() {
-        lv_disp_t * p = malloc(sizeof(lv_disp_t)) ;
-        memset(p, 0, sizeof(lv_disp_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_disp_t * p = malloc(sizeof(lv_disp_t)) ;
+    memset(p, 0, sizeof(lv_disp_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE struct _lv_disp_drv_t * lv_disp_get_driver(lv_disp_t * p) { return p->driver ; }
 EMSCRIPTEN_KEEPALIVE lv_timer_t * lv_disp_get_refr_timer(lv_disp_t * p) { return p->refr_timer ; }
 EMSCRIPTEN_KEEPALIVE struct _lv_obj_t ** lv_disp_get_screens(lv_disp_t * p) { return p->screens ; }
@@ -403,11 +381,11 @@ EMSCRIPTEN_KEEPALIVE void lv_disp_set_last_activity_time(lv_disp_t * p, uint32_t
 
 // struct lv_indev_data_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_indev_data_t * lv_indev_data_create() {
-        lv_indev_data_t * p = malloc(sizeof(lv_indev_data_t)) ;
-        memset(p, 0, sizeof(lv_indev_data_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_indev_data_t * p = malloc(sizeof(lv_indev_data_t)) ;
+    memset(p, 0, sizeof(lv_indev_data_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE lv_point_t lv_indev_data_get_point(lv_indev_data_t * p) { return p->point ; }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_indev_data_get_key(lv_indev_data_t * p) { return p->key ; }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_indev_data_get_btn_id(lv_indev_data_t * p) { return p->btn_id ; }
@@ -423,13 +401,47 @@ EMSCRIPTEN_KEEPALIVE void lv_indev_data_set_state(lv_indev_data_t * p, lv_indev_
 EMSCRIPTEN_KEEPALIVE void lv_indev_data_set_continue_reading(lv_indev_data_t * p, bool v) { p->continue_reading = v ; }
 
 
+// struct lv_indev_drv_t wasm api ----------
+EMSCRIPTEN_KEEPALIVE lv_indev_drv_t * lv_indev_drv_create() {
+    lv_indev_drv_t * p = malloc(sizeof(lv_indev_drv_t)) ;
+    memset(p, 0, sizeof(lv_indev_drv_t)) ;
+    return p ;
+}
+// fields getter
+EMSCRIPTEN_KEEPALIVE lv_indev_type_t lv_indev_drv_get_type(lv_indev_drv_t * p) { return p->type ; }
+EMSCRIPTEN_KEEPALIVE void * lv_indev_drv_get_read_cb(lv_indev_drv_t * p) { return p->read_cb ; }
+EMSCRIPTEN_KEEPALIVE void * lv_indev_drv_get_feedback_cb(lv_indev_drv_t * p) { return p->feedback_cb ; }
+EMSCRIPTEN_KEEPALIVE void * lv_indev_drv_get_user_data(lv_indev_drv_t * p) { return p->user_data ; }
+EMSCRIPTEN_KEEPALIVE struct _lv_disp_t * lv_indev_drv_get_disp(lv_indev_drv_t * p) { return p->disp ; }
+EMSCRIPTEN_KEEPALIVE lv_timer_t * lv_indev_drv_get_read_timer(lv_indev_drv_t * p) { return p->read_timer ; }
+EMSCRIPTEN_KEEPALIVE uint8_t lv_indev_drv_get_scroll_limit(lv_indev_drv_t * p) { return p->scroll_limit ; }
+EMSCRIPTEN_KEEPALIVE uint8_t lv_indev_drv_get_scroll_throw(lv_indev_drv_t * p) { return p->scroll_throw ; }
+EMSCRIPTEN_KEEPALIVE uint8_t lv_indev_drv_get_gesture_min_velocity(lv_indev_drv_t * p) { return p->gesture_min_velocity ; }
+EMSCRIPTEN_KEEPALIVE uint8_t lv_indev_drv_get_gesture_limit(lv_indev_drv_t * p) { return p->gesture_limit ; }
+EMSCRIPTEN_KEEPALIVE uint16_t lv_indev_drv_get_long_press_time(lv_indev_drv_t * p) { return p->long_press_time ; }
+EMSCRIPTEN_KEEPALIVE uint16_t lv_indev_drv_get_long_press_repeat_time(lv_indev_drv_t * p) { return p->long_press_repeat_time ; }
+// fields setter
+EMSCRIPTEN_KEEPALIVE void lv_indev_drv_set_type(lv_indev_drv_t * p, lv_indev_type_t v) { p->type = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_indev_drv_set_read_cb(lv_indev_drv_t * p, void * v) { p->read_cb = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_indev_drv_set_feedback_cb(lv_indev_drv_t * p, void * v) { p->feedback_cb = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_indev_drv_set_user_data(lv_indev_drv_t * p, void * v) { p->user_data = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_indev_drv_set_disp(lv_indev_drv_t * p, struct _lv_disp_t * v) { p->disp = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_indev_drv_set_read_timer(lv_indev_drv_t * p, lv_timer_t * v) { p->read_timer = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_indev_drv_set_scroll_limit(lv_indev_drv_t * p, uint8_t v) { p->scroll_limit = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_indev_drv_set_scroll_throw(lv_indev_drv_t * p, uint8_t v) { p->scroll_throw = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_indev_drv_set_gesture_min_velocity(lv_indev_drv_t * p, uint8_t v) { p->gesture_min_velocity = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_indev_drv_set_gesture_limit(lv_indev_drv_t * p, uint8_t v) { p->gesture_limit = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_indev_drv_set_long_press_time(lv_indev_drv_t * p, uint16_t v) { p->long_press_time = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_indev_drv_set_long_press_repeat_time(lv_indev_drv_t * p, uint16_t v) { p->long_press_repeat_time = v ; }
+
+
 // struct _lv_indev_proc_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE _lv_indev_proc_t * _lv_indev_proc_create() {
-        _lv_indev_proc_t * p = malloc(sizeof(_lv_indev_proc_t)) ;
-        memset(p, 0, sizeof(_lv_indev_proc_t)) ;
-        return p ;
-    }
-    // fields getter
+    _lv_indev_proc_t * p = malloc(sizeof(_lv_indev_proc_t)) ;
+    memset(p, 0, sizeof(_lv_indev_proc_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE lv_indev_state_t _lv_indev_proc_get_state(_lv_indev_proc_t * p) { return p->state ; }
 EMSCRIPTEN_KEEPALIVE uint8_t _lv_indev_proc_get_long_pr_sent(_lv_indev_proc_t * p) { return p->long_pr_sent ; }
 EMSCRIPTEN_KEEPALIVE uint8_t _lv_indev_proc_get_reset_query(_lv_indev_proc_t * p) { return p->reset_query ; }
@@ -449,11 +461,11 @@ EMSCRIPTEN_KEEPALIVE void _lv_indev_proc_set_longpr_rep_timestamp(_lv_indev_proc
 
 // struct lv_indev_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_indev_t * lv_indev_create() {
-        lv_indev_t * p = malloc(sizeof(lv_indev_t)) ;
-        memset(p, 0, sizeof(lv_indev_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_indev_t * p = malloc(sizeof(lv_indev_t)) ;
+    memset(p, 0, sizeof(lv_indev_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE struct _lv_indev_drv_t * lv_indev_get_driver(lv_indev_t * p) { return p->driver ; }
 EMSCRIPTEN_KEEPALIVE _lv_indev_proc_t lv_indev_get_proc(lv_indev_t * p) { return p->proc ; }
 EMSCRIPTEN_KEEPALIVE struct _lv_obj_t * lv_indev_get_cursor(lv_indev_t * p) { return p->cursor ; }
@@ -467,11 +479,11 @@ EMSCRIPTEN_KEEPALIVE void lv_indev_set_btn_points(lv_indev_t * p, const lv_point
 
 // struct lv_font_glyph_dsc_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_font_glyph_dsc_t * lv_font_glyph_dsc_create() {
-        lv_font_glyph_dsc_t * p = malloc(sizeof(lv_font_glyph_dsc_t)) ;
-        memset(p, 0, sizeof(lv_font_glyph_dsc_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_font_glyph_dsc_t * p = malloc(sizeof(lv_font_glyph_dsc_t)) ;
+    memset(p, 0, sizeof(lv_font_glyph_dsc_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE uint16_t lv_font_glyph_dsc_get_adv_w(lv_font_glyph_dsc_t * p) { return p->adv_w ; }
 EMSCRIPTEN_KEEPALIVE uint16_t lv_font_glyph_dsc_get_box_w(lv_font_glyph_dsc_t * p) { return p->box_w ; }
 EMSCRIPTEN_KEEPALIVE uint16_t lv_font_glyph_dsc_get_box_h(lv_font_glyph_dsc_t * p) { return p->box_h ; }
@@ -489,11 +501,11 @@ EMSCRIPTEN_KEEPALIVE void lv_font_glyph_dsc_set_bpp(lv_font_glyph_dsc_t * p, uin
 
 // struct lv_font_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_font_t * lv_font_create() {
-        lv_font_t * p = malloc(sizeof(lv_font_t)) ;
-        memset(p, 0, sizeof(lv_font_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_font_t * p = malloc(sizeof(lv_font_t)) ;
+    memset(p, 0, sizeof(lv_font_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE void * lv_font_get_get_glyph_dsc(lv_font_t * p) { return p->get_glyph_dsc ; }
 EMSCRIPTEN_KEEPALIVE void * lv_font_get_get_glyph_bitmap(lv_font_t * p) { return p->get_glyph_bitmap ; }
 EMSCRIPTEN_KEEPALIVE lv_coord_t lv_font_get_base_line(lv_font_t * p) { return p->base_line ; }
@@ -514,29 +526,13 @@ EMSCRIPTEN_KEEPALIVE void lv_font_set_dsc(lv_font_t * p, const void * v) { p->ds
 EMSCRIPTEN_KEEPALIVE void lv_font_set_user_data(lv_font_t * p, void * v) { p->user_data = v ; }
 
 
-// struct lv_style_value_t wasm api ----------
-EMSCRIPTEN_KEEPALIVE lv_style_value_t * lv_style_value_create() {
-        lv_style_value_t * p = malloc(sizeof(lv_style_value_t)) ;
-        memset(p, 0, sizeof(lv_style_value_t)) ;
-        return p ;
-    }
-    // fields getter
-EMSCRIPTEN_KEEPALIVE int32_t lv_style_value_get_num(lv_style_value_t * p) { return p->num ; }
-EMSCRIPTEN_KEEPALIVE const void * lv_style_value_get_ptr(lv_style_value_t * p) { return p->ptr ; }
-EMSCRIPTEN_KEEPALIVE lv_color_t lv_style_value_get_color(lv_style_value_t * p) { return p->color ; }
-// fields setter
-EMSCRIPTEN_KEEPALIVE void lv_style_value_set_num(lv_style_value_t * p, int32_t v) { p->num = v ; }
-EMSCRIPTEN_KEEPALIVE void lv_style_value_set_ptr(lv_style_value_t * p, const void * v) { p->ptr = v ; }
-EMSCRIPTEN_KEEPALIVE void lv_style_value_set_color(lv_style_value_t * p, lv_color_t v) { p->color = v ; }
-
-
 // struct lv_style_transition_dsc_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_style_transition_dsc_t * lv_style_transition_dsc_create() {
-        lv_style_transition_dsc_t * p = malloc(sizeof(lv_style_transition_dsc_t)) ;
-        memset(p, 0, sizeof(lv_style_transition_dsc_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_style_transition_dsc_t * p = malloc(sizeof(lv_style_transition_dsc_t)) ;
+    memset(p, 0, sizeof(lv_style_transition_dsc_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE const lv_style_prop_t * lv_style_transition_dsc_get_props(lv_style_transition_dsc_t * p) { return p->props ; }
 EMSCRIPTEN_KEEPALIVE void * lv_style_transition_dsc_get_user_data(lv_style_transition_dsc_t * p) { return p->user_data ; }
 EMSCRIPTEN_KEEPALIVE lv_anim_path_cb_t lv_style_transition_dsc_get_path_xcb(lv_style_transition_dsc_t * p) { return p->path_xcb ; }
@@ -552,11 +548,11 @@ EMSCRIPTEN_KEEPALIVE void lv_style_transition_dsc_set_delay(lv_style_transition_
 
 // struct lv_style_const_prop_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_style_const_prop_t * lv_style_const_prop_create() {
-        lv_style_const_prop_t * p = malloc(sizeof(lv_style_const_prop_t)) ;
-        memset(p, 0, sizeof(lv_style_const_prop_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_style_const_prop_t * p = malloc(sizeof(lv_style_const_prop_t)) ;
+    memset(p, 0, sizeof(lv_style_const_prop_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE lv_style_prop_t lv_style_const_prop_get_prop(lv_style_const_prop_t * p) { return p->prop ; }
 EMSCRIPTEN_KEEPALIVE lv_style_value_t lv_style_const_prop_get_value(lv_style_const_prop_t * p) { return p->value ; }
 // fields setter
@@ -566,11 +562,11 @@ EMSCRIPTEN_KEEPALIVE void lv_style_const_prop_set_value(lv_style_const_prop_t * 
 
 // struct lv_style_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_style_t * lv_style_create() {
-        lv_style_t * p = malloc(sizeof(lv_style_t)) ;
-        memset(p, 0, sizeof(lv_style_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_style_t * p = malloc(sizeof(lv_style_t)) ;
+    memset(p, 0, sizeof(lv_style_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE uint16_t lv_style_get_prop1(lv_style_t * p) { return p->prop1 ; }
 EMSCRIPTEN_KEEPALIVE uint16_t lv_style_get_is_const(lv_style_t * p) { return p->is_const ; }
 EMSCRIPTEN_KEEPALIVE uint8_t lv_style_get_has_group(lv_style_t * p) { return p->has_group ; }
@@ -582,13 +578,27 @@ EMSCRIPTEN_KEEPALIVE void lv_style_set_has_group(lv_style_t * p, uint8_t v) { p-
 EMSCRIPTEN_KEEPALIVE void lv_style_set_prop_cnt(lv_style_t * p, uint8_t v) { p->prop_cnt = v ; }
 
 
+// struct lv_layout_dsc_t wasm api ----------
+EMSCRIPTEN_KEEPALIVE lv_layout_dsc_t * lv_layout_dsc_create() {
+    lv_layout_dsc_t * p = malloc(sizeof(lv_layout_dsc_t)) ;
+    memset(p, 0, sizeof(lv_layout_dsc_t)) ;
+    return p ;
+}
+// fields getter
+EMSCRIPTEN_KEEPALIVE lv_layout_update_cb_t lv_layout_dsc_get_cb(lv_layout_dsc_t * p) { return p->cb ; }
+EMSCRIPTEN_KEEPALIVE void * lv_layout_dsc_get_user_data(lv_layout_dsc_t * p) { return p->user_data ; }
+// fields setter
+EMSCRIPTEN_KEEPALIVE void lv_layout_dsc_set_cb(lv_layout_dsc_t * p, lv_layout_update_cb_t v) { p->cb = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_layout_dsc_set_user_data(lv_layout_dsc_t * p, void * v) { p->user_data = v ; }
+
+
 // struct _lv_obj_style_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE _lv_obj_style_t * _lv_obj_style_create() {
-        _lv_obj_style_t * p = malloc(sizeof(_lv_obj_style_t)) ;
-        memset(p, 0, sizeof(_lv_obj_style_t)) ;
-        return p ;
-    }
-    // fields getter
+    _lv_obj_style_t * p = malloc(sizeof(_lv_obj_style_t)) ;
+    memset(p, 0, sizeof(_lv_obj_style_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE lv_style_t * _lv_obj_style_get_style(_lv_obj_style_t * p) { return p->style ; }
 EMSCRIPTEN_KEEPALIVE uint32_t _lv_obj_style_get_selector(_lv_obj_style_t * p) { return p->selector ; }
 EMSCRIPTEN_KEEPALIVE uint32_t _lv_obj_style_get_is_local(_lv_obj_style_t * p) { return p->is_local ; }
@@ -602,11 +612,11 @@ EMSCRIPTEN_KEEPALIVE void _lv_obj_style_set_is_trans(_lv_obj_style_t * p, uint32
 
 // struct _lv_obj_style_transition_dsc_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE _lv_obj_style_transition_dsc_t * _lv_obj_style_transition_dsc_create() {
-        _lv_obj_style_transition_dsc_t * p = malloc(sizeof(_lv_obj_style_transition_dsc_t)) ;
-        memset(p, 0, sizeof(_lv_obj_style_transition_dsc_t)) ;
-        return p ;
-    }
-    // fields getter
+    _lv_obj_style_transition_dsc_t * p = malloc(sizeof(_lv_obj_style_transition_dsc_t)) ;
+    memset(p, 0, sizeof(_lv_obj_style_transition_dsc_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE uint16_t _lv_obj_style_transition_dsc_get_time(_lv_obj_style_transition_dsc_t * p) { return p->time ; }
 EMSCRIPTEN_KEEPALIVE uint16_t _lv_obj_style_transition_dsc_get_delay(_lv_obj_style_transition_dsc_t * p) { return p->delay ; }
 EMSCRIPTEN_KEEPALIVE lv_style_selector_t _lv_obj_style_transition_dsc_get_selector(_lv_obj_style_transition_dsc_t * p) { return p->selector ; }
@@ -624,11 +634,11 @@ EMSCRIPTEN_KEEPALIVE void _lv_obj_style_transition_dsc_set_user_data(_lv_obj_sty
 
 // struct lv_fs_drv_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_fs_drv_t * lv_fs_drv_create() {
-        lv_fs_drv_t * p = malloc(sizeof(lv_fs_drv_t)) ;
-        memset(p, 0, sizeof(lv_fs_drv_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_fs_drv_t * p = malloc(sizeof(lv_fs_drv_t)) ;
+    memset(p, 0, sizeof(lv_fs_drv_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE char lv_fs_drv_get_letter(lv_fs_drv_t * p) { return p->letter ; }
 EMSCRIPTEN_KEEPALIVE void * lv_fs_drv_get_ready_cb(lv_fs_drv_t * p) { return p->ready_cb ; }
 EMSCRIPTEN_KEEPALIVE void * lv_fs_drv_get_open_cb(lv_fs_drv_t * p) { return p->open_cb ; }
@@ -658,11 +668,11 @@ EMSCRIPTEN_KEEPALIVE void lv_fs_drv_set_user_data(lv_fs_drv_t * p, void * v) { p
 
 // struct lv_fs_file_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_fs_file_t * lv_fs_file_create() {
-        lv_fs_file_t * p = malloc(sizeof(lv_fs_file_t)) ;
-        memset(p, 0, sizeof(lv_fs_file_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_fs_file_t * p = malloc(sizeof(lv_fs_file_t)) ;
+    memset(p, 0, sizeof(lv_fs_file_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE void * lv_fs_file_get_file_d(lv_fs_file_t * p) { return p->file_d ; }
 EMSCRIPTEN_KEEPALIVE lv_fs_drv_t * lv_fs_file_get_drv(lv_fs_file_t * p) { return p->drv ; }
 // fields setter
@@ -672,11 +682,11 @@ EMSCRIPTEN_KEEPALIVE void lv_fs_file_set_drv(lv_fs_file_t * p, lv_fs_drv_t * v) 
 
 // struct lv_fs_dir_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_fs_dir_t * lv_fs_dir_create() {
-        lv_fs_dir_t * p = malloc(sizeof(lv_fs_dir_t)) ;
-        memset(p, 0, sizeof(lv_fs_dir_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_fs_dir_t * p = malloc(sizeof(lv_fs_dir_t)) ;
+    memset(p, 0, sizeof(lv_fs_dir_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE void * lv_fs_dir_get_dir_d(lv_fs_dir_t * p) { return p->dir_d ; }
 EMSCRIPTEN_KEEPALIVE lv_fs_drv_t * lv_fs_dir_get_drv(lv_fs_dir_t * p) { return p->drv ; }
 // fields setter
@@ -697,11 +707,11 @@ EMSCRIPTEN_KEEPALIVE void lv_img_decoder_set_user_data(lv_img_decoder_t * p, voi
 
 // struct lv_img_decoder_dsc_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_img_decoder_dsc_t * lv_img_decoder_dsc_create() {
-        lv_img_decoder_dsc_t * p = malloc(sizeof(lv_img_decoder_dsc_t)) ;
-        memset(p, 0, sizeof(lv_img_decoder_dsc_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_img_decoder_dsc_t * p = malloc(sizeof(lv_img_decoder_dsc_t)) ;
+    memset(p, 0, sizeof(lv_img_decoder_dsc_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE lv_img_decoder_t * lv_img_decoder_dsc_get_decoder(lv_img_decoder_dsc_t * p) { return p->decoder ; }
 EMSCRIPTEN_KEEPALIVE const void * lv_img_decoder_dsc_get_src(lv_img_decoder_dsc_t * p) { return p->src ; }
 EMSCRIPTEN_KEEPALIVE lv_color_t lv_img_decoder_dsc_get_color(lv_img_decoder_dsc_t * p) { return p->color ; }
@@ -727,11 +737,11 @@ EMSCRIPTEN_KEEPALIVE void lv_img_decoder_dsc_set_user_data(lv_img_decoder_dsc_t 
 
 // struct _lv_img_cache_entry_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE _lv_img_cache_entry_t * _lv_img_cache_entry_create() {
-        _lv_img_cache_entry_t * p = malloc(sizeof(_lv_img_cache_entry_t)) ;
-        memset(p, 0, sizeof(_lv_img_cache_entry_t)) ;
-        return p ;
-    }
-    // fields getter
+    _lv_img_cache_entry_t * p = malloc(sizeof(_lv_img_cache_entry_t)) ;
+    memset(p, 0, sizeof(_lv_img_cache_entry_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE lv_img_decoder_dsc_t _lv_img_cache_entry_get_dec_dsc(_lv_img_cache_entry_t * p) { return p->dec_dsc ; }
 EMSCRIPTEN_KEEPALIVE int32_t _lv_img_cache_entry_get_life(_lv_img_cache_entry_t * p) { return p->life ; }
 // fields setter
@@ -741,11 +751,11 @@ EMSCRIPTEN_KEEPALIVE void _lv_img_cache_entry_set_life(_lv_img_cache_entry_t * p
 
 // struct _lv_draw_mask_saved_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE _lv_draw_mask_saved_t * _lv_draw_mask_saved_create() {
-        _lv_draw_mask_saved_t * p = malloc(sizeof(_lv_draw_mask_saved_t)) ;
-        memset(p, 0, sizeof(_lv_draw_mask_saved_t)) ;
-        return p ;
-    }
-    // fields getter
+    _lv_draw_mask_saved_t * p = malloc(sizeof(_lv_draw_mask_saved_t)) ;
+    memset(p, 0, sizeof(_lv_draw_mask_saved_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE void * _lv_draw_mask_saved_get_param(_lv_draw_mask_saved_t * p) { return p->param ; }
 EMSCRIPTEN_KEEPALIVE void * _lv_draw_mask_saved_get_custom_id(_lv_draw_mask_saved_t * p) { return p->custom_id ; }
 // fields setter
@@ -755,11 +765,11 @@ EMSCRIPTEN_KEEPALIVE void _lv_draw_mask_saved_set_custom_id(_lv_draw_mask_saved_
 
 // struct _lv_draw_mask_common_dsc_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE _lv_draw_mask_common_dsc_t * _lv_draw_mask_common_dsc_create() {
-        _lv_draw_mask_common_dsc_t * p = malloc(sizeof(_lv_draw_mask_common_dsc_t)) ;
-        memset(p, 0, sizeof(_lv_draw_mask_common_dsc_t)) ;
-        return p ;
-    }
-    // fields getter
+    _lv_draw_mask_common_dsc_t * p = malloc(sizeof(_lv_draw_mask_common_dsc_t)) ;
+    memset(p, 0, sizeof(_lv_draw_mask_common_dsc_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE lv_draw_mask_xcb_t _lv_draw_mask_common_dsc_get_cb(_lv_draw_mask_common_dsc_t * p) { return p->cb ; }
 EMSCRIPTEN_KEEPALIVE lv_draw_mask_type_t _lv_draw_mask_common_dsc_get_type(_lv_draw_mask_common_dsc_t * p) { return p->type ; }
 // fields setter
@@ -769,11 +779,11 @@ EMSCRIPTEN_KEEPALIVE void _lv_draw_mask_common_dsc_set_type(_lv_draw_mask_common
 
 // struct lv_draw_mask_line_param_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_draw_mask_line_param_t * lv_draw_mask_line_param_create() {
-        lv_draw_mask_line_param_t * p = malloc(sizeof(lv_draw_mask_line_param_t)) ;
-        memset(p, 0, sizeof(lv_draw_mask_line_param_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_draw_mask_line_param_t * p = malloc(sizeof(lv_draw_mask_line_param_t)) ;
+    memset(p, 0, sizeof(lv_draw_mask_line_param_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE _lv_draw_mask_common_dsc_t lv_draw_mask_line_param_get_dsc(lv_draw_mask_line_param_t * p) { return p->dsc ; }
 EMSCRIPTEN_KEEPALIVE lv_point_t lv_draw_mask_line_param_get_origo(lv_draw_mask_line_param_t * p) { return p->origo ; }
 EMSCRIPTEN_KEEPALIVE int32_t lv_draw_mask_line_param_get_xy_steep(lv_draw_mask_line_param_t * p) { return p->xy_steep ; }
@@ -795,11 +805,11 @@ EMSCRIPTEN_KEEPALIVE void lv_draw_mask_line_param_set_inv(lv_draw_mask_line_para
 
 // struct lv_draw_mask_angle_param_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_draw_mask_angle_param_t * lv_draw_mask_angle_param_create() {
-        lv_draw_mask_angle_param_t * p = malloc(sizeof(lv_draw_mask_angle_param_t)) ;
-        memset(p, 0, sizeof(lv_draw_mask_angle_param_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_draw_mask_angle_param_t * p = malloc(sizeof(lv_draw_mask_angle_param_t)) ;
+    memset(p, 0, sizeof(lv_draw_mask_angle_param_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE _lv_draw_mask_common_dsc_t lv_draw_mask_angle_param_get_dsc(lv_draw_mask_angle_param_t * p) { return p->dsc ; }
 EMSCRIPTEN_KEEPALIVE lv_draw_mask_line_param_t lv_draw_mask_angle_param_get_start_line(lv_draw_mask_angle_param_t * p) { return p->start_line ; }
 EMSCRIPTEN_KEEPALIVE lv_draw_mask_line_param_t lv_draw_mask_angle_param_get_end_line(lv_draw_mask_angle_param_t * p) { return p->end_line ; }
@@ -813,11 +823,11 @@ EMSCRIPTEN_KEEPALIVE void lv_draw_mask_angle_param_set_delta_deg(lv_draw_mask_an
 
 // struct _lv_draw_mask_radius_circle_dsc_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE _lv_draw_mask_radius_circle_dsc_t * _lv_draw_mask_radius_circle_dsc_create() {
-        _lv_draw_mask_radius_circle_dsc_t * p = malloc(sizeof(_lv_draw_mask_radius_circle_dsc_t)) ;
-        memset(p, 0, sizeof(_lv_draw_mask_radius_circle_dsc_t)) ;
-        return p ;
-    }
-    // fields getter
+    _lv_draw_mask_radius_circle_dsc_t * p = malloc(sizeof(_lv_draw_mask_radius_circle_dsc_t)) ;
+    memset(p, 0, sizeof(_lv_draw_mask_radius_circle_dsc_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE uint8_t * _lv_draw_mask_radius_circle_dsc_get_buf(_lv_draw_mask_radius_circle_dsc_t * p) { return p->buf ; }
 EMSCRIPTEN_KEEPALIVE lv_opa_t * _lv_draw_mask_radius_circle_dsc_get_cir_opa(_lv_draw_mask_radius_circle_dsc_t * p) { return p->cir_opa ; }
 EMSCRIPTEN_KEEPALIVE uint16_t * _lv_draw_mask_radius_circle_dsc_get_x_start_on_y(_lv_draw_mask_radius_circle_dsc_t * p) { return p->x_start_on_y ; }
@@ -837,11 +847,11 @@ EMSCRIPTEN_KEEPALIVE void _lv_draw_mask_radius_circle_dsc_set_radius(_lv_draw_ma
 
 // struct lv_draw_mask_radius_param_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_draw_mask_radius_param_t * lv_draw_mask_radius_param_create() {
-        lv_draw_mask_radius_param_t * p = malloc(sizeof(lv_draw_mask_radius_param_t)) ;
-        memset(p, 0, sizeof(lv_draw_mask_radius_param_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_draw_mask_radius_param_t * p = malloc(sizeof(lv_draw_mask_radius_param_t)) ;
+    memset(p, 0, sizeof(lv_draw_mask_radius_param_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE _lv_draw_mask_common_dsc_t lv_draw_mask_radius_param_get_dsc(lv_draw_mask_radius_param_t * p) { return p->dsc ; }
 EMSCRIPTEN_KEEPALIVE _lv_draw_mask_radius_circle_dsc_t * lv_draw_mask_radius_param_get_circle(lv_draw_mask_radius_param_t * p) { return p->circle ; }
 // fields setter
@@ -851,11 +861,11 @@ EMSCRIPTEN_KEEPALIVE void lv_draw_mask_radius_param_set_circle(lv_draw_mask_radi
 
 // struct lv_draw_mask_fade_param_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_draw_mask_fade_param_t * lv_draw_mask_fade_param_create() {
-        lv_draw_mask_fade_param_t * p = malloc(sizeof(lv_draw_mask_fade_param_t)) ;
-        memset(p, 0, sizeof(lv_draw_mask_fade_param_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_draw_mask_fade_param_t * p = malloc(sizeof(lv_draw_mask_fade_param_t)) ;
+    memset(p, 0, sizeof(lv_draw_mask_fade_param_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE _lv_draw_mask_common_dsc_t lv_draw_mask_fade_param_get_dsc(lv_draw_mask_fade_param_t * p) { return p->dsc ; }
 // fields setter
 EMSCRIPTEN_KEEPALIVE void lv_draw_mask_fade_param_set_dsc(lv_draw_mask_fade_param_t * p, _lv_draw_mask_common_dsc_t v) { p->dsc = v ; }
@@ -863,11 +873,11 @@ EMSCRIPTEN_KEEPALIVE void lv_draw_mask_fade_param_set_dsc(lv_draw_mask_fade_para
 
 // struct lv_draw_mask_map_param_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_draw_mask_map_param_t * lv_draw_mask_map_param_create() {
-        lv_draw_mask_map_param_t * p = malloc(sizeof(lv_draw_mask_map_param_t)) ;
-        memset(p, 0, sizeof(lv_draw_mask_map_param_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_draw_mask_map_param_t * p = malloc(sizeof(lv_draw_mask_map_param_t)) ;
+    memset(p, 0, sizeof(lv_draw_mask_map_param_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE _lv_draw_mask_common_dsc_t lv_draw_mask_map_param_get_dsc(lv_draw_mask_map_param_t * p) { return p->dsc ; }
 // fields setter
 EMSCRIPTEN_KEEPALIVE void lv_draw_mask_map_param_set_dsc(lv_draw_mask_map_param_t * p, _lv_draw_mask_common_dsc_t v) { p->dsc = v ; }
@@ -875,11 +885,11 @@ EMSCRIPTEN_KEEPALIVE void lv_draw_mask_map_param_set_dsc(lv_draw_mask_map_param_
 
 // struct lv_draw_rect_dsc_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_draw_rect_dsc_t * lv_draw_rect_dsc_create() {
-        lv_draw_rect_dsc_t * p = malloc(sizeof(lv_draw_rect_dsc_t)) ;
-        memset(p, 0, sizeof(lv_draw_rect_dsc_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_draw_rect_dsc_t * p = malloc(sizeof(lv_draw_rect_dsc_t)) ;
+    memset(p, 0, sizeof(lv_draw_rect_dsc_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE lv_coord_t lv_draw_rect_dsc_get_radius(lv_draw_rect_dsc_t * p) { return p->radius ; }
 EMSCRIPTEN_KEEPALIVE lv_blend_mode_t lv_draw_rect_dsc_get_blend_mode(lv_draw_rect_dsc_t * p) { return p->blend_mode ; }
 EMSCRIPTEN_KEEPALIVE lv_color_t lv_draw_rect_dsc_get_bg_color(lv_draw_rect_dsc_t * p) { return p->bg_color ; }
@@ -943,11 +953,11 @@ EMSCRIPTEN_KEEPALIVE void lv_draw_rect_dsc_set_shadow_opa(lv_draw_rect_dsc_t * p
 
 // struct lv_draw_label_dsc_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_draw_label_dsc_t * lv_draw_label_dsc_create() {
-        lv_draw_label_dsc_t * p = malloc(sizeof(lv_draw_label_dsc_t)) ;
-        memset(p, 0, sizeof(lv_draw_label_dsc_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_draw_label_dsc_t * p = malloc(sizeof(lv_draw_label_dsc_t)) ;
+    memset(p, 0, sizeof(lv_draw_label_dsc_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE const lv_font_t * lv_draw_label_dsc_get_font(lv_draw_label_dsc_t * p) { return p->font ; }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_draw_label_dsc_get_sel_start(lv_draw_label_dsc_t * p) { return p->sel_start ; }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_draw_label_dsc_get_sel_end(lv_draw_label_dsc_t * p) { return p->sel_end ; }
@@ -985,11 +995,11 @@ EMSCRIPTEN_KEEPALIVE void lv_draw_label_dsc_set_blend_mode(lv_draw_label_dsc_t *
 
 // struct lv_draw_label_hint_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_draw_label_hint_t * lv_draw_label_hint_create() {
-        lv_draw_label_hint_t * p = malloc(sizeof(lv_draw_label_hint_t)) ;
-        memset(p, 0, sizeof(lv_draw_label_hint_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_draw_label_hint_t * p = malloc(sizeof(lv_draw_label_hint_t)) ;
+    memset(p, 0, sizeof(lv_draw_label_hint_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE int32_t lv_draw_label_hint_get_line_start(lv_draw_label_hint_t * p) { return p->line_start ; }
 EMSCRIPTEN_KEEPALIVE int32_t lv_draw_label_hint_get_y(lv_draw_label_hint_t * p) { return p->y ; }
 EMSCRIPTEN_KEEPALIVE int32_t lv_draw_label_hint_get_coord_y(lv_draw_label_hint_t * p) { return p->coord_y ; }
@@ -1001,11 +1011,11 @@ EMSCRIPTEN_KEEPALIVE void lv_draw_label_hint_set_coord_y(lv_draw_label_hint_t * 
 
 // struct lv_draw_img_dsc_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_draw_img_dsc_t * lv_draw_img_dsc_create() {
-        lv_draw_img_dsc_t * p = malloc(sizeof(lv_draw_img_dsc_t)) ;
-        memset(p, 0, sizeof(lv_draw_img_dsc_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_draw_img_dsc_t * p = malloc(sizeof(lv_draw_img_dsc_t)) ;
+    memset(p, 0, sizeof(lv_draw_img_dsc_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE uint16_t lv_draw_img_dsc_get_angle(lv_draw_img_dsc_t * p) { return p->angle ; }
 EMSCRIPTEN_KEEPALIVE uint16_t lv_draw_img_dsc_get_zoom(lv_draw_img_dsc_t * p) { return p->zoom ; }
 EMSCRIPTEN_KEEPALIVE lv_point_t lv_draw_img_dsc_get_pivot(lv_draw_img_dsc_t * p) { return p->pivot ; }
@@ -1029,11 +1039,11 @@ EMSCRIPTEN_KEEPALIVE void lv_draw_img_dsc_set_antialias(lv_draw_img_dsc_t * p, u
 
 // struct lv_draw_line_dsc_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_draw_line_dsc_t * lv_draw_line_dsc_create() {
-        lv_draw_line_dsc_t * p = malloc(sizeof(lv_draw_line_dsc_t)) ;
-        memset(p, 0, sizeof(lv_draw_line_dsc_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_draw_line_dsc_t * p = malloc(sizeof(lv_draw_line_dsc_t)) ;
+    memset(p, 0, sizeof(lv_draw_line_dsc_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE lv_color_t lv_draw_line_dsc_get_color(lv_draw_line_dsc_t * p) { return p->color ; }
 EMSCRIPTEN_KEEPALIVE lv_coord_t lv_draw_line_dsc_get_width(lv_draw_line_dsc_t * p) { return p->width ; }
 EMSCRIPTEN_KEEPALIVE lv_coord_t lv_draw_line_dsc_get_dash_width(lv_draw_line_dsc_t * p) { return p->dash_width ; }
@@ -1057,11 +1067,11 @@ EMSCRIPTEN_KEEPALIVE void lv_draw_line_dsc_set_raw_end(lv_draw_line_dsc_t * p, u
 
 // struct lv_draw_arc_dsc_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_draw_arc_dsc_t * lv_draw_arc_dsc_create() {
-        lv_draw_arc_dsc_t * p = malloc(sizeof(lv_draw_arc_dsc_t)) ;
-        memset(p, 0, sizeof(lv_draw_arc_dsc_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_draw_arc_dsc_t * p = malloc(sizeof(lv_draw_arc_dsc_t)) ;
+    memset(p, 0, sizeof(lv_draw_arc_dsc_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE lv_color_t lv_draw_arc_dsc_get_color(lv_draw_arc_dsc_t * p) { return p->color ; }
 EMSCRIPTEN_KEEPALIVE lv_coord_t lv_draw_arc_dsc_get_width(lv_draw_arc_dsc_t * p) { return p->width ; }
 EMSCRIPTEN_KEEPALIVE const void * lv_draw_arc_dsc_get_img_src(lv_draw_arc_dsc_t * p) { return p->img_src ; }
@@ -1079,11 +1089,11 @@ EMSCRIPTEN_KEEPALIVE void lv_draw_arc_dsc_set_rounded(lv_draw_arc_dsc_t * p, uin
 
 // struct lv_obj_draw_part_dsc_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_obj_draw_part_dsc_t * lv_obj_draw_part_dsc_create() {
-        lv_obj_draw_part_dsc_t * p = malloc(sizeof(lv_obj_draw_part_dsc_t)) ;
-        memset(p, 0, sizeof(lv_obj_draw_part_dsc_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_obj_draw_part_dsc_t * p = malloc(sizeof(lv_obj_draw_part_dsc_t)) ;
+    memset(p, 0, sizeof(lv_obj_draw_part_dsc_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE const lv_area_t * lv_obj_draw_part_dsc_get_clip_area(lv_obj_draw_part_dsc_t * p) { return p->clip_area ; }
 EMSCRIPTEN_KEEPALIVE const struct _lv_obj_class_t * lv_obj_draw_part_dsc_get_class_p(lv_obj_draw_part_dsc_t * p) { return p->class_p ; }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_obj_draw_part_dsc_get_type(lv_obj_draw_part_dsc_t * p) { return p->type ; }
@@ -1125,11 +1135,11 @@ EMSCRIPTEN_KEEPALIVE void lv_obj_draw_part_dsc_set_sub_part_ptr(lv_obj_draw_part
 
 // struct lv_obj_class_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_obj_class_t * lv_obj_class_create() {
-        lv_obj_class_t * p = malloc(sizeof(lv_obj_class_t)) ;
-        memset(p, 0, sizeof(lv_obj_class_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_obj_class_t * p = malloc(sizeof(lv_obj_class_t)) ;
+    memset(p, 0, sizeof(lv_obj_class_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE const struct _lv_obj_class_t * lv_obj_class_get_base_class(lv_obj_class_t * p) { return p->base_class ; }
 EMSCRIPTEN_KEEPALIVE void * lv_obj_class_get_constructor_cb(lv_obj_class_t * p) { return p->constructor_cb ; }
 EMSCRIPTEN_KEEPALIVE void * lv_obj_class_get_destructor_cb(lv_obj_class_t * p) { return p->destructor_cb ; }
@@ -1155,11 +1165,11 @@ EMSCRIPTEN_KEEPALIVE void lv_obj_class_set_instance_size(lv_obj_class_t * p, uin
 
 // struct lv_event_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_event_t * lv_event_create() {
-        lv_event_t * p = malloc(sizeof(lv_event_t)) ;
-        memset(p, 0, sizeof(lv_event_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_event_t * p = malloc(sizeof(lv_event_t)) ;
+    memset(p, 0, sizeof(lv_event_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE struct _lv_event_t * lv_event_get_prev(lv_event_t * p) { return p->prev ; }
 EMSCRIPTEN_KEEPALIVE uint8_t lv_event_get_deleted(lv_event_t * p) { return p->deleted ; }
 // fields setter
@@ -1174,16 +1184,30 @@ EMSCRIPTEN_KEEPALIVE void lv_event_set_deleted(lv_event_t * p, uint8_t v) { p->d
 
 // struct lv_hit_test_info_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_hit_test_info_t * lv_hit_test_info_create() {
-        lv_hit_test_info_t * p = malloc(sizeof(lv_hit_test_info_t)) ;
-        memset(p, 0, sizeof(lv_hit_test_info_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_hit_test_info_t * p = malloc(sizeof(lv_hit_test_info_t)) ;
+    memset(p, 0, sizeof(lv_hit_test_info_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE const lv_point_t * lv_hit_test_info_get_point(lv_hit_test_info_t * p) { return p->point ; }
 EMSCRIPTEN_KEEPALIVE bool lv_hit_test_info_get_res(lv_hit_test_info_t * p) { return p->res ; }
 // fields setter
 EMSCRIPTEN_KEEPALIVE void lv_hit_test_info_set_point(lv_hit_test_info_t * p, const lv_point_t * v) { p->point = v ; }
 EMSCRIPTEN_KEEPALIVE void lv_hit_test_info_set_res(lv_hit_test_info_t * p, bool v) { p->res = v ; }
+
+
+// struct lv_cover_check_info_t wasm api ----------
+EMSCRIPTEN_KEEPALIVE lv_cover_check_info_t * lv_cover_check_info_create() {
+    lv_cover_check_info_t * p = malloc(sizeof(lv_cover_check_info_t)) ;
+    memset(p, 0, sizeof(lv_cover_check_info_t)) ;
+    return p ;
+}
+// fields getter
+EMSCRIPTEN_KEEPALIVE lv_cover_res_t lv_cover_check_info_get_res(lv_cover_check_info_t * p) { return p->res ; }
+EMSCRIPTEN_KEEPALIVE const lv_area_t * lv_cover_check_info_get_area(lv_cover_check_info_t * p) { return p->area ; }
+// fields setter
+EMSCRIPTEN_KEEPALIVE void lv_cover_check_info_set_res(lv_cover_check_info_t * p, lv_cover_res_t v) { p->res = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_cover_check_info_set_area(lv_cover_check_info_t * p, const lv_area_t * v) { p->area = v ; }
 
 
 // struct lv_group_t wasm api ----------
@@ -1202,11 +1226,11 @@ EMSCRIPTEN_KEEPALIVE void lv_group_set_frozen(lv_group_t * p, uint8_t v) { p->fr
 
 // struct _lv_obj_spec_attr_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE _lv_obj_spec_attr_t * _lv_obj_spec_attr_create() {
-        _lv_obj_spec_attr_t * p = malloc(sizeof(_lv_obj_spec_attr_t)) ;
-        memset(p, 0, sizeof(_lv_obj_spec_attr_t)) ;
-        return p ;
-    }
-    // fields getter
+    _lv_obj_spec_attr_t * p = malloc(sizeof(_lv_obj_spec_attr_t)) ;
+    memset(p, 0, sizeof(_lv_obj_spec_attr_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE struct _lv_obj_t ** _lv_obj_spec_attr_get_children(_lv_obj_spec_attr_t * p) { return p->children ; }
 EMSCRIPTEN_KEEPALIVE uint32_t _lv_obj_spec_attr_get_child_cnt(_lv_obj_spec_attr_t * p) { return p->child_cnt ; }
 EMSCRIPTEN_KEEPALIVE lv_group_t * _lv_obj_spec_attr_get_group_p(_lv_obj_spec_attr_t * p) { return p->group_p ; }
@@ -1263,11 +1287,11 @@ EMSCRIPTEN_KEEPALIVE void lv_obj_set_w_layout(lv_obj_t * p, uint16_t v) { p->w_l
 
 // struct lv_theme_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_theme_t * lv_theme_create() {
-        lv_theme_t * p = malloc(sizeof(lv_theme_t)) ;
-        memset(p, 0, sizeof(lv_theme_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_theme_t * p = malloc(sizeof(lv_theme_t)) ;
+    memset(p, 0, sizeof(lv_theme_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE lv_theme_apply_cb_t lv_theme_get_apply_cb(lv_theme_t * p) { return p->apply_cb ; }
 EMSCRIPTEN_KEEPALIVE struct _lv_theme_t * lv_theme_get_parent(lv_theme_t * p) { return p->parent ; }
 EMSCRIPTEN_KEEPALIVE void * lv_theme_get_user_data(lv_theme_t * p) { return p->user_data ; }
@@ -1286,11 +1310,11 @@ EMSCRIPTEN_KEEPALIVE void lv_theme_set_flags(lv_theme_t * p, uint32_t v) { p->fl
 
 // struct lv_font_fmt_txt_glyph_dsc_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_font_fmt_txt_glyph_dsc_t * lv_font_fmt_txt_glyph_dsc_create() {
-        lv_font_fmt_txt_glyph_dsc_t * p = malloc(sizeof(lv_font_fmt_txt_glyph_dsc_t)) ;
-        memset(p, 0, sizeof(lv_font_fmt_txt_glyph_dsc_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_font_fmt_txt_glyph_dsc_t * p = malloc(sizeof(lv_font_fmt_txt_glyph_dsc_t)) ;
+    memset(p, 0, sizeof(lv_font_fmt_txt_glyph_dsc_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE uint32_t lv_font_fmt_txt_glyph_dsc_get_bitmap_index(lv_font_fmt_txt_glyph_dsc_t * p) { return p->bitmap_index ; }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_font_fmt_txt_glyph_dsc_get_adv_w(lv_font_fmt_txt_glyph_dsc_t * p) { return p->adv_w ; }
 EMSCRIPTEN_KEEPALIVE uint8_t lv_font_fmt_txt_glyph_dsc_get_box_w(lv_font_fmt_txt_glyph_dsc_t * p) { return p->box_w ; }
@@ -1308,11 +1332,11 @@ EMSCRIPTEN_KEEPALIVE void lv_font_fmt_txt_glyph_dsc_set_ofs_y(lv_font_fmt_txt_gl
 
 // struct lv_font_fmt_txt_cmap_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_font_fmt_txt_cmap_t * lv_font_fmt_txt_cmap_create() {
-        lv_font_fmt_txt_cmap_t * p = malloc(sizeof(lv_font_fmt_txt_cmap_t)) ;
-        memset(p, 0, sizeof(lv_font_fmt_txt_cmap_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_font_fmt_txt_cmap_t * p = malloc(sizeof(lv_font_fmt_txt_cmap_t)) ;
+    memset(p, 0, sizeof(lv_font_fmt_txt_cmap_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE uint32_t lv_font_fmt_txt_cmap_get_range_start(lv_font_fmt_txt_cmap_t * p) { return p->range_start ; }
 EMSCRIPTEN_KEEPALIVE uint16_t lv_font_fmt_txt_cmap_get_range_length(lv_font_fmt_txt_cmap_t * p) { return p->range_length ; }
 EMSCRIPTEN_KEEPALIVE uint16_t lv_font_fmt_txt_cmap_get_glyph_id_start(lv_font_fmt_txt_cmap_t * p) { return p->glyph_id_start ; }
@@ -1330,18 +1354,121 @@ EMSCRIPTEN_KEEPALIVE void lv_font_fmt_txt_cmap_set_list_length(lv_font_fmt_txt_c
 EMSCRIPTEN_KEEPALIVE void lv_font_fmt_txt_cmap_set_type(lv_font_fmt_txt_cmap_t * p, lv_font_fmt_txt_cmap_type_t v) { p->type = v ; }
 
 
+// struct lv_font_fmt_txt_kern_pair_t wasm api ----------
+EMSCRIPTEN_KEEPALIVE lv_font_fmt_txt_kern_pair_t * lv_font_fmt_txt_kern_pair_create() {
+    lv_font_fmt_txt_kern_pair_t * p = malloc(sizeof(lv_font_fmt_txt_kern_pair_t)) ;
+    memset(p, 0, sizeof(lv_font_fmt_txt_kern_pair_t)) ;
+    return p ;
+}
+// fields getter
+EMSCRIPTEN_KEEPALIVE const void * lv_font_fmt_txt_kern_pair_get_glyph_ids(lv_font_fmt_txt_kern_pair_t * p) { return p->glyph_ids ; }
+EMSCRIPTEN_KEEPALIVE const int8_t * lv_font_fmt_txt_kern_pair_get_values(lv_font_fmt_txt_kern_pair_t * p) { return p->values ; }
+EMSCRIPTEN_KEEPALIVE uint32_t lv_font_fmt_txt_kern_pair_get_pair_cnt(lv_font_fmt_txt_kern_pair_t * p) { return p->pair_cnt ; }
+EMSCRIPTEN_KEEPALIVE uint32_t lv_font_fmt_txt_kern_pair_get_glyph_ids_size(lv_font_fmt_txt_kern_pair_t * p) { return p->glyph_ids_size ; }
+// fields setter
+EMSCRIPTEN_KEEPALIVE void lv_font_fmt_txt_kern_pair_set_glyph_ids(lv_font_fmt_txt_kern_pair_t * p, const void * v) { p->glyph_ids = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_font_fmt_txt_kern_pair_set_values(lv_font_fmt_txt_kern_pair_t * p, const int8_t * v) { p->values = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_font_fmt_txt_kern_pair_set_pair_cnt(lv_font_fmt_txt_kern_pair_t * p, uint32_t v) { p->pair_cnt = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_font_fmt_txt_kern_pair_set_glyph_ids_size(lv_font_fmt_txt_kern_pair_t * p, uint32_t v) { p->glyph_ids_size = v ; }
+
+
+// struct lv_font_fmt_txt_kern_classes_t wasm api ----------
+EMSCRIPTEN_KEEPALIVE lv_font_fmt_txt_kern_classes_t * lv_font_fmt_txt_kern_classes_create() {
+    lv_font_fmt_txt_kern_classes_t * p = malloc(sizeof(lv_font_fmt_txt_kern_classes_t)) ;
+    memset(p, 0, sizeof(lv_font_fmt_txt_kern_classes_t)) ;
+    return p ;
+}
+// fields getter
+EMSCRIPTEN_KEEPALIVE const int8_t * lv_font_fmt_txt_kern_classes_get_class_pair_values(lv_font_fmt_txt_kern_classes_t * p) { return p->class_pair_values ; }
+EMSCRIPTEN_KEEPALIVE const uint8_t * lv_font_fmt_txt_kern_classes_get_left_class_mapping(lv_font_fmt_txt_kern_classes_t * p) { return p->left_class_mapping ; }
+EMSCRIPTEN_KEEPALIVE const uint8_t * lv_font_fmt_txt_kern_classes_get_right_class_mapping(lv_font_fmt_txt_kern_classes_t * p) { return p->right_class_mapping ; }
+EMSCRIPTEN_KEEPALIVE uint8_t lv_font_fmt_txt_kern_classes_get_left_class_cnt(lv_font_fmt_txt_kern_classes_t * p) { return p->left_class_cnt ; }
+EMSCRIPTEN_KEEPALIVE uint8_t lv_font_fmt_txt_kern_classes_get_right_class_cnt(lv_font_fmt_txt_kern_classes_t * p) { return p->right_class_cnt ; }
+// fields setter
+EMSCRIPTEN_KEEPALIVE void lv_font_fmt_txt_kern_classes_set_class_pair_values(lv_font_fmt_txt_kern_classes_t * p, const int8_t * v) { p->class_pair_values = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_font_fmt_txt_kern_classes_set_left_class_mapping(lv_font_fmt_txt_kern_classes_t * p, const uint8_t * v) { p->left_class_mapping = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_font_fmt_txt_kern_classes_set_right_class_mapping(lv_font_fmt_txt_kern_classes_t * p, const uint8_t * v) { p->right_class_mapping = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_font_fmt_txt_kern_classes_set_left_class_cnt(lv_font_fmt_txt_kern_classes_t * p, uint8_t v) { p->left_class_cnt = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_font_fmt_txt_kern_classes_set_right_class_cnt(lv_font_fmt_txt_kern_classes_t * p, uint8_t v) { p->right_class_cnt = v ; }
+
+
 // struct lv_font_fmt_txt_glyph_cache_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_font_fmt_txt_glyph_cache_t * lv_font_fmt_txt_glyph_cache_create() {
-        lv_font_fmt_txt_glyph_cache_t * p = malloc(sizeof(lv_font_fmt_txt_glyph_cache_t)) ;
-        memset(p, 0, sizeof(lv_font_fmt_txt_glyph_cache_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_font_fmt_txt_glyph_cache_t * p = malloc(sizeof(lv_font_fmt_txt_glyph_cache_t)) ;
+    memset(p, 0, sizeof(lv_font_fmt_txt_glyph_cache_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE uint32_t lv_font_fmt_txt_glyph_cache_get_last_letter(lv_font_fmt_txt_glyph_cache_t * p) { return p->last_letter ; }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_font_fmt_txt_glyph_cache_get_last_glyph_id(lv_font_fmt_txt_glyph_cache_t * p) { return p->last_glyph_id ; }
 // fields setter
 EMSCRIPTEN_KEEPALIVE void lv_font_fmt_txt_glyph_cache_set_last_letter(lv_font_fmt_txt_glyph_cache_t * p, uint32_t v) { p->last_letter = v ; }
 EMSCRIPTEN_KEEPALIVE void lv_font_fmt_txt_glyph_cache_set_last_glyph_id(lv_font_fmt_txt_glyph_cache_t * p, uint32_t v) { p->last_glyph_id = v ; }
+
+
+// struct lv_font_fmt_txt_dsc_t wasm api ----------
+EMSCRIPTEN_KEEPALIVE lv_font_fmt_txt_dsc_t * lv_font_fmt_txt_dsc_create() {
+    lv_font_fmt_txt_dsc_t * p = malloc(sizeof(lv_font_fmt_txt_dsc_t)) ;
+    memset(p, 0, sizeof(lv_font_fmt_txt_dsc_t)) ;
+    return p ;
+}
+// fields getter
+EMSCRIPTEN_KEEPALIVE const uint8_t * lv_font_fmt_txt_dsc_get_glyph_bitmap(lv_font_fmt_txt_dsc_t * p) { return p->glyph_bitmap ; }
+EMSCRIPTEN_KEEPALIVE const lv_font_fmt_txt_glyph_dsc_t * lv_font_fmt_txt_dsc_get_glyph_dsc(lv_font_fmt_txt_dsc_t * p) { return p->glyph_dsc ; }
+EMSCRIPTEN_KEEPALIVE const lv_font_fmt_txt_cmap_t * lv_font_fmt_txt_dsc_get_cmaps(lv_font_fmt_txt_dsc_t * p) { return p->cmaps ; }
+EMSCRIPTEN_KEEPALIVE const void * lv_font_fmt_txt_dsc_get_kern_dsc(lv_font_fmt_txt_dsc_t * p) { return p->kern_dsc ; }
+EMSCRIPTEN_KEEPALIVE uint16_t lv_font_fmt_txt_dsc_get_kern_scale(lv_font_fmt_txt_dsc_t * p) { return p->kern_scale ; }
+EMSCRIPTEN_KEEPALIVE uint16_t lv_font_fmt_txt_dsc_get_cmap_num(lv_font_fmt_txt_dsc_t * p) { return p->cmap_num ; }
+EMSCRIPTEN_KEEPALIVE uint16_t lv_font_fmt_txt_dsc_get_bpp(lv_font_fmt_txt_dsc_t * p) { return p->bpp ; }
+EMSCRIPTEN_KEEPALIVE uint16_t lv_font_fmt_txt_dsc_get_kern_classes(lv_font_fmt_txt_dsc_t * p) { return p->kern_classes ; }
+EMSCRIPTEN_KEEPALIVE uint16_t lv_font_fmt_txt_dsc_get_bitmap_format(lv_font_fmt_txt_dsc_t * p) { return p->bitmap_format ; }
+EMSCRIPTEN_KEEPALIVE lv_font_fmt_txt_glyph_cache_t * lv_font_fmt_txt_dsc_get_cache(lv_font_fmt_txt_dsc_t * p) { return p->cache ; }
+// fields setter
+EMSCRIPTEN_KEEPALIVE void lv_font_fmt_txt_dsc_set_glyph_bitmap(lv_font_fmt_txt_dsc_t * p, const uint8_t * v) { p->glyph_bitmap = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_font_fmt_txt_dsc_set_glyph_dsc(lv_font_fmt_txt_dsc_t * p, const lv_font_fmt_txt_glyph_dsc_t * v) { p->glyph_dsc = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_font_fmt_txt_dsc_set_cmaps(lv_font_fmt_txt_dsc_t * p, const lv_font_fmt_txt_cmap_t * v) { p->cmaps = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_font_fmt_txt_dsc_set_kern_dsc(lv_font_fmt_txt_dsc_t * p, const void * v) { p->kern_dsc = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_font_fmt_txt_dsc_set_kern_scale(lv_font_fmt_txt_dsc_t * p, uint16_t v) { p->kern_scale = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_font_fmt_txt_dsc_set_cmap_num(lv_font_fmt_txt_dsc_t * p, uint16_t v) { p->cmap_num = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_font_fmt_txt_dsc_set_bpp(lv_font_fmt_txt_dsc_t * p, uint16_t v) { p->bpp = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_font_fmt_txt_dsc_set_kern_classes(lv_font_fmt_txt_dsc_t * p, uint16_t v) { p->kern_classes = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_font_fmt_txt_dsc_set_bitmap_format(lv_font_fmt_txt_dsc_t * p, uint16_t v) { p->bitmap_format = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_font_fmt_txt_dsc_set_cache(lv_font_fmt_txt_dsc_t * p, lv_font_fmt_txt_glyph_cache_t * v) { p->cache = v ; }
+
+
+// struct lv_arc_t wasm api ----------
+// fields getter
+EMSCRIPTEN_KEEPALIVE lv_obj_t lv_arc_get_obj(lv_arc_t * p) { return p->obj ; }
+EMSCRIPTEN_KEEPALIVE uint16_t lv_arc_get_rotation(lv_arc_t * p) { return p->rotation ; }
+EMSCRIPTEN_KEEPALIVE uint16_t lv_arc_get_indic_angle_start(lv_arc_t * p) { return p->indic_angle_start ; }
+EMSCRIPTEN_KEEPALIVE uint16_t lv_arc_get_indic_angle_end(lv_arc_t * p) { return p->indic_angle_end ; }
+EMSCRIPTEN_KEEPALIVE uint16_t lv_arc_get_dragging(lv_arc_t * p) { return p->dragging ; }
+EMSCRIPTEN_KEEPALIVE uint16_t lv_arc_get_type(lv_arc_t * p) { return p->type ; }
+EMSCRIPTEN_KEEPALIVE uint16_t lv_arc_get_min_close(lv_arc_t * p) { return p->min_close ; }
+EMSCRIPTEN_KEEPALIVE uint16_t lv_arc_get_chg_rate(lv_arc_t * p) { return p->chg_rate ; }
+EMSCRIPTEN_KEEPALIVE uint32_t lv_arc_get_last_tick(lv_arc_t * p) { return p->last_tick ; }
+EMSCRIPTEN_KEEPALIVE int16_t lv_arc_get_last_angle(lv_arc_t * p) { return p->last_angle ; }
+// fields setter
+EMSCRIPTEN_KEEPALIVE void lv_arc_set_obj(lv_arc_t * p, lv_obj_t v) { p->obj = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_arc_set_indic_angle_start(lv_arc_t * p, uint16_t v) { p->indic_angle_start = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_arc_set_indic_angle_end(lv_arc_t * p, uint16_t v) { p->indic_angle_end = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_arc_set_bg_angle_start(lv_arc_t * p, uint16_t v) { p->bg_angle_start = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_arc_set_bg_angle_end(lv_arc_t * p, uint16_t v) { p->bg_angle_end = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_arc_set_min_value(lv_arc_t * p, int16_t v) { p->min_value = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_arc_set_max_value(lv_arc_t * p, int16_t v) { p->max_value = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_arc_set_dragging(lv_arc_t * p, uint16_t v) { p->dragging = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_arc_set_type(lv_arc_t * p, uint16_t v) { p->type = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_arc_set_min_close(lv_arc_t * p, uint16_t v) { p->min_close = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_arc_set_chg_rate(lv_arc_t * p, uint16_t v) { p->chg_rate = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_arc_set_last_tick(lv_arc_t * p, uint32_t v) { p->last_tick = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_arc_set_last_angle(lv_arc_t * p, int16_t v) { p->last_angle = v ; }
+
+
+// struct lv_btn_t wasm api ----------
+// fields getter
+EMSCRIPTEN_KEEPALIVE lv_obj_t lv_btn_get_obj(lv_btn_t * p) { return p->obj ; }
+// fields setter
+EMSCRIPTEN_KEEPALIVE void lv_btn_set_obj(lv_btn_t * p, lv_obj_t v) { p->obj = v ; }
 
 
 // struct lv_img_t wasm api ----------
@@ -1363,13 +1490,77 @@ EMSCRIPTEN_KEEPALIVE void lv_img_set_cf(lv_img_t * p, uint8_t v) { p->cf = v ; }
 EMSCRIPTEN_KEEPALIVE void lv_img_set_obj_size_mode(lv_img_t * p, uint8_t v) { p->obj_size_mode = v ; }
 
 
+// struct lv_label_t wasm api ----------
+// fields getter
+EMSCRIPTEN_KEEPALIVE lv_obj_t lv_label_get_obj(lv_label_t * p) { return p->obj ; }
+EMSCRIPTEN_KEEPALIVE uint32_t lv_label_get_dot_end(lv_label_t * p) { return p->dot_end ; }
+EMSCRIPTEN_KEEPALIVE lv_draw_label_hint_t lv_label_get_hint(lv_label_t * p) { return p->hint ; }
+EMSCRIPTEN_KEEPALIVE uint32_t lv_label_get_sel_start(lv_label_t * p) { return p->sel_start ; }
+EMSCRIPTEN_KEEPALIVE uint32_t lv_label_get_sel_end(lv_label_t * p) { return p->sel_end ; }
+EMSCRIPTEN_KEEPALIVE lv_point_t lv_label_get_offset(lv_label_t * p) { return p->offset ; }
+EMSCRIPTEN_KEEPALIVE uint8_t lv_label_get_static_txt(lv_label_t * p) { return p->static_txt ; }
+EMSCRIPTEN_KEEPALIVE uint8_t lv_label_get_expand(lv_label_t * p) { return p->expand ; }
+EMSCRIPTEN_KEEPALIVE uint8_t lv_label_get_dot_tmp_alloc(lv_label_t * p) { return p->dot_tmp_alloc ; }
+// fields setter
+EMSCRIPTEN_KEEPALIVE void lv_label_set_obj(lv_label_t * p, lv_obj_t v) { p->obj = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_label_set_dot_end(lv_label_t * p, uint32_t v) { p->dot_end = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_label_set_hint(lv_label_t * p, lv_draw_label_hint_t v) { p->hint = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_label_set_sel_start(lv_label_t * p, uint32_t v) { p->sel_start = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_label_set_sel_end(lv_label_t * p, uint32_t v) { p->sel_end = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_label_set_offset(lv_label_t * p, lv_point_t v) { p->offset = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_label_set_static_txt(lv_label_t * p, uint8_t v) { p->static_txt = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_label_set_expand(lv_label_t * p, uint8_t v) { p->expand = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_label_set_dot_tmp_alloc(lv_label_t * p, uint8_t v) { p->dot_tmp_alloc = v ; }
+
+
+// struct lv_line_t wasm api ----------
+// fields getter
+EMSCRIPTEN_KEEPALIVE lv_obj_t lv_line_get_obj(lv_line_t * p) { return p->obj ; }
+EMSCRIPTEN_KEEPALIVE const lv_point_t * lv_line_get_point_array(lv_line_t * p) { return p->point_array ; }
+EMSCRIPTEN_KEEPALIVE uint16_t lv_line_get_point_num(lv_line_t * p) { return p->point_num ; }
+EMSCRIPTEN_KEEPALIVE uint8_t lv_line_get_y_inv(lv_line_t * p) { return p->y_inv ; }
+// fields setter
+EMSCRIPTEN_KEEPALIVE void lv_line_set_obj(lv_line_t * p, lv_obj_t v) { p->obj = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_line_set_point_array(lv_line_t * p, const lv_point_t * v) { p->point_array = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_line_set_point_num(lv_line_t * p, uint16_t v) { p->point_num = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_line_set_y_inv(lv_line_t * p, uint8_t v) { p->y_inv = v ; }
+
+
+// struct lv_table_t wasm api ----------
+// fields getter
+EMSCRIPTEN_KEEPALIVE lv_obj_t lv_table_get_obj(lv_table_t * p) { return p->obj ; }
+EMSCRIPTEN_KEEPALIVE char ** lv_table_get_cell_data(lv_table_t * p) { return p->cell_data ; }
+EMSCRIPTEN_KEEPALIVE lv_coord_t * lv_table_get_row_h(lv_table_t * p) { return p->row_h ; }
+EMSCRIPTEN_KEEPALIVE lv_coord_t * lv_table_get_col_w(lv_table_t * p) { return p->col_w ; }
+EMSCRIPTEN_KEEPALIVE uint16_t lv_table_get_col_act(lv_table_t * p) { return p->col_act ; }
+EMSCRIPTEN_KEEPALIVE uint16_t lv_table_get_row_act(lv_table_t * p) { return p->row_act ; }
+// fields setter
+EMSCRIPTEN_KEEPALIVE void lv_table_set_obj(lv_table_t * p, lv_obj_t v) { p->obj = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_table_set_cell_data(lv_table_t * p, char ** v) { p->cell_data = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_table_set_row_h(lv_table_t * p, lv_coord_t * v) { p->row_h = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_table_set_col_w(lv_table_t * p, lv_coord_t * v) { p->col_w = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_table_set_col_act(lv_table_t * p, uint16_t v) { p->col_act = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_table_set_row_act(lv_table_t * p, uint16_t v) { p->row_act = v ; }
+
+
+// struct lv_checkbox_t wasm api ----------
+// fields getter
+EMSCRIPTEN_KEEPALIVE lv_obj_t lv_checkbox_get_obj(lv_checkbox_t * p) { return p->obj ; }
+EMSCRIPTEN_KEEPALIVE char * lv_checkbox_get_txt(lv_checkbox_t * p) { return p->txt ; }
+EMSCRIPTEN_KEEPALIVE uint32_t lv_checkbox_get_static_txt(lv_checkbox_t * p) { return p->static_txt ; }
+// fields setter
+EMSCRIPTEN_KEEPALIVE void lv_checkbox_set_obj(lv_checkbox_t * p, lv_obj_t v) { p->obj = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_checkbox_set_txt(lv_checkbox_t * p, char * v) { p->txt = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_checkbox_set_static_txt(lv_checkbox_t * p, uint32_t v) { p->static_txt = v ; }
+
+
 // struct _lv_bar_anim_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE _lv_bar_anim_t * _lv_bar_anim_create() {
-        _lv_bar_anim_t * p = malloc(sizeof(_lv_bar_anim_t)) ;
-        memset(p, 0, sizeof(_lv_bar_anim_t)) ;
-        return p ;
-    }
-    // fields getter
+    _lv_bar_anim_t * p = malloc(sizeof(_lv_bar_anim_t)) ;
+    memset(p, 0, sizeof(_lv_bar_anim_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE lv_obj_t * _lv_bar_anim_get_bar(_lv_bar_anim_t * p) { return p->bar ; }
 EMSCRIPTEN_KEEPALIVE int32_t _lv_bar_anim_get_anim_start(_lv_bar_anim_t * p) { return p->anim_start ; }
 EMSCRIPTEN_KEEPALIVE int32_t _lv_bar_anim_get_anim_end(_lv_bar_anim_t * p) { return p->anim_end ; }
@@ -1398,6 +1589,23 @@ EMSCRIPTEN_KEEPALIVE void lv_bar_set_cur_value_anim(lv_bar_t * p, _lv_bar_anim_t
 EMSCRIPTEN_KEEPALIVE void lv_bar_set_start_value_anim(lv_bar_t * p, _lv_bar_anim_t v) { p->start_value_anim = v ; }
 
 
+// struct lv_slider_t wasm api ----------
+// fields getter
+EMSCRIPTEN_KEEPALIVE lv_bar_t lv_slider_get_bar(lv_slider_t * p) { return p->bar ; }
+EMSCRIPTEN_KEEPALIVE lv_area_t lv_slider_get_left_knob_area(lv_slider_t * p) { return p->left_knob_area ; }
+EMSCRIPTEN_KEEPALIVE lv_area_t lv_slider_get_right_knob_area(lv_slider_t * p) { return p->right_knob_area ; }
+EMSCRIPTEN_KEEPALIVE int32_t * lv_slider_get_value_to_set(lv_slider_t * p) { return p->value_to_set ; }
+EMSCRIPTEN_KEEPALIVE uint8_t lv_slider_get_dragging(lv_slider_t * p) { return p->dragging ; }
+EMSCRIPTEN_KEEPALIVE uint8_t lv_slider_get_left_knob_focus(lv_slider_t * p) { return p->left_knob_focus ; }
+// fields setter
+EMSCRIPTEN_KEEPALIVE void lv_slider_set_bar(lv_slider_t * p, lv_bar_t v) { p->bar = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_slider_set_left_knob_area(lv_slider_t * p, lv_area_t v) { p->left_knob_area = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_slider_set_right_knob_area(lv_slider_t * p, lv_area_t v) { p->right_knob_area = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_slider_set_value_to_set(lv_slider_t * p, int32_t * v) { p->value_to_set = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_slider_set_dragging(lv_slider_t * p, uint8_t v) { p->dragging = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_slider_set_left_knob_focus(lv_slider_t * p, uint8_t v) { p->left_knob_focus = v ; }
+
+
 // struct lv_btnmatrix_t wasm api ----------
 // fields getter
 EMSCRIPTEN_KEEPALIVE lv_obj_t lv_btnmatrix_get_obj(lv_btnmatrix_t * p) { return p->obj ; }
@@ -1417,6 +1625,53 @@ EMSCRIPTEN_KEEPALIVE void lv_btnmatrix_set_btn_cnt(lv_btnmatrix_t * p, uint16_t 
 EMSCRIPTEN_KEEPALIVE void lv_btnmatrix_set_row_cnt(lv_btnmatrix_t * p, uint16_t v) { p->row_cnt = v ; }
 EMSCRIPTEN_KEEPALIVE void lv_btnmatrix_set_btn_id_sel(lv_btnmatrix_t * p, uint16_t v) { p->btn_id_sel = v ; }
 EMSCRIPTEN_KEEPALIVE void lv_btnmatrix_set_one_check(lv_btnmatrix_t * p, uint8_t v) { p->one_check = v ; }
+
+
+// struct lv_dropdown_t wasm api ----------
+// fields getter
+EMSCRIPTEN_KEEPALIVE lv_obj_t lv_dropdown_get_obj(lv_dropdown_t * p) { return p->obj ; }
+EMSCRIPTEN_KEEPALIVE uint16_t lv_dropdown_get_sel_opt_id(lv_dropdown_t * p) { return p->sel_opt_id ; }
+EMSCRIPTEN_KEEPALIVE uint16_t lv_dropdown_get_sel_opt_id_orig(lv_dropdown_t * p) { return p->sel_opt_id_orig ; }
+EMSCRIPTEN_KEEPALIVE uint16_t lv_dropdown_get_pr_opt_id(lv_dropdown_t * p) { return p->pr_opt_id ; }
+EMSCRIPTEN_KEEPALIVE uint8_t lv_dropdown_get_static_txt(lv_dropdown_t * p) { return p->static_txt ; }
+// fields setter
+EMSCRIPTEN_KEEPALIVE void lv_dropdown_set_obj(lv_dropdown_t * p, lv_obj_t v) { p->obj = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_dropdown_set_list(lv_dropdown_t * p, lv_obj_t * v) { p->list = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_dropdown_set_option_cnt(lv_dropdown_t * p, uint16_t v) { p->option_cnt = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_dropdown_set_sel_opt_id(lv_dropdown_t * p, uint16_t v) { p->sel_opt_id = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_dropdown_set_sel_opt_id_orig(lv_dropdown_t * p, uint16_t v) { p->sel_opt_id_orig = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_dropdown_set_pr_opt_id(lv_dropdown_t * p, uint16_t v) { p->pr_opt_id = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_dropdown_set_static_txt(lv_dropdown_t * p, uint8_t v) { p->static_txt = v ; }
+
+
+// struct lv_dropdown_list_t wasm api ----------
+EMSCRIPTEN_KEEPALIVE lv_dropdown_list_t * lv_dropdown_list_create() {
+    lv_dropdown_list_t * p = malloc(sizeof(lv_dropdown_list_t)) ;
+    memset(p, 0, sizeof(lv_dropdown_list_t)) ;
+    return p ;
+}
+// fields getter
+EMSCRIPTEN_KEEPALIVE lv_obj_t lv_dropdown_list_get_obj(lv_dropdown_list_t * p) { return p->obj ; }
+EMSCRIPTEN_KEEPALIVE lv_obj_t * lv_dropdown_list_get_dropdown(lv_dropdown_list_t * p) { return p->dropdown ; }
+// fields setter
+EMSCRIPTEN_KEEPALIVE void lv_dropdown_list_set_obj(lv_dropdown_list_t * p, lv_obj_t v) { p->obj = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_dropdown_list_set_dropdown(lv_dropdown_list_t * p, lv_obj_t * v) { p->dropdown = v ; }
+
+
+// struct lv_roller_t wasm api ----------
+// fields getter
+EMSCRIPTEN_KEEPALIVE lv_obj_t lv_roller_get_obj(lv_roller_t * p) { return p->obj ; }
+EMSCRIPTEN_KEEPALIVE uint16_t lv_roller_get_sel_opt_id(lv_roller_t * p) { return p->sel_opt_id ; }
+EMSCRIPTEN_KEEPALIVE uint16_t lv_roller_get_sel_opt_id_ori(lv_roller_t * p) { return p->sel_opt_id_ori ; }
+EMSCRIPTEN_KEEPALIVE lv_roller_mode_t lv_roller_get_mode(lv_roller_t * p) { return p->mode ; }
+EMSCRIPTEN_KEEPALIVE uint32_t lv_roller_get_moved(lv_roller_t * p) { return p->moved ; }
+// fields setter
+EMSCRIPTEN_KEEPALIVE void lv_roller_set_obj(lv_roller_t * p, lv_obj_t v) { p->obj = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_roller_set_option_cnt(lv_roller_t * p, uint16_t v) { p->option_cnt = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_roller_set_sel_opt_id(lv_roller_t * p, uint16_t v) { p->sel_opt_id = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_roller_set_sel_opt_id_ori(lv_roller_t * p, uint16_t v) { p->sel_opt_id_ori = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_roller_set_mode(lv_roller_t * p, lv_roller_mode_t v) { p->mode = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_roller_set_moved(lv_roller_t * p, uint32_t v) { p->moved = v ; }
 
 
 // struct lv_textarea_t wasm api ----------
@@ -1443,13 +1698,43 @@ EMSCRIPTEN_KEEPALIVE void lv_textarea_set_text_sel_en(lv_textarea_t * p, uint8_t
 EMSCRIPTEN_KEEPALIVE void lv_textarea_set_pwd_mode(lv_textarea_t * p, uint8_t v) { p->pwd_mode = v ; }
 
 
+// struct lv_canvas_t wasm api ----------
+// fields getter
+EMSCRIPTEN_KEEPALIVE lv_img_dsc_t lv_canvas_get_dsc(lv_canvas_t * p) { return p->dsc ; }
+// fields setter
+EMSCRIPTEN_KEEPALIVE void lv_canvas_set_img(lv_canvas_t * p, lv_img_t v) { p->img = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_canvas_set_dsc(lv_canvas_t * p, lv_img_dsc_t v) { p->dsc = v ; }
+
+
+// struct lv_switch_t wasm api ----------
+// fields getter
+EMSCRIPTEN_KEEPALIVE lv_obj_t lv_switch_get_obj(lv_switch_t * p) { return p->obj ; }
+EMSCRIPTEN_KEEPALIVE int32_t lv_switch_get_anim_state(lv_switch_t * p) { return p->anim_state ; }
+// fields setter
+EMSCRIPTEN_KEEPALIVE void lv_switch_set_obj(lv_switch_t * p, lv_obj_t v) { p->obj = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_switch_set_anim_state(lv_switch_t * p, int32_t v) { p->anim_state = v ; }
+
+
+// struct lv_animimg_t wasm api ----------
+// fields getter
+EMSCRIPTEN_KEEPALIVE lv_img_t lv_animimg_get_img(lv_animimg_t * p) { return p->img ; }
+EMSCRIPTEN_KEEPALIVE lv_anim_t lv_animimg_get_anim(lv_animimg_t * p) { return p->anim ; }
+EMSCRIPTEN_KEEPALIVE lv_img_dsc_t ** lv_animimg_get_dsc(lv_animimg_t * p) { return p->dsc ; }
+EMSCRIPTEN_KEEPALIVE int8_t lv_animimg_get_pic_count(lv_animimg_t * p) { return p->pic_count ; }
+// fields setter
+EMSCRIPTEN_KEEPALIVE void lv_animimg_set_img(lv_animimg_t * p, lv_img_t v) { p->img = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_animimg_set_anim(lv_animimg_t * p, lv_anim_t v) { p->anim = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_animimg_set_dsc(lv_animimg_t * p, lv_img_dsc_t ** v) { p->dsc = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_animimg_set_pic_count(lv_animimg_t * p, int8_t v) { p->pic_count = v ; }
+
+
 // struct lv_calendar_date_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_calendar_date_t * lv_calendar_date_create() {
-        lv_calendar_date_t * p = malloc(sizeof(lv_calendar_date_t)) ;
-        memset(p, 0, sizeof(lv_calendar_date_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_calendar_date_t * p = malloc(sizeof(lv_calendar_date_t)) ;
+    memset(p, 0, sizeof(lv_calendar_date_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE uint16_t lv_calendar_date_get_year(lv_calendar_date_t * p) { return p->year ; }
 EMSCRIPTEN_KEEPALIVE int8_t lv_calendar_date_get_month(lv_calendar_date_t * p) { return p->month ; }
 EMSCRIPTEN_KEEPALIVE int8_t lv_calendar_date_get_day(lv_calendar_date_t * p) { return p->day ; }
@@ -1459,13 +1744,26 @@ EMSCRIPTEN_KEEPALIVE void lv_calendar_date_set_month(lv_calendar_date_t * p, int
 EMSCRIPTEN_KEEPALIVE void lv_calendar_date_set_day(lv_calendar_date_t * p, int8_t v) { p->day = v ; }
 
 
+// struct lv_calendar_t wasm api ----------
+// fields getter
+EMSCRIPTEN_KEEPALIVE lv_obj_t lv_calendar_get_obj(lv_calendar_t * p) { return p->obj ; }
+EMSCRIPTEN_KEEPALIVE lv_obj_t * lv_calendar_get_btnm(lv_calendar_t * p) { return p->btnm ; }
+EMSCRIPTEN_KEEPALIVE lv_calendar_date_t lv_calendar_get_today(lv_calendar_t * p) { return p->today ; }
+EMSCRIPTEN_KEEPALIVE const char ** lv_calendar_get_map(lv_calendar_t * p) { return p->map ; }
+// fields setter
+EMSCRIPTEN_KEEPALIVE void lv_calendar_set_obj(lv_calendar_t * p, lv_obj_t v) { p->obj = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_calendar_set_btnm(lv_calendar_t * p, lv_obj_t * v) { p->btnm = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_calendar_set_today(lv_calendar_t * p, lv_calendar_date_t v) { p->today = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_calendar_set_highlighted_dates_num(lv_calendar_t * p, uint16_t v) { p->highlighted_dates_num = v ; }
+
+
 // struct lv_chart_series_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_chart_series_t * lv_chart_series_create() {
-        lv_chart_series_t * p = malloc(sizeof(lv_chart_series_t)) ;
-        memset(p, 0, sizeof(lv_chart_series_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_chart_series_t * p = malloc(sizeof(lv_chart_series_t)) ;
+    memset(p, 0, sizeof(lv_chart_series_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE lv_coord_t * lv_chart_series_get_x_points(lv_chart_series_t * p) { return p->x_points ; }
 EMSCRIPTEN_KEEPALIVE lv_coord_t * lv_chart_series_get_y_points(lv_chart_series_t * p) { return p->y_points ; }
 EMSCRIPTEN_KEEPALIVE lv_color_t lv_chart_series_get_color(lv_chart_series_t * p) { return p->color ; }
@@ -1489,11 +1787,11 @@ EMSCRIPTEN_KEEPALIVE void lv_chart_series_set_y_axis_sec(lv_chart_series_t * p, 
 
 // struct lv_chart_cursor_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_chart_cursor_t * lv_chart_cursor_create() {
-        lv_chart_cursor_t * p = malloc(sizeof(lv_chart_cursor_t)) ;
-        memset(p, 0, sizeof(lv_chart_cursor_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_chart_cursor_t * p = malloc(sizeof(lv_chart_cursor_t)) ;
+    memset(p, 0, sizeof(lv_chart_cursor_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE lv_point_t lv_chart_cursor_get_pos(lv_chart_cursor_t * p) { return p->pos ; }
 EMSCRIPTEN_KEEPALIVE uint16_t lv_chart_cursor_get_point_id(lv_chart_cursor_t * p) { return p->point_id ; }
 EMSCRIPTEN_KEEPALIVE lv_color_t lv_chart_cursor_get_color(lv_chart_cursor_t * p) { return p->color ; }
@@ -1511,11 +1809,11 @@ EMSCRIPTEN_KEEPALIVE void lv_chart_cursor_set_pos_set(lv_chart_cursor_t * p, uin
 
 // struct lv_chart_tick_dsc_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_chart_tick_dsc_t * lv_chart_tick_dsc_create() {
-        lv_chart_tick_dsc_t * p = malloc(sizeof(lv_chart_tick_dsc_t)) ;
-        memset(p, 0, sizeof(lv_chart_tick_dsc_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_chart_tick_dsc_t * p = malloc(sizeof(lv_chart_tick_dsc_t)) ;
+    memset(p, 0, sizeof(lv_chart_tick_dsc_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE lv_coord_t lv_chart_tick_dsc_get_major_len(lv_chart_tick_dsc_t * p) { return p->major_len ; }
 EMSCRIPTEN_KEEPALIVE lv_coord_t lv_chart_tick_dsc_get_minor_len(lv_chart_tick_dsc_t * p) { return p->minor_len ; }
 EMSCRIPTEN_KEEPALIVE lv_coord_t lv_chart_tick_dsc_get_draw_size(lv_chart_tick_dsc_t * p) { return p->draw_size ; }
@@ -1531,13 +1829,60 @@ EMSCRIPTEN_KEEPALIVE void lv_chart_tick_dsc_set_major_cnt(lv_chart_tick_dsc_t * 
 EMSCRIPTEN_KEEPALIVE void lv_chart_tick_dsc_set_label_en(lv_chart_tick_dsc_t * p, uint32_t v) { p->label_en = v ; }
 
 
+// struct lv_chart_t wasm api ----------
+// fields getter
+EMSCRIPTEN_KEEPALIVE lv_obj_t lv_chart_get_obj(lv_chart_t * p) { return p->obj ; }
+EMSCRIPTEN_KEEPALIVE lv_ll_t lv_chart_get_series_ll(lv_chart_t * p) { return p->series_ll ; }
+EMSCRIPTEN_KEEPALIVE lv_ll_t lv_chart_get_cursor_ll(lv_chart_t * p) { return p->cursor_ll ; }
+EMSCRIPTEN_KEEPALIVE lv_chart_tick_dsc_t * lv_chart_get_tick(lv_chart_t * p) { return p->tick ; }
+EMSCRIPTEN_KEEPALIVE lv_coord_t * lv_chart_get_ymin(lv_chart_t * p) { return p->ymin ; }
+EMSCRIPTEN_KEEPALIVE lv_coord_t * lv_chart_get_ymax(lv_chart_t * p) { return p->ymax ; }
+EMSCRIPTEN_KEEPALIVE lv_coord_t * lv_chart_get_xmin(lv_chart_t * p) { return p->xmin ; }
+EMSCRIPTEN_KEEPALIVE lv_coord_t * lv_chart_get_xmax(lv_chart_t * p) { return p->xmax ; }
+EMSCRIPTEN_KEEPALIVE uint16_t lv_chart_get_pressed_point_id(lv_chart_t * p) { return p->pressed_point_id ; }
+EMSCRIPTEN_KEEPALIVE uint16_t lv_chart_get_hdiv_cnt(lv_chart_t * p) { return p->hdiv_cnt ; }
+EMSCRIPTEN_KEEPALIVE uint16_t lv_chart_get_vdiv_cnt(lv_chart_t * p) { return p->vdiv_cnt ; }
+EMSCRIPTEN_KEEPALIVE uint16_t lv_chart_get_point_cnt(lv_chart_t * p) { return p->point_cnt ; }
+EMSCRIPTEN_KEEPALIVE lv_chart_update_mode_t lv_chart_get_update_mode(lv_chart_t * p) { return p->update_mode ; }
+// fields setter
+EMSCRIPTEN_KEEPALIVE void lv_chart_set_obj(lv_chart_t * p, lv_obj_t v) { p->obj = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_chart_set_series_ll(lv_chart_t * p, lv_ll_t v) { p->series_ll = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_chart_set_cursor_ll(lv_chart_t * p, lv_ll_t v) { p->cursor_ll = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_chart_set_pressed_point_id(lv_chart_t * p, uint16_t v) { p->pressed_point_id = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_chart_set_hdiv_cnt(lv_chart_t * p, uint16_t v) { p->hdiv_cnt = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_chart_set_vdiv_cnt(lv_chart_t * p, uint16_t v) { p->vdiv_cnt = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_chart_set_point_cnt(lv_chart_t * p, uint16_t v) { p->point_cnt = v ; }
+
+
+// struct lv_keyboard_t wasm api ----------
+// fields getter
+EMSCRIPTEN_KEEPALIVE lv_btnmatrix_t lv_keyboard_get_btnm(lv_keyboard_t * p) { return p->btnm ; }
+EMSCRIPTEN_KEEPALIVE lv_obj_t * lv_keyboard_get_ta(lv_keyboard_t * p) { return p->ta ; }
+EMSCRIPTEN_KEEPALIVE uint8_t lv_keyboard_get_popovers(lv_keyboard_t * p) { return p->popovers ; }
+// fields setter
+EMSCRIPTEN_KEEPALIVE void lv_keyboard_set_btnm(lv_keyboard_t * p, lv_btnmatrix_t v) { p->btnm = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_keyboard_set_ta(lv_keyboard_t * p, lv_obj_t * v) { p->ta = v ; }
+
+
+// struct lv_msgbox_t wasm api ----------
+// fields getter
+EMSCRIPTEN_KEEPALIVE lv_obj_t lv_msgbox_get_obj(lv_msgbox_t * p) { return p->obj ; }
+// fields setter
+EMSCRIPTEN_KEEPALIVE void lv_msgbox_set_obj(lv_msgbox_t * p, lv_obj_t v) { p->obj = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_msgbox_set_title(lv_msgbox_t * p, lv_obj_t * v) { p->title = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_msgbox_set_close_btn(lv_msgbox_t * p, lv_obj_t * v) { p->close_btn = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_msgbox_set_content(lv_msgbox_t * p, lv_obj_t * v) { p->content = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_msgbox_set_text(lv_msgbox_t * p, lv_obj_t * v) { p->text = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_msgbox_set_btns(lv_msgbox_t * p, lv_obj_t * v) { p->btns = v ; }
+
+
 // struct lv_meter_scale_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_meter_scale_t * lv_meter_scale_create() {
-        lv_meter_scale_t * p = malloc(sizeof(lv_meter_scale_t)) ;
-        memset(p, 0, sizeof(lv_meter_scale_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_meter_scale_t * p = malloc(sizeof(lv_meter_scale_t)) ;
+    memset(p, 0, sizeof(lv_meter_scale_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE lv_color_t lv_meter_scale_get_tick_color(lv_meter_scale_t * p) { return p->tick_color ; }
 EMSCRIPTEN_KEEPALIVE uint16_t lv_meter_scale_get_tick_cnt(lv_meter_scale_t * p) { return p->tick_cnt ; }
 EMSCRIPTEN_KEEPALIVE uint16_t lv_meter_scale_get_tick_length(lv_meter_scale_t * p) { return p->tick_length ; }
@@ -1573,11 +1918,11 @@ EMSCRIPTEN_KEEPALIVE void lv_meter_scale_set_rotation(lv_meter_scale_t * p, int1
 
 // struct lv_meter_indicator_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_meter_indicator_t * lv_meter_indicator_create() {
-        lv_meter_indicator_t * p = malloc(sizeof(lv_meter_indicator_t)) ;
-        memset(p, 0, sizeof(lv_meter_indicator_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_meter_indicator_t * p = malloc(sizeof(lv_meter_indicator_t)) ;
+    memset(p, 0, sizeof(lv_meter_indicator_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE lv_meter_scale_t * lv_meter_indicator_get_scale(lv_meter_indicator_t * p) { return p->scale ; }
 EMSCRIPTEN_KEEPALIVE lv_meter_indicator_type_t lv_meter_indicator_get_type(lv_meter_indicator_t * p) { return p->type ; }
 EMSCRIPTEN_KEEPALIVE lv_opa_t lv_meter_indicator_get_opa(lv_meter_indicator_t * p) { return p->opa ; }
@@ -1591,13 +1936,122 @@ EMSCRIPTEN_KEEPALIVE void lv_meter_indicator_set_start_value(lv_meter_indicator_
 EMSCRIPTEN_KEEPALIVE void lv_meter_indicator_set_end_value(lv_meter_indicator_t * p, int32_t v) { p->end_value = v ; }
 
 
+// struct lv_meter_t wasm api ----------
+// fields getter
+EMSCRIPTEN_KEEPALIVE lv_obj_t lv_meter_get_obj(lv_meter_t * p) { return p->obj ; }
+EMSCRIPTEN_KEEPALIVE lv_ll_t lv_meter_get_scale_ll(lv_meter_t * p) { return p->scale_ll ; }
+EMSCRIPTEN_KEEPALIVE lv_ll_t lv_meter_get_indicator_ll(lv_meter_t * p) { return p->indicator_ll ; }
+// fields setter
+EMSCRIPTEN_KEEPALIVE void lv_meter_set_obj(lv_meter_t * p, lv_obj_t v) { p->obj = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_meter_set_scale_ll(lv_meter_t * p, lv_ll_t v) { p->scale_ll = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_meter_set_indicator_ll(lv_meter_t * p, lv_ll_t v) { p->indicator_ll = v ; }
+
+
+// struct lv_spinbox_t wasm api ----------
+// fields getter
+EMSCRIPTEN_KEEPALIVE lv_textarea_t lv_spinbox_get_ta(lv_spinbox_t * p) { return p->ta ; }
+EMSCRIPTEN_KEEPALIVE int32_t lv_spinbox_get_range_max(lv_spinbox_t * p) { return p->range_max ; }
+EMSCRIPTEN_KEEPALIVE int32_t lv_spinbox_get_range_min(lv_spinbox_t * p) { return p->range_min ; }
+EMSCRIPTEN_KEEPALIVE uint16_t lv_spinbox_get_digit_count(lv_spinbox_t * p) { return p->digit_count ; }
+EMSCRIPTEN_KEEPALIVE uint16_t lv_spinbox_get_dec_point_pos(lv_spinbox_t * p) { return p->dec_point_pos ; }
+EMSCRIPTEN_KEEPALIVE uint16_t lv_spinbox_get_digit_step_dir(lv_spinbox_t * p) { return p->digit_step_dir ; }
+// fields setter
+EMSCRIPTEN_KEEPALIVE void lv_spinbox_set_ta(lv_spinbox_t * p, lv_textarea_t v) { p->ta = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_spinbox_set_range_max(lv_spinbox_t * p, int32_t v) { p->range_max = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_spinbox_set_range_min(lv_spinbox_t * p, int32_t v) { p->range_min = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_spinbox_set_digit_count(lv_spinbox_t * p, uint16_t v) { p->digit_count = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_spinbox_set_dec_point_pos(lv_spinbox_t * p, uint16_t v) { p->dec_point_pos = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_spinbox_set_digit_step_dir(lv_spinbox_t * p, uint16_t v) { p->digit_step_dir = v ; }
+
+
+// struct lv_tabview_t wasm api ----------
+// fields getter
+EMSCRIPTEN_KEEPALIVE lv_obj_t lv_tabview_get_obj(lv_tabview_t * p) { return p->obj ; }
+EMSCRIPTEN_KEEPALIVE char ** lv_tabview_get_map(lv_tabview_t * p) { return p->map ; }
+EMSCRIPTEN_KEEPALIVE uint16_t lv_tabview_get_tab_cnt(lv_tabview_t * p) { return p->tab_cnt ; }
+EMSCRIPTEN_KEEPALIVE uint16_t lv_tabview_get_tab_cur(lv_tabview_t * p) { return p->tab_cur ; }
+EMSCRIPTEN_KEEPALIVE lv_dir_t lv_tabview_get_tab_pos(lv_tabview_t * p) { return p->tab_pos ; }
+// fields setter
+EMSCRIPTEN_KEEPALIVE void lv_tabview_set_obj(lv_tabview_t * p, lv_obj_t v) { p->obj = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_tabview_set_map(lv_tabview_t * p, char ** v) { p->map = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_tabview_set_tab_cnt(lv_tabview_t * p, uint16_t v) { p->tab_cnt = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_tabview_set_tab_cur(lv_tabview_t * p, uint16_t v) { p->tab_cur = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_tabview_set_tab_pos(lv_tabview_t * p, lv_dir_t v) { p->tab_pos = v ; }
+
+
+// struct lv_tileview_t wasm api ----------
+// fields getter
+EMSCRIPTEN_KEEPALIVE lv_obj_t lv_tileview_get_obj(lv_tileview_t * p) { return p->obj ; }
+// fields setter
+EMSCRIPTEN_KEEPALIVE void lv_tileview_set_obj(lv_tileview_t * p, lv_obj_t v) { p->obj = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_tileview_set_tile_act(lv_tileview_t * p, lv_obj_t * v) { p->tile_act = v ; }
+
+
+// struct lv_tileview_tile_t wasm api ----------
+EMSCRIPTEN_KEEPALIVE lv_tileview_tile_t * lv_tileview_tile_create() {
+    lv_tileview_tile_t * p = malloc(sizeof(lv_tileview_tile_t)) ;
+    memset(p, 0, sizeof(lv_tileview_tile_t)) ;
+    return p ;
+}
+// fields getter
+EMSCRIPTEN_KEEPALIVE lv_obj_t lv_tileview_tile_get_obj(lv_tileview_tile_t * p) { return p->obj ; }
+EMSCRIPTEN_KEEPALIVE lv_dir_t lv_tileview_tile_get_dir(lv_tileview_tile_t * p) { return p->dir ; }
+// fields setter
+EMSCRIPTEN_KEEPALIVE void lv_tileview_tile_set_obj(lv_tileview_tile_t * p, lv_obj_t v) { p->obj = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_tileview_tile_set_dir(lv_tileview_tile_t * p, lv_dir_t v) { p->dir = v ; }
+
+
+// struct lv_win_t wasm api ----------
+// fields getter
+EMSCRIPTEN_KEEPALIVE lv_obj_t lv_win_get_obj(lv_win_t * p) { return p->obj ; }
+// fields setter
+EMSCRIPTEN_KEEPALIVE void lv_win_set_obj(lv_win_t * p, lv_obj_t v) { p->obj = v ; }
+
+
+// struct lv_colorwheel_t wasm api ----------
+// fields getter
+EMSCRIPTEN_KEEPALIVE lv_obj_t lv_colorwheel_get_obj(lv_colorwheel_t * p) { return p->obj ; }
+EMSCRIPTEN_KEEPALIVE uint32_t lv_colorwheel_get_last_click_time(lv_colorwheel_t * p) { return p->last_click_time ; }
+EMSCRIPTEN_KEEPALIVE uint32_t lv_colorwheel_get_last_change_time(lv_colorwheel_t * p) { return p->last_change_time ; }
+EMSCRIPTEN_KEEPALIVE lv_point_t lv_colorwheel_get_last_press_point(lv_colorwheel_t * p) { return p->last_press_point ; }
+EMSCRIPTEN_KEEPALIVE lv_colorwheel_mode_t lv_colorwheel_get_mode(lv_colorwheel_t * p) { return p->mode ; }
+EMSCRIPTEN_KEEPALIVE uint8_t lv_colorwheel_get_mode_fixed(lv_colorwheel_t * p) { return p->mode_fixed ; }
+// fields setter
+EMSCRIPTEN_KEEPALIVE void lv_colorwheel_set_obj(lv_colorwheel_t * p, lv_obj_t v) { p->obj = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_colorwheel_set_last_click_time(lv_colorwheel_t * p, uint32_t v) { p->last_click_time = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_colorwheel_set_last_change_time(lv_colorwheel_t * p, uint32_t v) { p->last_change_time = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_colorwheel_set_last_press_point(lv_colorwheel_t * p, lv_point_t v) { p->last_press_point = v ; }
+
+
+// struct lv_led_t wasm api ----------
+// fields getter
+EMSCRIPTEN_KEEPALIVE lv_obj_t lv_led_get_obj(lv_led_t * p) { return p->obj ; }
+EMSCRIPTEN_KEEPALIVE lv_color_t lv_led_get_color(lv_led_t * p) { return p->color ; }
+EMSCRIPTEN_KEEPALIVE uint8_t lv_led_get_bright(lv_led_t * p) { return p->bright ; }
+// fields setter
+EMSCRIPTEN_KEEPALIVE void lv_led_set_obj(lv_led_t * p, lv_obj_t v) { p->obj = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_led_set_bright(lv_led_t * p, uint8_t v) { p->bright = v ; }
+
+
+// struct lv_imgbtn_t wasm api ----------
+// fields getter
+EMSCRIPTEN_KEEPALIVE lv_obj_t lv_imgbtn_get_obj(lv_imgbtn_t * p) { return p->obj ; }
+EMSCRIPTEN_KEEPALIVE const void ** lv_imgbtn_get_img_src_mid(lv_imgbtn_t * p) { return p->img_src_mid ; }
+EMSCRIPTEN_KEEPALIVE const void ** lv_imgbtn_get_img_src_left(lv_imgbtn_t * p) { return p->img_src_left ; }
+EMSCRIPTEN_KEEPALIVE const void ** lv_imgbtn_get_img_src_right(lv_imgbtn_t * p) { return p->img_src_right ; }
+EMSCRIPTEN_KEEPALIVE lv_img_cf_t lv_imgbtn_get_act_cf(lv_imgbtn_t * p) { return p->act_cf ; }
+// fields setter
+EMSCRIPTEN_KEEPALIVE void lv_imgbtn_set_obj(lv_imgbtn_t * p, lv_obj_t v) { p->obj = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_imgbtn_set_act_cf(lv_imgbtn_t * p, lv_img_cf_t v) { p->act_cf = v ; }
+
+
 // struct lv_span_t wasm api ----------
 EMSCRIPTEN_KEEPALIVE lv_span_t * lv_span_create() {
-        lv_span_t * p = malloc(sizeof(lv_span_t)) ;
-        memset(p, 0, sizeof(lv_span_t)) ;
-        return p ;
-    }
-    // fields getter
+    lv_span_t * p = malloc(sizeof(lv_span_t)) ;
+    memset(p, 0, sizeof(lv_span_t)) ;
+    return p ;
+}
+// fields getter
 EMSCRIPTEN_KEEPALIVE char * lv_span_get_txt(lv_span_t * p) { return p->txt ; }
 EMSCRIPTEN_KEEPALIVE lv_obj_t * lv_span_get_spangroup(lv_span_t * p) { return p->spangroup ; }
 EMSCRIPTEN_KEEPALIVE lv_style_t lv_span_get_style(lv_span_t * p) { return p->style ; }
@@ -1607,6 +2061,21 @@ EMSCRIPTEN_KEEPALIVE void lv_span_set_txt(lv_span_t * p, char * v) { p->txt = v 
 EMSCRIPTEN_KEEPALIVE void lv_span_set_spangroup(lv_span_t * p, lv_obj_t * v) { p->spangroup = v ; }
 EMSCRIPTEN_KEEPALIVE void lv_span_set_style(lv_span_t * p, lv_style_t v) { p->style = v ; }
 EMSCRIPTEN_KEEPALIVE void lv_span_set_static_flag(lv_span_t * p, uint8_t v) { p->static_flag = v ; }
+
+
+// struct lv_spangroup_t wasm api ----------
+// fields getter
+EMSCRIPTEN_KEEPALIVE lv_obj_t lv_spangroup_get_obj(lv_spangroup_t * p) { return p->obj ; }
+EMSCRIPTEN_KEEPALIVE lv_coord_t lv_spangroup_get_cache_w(lv_spangroup_t * p) { return p->cache_w ; }
+EMSCRIPTEN_KEEPALIVE lv_coord_t lv_spangroup_get_cache_h(lv_spangroup_t * p) { return p->cache_h ; }
+EMSCRIPTEN_KEEPALIVE lv_ll_t lv_spangroup_get_child_ll(lv_spangroup_t * p) { return p->child_ll ; }
+EMSCRIPTEN_KEEPALIVE uint8_t lv_spangroup_get_refresh(lv_spangroup_t * p) { return p->refresh ; }
+// fields setter
+EMSCRIPTEN_KEEPALIVE void lv_spangroup_set_obj(lv_spangroup_t * p, lv_obj_t v) { p->obj = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_spangroup_set_cache_w(lv_spangroup_t * p, lv_coord_t v) { p->cache_w = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_spangroup_set_cache_h(lv_spangroup_t * p, lv_coord_t v) { p->cache_h = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_spangroup_set_child_ll(lv_spangroup_t * p, lv_ll_t v) { p->child_ll = v ; }
+EMSCRIPTEN_KEEPALIVE void lv_spangroup_set_refresh(lv_spangroup_t * p, uint8_t v) { p->refresh = v ; }
 // AUTO GENERATE CODE END [API STRUCT] --------
 
 

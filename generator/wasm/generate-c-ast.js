@@ -141,9 +141,15 @@ function lvStructToJSClass() {
     let mapConstDef = {}
 
     walk_ast(ast.inner, (node, prev)=>{
-        if(node.kind=='TypedefDecl' && node.isReferenced==true && prev /*&& prev.completeDefinition==true*/) {
+
+        // if(node.name=="lv_indev_state_t") {
+        //     console.log(node, prev)
+        // }
+
+        if(node.kind=='TypedefDecl' && prev /*&& prev.completeDefinition==true*/) {
+
             // typedef struct/union {} lv_xxxx_t
-            if(prev.completeDefinition==true) {
+            if(prev.kind=="RecordDecl" && prev.tagUsed=="struct" && prev.completeDefinition==true) {
                 genStruct(node, prev)
             }
             // enmu
@@ -168,7 +174,7 @@ function lvStructToJSClass() {
         mapConstDef[typedef.name] = {
             jsname: baseName.toUpperCase(),
             nameFunc: `lv_${baseName}_to_name` ,
-            valueFunc: `lv_${baseName}_to_const` ,
+            valueFunc: `lv_${baseName}_to_value` ,
         }
 
         for(let node of def.inner||[]) {
@@ -176,14 +182,14 @@ function lvStructToJSClass() {
                 continue
             }
             let name = node.name.replace(regexp, "$1").replace(/_/g,"-").replace(/^\-/g,"_").toLowerCase()
-            codeToName+= `        case ${node.name}: return "${name}" ;\r\n`
+            codeToName+= `    ${codeToConst?'else ':''}if(${node.name}==v){ return "${name}" ; }\r\n`
             codeToConst+= `    ${codeToConst?'else ':''}if(strcmp("${name}", n)==0){ return ${node.name} ; }\r\n`
         }
 
         codeConstCApiFuncs+= `EMSCRIPTEN_KEEPALIVE char * lv_${baseName}_to_name(uint32_t v) {
-    switch(v) {
 ${codeToName}\
-        default: return "<unknow>" ;
+    else {
+        return "<unknow>" ;
     }
 }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_${baseName}_to_value(char * n) {
@@ -223,11 +229,11 @@ ${codeToConst}\
             }
 
             codeStructApiDef+= `EMSCRIPTEN_KEEPALIVE ${typedef.name} * ${funcName}() {
-        ${typedef.name} * p = malloc(sizeof(${typedef.name})) ;
-        memset(p, 0, sizeof(${typedef.name})) ;
-        return p ;
-    }
-    `
+    ${typedef.name} * p = malloc(sizeof(${typedef.name})) ;
+    memset(p, 0, sizeof(${typedef.name})) ;
+    return p ;
+}
+`
         }
 
         if(def.inner) {
@@ -249,16 +255,19 @@ ${codeToConst}\
 
                         let type = field.type.qualType
 
+                        // 多维数组类型，暂不处理
+                        if( type.match(/\[\d+\]\s*\[\d+\]/) ) {
+                            continue
+                        }
+
                         // 函数指针类型
                         if( /\(\*\)/.test(type) ) {
                             type = 'void *'
                         }
 
                         // 有长度的字符串
-                        let resArrayField = type.match(/\[(\d+)\]/)
-                        let memlen = 0 ;
+                        let resArrayField = type.match(/\[\d+\]/)
                         if(resArrayField) {
-                            memlen = resArrayField[1]
                             type = type.replace(/\[(\d+)\]/, '*')
                         }
 

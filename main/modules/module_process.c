@@ -4,15 +4,18 @@
 #include "utils.h"
 #include <string.h>
 
+#include "telnet.h"
+
 #ifndef SIMULATION
 #include "esp32_perfmon.h"
-#include "telnet.h"
 #include "psram.h"
 
 #include "esp_system.h"
 #include "soc/efuse_reg.h"
 #include "esp_heap_caps.h"
-
+#include <sys/types.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/queue.h"
 
 static int cpu0_idle_cnt = 0;
 static int cpu1_idle_cnt = 0;
@@ -147,13 +150,7 @@ JSValue js_console_print(JSContext *ctx, JSValueConst this_val, int argc, JSValu
         THROW_EXCEPTION("not a avalid string.") 
     }
     if(len) {
-#ifndef SIMULATION
-        telnet_send_pkg(echo_pkgid(), CMD_OUTPUT, str, len) ;
-#else
-        printf(str) ;
-        printf("\n") ;
-        fflush(stdout) ;
-#endif
+        telnet_output(CMD_OUTPUT, mk_echo_pkgid() , str, len) ;
     }
     JS_FreeCString(ctx, str) ;
     return JS_UNDEFINED ;
@@ -186,13 +183,7 @@ JSValue js_console_log(JSContext *ctx, JSValueConst this_val, int argc, JSValueC
     }
     buff[totalLen-1] = 0 ;
 
-#ifndef SIMULATION
-    telnet_send_pkg(echo_pkgid(), CMD_OUTPUT, buff, totalLen-1) ;
-#else
-    printf(buff) ;
-    printf("\n") ;
-    fflush(stdout) ;
-#endif
+    telnet_output(CMD_OUTPUT, mk_echo_pkgid(), buff, totalLen-1) ;
 
     for(i = 0; i < argc; i++) {
         JS_FreeCString(ctx, strlst[i]);

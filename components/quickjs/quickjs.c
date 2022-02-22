@@ -41,6 +41,15 @@
 
 // #include "utils.h"
 
+uint8_t debug = 0 ;
+#define pf(...) if(debug){ printf(__VA_ARGS__) ;printf("\n") ; }
+#define dd      if(debug){ printf("@%d\n", __LINE__) ; }
+#define df(msg) if(debug){ printf("@%d %s\n", __LINE__, msg) ; }
+#define dm(msg) if(debug){ printf("%s: %dKB\n", msg, esp_get_free_heap_size()/1024); }
+#define dp(p)   if(debug){ printf(#p"@%p\n", p) ; }
+#define ds(s)   if(debug){ printf(#s"=%s\n", s) ; }
+#define dn(v)   if(debug){ printf(#v"=%d\n", v) ; }
+
 #include "cutils.h"
 #include "list.h"
 #include "quickjs.h"

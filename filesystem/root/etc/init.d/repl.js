@@ -8,54 +8,56 @@ const CMD_EXCEPTION = 5 ;
 
 function _mkresolve(pkgid) {
     return function(ret) {
-        telnet.send(pkgid, CMD_RSPN, JSON.stringify(ret))
+        beapi.telnet.rspn(pkgid, CMD_RSPN, JSON.stringify(ret))
     }
 }
 function _mkreject(pkgid) {
     return function(ret) {
-        telnet.send(pkgid, CMD_EXCEPTION, JSON.stringify(ret))
+        beapi.telnet.rspn(pkgid, CMD_EXCEPTION, JSON.stringify(ret))
     }
 }
 
 let _pending_pkg_id = -1
 let _pending_code = ''
 
-if(beapi._repl_set_input_func) {
-    beapi._repl_set_input_func(function(pkgid, remain, pkgcmd, code){
+beapi.telnet.registerHandle(function(pkgid, remain, pkgcmd, code){
 
-        if(_pending_pkg_id>0 && _pending_pkg_id!=pkgid) {
-            _pending_pkg_id = -1
-            _pending_code = ''
-        }
-
-        _pending_code+= code
-
-        if(remain>0) {
-            return
-        }
-        
-        code = _pending_code.trim()
+    if(_pending_pkg_id>0 && _pending_pkg_id!=pkgid) {
         _pending_pkg_id = -1
         _pending_code = ''
+    }
 
-        try{
-            if(pkgcmd == CMD_RUN) {
-                evalAsFile(code, "REPL")
-            }
-            else if(pkgcmd == CMD_CALL) {
-                let res = evalAsFile(code, "REPL")
-                telnet.send(pkgid, CMD_RSPN, JSON.stringify(res))
-            }
-            else if(pkgcmd == CMD_CALL_ASYNC) {
-                evalAsFile(`(async ()=>{let resolve = repl._mkresolve(${pkgid});let reject = repl._mkreject(${pkgid}); try{${code}}catch(e){reject(e)}})()`, "REPL")
-            }
+    _pending_code+= code
 
-        } catch(e) {
-            telnet.send(pkgid, CMD_EXCEPTION, stringify(e))
+    if(remain>0) {
+        return
+    }
+    
+    code = _pending_code.trim()
+    _pending_pkg_id = -1
+    _pending_code = ''
+
+    try{
+        if( runShellCmd(code) ) {
+            beapi.telnet.rspn(pkgid, CMD_RSPN, "")
             return
         }
-    })
-}
+
+        if(pkgcmd == CMD_CALL_ASYNC) {
+            evalAsFile(`(async ()=>{let resolve = repl._mkresolve(${pkgid});let reject = repl._mkreject(${pkgid}); try{${code}}catch(e){reject(e)}})()`, "REPL")
+        }
+        else {
+            let res = evalAsFile(code, "REPL")
+            if(pkgcmd == CMD_CALL) {
+                beapi.telnet.rspn(pkgid, CMD_RSPN, stringify(res))
+            }
+        }
+
+    } catch(e) {
+        beapi.telnet.rspn(pkgid, CMD_EXCEPTION, stringify(e))
+        return
+    }
+})
 
 function resolvepath(path) {
     if(path=='~' ) {
@@ -220,36 +222,4 @@ function runShellCmd(code) {
     ShellCmds[cmd].apply(null, argvs)
 
     return true
-}
-
-if(process.simulate && process.setStdinCallback) {
-    let pendingStdinInput = ""
-    process.setStdinCallback(function(instr) {
-        pendingStdinInput+= instr
-        execLine()
-    })
-    function execLine() {
-        let firstLineEnd = pendingStdinInput.indexOf("\n")
-        if(firstLineEnd<0) {
-            return
-        }
-        let line = pendingStdinInput.substr(0, firstLineEnd+1).trim()
-        pendingStdinInput = pendingStdinInput.substr(firstLineEnd+1)
-        try{
-            if( !runShellCmd(line) ) {
-                let res = evalAsFile(line, "REPL")
-                if( typeof res=='object' ) {
-                    console.log(stringify(res))
-                }
-                else {
-                    console.log(res)
-                }
-            }
-        }catch(e){
-            console.log(e.toString())
-            console.log(e.stack)
-        }
-        if(pendingStdinInput)
-            execLine(pendingStdinInput)
-    }
 }

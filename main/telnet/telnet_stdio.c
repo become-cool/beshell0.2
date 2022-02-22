@@ -1,4 +1,5 @@
-#include "repl.h"
+#include "telnet_stdio.h"
+#include "telnet.h"
 #include "utils.h"
 #include <string.h>
 #include "beshell.h"
@@ -11,29 +12,6 @@
 #include <errno.h>
 #include <unistd.h>
 
-void js_dump_err(JSContext *ctx, JSValueConst val) {
-    const char * str = JS_ToCString(ctx, val);
-    if (str) {
-		printf(str);
-        JS_FreeCString(ctx, str);
-    } else {
-        printf("[exception]\n");
-    }
-    fflush(stdout);
-}
-void echo_error(JSContext * ctx) {
-    JSValue exception_val = JS_GetException(ctx);
-    bool is_error = JS_IsError(ctx, exception_val);
-    js_dump_err(ctx, exception_val);
-    if (is_error) {
-        JSValue val = JS_GetPropertyStr(ctx, exception_val, "stack");
-        if (!JS_IsUndefined(val)) {
-            js_dump_err(ctx, val);
-        }
-        JS_FreeValue(ctx, val);
-    }
-    JS_FreeValue(ctx, exception_val);
-}
 
 
 
@@ -58,16 +36,12 @@ JSValue js_proc_set_stdin_callback(JSContext *ctx, JSValueConst this_val, int ar
     return JS_UNDEFINED ;
 }
 
-void be_module_repl_init() {
+void be_telnet_stdio_init() {
     js_stdin_callback = JS_UNDEFINED ;
     fd_stdin = fileno(stdin);
 }
 
-void be_module_repl_reset(JSContext * ctx) {
-    JS_FreeValue(ctx, js_stdin_callback) ;
-    js_stdin_callback = JS_UNDEFINED ;
-}
-void be_module_repl_require(JSContext * ctx) {
+void be_telnet_stdio_require(JSContext * ctx) {
     JSValue jsproc = js_get_glob_prop(ctx, 1, "process") ;
     JS_SetPropertyStr(ctx, jsproc, "setStdinCallback", JS_NewCFunction(ctx, js_proc_set_stdin_callback, "setStdinCallback", 1));
 
@@ -78,7 +52,7 @@ void be_module_repl_require(JSContext * ctx) {
     JS_FreeValue(ctx, jsproc) ;
 }
 
-void be_module_repl_loop(JSContext * ctx) {
+void be_telnet_stdio_loop(JSContext * ctx) {
 
     FD_ZERO(&readfds);
     FD_SET(fileno(stdin), &readfds);
@@ -102,14 +76,11 @@ void be_module_repl_loop(JSContext * ctx) {
                 exit(1);
         }
 
-        if( JS_IsFunction(ctx, js_stdin_callback) ) {
-            JSValue jsstr = JS_NewStringLen(ctx, buf, num_bytes) ;
-            MAKE_ARGV1(jsargv, jsstr);
-
-            JSValue ret = JS_Call(ctx, js_stdin_callback, JS_UNDEFINED, 1, jsargv) ;
-            JS_FreeValue(ctx, ret) ;
-            free(jsargv) ;
-            JS_FreeValue(ctx, jsstr) ;
-        }
+        telnet_run(ctx, 0, 0, CMD_CALL, (uint8_t *) buf, num_bytes) ;
     }
+}
+
+void be_telnet_stdio_reset(JSContext * ctx) {
+    JS_FreeValue(ctx, js_stdin_callback) ;
+    js_stdin_callback = JS_UNDEFINED ;
 }

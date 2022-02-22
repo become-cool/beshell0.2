@@ -6,19 +6,18 @@
 #include "cutils.h"
 
 #include "lv_conf.h"
+#include "telnet_ws.h"
 
 #ifndef SIMULATION
 // #include "touch_driver.h"
 #include "xpt2046.h"
 #include "tp_spi.h"
-#include "display_ws.h"
 #include "disp_st77xx.h"
 #include <freertos/queue.h>
 
 #define OFFSET_X 11
 
 #else
-#include "http_lws.h"
 #endif
 
 typedef struct {
@@ -215,8 +214,6 @@ spi_device_handle_t device_touch = NULL;
 //         lv_disp_flush_ready(param->disp) ;
 // 	}
 // }
-
-void ws_disp_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color_p) {}
 
 void disp_st7789_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color_p) {
     if(!disp->user_data) {
@@ -514,7 +511,7 @@ void be_lv_display_init() {
     JS_NewClassID(&js_lvgl_disp_class_id);
 
 #ifndef SIMULATION
-    vlgl_js_display_ws_init() ;
+    // vlgl_js_display_ws_init() ;
     
 	// disp_queue = xQueueCreate(1, sizeof(draw_param_t *));
 	// xTaskCreatePinnedToCore(task_disp, "task_disp", 2048, NULL, 5, NULL, 1);

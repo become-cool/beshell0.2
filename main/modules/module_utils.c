@@ -10,12 +10,13 @@
 #include "module_fs.h"
 #include "eventloop.h"
 #include "uuid.h"
+#include "telnet.h"
 
 #ifndef SIMULATION
 #include "esp_system.h"
 #include "esp_task_wdt.h"
 #include "soc/soc.h"
-#include "telnet.h"
+
 #include "untar.h"
 #include "libb64/cdecode.h"
 #include "libb64/cencode.h"
@@ -299,18 +300,7 @@ JSValue js_util_generate_uuid(JSContext *ctx, JSValueConst this_val, int argc, J
     return JS_NewStringLen(ctx, uu_str, UUID_STR_LEN-1) ;
 }
 
-
 #ifndef SIMULATION
-JSValue js_repl_set_input_func(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
-    CHECK_ARGC(1)
-    if(!JS_IsFunction(ctx, argv[0])) {
-        THROW_EXCEPTION("REPL input function must be a function type")
-    }
-    telnet_set_input_function(ctx, argv[0]) ;
-    return JS_UNDEFINED ;
-}
-
-
 JSValue js_utils_base64_encode(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(1)
     size_t srclen = 0 ;
@@ -654,7 +644,6 @@ void be_module_utils_require(JSContext *ctx) {
     JSValue utils = JS_NewObject(ctx);
     JS_SetPropertyStr(ctx, beapi, "utils", utils);
 #ifndef SIMULATION
-    JS_SetPropertyStr(ctx, beapi, "_repl_set_input_func", JS_NewCFunction(ctx, js_repl_set_input_func, "_repl_set_input_func", 1));
     JS_SetPropertyStr(ctx, utils, "setLogLevel", JS_NewCFunction(ctx, js_util_set_log_level, "setLogLevel", 1));
     JS_SetPropertyStr(ctx, utils, "untar", JS_NewCFunction(ctx, js_utils_untar, "untar", 1));
     JS_SetPropertyStr(ctx, utils, "base64Encode", JS_NewCFunction(ctx, js_utils_base64_encode, "base64Encode", 1));

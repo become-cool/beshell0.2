@@ -551,6 +551,7 @@ void be_module_mg_require(JSContext *ctx) {
 }
 
 void be_module_mg_loop(JSContext *ctx) {
+    mgr.userdata = ctx ;
     mg_mgr_poll(&mgr, 10);
 }
 

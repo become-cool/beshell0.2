@@ -6,13 +6,10 @@
 #include <sys/stat.h>
 
 #ifndef SIMULATION
-#include "telnet.h"
 #include "sniffer.h"
-#include "webtelnet.h"
-#else
-#include "repl.h"
-#include "http_lws.h"
 #endif
+
+#include "telnet.h"
 
 #include "module_fs.h"
 #include "module_utils.h"
@@ -21,7 +18,7 @@
 #include "module_gpio.h"
 #include "module_serial.h"
 #include "module_socks.h"
-#include "module_http.h"
+// #include "module_http.h"
 #include "module_mg.h"
 #endif
 #include "module_lvgl.h"
@@ -80,7 +77,6 @@ void eval_rc_script(JSContext *ctx, const char * path) {
     }
     free(binpath) ;
 #else
-    ds(fullpath)
     evalScript(ctx, fullpath, false) ;
 #endif
 
@@ -136,14 +132,13 @@ static JSContext * JS_NewCustomContext(JSRuntime *rt)
 #ifndef SIMULATION
     be_module_wifi_require(ctx) ;
     be_module_gpio_require(ctx) ;  
-    be_module_telnet_require(ctx) ;
+    // be_module_telnet_require(ctx) ;
     be_module_serial_require(ctx) ;
     be_module_socks_require(ctx) ;
-    require_module_http(ctx) ;
-#else
-    be_module_mg_require(ctx) ;
-    be_module_repl_require(ctx) ;
+    // require_module_http(ctx) ;
 #endif
+    be_module_mg_require(ctx) ;
+    be_telnet_require(ctx) ;
     be_module_lvgl_require(ctx) ;
 
     return ctx;
@@ -180,10 +175,8 @@ void quickjs_init() {
         free(initScriptCodeBuff) ;
     }
 
-#ifndef SIMULATION
     // ready 包
     telnet_send_ready() ;
-#endif
 }
 
 void quickjs_deinit() {
@@ -216,26 +209,23 @@ void task_js_main(){
 
 #ifndef SIMULATION
     nvs_flash_init();
-
     be_module_fs_init() ;
     be_module_wifi_init() ;
-    be_module_telweb_init() ;
 #endif
+
     be_module_mg_init() ;
     be_module_lvgl_init() ;
+    be_telnet_init() ;
 
 #ifndef SIMULATION
     be_module_socks_init() ;
-    be_module_telnet_init() ;
     be_module_sniffer_init() ;
     be_module_gpio_init() ;
-    be_module_http_init() ;
-#else
-    be_module_repl_init() ;
-    be_module_httplws_init() ;
+    // be_module_http_init() ;
 #endif
 
     quickjs_init() ;
+
 
     while(1) {
 
@@ -244,15 +234,14 @@ void task_js_main(){
             be_module_eventloop_reset(ctx) ;
             be_module_mg_reset(ctx) ;
             be_module_lvgl_reset(ctx) ;
+            be_telnet_reset(ctx) ;
 #ifndef SIMULATION
-            be_module_telnet_reset(ctx) ;
+            // be_module_telnet_reset(ctx) ;
             be_module_gpio_reset(ctx) ;
             be_module_serial_reset(ctx) ;
             be_module_socks_reset(ctx) ;
-            be_module_http_reset(ctx) ;
+            // be_module_http_reset(ctx) ;
             be_module_wifi_reset(ctx) ;
-#else
-            be_module_repl_reset(ctx) ;
 #endif
             quickjs_deinit() ;
             quickjs_init() ;
@@ -262,13 +251,12 @@ void task_js_main(){
 
         js_std_loop(ctx) ;
 #ifndef SIMULATION
-        be_module_telnet_loop(ctx) ;
+        // be_module_telnet_loop(ctx) ;
         be_module_sniffer_loop() ;
         be_module_socks_udp_loop(ctx) ;
         be_module_gpio_loop(ctx) ;
-#else
-        be_module_repl_loop(ctx) ;
 #endif
+        be_telnet_loop(ctx) ;
         be_module_mg_loop(ctx) ;
         be_module_lvgl_loop(ctx) ;
         be_module_eventloop_loop(ctx) ;

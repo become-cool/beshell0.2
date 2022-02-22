@@ -1,5 +1,5 @@
 #include "module_http.h"
-#include "webtelnet.h"
+#include "telnet_ws.h"
 
 #include "utils.h"
 #include <stdio.h>
@@ -12,7 +12,6 @@
 
 #include "cutils.h"
 #include "esp_log.h"
-#include "telnet.h"
 #include "task_js.h"
 #include "eventloop.h"
 
@@ -20,6 +19,7 @@
 #include "esp_spiffs.h"
 #include "esp_littlefs.h"
 
+#define MAX_OPEN_SOCKETS 8
 
 static JSClassID js_http_server_class_id;
 
@@ -207,8 +207,8 @@ void require_module_http(JSContext *ctx) {
     JS_SetPropertyStr(ctx, httpProto, "__proto__", EventEmitterProto);  // 继承自 EventEmitter
 
     // web telnet
-    server_t * webtelnet = http_server_new(ctx, webtelnet_handle()) ;
-    JS_SetPropertyStr(ctx, http, "telnet", webtelnet->jsserver);
+    // server_t * webtelnet = http_server_new(ctx, webtelnet_handle()) ;
+    // JS_SetPropertyStr(ctx, http, "telnet", webtelnet->jsserver);
 
     require_module_http_req(ctx, EventEmitterProto) ;
 

@@ -183,6 +183,8 @@ void init_usb_cdc() {
 #include "lwip/sys.h"
 #include "module_wifi.h"
 
+#include "driver/uart.h"
+
 void app_main(void)
 {
 #ifdef CONFIG_IDF_TARGET_ESP32S2
@@ -192,10 +194,10 @@ void app_main(void)
 
     ESP_ERROR_CHECK(esp_event_loop_create_default());
 
-    // printf("Total heap: %d\n", getHeapSize());
-    // printf("Free heap: %d\n", getFreeHeap());
-    // printf("Total PSRAM: %d\n", getPsramSize());
-    // printf("Free PSRAM: %d\n", getFreePsram());
+    printf("Total heap: %d\n", getHeapSize());
+    printf("Free heap: %d\n", getFreeHeap());
+    printf("Total PSRAM: %d\n", getPsramSize());
+    printf("Free PSRAM: %d\n", getFreePsram());
 
     xTaskCreatePinnedToCore(&task_js_main, "task_js_main", 16*1024, NULL, 5, NULL, 0);
 #endif

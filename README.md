@@ -171,3 +171,19 @@ Backtrace:0x4008f4c2:0x3ffc3420 0x4008fccd:0x3ffc3440 0x40097a36:0x3ffc3460 0x40
 ```
 xtensa-esp32-elf-addr2line -pfiaC -e build/beshell.elf 0x4008f4c2:0x3ffc3420 0x4008fccd:0x3ffc3440 0x40097a36:0x3ffc3460 0x4017acc3:0x3ffc34d0 0x4019ac39:0x3ffc34f0 0x400deb7b:0x3ffc3530 0x400f92d2:0x3ffc3580 0x400e8c79:0x3ffc35d0 0x400dd9e1:0x3ffc3610 0x400dda15:0x3ffc3640 0x400ddb0e:0x3ffc3670 0x4009337e:0x3ffc3690
 ```
+
+输出：
+```
+0x4008f4c2: panic_abort at /mnt/d/lib/esp-idf/components/esp_system/panic.c:356
+0x4008fccd: esp_system_abort at /mnt/d/lib/esp-idf/components/esp_system/system_api.c:112
+0x40097a36: abort at /mnt/d/lib/esp-idf/components/newlib/abort.c:46
+0x4017acc3: JS_DefineAutoInitProperty at /mnt/d/project/robot/beshell/build/../components/quickjs/quickjs.c:9234
+0x4019ac39: JS_SetPropertyFunctionList at /mnt/d/project/robot/beshell/build/../components/quickjs/quickjs.c:35770
+0x400deb7b: qjs_def_class at /mnt/d/project/robot/beshell/build/../main/utils.c:100
+0x400f92d2: be_lv_widgets_gen_require at /mnt/d/project/robot/beshell/build/../main/modules/lvgl/widgets_gen.c:7467
+0x400e8c79: be_module_lvgl_require at /mnt/d/project/robot/beshell/build/../main/modules/lvgl/module_lvgl.c:328
+0x400dd9e1: JS_NewCustomContext at /mnt/d/project/robot/beshell/build/../main/task_js.c:141
+0x400dda15: quickjs_init at /mnt/d/project/robot/beshell/build/../main/task_js.c:153
+0x400ddb0e: task_js_main at /mnt/d/project/robot/beshell/build/../main/task_js.c:220
+0x4009337e: vPortTaskWrapper at /mnt/d/lib/esp-idf/components/freertos/port/xtensa/port.c:168
+```

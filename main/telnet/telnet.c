@@ -35,15 +35,14 @@ uint8_t mk_echo_pkgid() {
 
 
 void telnet_output(uint8_t cmd, int pkgid, const char * data, size_t datalen) {
+
 	// for WebSocket(wifi)
     telnet_ws_output(cmd, pkgid, data, datalen) ;
 	
 	// for serial(usb) or stdio(simulators)
 #ifdef SIMULATION
-    printf("%.*s\n", datalen, data) ;
     fflush(stdout) ;
 #else
-	// ds(data)
 	telnet_serial_send_pkg(pkgid, cmd, data, datalen) ;
 #endif
 }
@@ -67,6 +66,9 @@ void telnet_run(JSContext * ctx, uint8_t pkgid, uint8_t remain, uint8_t cmd, uin
 		JS_FreeValue(ctx, ret) ;
 		JS_FreeValue(ctx, argv[3]) ;
 		free(argv) ;
+	}
+	else {
+		printf("_func_repl_input is NULL or not Function\n") ;
 	}
 }
 
@@ -155,11 +157,10 @@ void be_telnet_require(JSContext *ctx) {
 
 }
 void be_telnet_loop(JSContext *ctx) {
-	be_telnet_stdio_loop(ctx) ;
-	
 #ifdef SIMULATION
 	be_telnet_stdio_loop(ctx) ;
 #else
+	be_telnet_serial_loop(ctx) ;
 #endif
 }
 
@@ -170,5 +171,6 @@ void be_telnet_reset(JSContext *ctx) {
 #ifdef SIMULATION
 	be_telnet_stdio_reset(ctx) ;
 #else
+	be_telnet_serial_reset(ctx) ;
 #endif
 }

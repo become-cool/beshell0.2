@@ -89,7 +89,6 @@ void be_telnet_serial_loop(JSContext *ctx) {
 		return ;
 	} 
 	
-
 	// UART 接收
 	if (FD_ISSET(uart_fd, &telnet_rfds)) {
 		int len = uart_read_bytes(0, recv_buff, sizeof(recv_buff), 0) ;
@@ -188,6 +187,7 @@ void on_pkg_receive (uint8_t pkgid, uint8_t remain, uint8_t cmd, uint8_t * data,
 
 	// JS代码/命令
 	if(cmd==CMD_RUN || cmd==CMD_CALL || cmd==CMD_CALL_ASYNC) {
+		// printf("run cmd\n") ;
 		// *(data+datalen) = '\0' ;
 		telnet_run(ctx, pkgid, remain, cmd, data, datalen) ;
 	}

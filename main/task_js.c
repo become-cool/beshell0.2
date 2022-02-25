@@ -34,7 +34,7 @@
 
 JSRuntime *rt;
 JSContext *ctx;
-uint8_t boot_level = 3 ;
+uint8_t boot_level = 5 ;
 bool requst_reset = false ;
 char * requst_app = NULL ;
 
@@ -122,13 +122,14 @@ static JSContext * JS_NewCustomContext(JSRuntime *rt)
     JS_FreeValue(ctx, global);
     
     be_module_fs_require(ctx) ;
+    be_module_utils_require(ctx) ;
+    be_module_process_require(ctx) ;
 
     // base 函数
+    eval_rc_script(ctx, "/lib/base/console.js") ;
     eval_rc_script(ctx, "/lib/base/events.js") ;
     eval_rc_script(ctx, "/lib/base/require.js") ;
 
-    be_module_utils_require(ctx) ;
-    be_module_process_require(ctx) ;  
 #ifndef SIMULATION
     be_module_wifi_require(ctx) ;
     be_module_gpio_require(ctx) ;  

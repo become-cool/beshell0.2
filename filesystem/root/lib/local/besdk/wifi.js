@@ -171,8 +171,7 @@ function defaultConfig() {
 }
 function readWiFiConfig() {
     try{
-        var json = beapi.fs.readFileSync(ConfigPath)
-        json = JSON.parse(json)
+        var json = JSON.load(ConfigPath)
     }catch(e){
         console.log(e)
         console.log("bad json file:", ConfigPath)
@@ -182,9 +181,9 @@ function readWiFiConfig() {
 }
 
 
-wifi.save = function(netif) {    
+wifi.save = function(netif) {
     try{
-        var json = beapi.fs.readFileSync(ConfigPath)
+        var json = beapi.fs.readFileSync(ConfigPath).asString()
         json = JSON.parse(json)
     }catch(e) {
         console.log(e)
@@ -216,7 +215,10 @@ wifi.save = function(netif) {
     }
 
     if(changed) {
-        beapi.fs.writeFileSync(ConfigPath, JSON.stringify(json,null,4))
+        return !! beapi.fs.writeFileSync(ConfigPath, JSON.stringify(json,null,4))
+    }
+    else {
+        return false
     }
 }
 function connectToAP() {
@@ -243,7 +245,7 @@ wifi.restore = function() {
 
     let json = readWiFiConfig()
     let status = wifi.status()
-
+    
     // sta
     if(!status.sta.connected) {
         setTimeout(connectToAP,1000)
@@ -252,11 +254,11 @@ wifi.restore = function() {
         }
     }
     else {
-        console.log("wifi status", status.status)
+        console.log("wifi status", status)
     }
 
     // ap
-    let ssid = json.ap.ssid.replace("${UUID}", beapi.utils.uuid().substr(-4))
+    let ssid = json.ap.ssid.replace("${UUID}", beapi.utils.partUUID().substr(-4))
     if( !status.ap.started || status.ap.ssid!=ssid ){
         beapi.wifi.startAP(ssid, json.ap.password)
     }

@@ -1,7 +1,5 @@
 (async function(){
-    try{
-        require("/lib/base/utils.js")
-        
+    try{        
         require("./init.d/repl.js")
 
         require("./init.d/banner.js")()

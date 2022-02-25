@@ -1,8 +1,5 @@
 (async function(){
     try{
-        require("/lib/base/utils.js")
-        sleep(0)
-
         require("./init.d/repl.js")
         sleep(0)
 
@@ -12,8 +9,10 @@
 
         if(!process.simulate) {
             global.WiFi = require("besdk/wifi")
-            require("./init.d/beconsoled.js")
-            sleep(0)
+            WiFi.restore()
+
+            // require("./init.d/beconsoled.js")
+            // sleep(0)
         }
         
         await require("./init.d/display.js")()

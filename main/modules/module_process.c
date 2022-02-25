@@ -156,42 +156,46 @@ JSValue js_console_print(JSContext *ctx, JSValueConst this_val, int argc, JSValu
     return JS_UNDEFINED ;
 }
 
-JSValue js_console_log(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-    // const char *str;
+// JSValue js_console_log(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+//     // const char *str;
 
-    char * strlst[argc] ;
-    size_t lenlst[argc] ;
-    size_t totalLen = 0 ;
+//     char * strlst[argc] ;
+//     size_t lenlst[argc] ;
+//     size_t totalLen = 0 ;
     
-    int i;
-    for(i = 0; i < argc; i++) {
-        strlst[i] = JS_ToCStringLen(ctx, &lenlst[i], argv[i]);
-        if (!strlst[i])
-            return JS_EXCEPTION;
-        totalLen+= lenlst[i] + 1 ; // +1 表示间隔空格,和最后的0字节
-    }
+//     int i;
+//     for(i = 0; i < argc; i++) {
+//         strlst[i] = JS_ToCStringLen(ctx, &lenlst[i], argv[i]);
+//         if (!strlst[i])
+//             return JS_EXCEPTION;
+//         totalLen+= lenlst[i] + 1 ; // +1 表示间隔空格,和最后\n
+//     }
+//     totalLen+=1 ; // ending 0字节
 
-    char * buff = malloc( totalLen ) ;
-    char * writer = buff ;
-    for(i = 0; i < argc; i++) {
-        memcpy(writer, strlst[i], lenlst[i]) ;
-        writer+= lenlst[i] ;
-        if(i<argc-1) {
-            memcpy(writer, " ", 1) ;
-            writer++ ;
-        }
-    }
-    buff[totalLen-1] = 0 ;
+//     char * buff = malloc( totalLen ) ;
+//     char * writer = buff ;
+//     for(i = 0; i < argc; i++) {
+//         memcpy(writer, strlst[i], lenlst[i]) ;
+//         writer+= lenlst[i] ;
+//         if(i<argc-1) {
+//             memcpy(writer, " ", 1) ;
+//         }
+//         else {
+//             memcpy(writer, "\n", 1) ;
+//         }
+//         writer++ ;
+//     }
+//     buff[totalLen-1] = 0 ;
 
-    telnet_output(CMD_OUTPUT, mk_echo_pkgid(), buff, totalLen-1) ;
+//     telnet_output(CMD_OUTPUT, mk_echo_pkgid(), buff, totalLen-1) ;
 
-    for(i = 0; i < argc; i++) {
-        JS_FreeCString(ctx, strlst[i]);
-    }
-    free(buff) ;
+//     for(i = 0; i < argc; i++) {
+//         JS_FreeCString(ctx, strlst[i]);
+//     }
+//     free(buff) ;
     
-    return JS_UNDEFINED;
-}
+//     return JS_UNDEFINED;
+// }
 
 
 
@@ -241,8 +245,8 @@ void be_module_process_require(JSContext *ctx) {
     // console
     JSValue console = JS_NewObject(ctx) ;
     JS_SetPropertyStr(ctx, console, "print", JS_NewCFunction(ctx, js_console_print, "print", 1));
-    JS_SetPropertyStr(ctx, console, "log", JS_NewCFunction(ctx, js_console_log, "log", 1));
-    JS_SetPropertyStr(ctx, console, "error", JS_NewCFunction(ctx, js_console_log, "error", 1));
+    // JS_SetPropertyStr(ctx, console, "log", JS_NewCFunction(ctx, js_console_log, "log", 1));
+    // JS_SetPropertyStr(ctx, console, "error", JS_NewCFunction(ctx, js_console_log, "error", 1));
     JS_SetPropertyStr(ctx, global, "console", console);
 
 	JS_FreeValue(ctx, global);

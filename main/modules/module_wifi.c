@@ -103,7 +103,7 @@ static void esp32_wifi_eventHandler(void* arg, esp_event_base_t event_base, int3
         eventType = 2 ;
     }
 
-    if( !JS_IsUndefined(__event_handle) && __event_handle_ctx!=NULL && JS_IsFunction(__event_handle_ctx, __event_handle) ) {
+    if( __event_handle_ctx!=NULL && JS_IsFunction(__event_handle_ctx, __event_handle) ) {
         MAKE_ARGV3(argv, JS_NewInt32(__event_handle_ctx, eventType), JS_NewInt32(__event_handle_ctx, event_id), JS_UNDEFINED)
         // dis reason
         if(event_base==WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {

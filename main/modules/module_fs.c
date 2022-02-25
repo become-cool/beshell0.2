@@ -579,7 +579,7 @@ bool be_module_fs_init() {
         .base_path = "/fs",
         .partition_label = PARTITION_LABEL_ROOT,
         .format_if_mount_failed = true,
-        .block_size = 1024
+        .block_size = 4096
     };
     if(esp_vfs_littlefs_register(&conf_root)!=ESP_OK){
         printf("Failed to mount fs.\n") ;

@@ -49,12 +49,14 @@ beapi.telnet.registerHandle(function(pkgid, remain, pkgcmd, code){
         else {
             let res = evalAsFile(code, "REPL")
             if(pkgcmd == CMD_CALL) {
-                beapi.telnet.rspn(pkgid, CMD_RSPN, stringify(res))
+                beapi.telnet.rspn(pkgid, CMD_RSPN, console.stringify(res))
             }
         }
-
     } catch(e) {
-        beapi.telnet.rspn(pkgid, CMD_EXCEPTION, stringify(e))
+        if(e instanceof Error) {
+            e = {message:e.message,stack:e.stack}
+        }
+        beapi.telnet.rspn(pkgid, CMD_EXCEPTION, console.stringify(e))
         return
     }
 })
@@ -88,8 +90,11 @@ function cd(path) {
     return process.env.PWD
 }
 
-function ls() {
-    for(let item of beapi.fs.readdirSync(process.env.PWD)) {
+function ls(path) {
+    if(!path) {
+        path = process.env.PWD
+    }
+    for(let item of beapi.fs.readdirSync(path)) {
         if(item=='.')
             continue
         if( beapi.fs.isDirSync(process.env.PWD+'/'+item) ) {
@@ -186,31 +191,6 @@ const ShellCmds = {
     , compile
 }
 
-
-function stringify(value) {
-    let pool = []
-    let str = JSON.stringify(value, (key,value)=>{
-        if( key=="_handles" ) {
-            return undefined
-        }
-        if(value===null) {
-            return value
-        }
-        if( typeof value=="object" || typeof value=="function" ) {
-            let idx = pool.indexOf(value)
-            if( idx>=0 ) {
-                return "<circular reference>#"+idx
-            }
-            pool.push(value)
-            if(typeof value=="function") {
-                return (value.name||'')+'<function>'
-            }
-        }
-        return value
-    },2)
-    pool.length = 0
-    return str
-}
 
 function runShellCmd(code) {
     let argvs = code.trim().split(/ +/)

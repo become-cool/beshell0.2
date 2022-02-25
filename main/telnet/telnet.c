@@ -74,14 +74,12 @@ void telnet_run(JSContext * ctx, uint8_t pkgid, uint8_t remain, uint8_t cmd, uin
 
 
 void js_dump_err(JSContext *ctx, JSValueConst val) {
-    const char * str = JS_ToCString(ctx, val);
-    if (str) {
-		printf(str);
-        JS_FreeCString(ctx, str);
-    } else {
-        printf("[exception]\n");
+	size_t len ;
+    const char * str = JS_ToCStringLen(ctx, &len, val);
+	// printf("error:%s\n",str) ;
+    if (len) {
+		telnet_output(CMD_OUTPUT, mk_echo_pkgid(), str, len) ;
     }
-    fflush(stdout);
 }
 
 void echo_error(JSContext * ctx) {
@@ -102,7 +100,7 @@ void echo_error(JSContext * ctx) {
 
 void telnet_send_ready() {
 	char * buff = mallocf("{\"firmware\":\"beshell\",\"version\":\"%s\",\"level\":%d}", BESHELL_VERSION, task_boot_level()) ;
-    telnet_output(0,CMD_READY,buff, strlen(buff)) ;
+    telnet_output(CMD_READY, 0, buff, strlen(buff)) ;
 	free(buff) ;
 }
 

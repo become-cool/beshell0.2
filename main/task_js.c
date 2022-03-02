@@ -156,11 +156,8 @@ void quickjs_init() {
 
     // 0等级，不加载任何启动脚本，作为安全模式
     if(boot_level>0) { 
-#ifndef SIMULATION    
         echof("init level: %d\n", boot_level) ;
-#else
-        printf("init level: %d\n", boot_level) ;
-#endif
+        
         if(requst_app) {
 
             JSValue beapi = js_get_glob_prop(ctx, 1, "beapi") ;
@@ -203,15 +200,16 @@ void quickjs_deinit() {
 #endif
 }
 
-void task_js_main(){
+void task_js_main(const char * script){
+    
 
     be_module_lvgl_malloc_buffer() ;
+    be_module_wifi_init() ;
+    
     be_module_process_init() ;
 
 #ifndef SIMULATION
-    nvs_flash_init();
     be_module_fs_init() ;
-    be_module_wifi_init() ;
 #endif
 
     be_module_mg_init() ;
@@ -227,6 +225,9 @@ void task_js_main(){
 
     quickjs_init() ;
 
+    if(script) {
+        evalScript(ctx, script, false) ;
+    }
 
     while(1) {
 

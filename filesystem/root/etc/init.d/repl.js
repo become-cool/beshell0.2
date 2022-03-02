@@ -6,16 +6,6 @@ const CMD_CALL_ASYNC = 3 ;
 const CMD_RSPN = 4 ;
 const CMD_EXCEPTION = 5 ;
 
-function _mkresolve(pkgid) {
-    return function(ret) {
-        beapi.telnet.rspn(pkgid, CMD_RSPN, JSON.stringify(ret))
-    }
-}
-function _mkreject(pkgid) {
-    return function(ret) {
-        beapi.telnet.rspn(pkgid, CMD_EXCEPTION, JSON.stringify(ret))
-    }
-}
 
 let _pending_pkg_id = -1
 let _pending_code = ''
@@ -39,12 +29,12 @@ beapi.telnet.registerHandle(function(pkgid, remain, pkgcmd, code){
 
     try{
         if( runShellCmd(code) ) {
-            beapi.telnet.rspn(pkgid, CMD_RSPN, "")
+            beapi.telnet.rspn(pkgid, CMD_RSPN, "<~ASSHELL>")
             return
         }
 
         if(pkgcmd == CMD_CALL_ASYNC) {
-            evalAsFile(`(async ()=>{let resolve = repl._mkresolve(${pkgid});let reject = repl._mkreject(${pkgid}); try{${code}}catch(e){reject(e)}})()`, "REPL")
+            evalAsFile(`(async ()=>{let resolve = beapi.repl._mkresolve(${pkgid});let reject = beapi.repl._mkreject(${pkgid}); try{${code}}catch(e){reject(e)}})()`, "REPL")
         }
         else {
             let res = evalAsFile(code, "REPL")
@@ -95,7 +85,7 @@ function ls(path) {
         path = process.env.PWD
     }
     for(let item of beapi.fs.readdirSync(path)) {
-        if(item=='.')
+        if(item=='.' || item=='..')
             continue
         if( beapi.fs.isDirSync(process.env.PWD+'/'+item) ) {
             console.log(item+'/')
@@ -202,4 +192,18 @@ function runShellCmd(code) {
     ShellCmds[cmd].apply(null, argvs)
 
     return true
+}
+
+beapi.repl = {
+    _mkresolve(pkgid) {
+        return function(ret) {
+            beapi.telnet.rspn(pkgid, CMD_RSPN, console.stringify(ret))
+        }
+    } ,
+    _mkreject(pkgid) {
+        return function(ret) {
+            beapi.telnet.rspn(pkgid, CMD_EXCEPTION, console.stringify(ret))
+        }
+    } ,
+    cmds: ShellCmds
 }

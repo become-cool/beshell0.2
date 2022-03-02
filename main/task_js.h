@@ -3,7 +3,7 @@
 
 #include "quickjs-libc.h"
 
-void task_js_main() ;
+void task_js_main(const char * script) ;
 JSContext * task_current_context() ;
 
 uint8_t task_boot_level() ;

@@ -207,9 +207,93 @@ static void upgrade_ws(struct mg_connection *c, struct mg_http_message *hm, WS_T
     }
 }
 
-static void fn(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
+static void response_fs(struct mg_connection *c, struct mg_http_message *hm, const char * path) {
+
+    // 判断 路径不存在
+    struct stat statbuf;
+    if(stat(path,&statbuf)<0) {
+        mg_http_reply(c, 404,  "Content-Type: application/json\r\n", "{error: \"%s\"}", "Not Found");
+        return ;
+    }
+
+    if(mg_vcmp(&hm->method, "GET")==0) {
+        // 文件
+        if(S_ISREG(statbuf.st_mode)) {
+            mg_http_reply(c, 200, "", "file:%s", path);
+        }
+        // 目录
+        else if(S_ISDIR(statbuf.st_mode)) {
+            listdir(c, path) ;
+        }
+        // unknow
+        else {
+            mg_http_reply(c, 500,  "Content-Type: application/json\r\n", "{error: \"%s\"}", "Unknow File Type");
+        }
+    }
+    // 上传文件  (CROS 浏览器跨域时的预检请求)
+    else if(mg_vcmp(&hm->method, "OPTIONS")==0){
+        mg_http_reply(c, 204,  
+                "Access-Control-Allow-Origin: *\r\n"
+                "Access-Control-Request-Method: GET, POST, OPTIONS\r\n"
+                "Access-Control-Request-Headers: content-type\r\n"
+                "Content-Type: application/octet-stream\r\n"
+        , "", "");
+    }
+    else if(mg_vcmp(&hm->method, "POST")==0) {
+        // printf("post path=%s, body len:%d\n", path, hm->body.len); ;
+
+        // 检查目录是否存在
+        if(!S_ISDIR(statbuf.st_mode)) {
+            mg_http_reply(c, 500, "", "{error: \"%s\"}", "arg path is not a dir") ;
+            return ;
+        }
+
+        struct mg_http_part part;
+        for(int pos=0; (pos=mg_http_next_multipart(hm->body, 0, &part));) {
+            if( mg_vcmp(&part.name, "file")==0 ) {
+
+                const char * fullpath = mallocf("%s/%.*s", path, part.filename.len, part.filename.ptr) ;
+                ds(fullpath)
+                dn(part.body.len)
+                
+                FILE * fd = fopen(fullpath, "w");
+                if(NULL==fd) {
+                    free(fullpath) ;
+                    mg_http_reply(c, 500, "", "{error: \"%s\"}", "can not open file") ;
+                    return ;
+                }
+                free(fullpath) ;
+
+	            size_t wroteBytes = fwrite(part.body.ptr, 1, part.body.len, fd);
+                fclose(fd) ;
+
+                if(wroteBytes==part.body.len) {
+                    mg_http_reply(c, 200, NULL, NULL, NULL) ;
+                }
+                else {
+                    mg_http_reply(c, 200, NULL, "{error: \"%s\"}", "some error occur") ;
+                }
+                return ;
+            }
+        }
+
+        mg_http_reply(c, 403, "", "{error: \"%s\"}", "missing file") ;
+    }
+    // 删除文件/目录
+    else if(mg_vcmp(&hm->method, "DELETE")==0) {
+        dd
+    }
+    // 无效请求
+    else {
+        mg_http_reply(c, 500,  "Content-Type: application/json\r\n", "{error: \"%s\"}", "Unknow Method");
+    }
+}
+
+static void response(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
+
     if (ev == MG_EV_HTTP_MSG) {
         struct mg_http_message *hm = (struct mg_http_message *)ev_data;
+        
         if (mg_http_match_uri(hm, "/repl")) {
             upgrade_ws(c, hm, WS_REPL) ;
         }
@@ -219,6 +303,7 @@ static void fn(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
         else if( hm->uri.len>=3 && hm->uri.ptr[0]=='/' && hm->uri.ptr[1]=='f' && hm->uri.ptr[2]=='s'
             && (hm->uri.len==3 || hm->uri.ptr[3]=='/')
         ) {
+
 
 #ifndef SIMULATION
             char * path = malloc(hm->uri.len+1) ;
@@ -240,34 +325,7 @@ static void fn(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
             }
 
 #endif
-            if(mg_vcmp(&hm->method, "GET")==0) {
-                struct stat statbuf;
-                // 不存在
-                if(stat(path,&statbuf)<0) {
-                    mg_http_reply(c, 404,  "Content-Type: application/json\r\n", "{error: \"%s\"}", "Not Found");
-                }
-                // 文件
-                else if(S_ISREG(statbuf.st_mode)) {
-                    mg_http_reply(c, 200, "", "file:%s", path);
-                }
-                // 目录
-                else if(S_ISDIR(statbuf.st_mode)) {
-                    listdir(c, path) ;
-                }
-                // unknow
-                else {
-                    mg_http_reply(c, 500,  "Content-Type: application/json\r\n", "{error: \"%s\"}", "Unknow File Type");
-                }
-            }
-            else if(mg_vcmp(&hm->method, "POST")==0) {
-                dd
-            }
-            else if(mg_vcmp(&hm->method, "DELETE")==0) {
-                dd
-            }
-            else {
-                mg_http_reply(c, 500,  "Content-Type: application/json\r\n", "{error: \"%s\"}", "Unknow Method");
-            }
+            response_fs(c, hm, path) ;
 
             free(path) ;
         }
@@ -363,5 +421,5 @@ void telnet_ws_output(uint8_t cmd, int pkgid, const char * data, size_t datalen)
 
 void be_telnet_ws_init() {
     fs_root = mallocf("/fs/=%s", vfs_path_prefix) ;
-    mg_http_listen(be_module_mg_mgr(), s_listen_on, fn, NULL); // Create HTTP listener
+    mg_http_listen(be_module_mg_mgr(), s_listen_on, response, NULL); // Create HTTP listener
 }

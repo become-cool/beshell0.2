@@ -3,6 +3,8 @@ all:
 	./build.sh
 	
 fs:
+	./pc/build/beshell --root ./filesystem/root --script ./pc/compile-fs.js
+
 	node filesystem/packfs.js
 	bin/mklittlefs -c filesystem/tmp/root -s 524288 filesystem/img/fs-root.img -d 5
 	bin/mklittlefs -c filesystem/tmp/home -s 262144 filesystem/img/fs-home.img -d 5

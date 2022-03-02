@@ -11,15 +11,15 @@
             global.WiFi = require("besdk/wifi")
             WiFi.restore()
 
-            // require("./init.d/beconsoled.js")
-            // sleep(0)
+            require("./init.d/beconsoled.js")
+            sleep(0)
         }
         
         await require("./init.d/display.js")()
         sleep(0)
         
-        require("./init.d/desktop.js")
-        sleep(0)
+        // require("./init.d/desktop.js")
+        // sleep(0)
 
         let rcpath = process.env.HOME + "/.beshellrc"
         if(beapi.fs.isFileSync(rcpath)) {

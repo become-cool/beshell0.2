@@ -41,6 +41,8 @@ void telnet_output(uint8_t cmd, int pkgid, const char * data, size_t datalen) {
 	
 	// for serial(usb) or stdio(simulators)
 #ifdef SIMULATION
+	printf(data) ;
+	printf("\n") ;
     fflush(stdout) ;
 #else
 	telnet_serial_send_pkg(pkgid, cmd, data, datalen) ;

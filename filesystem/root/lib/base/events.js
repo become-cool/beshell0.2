@@ -32,10 +32,10 @@ beapi.EventEmitter = class EventEmitter {
      */
     once(eventName, handle, norepeat) {
         var wrapper =  (...args) => {
-            this.off(eventName, wrapper)
+            this.off(eventName, wrapper.__origin)
             handle.apply(this, args)
         }
-        wrapper.__origin = handle
+        wrapper.__origin = this.originHanlde(handle)
         this.on(eventName, wrapper, norepeat)
         return
     }

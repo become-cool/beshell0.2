@@ -387,32 +387,40 @@ JSValue js_fs_readdir_sync(JSContext *ctx, JSValueConst this_val, int argc, JSVa
     }
     
     struct dirent *dirEnt;
-    JSValue ret = JS_NULL ;
-    
-    if(detail)
-        ret = JS_NewObject(ctx) ;
-    else
-        ret = JS_NewArray(ctx) ;
+    JSValue ret = JS_NewArray(ctx) ;
 
     int idx = 0 ;
     struct stat statbuf;
     while((dirEnt = readdir(dir))) {
         if(detail) {
 
+            JSValue item = JS_NewObject(ctx) ;
+            JS_SetPropertyUint32(ctx, ret, idx++, item) ;
+            JS_SetPropertyStr(ctx, item, "name", JS_NewString(ctx, dirEnt->d_name) ) ;
+
             char * childpath = mallocf("%s/%s",path,dirEnt->d_name) ;
             if(!childpath){
-                pf("could not malloc for path %s/%s ?", path, dirEnt->d_name)
-                continue ;
+                // pf("could not malloc for path %s/%s ?", path, dirEnt->d_name)
+                THROW_EXCEPTION("could not malloc for path %s/%s ?", path, dirEnt->d_name)
+                break ;
             }
             if(stat(childpath,&statbuf)!=0) {
-                JS_SetPropertyStr(ctx, ret, dirEnt->d_name, JS_NewString(ctx, "unknow")) ;
+                JS_SetPropertyStr(ctx, item, "type", JS_NewString(ctx, "unknow") ) ;
             }
             else {
-                JS_SetPropertyStr(ctx, ret, dirEnt->d_name, JS_NewString(ctx, S_ISDIR(statbuf.st_mode)? "dir": "file")) ;
+                if(S_ISDIR(statbuf.st_mode)) {
+                    JS_SetPropertyStr(ctx, item, "type", JS_NewString(ctx, "dir") ) ;
+                }
+                else {
+                    JS_SetPropertyStr(ctx, item, "type", JS_NewString(ctx, "file") ) ;
+                    JS_SetPropertyStr(ctx, item, "size", JS_NewUint32(ctx, statbuf.st_size) ) ;
+                }
             }
+            
             free(childpath) ;
-        } else
+        } else {
             JS_SetPropertyUint32(ctx, ret, idx++, JS_NewString(ctx, dirEnt->d_name)) ;
+        }
     }
 
     free(path) ;
@@ -433,6 +441,7 @@ bool rm(const char * path, bool recursive) {
 
     // 直接删除文件
     if(S_ISREG(statbuf.st_mode)) {
+        // printf("unlink(%s)\n",path) ;
         return unlink(path)>-1 ;
     }
 
@@ -441,18 +450,15 @@ bool rm(const char * path, bool recursive) {
         // 递归删除文件/子目录
         if(recursive) {
             DIR* dir = opendir(path);
-            size_t pathlen = strlen(path) ;
             if(dir) {
                 struct dirent *dirEnt;
                 while((dirEnt = readdir(dir))) {
-                    size_t namelen = strlen(dirEnt->d_name) ;
-                    char * childpath = malloc(pathlen+namelen+2) ;
-                    if(childpath) {
-                        memcpy(childpath, path, pathlen) ;
-                        childpath[pathlen] = '/' ;
-                        memcpy(childpath+pathlen+1, dirEnt->d_name, namelen) ;
-                        childpath[pathlen+namelen+1] = 0 ;
-                        
+                    const char * childpath = mallocf("%s/%s",path, dirEnt->d_name) ;
+                    if(strcmp(dirEnt->d_name, ".")==0 || strcmp(dirEnt->d_name, "..")==0) { 
+                        continue ;
+                    }
+                    // ds(childpath)
+                    if(childpath) {                        
                         rm(childpath, recursive) ;
                         free(childpath) ;
                     }
@@ -460,6 +466,7 @@ bool rm(const char * path, bool recursive) {
             }
         }
 
+        // printf("rmdir(%s)\n",path) ;
         return rmdir(path) > -1 ;
     }
 

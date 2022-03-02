@@ -103,6 +103,19 @@ JSValue js_process_reboot(JSContext *ctx, JSValueConst this_val, int argc, JSVal
     return JS_UNDEFINED ;
 }
 
+
+#ifdef SIMULATION
+JSValue js_process_exit(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    int code = 0 ;
+    if(argc>1) {
+        JS_ToInt32(ctx, &code, argv[0]) ;
+    }
+
+    exit(code) ;
+    return JS_UNDEFINED ;
+}
+#endif
+
 JSValue js_process_memory_usage(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     (void) argc ;
     (void) argv ;
@@ -234,6 +247,7 @@ void be_module_process_require(JSContext *ctx) {
 #else
     JS_SetPropertyStr(ctx, versions, "esp-idf", JS_NewString(ctx, "none"));
     JS_SetPropertyStr(ctx, process, "simulate", JS_NewBool(ctx, true));
+    JS_SetPropertyStr(ctx, process, "exit", JS_NewCFunction(ctx, js_process_exit, "exit", 1));
 #endif
     JS_SetPropertyStr(ctx, versions, "quickjs", JS_NewString(ctx, QUICKJS_VERSION));
     JS_SetPropertyStr(ctx, process, "versions", versions);

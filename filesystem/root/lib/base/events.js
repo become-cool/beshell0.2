@@ -40,6 +40,22 @@ beapi.EventEmitter = class EventEmitter {
         return
     }
 
+    /**
+     * 
+     * @param {string[]} eventName array
+     * @param {function} handle 
+     */
+    race(events, callback) {
+        let h = (evt, ...args) => {
+            if(!events.includes(evt)) {
+                return
+            }
+            this.off("*", h)
+            callback(evt, ...args)
+        }
+        this.on("*", h)
+    }
+
     off(eventName, handle, all) {
         if(!this._handles[eventName]) {
             return

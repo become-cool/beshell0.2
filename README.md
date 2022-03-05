@@ -156,6 +156,16 @@ static camera_config_t camera_config = {
 Component config > driver configurations > RTCI0
 ```
 
+## WiFi 问题
+
+`wifi` 会占用很大 DMA 内存, 如果事先占用过多 DMA 内存, 则在 `esp_wifi_start()` 时会直接崩溃, 或启动 AP 后拒绝其他设备连接.
+
+`heap_caps_malloc(N, MALLOC_CAP_DMA)` 函数调用会分配 DMA 内存.
+
+出于性能考虑, IO密集型任务, 往往也需要 DMA内存, 需要额外注意 DMA内存的使用.
+
+例如 `lvgl`的显存 (lv_disp_draw_buf_init) , 经过反复实验, 不要超过 `320*15*2` .
+
 
 ## 程序崩溃时调用路径定位
 

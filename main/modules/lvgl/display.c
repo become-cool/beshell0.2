@@ -27,6 +27,7 @@ typedef struct {
 
 
 void free_disp_drv(JSContext * ctx, lv_disp_t * disp) {
+    printf("free_disp_drv()") ;
     if(disp->driver){
         if(disp->driver->draw_buf) {
             free(disp->driver->draw_buf) ;

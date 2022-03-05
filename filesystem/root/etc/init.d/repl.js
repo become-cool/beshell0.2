@@ -173,11 +173,14 @@ function reset(level) {
         process.reset(level)
     }
 }
+function reboot() {
+    process.reboot()
+}
 
 const ShellCmds = {
     cd, pwd, ls, cp, rm, mv, touch, cat
     , require:cmd_require
-    , free, reset
+    , free, reset, reboot
     , compile
 }
 

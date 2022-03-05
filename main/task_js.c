@@ -5,31 +5,28 @@
 #include "eventloop.h"
 #include <sys/stat.h>
 
-#ifndef SIMULATION
-#include "sniffer.h"
-#endif
-
 #include "telnet.h"
-
 #include "module_fs.h"
 #include "module_utils.h"
+
 #ifndef SIMULATION
+#include "sniffer.h"
 #include "module_wifi.h"
 #include "module_gpio.h"
 #include "module_serial.h"
 #include "module_socks.h"
-// #include "module_http.h"
-#include "module_mg.h"
-#endif
-#include "module_lvgl.h"
-#include "module_process.h"
+#include "module_metadata.h"
 
-#ifndef SIMULATION
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include <nvs_flash.h>
 #include "esp_vfs_fat.h"
 #endif
+
+#include "module_mg.h"
+#include "module_lvgl.h"
+#include "module_process.h"
+
 
 
 JSRuntime *rt;
@@ -202,21 +199,20 @@ void quickjs_deinit() {
 
 void task_js_main(const char * script){
     
-
     be_module_lvgl_malloc_buffer() ;
-    be_module_wifi_init() ;
-    
     be_module_process_init() ;
 
 #ifndef SIMULATION
     be_module_fs_init() ;
 #endif
 
+    be_module_wifi_init() ;
     be_module_mg_init() ;
     be_module_lvgl_init() ;
     be_telnet_init() ;
 
 #ifndef SIMULATION
+    module_metadata_init() ;
     be_module_socks_init() ;
     be_module_sniffer_init() ;
     be_module_gpio_init() ;

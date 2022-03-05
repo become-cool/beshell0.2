@@ -6,6 +6,7 @@
 
         if(!process.simulate) {
             global.WiFi = require("besdk/wifi")
+            WiFi.autostart()
         }
 
         await require("./init.d/display.js")()

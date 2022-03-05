@@ -69,6 +69,8 @@ wifi.stop = beapi.wifi.stop
 wifi.mode = beapi.wifi.getMode
 wifi.setMode = beapi.wifi.setMode
 
+wifi.staStarted = beapi.wifi.staStarted
+wifi.apStarted = beapi.wifi.apStarted
 
 function contrastStatus(b) {
     let mode = wifi.mode()
@@ -84,93 +86,90 @@ function contrastStatus(b) {
 wifi.isReady = function(){
     return contrastStatus(true)
 }
-wifi.start = function() {
-    return new Promise(resolve=>{
-        beapi.wifi.start()
+wifi.start = function(callback) {
+    beapi.wifi.start()
+    if(callback) {
         if(wifi.isReady()) {
-            resolve()
+            callback()
         }
         else {
-            wifi.once("start", resolve)
+            wifi.once("start", callback)
         }
-    })
-}
-wifi.stop = function() {
-    return new Promise(resolve=>{
-        beapi.wifi.stop()
-        if(contrastStatus(false)) {
-            resolve()
-        }
-        else {
-            wifi.once("stop", resolve)
-        }
-    })
-}
-
-wifi.connect = function(ssid,password,callback) {
-
-    if(beapi.wifi.staConnected()) {
-        wifi.stop()
     }
-    
+}
+wifi.stop = function(callback) {
+    beapi.wifi.stop()
+    if(callback) {
+        if(contrastStatus(false)) {
+            callback()
+        }
+        else {
+            wifi.once("stop", callback)
+        }
+    }
+}
+
+let _connecting = false
+wifi.isConnecting = function() {
+    return _connecting
+}
+wifi.connect = function(ssid,password,callback) {
+    if(_connecting) {
+        throw new Error("wifi STA is connecting")
+    }
+    _connecting = true
     let mode = wifi.mode()
     wifi.setMode(mode|MODE_STA)
-    
-    beapi.wifi.setStaConfig({ssid, password})
 
-    beapi.wifi.start()
-
-    if(callback) {
-        wifi.once("sta.connected",callback)
-    }
-    return
-    
-    if(beapi.wifi.staConnected()) {
-        callback && callback()
-        return
-    }
-
-    if(_wifi_connect_callback) {
-        callback && callback(new Error("wifi sta is connecting"))
-        return
-    }
-
-    if(!beapi.wifi.staStarted()) {
-        beapi.wifi.setMode( beapi.wifi.getMode() | MODE_STA )
-        var ret = beapi.wifi.start()
-        if(ret!=0) {
-            callback && callback(new Error("beapi.wifi.start() failed: "+ret))
-            return
-        }
-    }
-
-    setTimeout(()=>{
-
-        if(!beapi.wifi.staStarted()) {
-            callback && callback(new Error("wifi sta has not readied"))
-            return
-        }
-    
-        var ret = beapi.wifi.connect(ssid,password)
-        if(ret!=0){
-            callback(new Error("beapi.wifi.connect() failed: "+ret))
-            return
-        }
-    
-        if(typeof callback=="function")
-            _wifi_connect_callback = callback
-    }, 0)
+    wifi.start(()=>{
+        wifi.disconnect(()=>{
+            wifi.race(["sta.disconnected","sta.connected"], (evt, ...args)=>{
+                _connecting = false
+                callback && callback(evt=="sta.connected", ...args)
+            })
+            beapi.wifi.setStaConfig({ssid, password})
+            beapi.wifi.connect()
+        })
+    })
 }
 
 wifi.disconnect = function(callback) {
     if(!beapi.wifi.staConnected()) {
-        callback && callback()
+        callback && callback(true)
         return
     }
-    if(typeof callback=="function") {
-        wifi.once("sta.disconnected", callback)
-    }
+    _connecting = true
+    wifi.race(["sta.disconnected","sta.connected"], evt=>{
+        _connecting = false
+        callback && callback(evt=="sta.disconnected")
+    })
     beapi.wifi.disconnect() ;
+}
+
+wifi.startAP = function(ssid, password, callback) {
+    wifi.stopAP(ret=>{
+        if(!ret) {
+            callback(false)
+            return
+        }
+        if(typeof callback=="function") {        
+            wifi.race(["ap.start","ap.stop"], evt=>callback(evt=="ap.start"))
+        }
+        wifi.setMode( wifi.mode() | MODE_AP )
+        beapi.wifi.setAPConfig({ssid, password})
+        wifi.start()
+    })
+    
+}
+wifi.stopAP = function(callback) {
+    if(!wifi.apStarted()) {
+        callback && callback(true)
+        return
+    }
+    if(typeof callback=="function") {        
+        wifi.race(["ap.start","ap.stop"], evt=>callback(evt=="ap.stop"))
+    }
+    wifi.setMode( wifi.mode() & (~MODE_AP) )
 }
 
 wifi.status = function(netif) {
@@ -207,127 +206,13 @@ wifi.status = function(netif) {
     }
 }
 
-
-const ConfigPath = "/etc/config/wifi.json"
-function defaultConfig() {
-    return {
-        "sta": {
-            "ssid": "" ,
-            "password": "" ,
-            "useDHCP": true ,
-            "watch_dur": 0
-        } ,
-
-        "ap": {
-            "ssid": "BECOME-${UUID}" ,
-            "password": "" ,
-        }
-    }
-}
-function readWiFiConfig() {
-    try{
-        var json = JSON.load(ConfigPath)
-    }catch(e){
-        console.log(e)
-        console.log("bad json file:", ConfigPath)
-        json = defaultConfig()
-    }
-    return json
-}
-
-
-wifi.save = function(netif) {
-    try{
-        var json = beapi.fs.readFileSync(ConfigPath).asString()
-        json = JSON.parse(json)
-    }catch(e) {
-        console.log(e)
-    }
-    if(!json || !json.sta) {
-        json = defaultConfig()
-    }
-
-    let changed = false
-
-    // for sta
-    if(!netif || netif=="apsta" || netif=="sta") {
-        let config = beapi.wifi.getConfig(MODE_STA)
-        if(config.ssid) {
-            json.sta.ssid = config.ssid
-            json.sta.password = config.password
-            changed = true
-        }
-    }
-
-    // for ap
-    if(!netif || netif=="apsta" || netif=="ap") {
-        let config = beapi.wifi.getConfig(MODE_AP)
-        if(config.ssid) {
-            json.ap.ssid = config.ssid
-            json.ap.password = config.password
-            changed = true
-        }
-    }
-
-    if(changed) {
-        return !! beapi.fs.writeFileSync(ConfigPath, JSON.stringify(json,null,4))
-    }
-    else {
-        return false
-    }
-}
-function connectToAP() {
-    let status = wifi.status("sta")
-    if(status.connected) {
-        return
-    }
-    let json = readWiFiConfig()
-    if(!json.sta.ssid) {
-        return
-    }
-
-    console.log("connect to ssid:", json.sta.ssid, json.sta.password)
-    wifi.connect(json.sta.ssid, json.sta.password||"", function(err){
-        if(err) {
-            console.error("connect wifi error:", err)
+wifi.autostart = async function() {
+    wifi.start(()=>{
+        console.log("wifi auto start")
+        if(wifi.mode()&MODE_STA) {
+            beapi.wifi.connect()
         }
     })
-}
-
-wifi.restore = async function() {
-
-    return
-    await sleep(1000)
-    await wifi.stop()
-    await sleep(1000)
-    await wifi.start()
-
-    console.log("restore WiFi AP/STA ...")
-
-    if(!beapi.wifi.staStarted()) {
-        console.log("wifi.stdStarted() == false")
-        return
-    }
-
-    let json = readWiFiConfig()
-    let status = wifi.status()
-
-    // sta
-    if(!status.sta.connected) {
-        setTimeout(connectToAP,1000)
-        if(json.sta.watch_dur>0) {
-            setInterval(connectToAP, json.sta.watch_dur)
-        }
-    }
-    else {
-        console.log("wifi status", status)
-    }
-
-    // ap
-    let ssid = json.ap.ssid.replace("${UUID}", beapi.utils.partUUID().substr(-4))
-    if( !status.ap.started || status.ap.ssid!=ssid ){
-        beapi.wifi.startAP(ssid, json.ap.password)
-    }
 }
 
 
@@ -336,15 +221,13 @@ beapi.wifi.registerEventHandle(function(eventType, eventId, data){
     let eventArgv = []
 
     if(eventType==EVENT_WIFI) {
-        if(evtNames[eventId])
-            eventName = evtNames[eventId]
+        eventName = evtNames[eventId]
         if(eventId==WIFI_STA_DISCONNECTED) {
             eventArgv.push( data )  // disconnect reason
         }
     }
     else if(eventType==EVENT_IP) {
-        if(ipEvtNames[eventId])
-            eventName = ipEvtNames[eventId]
+        eventName = ipEvtNames[eventId]
     }
 
     if(eventName) {
@@ -365,6 +248,5 @@ beapi.wifi.registerEventHandle(function(eventType, eventId, data){
     }
 })
 
-
 // 禁止 wifi 睡眠 (增加耗电)
-// beapi.wifi.setPS(PS_NONE)
+beapi.wifi.setPS(PS_NONE)

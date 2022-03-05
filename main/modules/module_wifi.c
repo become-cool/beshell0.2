@@ -122,7 +122,6 @@ static void esp32_wifi_eventHandler(void* arg, esp_event_base_t event_base, int3
         
         if(event_id == WIFI_EVENT_STA_START) {
             _sta_started = true ;
-            esp_wifi_connect() ;
         }
         else if(event_id == WIFI_EVENT_STA_STOP) {
             _sta_started = false ;
@@ -440,7 +439,6 @@ JSValue js_wifi_register_event_handle(JSContext *ctx, JSValueConst this_val, int
 
 JSValue js_wifi_start(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     esp_err_t err = esp_wifi_start() ;
-    printf("esp_wifi_start(): %d\n", err) ;
     return JS_NewInt32(ctx, err);
 }
 JSValue js_wifi_stop(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {

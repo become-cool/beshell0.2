@@ -102,7 +102,7 @@ python gen_esp32part.py binary_partitions.bin input_partitions.csv
 工具文档：
 
 ```
-https://github.com/espressif/esptool/wiki/espefuse
+https://github.com/espressif/esptool/blob/master/docs/en/espefuse/index.rst
 ```
 
 可在出厂时将产品型号写入 efuse ，在 js 运行时读取
@@ -113,6 +113,11 @@ https://github.com/espressif/esptool/wiki/espefuse
 >
 > 例子 : https://github.com/espressif/esp-idf/blob/master/examples/system/efuse
 
+
+烧写命令:
+```
+python <esp-idf path>/components/esptool_py/esptool/espefuse.py --port COM18 burn_block_data BLOCK3 <bin_file_path>
+```
 
 ## esp-idf SD 限制
 
@@ -179,8 +184,7 @@ Backtrace:0x4008f4c2:0x3ffc3420 0x4008fccd:0x3ffc3440 0x40097a36:0x3ffc3460 0x40
 
 复制 `Backtrace:` 后的内容，在 beshell 项目目录内执行：
 ```
-xtensa-esp32-elf-addr2line -pfiaC -e build/beshell.elf 0x401bb1fe:0x3ffd0f30 0x401bcbec:0x3ffd0f90 0x401c2c33:0x3ffd0fd0 0x401c3904:0x3ffd0ff0 0x401c0e20:0x3ffd1010 0x4009972a:0x3
-ffd1030 0x400934ee:0x3ffd1060
+xtensa-esp32-elf-addr2line -pfiaC -e build/beshell.elf 0x400e27ea:0x3ffcb420 0x4016a559:0x3ffcb450 0x4014e159:0x3ffcb4d0 0x4014ef21:0x3ffcb5e0 0x40153262:0x3ffcb720 0x40179e22:0x3ffcb770 0x4017a13a:0x3ffcb7a0 0x40154f41:0x3ffcb830 0x40154f87:0x3ffcb8600x400e653b:0x3ffcb890 0x4016a559:0x3ffcb8c0 0x4014e159:0x3ffcb940 0x4014edb1:0x3ffcba50 0x4017d997:0x3ffcbbe0 0x400df0fe:0x3ffcbc20 0x400df53e:0x3ffcbc60 0x400fbeb5:0x3ffcbcd0 0x400fbee3:0x3ffcbcf0 0x400df3d3:0x3ffcbd10 0x400df275:0x3ffcbd30 0x400deacc:0x3ffcbd50 0x400934ee:0x3ffcbd70
 ```
 
 输出：

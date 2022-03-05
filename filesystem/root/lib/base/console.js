@@ -1,7 +1,3 @@
-global.sleep = function (ms) {
-    return new Promise(resolve=>setTimeout(resolve, ms))
-}
-
 console.stringify = function(value,format) {
     let pool = []
     let str = JSON.stringify(value, (key,value)=>{

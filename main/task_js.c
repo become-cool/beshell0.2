@@ -15,7 +15,6 @@
 #include "module_gpio.h"
 #include "module_serial.h"
 #include "module_socks.h"
-#include "module_metadata.h"
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -26,6 +25,7 @@
 #include "module_mg.h"
 #include "module_lvgl.h"
 #include "module_process.h"
+#include "module_metadata.h"
 
 
 
@@ -123,6 +123,7 @@ static JSContext * JS_NewCustomContext(JSRuntime *rt)
     be_module_process_require(ctx) ;
 
     // base 函数
+    eval_rc_script(ctx, "/lib/base/base.js") ;
     eval_rc_script(ctx, "/lib/base/console.js") ;
     eval_rc_script(ctx, "/lib/base/events.js") ;
     eval_rc_script(ctx, "/lib/base/require.js") ;
@@ -138,6 +139,7 @@ static JSContext * JS_NewCustomContext(JSRuntime *rt)
     be_module_mg_require(ctx) ;
     be_telnet_require(ctx) ;
     be_module_lvgl_require(ctx) ;
+    module_metadata_require(ctx) ;
 
     return ctx;
 }
@@ -204,15 +206,14 @@ void task_js_main(const char * script){
 
 #ifndef SIMULATION
     be_module_fs_init() ;
+    be_module_wifi_init() ;
 #endif
 
-    be_module_wifi_init() ;
     be_module_mg_init() ;
     be_module_lvgl_init() ;
     be_telnet_init() ;
 
 #ifndef SIMULATION
-    module_metadata_init() ;
     be_module_socks_init() ;
     be_module_sniffer_init() ;
     be_module_gpio_init() ;

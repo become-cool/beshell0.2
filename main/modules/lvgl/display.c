@@ -38,7 +38,9 @@ void free_disp_drv(JSContext * ctx, lv_disp_t * disp) {
 #ifndef SIMULATION
             st77xx_dev_t * dev = drvdata->spi_dev ;
             if(dev) {
-                spi_bus_remove_device(dev->spi_dev) ;
+                if(dev->spi_dev) {
+                    spi_bus_remove_device(dev->spi_dev) ;
+                }
                 free(dev) ;
             }
 #endif
@@ -368,6 +370,8 @@ static const JSCFunctionListEntry js_display_proto_funcs[] = {
  * @return JSValue 
  */
 JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+
+    printf("js_lvgl_create_display()\n") ;
 
     if(!disp_buff1) {
         THROW_EXCEPTION("DMA Buff is NULL")

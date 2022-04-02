@@ -18,8 +18,8 @@
         await require("./init.d/display.js")()
         sleep(0)
         
-        // require("./init.d/desktop.js")
-        // sleep(0)
+        require("./init.d/desktop.js")
+        sleep(0)
 
         let rcpath = process.env.HOME + "/.beshellrc.js"
         if(beapi.fs.isFileSync(rcpath)) {
@@ -29,7 +29,7 @@
 
         console.log('BeShell is ready.')
         
-        require("app").autoBoot()
+        require("./init.d/app").autoBoot()
         sleep(0)
     }
     catch(e) {

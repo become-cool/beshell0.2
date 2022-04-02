@@ -29,7 +29,7 @@
 
         console.log('BeShell is ready.')
         
-        require("./init.d/app.js").autoBoot()
+        require("app").autoBoot()
         sleep(0)
     }
     catch(e) {

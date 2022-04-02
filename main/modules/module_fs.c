@@ -423,6 +423,22 @@ JSValue js_fs_readdir_sync(JSContext *ctx, JSValueConst this_val, int argc, JSVa
         }
     }
 
+#ifndef SIMULATION
+    // esp32 vfs 读取目录时，忽略了挂载点，将已知挂载点补充上
+    if(strcmp(path,"/fs/")==0 || strcmp(path,"/fs")==0) {
+        if(detail) {
+            JSValue item = JS_NewObject(ctx) ;
+            JS_SetPropertyStr(ctx, item, "name", JS_NewString(ctx, "home") ) ;
+            JS_SetPropertyStr(ctx, item, "type", JS_NewString(ctx, "dir") ) ;
+            JS_SetPropertyUint32(ctx, ret, idx++, item) ;
+        }
+        else {
+            JS_SetPropertyUint32(ctx, ret, idx++, JS_NewString(ctx, "home")) ;
+
+        }
+    }
+#endif
+
     free(path) ;
     closedir(dir);
     

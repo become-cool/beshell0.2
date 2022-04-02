@@ -2,7 +2,7 @@
 #include "telnet_stdio.h"
 #include "telnet_ws.h"
 #include "telnet_serial.h"
-
+#include "module_utils.h"
 #include "module_fs.h"
 #include "utils.h"
 #include "beshell.h"
@@ -101,7 +101,19 @@ void echo_error(JSContext * ctx) {
 
 
 void telnet_send_ready() {
-	char * buff = mallocf("{\"firmware\":\"beshell\",\"version\":\"%s\",\"level\":%d}", BESHELL_VERSION, task_boot_level()) ;
+	char * buff = mallocf(
+		"{"
+			"\"firmware\":\"beshell\""
+			",\"version\":\"%s\""
+			",\"level\":%d"
+			",\"partID\":%d"
+			",\"partVersion\":%d"
+		"}"
+		, BESHELL_VERSION
+		, task_boot_level()
+		, readPartId()
+		, readPartVersion()
+	) ;
     telnet_output(CMD_READY, 0, buff, strlen(buff)) ;
 	free(buff) ;
 }

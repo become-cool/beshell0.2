@@ -268,13 +268,23 @@ JSValue js_eval_bin(JSContext *ctx, JSValueConst this_val, int argc, JSValueCons
     return ret ;
 }
 
-JSValue js_utils_part_id(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+int readPartId() {
 #ifdef SIMULATION
-    return JS_NewInt32(ctx, 255) ;
+    return 255 ;
 #else
-    int value = REG_READ(0x3FF5A078) ;
-    return JS_NewInt32(ctx, value) ;
+    return REG_READ(0x3FF5A078) ;
 #endif
+}
+
+int readPartVersion() {
+    return 0 ;
+}
+
+JSValue js_utils_part_id(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    return JS_NewInt32(ctx, readPartId()) ;
+}
+JSValue js_utils_part_version(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    return JS_NewInt32(ctx, readPartVersion()) ;
 }
 
 JSValue js_util_part_uuid(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
@@ -653,6 +663,7 @@ void be_module_utils_require(JSContext *ctx) {
     JS_SetPropertyStr(ctx, utils, "setTime", JS_NewCFunction(ctx, js_util_set_time, "setTime", 1));
     // JS_SetPropertyStr(ctx, utils, "freeStacks", JS_NewCFunction(ctx, js_util_free_stacks, "freeStacks", 1));
     JS_SetPropertyStr(ctx, utils, "partId", JS_NewCFunction(ctx, js_utils_part_id, "partId", 1));
+    JS_SetPropertyStr(ctx, utils, "partVersion", JS_NewCFunction(ctx, js_utils_part_version, "partVersion", 1));
     JS_SetPropertyStr(ctx, utils, "partUUID", JS_NewCFunction(ctx, js_util_part_uuid, "partUUID", 1));
     JS_SetPropertyStr(ctx, utils, "genUUID", JS_NewCFunction(ctx, js_util_generate_uuid, "genUUID", 1));
     JS_SetPropertyStr(ctx, utils, "varRefCnt", JS_NewCFunction(ctx, js_util_var_refcount, "varRefCnt", 1));

@@ -18,3 +18,60 @@ watchPins((gpio)=>{
         beapi.telnet.callback('EmitPinChanged', gpio, beapi.gpio.digitalRead(gpio))
     }, 20)
 })
+
+global.beconsoled = {}
+
+
+function loadApp(folder) {
+    try{ return JSON.load(folder+'/package.json') }
+    catch(e) { return null }
+}
+beconsoled.loadApp = loadApp
+beconsoled.loadAppLib = function(libpath) {
+    if(!libpath) {
+        libpath = "/home/become"
+    }
+    let applst=[]
+    for(let item of beapi.fs.readdirSync(libpath) ){
+        if(item=='.'||item=='..') {
+            continue
+        }
+        let folder = libpath + "/" +item
+        let app = loadApp(folder)
+        if(!app) {
+            continue
+        }
+
+        applst.push({ local: folder, name: app.name, title: app.title, icon: app.icon })
+    }
+    return applst
+}
+function genAppPath(name, uuid) {
+    let path = '/home/become/'+name
+    if(!beapi.fs.existsSync(path)) {
+        return path
+    }
+    uuid = uuid.replace(/\-/g,'')
+    for(let len=4; len<uuid.length; len++) {
+        let p = path + '-' + uuid.substr(0,len)
+        if(!beapi.fs.existsSync(p)) {
+            return p
+        }
+    }
+    return null
+}
+beconsoled.createAppFolder = function(name, uuid) {
+    if(!name) name = "UnnameApp"
+    if(!uuid) uuid = beapi.utils.genUUID()
+    let path = genAppPath(name, uuid)
+    if(!path) {
+        throw new Error("Can not use app folder path, uuid repeat ?")
+    }
+    if(beapi.fs.existsSync(path)) {
+        throw new Error("app folder has exists:"+path)
+    }
+    if(!beapi.fs.mkdirSync(path)) {
+        throw new Error("mkdir app path failed:"+path)
+    }
+    return path
+}

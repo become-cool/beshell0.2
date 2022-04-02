@@ -4,8 +4,8 @@
 
 const char * field_names[] = {
     "",
-    "part.id", 
-    "part.version", 
+    "PART_ID", 
+    "PART_VERSION", 
 } ;
 
 #ifndef SIMULATION

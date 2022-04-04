@@ -1,3 +1,33 @@
+## 日常操作
+
+初始化 emsdk 环境 (bash)：
+```
+. emsdk/emsdk_env.sh
+```
+或 (fish)
+```
+. emsdk/emsdk_env.fish
+```
+
+编译：
+
+```
+make
+```
+
+调试 server：
+
+```
+make dev
+```
+
+生成 JS 代码:
+```
+make gen
+```
+
+
+
 ## Install Emscripten SDK
 Download the [Emscripten SDK](https://kripken.github.io/emscripten-site/) and make sure it is in your PATH.
 

@@ -1,9 +1,6 @@
 
 
 function parseCSource(src) {
-
-    
-
     let array = []
     for(let res of [...src.matchAll(/\s*([\w\-_]+)(\s*=\s*[^\,]+)\s*\,/g)]) {
         array.push(res[1])

@@ -131,6 +131,21 @@ function exportApiFunctions() {
     }
 }
 
+let mapConstNameTrims = {
+    "lv_event_code_t": /^(_?)LV_EVENT_/ ,
+    "lv_font_fmt_txt_bitmap_format_t": /^(_?)LV_FONT_FMT_TXT_/ ,
+    "lv_anim_enable_t": /^(_?)LV_ANIM_/ ,
+    "lv_btnmatrix_ctrl_t": /^(_?)LV_BTNMATRIX_/ ,
+    "lv_obj_tree_walk_res_t": /^(_?)LV_OBJ_TREE_WALK_/ ,
+    "lv_fs_whence_t": /^(_?)LV_FS_/ ,
+    "lv_draw_mask_xcb_t": /^(_?)LV_DRAW_MASK_/ ,
+    "lv_animimg_part_t": /^(_?)LV_ANIM_IMG_PART_/ ,
+    "lv_obj_tree_walk_res_t": /^(_?)LV_OBJ_TREE_WALK_/ ,
+    "lv_indev_type_t": /^(_?)LV_INDEV_TYPE_/ ,
+    "lv_draw_mask_type_t": /^(_?)LV_DRAW_MASK_TYPE_/ ,
+    "lv_chart_type_t": /^(_?)LV_CHART_TYPE_/ ,
+    "lv_meter_indicator_type_t": /^(_?)LV_METER_INDICATOR_TYPE_/ ,
+}
 
 
 // 第二次遍历 ast , 生成 struct/union/enum wrapper api 函数
@@ -164,7 +179,11 @@ function lvStructToJSClass() {
     function genEnum(typedef, def) {
 
         let prefixeName = typedef.name.replace(/_t$/,'_').toUpperCase()
-        let regexp = new RegExp("^(_?)"+prefixeName)
+        let regexp = mapConstNameTrims[typedef.name]
+        if(!mapConstNameTrims[typedef.name]) {
+            regexp = new RegExp("^(_?)"+prefixeName.replace(/_(TYPE|MODE|PROP|CTRL)_$/,'_'))
+        }
+        // console.log(typedef.name, regexp)
 
         let baseName = typedef.name.replace(/_t$/, '').replace(/^(_?)lv_/,'$1')
 
@@ -182,11 +201,13 @@ function lvStructToJSClass() {
                 continue
             }
             let name = node.name.replace(regexp, "$1").replace(/_/g,"-").replace(/^\-/g,"_").toLowerCase()
+            // console.log(name)
             codeToName+= `    ${codeToConst?'else ':''}if(${node.name}==v){ return "${name}" ; }\r\n`
             codeToConst+= `    ${codeToConst?'else ':''}if(strcmp("${name}", n)==0){ return ${node.name} ; }\r\n`
         }
 
-        codeConstCApiFuncs+= `EMSCRIPTEN_KEEPALIVE char * lv_${baseName}_to_name(uint32_t v) {
+        codeConstCApiFuncs+= `// "${typedef.name}": ${regexp} ,
+EMSCRIPTEN_KEEPALIVE char * lv_${baseName}_to_name(uint32_t v) {
 ${codeToName}\
     else {
         return "<unknow>" ;

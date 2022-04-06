@@ -31,3 +31,26 @@ EMSCRIPTEN_KEEPALIVE void lv_indev_data_set_point_y(lv_indev_data_t * pdata, lv_
 }
 
 
+
+EMSCRIPTEN_KEEPALIVE void lv_obj_set_coord_x(lv_obj_t * obj, lv_coord_t val) {
+    lv_coord_t dx = val - obj->coords.x1 ;
+    lv_obj_set_x(obj, lv_obj_get_x_aligned(obj) + dx) ;
+}
+EMSCRIPTEN_KEEPALIVE void lv_obj_set_coord_y(lv_obj_t * obj, lv_coord_t val) {
+    lv_coord_t dy = val - obj->coords.y1 ;
+    lv_obj_set_y(obj, lv_obj_get_y_aligned(obj) + dy) ;
+}
+EMSCRIPTEN_KEEPALIVE void lv_obj_set_coords(lv_obj_t * obj, lv_coord_t x, lv_coord_t y) {
+    lv_coord_t dx = x - obj->coords.x1 ;
+    lv_obj_set_x(obj, lv_obj_get_x_aligned(obj) + dx) ;
+
+    lv_coord_t dy = y - obj->coords.y1 ;
+    lv_obj_set_y(obj, lv_obj_get_y_aligned(obj) + dy) ;
+}
+
+EMSCRIPTEN_KEEPALIVE lv_coord_t lv_obj_get_coord_x(lv_obj_t * obj) {
+    return obj->coords.x1 ;
+}
+EMSCRIPTEN_KEEPALIVE lv_coord_t lv_obj_get_coord_y(lv_obj_t * obj) {
+    return obj->coords.y1 ;
+}

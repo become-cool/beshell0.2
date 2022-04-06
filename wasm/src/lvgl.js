@@ -1,6 +1,6 @@
 class WASMObject {
     ptr = 0
-    static wrap(clz, ptr) {
+    static wrap(ptr, clz) {
         if(!ptr) {
             return null
         }
@@ -389,6 +389,9 @@ class Obj extends EventEmitter {
     }
     screen() {
         return Module._lv_obj_get_screen(this.ptr)
+    }
+    disp() {
+        return WASMObject.wrap(Disp, Module._lv_obj_get_disp(this.ptr))
     }
     parent() {
         return Module._lv_obj_get_parent(this.ptr)

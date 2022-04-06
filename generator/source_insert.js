@@ -27,7 +27,7 @@ function fileInsert(path, source, mark, commentStart) {
     fileSrc = srcInsert(fileSrc, source, start(mark,commentStart),end(mark,commentStart))
     if(fileSrc!=false) {
         fs.writeFileSync(path, fileSrc)
-        return true
+        return fileSrc
     }
     return false
 }

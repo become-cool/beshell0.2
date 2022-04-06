@@ -6,6 +6,7 @@
 
 
 // AUTO GENERATE CODE START [CONST MAPPING] --------
+// "lv_res_t": /^(_?)LV_RES_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_res_to_name(uint32_t v) {
     if(LV_RES_INV==v){ return "inv" ; }
     else if(LV_RES_OK==v){ return "ok" ; }
@@ -20,20 +21,22 @@ EMSCRIPTEN_KEEPALIVE uint32_t lv_res_to_value(char * n) {
         return (uint32_t)-1 ;
     }
 }
+// "lv_anim_enable_t": /^(_?)LV_ANIM_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_anim_enable_to_name(uint32_t v) {
-    if(LV_ANIM_OFF==v){ return "lv-anim-off" ; }
-    else if(LV_ANIM_ON==v){ return "lv-anim-on" ; }
+    if(LV_ANIM_OFF==v){ return "off" ; }
+    else if(LV_ANIM_ON==v){ return "on" ; }
     else {
         return "<unknow>" ;
     }
 }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_anim_enable_to_value(char * n) {
-    if(strcmp("lv-anim-off", n)==0){ return LV_ANIM_OFF ; }
-    else if(strcmp("lv-anim-on", n)==0){ return LV_ANIM_ON ; }
+    if(strcmp("off", n)==0){ return LV_ANIM_OFF ; }
+    else if(strcmp("on", n)==0){ return LV_ANIM_ON ; }
     else {
         return (uint32_t)-1 ;
     }
 }
+// "lv_palette_t": /^(_?)LV_PALETTE_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_palette_to_name(uint32_t v) {
     if(LV_PALETTE_RED==v){ return "red" ; }
     else if(LV_PALETTE_PINK==v){ return "pink" ; }
@@ -86,6 +89,7 @@ EMSCRIPTEN_KEEPALIVE uint32_t lv_palette_to_value(char * n) {
         return (uint32_t)-1 ;
     }
 }
+// "lv_align_t": /^(_?)LV_ALIGN_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_align_to_name(uint32_t v) {
     if(LV_ALIGN_DEFAULT==v){ return "default" ; }
     else if(LV_ALIGN_TOP_LEFT==v){ return "top-left" ; }
@@ -140,6 +144,7 @@ EMSCRIPTEN_KEEPALIVE uint32_t lv_align_to_value(char * n) {
         return (uint32_t)-1 ;
     }
 }
+// "lv_dir_t": /^(_?)LV_DIR_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_dir_to_name(uint32_t v) {
     if(LV_DIR_NONE==v){ return "none" ; }
     else if(LV_DIR_LEFT==v){ return "left" ; }
@@ -166,6 +171,7 @@ EMSCRIPTEN_KEEPALIVE uint32_t lv_dir_to_value(char * n) {
         return (uint32_t)-1 ;
     }
 }
+// "lv_img_cf_t": /^(_?)LV_IMG_CF_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_img_cf_to_name(uint32_t v) {
     if(LV_IMG_CF_UNKNOWN==v){ return "unknown" ; }
     else if(LV_IMG_CF_RAW==v){ return "raw" ; }
@@ -240,6 +246,7 @@ EMSCRIPTEN_KEEPALIVE uint32_t lv_img_cf_to_value(char * n) {
         return (uint32_t)-1 ;
     }
 }
+// "lv_disp_rot_t": /^(_?)LV_DISP_ROT_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_disp_rot_to_name(uint32_t v) {
     if(LV_DISP_ROT_NONE==v){ return "none" ; }
     else if(LV_DISP_ROT_90==v){ return "90" ; }
@@ -258,6 +265,7 @@ EMSCRIPTEN_KEEPALIVE uint32_t lv_disp_rot_to_value(char * n) {
         return (uint32_t)-1 ;
     }
 }
+// "lv_indev_type_t": /^(_?)LV_INDEV_TYPE_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_indev_type_to_name(uint32_t v) {
     if(LV_INDEV_TYPE_NONE==v){ return "none" ; }
     else if(LV_INDEV_TYPE_POINTER==v){ return "pointer" ; }
@@ -278,6 +286,7 @@ EMSCRIPTEN_KEEPALIVE uint32_t lv_indev_type_to_value(char * n) {
         return (uint32_t)-1 ;
     }
 }
+// "lv_indev_state_t": /^(_?)LV_INDEV_STATE_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_indev_state_to_name(uint32_t v) {
     if(LV_INDEV_STATE_RELEASED==v){ return "released" ; }
     else if(LV_INDEV_STATE_PRESSED==v){ return "pressed" ; }
@@ -292,6 +301,7 @@ EMSCRIPTEN_KEEPALIVE uint32_t lv_indev_state_to_value(char * n) {
         return (uint32_t)-1 ;
     }
 }
+// "lv_font_subpx_t": /^(_?)LV_FONT_SUBPX_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_font_subpx_to_name(uint32_t v) {
     if(LV_FONT_SUBPX_NONE==v){ return "none" ; }
     else if(LV_FONT_SUBPX_HOR==v){ return "hor" ; }
@@ -310,6 +320,7 @@ EMSCRIPTEN_KEEPALIVE uint32_t lv_font_subpx_to_value(char * n) {
         return (uint32_t)-1 ;
     }
 }
+// "lv_text_flag_t": /^(_?)LV_TEXT_FLAG_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_text_flag_to_name(uint32_t v) {
     if(LV_TEXT_FLAG_NONE==v){ return "none" ; }
     else if(LV_TEXT_FLAG_RECOLOR==v){ return "recolor" ; }
@@ -328,6 +339,7 @@ EMSCRIPTEN_KEEPALIVE uint32_t lv_text_flag_to_value(char * n) {
         return (uint32_t)-1 ;
     }
 }
+// "lv_text_cmd_state_t": /^(_?)LV_TEXT_CMD_STATE_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_text_cmd_state_to_name(uint32_t v) {
     if(LV_TEXT_CMD_STATE_WAIT==v){ return "wait" ; }
     else if(LV_TEXT_CMD_STATE_PAR==v){ return "par" ; }
@@ -344,6 +356,7 @@ EMSCRIPTEN_KEEPALIVE uint32_t lv_text_cmd_state_to_value(char * n) {
         return (uint32_t)-1 ;
     }
 }
+// "lv_text_align_t": /^(_?)LV_TEXT_ALIGN_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_text_align_to_name(uint32_t v) {
     if(LV_TEXT_ALIGN_AUTO==v){ return "auto" ; }
     else if(LV_TEXT_ALIGN_LEFT==v){ return "left" ; }
@@ -362,6 +375,7 @@ EMSCRIPTEN_KEEPALIVE uint32_t lv_text_align_to_value(char * n) {
         return (uint32_t)-1 ;
     }
 }
+// "lv_base_dir_t": /^(_?)LV_BASE_DIR_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_base_dir_to_name(uint32_t v) {
     if(LV_BASE_DIR_LTR==v){ return "ltr" ; }
     else if(LV_BASE_DIR_RTL==v){ return "rtl" ; }
@@ -382,24 +396,26 @@ EMSCRIPTEN_KEEPALIVE uint32_t lv_base_dir_to_value(char * n) {
         return (uint32_t)-1 ;
     }
 }
+// "lv_blend_mode_t": /^(_?)LV_BLEND_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_blend_mode_to_name(uint32_t v) {
-    if(LV_BLEND_MODE_NORMAL==v){ return "normal" ; }
-    else if(LV_BLEND_MODE_ADDITIVE==v){ return "additive" ; }
-    else if(LV_BLEND_MODE_SUBTRACTIVE==v){ return "subtractive" ; }
-    else if(LV_BLEND_MODE_MULTIPLY==v){ return "multiply" ; }
+    if(LV_BLEND_MODE_NORMAL==v){ return "mode-normal" ; }
+    else if(LV_BLEND_MODE_ADDITIVE==v){ return "mode-additive" ; }
+    else if(LV_BLEND_MODE_SUBTRACTIVE==v){ return "mode-subtractive" ; }
+    else if(LV_BLEND_MODE_MULTIPLY==v){ return "mode-multiply" ; }
     else {
         return "<unknow>" ;
     }
 }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_blend_mode_to_value(char * n) {
-    if(strcmp("normal", n)==0){ return LV_BLEND_MODE_NORMAL ; }
-    else if(strcmp("additive", n)==0){ return LV_BLEND_MODE_ADDITIVE ; }
-    else if(strcmp("subtractive", n)==0){ return LV_BLEND_MODE_SUBTRACTIVE ; }
-    else if(strcmp("multiply", n)==0){ return LV_BLEND_MODE_MULTIPLY ; }
+    if(strcmp("mode-normal", n)==0){ return LV_BLEND_MODE_NORMAL ; }
+    else if(strcmp("mode-additive", n)==0){ return LV_BLEND_MODE_ADDITIVE ; }
+    else if(strcmp("mode-subtractive", n)==0){ return LV_BLEND_MODE_SUBTRACTIVE ; }
+    else if(strcmp("mode-multiply", n)==0){ return LV_BLEND_MODE_MULTIPLY ; }
     else {
         return (uint32_t)-1 ;
     }
 }
+// "lv_text_decor_t": /^(_?)LV_TEXT_DECOR_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_text_decor_to_name(uint32_t v) {
     if(LV_TEXT_DECOR_NONE==v){ return "none" ; }
     else if(LV_TEXT_DECOR_UNDERLINE==v){ return "underline" ; }
@@ -416,6 +432,7 @@ EMSCRIPTEN_KEEPALIVE uint32_t lv_text_decor_to_value(char * n) {
         return (uint32_t)-1 ;
     }
 }
+// "lv_border_side_t": /^(_?)LV_BORDER_SIDE_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_border_side_to_name(uint32_t v) {
     if(LV_BORDER_SIDE_NONE==v){ return "none" ; }
     else if(LV_BORDER_SIDE_BOTTOM==v){ return "bottom" ; }
@@ -440,6 +457,7 @@ EMSCRIPTEN_KEEPALIVE uint32_t lv_border_side_to_value(char * n) {
         return (uint32_t)-1 ;
     }
 }
+// "lv_grad_dir_t": /^(_?)LV_GRAD_DIR_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_grad_dir_to_name(uint32_t v) {
     if(LV_GRAD_DIR_NONE==v){ return "none" ; }
     else if(LV_GRAD_DIR_VER==v){ return "ver" ; }
@@ -456,200 +474,202 @@ EMSCRIPTEN_KEEPALIVE uint32_t lv_grad_dir_to_value(char * n) {
         return (uint32_t)-1 ;
     }
 }
+// "lv_style_prop_t": /^(_?)LV_STYLE_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_style_prop_to_name(uint32_t v) {
-    if(LV_STYLE_PROP_INV==v){ return "inv" ; }
-    else if(LV_STYLE_WIDTH==v){ return "lv-style-width" ; }
-    else if(LV_STYLE_MIN_WIDTH==v){ return "lv-style-min-width" ; }
-    else if(LV_STYLE_MAX_WIDTH==v){ return "lv-style-max-width" ; }
-    else if(LV_STYLE_HEIGHT==v){ return "lv-style-height" ; }
-    else if(LV_STYLE_MIN_HEIGHT==v){ return "lv-style-min-height" ; }
-    else if(LV_STYLE_MAX_HEIGHT==v){ return "lv-style-max-height" ; }
-    else if(LV_STYLE_X==v){ return "lv-style-x" ; }
-    else if(LV_STYLE_Y==v){ return "lv-style-y" ; }
-    else if(LV_STYLE_ALIGN==v){ return "lv-style-align" ; }
-    else if(LV_STYLE_TRANSFORM_WIDTH==v){ return "lv-style-transform-width" ; }
-    else if(LV_STYLE_TRANSFORM_HEIGHT==v){ return "lv-style-transform-height" ; }
-    else if(LV_STYLE_TRANSLATE_X==v){ return "lv-style-translate-x" ; }
-    else if(LV_STYLE_TRANSLATE_Y==v){ return "lv-style-translate-y" ; }
-    else if(LV_STYLE_TRANSFORM_ZOOM==v){ return "lv-style-transform-zoom" ; }
-    else if(LV_STYLE_TRANSFORM_ANGLE==v){ return "lv-style-transform-angle" ; }
-    else if(LV_STYLE_PAD_TOP==v){ return "lv-style-pad-top" ; }
-    else if(LV_STYLE_PAD_BOTTOM==v){ return "lv-style-pad-bottom" ; }
-    else if(LV_STYLE_PAD_LEFT==v){ return "lv-style-pad-left" ; }
-    else if(LV_STYLE_PAD_RIGHT==v){ return "lv-style-pad-right" ; }
-    else if(LV_STYLE_PAD_ROW==v){ return "lv-style-pad-row" ; }
-    else if(LV_STYLE_PAD_COLUMN==v){ return "lv-style-pad-column" ; }
-    else if(LV_STYLE_BG_COLOR==v){ return "lv-style-bg-color" ; }
-    else if(LV_STYLE_BG_COLOR_FILTERED==v){ return "lv-style-bg-color-filtered" ; }
-    else if(LV_STYLE_BG_OPA==v){ return "lv-style-bg-opa" ; }
-    else if(LV_STYLE_BG_GRAD_COLOR==v){ return "lv-style-bg-grad-color" ; }
-    else if(LV_STYLE_BG_GRAD_COLOR_FILTERED==v){ return "lv-style-bg-grad-color-filtered" ; }
-    else if(LV_STYLE_BG_GRAD_DIR==v){ return "lv-style-bg-grad-dir" ; }
-    else if(LV_STYLE_BG_MAIN_STOP==v){ return "lv-style-bg-main-stop" ; }
-    else if(LV_STYLE_BG_GRAD_STOP==v){ return "lv-style-bg-grad-stop" ; }
-    else if(LV_STYLE_BG_IMG_SRC==v){ return "lv-style-bg-img-src" ; }
-    else if(LV_STYLE_BG_IMG_OPA==v){ return "lv-style-bg-img-opa" ; }
-    else if(LV_STYLE_BG_IMG_RECOLOR==v){ return "lv-style-bg-img-recolor" ; }
-    else if(LV_STYLE_BG_IMG_RECOLOR_FILTERED==v){ return "lv-style-bg-img-recolor-filtered" ; }
-    else if(LV_STYLE_BG_IMG_RECOLOR_OPA==v){ return "lv-style-bg-img-recolor-opa" ; }
-    else if(LV_STYLE_BG_IMG_TILED==v){ return "lv-style-bg-img-tiled" ; }
-    else if(LV_STYLE_BORDER_COLOR==v){ return "lv-style-border-color" ; }
-    else if(LV_STYLE_BORDER_COLOR_FILTERED==v){ return "lv-style-border-color-filtered" ; }
-    else if(LV_STYLE_BORDER_OPA==v){ return "lv-style-border-opa" ; }
-    else if(LV_STYLE_BORDER_WIDTH==v){ return "lv-style-border-width" ; }
-    else if(LV_STYLE_BORDER_SIDE==v){ return "lv-style-border-side" ; }
-    else if(LV_STYLE_BORDER_POST==v){ return "lv-style-border-post" ; }
-    else if(LV_STYLE_OUTLINE_WIDTH==v){ return "lv-style-outline-width" ; }
-    else if(LV_STYLE_OUTLINE_COLOR==v){ return "lv-style-outline-color" ; }
-    else if(LV_STYLE_OUTLINE_COLOR_FILTERED==v){ return "lv-style-outline-color-filtered" ; }
-    else if(LV_STYLE_OUTLINE_OPA==v){ return "lv-style-outline-opa" ; }
-    else if(LV_STYLE_OUTLINE_PAD==v){ return "lv-style-outline-pad" ; }
-    else if(LV_STYLE_SHADOW_WIDTH==v){ return "lv-style-shadow-width" ; }
-    else if(LV_STYLE_SHADOW_OFS_X==v){ return "lv-style-shadow-ofs-x" ; }
-    else if(LV_STYLE_SHADOW_OFS_Y==v){ return "lv-style-shadow-ofs-y" ; }
-    else if(LV_STYLE_SHADOW_SPREAD==v){ return "lv-style-shadow-spread" ; }
-    else if(LV_STYLE_SHADOW_COLOR==v){ return "lv-style-shadow-color" ; }
-    else if(LV_STYLE_SHADOW_COLOR_FILTERED==v){ return "lv-style-shadow-color-filtered" ; }
-    else if(LV_STYLE_SHADOW_OPA==v){ return "lv-style-shadow-opa" ; }
-    else if(LV_STYLE_IMG_OPA==v){ return "lv-style-img-opa" ; }
-    else if(LV_STYLE_IMG_RECOLOR==v){ return "lv-style-img-recolor" ; }
-    else if(LV_STYLE_IMG_RECOLOR_FILTERED==v){ return "lv-style-img-recolor-filtered" ; }
-    else if(LV_STYLE_IMG_RECOLOR_OPA==v){ return "lv-style-img-recolor-opa" ; }
-    else if(LV_STYLE_LINE_WIDTH==v){ return "lv-style-line-width" ; }
-    else if(LV_STYLE_LINE_DASH_WIDTH==v){ return "lv-style-line-dash-width" ; }
-    else if(LV_STYLE_LINE_DASH_GAP==v){ return "lv-style-line-dash-gap" ; }
-    else if(LV_STYLE_LINE_ROUNDED==v){ return "lv-style-line-rounded" ; }
-    else if(LV_STYLE_LINE_COLOR==v){ return "lv-style-line-color" ; }
-    else if(LV_STYLE_LINE_COLOR_FILTERED==v){ return "lv-style-line-color-filtered" ; }
-    else if(LV_STYLE_LINE_OPA==v){ return "lv-style-line-opa" ; }
-    else if(LV_STYLE_ARC_WIDTH==v){ return "lv-style-arc-width" ; }
-    else if(LV_STYLE_ARC_ROUNDED==v){ return "lv-style-arc-rounded" ; }
-    else if(LV_STYLE_ARC_COLOR==v){ return "lv-style-arc-color" ; }
-    else if(LV_STYLE_ARC_COLOR_FILTERED==v){ return "lv-style-arc-color-filtered" ; }
-    else if(LV_STYLE_ARC_OPA==v){ return "lv-style-arc-opa" ; }
-    else if(LV_STYLE_ARC_IMG_SRC==v){ return "lv-style-arc-img-src" ; }
-    else if(LV_STYLE_TEXT_COLOR==v){ return "lv-style-text-color" ; }
-    else if(LV_STYLE_TEXT_COLOR_FILTERED==v){ return "lv-style-text-color-filtered" ; }
-    else if(LV_STYLE_TEXT_OPA==v){ return "lv-style-text-opa" ; }
-    else if(LV_STYLE_TEXT_FONT==v){ return "lv-style-text-font" ; }
-    else if(LV_STYLE_TEXT_LETTER_SPACE==v){ return "lv-style-text-letter-space" ; }
-    else if(LV_STYLE_TEXT_LINE_SPACE==v){ return "lv-style-text-line-space" ; }
-    else if(LV_STYLE_TEXT_DECOR==v){ return "lv-style-text-decor" ; }
-    else if(LV_STYLE_TEXT_ALIGN==v){ return "lv-style-text-align" ; }
-    else if(LV_STYLE_RADIUS==v){ return "lv-style-radius" ; }
-    else if(LV_STYLE_CLIP_CORNER==v){ return "lv-style-clip-corner" ; }
-    else if(LV_STYLE_OPA==v){ return "lv-style-opa" ; }
-    else if(LV_STYLE_COLOR_FILTER_DSC==v){ return "lv-style-color-filter-dsc" ; }
-    else if(LV_STYLE_COLOR_FILTER_OPA==v){ return "lv-style-color-filter-opa" ; }
-    else if(LV_STYLE_ANIM_TIME==v){ return "lv-style-anim-time" ; }
-    else if(LV_STYLE_ANIM_SPEED==v){ return "lv-style-anim-speed" ; }
-    else if(LV_STYLE_TRANSITION==v){ return "lv-style-transition" ; }
-    else if(LV_STYLE_BLEND_MODE==v){ return "lv-style-blend-mode" ; }
-    else if(LV_STYLE_LAYOUT==v){ return "lv-style-layout" ; }
-    else if(LV_STYLE_BASE_DIR==v){ return "lv-style-base-dir" ; }
-    else if(_LV_STYLE_LAST_BUILT_IN_PROP==v){ return "_lv-style-last-built-in-prop" ; }
-    else if(LV_STYLE_PROP_ANY==v){ return "any" ; }
+    if(LV_STYLE_PROP_INV==v){ return "prop-inv" ; }
+    else if(LV_STYLE_WIDTH==v){ return "width" ; }
+    else if(LV_STYLE_MIN_WIDTH==v){ return "min-width" ; }
+    else if(LV_STYLE_MAX_WIDTH==v){ return "max-width" ; }
+    else if(LV_STYLE_HEIGHT==v){ return "height" ; }
+    else if(LV_STYLE_MIN_HEIGHT==v){ return "min-height" ; }
+    else if(LV_STYLE_MAX_HEIGHT==v){ return "max-height" ; }
+    else if(LV_STYLE_X==v){ return "x" ; }
+    else if(LV_STYLE_Y==v){ return "y" ; }
+    else if(LV_STYLE_ALIGN==v){ return "align" ; }
+    else if(LV_STYLE_TRANSFORM_WIDTH==v){ return "transform-width" ; }
+    else if(LV_STYLE_TRANSFORM_HEIGHT==v){ return "transform-height" ; }
+    else if(LV_STYLE_TRANSLATE_X==v){ return "translate-x" ; }
+    else if(LV_STYLE_TRANSLATE_Y==v){ return "translate-y" ; }
+    else if(LV_STYLE_TRANSFORM_ZOOM==v){ return "transform-zoom" ; }
+    else if(LV_STYLE_TRANSFORM_ANGLE==v){ return "transform-angle" ; }
+    else if(LV_STYLE_PAD_TOP==v){ return "pad-top" ; }
+    else if(LV_STYLE_PAD_BOTTOM==v){ return "pad-bottom" ; }
+    else if(LV_STYLE_PAD_LEFT==v){ return "pad-left" ; }
+    else if(LV_STYLE_PAD_RIGHT==v){ return "pad-right" ; }
+    else if(LV_STYLE_PAD_ROW==v){ return "pad-row" ; }
+    else if(LV_STYLE_PAD_COLUMN==v){ return "pad-column" ; }
+    else if(LV_STYLE_BG_COLOR==v){ return "bg-color" ; }
+    else if(LV_STYLE_BG_COLOR_FILTERED==v){ return "bg-color-filtered" ; }
+    else if(LV_STYLE_BG_OPA==v){ return "bg-opa" ; }
+    else if(LV_STYLE_BG_GRAD_COLOR==v){ return "bg-grad-color" ; }
+    else if(LV_STYLE_BG_GRAD_COLOR_FILTERED==v){ return "bg-grad-color-filtered" ; }
+    else if(LV_STYLE_BG_GRAD_DIR==v){ return "bg-grad-dir" ; }
+    else if(LV_STYLE_BG_MAIN_STOP==v){ return "bg-main-stop" ; }
+    else if(LV_STYLE_BG_GRAD_STOP==v){ return "bg-grad-stop" ; }
+    else if(LV_STYLE_BG_IMG_SRC==v){ return "bg-img-src" ; }
+    else if(LV_STYLE_BG_IMG_OPA==v){ return "bg-img-opa" ; }
+    else if(LV_STYLE_BG_IMG_RECOLOR==v){ return "bg-img-recolor" ; }
+    else if(LV_STYLE_BG_IMG_RECOLOR_FILTERED==v){ return "bg-img-recolor-filtered" ; }
+    else if(LV_STYLE_BG_IMG_RECOLOR_OPA==v){ return "bg-img-recolor-opa" ; }
+    else if(LV_STYLE_BG_IMG_TILED==v){ return "bg-img-tiled" ; }
+    else if(LV_STYLE_BORDER_COLOR==v){ return "border-color" ; }
+    else if(LV_STYLE_BORDER_COLOR_FILTERED==v){ return "border-color-filtered" ; }
+    else if(LV_STYLE_BORDER_OPA==v){ return "border-opa" ; }
+    else if(LV_STYLE_BORDER_WIDTH==v){ return "border-width" ; }
+    else if(LV_STYLE_BORDER_SIDE==v){ return "border-side" ; }
+    else if(LV_STYLE_BORDER_POST==v){ return "border-post" ; }
+    else if(LV_STYLE_OUTLINE_WIDTH==v){ return "outline-width" ; }
+    else if(LV_STYLE_OUTLINE_COLOR==v){ return "outline-color" ; }
+    else if(LV_STYLE_OUTLINE_COLOR_FILTERED==v){ return "outline-color-filtered" ; }
+    else if(LV_STYLE_OUTLINE_OPA==v){ return "outline-opa" ; }
+    else if(LV_STYLE_OUTLINE_PAD==v){ return "outline-pad" ; }
+    else if(LV_STYLE_SHADOW_WIDTH==v){ return "shadow-width" ; }
+    else if(LV_STYLE_SHADOW_OFS_X==v){ return "shadow-ofs-x" ; }
+    else if(LV_STYLE_SHADOW_OFS_Y==v){ return "shadow-ofs-y" ; }
+    else if(LV_STYLE_SHADOW_SPREAD==v){ return "shadow-spread" ; }
+    else if(LV_STYLE_SHADOW_COLOR==v){ return "shadow-color" ; }
+    else if(LV_STYLE_SHADOW_COLOR_FILTERED==v){ return "shadow-color-filtered" ; }
+    else if(LV_STYLE_SHADOW_OPA==v){ return "shadow-opa" ; }
+    else if(LV_STYLE_IMG_OPA==v){ return "img-opa" ; }
+    else if(LV_STYLE_IMG_RECOLOR==v){ return "img-recolor" ; }
+    else if(LV_STYLE_IMG_RECOLOR_FILTERED==v){ return "img-recolor-filtered" ; }
+    else if(LV_STYLE_IMG_RECOLOR_OPA==v){ return "img-recolor-opa" ; }
+    else if(LV_STYLE_LINE_WIDTH==v){ return "line-width" ; }
+    else if(LV_STYLE_LINE_DASH_WIDTH==v){ return "line-dash-width" ; }
+    else if(LV_STYLE_LINE_DASH_GAP==v){ return "line-dash-gap" ; }
+    else if(LV_STYLE_LINE_ROUNDED==v){ return "line-rounded" ; }
+    else if(LV_STYLE_LINE_COLOR==v){ return "line-color" ; }
+    else if(LV_STYLE_LINE_COLOR_FILTERED==v){ return "line-color-filtered" ; }
+    else if(LV_STYLE_LINE_OPA==v){ return "line-opa" ; }
+    else if(LV_STYLE_ARC_WIDTH==v){ return "arc-width" ; }
+    else if(LV_STYLE_ARC_ROUNDED==v){ return "arc-rounded" ; }
+    else if(LV_STYLE_ARC_COLOR==v){ return "arc-color" ; }
+    else if(LV_STYLE_ARC_COLOR_FILTERED==v){ return "arc-color-filtered" ; }
+    else if(LV_STYLE_ARC_OPA==v){ return "arc-opa" ; }
+    else if(LV_STYLE_ARC_IMG_SRC==v){ return "arc-img-src" ; }
+    else if(LV_STYLE_TEXT_COLOR==v){ return "text-color" ; }
+    else if(LV_STYLE_TEXT_COLOR_FILTERED==v){ return "text-color-filtered" ; }
+    else if(LV_STYLE_TEXT_OPA==v){ return "text-opa" ; }
+    else if(LV_STYLE_TEXT_FONT==v){ return "text-font" ; }
+    else if(LV_STYLE_TEXT_LETTER_SPACE==v){ return "text-letter-space" ; }
+    else if(LV_STYLE_TEXT_LINE_SPACE==v){ return "text-line-space" ; }
+    else if(LV_STYLE_TEXT_DECOR==v){ return "text-decor" ; }
+    else if(LV_STYLE_TEXT_ALIGN==v){ return "text-align" ; }
+    else if(LV_STYLE_RADIUS==v){ return "radius" ; }
+    else if(LV_STYLE_CLIP_CORNER==v){ return "clip-corner" ; }
+    else if(LV_STYLE_OPA==v){ return "opa" ; }
+    else if(LV_STYLE_COLOR_FILTER_DSC==v){ return "color-filter-dsc" ; }
+    else if(LV_STYLE_COLOR_FILTER_OPA==v){ return "color-filter-opa" ; }
+    else if(LV_STYLE_ANIM_TIME==v){ return "anim-time" ; }
+    else if(LV_STYLE_ANIM_SPEED==v){ return "anim-speed" ; }
+    else if(LV_STYLE_TRANSITION==v){ return "transition" ; }
+    else if(LV_STYLE_BLEND_MODE==v){ return "blend-mode" ; }
+    else if(LV_STYLE_LAYOUT==v){ return "layout" ; }
+    else if(LV_STYLE_BASE_DIR==v){ return "base-dir" ; }
+    else if(_LV_STYLE_LAST_BUILT_IN_PROP==v){ return "_last-built-in-prop" ; }
+    else if(LV_STYLE_PROP_ANY==v){ return "prop-any" ; }
     else {
         return "<unknow>" ;
     }
 }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_style_prop_to_value(char * n) {
-    if(strcmp("inv", n)==0){ return LV_STYLE_PROP_INV ; }
-    else if(strcmp("lv-style-width", n)==0){ return LV_STYLE_WIDTH ; }
-    else if(strcmp("lv-style-min-width", n)==0){ return LV_STYLE_MIN_WIDTH ; }
-    else if(strcmp("lv-style-max-width", n)==0){ return LV_STYLE_MAX_WIDTH ; }
-    else if(strcmp("lv-style-height", n)==0){ return LV_STYLE_HEIGHT ; }
-    else if(strcmp("lv-style-min-height", n)==0){ return LV_STYLE_MIN_HEIGHT ; }
-    else if(strcmp("lv-style-max-height", n)==0){ return LV_STYLE_MAX_HEIGHT ; }
-    else if(strcmp("lv-style-x", n)==0){ return LV_STYLE_X ; }
-    else if(strcmp("lv-style-y", n)==0){ return LV_STYLE_Y ; }
-    else if(strcmp("lv-style-align", n)==0){ return LV_STYLE_ALIGN ; }
-    else if(strcmp("lv-style-transform-width", n)==0){ return LV_STYLE_TRANSFORM_WIDTH ; }
-    else if(strcmp("lv-style-transform-height", n)==0){ return LV_STYLE_TRANSFORM_HEIGHT ; }
-    else if(strcmp("lv-style-translate-x", n)==0){ return LV_STYLE_TRANSLATE_X ; }
-    else if(strcmp("lv-style-translate-y", n)==0){ return LV_STYLE_TRANSLATE_Y ; }
-    else if(strcmp("lv-style-transform-zoom", n)==0){ return LV_STYLE_TRANSFORM_ZOOM ; }
-    else if(strcmp("lv-style-transform-angle", n)==0){ return LV_STYLE_TRANSFORM_ANGLE ; }
-    else if(strcmp("lv-style-pad-top", n)==0){ return LV_STYLE_PAD_TOP ; }
-    else if(strcmp("lv-style-pad-bottom", n)==0){ return LV_STYLE_PAD_BOTTOM ; }
-    else if(strcmp("lv-style-pad-left", n)==0){ return LV_STYLE_PAD_LEFT ; }
-    else if(strcmp("lv-style-pad-right", n)==0){ return LV_STYLE_PAD_RIGHT ; }
-    else if(strcmp("lv-style-pad-row", n)==0){ return LV_STYLE_PAD_ROW ; }
-    else if(strcmp("lv-style-pad-column", n)==0){ return LV_STYLE_PAD_COLUMN ; }
-    else if(strcmp("lv-style-bg-color", n)==0){ return LV_STYLE_BG_COLOR ; }
-    else if(strcmp("lv-style-bg-color-filtered", n)==0){ return LV_STYLE_BG_COLOR_FILTERED ; }
-    else if(strcmp("lv-style-bg-opa", n)==0){ return LV_STYLE_BG_OPA ; }
-    else if(strcmp("lv-style-bg-grad-color", n)==0){ return LV_STYLE_BG_GRAD_COLOR ; }
-    else if(strcmp("lv-style-bg-grad-color-filtered", n)==0){ return LV_STYLE_BG_GRAD_COLOR_FILTERED ; }
-    else if(strcmp("lv-style-bg-grad-dir", n)==0){ return LV_STYLE_BG_GRAD_DIR ; }
-    else if(strcmp("lv-style-bg-main-stop", n)==0){ return LV_STYLE_BG_MAIN_STOP ; }
-    else if(strcmp("lv-style-bg-grad-stop", n)==0){ return LV_STYLE_BG_GRAD_STOP ; }
-    else if(strcmp("lv-style-bg-img-src", n)==0){ return LV_STYLE_BG_IMG_SRC ; }
-    else if(strcmp("lv-style-bg-img-opa", n)==0){ return LV_STYLE_BG_IMG_OPA ; }
-    else if(strcmp("lv-style-bg-img-recolor", n)==0){ return LV_STYLE_BG_IMG_RECOLOR ; }
-    else if(strcmp("lv-style-bg-img-recolor-filtered", n)==0){ return LV_STYLE_BG_IMG_RECOLOR_FILTERED ; }
-    else if(strcmp("lv-style-bg-img-recolor-opa", n)==0){ return LV_STYLE_BG_IMG_RECOLOR_OPA ; }
-    else if(strcmp("lv-style-bg-img-tiled", n)==0){ return LV_STYLE_BG_IMG_TILED ; }
-    else if(strcmp("lv-style-border-color", n)==0){ return LV_STYLE_BORDER_COLOR ; }
-    else if(strcmp("lv-style-border-color-filtered", n)==0){ return LV_STYLE_BORDER_COLOR_FILTERED ; }
-    else if(strcmp("lv-style-border-opa", n)==0){ return LV_STYLE_BORDER_OPA ; }
-    else if(strcmp("lv-style-border-width", n)==0){ return LV_STYLE_BORDER_WIDTH ; }
-    else if(strcmp("lv-style-border-side", n)==0){ return LV_STYLE_BORDER_SIDE ; }
-    else if(strcmp("lv-style-border-post", n)==0){ return LV_STYLE_BORDER_POST ; }
-    else if(strcmp("lv-style-outline-width", n)==0){ return LV_STYLE_OUTLINE_WIDTH ; }
-    else if(strcmp("lv-style-outline-color", n)==0){ return LV_STYLE_OUTLINE_COLOR ; }
-    else if(strcmp("lv-style-outline-color-filtered", n)==0){ return LV_STYLE_OUTLINE_COLOR_FILTERED ; }
-    else if(strcmp("lv-style-outline-opa", n)==0){ return LV_STYLE_OUTLINE_OPA ; }
-    else if(strcmp("lv-style-outline-pad", n)==0){ return LV_STYLE_OUTLINE_PAD ; }
-    else if(strcmp("lv-style-shadow-width", n)==0){ return LV_STYLE_SHADOW_WIDTH ; }
-    else if(strcmp("lv-style-shadow-ofs-x", n)==0){ return LV_STYLE_SHADOW_OFS_X ; }
-    else if(strcmp("lv-style-shadow-ofs-y", n)==0){ return LV_STYLE_SHADOW_OFS_Y ; }
-    else if(strcmp("lv-style-shadow-spread", n)==0){ return LV_STYLE_SHADOW_SPREAD ; }
-    else if(strcmp("lv-style-shadow-color", n)==0){ return LV_STYLE_SHADOW_COLOR ; }
-    else if(strcmp("lv-style-shadow-color-filtered", n)==0){ return LV_STYLE_SHADOW_COLOR_FILTERED ; }
-    else if(strcmp("lv-style-shadow-opa", n)==0){ return LV_STYLE_SHADOW_OPA ; }
-    else if(strcmp("lv-style-img-opa", n)==0){ return LV_STYLE_IMG_OPA ; }
-    else if(strcmp("lv-style-img-recolor", n)==0){ return LV_STYLE_IMG_RECOLOR ; }
-    else if(strcmp("lv-style-img-recolor-filtered", n)==0){ return LV_STYLE_IMG_RECOLOR_FILTERED ; }
-    else if(strcmp("lv-style-img-recolor-opa", n)==0){ return LV_STYLE_IMG_RECOLOR_OPA ; }
-    else if(strcmp("lv-style-line-width", n)==0){ return LV_STYLE_LINE_WIDTH ; }
-    else if(strcmp("lv-style-line-dash-width", n)==0){ return LV_STYLE_LINE_DASH_WIDTH ; }
-    else if(strcmp("lv-style-line-dash-gap", n)==0){ return LV_STYLE_LINE_DASH_GAP ; }
-    else if(strcmp("lv-style-line-rounded", n)==0){ return LV_STYLE_LINE_ROUNDED ; }
-    else if(strcmp("lv-style-line-color", n)==0){ return LV_STYLE_LINE_COLOR ; }
-    else if(strcmp("lv-style-line-color-filtered", n)==0){ return LV_STYLE_LINE_COLOR_FILTERED ; }
-    else if(strcmp("lv-style-line-opa", n)==0){ return LV_STYLE_LINE_OPA ; }
-    else if(strcmp("lv-style-arc-width", n)==0){ return LV_STYLE_ARC_WIDTH ; }
-    else if(strcmp("lv-style-arc-rounded", n)==0){ return LV_STYLE_ARC_ROUNDED ; }
-    else if(strcmp("lv-style-arc-color", n)==0){ return LV_STYLE_ARC_COLOR ; }
-    else if(strcmp("lv-style-arc-color-filtered", n)==0){ return LV_STYLE_ARC_COLOR_FILTERED ; }
-    else if(strcmp("lv-style-arc-opa", n)==0){ return LV_STYLE_ARC_OPA ; }
-    else if(strcmp("lv-style-arc-img-src", n)==0){ return LV_STYLE_ARC_IMG_SRC ; }
-    else if(strcmp("lv-style-text-color", n)==0){ return LV_STYLE_TEXT_COLOR ; }
-    else if(strcmp("lv-style-text-color-filtered", n)==0){ return LV_STYLE_TEXT_COLOR_FILTERED ; }
-    else if(strcmp("lv-style-text-opa", n)==0){ return LV_STYLE_TEXT_OPA ; }
-    else if(strcmp("lv-style-text-font", n)==0){ return LV_STYLE_TEXT_FONT ; }
-    else if(strcmp("lv-style-text-letter-space", n)==0){ return LV_STYLE_TEXT_LETTER_SPACE ; }
-    else if(strcmp("lv-style-text-line-space", n)==0){ return LV_STYLE_TEXT_LINE_SPACE ; }
-    else if(strcmp("lv-style-text-decor", n)==0){ return LV_STYLE_TEXT_DECOR ; }
-    else if(strcmp("lv-style-text-align", n)==0){ return LV_STYLE_TEXT_ALIGN ; }
-    else if(strcmp("lv-style-radius", n)==0){ return LV_STYLE_RADIUS ; }
-    else if(strcmp("lv-style-clip-corner", n)==0){ return LV_STYLE_CLIP_CORNER ; }
-    else if(strcmp("lv-style-opa", n)==0){ return LV_STYLE_OPA ; }
-    else if(strcmp("lv-style-color-filter-dsc", n)==0){ return LV_STYLE_COLOR_FILTER_DSC ; }
-    else if(strcmp("lv-style-color-filter-opa", n)==0){ return LV_STYLE_COLOR_FILTER_OPA ; }
-    else if(strcmp("lv-style-anim-time", n)==0){ return LV_STYLE_ANIM_TIME ; }
-    else if(strcmp("lv-style-anim-speed", n)==0){ return LV_STYLE_ANIM_SPEED ; }
-    else if(strcmp("lv-style-transition", n)==0){ return LV_STYLE_TRANSITION ; }
-    else if(strcmp("lv-style-blend-mode", n)==0){ return LV_STYLE_BLEND_MODE ; }
-    else if(strcmp("lv-style-layout", n)==0){ return LV_STYLE_LAYOUT ; }
-    else if(strcmp("lv-style-base-dir", n)==0){ return LV_STYLE_BASE_DIR ; }
-    else if(strcmp("_lv-style-last-built-in-prop", n)==0){ return _LV_STYLE_LAST_BUILT_IN_PROP ; }
-    else if(strcmp("any", n)==0){ return LV_STYLE_PROP_ANY ; }
+    if(strcmp("prop-inv", n)==0){ return LV_STYLE_PROP_INV ; }
+    else if(strcmp("width", n)==0){ return LV_STYLE_WIDTH ; }
+    else if(strcmp("min-width", n)==0){ return LV_STYLE_MIN_WIDTH ; }
+    else if(strcmp("max-width", n)==0){ return LV_STYLE_MAX_WIDTH ; }
+    else if(strcmp("height", n)==0){ return LV_STYLE_HEIGHT ; }
+    else if(strcmp("min-height", n)==0){ return LV_STYLE_MIN_HEIGHT ; }
+    else if(strcmp("max-height", n)==0){ return LV_STYLE_MAX_HEIGHT ; }
+    else if(strcmp("x", n)==0){ return LV_STYLE_X ; }
+    else if(strcmp("y", n)==0){ return LV_STYLE_Y ; }
+    else if(strcmp("align", n)==0){ return LV_STYLE_ALIGN ; }
+    else if(strcmp("transform-width", n)==0){ return LV_STYLE_TRANSFORM_WIDTH ; }
+    else if(strcmp("transform-height", n)==0){ return LV_STYLE_TRANSFORM_HEIGHT ; }
+    else if(strcmp("translate-x", n)==0){ return LV_STYLE_TRANSLATE_X ; }
+    else if(strcmp("translate-y", n)==0){ return LV_STYLE_TRANSLATE_Y ; }
+    else if(strcmp("transform-zoom", n)==0){ return LV_STYLE_TRANSFORM_ZOOM ; }
+    else if(strcmp("transform-angle", n)==0){ return LV_STYLE_TRANSFORM_ANGLE ; }
+    else if(strcmp("pad-top", n)==0){ return LV_STYLE_PAD_TOP ; }
+    else if(strcmp("pad-bottom", n)==0){ return LV_STYLE_PAD_BOTTOM ; }
+    else if(strcmp("pad-left", n)==0){ return LV_STYLE_PAD_LEFT ; }
+    else if(strcmp("pad-right", n)==0){ return LV_STYLE_PAD_RIGHT ; }
+    else if(strcmp("pad-row", n)==0){ return LV_STYLE_PAD_ROW ; }
+    else if(strcmp("pad-column", n)==0){ return LV_STYLE_PAD_COLUMN ; }
+    else if(strcmp("bg-color", n)==0){ return LV_STYLE_BG_COLOR ; }
+    else if(strcmp("bg-color-filtered", n)==0){ return LV_STYLE_BG_COLOR_FILTERED ; }
+    else if(strcmp("bg-opa", n)==0){ return LV_STYLE_BG_OPA ; }
+    else if(strcmp("bg-grad-color", n)==0){ return LV_STYLE_BG_GRAD_COLOR ; }
+    else if(strcmp("bg-grad-color-filtered", n)==0){ return LV_STYLE_BG_GRAD_COLOR_FILTERED ; }
+    else if(strcmp("bg-grad-dir", n)==0){ return LV_STYLE_BG_GRAD_DIR ; }
+    else if(strcmp("bg-main-stop", n)==0){ return LV_STYLE_BG_MAIN_STOP ; }
+    else if(strcmp("bg-grad-stop", n)==0){ return LV_STYLE_BG_GRAD_STOP ; }
+    else if(strcmp("bg-img-src", n)==0){ return LV_STYLE_BG_IMG_SRC ; }
+    else if(strcmp("bg-img-opa", n)==0){ return LV_STYLE_BG_IMG_OPA ; }
+    else if(strcmp("bg-img-recolor", n)==0){ return LV_STYLE_BG_IMG_RECOLOR ; }
+    else if(strcmp("bg-img-recolor-filtered", n)==0){ return LV_STYLE_BG_IMG_RECOLOR_FILTERED ; }
+    else if(strcmp("bg-img-recolor-opa", n)==0){ return LV_STYLE_BG_IMG_RECOLOR_OPA ; }
+    else if(strcmp("bg-img-tiled", n)==0){ return LV_STYLE_BG_IMG_TILED ; }
+    else if(strcmp("border-color", n)==0){ return LV_STYLE_BORDER_COLOR ; }
+    else if(strcmp("border-color-filtered", n)==0){ return LV_STYLE_BORDER_COLOR_FILTERED ; }
+    else if(strcmp("border-opa", n)==0){ return LV_STYLE_BORDER_OPA ; }
+    else if(strcmp("border-width", n)==0){ return LV_STYLE_BORDER_WIDTH ; }
+    else if(strcmp("border-side", n)==0){ return LV_STYLE_BORDER_SIDE ; }
+    else if(strcmp("border-post", n)==0){ return LV_STYLE_BORDER_POST ; }
+    else if(strcmp("outline-width", n)==0){ return LV_STYLE_OUTLINE_WIDTH ; }
+    else if(strcmp("outline-color", n)==0){ return LV_STYLE_OUTLINE_COLOR ; }
+    else if(strcmp("outline-color-filtered", n)==0){ return LV_STYLE_OUTLINE_COLOR_FILTERED ; }
+    else if(strcmp("outline-opa", n)==0){ return LV_STYLE_OUTLINE_OPA ; }
+    else if(strcmp("outline-pad", n)==0){ return LV_STYLE_OUTLINE_PAD ; }
+    else if(strcmp("shadow-width", n)==0){ return LV_STYLE_SHADOW_WIDTH ; }
+    else if(strcmp("shadow-ofs-x", n)==0){ return LV_STYLE_SHADOW_OFS_X ; }
+    else if(strcmp("shadow-ofs-y", n)==0){ return LV_STYLE_SHADOW_OFS_Y ; }
+    else if(strcmp("shadow-spread", n)==0){ return LV_STYLE_SHADOW_SPREAD ; }
+    else if(strcmp("shadow-color", n)==0){ return LV_STYLE_SHADOW_COLOR ; }
+    else if(strcmp("shadow-color-filtered", n)==0){ return LV_STYLE_SHADOW_COLOR_FILTERED ; }
+    else if(strcmp("shadow-opa", n)==0){ return LV_STYLE_SHADOW_OPA ; }
+    else if(strcmp("img-opa", n)==0){ return LV_STYLE_IMG_OPA ; }
+    else if(strcmp("img-recolor", n)==0){ return LV_STYLE_IMG_RECOLOR ; }
+    else if(strcmp("img-recolor-filtered", n)==0){ return LV_STYLE_IMG_RECOLOR_FILTERED ; }
+    else if(strcmp("img-recolor-opa", n)==0){ return LV_STYLE_IMG_RECOLOR_OPA ; }
+    else if(strcmp("line-width", n)==0){ return LV_STYLE_LINE_WIDTH ; }
+    else if(strcmp("line-dash-width", n)==0){ return LV_STYLE_LINE_DASH_WIDTH ; }
+    else if(strcmp("line-dash-gap", n)==0){ return LV_STYLE_LINE_DASH_GAP ; }
+    else if(strcmp("line-rounded", n)==0){ return LV_STYLE_LINE_ROUNDED ; }
+    else if(strcmp("line-color", n)==0){ return LV_STYLE_LINE_COLOR ; }
+    else if(strcmp("line-color-filtered", n)==0){ return LV_STYLE_LINE_COLOR_FILTERED ; }
+    else if(strcmp("line-opa", n)==0){ return LV_STYLE_LINE_OPA ; }
+    else if(strcmp("arc-width", n)==0){ return LV_STYLE_ARC_WIDTH ; }
+    else if(strcmp("arc-rounded", n)==0){ return LV_STYLE_ARC_ROUNDED ; }
+    else if(strcmp("arc-color", n)==0){ return LV_STYLE_ARC_COLOR ; }
+    else if(strcmp("arc-color-filtered", n)==0){ return LV_STYLE_ARC_COLOR_FILTERED ; }
+    else if(strcmp("arc-opa", n)==0){ return LV_STYLE_ARC_OPA ; }
+    else if(strcmp("arc-img-src", n)==0){ return LV_STYLE_ARC_IMG_SRC ; }
+    else if(strcmp("text-color", n)==0){ return LV_STYLE_TEXT_COLOR ; }
+    else if(strcmp("text-color-filtered", n)==0){ return LV_STYLE_TEXT_COLOR_FILTERED ; }
+    else if(strcmp("text-opa", n)==0){ return LV_STYLE_TEXT_OPA ; }
+    else if(strcmp("text-font", n)==0){ return LV_STYLE_TEXT_FONT ; }
+    else if(strcmp("text-letter-space", n)==0){ return LV_STYLE_TEXT_LETTER_SPACE ; }
+    else if(strcmp("text-line-space", n)==0){ return LV_STYLE_TEXT_LINE_SPACE ; }
+    else if(strcmp("text-decor", n)==0){ return LV_STYLE_TEXT_DECOR ; }
+    else if(strcmp("text-align", n)==0){ return LV_STYLE_TEXT_ALIGN ; }
+    else if(strcmp("radius", n)==0){ return LV_STYLE_RADIUS ; }
+    else if(strcmp("clip-corner", n)==0){ return LV_STYLE_CLIP_CORNER ; }
+    else if(strcmp("opa", n)==0){ return LV_STYLE_OPA ; }
+    else if(strcmp("color-filter-dsc", n)==0){ return LV_STYLE_COLOR_FILTER_DSC ; }
+    else if(strcmp("color-filter-opa", n)==0){ return LV_STYLE_COLOR_FILTER_OPA ; }
+    else if(strcmp("anim-time", n)==0){ return LV_STYLE_ANIM_TIME ; }
+    else if(strcmp("anim-speed", n)==0){ return LV_STYLE_ANIM_SPEED ; }
+    else if(strcmp("transition", n)==0){ return LV_STYLE_TRANSITION ; }
+    else if(strcmp("blend-mode", n)==0){ return LV_STYLE_BLEND_MODE ; }
+    else if(strcmp("layout", n)==0){ return LV_STYLE_LAYOUT ; }
+    else if(strcmp("base-dir", n)==0){ return LV_STYLE_BASE_DIR ; }
+    else if(strcmp("_last-built-in-prop", n)==0){ return _LV_STYLE_LAST_BUILT_IN_PROP ; }
+    else if(strcmp("prop-any", n)==0){ return LV_STYLE_PROP_ANY ; }
     else {
         return (uint32_t)-1 ;
     }
 }
+// "lv_state_t": /^(_?)LV_STATE_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_state_to_name(uint32_t v) {
     if(LV_STATE_DEFAULT==v){ return "default" ; }
     else if(LV_STATE_CHECKED==v){ return "checked" ; }
@@ -688,6 +708,7 @@ EMSCRIPTEN_KEEPALIVE uint32_t lv_state_to_value(char * n) {
         return (uint32_t)-1 ;
     }
 }
+// "lv_part_t": /^(_?)LV_PART_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_part_to_name(uint32_t v) {
     if(LV_PART_MAIN==v){ return "main" ; }
     else if(LV_PART_SCROLLBAR==v){ return "scrollbar" ; }
@@ -718,6 +739,7 @@ EMSCRIPTEN_KEEPALIVE uint32_t lv_part_to_value(char * n) {
         return (uint32_t)-1 ;
     }
 }
+// "lv_obj_flag_t": /^(_?)LV_OBJ_FLAG_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_obj_flag_to_name(uint32_t v) {
     if(LV_OBJ_FLAG_HIDDEN==v){ return "hidden" ; }
     else if(LV_OBJ_FLAG_CLICKABLE==v){ return "clickable" ; }
@@ -778,56 +800,60 @@ EMSCRIPTEN_KEEPALIVE uint32_t lv_obj_flag_to_value(char * n) {
         return (uint32_t)-1 ;
     }
 }
+// "lv_obj_draw_part_type_t": /^(_?)LV_OBJ_DRAW_PART_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_obj_draw_part_type_to_name(uint32_t v) {
-    if(LV_OBJ_DRAW_PART_RECTANGLE==v){ return "lv-obj-draw-part-rectangle" ; }
-    else if(LV_OBJ_DRAW_PART_BORDER_POST==v){ return "lv-obj-draw-part-border-post" ; }
-    else if(LV_OBJ_DRAW_PART_SCROLLBAR==v){ return "lv-obj-draw-part-scrollbar" ; }
+    if(LV_OBJ_DRAW_PART_RECTANGLE==v){ return "rectangle" ; }
+    else if(LV_OBJ_DRAW_PART_BORDER_POST==v){ return "border-post" ; }
+    else if(LV_OBJ_DRAW_PART_SCROLLBAR==v){ return "scrollbar" ; }
     else {
         return "<unknow>" ;
     }
 }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_obj_draw_part_type_to_value(char * n) {
-    if(strcmp("lv-obj-draw-part-rectangle", n)==0){ return LV_OBJ_DRAW_PART_RECTANGLE ; }
-    else if(strcmp("lv-obj-draw-part-border-post", n)==0){ return LV_OBJ_DRAW_PART_BORDER_POST ; }
-    else if(strcmp("lv-obj-draw-part-scrollbar", n)==0){ return LV_OBJ_DRAW_PART_SCROLLBAR ; }
+    if(strcmp("rectangle", n)==0){ return LV_OBJ_DRAW_PART_RECTANGLE ; }
+    else if(strcmp("border-post", n)==0){ return LV_OBJ_DRAW_PART_BORDER_POST ; }
+    else if(strcmp("scrollbar", n)==0){ return LV_OBJ_DRAW_PART_SCROLLBAR ; }
     else {
         return (uint32_t)-1 ;
     }
 }
+// "lv_obj_tree_walk_res_t": /^(_?)LV_OBJ_TREE_WALK_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_obj_tree_walk_res_to_name(uint32_t v) {
-    if(LV_OBJ_TREE_WALK_NEXT==v){ return "lv-obj-tree-walk-next" ; }
-    else if(LV_OBJ_TREE_WALK_SKIP_CHILDREN==v){ return "lv-obj-tree-walk-skip-children" ; }
-    else if(LV_OBJ_TREE_WALK_END==v){ return "lv-obj-tree-walk-end" ; }
+    if(LV_OBJ_TREE_WALK_NEXT==v){ return "next" ; }
+    else if(LV_OBJ_TREE_WALK_SKIP_CHILDREN==v){ return "skip-children" ; }
+    else if(LV_OBJ_TREE_WALK_END==v){ return "end" ; }
     else {
         return "<unknow>" ;
     }
 }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_obj_tree_walk_res_to_value(char * n) {
-    if(strcmp("lv-obj-tree-walk-next", n)==0){ return LV_OBJ_TREE_WALK_NEXT ; }
-    else if(strcmp("lv-obj-tree-walk-skip-children", n)==0){ return LV_OBJ_TREE_WALK_SKIP_CHILDREN ; }
-    else if(strcmp("lv-obj-tree-walk-end", n)==0){ return LV_OBJ_TREE_WALK_END ; }
+    if(strcmp("next", n)==0){ return LV_OBJ_TREE_WALK_NEXT ; }
+    else if(strcmp("skip-children", n)==0){ return LV_OBJ_TREE_WALK_SKIP_CHILDREN ; }
+    else if(strcmp("end", n)==0){ return LV_OBJ_TREE_WALK_END ; }
     else {
         return (uint32_t)-1 ;
     }
 }
+// "lv_scrollbar_mode_t": /^(_?)LV_SCROLLBAR_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_scrollbar_mode_to_name(uint32_t v) {
-    if(LV_SCROLLBAR_MODE_OFF==v){ return "off" ; }
-    else if(LV_SCROLLBAR_MODE_ON==v){ return "on" ; }
-    else if(LV_SCROLLBAR_MODE_ACTIVE==v){ return "active" ; }
-    else if(LV_SCROLLBAR_MODE_AUTO==v){ return "auto" ; }
+    if(LV_SCROLLBAR_MODE_OFF==v){ return "mode-off" ; }
+    else if(LV_SCROLLBAR_MODE_ON==v){ return "mode-on" ; }
+    else if(LV_SCROLLBAR_MODE_ACTIVE==v){ return "mode-active" ; }
+    else if(LV_SCROLLBAR_MODE_AUTO==v){ return "mode-auto" ; }
     else {
         return "<unknow>" ;
     }
 }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_scrollbar_mode_to_value(char * n) {
-    if(strcmp("off", n)==0){ return LV_SCROLLBAR_MODE_OFF ; }
-    else if(strcmp("on", n)==0){ return LV_SCROLLBAR_MODE_ON ; }
-    else if(strcmp("active", n)==0){ return LV_SCROLLBAR_MODE_ACTIVE ; }
-    else if(strcmp("auto", n)==0){ return LV_SCROLLBAR_MODE_AUTO ; }
+    if(strcmp("mode-off", n)==0){ return LV_SCROLLBAR_MODE_OFF ; }
+    else if(strcmp("mode-on", n)==0){ return LV_SCROLLBAR_MODE_ON ; }
+    else if(strcmp("mode-active", n)==0){ return LV_SCROLLBAR_MODE_ACTIVE ; }
+    else if(strcmp("mode-auto", n)==0){ return LV_SCROLLBAR_MODE_AUTO ; }
     else {
         return (uint32_t)-1 ;
     }
 }
+// "lv_scroll_snap_t": /^(_?)LV_SCROLL_SNAP_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_scroll_snap_to_name(uint32_t v) {
     if(LV_SCROLL_SNAP_NONE==v){ return "none" ; }
     else if(LV_SCROLL_SNAP_START==v){ return "start" ; }
@@ -846,6 +872,7 @@ EMSCRIPTEN_KEEPALIVE uint32_t lv_scroll_snap_to_value(char * n) {
         return (uint32_t)-1 ;
     }
 }
+// "_lv_style_state_cmp_t": /^(_?)_LV_STYLE_STATE_CMP_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv__style_state_cmp_to_name(uint32_t v) {
     if(_LV_STYLE_STATE_CMP_SAME==v){ return "same" ; }
     else if(_LV_STYLE_STATE_CMP_DIFF_REDRAW==v){ return "diff-redraw" ; }
@@ -864,6 +891,7 @@ EMSCRIPTEN_KEEPALIVE uint32_t lv__style_state_cmp_to_value(char * n) {
         return (uint32_t)-1 ;
     }
 }
+// "lv_fs_res_t": /^(_?)LV_FS_RES_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_fs_res_to_name(uint32_t v) {
     if(LV_FS_RES_OK==v){ return "ok" ; }
     else if(LV_FS_RES_HW_ERR==v){ return "hw-err" ; }
@@ -900,36 +928,39 @@ EMSCRIPTEN_KEEPALIVE uint32_t lv_fs_res_to_value(char * n) {
         return (uint32_t)-1 ;
     }
 }
+// "lv_fs_mode_t": /^(_?)LV_FS_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_fs_mode_to_name(uint32_t v) {
-    if(LV_FS_MODE_WR==v){ return "wr" ; }
-    else if(LV_FS_MODE_RD==v){ return "rd" ; }
+    if(LV_FS_MODE_WR==v){ return "mode-wr" ; }
+    else if(LV_FS_MODE_RD==v){ return "mode-rd" ; }
     else {
         return "<unknow>" ;
     }
 }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_fs_mode_to_value(char * n) {
-    if(strcmp("wr", n)==0){ return LV_FS_MODE_WR ; }
-    else if(strcmp("rd", n)==0){ return LV_FS_MODE_RD ; }
+    if(strcmp("mode-wr", n)==0){ return LV_FS_MODE_WR ; }
+    else if(strcmp("mode-rd", n)==0){ return LV_FS_MODE_RD ; }
     else {
         return (uint32_t)-1 ;
     }
 }
+// "lv_fs_whence_t": /^(_?)LV_FS_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_fs_whence_to_name(uint32_t v) {
-    if(LV_FS_SEEK_SET==v){ return "lv-fs-seek-set" ; }
-    else if(LV_FS_SEEK_CUR==v){ return "lv-fs-seek-cur" ; }
-    else if(LV_FS_SEEK_END==v){ return "lv-fs-seek-end" ; }
+    if(LV_FS_SEEK_SET==v){ return "seek-set" ; }
+    else if(LV_FS_SEEK_CUR==v){ return "seek-cur" ; }
+    else if(LV_FS_SEEK_END==v){ return "seek-end" ; }
     else {
         return "<unknow>" ;
     }
 }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_fs_whence_to_value(char * n) {
-    if(strcmp("lv-fs-seek-set", n)==0){ return LV_FS_SEEK_SET ; }
-    else if(strcmp("lv-fs-seek-cur", n)==0){ return LV_FS_SEEK_CUR ; }
-    else if(strcmp("lv-fs-seek-end", n)==0){ return LV_FS_SEEK_END ; }
+    if(strcmp("seek-set", n)==0){ return LV_FS_SEEK_SET ; }
+    else if(strcmp("seek-cur", n)==0){ return LV_FS_SEEK_CUR ; }
+    else if(strcmp("seek-end", n)==0){ return LV_FS_SEEK_END ; }
     else {
         return (uint32_t)-1 ;
     }
 }
+// "lv_img_src_t": /^(_?)LV_IMG_SRC_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_img_src_to_name(uint32_t v) {
     if(LV_IMG_SRC_VARIABLE==v){ return "variable" ; }
     else if(LV_IMG_SRC_FILE==v){ return "file" ; }
@@ -948,6 +979,7 @@ EMSCRIPTEN_KEEPALIVE uint32_t lv_img_src_to_value(char * n) {
         return (uint32_t)-1 ;
     }
 }
+// "lv_draw_mask_res_t": /^(_?)LV_DRAW_MASK_RES_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_draw_mask_res_to_name(uint32_t v) {
     if(LV_DRAW_MASK_RES_TRANSP==v){ return "transp" ; }
     else if(LV_DRAW_MASK_RES_FULL_COVER==v){ return "full-cover" ; }
@@ -966,6 +998,7 @@ EMSCRIPTEN_KEEPALIVE uint32_t lv_draw_mask_res_to_value(char * n) {
         return (uint32_t)-1 ;
     }
 }
+// "lv_draw_mask_type_t": /^(_?)LV_DRAW_MASK_TYPE_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_draw_mask_type_to_name(uint32_t v) {
     if(LV_DRAW_MASK_TYPE_LINE==v){ return "line" ; }
     else if(LV_DRAW_MASK_TYPE_ANGLE==v){ return "angle" ; }
@@ -986,24 +1019,26 @@ EMSCRIPTEN_KEEPALIVE uint32_t lv_draw_mask_type_to_value(char * n) {
         return (uint32_t)-1 ;
     }
 }
+// "lv_draw_mask_xcb_t": /^(_?)LV_DRAW_MASK_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_draw_mask_xcb_to_name(uint32_t v) {
-    if(LV_DRAW_MASK_LINE_SIDE_LEFT==v){ return "lv-draw-mask-line-side-left" ; }
-    else if(LV_DRAW_MASK_LINE_SIDE_RIGHT==v){ return "lv-draw-mask-line-side-right" ; }
-    else if(LV_DRAW_MASK_LINE_SIDE_TOP==v){ return "lv-draw-mask-line-side-top" ; }
-    else if(LV_DRAW_MASK_LINE_SIDE_BOTTOM==v){ return "lv-draw-mask-line-side-bottom" ; }
+    if(LV_DRAW_MASK_LINE_SIDE_LEFT==v){ return "line-side-left" ; }
+    else if(LV_DRAW_MASK_LINE_SIDE_RIGHT==v){ return "line-side-right" ; }
+    else if(LV_DRAW_MASK_LINE_SIDE_TOP==v){ return "line-side-top" ; }
+    else if(LV_DRAW_MASK_LINE_SIDE_BOTTOM==v){ return "line-side-bottom" ; }
     else {
         return "<unknow>" ;
     }
 }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_draw_mask_xcb_to_value(char * n) {
-    if(strcmp("lv-draw-mask-line-side-left", n)==0){ return LV_DRAW_MASK_LINE_SIDE_LEFT ; }
-    else if(strcmp("lv-draw-mask-line-side-right", n)==0){ return LV_DRAW_MASK_LINE_SIDE_RIGHT ; }
-    else if(strcmp("lv-draw-mask-line-side-top", n)==0){ return LV_DRAW_MASK_LINE_SIDE_TOP ; }
-    else if(strcmp("lv-draw-mask-line-side-bottom", n)==0){ return LV_DRAW_MASK_LINE_SIDE_BOTTOM ; }
+    if(strcmp("line-side-left", n)==0){ return LV_DRAW_MASK_LINE_SIDE_LEFT ; }
+    else if(strcmp("line-side-right", n)==0){ return LV_DRAW_MASK_LINE_SIDE_RIGHT ; }
+    else if(strcmp("line-side-top", n)==0){ return LV_DRAW_MASK_LINE_SIDE_TOP ; }
+    else if(strcmp("line-side-bottom", n)==0){ return LV_DRAW_MASK_LINE_SIDE_BOTTOM ; }
     else {
         return (uint32_t)-1 ;
     }
 }
+// "lv_cover_res_t": /^(_?)LV_COVER_RES_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_cover_res_to_name(uint32_t v) {
     if(LV_COVER_RES_COVER==v){ return "cover" ; }
     else if(LV_COVER_RES_NOT_COVER==v){ return "not-cover" ; }
@@ -1020,6 +1055,7 @@ EMSCRIPTEN_KEEPALIVE uint32_t lv_cover_res_to_value(char * n) {
         return (uint32_t)-1 ;
     }
 }
+// "lv_obj_class_editable_t": /^(_?)LV_OBJ_CLASS_EDITABLE_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_obj_class_editable_to_name(uint32_t v) {
     if(LV_OBJ_CLASS_EDITABLE_INHERIT==v){ return "inherit" ; }
     else if(LV_OBJ_CLASS_EDITABLE_TRUE==v){ return "true" ; }
@@ -1036,6 +1072,7 @@ EMSCRIPTEN_KEEPALIVE uint32_t lv_obj_class_editable_to_value(char * n) {
         return (uint32_t)-1 ;
     }
 }
+// "lv_obj_class_group_def_t": /^(_?)LV_OBJ_CLASS_GROUP_DEF_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_obj_class_group_def_to_name(uint32_t v) {
     if(LV_OBJ_CLASS_GROUP_DEF_INHERIT==v){ return "inherit" ; }
     else if(LV_OBJ_CLASS_GROUP_DEF_TRUE==v){ return "true" ; }
@@ -1052,108 +1089,110 @@ EMSCRIPTEN_KEEPALIVE uint32_t lv_obj_class_group_def_to_value(char * n) {
         return (uint32_t)-1 ;
     }
 }
+// "lv_event_code_t": /^(_?)LV_EVENT_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_event_code_to_name(uint32_t v) {
-    if(LV_EVENT_ALL==v){ return "lv-event-all" ; }
-    else if(LV_EVENT_PRESSED==v){ return "lv-event-pressed" ; }
-    else if(LV_EVENT_PRESSING==v){ return "lv-event-pressing" ; }
-    else if(LV_EVENT_PRESS_LOST==v){ return "lv-event-press-lost" ; }
-    else if(LV_EVENT_SHORT_CLICKED==v){ return "lv-event-short-clicked" ; }
-    else if(LV_EVENT_LONG_PRESSED==v){ return "lv-event-long-pressed" ; }
-    else if(LV_EVENT_LONG_PRESSED_REPEAT==v){ return "lv-event-long-pressed-repeat" ; }
-    else if(LV_EVENT_CLICKED==v){ return "lv-event-clicked" ; }
-    else if(LV_EVENT_RELEASED==v){ return "lv-event-released" ; }
-    else if(LV_EVENT_SCROLL_BEGIN==v){ return "lv-event-scroll-begin" ; }
-    else if(LV_EVENT_SCROLL_END==v){ return "lv-event-scroll-end" ; }
-    else if(LV_EVENT_SCROLL==v){ return "lv-event-scroll" ; }
-    else if(LV_EVENT_GESTURE==v){ return "lv-event-gesture" ; }
-    else if(LV_EVENT_KEY==v){ return "lv-event-key" ; }
-    else if(LV_EVENT_FOCUSED==v){ return "lv-event-focused" ; }
-    else if(LV_EVENT_DEFOCUSED==v){ return "lv-event-defocused" ; }
-    else if(LV_EVENT_LEAVE==v){ return "lv-event-leave" ; }
-    else if(LV_EVENT_HIT_TEST==v){ return "lv-event-hit-test" ; }
-    else if(LV_EVENT_COVER_CHECK==v){ return "lv-event-cover-check" ; }
-    else if(LV_EVENT_REFR_EXT_DRAW_SIZE==v){ return "lv-event-refr-ext-draw-size" ; }
-    else if(LV_EVENT_DRAW_MAIN_BEGIN==v){ return "lv-event-draw-main-begin" ; }
-    else if(LV_EVENT_DRAW_MAIN==v){ return "lv-event-draw-main" ; }
-    else if(LV_EVENT_DRAW_MAIN_END==v){ return "lv-event-draw-main-end" ; }
-    else if(LV_EVENT_DRAW_POST_BEGIN==v){ return "lv-event-draw-post-begin" ; }
-    else if(LV_EVENT_DRAW_POST==v){ return "lv-event-draw-post" ; }
-    else if(LV_EVENT_DRAW_POST_END==v){ return "lv-event-draw-post-end" ; }
-    else if(LV_EVENT_DRAW_PART_BEGIN==v){ return "lv-event-draw-part-begin" ; }
-    else if(LV_EVENT_DRAW_PART_END==v){ return "lv-event-draw-part-end" ; }
-    else if(LV_EVENT_VALUE_CHANGED==v){ return "lv-event-value-changed" ; }
-    else if(LV_EVENT_INSERT==v){ return "lv-event-insert" ; }
-    else if(LV_EVENT_REFRESH==v){ return "lv-event-refresh" ; }
-    else if(LV_EVENT_READY==v){ return "lv-event-ready" ; }
-    else if(LV_EVENT_CANCEL==v){ return "lv-event-cancel" ; }
-    else if(LV_EVENT_DELETE==v){ return "lv-event-delete" ; }
-    else if(LV_EVENT_CHILD_CHANGED==v){ return "lv-event-child-changed" ; }
-    else if(LV_EVENT_CHILD_CREATED==v){ return "lv-event-child-created" ; }
-    else if(LV_EVENT_CHILD_DELETED==v){ return "lv-event-child-deleted" ; }
-    else if(LV_EVENT_SCREEN_UNLOAD_START==v){ return "lv-event-screen-unload-start" ; }
-    else if(LV_EVENT_SCREEN_LOAD_START==v){ return "lv-event-screen-load-start" ; }
-    else if(LV_EVENT_SCREEN_LOADED==v){ return "lv-event-screen-loaded" ; }
-    else if(LV_EVENT_SCREEN_UNLOADED==v){ return "lv-event-screen-unloaded" ; }
-    else if(LV_EVENT_SIZE_CHANGED==v){ return "lv-event-size-changed" ; }
-    else if(LV_EVENT_STYLE_CHANGED==v){ return "lv-event-style-changed" ; }
-    else if(LV_EVENT_LAYOUT_CHANGED==v){ return "lv-event-layout-changed" ; }
-    else if(LV_EVENT_GET_SELF_SIZE==v){ return "lv-event-get-self-size" ; }
-    else if(_LV_EVENT_LAST==v){ return "_lv-event-last" ; }
+    if(LV_EVENT_ALL==v){ return "all" ; }
+    else if(LV_EVENT_PRESSED==v){ return "pressed" ; }
+    else if(LV_EVENT_PRESSING==v){ return "pressing" ; }
+    else if(LV_EVENT_PRESS_LOST==v){ return "press-lost" ; }
+    else if(LV_EVENT_SHORT_CLICKED==v){ return "short-clicked" ; }
+    else if(LV_EVENT_LONG_PRESSED==v){ return "long-pressed" ; }
+    else if(LV_EVENT_LONG_PRESSED_REPEAT==v){ return "long-pressed-repeat" ; }
+    else if(LV_EVENT_CLICKED==v){ return "clicked" ; }
+    else if(LV_EVENT_RELEASED==v){ return "released" ; }
+    else if(LV_EVENT_SCROLL_BEGIN==v){ return "scroll-begin" ; }
+    else if(LV_EVENT_SCROLL_END==v){ return "scroll-end" ; }
+    else if(LV_EVENT_SCROLL==v){ return "scroll" ; }
+    else if(LV_EVENT_GESTURE==v){ return "gesture" ; }
+    else if(LV_EVENT_KEY==v){ return "key" ; }
+    else if(LV_EVENT_FOCUSED==v){ return "focused" ; }
+    else if(LV_EVENT_DEFOCUSED==v){ return "defocused" ; }
+    else if(LV_EVENT_LEAVE==v){ return "leave" ; }
+    else if(LV_EVENT_HIT_TEST==v){ return "hit-test" ; }
+    else if(LV_EVENT_COVER_CHECK==v){ return "cover-check" ; }
+    else if(LV_EVENT_REFR_EXT_DRAW_SIZE==v){ return "refr-ext-draw-size" ; }
+    else if(LV_EVENT_DRAW_MAIN_BEGIN==v){ return "draw-main-begin" ; }
+    else if(LV_EVENT_DRAW_MAIN==v){ return "draw-main" ; }
+    else if(LV_EVENT_DRAW_MAIN_END==v){ return "draw-main-end" ; }
+    else if(LV_EVENT_DRAW_POST_BEGIN==v){ return "draw-post-begin" ; }
+    else if(LV_EVENT_DRAW_POST==v){ return "draw-post" ; }
+    else if(LV_EVENT_DRAW_POST_END==v){ return "draw-post-end" ; }
+    else if(LV_EVENT_DRAW_PART_BEGIN==v){ return "draw-part-begin" ; }
+    else if(LV_EVENT_DRAW_PART_END==v){ return "draw-part-end" ; }
+    else if(LV_EVENT_VALUE_CHANGED==v){ return "value-changed" ; }
+    else if(LV_EVENT_INSERT==v){ return "insert" ; }
+    else if(LV_EVENT_REFRESH==v){ return "refresh" ; }
+    else if(LV_EVENT_READY==v){ return "ready" ; }
+    else if(LV_EVENT_CANCEL==v){ return "cancel" ; }
+    else if(LV_EVENT_DELETE==v){ return "delete" ; }
+    else if(LV_EVENT_CHILD_CHANGED==v){ return "child-changed" ; }
+    else if(LV_EVENT_CHILD_CREATED==v){ return "child-created" ; }
+    else if(LV_EVENT_CHILD_DELETED==v){ return "child-deleted" ; }
+    else if(LV_EVENT_SCREEN_UNLOAD_START==v){ return "screen-unload-start" ; }
+    else if(LV_EVENT_SCREEN_LOAD_START==v){ return "screen-load-start" ; }
+    else if(LV_EVENT_SCREEN_LOADED==v){ return "screen-loaded" ; }
+    else if(LV_EVENT_SCREEN_UNLOADED==v){ return "screen-unloaded" ; }
+    else if(LV_EVENT_SIZE_CHANGED==v){ return "size-changed" ; }
+    else if(LV_EVENT_STYLE_CHANGED==v){ return "style-changed" ; }
+    else if(LV_EVENT_LAYOUT_CHANGED==v){ return "layout-changed" ; }
+    else if(LV_EVENT_GET_SELF_SIZE==v){ return "get-self-size" ; }
+    else if(_LV_EVENT_LAST==v){ return "_last" ; }
     else {
         return "<unknow>" ;
     }
 }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_event_code_to_value(char * n) {
-    if(strcmp("lv-event-all", n)==0){ return LV_EVENT_ALL ; }
-    else if(strcmp("lv-event-pressed", n)==0){ return LV_EVENT_PRESSED ; }
-    else if(strcmp("lv-event-pressing", n)==0){ return LV_EVENT_PRESSING ; }
-    else if(strcmp("lv-event-press-lost", n)==0){ return LV_EVENT_PRESS_LOST ; }
-    else if(strcmp("lv-event-short-clicked", n)==0){ return LV_EVENT_SHORT_CLICKED ; }
-    else if(strcmp("lv-event-long-pressed", n)==0){ return LV_EVENT_LONG_PRESSED ; }
-    else if(strcmp("lv-event-long-pressed-repeat", n)==0){ return LV_EVENT_LONG_PRESSED_REPEAT ; }
-    else if(strcmp("lv-event-clicked", n)==0){ return LV_EVENT_CLICKED ; }
-    else if(strcmp("lv-event-released", n)==0){ return LV_EVENT_RELEASED ; }
-    else if(strcmp("lv-event-scroll-begin", n)==0){ return LV_EVENT_SCROLL_BEGIN ; }
-    else if(strcmp("lv-event-scroll-end", n)==0){ return LV_EVENT_SCROLL_END ; }
-    else if(strcmp("lv-event-scroll", n)==0){ return LV_EVENT_SCROLL ; }
-    else if(strcmp("lv-event-gesture", n)==0){ return LV_EVENT_GESTURE ; }
-    else if(strcmp("lv-event-key", n)==0){ return LV_EVENT_KEY ; }
-    else if(strcmp("lv-event-focused", n)==0){ return LV_EVENT_FOCUSED ; }
-    else if(strcmp("lv-event-defocused", n)==0){ return LV_EVENT_DEFOCUSED ; }
-    else if(strcmp("lv-event-leave", n)==0){ return LV_EVENT_LEAVE ; }
-    else if(strcmp("lv-event-hit-test", n)==0){ return LV_EVENT_HIT_TEST ; }
-    else if(strcmp("lv-event-cover-check", n)==0){ return LV_EVENT_COVER_CHECK ; }
-    else if(strcmp("lv-event-refr-ext-draw-size", n)==0){ return LV_EVENT_REFR_EXT_DRAW_SIZE ; }
-    else if(strcmp("lv-event-draw-main-begin", n)==0){ return LV_EVENT_DRAW_MAIN_BEGIN ; }
-    else if(strcmp("lv-event-draw-main", n)==0){ return LV_EVENT_DRAW_MAIN ; }
-    else if(strcmp("lv-event-draw-main-end", n)==0){ return LV_EVENT_DRAW_MAIN_END ; }
-    else if(strcmp("lv-event-draw-post-begin", n)==0){ return LV_EVENT_DRAW_POST_BEGIN ; }
-    else if(strcmp("lv-event-draw-post", n)==0){ return LV_EVENT_DRAW_POST ; }
-    else if(strcmp("lv-event-draw-post-end", n)==0){ return LV_EVENT_DRAW_POST_END ; }
-    else if(strcmp("lv-event-draw-part-begin", n)==0){ return LV_EVENT_DRAW_PART_BEGIN ; }
-    else if(strcmp("lv-event-draw-part-end", n)==0){ return LV_EVENT_DRAW_PART_END ; }
-    else if(strcmp("lv-event-value-changed", n)==0){ return LV_EVENT_VALUE_CHANGED ; }
-    else if(strcmp("lv-event-insert", n)==0){ return LV_EVENT_INSERT ; }
-    else if(strcmp("lv-event-refresh", n)==0){ return LV_EVENT_REFRESH ; }
-    else if(strcmp("lv-event-ready", n)==0){ return LV_EVENT_READY ; }
-    else if(strcmp("lv-event-cancel", n)==0){ return LV_EVENT_CANCEL ; }
-    else if(strcmp("lv-event-delete", n)==0){ return LV_EVENT_DELETE ; }
-    else if(strcmp("lv-event-child-changed", n)==0){ return LV_EVENT_CHILD_CHANGED ; }
-    else if(strcmp("lv-event-child-created", n)==0){ return LV_EVENT_CHILD_CREATED ; }
-    else if(strcmp("lv-event-child-deleted", n)==0){ return LV_EVENT_CHILD_DELETED ; }
-    else if(strcmp("lv-event-screen-unload-start", n)==0){ return LV_EVENT_SCREEN_UNLOAD_START ; }
-    else if(strcmp("lv-event-screen-load-start", n)==0){ return LV_EVENT_SCREEN_LOAD_START ; }
-    else if(strcmp("lv-event-screen-loaded", n)==0){ return LV_EVENT_SCREEN_LOADED ; }
-    else if(strcmp("lv-event-screen-unloaded", n)==0){ return LV_EVENT_SCREEN_UNLOADED ; }
-    else if(strcmp("lv-event-size-changed", n)==0){ return LV_EVENT_SIZE_CHANGED ; }
-    else if(strcmp("lv-event-style-changed", n)==0){ return LV_EVENT_STYLE_CHANGED ; }
-    else if(strcmp("lv-event-layout-changed", n)==0){ return LV_EVENT_LAYOUT_CHANGED ; }
-    else if(strcmp("lv-event-get-self-size", n)==0){ return LV_EVENT_GET_SELF_SIZE ; }
-    else if(strcmp("_lv-event-last", n)==0){ return _LV_EVENT_LAST ; }
+    if(strcmp("all", n)==0){ return LV_EVENT_ALL ; }
+    else if(strcmp("pressed", n)==0){ return LV_EVENT_PRESSED ; }
+    else if(strcmp("pressing", n)==0){ return LV_EVENT_PRESSING ; }
+    else if(strcmp("press-lost", n)==0){ return LV_EVENT_PRESS_LOST ; }
+    else if(strcmp("short-clicked", n)==0){ return LV_EVENT_SHORT_CLICKED ; }
+    else if(strcmp("long-pressed", n)==0){ return LV_EVENT_LONG_PRESSED ; }
+    else if(strcmp("long-pressed-repeat", n)==0){ return LV_EVENT_LONG_PRESSED_REPEAT ; }
+    else if(strcmp("clicked", n)==0){ return LV_EVENT_CLICKED ; }
+    else if(strcmp("released", n)==0){ return LV_EVENT_RELEASED ; }
+    else if(strcmp("scroll-begin", n)==0){ return LV_EVENT_SCROLL_BEGIN ; }
+    else if(strcmp("scroll-end", n)==0){ return LV_EVENT_SCROLL_END ; }
+    else if(strcmp("scroll", n)==0){ return LV_EVENT_SCROLL ; }
+    else if(strcmp("gesture", n)==0){ return LV_EVENT_GESTURE ; }
+    else if(strcmp("key", n)==0){ return LV_EVENT_KEY ; }
+    else if(strcmp("focused", n)==0){ return LV_EVENT_FOCUSED ; }
+    else if(strcmp("defocused", n)==0){ return LV_EVENT_DEFOCUSED ; }
+    else if(strcmp("leave", n)==0){ return LV_EVENT_LEAVE ; }
+    else if(strcmp("hit-test", n)==0){ return LV_EVENT_HIT_TEST ; }
+    else if(strcmp("cover-check", n)==0){ return LV_EVENT_COVER_CHECK ; }
+    else if(strcmp("refr-ext-draw-size", n)==0){ return LV_EVENT_REFR_EXT_DRAW_SIZE ; }
+    else if(strcmp("draw-main-begin", n)==0){ return LV_EVENT_DRAW_MAIN_BEGIN ; }
+    else if(strcmp("draw-main", n)==0){ return LV_EVENT_DRAW_MAIN ; }
+    else if(strcmp("draw-main-end", n)==0){ return LV_EVENT_DRAW_MAIN_END ; }
+    else if(strcmp("draw-post-begin", n)==0){ return LV_EVENT_DRAW_POST_BEGIN ; }
+    else if(strcmp("draw-post", n)==0){ return LV_EVENT_DRAW_POST ; }
+    else if(strcmp("draw-post-end", n)==0){ return LV_EVENT_DRAW_POST_END ; }
+    else if(strcmp("draw-part-begin", n)==0){ return LV_EVENT_DRAW_PART_BEGIN ; }
+    else if(strcmp("draw-part-end", n)==0){ return LV_EVENT_DRAW_PART_END ; }
+    else if(strcmp("value-changed", n)==0){ return LV_EVENT_VALUE_CHANGED ; }
+    else if(strcmp("insert", n)==0){ return LV_EVENT_INSERT ; }
+    else if(strcmp("refresh", n)==0){ return LV_EVENT_REFRESH ; }
+    else if(strcmp("ready", n)==0){ return LV_EVENT_READY ; }
+    else if(strcmp("cancel", n)==0){ return LV_EVENT_CANCEL ; }
+    else if(strcmp("delete", n)==0){ return LV_EVENT_DELETE ; }
+    else if(strcmp("child-changed", n)==0){ return LV_EVENT_CHILD_CHANGED ; }
+    else if(strcmp("child-created", n)==0){ return LV_EVENT_CHILD_CREATED ; }
+    else if(strcmp("child-deleted", n)==0){ return LV_EVENT_CHILD_DELETED ; }
+    else if(strcmp("screen-unload-start", n)==0){ return LV_EVENT_SCREEN_UNLOAD_START ; }
+    else if(strcmp("screen-load-start", n)==0){ return LV_EVENT_SCREEN_LOAD_START ; }
+    else if(strcmp("screen-loaded", n)==0){ return LV_EVENT_SCREEN_LOADED ; }
+    else if(strcmp("screen-unloaded", n)==0){ return LV_EVENT_SCREEN_UNLOADED ; }
+    else if(strcmp("size-changed", n)==0){ return LV_EVENT_SIZE_CHANGED ; }
+    else if(strcmp("style-changed", n)==0){ return LV_EVENT_STYLE_CHANGED ; }
+    else if(strcmp("layout-changed", n)==0){ return LV_EVENT_LAYOUT_CHANGED ; }
+    else if(strcmp("get-self-size", n)==0){ return LV_EVENT_GET_SELF_SIZE ; }
+    else if(strcmp("_last", n)==0){ return _LV_EVENT_LAST ; }
     else {
         return (uint32_t)-1 ;
     }
 }
+// "lv_key_t": /^(_?)LV_KEY_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_key_to_name(uint32_t v) {
     if(LV_KEY_UP==v){ return "up" ; }
     else if(LV_KEY_DOWN==v){ return "down" ; }
@@ -1188,6 +1227,7 @@ EMSCRIPTEN_KEEPALIVE uint32_t lv_key_to_value(char * n) {
         return (uint32_t)-1 ;
     }
 }
+// "lv_group_refocus_policy_t": /^(_?)LV_GROUP_REFOCUS_POLICY_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_group_refocus_policy_to_name(uint32_t v) {
     if(LV_GROUP_REFOCUS_POLICY_NEXT==v){ return "next" ; }
     else if(LV_GROUP_REFOCUS_POLICY_PREV==v){ return "prev" ; }
@@ -1202,6 +1242,7 @@ EMSCRIPTEN_KEEPALIVE uint32_t lv_group_refocus_policy_to_value(char * n) {
         return (uint32_t)-1 ;
     }
 }
+// "lv_scr_load_anim_t": /^(_?)LV_SCR_LOAD_ANIM_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_scr_load_anim_to_name(uint32_t v) {
     if(LV_SCR_LOAD_ANIM_NONE==v){ return "none" ; }
     else if(LV_SCR_LOAD_ANIM_OVER_LEFT==v){ return "over-left" ; }
@@ -1232,282 +1273,300 @@ EMSCRIPTEN_KEEPALIVE uint32_t lv_scr_load_anim_to_value(char * n) {
         return (uint32_t)-1 ;
     }
 }
+// "lv_font_fmt_txt_cmap_type_t": /^(_?)LV_FONT_FMT_TXT_CMAP_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_font_fmt_txt_cmap_type_to_name(uint32_t v) {
-    if(LV_FONT_FMT_TXT_CMAP_FORMAT0_FULL==v){ return "lv-font-fmt-txt-cmap-format0-full" ; }
-    else if(LV_FONT_FMT_TXT_CMAP_SPARSE_FULL==v){ return "lv-font-fmt-txt-cmap-sparse-full" ; }
-    else if(LV_FONT_FMT_TXT_CMAP_FORMAT0_TINY==v){ return "lv-font-fmt-txt-cmap-format0-tiny" ; }
-    else if(LV_FONT_FMT_TXT_CMAP_SPARSE_TINY==v){ return "lv-font-fmt-txt-cmap-sparse-tiny" ; }
+    if(LV_FONT_FMT_TXT_CMAP_FORMAT0_FULL==v){ return "format0-full" ; }
+    else if(LV_FONT_FMT_TXT_CMAP_SPARSE_FULL==v){ return "sparse-full" ; }
+    else if(LV_FONT_FMT_TXT_CMAP_FORMAT0_TINY==v){ return "format0-tiny" ; }
+    else if(LV_FONT_FMT_TXT_CMAP_SPARSE_TINY==v){ return "sparse-tiny" ; }
     else {
         return "<unknow>" ;
     }
 }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_font_fmt_txt_cmap_type_to_value(char * n) {
-    if(strcmp("lv-font-fmt-txt-cmap-format0-full", n)==0){ return LV_FONT_FMT_TXT_CMAP_FORMAT0_FULL ; }
-    else if(strcmp("lv-font-fmt-txt-cmap-sparse-full", n)==0){ return LV_FONT_FMT_TXT_CMAP_SPARSE_FULL ; }
-    else if(strcmp("lv-font-fmt-txt-cmap-format0-tiny", n)==0){ return LV_FONT_FMT_TXT_CMAP_FORMAT0_TINY ; }
-    else if(strcmp("lv-font-fmt-txt-cmap-sparse-tiny", n)==0){ return LV_FONT_FMT_TXT_CMAP_SPARSE_TINY ; }
+    if(strcmp("format0-full", n)==0){ return LV_FONT_FMT_TXT_CMAP_FORMAT0_FULL ; }
+    else if(strcmp("sparse-full", n)==0){ return LV_FONT_FMT_TXT_CMAP_SPARSE_FULL ; }
+    else if(strcmp("format0-tiny", n)==0){ return LV_FONT_FMT_TXT_CMAP_FORMAT0_TINY ; }
+    else if(strcmp("sparse-tiny", n)==0){ return LV_FONT_FMT_TXT_CMAP_SPARSE_TINY ; }
     else {
         return (uint32_t)-1 ;
     }
 }
+// "lv_font_fmt_txt_bitmap_format_t": /^(_?)LV_FONT_FMT_TXT_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_font_fmt_txt_bitmap_format_to_name(uint32_t v) {
-    if(LV_FONT_FMT_TXT_PLAIN==v){ return "lv-font-fmt-txt-plain" ; }
-    else if(LV_FONT_FMT_TXT_COMPRESSED==v){ return "lv-font-fmt-txt-compressed" ; }
-    else if(LV_FONT_FMT_TXT_COMPRESSED_NO_PREFILTER==v){ return "lv-font-fmt-txt-compressed-no-prefilter" ; }
+    if(LV_FONT_FMT_TXT_PLAIN==v){ return "plain" ; }
+    else if(LV_FONT_FMT_TXT_COMPRESSED==v){ return "compressed" ; }
+    else if(LV_FONT_FMT_TXT_COMPRESSED_NO_PREFILTER==v){ return "compressed-no-prefilter" ; }
     else {
         return "<unknow>" ;
     }
 }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_font_fmt_txt_bitmap_format_to_value(char * n) {
-    if(strcmp("lv-font-fmt-txt-plain", n)==0){ return LV_FONT_FMT_TXT_PLAIN ; }
-    else if(strcmp("lv-font-fmt-txt-compressed", n)==0){ return LV_FONT_FMT_TXT_COMPRESSED ; }
-    else if(strcmp("lv-font-fmt-txt-compressed-no-prefilter", n)==0){ return LV_FONT_FMT_TXT_COMPRESSED_NO_PREFILTER ; }
+    if(strcmp("plain", n)==0){ return LV_FONT_FMT_TXT_PLAIN ; }
+    else if(strcmp("compressed", n)==0){ return LV_FONT_FMT_TXT_COMPRESSED ; }
+    else if(strcmp("compressed-no-prefilter", n)==0){ return LV_FONT_FMT_TXT_COMPRESSED_NO_PREFILTER ; }
     else {
         return (uint32_t)-1 ;
     }
 }
+// "lv_arc_mode_t": /^(_?)LV_ARC_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_arc_mode_to_name(uint32_t v) {
-    if(LV_ARC_MODE_NORMAL==v){ return "normal" ; }
-    else if(LV_ARC_MODE_SYMMETRICAL==v){ return "symmetrical" ; }
-    else if(LV_ARC_MODE_REVERSE==v){ return "reverse" ; }
+    if(LV_ARC_MODE_NORMAL==v){ return "mode-normal" ; }
+    else if(LV_ARC_MODE_SYMMETRICAL==v){ return "mode-symmetrical" ; }
+    else if(LV_ARC_MODE_REVERSE==v){ return "mode-reverse" ; }
     else {
         return "<unknow>" ;
     }
 }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_arc_mode_to_value(char * n) {
-    if(strcmp("normal", n)==0){ return LV_ARC_MODE_NORMAL ; }
-    else if(strcmp("symmetrical", n)==0){ return LV_ARC_MODE_SYMMETRICAL ; }
-    else if(strcmp("reverse", n)==0){ return LV_ARC_MODE_REVERSE ; }
+    if(strcmp("mode-normal", n)==0){ return LV_ARC_MODE_NORMAL ; }
+    else if(strcmp("mode-symmetrical", n)==0){ return LV_ARC_MODE_SYMMETRICAL ; }
+    else if(strcmp("mode-reverse", n)==0){ return LV_ARC_MODE_REVERSE ; }
     else {
         return (uint32_t)-1 ;
     }
 }
+// "lv_arc_draw_part_type_t": /^(_?)LV_ARC_DRAW_PART_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_arc_draw_part_type_to_name(uint32_t v) {
-    if(LV_ARC_DRAW_PART_BACKGROUND==v){ return "lv-arc-draw-part-background" ; }
-    else if(LV_ARC_DRAW_PART_FOREGROUND==v){ return "lv-arc-draw-part-foreground" ; }
-    else if(LV_ARC_DRAW_PART_KNOB==v){ return "lv-arc-draw-part-knob" ; }
+    if(LV_ARC_DRAW_PART_BACKGROUND==v){ return "background" ; }
+    else if(LV_ARC_DRAW_PART_FOREGROUND==v){ return "foreground" ; }
+    else if(LV_ARC_DRAW_PART_KNOB==v){ return "knob" ; }
     else {
         return "<unknow>" ;
     }
 }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_arc_draw_part_type_to_value(char * n) {
-    if(strcmp("lv-arc-draw-part-background", n)==0){ return LV_ARC_DRAW_PART_BACKGROUND ; }
-    else if(strcmp("lv-arc-draw-part-foreground", n)==0){ return LV_ARC_DRAW_PART_FOREGROUND ; }
-    else if(strcmp("lv-arc-draw-part-knob", n)==0){ return LV_ARC_DRAW_PART_KNOB ; }
+    if(strcmp("background", n)==0){ return LV_ARC_DRAW_PART_BACKGROUND ; }
+    else if(strcmp("foreground", n)==0){ return LV_ARC_DRAW_PART_FOREGROUND ; }
+    else if(strcmp("knob", n)==0){ return LV_ARC_DRAW_PART_KNOB ; }
     else {
         return (uint32_t)-1 ;
     }
 }
+// "lv_img_size_mode_t": /^(_?)LV_IMG_SIZE_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_img_size_mode_to_name(uint32_t v) {
-    if(LV_IMG_SIZE_MODE_VIRTUAL==v){ return "virtual" ; }
-    else if(LV_IMG_SIZE_MODE_REAL==v){ return "real" ; }
+    if(LV_IMG_SIZE_MODE_VIRTUAL==v){ return "mode-virtual" ; }
+    else if(LV_IMG_SIZE_MODE_REAL==v){ return "mode-real" ; }
     else {
         return "<unknow>" ;
     }
 }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_img_size_mode_to_value(char * n) {
-    if(strcmp("virtual", n)==0){ return LV_IMG_SIZE_MODE_VIRTUAL ; }
-    else if(strcmp("real", n)==0){ return LV_IMG_SIZE_MODE_REAL ; }
+    if(strcmp("mode-virtual", n)==0){ return LV_IMG_SIZE_MODE_VIRTUAL ; }
+    else if(strcmp("mode-real", n)==0){ return LV_IMG_SIZE_MODE_REAL ; }
     else {
         return (uint32_t)-1 ;
     }
 }
+// "lv_label_long_mode_t": /^(_?)LV_LABEL_LONG_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_label_long_mode_to_name(uint32_t v) {
-    if(LV_LABEL_LONG_WRAP==v){ return "lv-label-long-wrap" ; }
-    else if(LV_LABEL_LONG_DOT==v){ return "lv-label-long-dot" ; }
-    else if(LV_LABEL_LONG_SCROLL==v){ return "lv-label-long-scroll" ; }
-    else if(LV_LABEL_LONG_SCROLL_CIRCULAR==v){ return "lv-label-long-scroll-circular" ; }
-    else if(LV_LABEL_LONG_CLIP==v){ return "lv-label-long-clip" ; }
+    if(LV_LABEL_LONG_WRAP==v){ return "wrap" ; }
+    else if(LV_LABEL_LONG_DOT==v){ return "dot" ; }
+    else if(LV_LABEL_LONG_SCROLL==v){ return "scroll" ; }
+    else if(LV_LABEL_LONG_SCROLL_CIRCULAR==v){ return "scroll-circular" ; }
+    else if(LV_LABEL_LONG_CLIP==v){ return "clip" ; }
     else {
         return "<unknow>" ;
     }
 }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_label_long_mode_to_value(char * n) {
-    if(strcmp("lv-label-long-wrap", n)==0){ return LV_LABEL_LONG_WRAP ; }
-    else if(strcmp("lv-label-long-dot", n)==0){ return LV_LABEL_LONG_DOT ; }
-    else if(strcmp("lv-label-long-scroll", n)==0){ return LV_LABEL_LONG_SCROLL ; }
-    else if(strcmp("lv-label-long-scroll-circular", n)==0){ return LV_LABEL_LONG_SCROLL_CIRCULAR ; }
-    else if(strcmp("lv-label-long-clip", n)==0){ return LV_LABEL_LONG_CLIP ; }
+    if(strcmp("wrap", n)==0){ return LV_LABEL_LONG_WRAP ; }
+    else if(strcmp("dot", n)==0){ return LV_LABEL_LONG_DOT ; }
+    else if(strcmp("scroll", n)==0){ return LV_LABEL_LONG_SCROLL ; }
+    else if(strcmp("scroll-circular", n)==0){ return LV_LABEL_LONG_SCROLL_CIRCULAR ; }
+    else if(strcmp("clip", n)==0){ return LV_LABEL_LONG_CLIP ; }
     else {
         return (uint32_t)-1 ;
     }
 }
+// "lv_table_cell_ctrl_t": /^(_?)LV_TABLE_CELL_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_table_cell_ctrl_to_name(uint32_t v) {
-    if(LV_TABLE_CELL_CTRL_MERGE_RIGHT==v){ return "merge-right" ; }
-    else if(LV_TABLE_CELL_CTRL_TEXT_CROP==v){ return "text-crop" ; }
-    else if(LV_TABLE_CELL_CTRL_CUSTOM_1==v){ return "custom-1" ; }
-    else if(LV_TABLE_CELL_CTRL_CUSTOM_2==v){ return "custom-2" ; }
-    else if(LV_TABLE_CELL_CTRL_CUSTOM_3==v){ return "custom-3" ; }
-    else if(LV_TABLE_CELL_CTRL_CUSTOM_4==v){ return "custom-4" ; }
+    if(LV_TABLE_CELL_CTRL_MERGE_RIGHT==v){ return "ctrl-merge-right" ; }
+    else if(LV_TABLE_CELL_CTRL_TEXT_CROP==v){ return "ctrl-text-crop" ; }
+    else if(LV_TABLE_CELL_CTRL_CUSTOM_1==v){ return "ctrl-custom-1" ; }
+    else if(LV_TABLE_CELL_CTRL_CUSTOM_2==v){ return "ctrl-custom-2" ; }
+    else if(LV_TABLE_CELL_CTRL_CUSTOM_3==v){ return "ctrl-custom-3" ; }
+    else if(LV_TABLE_CELL_CTRL_CUSTOM_4==v){ return "ctrl-custom-4" ; }
     else {
         return "<unknow>" ;
     }
 }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_table_cell_ctrl_to_value(char * n) {
-    if(strcmp("merge-right", n)==0){ return LV_TABLE_CELL_CTRL_MERGE_RIGHT ; }
-    else if(strcmp("text-crop", n)==0){ return LV_TABLE_CELL_CTRL_TEXT_CROP ; }
-    else if(strcmp("custom-1", n)==0){ return LV_TABLE_CELL_CTRL_CUSTOM_1 ; }
-    else if(strcmp("custom-2", n)==0){ return LV_TABLE_CELL_CTRL_CUSTOM_2 ; }
-    else if(strcmp("custom-3", n)==0){ return LV_TABLE_CELL_CTRL_CUSTOM_3 ; }
-    else if(strcmp("custom-4", n)==0){ return LV_TABLE_CELL_CTRL_CUSTOM_4 ; }
+    if(strcmp("ctrl-merge-right", n)==0){ return LV_TABLE_CELL_CTRL_MERGE_RIGHT ; }
+    else if(strcmp("ctrl-text-crop", n)==0){ return LV_TABLE_CELL_CTRL_TEXT_CROP ; }
+    else if(strcmp("ctrl-custom-1", n)==0){ return LV_TABLE_CELL_CTRL_CUSTOM_1 ; }
+    else if(strcmp("ctrl-custom-2", n)==0){ return LV_TABLE_CELL_CTRL_CUSTOM_2 ; }
+    else if(strcmp("ctrl-custom-3", n)==0){ return LV_TABLE_CELL_CTRL_CUSTOM_3 ; }
+    else if(strcmp("ctrl-custom-4", n)==0){ return LV_TABLE_CELL_CTRL_CUSTOM_4 ; }
     else {
         return (uint32_t)-1 ;
     }
 }
+// "lv_table_draw_part_type_t": /^(_?)LV_TABLE_DRAW_PART_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_table_draw_part_type_to_name(uint32_t v) {
-    if(LV_TABLE_DRAW_PART_CELL==v){ return "lv-table-draw-part-cell" ; }
+    if(LV_TABLE_DRAW_PART_CELL==v){ return "cell" ; }
     else {
         return "<unknow>" ;
     }
 }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_table_draw_part_type_to_value(char * n) {
-    if(strcmp("lv-table-draw-part-cell", n)==0){ return LV_TABLE_DRAW_PART_CELL ; }
+    if(strcmp("cell", n)==0){ return LV_TABLE_DRAW_PART_CELL ; }
     else {
         return (uint32_t)-1 ;
     }
 }
+// "lv_checkbox_draw_part_type_t": /^(_?)LV_CHECKBOX_DRAW_PART_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_checkbox_draw_part_type_to_name(uint32_t v) {
-    if(LV_CHECKBOX_DRAW_PART_BOX==v){ return "lv-checkbox-draw-part-box" ; }
+    if(LV_CHECKBOX_DRAW_PART_BOX==v){ return "box" ; }
     else {
         return "<unknow>" ;
     }
 }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_checkbox_draw_part_type_to_value(char * n) {
-    if(strcmp("lv-checkbox-draw-part-box", n)==0){ return LV_CHECKBOX_DRAW_PART_BOX ; }
+    if(strcmp("box", n)==0){ return LV_CHECKBOX_DRAW_PART_BOX ; }
     else {
         return (uint32_t)-1 ;
     }
 }
+// "lv_bar_mode_t": /^(_?)LV_BAR_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_bar_mode_to_name(uint32_t v) {
-    if(LV_BAR_MODE_NORMAL==v){ return "normal" ; }
-    else if(LV_BAR_MODE_SYMMETRICAL==v){ return "symmetrical" ; }
-    else if(LV_BAR_MODE_RANGE==v){ return "range" ; }
+    if(LV_BAR_MODE_NORMAL==v){ return "mode-normal" ; }
+    else if(LV_BAR_MODE_SYMMETRICAL==v){ return "mode-symmetrical" ; }
+    else if(LV_BAR_MODE_RANGE==v){ return "mode-range" ; }
     else {
         return "<unknow>" ;
     }
 }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_bar_mode_to_value(char * n) {
-    if(strcmp("normal", n)==0){ return LV_BAR_MODE_NORMAL ; }
-    else if(strcmp("symmetrical", n)==0){ return LV_BAR_MODE_SYMMETRICAL ; }
-    else if(strcmp("range", n)==0){ return LV_BAR_MODE_RANGE ; }
+    if(strcmp("mode-normal", n)==0){ return LV_BAR_MODE_NORMAL ; }
+    else if(strcmp("mode-symmetrical", n)==0){ return LV_BAR_MODE_SYMMETRICAL ; }
+    else if(strcmp("mode-range", n)==0){ return LV_BAR_MODE_RANGE ; }
     else {
         return (uint32_t)-1 ;
     }
 }
+// "lv_bar_draw_part_type_t": /^(_?)LV_BAR_DRAW_PART_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_bar_draw_part_type_to_name(uint32_t v) {
-    if(LV_BAR_DRAW_PART_INDICATOR==v){ return "lv-bar-draw-part-indicator" ; }
+    if(LV_BAR_DRAW_PART_INDICATOR==v){ return "indicator" ; }
     else {
         return "<unknow>" ;
     }
 }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_bar_draw_part_type_to_value(char * n) {
-    if(strcmp("lv-bar-draw-part-indicator", n)==0){ return LV_BAR_DRAW_PART_INDICATOR ; }
+    if(strcmp("indicator", n)==0){ return LV_BAR_DRAW_PART_INDICATOR ; }
     else {
         return (uint32_t)-1 ;
     }
 }
+// "lv_slider_mode_t": /^(_?)LV_SLIDER_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_slider_mode_to_name(uint32_t v) {
-    if(LV_SLIDER_MODE_NORMAL==v){ return "normal" ; }
-    else if(LV_SLIDER_MODE_SYMMETRICAL==v){ return "symmetrical" ; }
-    else if(LV_SLIDER_MODE_RANGE==v){ return "range" ; }
+    if(LV_SLIDER_MODE_NORMAL==v){ return "mode-normal" ; }
+    else if(LV_SLIDER_MODE_SYMMETRICAL==v){ return "mode-symmetrical" ; }
+    else if(LV_SLIDER_MODE_RANGE==v){ return "mode-range" ; }
     else {
         return "<unknow>" ;
     }
 }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_slider_mode_to_value(char * n) {
-    if(strcmp("normal", n)==0){ return LV_SLIDER_MODE_NORMAL ; }
-    else if(strcmp("symmetrical", n)==0){ return LV_SLIDER_MODE_SYMMETRICAL ; }
-    else if(strcmp("range", n)==0){ return LV_SLIDER_MODE_RANGE ; }
+    if(strcmp("mode-normal", n)==0){ return LV_SLIDER_MODE_NORMAL ; }
+    else if(strcmp("mode-symmetrical", n)==0){ return LV_SLIDER_MODE_SYMMETRICAL ; }
+    else if(strcmp("mode-range", n)==0){ return LV_SLIDER_MODE_RANGE ; }
     else {
         return (uint32_t)-1 ;
     }
 }
+// "lv_slider_draw_part_type_t": /^(_?)LV_SLIDER_DRAW_PART_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_slider_draw_part_type_to_name(uint32_t v) {
-    if(LV_SLIDER_DRAW_PART_KNOB==v){ return "lv-slider-draw-part-knob" ; }
-    else if(LV_SLIDER_DRAW_PART_KNOB_LEFT==v){ return "lv-slider-draw-part-knob-left" ; }
+    if(LV_SLIDER_DRAW_PART_KNOB==v){ return "knob" ; }
+    else if(LV_SLIDER_DRAW_PART_KNOB_LEFT==v){ return "knob-left" ; }
     else {
         return "<unknow>" ;
     }
 }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_slider_draw_part_type_to_value(char * n) {
-    if(strcmp("lv-slider-draw-part-knob", n)==0){ return LV_SLIDER_DRAW_PART_KNOB ; }
-    else if(strcmp("lv-slider-draw-part-knob-left", n)==0){ return LV_SLIDER_DRAW_PART_KNOB_LEFT ; }
+    if(strcmp("knob", n)==0){ return LV_SLIDER_DRAW_PART_KNOB ; }
+    else if(strcmp("knob-left", n)==0){ return LV_SLIDER_DRAW_PART_KNOB_LEFT ; }
     else {
         return (uint32_t)-1 ;
     }
 }
+// "lv_btnmatrix_ctrl_t": /^(_?)LV_BTNMATRIX_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_btnmatrix_ctrl_to_name(uint32_t v) {
-    if(_LV_BTNMATRIX_WIDTH==v){ return "_lv-btnmatrix-width" ; }
-    else if(LV_BTNMATRIX_CTRL_HIDDEN==v){ return "hidden" ; }
-    else if(LV_BTNMATRIX_CTRL_NO_REPEAT==v){ return "no-repeat" ; }
-    else if(LV_BTNMATRIX_CTRL_DISABLED==v){ return "disabled" ; }
-    else if(LV_BTNMATRIX_CTRL_CHECKABLE==v){ return "checkable" ; }
-    else if(LV_BTNMATRIX_CTRL_CHECKED==v){ return "checked" ; }
-    else if(LV_BTNMATRIX_CTRL_CLICK_TRIG==v){ return "click-trig" ; }
-    else if(LV_BTNMATRIX_CTRL_POPOVER==v){ return "popover" ; }
-    else if(LV_BTNMATRIX_CTRL_RECOLOR==v){ return "recolor" ; }
-    else if(_LV_BTNMATRIX_CTRL_RESERVED==v){ return "_reserved" ; }
-    else if(LV_BTNMATRIX_CTRL_CUSTOM_1==v){ return "custom-1" ; }
-    else if(LV_BTNMATRIX_CTRL_CUSTOM_2==v){ return "custom-2" ; }
+    if(_LV_BTNMATRIX_WIDTH==v){ return "_width" ; }
+    else if(LV_BTNMATRIX_CTRL_HIDDEN==v){ return "ctrl-hidden" ; }
+    else if(LV_BTNMATRIX_CTRL_NO_REPEAT==v){ return "ctrl-no-repeat" ; }
+    else if(LV_BTNMATRIX_CTRL_DISABLED==v){ return "ctrl-disabled" ; }
+    else if(LV_BTNMATRIX_CTRL_CHECKABLE==v){ return "ctrl-checkable" ; }
+    else if(LV_BTNMATRIX_CTRL_CHECKED==v){ return "ctrl-checked" ; }
+    else if(LV_BTNMATRIX_CTRL_CLICK_TRIG==v){ return "ctrl-click-trig" ; }
+    else if(LV_BTNMATRIX_CTRL_POPOVER==v){ return "ctrl-popover" ; }
+    else if(LV_BTNMATRIX_CTRL_RECOLOR==v){ return "ctrl-recolor" ; }
+    else if(_LV_BTNMATRIX_CTRL_RESERVED==v){ return "_ctrl-reserved" ; }
+    else if(LV_BTNMATRIX_CTRL_CUSTOM_1==v){ return "ctrl-custom-1" ; }
+    else if(LV_BTNMATRIX_CTRL_CUSTOM_2==v){ return "ctrl-custom-2" ; }
     else {
         return "<unknow>" ;
     }
 }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_btnmatrix_ctrl_to_value(char * n) {
-    if(strcmp("_lv-btnmatrix-width", n)==0){ return _LV_BTNMATRIX_WIDTH ; }
-    else if(strcmp("hidden", n)==0){ return LV_BTNMATRIX_CTRL_HIDDEN ; }
-    else if(strcmp("no-repeat", n)==0){ return LV_BTNMATRIX_CTRL_NO_REPEAT ; }
-    else if(strcmp("disabled", n)==0){ return LV_BTNMATRIX_CTRL_DISABLED ; }
-    else if(strcmp("checkable", n)==0){ return LV_BTNMATRIX_CTRL_CHECKABLE ; }
-    else if(strcmp("checked", n)==0){ return LV_BTNMATRIX_CTRL_CHECKED ; }
-    else if(strcmp("click-trig", n)==0){ return LV_BTNMATRIX_CTRL_CLICK_TRIG ; }
-    else if(strcmp("popover", n)==0){ return LV_BTNMATRIX_CTRL_POPOVER ; }
-    else if(strcmp("recolor", n)==0){ return LV_BTNMATRIX_CTRL_RECOLOR ; }
-    else if(strcmp("_reserved", n)==0){ return _LV_BTNMATRIX_CTRL_RESERVED ; }
-    else if(strcmp("custom-1", n)==0){ return LV_BTNMATRIX_CTRL_CUSTOM_1 ; }
-    else if(strcmp("custom-2", n)==0){ return LV_BTNMATRIX_CTRL_CUSTOM_2 ; }
+    if(strcmp("_width", n)==0){ return _LV_BTNMATRIX_WIDTH ; }
+    else if(strcmp("ctrl-hidden", n)==0){ return LV_BTNMATRIX_CTRL_HIDDEN ; }
+    else if(strcmp("ctrl-no-repeat", n)==0){ return LV_BTNMATRIX_CTRL_NO_REPEAT ; }
+    else if(strcmp("ctrl-disabled", n)==0){ return LV_BTNMATRIX_CTRL_DISABLED ; }
+    else if(strcmp("ctrl-checkable", n)==0){ return LV_BTNMATRIX_CTRL_CHECKABLE ; }
+    else if(strcmp("ctrl-checked", n)==0){ return LV_BTNMATRIX_CTRL_CHECKED ; }
+    else if(strcmp("ctrl-click-trig", n)==0){ return LV_BTNMATRIX_CTRL_CLICK_TRIG ; }
+    else if(strcmp("ctrl-popover", n)==0){ return LV_BTNMATRIX_CTRL_POPOVER ; }
+    else if(strcmp("ctrl-recolor", n)==0){ return LV_BTNMATRIX_CTRL_RECOLOR ; }
+    else if(strcmp("_ctrl-reserved", n)==0){ return _LV_BTNMATRIX_CTRL_RESERVED ; }
+    else if(strcmp("ctrl-custom-1", n)==0){ return LV_BTNMATRIX_CTRL_CUSTOM_1 ; }
+    else if(strcmp("ctrl-custom-2", n)==0){ return LV_BTNMATRIX_CTRL_CUSTOM_2 ; }
     else {
         return (uint32_t)-1 ;
     }
 }
+// "lv_btnmatrix_draw_part_type_t": /^(_?)LV_BTNMATRIX_DRAW_PART_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_btnmatrix_draw_part_type_to_name(uint32_t v) {
-    if(LV_BTNMATRIX_DRAW_PART_BTN==v){ return "lv-btnmatrix-draw-part-btn" ; }
+    if(LV_BTNMATRIX_DRAW_PART_BTN==v){ return "btn" ; }
     else {
         return "<unknow>" ;
     }
 }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_btnmatrix_draw_part_type_to_value(char * n) {
-    if(strcmp("lv-btnmatrix-draw-part-btn", n)==0){ return LV_BTNMATRIX_DRAW_PART_BTN ; }
+    if(strcmp("btn", n)==0){ return LV_BTNMATRIX_DRAW_PART_BTN ; }
     else {
         return (uint32_t)-1 ;
     }
 }
+// "lv_roller_mode_t": /^(_?)LV_ROLLER_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_roller_mode_to_name(uint32_t v) {
-    if(LV_ROLLER_MODE_NORMAL==v){ return "normal" ; }
-    else if(LV_ROLLER_MODE_INFINITE==v){ return "infinite" ; }
+    if(LV_ROLLER_MODE_NORMAL==v){ return "mode-normal" ; }
+    else if(LV_ROLLER_MODE_INFINITE==v){ return "mode-infinite" ; }
     else {
         return "<unknow>" ;
     }
 }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_roller_mode_to_value(char * n) {
-    if(strcmp("normal", n)==0){ return LV_ROLLER_MODE_NORMAL ; }
-    else if(strcmp("infinite", n)==0){ return LV_ROLLER_MODE_INFINITE ; }
+    if(strcmp("mode-normal", n)==0){ return LV_ROLLER_MODE_NORMAL ; }
+    else if(strcmp("mode-infinite", n)==0){ return LV_ROLLER_MODE_INFINITE ; }
     else {
         return (uint32_t)-1 ;
     }
 }
+// "lv_animimg_part_t": /^(_?)LV_ANIM_IMG_PART_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_animimg_part_to_name(uint32_t v) {
-    if(LV_ANIM_IMG_PART_MAIN==v){ return "lv-anim-img-part-main" ; }
+    if(LV_ANIM_IMG_PART_MAIN==v){ return "main" ; }
     else {
         return "<unknow>" ;
     }
 }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_animimg_part_to_value(char * n) {
-    if(strcmp("lv-anim-img-part-main", n)==0){ return LV_ANIM_IMG_PART_MAIN ; }
+    if(strcmp("main", n)==0){ return LV_ANIM_IMG_PART_MAIN ; }
     else {
         return (uint32_t)-1 ;
     }
 }
+// "lv_chart_type_t": /^(_?)LV_CHART_TYPE_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_chart_type_to_name(uint32_t v) {
     if(LV_CHART_TYPE_NONE==v){ return "none" ; }
     else if(LV_CHART_TYPE_LINE==v){ return "line" ; }
@@ -1526,20 +1585,22 @@ EMSCRIPTEN_KEEPALIVE uint32_t lv_chart_type_to_value(char * n) {
         return (uint32_t)-1 ;
     }
 }
+// "lv_chart_update_mode_t": /^(_?)LV_CHART_UPDATE_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_chart_update_mode_to_name(uint32_t v) {
-    if(LV_CHART_UPDATE_MODE_SHIFT==v){ return "shift" ; }
-    else if(LV_CHART_UPDATE_MODE_CIRCULAR==v){ return "circular" ; }
+    if(LV_CHART_UPDATE_MODE_SHIFT==v){ return "mode-shift" ; }
+    else if(LV_CHART_UPDATE_MODE_CIRCULAR==v){ return "mode-circular" ; }
     else {
         return "<unknow>" ;
     }
 }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_chart_update_mode_to_value(char * n) {
-    if(strcmp("shift", n)==0){ return LV_CHART_UPDATE_MODE_SHIFT ; }
-    else if(strcmp("circular", n)==0){ return LV_CHART_UPDATE_MODE_CIRCULAR ; }
+    if(strcmp("mode-shift", n)==0){ return LV_CHART_UPDATE_MODE_SHIFT ; }
+    else if(strcmp("mode-circular", n)==0){ return LV_CHART_UPDATE_MODE_CIRCULAR ; }
     else {
         return (uint32_t)-1 ;
     }
 }
+// "lv_chart_axis_t": /^(_?)LV_CHART_AXIS_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_chart_axis_to_name(uint32_t v) {
     if(LV_CHART_AXIS_PRIMARY_Y==v){ return "primary-y" ; }
     else if(LV_CHART_AXIS_SECONDARY_Y==v){ return "secondary-y" ; }
@@ -1560,56 +1621,59 @@ EMSCRIPTEN_KEEPALIVE uint32_t lv_chart_axis_to_value(char * n) {
         return (uint32_t)-1 ;
     }
 }
+// "lv_chart_draw_part_type_t": /^(_?)LV_CHART_DRAW_PART_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_chart_draw_part_type_to_name(uint32_t v) {
-    if(LV_CHART_DRAW_PART_DIV_LINE_INIT==v){ return "lv-chart-draw-part-div-line-init" ; }
-    else if(LV_CHART_DRAW_PART_DIV_LINE_HOR==v){ return "lv-chart-draw-part-div-line-hor" ; }
-    else if(LV_CHART_DRAW_PART_DIV_LINE_VER==v){ return "lv-chart-draw-part-div-line-ver" ; }
-    else if(LV_CHART_DRAW_PART_LINE_AND_POINT==v){ return "lv-chart-draw-part-line-and-point" ; }
-    else if(LV_CHART_DRAW_PART_BAR==v){ return "lv-chart-draw-part-bar" ; }
-    else if(LV_CHART_DRAW_PART_CURSOR==v){ return "lv-chart-draw-part-cursor" ; }
-    else if(LV_CHART_DRAW_PART_TICK_LABEL==v){ return "lv-chart-draw-part-tick-label" ; }
+    if(LV_CHART_DRAW_PART_DIV_LINE_INIT==v){ return "div-line-init" ; }
+    else if(LV_CHART_DRAW_PART_DIV_LINE_HOR==v){ return "div-line-hor" ; }
+    else if(LV_CHART_DRAW_PART_DIV_LINE_VER==v){ return "div-line-ver" ; }
+    else if(LV_CHART_DRAW_PART_LINE_AND_POINT==v){ return "line-and-point" ; }
+    else if(LV_CHART_DRAW_PART_BAR==v){ return "bar" ; }
+    else if(LV_CHART_DRAW_PART_CURSOR==v){ return "cursor" ; }
+    else if(LV_CHART_DRAW_PART_TICK_LABEL==v){ return "tick-label" ; }
     else {
         return "<unknow>" ;
     }
 }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_chart_draw_part_type_to_value(char * n) {
-    if(strcmp("lv-chart-draw-part-div-line-init", n)==0){ return LV_CHART_DRAW_PART_DIV_LINE_INIT ; }
-    else if(strcmp("lv-chart-draw-part-div-line-hor", n)==0){ return LV_CHART_DRAW_PART_DIV_LINE_HOR ; }
-    else if(strcmp("lv-chart-draw-part-div-line-ver", n)==0){ return LV_CHART_DRAW_PART_DIV_LINE_VER ; }
-    else if(strcmp("lv-chart-draw-part-line-and-point", n)==0){ return LV_CHART_DRAW_PART_LINE_AND_POINT ; }
-    else if(strcmp("lv-chart-draw-part-bar", n)==0){ return LV_CHART_DRAW_PART_BAR ; }
-    else if(strcmp("lv-chart-draw-part-cursor", n)==0){ return LV_CHART_DRAW_PART_CURSOR ; }
-    else if(strcmp("lv-chart-draw-part-tick-label", n)==0){ return LV_CHART_DRAW_PART_TICK_LABEL ; }
+    if(strcmp("div-line-init", n)==0){ return LV_CHART_DRAW_PART_DIV_LINE_INIT ; }
+    else if(strcmp("div-line-hor", n)==0){ return LV_CHART_DRAW_PART_DIV_LINE_HOR ; }
+    else if(strcmp("div-line-ver", n)==0){ return LV_CHART_DRAW_PART_DIV_LINE_VER ; }
+    else if(strcmp("line-and-point", n)==0){ return LV_CHART_DRAW_PART_LINE_AND_POINT ; }
+    else if(strcmp("bar", n)==0){ return LV_CHART_DRAW_PART_BAR ; }
+    else if(strcmp("cursor", n)==0){ return LV_CHART_DRAW_PART_CURSOR ; }
+    else if(strcmp("tick-label", n)==0){ return LV_CHART_DRAW_PART_TICK_LABEL ; }
     else {
         return (uint32_t)-1 ;
     }
 }
+// "lv_keyboard_mode_t": /^(_?)LV_KEYBOARD_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_keyboard_mode_to_name(uint32_t v) {
-    if(LV_KEYBOARD_MODE_TEXT_LOWER==v){ return "text-lower" ; }
-    else if(LV_KEYBOARD_MODE_TEXT_UPPER==v){ return "text-upper" ; }
-    else if(LV_KEYBOARD_MODE_SPECIAL==v){ return "special" ; }
-    else if(LV_KEYBOARD_MODE_NUMBER==v){ return "number" ; }
-    else if(LV_KEYBOARD_MODE_USER_1==v){ return "user-1" ; }
-    else if(LV_KEYBOARD_MODE_USER_2==v){ return "user-2" ; }
-    else if(LV_KEYBOARD_MODE_USER_3==v){ return "user-3" ; }
-    else if(LV_KEYBOARD_MODE_USER_4==v){ return "user-4" ; }
+    if(LV_KEYBOARD_MODE_TEXT_LOWER==v){ return "mode-text-lower" ; }
+    else if(LV_KEYBOARD_MODE_TEXT_UPPER==v){ return "mode-text-upper" ; }
+    else if(LV_KEYBOARD_MODE_SPECIAL==v){ return "mode-special" ; }
+    else if(LV_KEYBOARD_MODE_NUMBER==v){ return "mode-number" ; }
+    else if(LV_KEYBOARD_MODE_USER_1==v){ return "mode-user-1" ; }
+    else if(LV_KEYBOARD_MODE_USER_2==v){ return "mode-user-2" ; }
+    else if(LV_KEYBOARD_MODE_USER_3==v){ return "mode-user-3" ; }
+    else if(LV_KEYBOARD_MODE_USER_4==v){ return "mode-user-4" ; }
     else {
         return "<unknow>" ;
     }
 }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_keyboard_mode_to_value(char * n) {
-    if(strcmp("text-lower", n)==0){ return LV_KEYBOARD_MODE_TEXT_LOWER ; }
-    else if(strcmp("text-upper", n)==0){ return LV_KEYBOARD_MODE_TEXT_UPPER ; }
-    else if(strcmp("special", n)==0){ return LV_KEYBOARD_MODE_SPECIAL ; }
-    else if(strcmp("number", n)==0){ return LV_KEYBOARD_MODE_NUMBER ; }
-    else if(strcmp("user-1", n)==0){ return LV_KEYBOARD_MODE_USER_1 ; }
-    else if(strcmp("user-2", n)==0){ return LV_KEYBOARD_MODE_USER_2 ; }
-    else if(strcmp("user-3", n)==0){ return LV_KEYBOARD_MODE_USER_3 ; }
-    else if(strcmp("user-4", n)==0){ return LV_KEYBOARD_MODE_USER_4 ; }
+    if(strcmp("mode-text-lower", n)==0){ return LV_KEYBOARD_MODE_TEXT_LOWER ; }
+    else if(strcmp("mode-text-upper", n)==0){ return LV_KEYBOARD_MODE_TEXT_UPPER ; }
+    else if(strcmp("mode-special", n)==0){ return LV_KEYBOARD_MODE_SPECIAL ; }
+    else if(strcmp("mode-number", n)==0){ return LV_KEYBOARD_MODE_NUMBER ; }
+    else if(strcmp("mode-user-1", n)==0){ return LV_KEYBOARD_MODE_USER_1 ; }
+    else if(strcmp("mode-user-2", n)==0){ return LV_KEYBOARD_MODE_USER_2 ; }
+    else if(strcmp("mode-user-3", n)==0){ return LV_KEYBOARD_MODE_USER_3 ; }
+    else if(strcmp("mode-user-4", n)==0){ return LV_KEYBOARD_MODE_USER_4 ; }
     else {
         return (uint32_t)-1 ;
     }
 }
+// "lv_flex_align_t": /^(_?)LV_FLEX_ALIGN_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_flex_align_to_name(uint32_t v) {
     if(LV_FLEX_ALIGN_START==v){ return "start" ; }
     else if(LV_FLEX_ALIGN_END==v){ return "end" ; }
@@ -1632,6 +1696,7 @@ EMSCRIPTEN_KEEPALIVE uint32_t lv_flex_align_to_value(char * n) {
         return (uint32_t)-1 ;
     }
 }
+// "lv_flex_flow_t": /^(_?)LV_FLEX_FLOW_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_flex_flow_to_name(uint32_t v) {
     if(LV_FLEX_FLOW_ROW==v){ return "row" ; }
     else if(LV_FLEX_FLOW_COLUMN==v){ return "column" ; }
@@ -1658,6 +1723,7 @@ EMSCRIPTEN_KEEPALIVE uint32_t lv_flex_flow_to_value(char * n) {
         return (uint32_t)-1 ;
     }
 }
+// "lv_meter_indicator_type_t": /^(_?)LV_METER_INDICATOR_TYPE_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_meter_indicator_type_to_name(uint32_t v) {
     if(LV_METER_INDICATOR_TYPE_NEEDLE_IMG==v){ return "needle-img" ; }
     else if(LV_METER_INDICATOR_TYPE_NEEDLE_LINE==v){ return "needle-line" ; }
@@ -1676,52 +1742,56 @@ EMSCRIPTEN_KEEPALIVE uint32_t lv_meter_indicator_type_to_value(char * n) {
         return (uint32_t)-1 ;
     }
 }
+// "lv_meter_draw_part_type_t": /^(_?)LV_METER_DRAW_PART_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_meter_draw_part_type_to_name(uint32_t v) {
-    if(LV_METER_DRAW_PART_ARC==v){ return "lv-meter-draw-part-arc" ; }
-    else if(LV_METER_DRAW_PART_NEEDLE_LINE==v){ return "lv-meter-draw-part-needle-line" ; }
-    else if(LV_METER_DRAW_PART_NEEDLE_IMG==v){ return "lv-meter-draw-part-needle-img" ; }
-    else if(LV_METER_DRAW_PART_TICK==v){ return "lv-meter-draw-part-tick" ; }
+    if(LV_METER_DRAW_PART_ARC==v){ return "arc" ; }
+    else if(LV_METER_DRAW_PART_NEEDLE_LINE==v){ return "needle-line" ; }
+    else if(LV_METER_DRAW_PART_NEEDLE_IMG==v){ return "needle-img" ; }
+    else if(LV_METER_DRAW_PART_TICK==v){ return "tick" ; }
     else {
         return "<unknow>" ;
     }
 }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_meter_draw_part_type_to_value(char * n) {
-    if(strcmp("lv-meter-draw-part-arc", n)==0){ return LV_METER_DRAW_PART_ARC ; }
-    else if(strcmp("lv-meter-draw-part-needle-line", n)==0){ return LV_METER_DRAW_PART_NEEDLE_LINE ; }
-    else if(strcmp("lv-meter-draw-part-needle-img", n)==0){ return LV_METER_DRAW_PART_NEEDLE_IMG ; }
-    else if(strcmp("lv-meter-draw-part-tick", n)==0){ return LV_METER_DRAW_PART_TICK ; }
+    if(strcmp("arc", n)==0){ return LV_METER_DRAW_PART_ARC ; }
+    else if(strcmp("needle-line", n)==0){ return LV_METER_DRAW_PART_NEEDLE_LINE ; }
+    else if(strcmp("needle-img", n)==0){ return LV_METER_DRAW_PART_NEEDLE_IMG ; }
+    else if(strcmp("tick", n)==0){ return LV_METER_DRAW_PART_TICK ; }
     else {
         return (uint32_t)-1 ;
     }
 }
+// "lv_colorwheel_mode_t": /^(_?)LV_COLORWHEEL_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_colorwheel_mode_to_name(uint32_t v) {
-    if(LV_COLORWHEEL_MODE_HUE==v){ return "hue" ; }
-    else if(LV_COLORWHEEL_MODE_SATURATION==v){ return "saturation" ; }
-    else if(LV_COLORWHEEL_MODE_VALUE==v){ return "value" ; }
+    if(LV_COLORWHEEL_MODE_HUE==v){ return "mode-hue" ; }
+    else if(LV_COLORWHEEL_MODE_SATURATION==v){ return "mode-saturation" ; }
+    else if(LV_COLORWHEEL_MODE_VALUE==v){ return "mode-value" ; }
     else {
         return "<unknow>" ;
     }
 }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_colorwheel_mode_to_value(char * n) {
-    if(strcmp("hue", n)==0){ return LV_COLORWHEEL_MODE_HUE ; }
-    else if(strcmp("saturation", n)==0){ return LV_COLORWHEEL_MODE_SATURATION ; }
-    else if(strcmp("value", n)==0){ return LV_COLORWHEEL_MODE_VALUE ; }
+    if(strcmp("mode-hue", n)==0){ return LV_COLORWHEEL_MODE_HUE ; }
+    else if(strcmp("mode-saturation", n)==0){ return LV_COLORWHEEL_MODE_SATURATION ; }
+    else if(strcmp("mode-value", n)==0){ return LV_COLORWHEEL_MODE_VALUE ; }
     else {
         return (uint32_t)-1 ;
     }
 }
+// "lv_led_draw_part_type_t": /^(_?)LV_LED_DRAW_PART_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_led_draw_part_type_to_name(uint32_t v) {
-    if(LV_LED_DRAW_PART_RECTANGLE==v){ return "lv-led-draw-part-rectangle" ; }
+    if(LV_LED_DRAW_PART_RECTANGLE==v){ return "rectangle" ; }
     else {
         return "<unknow>" ;
     }
 }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_led_draw_part_type_to_value(char * n) {
-    if(strcmp("lv-led-draw-part-rectangle", n)==0){ return LV_LED_DRAW_PART_RECTANGLE ; }
+    if(strcmp("rectangle", n)==0){ return LV_LED_DRAW_PART_RECTANGLE ; }
     else {
         return (uint32_t)-1 ;
     }
 }
+// "lv_imgbtn_state_t": /^(_?)LV_IMGBTN_STATE_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_imgbtn_state_to_name(uint32_t v) {
     if(LV_IMGBTN_STATE_RELEASED==v){ return "released" ; }
     else if(LV_IMGBTN_STATE_PRESSED==v){ return "pressed" ; }
@@ -1746,6 +1816,7 @@ EMSCRIPTEN_KEEPALIVE uint32_t lv_imgbtn_state_to_value(char * n) {
         return (uint32_t)-1 ;
     }
 }
+// "lv_span_overflow_t": /^(_?)LV_SPAN_OVERFLOW_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_span_overflow_to_name(uint32_t v) {
     if(LV_SPAN_OVERFLOW_CLIP==v){ return "clip" ; }
     else if(LV_SPAN_OVERFLOW_ELLIPSIS==v){ return "ellipsis" ; }
@@ -1760,22 +1831,24 @@ EMSCRIPTEN_KEEPALIVE uint32_t lv_span_overflow_to_value(char * n) {
         return (uint32_t)-1 ;
     }
 }
+// "lv_span_mode_t": /^(_?)LV_SPAN_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_span_mode_to_name(uint32_t v) {
-    if(LV_SPAN_MODE_FIXED==v){ return "fixed" ; }
-    else if(LV_SPAN_MODE_EXPAND==v){ return "expand" ; }
-    else if(LV_SPAN_MODE_BREAK==v){ return "break" ; }
+    if(LV_SPAN_MODE_FIXED==v){ return "mode-fixed" ; }
+    else if(LV_SPAN_MODE_EXPAND==v){ return "mode-expand" ; }
+    else if(LV_SPAN_MODE_BREAK==v){ return "mode-break" ; }
     else {
         return "<unknow>" ;
     }
 }
 EMSCRIPTEN_KEEPALIVE uint32_t lv_span_mode_to_value(char * n) {
-    if(strcmp("fixed", n)==0){ return LV_SPAN_MODE_FIXED ; }
-    else if(strcmp("expand", n)==0){ return LV_SPAN_MODE_EXPAND ; }
-    else if(strcmp("break", n)==0){ return LV_SPAN_MODE_BREAK ; }
+    if(strcmp("mode-fixed", n)==0){ return LV_SPAN_MODE_FIXED ; }
+    else if(strcmp("mode-expand", n)==0){ return LV_SPAN_MODE_EXPAND ; }
+    else if(strcmp("mode-break", n)==0){ return LV_SPAN_MODE_BREAK ; }
     else {
         return (uint32_t)-1 ;
     }
 }
+// "lv_grid_align_t": /^(_?)LV_GRID_ALIGN_/ ,
 EMSCRIPTEN_KEEPALIVE char * lv_grid_align_to_name(uint32_t v) {
     if(LV_GRID_ALIGN_START==v){ return "start" ; }
     else if(LV_GRID_ALIGN_CENTER==v){ return "center" ; }

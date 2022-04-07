@@ -4,6 +4,9 @@
 #include "lvgl.h"
 #include "../../main/debug.h"
 
+EMSCRIPTEN_KEEPALIVE void lv_free(void * ptr) {
+    free(ptr);
+}
 
 EMSCRIPTEN_KEEPALIVE lv_coord_t lv_coord_pct(uint16_t pct) {
     return LV_PCT(pct);

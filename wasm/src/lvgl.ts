@@ -27,6 +27,14 @@ export class WASMObject {
             WASMObject.pool[this.ptr] = this
         }
     }
+    public free() {
+        if(!this.ptr) {
+            return
+        }
+        delete WASMObject.pool[this.ptr]
+        Module._lv_free(this.ptr)
+        this.ptr = 0
+    }
 }
 class EventEmitter extends WASMObject {
     _handles: {[key:string]:Function[]} = {}
@@ -133,7 +141,7 @@ class EventEmitter extends WASMObject {
 export class Obj extends EventEmitter {
     public id = ""
     public name = ""
-    constructor(parent: Obj, ptr=0) {
+    constructor(parent: Obj|null, ptr=0) {
         super()
         this.on("#EVENT.ADD#", (name:string)=>{
             Module._lv_obj_enable_event(this.ptr,constMapping.EVENT_CODE.value(name))
@@ -170,7 +178,7 @@ export class Obj extends EventEmitter {
     }
 
     
-    protected _createWidget(parent: Obj) {
+    protected _createWidget(parent: Obj|null) {
         this.ptr = Module._lv_obj_create(parent?parent.ptr:null)
         this.registerPointer()
     }
@@ -324,8 +332,8 @@ export class Obj extends EventEmitter {
     public clickArea(area:any): void {
         Module._lv_obj_get_click_area(this.ptr, area)
     }
-    public hitTest(point:any): boolean {
-        return Module.ccall("lv_obj_hit_test", "bool", ["number", "number"], [this.ptr, point])
+    public hitTest(point:Point): boolean {
+        return Module.ccall("lv_obj_hit_test", "bool", ["number", "pointer"], [this.ptr, point.ptr])
     }
     public setScrollbarMode(mode:string): void {
         Module._lv_obj_set_scrollbar_mode(this.ptr, constMapping.SCROLLBAR_MODE.value(mode))
@@ -369,8 +377,8 @@ export class Obj extends EventEmitter {
     public scrollRight(): any {
         return Module._lv_obj_get_scroll_right(this.ptr)
     }
-    public scrollEnd(end:any): void {
-        Module._lv_obj_get_scroll_end(this.ptr, end)
+    public scrollEnd(end:Point): void {
+        Module._lv_obj_get_scroll_end(this.ptr, end.ptr)
     }
     public scrollBy(x:any, y:any, anim_en:string): void {
         Module._lv_obj_scroll_by(this.ptr, x, y, constMapping.ANIM_ENABLE.value(anim_en))
@@ -479,7 +487,7 @@ export class Obj extends EventEmitter {
     }
 }
 export class Label extends Obj {
-    protected _createWidget(parent: Obj) {
+    protected _createWidget(parent: Obj|null) {
         this.ptr = Module._lv_label_create(parent?parent.ptr:null)
         this.registerPointer()
     }
@@ -510,14 +518,14 @@ export class Label extends Obj {
     public recolor(): boolean {
         return Module.ccall("lv_label_get_recolor", "bool", ["number"], [this.ptr])
     }
-    public letterPos(char_id:any, pos:any): void {
-        Module._lv_label_get_letter_pos(this.ptr, char_id, pos)
+    public letterPos(char_id:any, pos:Point): void {
+        Module._lv_label_get_letter_pos(this.ptr, char_id, pos.ptr)
     }
-    public letterOn(pos_in:any): any {
-        return Module._lv_label_get_letter_on(this.ptr, pos_in)
+    public letterOn(pos_in:Point): any {
+        return Module._lv_label_get_letter_on(this.ptr, pos_in.ptr)
     }
-    public isCharUnderPos(pos:any): boolean {
-        return Module.ccall("lv_label_is_char_under_pos", "bool", ["number", "number"], [this.ptr, pos])
+    public isCharUnderPos(pos:Point): boolean {
+        return Module.ccall("lv_label_is_char_under_pos", "bool", ["number", "pointer"], [this.ptr, pos.ptr])
     }
     public textSelectionStart(): any {
         return Module._lv_label_get_text_selection_start(this.ptr)
@@ -533,7 +541,7 @@ export class Label extends Obj {
     }
 }
 export class Arc extends Obj {
-    protected _createWidget(parent: Obj) {
+    protected _createWidget(parent: Obj|null) {
         this.ptr = Module._lv_arc_create(parent?parent.ptr:null)
         this.registerPointer()
     }
@@ -596,7 +604,7 @@ export class Arc extends Obj {
     }
 }
 export class Bar extends Obj {
-    protected _createWidget(parent: Obj) {
+    protected _createWidget(parent: Obj|null) {
         this.ptr = Module._lv_bar_create(parent?parent.ptr:null)
         this.registerPointer()
     }
@@ -629,13 +637,13 @@ export class Bar extends Obj {
     }
 }
 export class Btn extends Obj {
-    protected _createWidget(parent: Obj) {
+    protected _createWidget(parent: Obj|null) {
         this.ptr = Module._lv_btn_create(parent?parent.ptr:null)
         this.registerPointer()
     }
 }
 export class BtnMatrix extends Obj {
-    protected _createWidget(parent: Obj) {
+    protected _createWidget(parent: Obj|null) {
         this.ptr = Module._lv_btnmatrix_create(parent?parent.ptr:null)
         this.registerPointer()
     }
@@ -677,7 +685,7 @@ export class BtnMatrix extends Obj {
     }
 }
 export class Canvas extends Obj {
-    protected _createWidget(parent: Obj) {
+    protected _createWidget(parent: Obj|null) {
         this.ptr = Module._lv_canvas_create(parent?parent.ptr:null)
         this.registerPointer()
     }
@@ -713,7 +721,7 @@ export class Canvas extends Obj {
     }
 }
 export class Checkbox extends Obj {
-    protected _createWidget(parent: Obj) {
+    protected _createWidget(parent: Obj|null) {
         this.ptr = Module._lv_checkbox_create(parent?parent.ptr:null)
         this.registerPointer()
     }
@@ -728,7 +736,7 @@ export class Checkbox extends Obj {
     }
 }
 export class Dropdown extends Obj {
-    protected _createWidget(parent: Obj) {
+    protected _createWidget(parent: Obj|null) {
         this.ptr = Module._lv_dropdown_create(parent?parent.ptr:null)
         this.registerPointer()
     }
@@ -788,7 +796,7 @@ export class Dropdown extends Obj {
     }
 }
 export class Img extends Obj {
-    protected _createWidget(parent: Obj) {
+    protected _createWidget(parent: Obj|null) {
         this.ptr = Module._lv_img_create(parent?parent.ptr:null)
         this.registerPointer()
     }
@@ -822,8 +830,8 @@ export class Img extends Obj {
     public angle(): any {
         return Module._lv_img_get_angle(this.ptr)
     }
-    public pivot(pivot:any): void {
-        Module._lv_img_get_pivot(this.ptr, pivot)
+    public pivot(pivot:Point): void {
+        Module._lv_img_get_pivot(this.ptr, pivot.ptr)
     }
     public zoom(): any {
         return Module._lv_img_get_zoom(this.ptr)
@@ -836,7 +844,7 @@ export class Img extends Obj {
     }
 }
 export class Line extends Obj {
-    protected _createWidget(parent: Obj) {
+    protected _createWidget(parent: Obj|null) {
         this.ptr = Module._lv_line_create(parent?parent.ptr:null)
         this.registerPointer()
     }
@@ -848,7 +856,7 @@ export class Line extends Obj {
     }
 }
 export class Roller extends Obj {
-    protected _createWidget(parent: Obj) {
+    protected _createWidget(parent: Obj|null) {
         this.ptr = Module._lv_roller_create(parent?parent.ptr:null)
         this.registerPointer()
     }
@@ -875,7 +883,7 @@ export class Roller extends Obj {
     }
 }
 export class Slider extends Obj {
-    protected _createWidget(parent: Obj) {
+    protected _createWidget(parent: Obj|null) {
         this.ptr = Module._lv_slider_create(parent?parent.ptr:null)
         this.registerPointer()
     }
@@ -911,13 +919,13 @@ export class Slider extends Obj {
     }
 }
 export class Switch extends Obj {
-    protected _createWidget(parent: Obj) {
+    protected _createWidget(parent: Obj|null) {
         this.ptr = Module._lv_switch_create(parent?parent.ptr:null)
         this.registerPointer()
     }
 }
 export class Table extends Obj {
-    protected _createWidget(parent: Obj) {
+    protected _createWidget(parent: Obj|null) {
         this.ptr = Module._lv_table_create(parent?parent.ptr:null)
         this.registerPointer()
     }
@@ -956,7 +964,7 @@ export class Table extends Obj {
     }
 }
 export class TextArea extends Obj {
-    protected _createWidget(parent: Obj) {
+    protected _createWidget(parent: Obj|null) {
         this.ptr = Module._lv_textarea_create(parent?parent.ptr:null)
         this.registerPointer()
     }
@@ -1058,7 +1066,7 @@ export class TextArea extends Obj {
     }
 }
 export class MsgBox extends Obj {
-    protected _createWidget(parent: Obj) {
+    protected _createWidget(parent: Obj|null) {
         this.ptr = Module._lv_msgbox_create(parent?parent.ptr:null)
         this.registerPointer()
     }
@@ -1091,7 +1099,7 @@ export class MsgBox extends Obj {
     }
 }
 export class Keyboard extends Obj {
-    protected _createWidget(parent: Obj) {
+    protected _createWidget(parent: Obj|null) {
         this.ptr = Module._lv_keyboard_create(parent?parent.ptr:null)
         this.registerPointer()
     }
@@ -1112,7 +1120,7 @@ export class Keyboard extends Obj {
     }
 }
 export class TileView extends Obj {
-    protected _createWidget(parent: Obj) {
+    protected _createWidget(parent: Obj|null) {
         this.ptr = Module._lv_tileview_create(parent?parent.ptr:null)
         this.registerPointer()
     }
@@ -1124,7 +1132,7 @@ export class TileView extends Obj {
     }
 }
 export class List extends Obj {
-    protected _createWidget(parent: Obj) {
+    protected _createWidget(parent: Obj|null) {
         this.ptr = Module._lv_list_create(parent?parent.ptr:null)
         this.registerPointer()
     }
@@ -1138,6 +1146,31 @@ export class List extends Obj {
 // AUTO GENERATE CODE END [LVGL.JS WIDGETS] --------
 
 
+
+export const Widgets = {
+// AUTO GENERATE CODE START [LVGL.JS WIDGET NAMES] --------
+Obj, 
+Label, 
+Arc, 
+Bar, 
+Btn, 
+BtnMatrix, 
+Canvas, 
+Checkbox, 
+Dropdown, 
+Img, 
+Line, 
+Roller, 
+Slider, 
+Switch, 
+Table, 
+TextArea, 
+MsgBox, 
+Keyboard, 
+TileView, 
+List
+// AUTO GENERATE CODE END [LVGL.JS WIDGET NAMES] --------
+}
 
 
 // AUTO GENERATE CODE START [LVGL.JS STRUCTS] --------
@@ -1739,6 +1772,24 @@ export class IndevData extends WASMObject {
     }
     public setContinueReading(continue_reading:any): void {
         Module._lv_indev_data_set_continue_reading(this.ptr, continue_reading)
+    }
+}
+export class Point extends WASMObject {
+    constructor() {
+        super()
+        this.ptr=Module._lv_point_create()
+    }
+    public x(): any {
+        return Module._lv_point_get_x(this.ptr)
+    }
+    public setX(x:any): void {
+        Module._lv_point_set_x(this.ptr, x)
+    }
+    public y(): any {
+        return Module._lv_point_get_y(this.ptr)
+    }
+    public setY(y:any): void {
+        Module._lv_point_set_y(this.ptr, y)
     }
 }
 // AUTO GENERATE CODE END [LVGL.JS STRUCTS] --------
@@ -2498,7 +2549,6 @@ export type SCROLL_SNAP = "none" | "start" | "end" | "center"
 // AUTO GENERATE CODE END [LVGL.JS CONST MAPPING] --------
 
 
-// pad for beapi.lvgl
 export declare interface IndevData {
     x(): number ;
     setX(val:number): void ;
@@ -2777,11 +2827,56 @@ export class Draggable {
     }
 }
 
+export type StyleValue = string | number | Color
+export type StyleProp = string
+
+export class Style extends WASMObject {
+    constructor(propsOrPtr:number|{[key:string]:StyleValue}=0) {
+        let ptr = 0
+        if(typeof propsOrPtr=="number") {
+            ptr = propsOrPtr
+        }
+        if(ptr==0) {
+            ptr = Module._lv_style_create()
+        }
+        super(ptr)
+        if(typeof propsOrPtr=='object' ) {
+            for(let propName in propsOrPtr) {
+                this.set(propName, propsOrPtr[propName])
+            }
+        }
+    }
+
+    public get(propName: string): StyleValue {
+        Module.__lastError = null
+        Module.ccall("lv_style_get", "void", ["number","string"], [this.ptr, propName])
+        if(Module.__lastError) {
+            throw Module.__lastError
+        }
+        return Module.__return
+    }
+    public set(propName: string, value: StyleValue) {
+        switch(Module.ccall("lv_style_datatype", "number", ["string"], [propName])) {
+            case 1: // number
+                return Module.ccall("lv_style_set_number", "boolean", ["number", "string", "number"], [this.ptr, propName, value])
+            case 2: // string
+                return Module.ccall("lv_style_set_string", "boolean", ["number", "string", "string"], [this.ptr, propName, value])
+            case 3: // color
+                if(value instanceof Color) {
+                    value = value.toRGB565()
+                }
+                return Module.ccall("lv_style_set_color", "boolean", ["number", "string", "number"], [this.ptr, propName, value])
+        }
+        return false
+    }
+    public props(): StyleProp[] {
+        Module._lv_style_props(this.ptr)
+        return Module.__return
+    }
+}
 
 
-
-
-;(Obj as any).prototype.draggable = function(onstart:DragStartCB, ondragging:DraggingCB, onstop: DragStopCB) {
+;(Obj as any).prototype.draggable = function(onstart?:DragStartCB|null, ondragging?:DraggingCB|null, onstop?: DragStopCB|null) {
     if(!this._draggable) {
         this._draggable = new Draggable(this)
         if(onstart) { this._draggable.setStart(onstart) }
@@ -2792,12 +2887,12 @@ export class Draggable {
     return this._draggable
 }
 
-;(Obj as any).prototype.hitTest = function hitTest(x?:number|null, y?:number|null) {
-    if(x==undefined || x==null || y==undefined || y==null) {
-        ; ({x,y} = lv.inputPoint())
+;(Obj as any).prototype.localStyle = function (selector=0) {
+    let stylePtr = Module._lv_obj_get_local_style(this.ptr, selector)
+    if(!stylePtr) {
+        return null
     }
-    let [x1,y1] = this.coords()
-    return (x as number)>x1 && (y as number)>y1 && (x as number)<x1+this.width() && (y as number)<y1+this.height() 
+    return new Style(stylePtr)
 }
 
 ;(Obj as any).prototype.show = function show() {
@@ -2844,6 +2939,161 @@ export class Draggable {
     return Module.__return
 }
 
+
+const MapPropFuncs = {
+    // clear: 'removeStyleAll' ,
+    align: 'setAlign' ,
+    flex: 'setFlexFlow' ,
+    flexAlign: 'setFlexAlign' ,
+    text: 'setText' ,
+    grow: 'setFlexGrow' ,
+    center: 'center' ,
+    width: 'setWidth' ,
+    height: 'setHeight' ,
+    font: 'setFont' ,
+    value: 'setValue' ,
+    src: 'setSrc' ,
+    longMode: 'setLongMode' ,
+    oneLine: 'setOneLine' ,
+    x: 'setX' ,
+    y: 'setY' ,
+    leftValue: 'setLeftValue' ,
+}
+const MapPressEvents = {
+    pressed:'pressed',
+    pressing:'pressing',
+    released:'released',
+    clicked:'clicked',
+}
+const MapEvents = {
+    valueChanged: 'value-changed',
+    __proto__: MapPressEvents ,
+}
+
+export function fromJson(json: any, parent: Obj, refs?: any): any{
+    if(!refs) {
+        refs={}
+    }
+    try{
+        if(json instanceof Array) {
+            for(let childJson of json) {
+                fromJson(childJson, parent, refs)
+            }
+        }
+        else {
+            let clz = json["class"] || json.clazz || "Obj"
+            if(!clz) {
+                throw new Error("missing class name")
+            }
+
+            if(typeof clz=='string'){
+                if(typeof (Widgets as any)[clz]!='function'){
+                    throw new Error("unknow class name: "+clz)
+                }
+                clz = (Widgets as any)[clz]
+            }
+            if( typeof clz!="function" ){
+                throw new Error("invalid lv obj class: "+(typeof clz))
+            }
+
+            var obj = new clz(parent, ...(json.args || []))
+            obj.fromJson(json,refs)
+        }
+    }catch(e:any){
+        console.error(e)
+    }
+    return refs
+}
+
+;(Obj as any).prototype.fromJson = function (json: any, refs?: any): any{
+    if(!refs)
+        refs={}
+    try{
+        if(json instanceof Array) {
+            fromJson(json, this, refs)
+        }
+        else {
+
+            if(json.clear) {
+                this.removeStyleAll()
+            }
+
+            for(let propName in json) {
+                if((MapPropFuncs as any)[propName]) {
+                    let methodName = (MapPropFuncs as any)[propName]
+                    if(typeof this[methodName]=='function') {
+                        this[methodName]( json[propName] )
+                        continue
+                    }
+                }
+                if((MapEvents as any)[propName] && typeof json[propName]=="function") {
+                    this.on((MapEvents as any)[propName], json[propName])
+                    if((MapPressEvents as any)[propName]) {
+                        this.addFlag("clickable")
+                    }
+                    continue
+                }
+                let setter = 'set' + propName[0] + propName.substr(1)
+                if(typeof this[setter]=='function') {
+                    this[setter](json[propName])
+                    continue
+                }
+            }
+
+            if(json.style) {
+                for(let propName in json.style) {
+                    this.setStyle(propName, json.style[propName])
+                }
+            }
+
+            if(json.flag) {
+                for(let flag of json.flag) {
+                    this.addFlag(flag)
+                }
+            }
+            if(json.state) {
+                for(let state of json.state) {
+                    this.addState(state)
+                }
+            }
+
+            if(json.bubble) {
+                this.addFlag("event-bubble")
+            }
+            
+            if(json.props && typeof json.props=="object") {
+                for(let name in json.props) {
+                    this[name] = json.props[name]
+                }
+            }
+
+            if(json.visible!=undefined){
+                if(json.visible) {
+                    this.show()
+                } else {
+                    this.hide()
+                }
+            }
+
+            if(json.children) {
+                fromJson(json.children, this, refs)
+            }
+
+            if(json.ref) {
+                refs[json.ref] = this
+            }
+        }
+        
+        this.updateLayout()
+
+    }catch(e:any){
+        console.error(e)
+    }
+
+    return refs
+}
+
+
 ;(Obj as any).prototype.asRow = function asRow() {
     this.removeStyleAll()
     this.setFlexFlow("row")
@@ -2874,7 +3124,7 @@ export class Draggable {
 }
 
 export class CleanObj extends Obj {
-    constructor(parent: Obj, ptr=0) {
+    constructor(parent: Obj|null, ptr=0) {
         super(parent, ptr)
         // this.removeStyleAll()
         this.setStyle("pad-top", 0)
@@ -2889,7 +3139,7 @@ export class CleanObj extends Obj {
 }
 
 class Row extends Obj {
-    constructor(parent: Obj, ptr=0) {
+    constructor(parent: Obj|null, ptr=0) {
         super(parent,ptr)
         this.asRow()
         this.setWidth("100%")
@@ -2898,7 +3148,7 @@ class Row extends Obj {
 }
 
 class Column extends Obj {
-    constructor(parent: Obj, ptr=0) {
+    constructor(parent: Obj|null, ptr=0) {
         super(parent,ptr)
         this.asColumn()
         this.setWidth(-1)
@@ -2937,10 +3187,11 @@ export declare interface Obj {
     show():void ;
     hide():void ;
     toggle():void ;
-    hitTest(x:number,y:number): boolean ;
-    draggable(onstart:DragStartCB, ondragging:DraggingCB, onstop: DragStopCB): void ;
+    localStyle(): Style|null ;
+    draggable(onstart?:DragStartCB|null, ondragging?:DraggingCB|null, onstop?: DragStopCB|null): void ;
     setStyle(styleName:string, value: string|number, selector?:number): boolean ;
     style(styleName:string, selector?:number): string|number ;
+    fromJson (json: any, refs?: any): any ;
 }
 export declare interface Keyboard {
     popup(textarea: Obj, cb:(obj:Obj,event:"ready"|"cancel")=>void|false):void ;
@@ -3012,3 +3263,8 @@ export class Color {
     }
 }
 
+
+export function palette(colorName:string, level=4) {
+    let color = Module.ccall("lv_palette_color","number",["string","number"],[colorName,level])
+    return Color.fromRGB565(color)
+}

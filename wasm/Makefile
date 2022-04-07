@@ -5,7 +5,7 @@ all:
 	cp build/lvgl_api.wasm ../../beconsole.next/public/lib/lvgl.js/ ;
 	cp build/lvgl_api.wasm.map ../../beconsole.next/public/lib/lvgl.js/ ;
 
-config:
+cmake:
 	cd build; emcmake cmake .
 
 dev:

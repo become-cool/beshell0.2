@@ -15,7 +15,6 @@ const MapPropFuncs = {
     oneLine: 'setOneLine' ,
     x: 'setX' ,
     y: 'setY' ,
-    value: 'setValue' ,
     leftValue: 'setLeftValue' ,
 }
 const MapPressEvents = {

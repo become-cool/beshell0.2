@@ -13,6 +13,7 @@ char * lv_base_dir_to_name(uint32_t v) ;
 char * lv_border_side_to_name(uint32_t v) ;
 char * lv_text_align_to_name(uint32_t v) ;
 
+char * lv_style_prop_to_name(lv_style_prop_t v) ;
 lv_style_prop_t lv_style_prop_to_value(char *) ;
 
 #define STYLE_TYPE_NUMBER   1
@@ -201,37 +202,45 @@ char * lv_style_value_to_string(lv_style_prop_t prop, lv_style_value_t value) {
     return "unknow type" ;
 }
 
+bool return_style_value_to_js(lv_style_prop_t prop, lv_style_value_t value) {
+
+    uint8_t datatype = _style_datatype(prop) ;
+
+    switch(datatype) {
+        case STYLE_TYPE_NUMBER:
+            EM_ASM_ARGS({
+                Module.__return = $0;
+                Module.__lastError = null
+            }, value.num);
+            return true ;
+        case STYLE_TYPE_COLOR:
+            EM_ASM_ARGS({
+                Module.__return = $0;
+                Module.__lastError = null
+            }, value.color.full);
+            return true ;
+        case STYLE_TYPE_STRING: {
+            char * sval = lv_style_value_to_string(prop, value) ;
+            if(sval!=NULL) {
+                EM_ASM_ARGS({
+                    Module.__return = Module.asString($0);
+                    Module.__lastError = null
+                }, sval);
+                return true ;
+            }
+        }
+    }
+
+    return false ;
+}
+
  EMSCRIPTEN_KEEPALIVE void lv_obj_get_style(lv_obj_t * obj, char * styleName, lv_style_selector_t selector) {
 
     lv_style_prop_t prop = lv_style_prop_to_value(styleName);
     if(((int32_t)prop)>=0) {
         lv_style_value_t value = lv_obj_get_style_prop(obj, selector, prop) ;
-
-        uint8_t datatype = _style_datatype(prop) ;
-
-        switch(datatype) {
-            case STYLE_TYPE_NUMBER:
-                EM_ASM_ARGS({
-                    Module.__return = $0;
-                    Module.__lastError = null
-                }, value.num);
-                return ;
-            case STYLE_TYPE_COLOR:
-                EM_ASM_ARGS({
-                    Module.__return = $0;
-                    Module.__lastError = null
-                }, value.color.full);
-                return ;
-            case STYLE_TYPE_STRING: {
-                char * sval = lv_style_value_to_string(prop, value) ;
-                if(sval!=NULL) {
-                    EM_ASM_ARGS({
-                        Module.__return = Module.asString($0);
-                        Module.__lastError = null
-                    }, sval);
-                    return ;
-                }
-            }
+        if(return_style_value_to_js(prop, value)) {
+            return ;
         }
     }
 
@@ -240,23 +249,120 @@ char * lv_style_value_to_string(lv_style_prop_t prop, lv_style_value_t value) {
     }, styleName);
 }
 
-// JSValue js_lv_obj_get_local_style(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-    
-//     lv_style_selector_t selector = LV_PART_MAIN | LV_STATE_DEFAULT ;
-//     if(argc>1) {
-//         if(JS_ToUint32(ctx, &selector, argv[1])!=0) {
-//             THROW_EXCEPTION("invalid arg part")
-//         }
-//     }
-    
-//     THIS_LVOBJ("Obj", "localStyle", thisobj)
+EMSCRIPTEN_KEEPALIVE lv_style_t * lv_obj_get_local_style(lv_obj_t * obj, lv_style_selector_t selector) {
+    for(int i = 0; i < obj->style_cnt; i++) {
+        if(obj->styles[i].is_local && obj->styles[i].selector == selector) {
+            return obj->styles[i].style ;
+        }
+    }
+    return NULL ;
+}
 
-//     for(int i = 0; i < thisobj->style_cnt; i++) {
-//         if(thisobj->styles[i].is_local && thisobj->styles[i].selector == selector) {
-//             JSValue jsstyle = lv_style_wrapper(ctx, thisobj->styles[i].style) ;
-//             JS_DupValue(ctx,jsstyle) ;
-//             return jsstyle ;
-//         }
-//     }
-//     return JS_UNDEFINED ;
-// }
+
+EMSCRIPTEN_KEEPALIVE void lv_style_get(lv_style_t * p, char * propName) {
+
+    lv_style_prop_t prop = lv_style_prop_to_value(propName);
+    if(((int32_t)prop)>=0) {
+        
+        lv_style_value_t value ;
+        if( lv_style_get_prop(p, propName, &value) ){
+            if(return_style_value_to_js(prop, value)) {
+                return ;
+            }
+        }
+    }
+
+    EM_ASM_ARGS({
+        Module.__lastError = new Error("unknow style name:"+Module.asString($0))
+    }, propName);
+}
+
+
+EMSCRIPTEN_KEEPALIVE void lv_style_props(lv_style_t * style) {
+    EM_ASM_ARGS({ Module.__return = [] });
+
+    if(style->prop_cnt==1) {
+        char * propName = lv_style_prop_to_name(style->prop1) ;
+        EM_ASM_ARGS({ Module.__return.push(Module.asString($0)) }, propName);
+    }
+    else {
+        lv_style_value_t * values = (lv_style_value_t *)style->v_p.values_and_props;
+        uint8_t * tmp = style->v_p.values_and_props + style->prop_cnt * sizeof(lv_style_value_t);
+        uint16_t * props = (uint16_t *)tmp;
+
+        char * propName ;
+        for(size_t j=0;j<style->prop_cnt;j++) {
+            propName = lv_style_prop_to_name(props[j]) ;
+            EM_ASM_ARGS({ Module.__return.push(Module.asString($0)) }, propName);
+        }
+    }
+}
+
+EMSCRIPTEN_KEEPALIVE bool lv_style_set_number(lv_style_t * p, char * propName, int val) {
+    lv_style_prop_t prop = lv_style_prop_to_value(propName) ;
+    if(((int32_t)prop)<0) {
+        return false ;
+    }
+    if(_style_datatype(prop)!=STYLE_TYPE_NUMBER) {
+        return false ;
+    }
+    lv_style_value_t styleValue ;
+    styleValue.num = val ;    
+    lv_style_set_prop(p, prop, styleValue) ;
+    return true ;
+}
+EMSCRIPTEN_KEEPALIVE bool lv_style_set_string(lv_style_t * p, char * propName, char * val) {
+    lv_style_prop_t prop = lv_style_prop_to_value(propName) ;
+    if(((int32_t)prop)<0) {
+        return false ;
+    }
+    if(_style_datatype(prop)!=STYLE_TYPE_STRING) {
+        return false ;
+    }
+    lv_style_value_t styleValue ;
+    styleValue.ptr = val ;    
+    lv_style_set_prop(p, prop, styleValue) ;
+    return true ;
+}
+EMSCRIPTEN_KEEPALIVE bool lv_style_set_color(lv_style_t * p, char * propName, int val) {
+    lv_style_prop_t prop = lv_style_prop_to_value(propName) ;
+    if(((int32_t)prop)<0) {
+        return false ;
+    }
+    if(_style_datatype(prop)!=STYLE_TYPE_COLOR) {
+        return false ;
+    }
+    lv_style_value_t styleValue ;
+    styleValue.color.full = val ;    
+    lv_style_set_prop(p, prop, styleValue) ;
+    return true ;
+}
+
+
+uint32_t lv_palette_to_value(char * n) ;
+
+EMSCRIPTEN_KEEPALIVE uint16_t lv_palette_color(char * colorName, uint8_t level) {
+
+    lv_palette_t palette = lv_palette_to_value(colorName) ;
+    if(((int32_t)palette)<0) {        
+        EM_ASM_ARGS({
+            Module.__lastError = new Error("unknow palette color name:"+Module.asString($0))
+        }, colorName);
+        return 0 ;
+    }
+
+    if( level<1 || level>4 ) {
+        EM_ASM_ARGS({
+            Module.__lastError = new Error("palette color level must between 1 to 4")
+        });
+        return 0 ;
+    }
+
+    lv_color_t color = lv_palette_lighten(palette,level) ;
+    return color.full ;
+}
+
+
+
+
+

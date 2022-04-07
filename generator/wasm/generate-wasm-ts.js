@@ -15,6 +15,7 @@ const mapExportStructs = {
     'lv_obj_class_t': 'ObjClass' ,
     'lv_indev_drv_t': 'IndevDrv' ,
     'lv_indev_data_t': 'IndevData' ,
+    'lv_point_t': 'Point'
 }
 const mapCTypeAlias = {
     'struct _lv_obj_t': 'Obj'
@@ -127,9 +128,6 @@ function generateMethod(methodDef, ctypePrefix, thisType) {
     argTypes = argTypes.join(', ')
 
     let returnWrapperClass = ctypeToJSClass(methodDef.returnType)
-    if(methodDef.name=="lv_disp_get_driver") {
-        console.log(methodDef)
-    }
 
     let methodReturnType = 'any'
     if(methodDef.returnType=="char *" || methodDef.returnType=="const char *") {
@@ -195,7 +193,7 @@ function generateWidgets() {
             code+= `export class ${wgtDef.className} extends EventEmitter {
     public id = ""
     public name = ""
-    constructor(parent: Obj, ptr=0) {
+    constructor(parent: Obj|null, ptr=0) {
         super()
         this.on("#EVENT.ADD#", (name:string)=>{
             Module._lv_obj_enable_event(this.ptr,constMapping.EVENT_CODE.value(name))
@@ -219,7 +217,7 @@ function generateWidgets() {
         }
 
         code+= `
-    protected _createWidget(parent: Obj) {
+    protected _createWidget(parent: Obj|null) {
         this.ptr = Module._${wgtDef.typeName}_create(parent?parent.ptr:null)
         this.registerPointer()
     }`
@@ -309,6 +307,10 @@ function generateConstNameMapping() {
     generateStructs()
 
     let data = generateConstNameMapping()
+
+    // export all widgets list
+    let code = Object.values(mapExportWidgets).join(", \r\n")+"\r\n"
+    fileInsert(__dirname + "/../../wasm/src/lvgl.ts", code, 'LVGL.JS WIDGET NAMES')
 
     // write to build
     fs.writeFileSync(__dirname + "/../../wasm/build/lvgl.ts", data)

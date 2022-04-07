@@ -29,7 +29,7 @@ class Color{
 Color.fromHex = function(val){
     val = val.trim().replace(/^#/,'')
     let color = new Color
-    if(val<3) {
+    if(val.length<3) {
         color.r = parseInt(val,16)
         color.g = color.r
         color.b = color.r

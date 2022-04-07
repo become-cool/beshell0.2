@@ -44,7 +44,7 @@ const redefineFunctions = {
     lv_obj_set_width: `public setWidth(width:string|number) {
         Module._lv_obj_set_width(this.ptr, size(width))
     }` ,
-    lv_obj_set_height: `setHeight(height:string|number) {
+    lv_obj_set_height: `public setHeight(height:string|number) {
         Module._lv_obj_set_height(this.ptr, size(height))
     }` ,
 }

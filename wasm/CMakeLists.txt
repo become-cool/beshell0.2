@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 project (lvgl_api)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0 -D ASMJS -gsource-map")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0 -D ASMJS -DLV_USE_FLEX -gsource-map")
 
 include_directories(${PROJECT_SOURCE_DIR})
 include_directories(../components/lvgl/src)
@@ -17,7 +17,6 @@ file(GLOB MY_SOURCES "./src/*.c")
 set(SOURCES ${LIB_SOURCES} ${MY_SOURCES})
 
 add_executable(lvgl_api ${SOURCES} ${INCLUDES})
-
 
 set(CMAKE_EXECUTABLE_SUFFIX ".html")
 

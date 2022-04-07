@@ -54,3 +54,4 @@ EMSCRIPTEN_KEEPALIVE lv_coord_t lv_obj_get_coord_x(lv_obj_t * obj) {
 EMSCRIPTEN_KEEPALIVE lv_coord_t lv_obj_get_coord_y(lv_obj_t * obj) {
     return obj->coords.y1 ;
 }
+

@@ -228,7 +228,7 @@ export class Obj extends EventEmitter {
     public setWidth(width:string|number) {
         Module._lv_obj_set_width(this.ptr, size(width))
     }
-    setHeight(height:string|number) {
+    public setHeight(height:string|number) {
         Module._lv_obj_set_height(this.ptr, size(height))
     }
     public setContentWidth(w:any): void {
@@ -2776,3 +2776,239 @@ export class Draggable {
         this.isEnabled = false
     }
 }
+
+
+
+
+
+;(Obj as any).prototype.draggable = function(onstart:DragStartCB, ondragging:DraggingCB, onstop: DragStopCB) {
+    if(!this._draggable) {
+        this._draggable = new Draggable(this)
+        if(onstart) { this._draggable.setStart(onstart) }
+        if(ondragging) { this._draggable.setDragging(ondragging) }
+        if(onstop) { this._draggable.setStop(onstop) }
+    }
+    this._draggable.enable()
+    return this._draggable
+}
+
+;(Obj as any).prototype.hitTest = function hitTest(x?:number|null, y?:number|null) {
+    if(x==undefined || x==null || y==undefined || y==null) {
+        ; ({x,y} = lv.inputPoint())
+    }
+    let [x1,y1] = this.coords()
+    return (x as number)>x1 && (y as number)>y1 && (x as number)<x1+this.width() && (y as number)<y1+this.height() 
+}
+
+;(Obj as any).prototype.show = function show() {
+    this.clearFlag("hidden")
+}
+;(Obj as any).prototype.hide = function hide() {
+    this.addFlag("hidden")
+}
+;(Obj as any).prototype.toggle = function toggle() {
+    if(this.isVisible()) {
+        this.addFlag("hidden")
+        return false
+    }
+    else {
+        this.clearFlag("hidden")
+        return true
+    }
+}
+;(Obj as any).prototype.setStyle = function setStyle(styleName:string, value: string|number|Color, selector=0): boolean {
+    switch(Module.ccall("lv_style_datatype", "number", ["string"], [styleName])) {
+        case 1: // number
+            return Module.ccall("js_lv_obj_set_style_num", "boolean", ["number", "string", "number", "number"], [this.ptr, styleName, value, selector])
+        case 2: // string
+            return Module.ccall("js_lv_obj_set_style_string", "boolean", ["number", "string", "string", "number"], [this.ptr, styleName, value, selector])
+        case 3: // color
+            if(value instanceof Color) {
+                value = value.toRGB565()
+            }
+            return Module.ccall("js_lv_obj_set_style_color", "boolean", ["number", "string", "number", "number"], [this.ptr, styleName, value, selector])
+    }
+    return false
+}
+
+;(Obj as any).prototype.style = function setStyle(styleName:string, selector=0): any {
+    Module.__lastError = null
+    Module.ccall("lv_obj_get_style", "void", ["number", "string", "number"], [this.ptr, styleName, selector])
+    if(Module.__lastError) {
+        throw Module.__lastError
+    }
+    // color
+    if( Module.ccall("lv_style_datatype", "number", ["string"], [styleName]) == 3 ) {
+        return Color.fromRGB565(Module.__return)
+    }
+    return Module.__return
+}
+
+;(Obj as any).prototype.asRow = function asRow() {
+    this.removeStyleAll()
+    this.setFlexFlow("row")
+}
+;(Obj as any).prototype.asColumn = function asColumn() {
+    this.removeStyleAll()
+    this.setFlexFlow("column")
+}
+
+
+;(Btn as any).prototype.text = function text() {
+    if(!this.label) {
+        return null
+    }
+    return this.label.text()
+}
+;(Btn as any).prototype.setText = function setText(text: string) {
+    if(!this.label) {
+        this.label = new Label(this)
+    }
+    this.label.setText(text)
+}
+;(Btn as any).prototype.setFont = function setFont(font: string) {
+    if(!this.label) {
+        this.label = new Label(this)
+    }
+    this.label.setFont(font)
+}
+
+export class CleanObj extends Obj {
+    constructor(parent: Obj, ptr=0) {
+        super(parent, ptr)
+        // this.removeStyleAll()
+        this.setStyle("pad-top", 0)
+        this.setStyle("pad-bottom", 0)
+        this.setStyle("pad-left", 0)
+        this.setStyle("pad-right", 0)
+        this.setStyle("border-width", 0)
+        this.setStyle("radius", 0)
+        this.setStyle("bg-opa", 0)
+        this.clearFlag("scrollable")
+    }
+}
+
+class Row extends Obj {
+    constructor(parent: Obj, ptr=0) {
+        super(parent,ptr)
+        this.asRow()
+        this.setWidth("100%")
+        this.setHeight(-1)
+    }
+}
+
+class Column extends Obj {
+    constructor(parent: Obj, ptr=0) {
+        super(parent,ptr)
+        this.asColumn()
+        this.setWidth(-1)
+        this.setHeight("100%")
+    }
+}
+
+; (Keyboard as any).prototype.popup = function(textarea: Obj, cb:(obj:Obj,event:"ready"|"cancel")=>void|false) {
+    if( !this._doneCb ){
+        this._doneCb = (event:"ready"|"cancel")=>{
+            if(!this._popupCb){
+                this.hide()
+                return
+            }
+            if(this._popupCb(this, event)!=false) {
+                this.hide()
+            }
+            this._popupCb = null
+        }
+        this.on("ready", this._doneCb)
+        this.on("cancel", this._doneCb)
+    }
+    if(textarea) {
+        this.setTextarea(textarea)
+    }
+    this._popupCb = cb || null
+    this.show()
+    return this
+}
+
+
+
+export declare interface Obj {
+    asRow():void ;
+    asColumn():void ;
+    show():void ;
+    hide():void ;
+    toggle():void ;
+    hitTest(x:number,y:number): boolean ;
+    draggable(onstart:DragStartCB, ondragging:DraggingCB, onstop: DragStopCB): void ;
+    setStyle(styleName:string, value: string|number, selector?:number): boolean ;
+    style(styleName:string, selector?:number): string|number ;
+}
+export declare interface Keyboard {
+    popup(textarea: Obj, cb:(obj:Obj,event:"ready"|"cancel")=>void|false):void ;
+}
+
+export class Color {
+    public r = 0
+    public g = 0
+    public b = 0
+    constructor(r=0,g=0,b=0) {
+        this.r = (r||0) & 255
+        this.g = (g||0) & 255
+        this.b = (b||0) & 255
+    }
+    
+    // high byte [ 3:G(1-3) | 5:B ] 
+    // low byte  [ 5:R | 3:G(4-6) ]
+    toRGB565() {
+        let r = Math.round((this.r&255)*31/255)
+        let g = Math.round((this.g&255)*63/255)
+        let b = Math.round((this.b&255)*31/255)
+        let v = b << 8
+        v|= (g>>3)&0b111
+        v|= (g&0b111) << 13
+        v|= r << 3
+        return  v
+    }
+
+    toHex() {
+        let r = (this.r&255).toString(16).toUpperCase()
+        if(r.length<2)
+            r = '0'+r
+        let g = (this.g&255).toString(16).toUpperCase()
+        if(g.length<2)
+            g = '0'+g
+        let b = (this.b&255).toString(16).toUpperCase()
+        if(b.length<2)
+            b = '0'+b
+        return '#'+r+g+b
+    }
+
+    public static fromHex (val:string): Color{
+        val = val.trim().replace(/^#/,'')
+        let color = new Color
+        if(val.length<3) {
+            color.r = parseInt(val,16)
+            color.g = color.r
+            color.b = color.r
+        }
+        else{
+            color.r = parseInt(val.substr(0,2),16)
+            color.g = parseInt(val.substr(2,2),16)
+            color.b = parseInt(val.substr(4,2),16)
+        }
+        return color
+    }
+
+    public static fromRGB565 (val:number) : Color {
+        let lb = val & 255
+        let hb = (val >> 8) & 255
+        let r = (lb>>3) & 255
+        let g = ((lb&7)<<3) | hb>>5
+        let b = hb & 31
+        return new Color(
+            Math.round(r * 255/31) ,
+            Math.round(g * 255/63) ,
+            Math.round(b * 255/31) 
+        )
+    }
+}
+

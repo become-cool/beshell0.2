@@ -1,8 +1,8 @@
 const WidgetsMeta = require("../lv_widgets.meta.js")
 
-let mapWidgets = {}
+WidgetsMeta.map = {}
 for(let w of WidgetsMeta) {
-    mapWidgets[w.className] = w
+    WidgetsMeta.map[w.className] = w
 }
 
 module.exports = WidgetsMeta

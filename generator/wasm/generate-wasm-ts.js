@@ -5,8 +5,9 @@ const lvStructDef = require("./lvgl-struct.json")
 const lvConstDef = require("./lvgl-const.json")
 const lvConstAPI = require("../api/consts.js")
 
+delete WidgetsMeta.map.Obj.methods.lv_obj_set_coords
+
 const mapExportWidgets = {
-    // '_lv_obj_t': 'Obj'
 }
 const mapExportStructs = {
     'lv_disp_draw_buf_t': 'DispDrawBuf' ,
@@ -15,10 +16,11 @@ const mapExportStructs = {
     'lv_obj_class_t': 'ObjClass' ,
     'lv_indev_drv_t': 'IndevDrv' ,
     'lv_indev_data_t': 'IndevData' ,
-    'lv_point_t': 'Point'
+    'lv_point_t': 'Point' ,
 }
 const mapCTypeAlias = {
-    'struct _lv_obj_t': 'Obj'
+    'struct _lv_obj_t': 'Obj' ,
+    'lv_style_t': 'Style' ,
 }
 const lvObjExtraDef = `
     public setCoordX(val:number) {
@@ -28,7 +30,7 @@ const lvObjExtraDef = `
         Module._lv_obj_set_coord_y(this.ptr, val)
     }
     public setCoords(x:number,y:number) {
-        Module._lv_obj_set_coords(this.ptr, x, y)
+        Module._lv_obj_set_coords_redefine(this.ptr, x, y)
     }
     public coordX() {
         return Module._lv_obj_get_coord_x(this.ptr)
@@ -40,6 +42,7 @@ const lvObjExtraDef = `
         return [Module._lv_obj_get_coord_x(this.ptr), Module._lv_obj_get_coord_y(this.ptr)]
     }
 `
+
 
 const redefineFunctions = {
     lv_obj_set_width: `public setWidth(width:string|number) {

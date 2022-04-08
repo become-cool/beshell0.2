@@ -43,7 +43,8 @@ EMSCRIPTEN_KEEPALIVE void lv_obj_set_coord_y(lv_obj_t * obj, lv_coord_t val) {
     lv_coord_t dy = val - obj->coords.y1 ;
     lv_obj_set_y(obj, lv_obj_get_y_aligned(obj) + dy) ;
 }
-EMSCRIPTEN_KEEPALIVE void lv_obj_set_coords(lv_obj_t * obj, lv_coord_t x, lv_coord_t y) {
+
+EMSCRIPTEN_KEEPALIVE void lv_obj_set_coords_redefine(lv_obj_t * obj, lv_coord_t x, lv_coord_t y) {
     lv_coord_t dx = x - obj->coords.x1 ;
     lv_obj_set_x(obj, lv_obj_get_x_aligned(obj) + dx) ;
 

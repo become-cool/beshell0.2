@@ -165,7 +165,7 @@ export class Obj extends EventEmitter {
         Module._lv_obj_set_coord_y(this.ptr, val)
     }
     public setCoords(x:number,y:number) {
-        Module._lv_obj_set_coords(this.ptr, x, y)
+        Module._lv_obj_set_coords_redefine(this.ptr, x, y)
     }
     public coordX() {
         return Module._lv_obj_get_coord_x(this.ptr)
@@ -413,11 +413,11 @@ export class Obj extends EventEmitter {
     public readjustScroll(anim_en:string): void {
         Module._lv_obj_readjust_scroll(this.ptr, constMapping.ANIM_ENABLE.value(anim_en))
     }
-    public addStyle(style:any, selector:any): void {
-        Module._lv_obj_add_style(this.ptr, style, selector)
+    public addStyle(style:Style, selector:any): void {
+        Module._lv_obj_add_style(this.ptr, style.ptr, selector)
     }
-    public removeStyle(style:any, selector:any): void {
-        Module._lv_obj_remove_style(this.ptr, style, selector)
+    public removeStyle(style:Style, selector:any): void {
+        Module._lv_obj_remove_style(this.ptr, style.ptr, selector)
     }
     public removeStyleAll(): void {
         Module._lv_obj_remove_style_all(this.ptr)

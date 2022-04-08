@@ -22,7 +22,8 @@ const mapCTypeAlias = {
     'struct _lv_obj_t': 'Obj' ,
     'lv_style_t': 'Style' ,
 }
-const lvObjExtraDef = `
+const lvExtraDef = {
+    Obj: `
     public setCoordX(val:number) {
         Module._lv_obj_set_coord_x(this.ptr, val)
     }
@@ -41,8 +42,21 @@ const lvObjExtraDef = `
     public coords() {
         return [Module._lv_obj_get_coord_x(this.ptr), Module._lv_obj_get_coord_y(this.ptr)]
     }
-`
+` ,
 
+    Disp: `
+    private _sharedKeyboard?: Keyboard
+    public sharedKeyboard(): Keyboard {
+        if(!this._sharedKeyboard){
+            this._sharedKeyboard = new Keyboard(this.actScr())
+        }
+        else {
+            this._sharedKeyboard.setParent(this.actScr())
+        }
+        return this._sharedKeyboard
+    }
+`
+}
 
 const redefineFunctions = {
     lv_obj_set_width: `public setWidth(width:string|number) {
@@ -54,12 +68,21 @@ const redefineFunctions = {
 }
 
 const createWidgetMethods = {
-    'Btn': `
+    Btn: `
     public label: Label
     protected _createWidget(parent: Obj|null) {
         this.ptr = Module._lv_btn_create(parent?parent.ptr:null)
         this.label = new Label(this)
         this.registerPointer()
+    }`,
+    
+    TextArea: `
+    protected _createWidget(parent: Obj|null) {
+        this.ptr = Module._lv_textarea_create(parent?parent.ptr:null)
+        this.registerPointer()
+        this.on("clicked",()=>{
+            this.disp().sharedKeyboard().popup(this)
+        })
     }`
 }
 
@@ -222,11 +245,14 @@ function generateWidgets() {
             this._createWidget(parent)
         }
     }
-    ${lvObjExtraDef}
     `
         }
         else {
             code+= `export class ${wgtDef.className} extends Obj {`
+        }
+
+        if(lvExtraDef[wgtDef.className]) {
+            code+= lvExtraDef[wgtDef.className]
         }
 
         if(createWidgetMethods[wgtDef.className]) {
@@ -277,6 +303,9 @@ function generateStructs() {
         this.ptr=Module._${clzDef.ctypePrefix}create()
     }`
 
+        if(lvExtraDef[clzDef.className]) {
+            code+= lvExtraDef[clzDef.className]
+        }
 
         for(let methodDef of clzDef.methods){
             code+= generateMethod(methodDef, clzDef.ctypePrefix, clzDef.thisType)

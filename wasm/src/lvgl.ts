@@ -177,7 +177,6 @@ export class Obj extends EventEmitter {
         return [Module._lv_obj_get_coord_x(this.ptr), Module._lv_obj_get_coord_y(this.ptr)]
     }
 
-    
     protected _createWidget(parent: Obj|null) {
         this.ptr = Module._lv_obj_create(parent?parent.ptr:null)
         this.registerPointer()
@@ -969,6 +968,9 @@ export class TextArea extends Obj {
     protected _createWidget(parent: Obj|null) {
         this.ptr = Module._lv_textarea_create(parent?parent.ptr:null)
         this.registerPointer()
+        this.on("clicked",()=>{
+            this.disp().sharedKeyboard().popup(this)
+        })
     }
     public addText(txt:string): void {
         Module.ccall("lv_textarea_add_text", "number", ["number", "string"], [this.ptr, txt])
@@ -1409,6 +1411,17 @@ export class Disp extends WASMObject {
         super()
         this.ptr=Module._lv_disp_create()
     }
+    private _sharedKeyboard?: Keyboard
+    public sharedKeyboard(): Keyboard {
+        if(!this._sharedKeyboard){
+            this._sharedKeyboard = new Keyboard(this.actScr())
+        }
+        else {
+            this._sharedKeyboard.setParent(this.actScr())
+        }
+        return this._sharedKeyboard
+    }
+
     public driver(): DispDrv {
         return WASMObject.wrap(Module._lv_disp_get_driver(this.ptr), DispDrv)
     }
@@ -2698,16 +2711,6 @@ export class CanvasDispDrv extends DispDrv {
             this.indevData?.setState("released")
         }
 
-        // window.indevDrv = indevDrv
-        // window.disp = disp
-
-
-        // console.log("setup")
-
-        // let btn = new lv.Btn(this.disp.scrAct())
-        // window.btn = btn
-        // window.lab = new lv.Label(btn)
-
         return this.disp
     }
 }
@@ -2716,8 +2719,6 @@ Module.onDispDrvFlush = function(pdrv:number, x1:number, y1:number, x2:number, y
     let width = x2 - x1 + 1
     let height = y2 - y1 + 1
     let datalen = width * height * 2
-
-    // console.log(x1,y1,x2,y2)
 
     const pixels = new Uint8ClampedArray(new ArrayBuffer(width * height * 4))
     for(let i=0;i<datalen;i+=2) {
@@ -2734,7 +2735,6 @@ Module.onDispDrvFlush = function(pdrv:number, x1:number, y1:number, x2:number, y
     const imageData = new ImageData(pixels, width, height);
 
     let drv = WASMObject.wrap(pdrv)
-    // console.log(drv)
     if(drv){
         drv.canvas.getContext("2d").putImageData(imageData, x1, y1);
     }
@@ -3170,14 +3170,14 @@ export class Column extends Obj {
     }
 }
 
-; (Keyboard as any).prototype.popup = function(textarea: Obj, cb:(obj:Obj,event:"ready"|"cancel")=>void|false) {
+; (Keyboard as any).prototype.popup = function(textarea: Obj, cb?:(obj:Obj,event:"ready"|"cancel")=>void|false) {
     if( !this._doneCb ){
         this._doneCb = (event:"ready"|"cancel")=>{
             if(!this._popupCb){
                 this.hide()
                 return
             }
-            if(this._popupCb(this, event)!=false) {
+            if(this._popupCb(this, event)!==false) {
                 this.hide()
             }
             this._popupCb = null
@@ -3276,7 +3276,6 @@ export class Color {
         )
     }
 }
-
 
 export function palette(colorName:string, level=4) {
     let color = Module.ccall("lv_palette_color","number",["string","number"],[colorName,level])

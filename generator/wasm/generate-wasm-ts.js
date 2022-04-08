@@ -69,7 +69,7 @@ const redefineFunctions = {
 
 const createWidgetMethods = {
     Btn: `
-    public label: Label
+    public label?: Label
     protected _createWidget(parent: Obj|null) {
         this.ptr = Module._lv_btn_create(parent?parent.ptr:null)
         this.label = new Label(this)

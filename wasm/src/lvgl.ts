@@ -636,7 +636,7 @@ export class Bar extends Obj {
     }
 }
 export class Btn extends Obj {
-    public label: Label
+    public label?: Label
     protected _createWidget(parent: Obj|null) {
         this.ptr = Module._lv_btn_create(parent?parent.ptr:null)
         this.label = new Label(this)
@@ -3208,7 +3208,7 @@ export declare interface Obj {
     fromJson (json: any, refs?: any): any ;
 }
 export declare interface Keyboard {
-    popup(textarea: Obj, cb:(obj:Obj,event:"ready"|"cancel")=>void|false):void ;
+    popup(textarea: Obj, cb?:(obj:Obj,event:"ready"|"cancel")=>void|false):void ;
 }
 
 export class Color {

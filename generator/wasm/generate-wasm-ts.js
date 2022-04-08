@@ -53,6 +53,16 @@ const redefineFunctions = {
     }` ,
 }
 
+const createWidgetMethods = {
+    'Btn': `
+    public label: Label
+    protected _createWidget(parent: Obj|null) {
+        this.ptr = Module._lv_btn_create(parent?parent.ptr:null)
+        this.label = new Label(this)
+        this.registerPointer()
+    }`
+}
+
 // 转换为驼峰命令风格，去掉前导get
 function transMethodName(cfuncName, ctypePrefix) {
     let jsmethod = cfuncName.substr(ctypePrefix.length)
@@ -199,10 +209,10 @@ function generateWidgets() {
     constructor(parent: Obj|null, ptr=0) {
         super()
         this.on("#EVENT.ADD#", (name:string)=>{
-            Module._lv_obj_enable_event(this.ptr,constMapping.EVENT_CODE.value(name))
+            try{ Module._lv_obj_enable_event(this.ptr,constMapping.EVENT_CODE.value(name)) }catch(e){}
         })
         this.on("#EVENT.CLEAR#", (name:string)=>{
-            Module._lv_obj_disable_event(this.ptr,constMapping.EVENT_CODE.value(name))
+            try{ Module._lv_obj_disable_event(this.ptr,constMapping.EVENT_CODE.value(name)) }catch(e){}
         })
         if(ptr) {
             this.ptr = ptr
@@ -219,11 +229,17 @@ function generateWidgets() {
             code+= `export class ${wgtDef.className} extends Obj {`
         }
 
-        code+= `
+        if(createWidgetMethods[wgtDef.className]) {
+            code+= createWidgetMethods[wgtDef.className]
+        }
+        else {
+            code+= `
     protected _createWidget(parent: Obj|null) {
         this.ptr = Module._${wgtDef.typeName}_create(parent?parent.ptr:null)
         this.registerPointer()
     }`
+
+        }
         // methods 
         let ctypePrefix = wgtDef.typeName + '_'
         for(let cfuncName in wgtDef.methods) {

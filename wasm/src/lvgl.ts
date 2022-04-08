@@ -144,10 +144,10 @@ export class Obj extends EventEmitter {
     constructor(parent: Obj|null, ptr=0) {
         super()
         this.on("#EVENT.ADD#", (name:string)=>{
-            Module._lv_obj_enable_event(this.ptr,constMapping.EVENT_CODE.value(name))
+            try{ Module._lv_obj_enable_event(this.ptr,constMapping.EVENT_CODE.value(name)) }catch(e){}
         })
         this.on("#EVENT.CLEAR#", (name:string)=>{
-            Module._lv_obj_disable_event(this.ptr,constMapping.EVENT_CODE.value(name))
+            try{ Module._lv_obj_disable_event(this.ptr,constMapping.EVENT_CODE.value(name)) }catch(e){}
         })
         if(ptr) {
             this.ptr = ptr
@@ -637,8 +637,10 @@ export class Bar extends Obj {
     }
 }
 export class Btn extends Obj {
+    public label: Label
     protected _createWidget(parent: Obj|null) {
         this.ptr = Module._lv_btn_create(parent?parent.ptr:null)
+        this.label = new Label(this)
         this.registerPointer()
     }
 }
@@ -2568,6 +2570,15 @@ export declare interface IndevData {
     Module._lv_indev_data_set_point_y(this.ptr,y)
 }
 
+
+export declare interface IndevDrv {
+    tick(): void ;
+}
+; (IndevDrv as any).prototype.tick = function() {
+    Module._lv_indev_drv_tick(this.ptr)
+}
+
+
 export declare interface Obj {
     show(): void ;
     hide(): void ;
@@ -2635,6 +2646,7 @@ export function init() {
 export class CanvasDispDrv extends DispDrv {
     constructor(private canvas: HTMLCanvasElement, private colorDepth = 2) {
         super()
+        this.setAntialiasing(true)
         this.registerPointer()
     }
 
@@ -2756,22 +2768,7 @@ export class Draggable {
     constructor(private target: Obj) {
         target.addFlag("clickable")
         // start
-        target.on("pressed", ()=>{
-            if(!this.isEnabled || this.isDragging) {
-                return
-            }
-            this.indevData = (target.disp().driver() as CanvasDispDrv).indevData
-            if(!this.indevData) {
-                return
-            }
-            let [x,y] = target.coords()
-            this.ox = x - this.indevData.x()
-            this.oy = y - this.indevData.y()
-            if(this.cbStart && this.cbStart()===false) {
-                return
-            }
-            this.isDragging = true
-        })
+        target.on("pressed", ()=> this.start())
         // dragging
         target.on("pressing", (e:any)=>{
             if(!this.isEnabled || !this.isDragging || !this.indevData) {
@@ -2796,6 +2793,23 @@ export class Draggable {
             this.cbStop && this.cbStop(false)
             this.isDragging = false
         })
+    }
+
+    start() {
+        if(!this.isEnabled || this.isDragging) {
+            return
+        }
+        this.indevData = (this.target.disp().driver() as CanvasDispDrv).indevData
+        if(!this.indevData) {
+            return
+        }
+        let [x,y] = this.target.coords()
+        this.ox = x - this.indevData.x()
+        this.oy = y - this.indevData.y()
+        if(this.cbStart && this.cbStart()===false) {
+            return
+        }
+        this.isDragging = true
     }
 
     private isEnabled = true
@@ -3138,7 +3152,7 @@ export class CleanObj extends Obj {
     }
 }
 
-class Row extends Obj {
+export class Row extends Obj {
     constructor(parent: Obj|null, ptr=0) {
         super(parent,ptr)
         this.asRow()
@@ -3147,7 +3161,7 @@ class Row extends Obj {
     }
 }
 
-class Column extends Obj {
+export class Column extends Obj {
     constructor(parent: Obj|null, ptr=0) {
         super(parent,ptr)
         this.asColumn()

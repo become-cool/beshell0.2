@@ -59,3 +59,8 @@ EMSCRIPTEN_KEEPALIVE lv_coord_t lv_obj_get_coord_y(lv_obj_t * obj) {
     return obj->coords.y1 ;
 }
 
+
+EMSCRIPTEN_KEEPALIVE void lv_indev_drv_tick(lv_indev_drv_t * indev_drv) {
+    lv_indev_read_timer_cb(indev_drv->read_timer) ;
+}
+

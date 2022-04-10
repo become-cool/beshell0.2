@@ -45,15 +45,15 @@ const lvExtraDef = {
 ` ,
 
     Disp: `
-    private _sharedKeyboard?: Keyboard
-    public sharedKeyboard(): Keyboard {
-        if(!this._sharedKeyboard){
-            this._sharedKeyboard = new Keyboard(this.actScr())
+    public sharedKeyboard?: Keyboard
+    public popupSharedKeyboard(txtarea:TextArea) {
+        if(!this.sharedKeyboard){
+            this.sharedKeyboard = new Keyboard(this.actScr())
         }
         else {
-            this._sharedKeyboard.setParent(this.actScr())
+            this.sharedKeyboard.setParent(this.actScr())
         }
-        return this._sharedKeyboard
+        this.sharedKeyboard.popup(txtarea)
     }
 `
 }
@@ -70,18 +70,42 @@ const redefineFunctions = {
 const createWidgetMethods = {
     Btn: `
     public label?: Label
+    constructor(parent: Obj|null, ptr=0) {
+        super(parent,ptr)
+        if(ptr==0) {
+            this.label = new Label(this)
+            this.label.setHeight(-1)
+            this.label.setWidth("100%")
+            this.label.setStyle("text-align","center")
+            this.label.align("center",0,0)
+        }
+    }
     protected _createWidget(parent: Obj|null) {
         this.ptr = Module._lv_btn_create(parent?parent.ptr:null)
-        this.label = new Label(this)
+        this.setWidth(80)
+        this.setHeight(20)
         this.registerPointer()
-    }`,
+    }
+    text() {
+        return this.label?.text()
+    }
+    setText(text: string) {
+        this.label?.setText(text)
+    }
+    // font() {
+    //     return this.label?.font()
+    // }
+    // setFont(font: string) {
+    //     this.label?.setFont(font)
+    // }
+    `,
     
     TextArea: `
     protected _createWidget(parent: Obj|null) {
         this.ptr = Module._lv_textarea_create(parent?parent.ptr:null)
         this.registerPointer()
         this.on("clicked",()=>{
-            this.disp().sharedKeyboard().popup(this)
+            this.disp().popupSharedKeyboard(this)
         })
     }`
 }

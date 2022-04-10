@@ -637,11 +637,35 @@ export class Bar extends Obj {
 }
 export class Btn extends Obj {
     public label?: Label
+    constructor(parent: Obj|null, ptr=0) {
+        super(parent,ptr)
+        if(ptr==0) {
+            this.label = new Label(this)
+            this.label.setHeight(-1)
+            this.label.setWidth("100%")
+            this.label.setStyle("text-align","center")
+            this.label.align("center",0,0)
+        }
+    }
     protected _createWidget(parent: Obj|null) {
         this.ptr = Module._lv_btn_create(parent?parent.ptr:null)
-        this.label = new Label(this)
+        this.setWidth(80)
+        this.setHeight(20)
         this.registerPointer()
     }
+    text() {
+        return this.label?.text()
+    }
+    setText(text: string) {
+        this.label?.setText(text)
+    }
+    // font() {
+    //     return this.label?.font()
+    // }
+    // setFont(font: string) {
+    //     this.label?.setFont(font)
+    // }
+    
 }
 export class BtnMatrix extends Obj {
     protected _createWidget(parent: Obj|null) {
@@ -969,7 +993,7 @@ export class TextArea extends Obj {
         this.ptr = Module._lv_textarea_create(parent?parent.ptr:null)
         this.registerPointer()
         this.on("clicked",()=>{
-            this.disp().sharedKeyboard().popup(this)
+            this.disp().popupSharedKeyboard(this)
         })
     }
     public addText(txt:string): void {
@@ -1411,15 +1435,15 @@ export class Disp extends WASMObject {
         super()
         this.ptr=Module._lv_disp_create()
     }
-    private _sharedKeyboard?: Keyboard
-    public sharedKeyboard(): Keyboard {
-        if(!this._sharedKeyboard){
-            this._sharedKeyboard = new Keyboard(this.actScr())
+    public sharedKeyboard?: Keyboard
+    public popupSharedKeyboard(txtarea:TextArea) {
+        if(!this.sharedKeyboard){
+            this.sharedKeyboard = new Keyboard(this.actScr())
         }
         else {
-            this._sharedKeyboard.setParent(this.actScr())
+            this.sharedKeyboard.setParent(this.actScr())
         }
-        return this._sharedKeyboard
+        this.sharedKeyboard.popup(txtarea)
     }
 
     public driver(): DispDrv {
@@ -2592,11 +2616,6 @@ export declare interface IndevDrv {
 }
 
 
-export declare interface Obj {
-    show(): void ;
-    hide(): void ;
-    toggle(): void ;
-}
 ; (Obj as any).prototype.show = function show() {
     this.clearFlag("hidden")
 }
@@ -2990,9 +3009,11 @@ export function fromJson(json: any, parent: Obj, refs?: any): any{
     }
     try{
         if(json instanceof Array) {
+            let lst = []
             for(let childJson of json) {
-                fromJson(childJson, parent, refs)
+                lst.push(fromJson(childJson, parent, refs))
             }
+            return lst
         }
         else {
             let clz = json["class"] || json.clazz || "Obj"
@@ -3012,11 +3033,11 @@ export function fromJson(json: any, parent: Obj, refs?: any): any{
 
             var obj = new clz(parent, ...(json.args || []))
             obj.fromJson(json,refs)
+            return obj
         }
     }catch(e:any){
         console.error(e)
     }
-    return refs
 }
 
 ;(Obj as any).prototype.fromJson = function (json: any, refs?: any): any{
@@ -3027,6 +3048,9 @@ export function fromJson(json: any, parent: Obj, refs?: any): any{
             fromJson(json, this, refs)
         }
         else {
+
+            this.id = json.id || ''
+            this.name = json.name || ''
 
             if(json.clear) {
                 this.removeStyleAll()
@@ -3107,6 +3131,40 @@ export function fromJson(json: any, parent: Obj, refs?: any): any{
     return refs
 }
 
+const arrStyleAsProp = ['x', 'y', 'width', 'height']
+;(Obj as any).prototype.toJson = function (): any {
+    let json: any = {
+        class: this.constructor.name ,
+        id: this.id ,
+        name: this.name ,
+        visible: this.isVisible() ,
+    }
+    let parent: Obj = this.parent()
+    if(parent && parent.id) {
+        json.parent = parent.id
+    }
+    
+    let style = this.localStyle()
+    if(style) {
+        let styleJson:any = {}
+        let props = style.props()
+        for(let propName of props) {
+            if("unknow"==propName) {
+                continue
+            }
+            if( arrStyleAsProp.includes(propName) ) {
+                json[propName] = style.get(propName)
+            }
+            else {
+                styleJson[propName] = style.get(propName)
+            }
+        }
+        if(Object.keys(styleJson).length) {
+            json.style = styleJson
+        }
+    }
+    return json
+}
 
 ;(Obj as any).prototype.asRow = function asRow() {
     this.removeStyleAll()
@@ -3118,24 +3176,6 @@ export function fromJson(json: any, parent: Obj, refs?: any): any{
 }
 
 
-;(Btn as any).prototype.text = function text() {
-    if(!this.label) {
-        return null
-    }
-    return this.label.text()
-}
-;(Btn as any).prototype.setText = function setText(text: string) {
-    if(!this.label) {
-        this.label = new Label(this)
-    }
-    this.label.setText(text)
-}
-;(Btn as any).prototype.setFont = function setFont(font: string) {
-    if(!this.label) {
-        this.label = new Label(this)
-    }
-    this.label.setFont(font)
-}
 
 export class CleanObj extends Obj {
     constructor(parent: Obj|null, ptr=0) {
@@ -3170,7 +3210,7 @@ export class Column extends Obj {
     }
 }
 
-; (Keyboard as any).prototype.popup = function(textarea: Obj, cb?:(obj:Obj,event:"ready"|"cancel")=>void|false) {
+; (Keyboard as any).prototype.popup = function(textarea: TextArea, cb?:(obj:Obj,event:"ready"|"cancel")=>void|false) {
     if( !this._doneCb ){
         this._doneCb = (event:"ready"|"cancel")=>{
             if(!this._popupCb){
@@ -3202,10 +3242,11 @@ export declare interface Obj {
     hide():void ;
     toggle():void ;
     localStyle(): Style|null ;
-    draggable(onstart?:DragStartCB|null, ondragging?:DraggingCB|null, onstop?: DragStopCB|null): void ;
-    setStyle(styleName:string, value: string|number, selector?:number): boolean ;
-    style(styleName:string, selector?:number): string|number ;
+    draggable(onstart?:DragStartCB|null, ondragging?:DraggingCB|null, onstop?: DragStopCB|null): Draggable ;
+    setStyle(styleName:string, value: string|number|Color, selector?:number): boolean ;
+    style(styleName:string, selector?:number): string|number|Color ;
     fromJson (json: any, refs?: any): any ;
+    toJson(): any ;
 }
 export declare interface Keyboard {
     popup(textarea: Obj, cb?:(obj:Obj,event:"ready"|"cancel")=>void|false):void ;

@@ -1,10 +1,10 @@
 #include "module_process.h"
-#include "task_js.h"
+#include "js_main_loop.h"
 #include "beshell.h"
 #include "utils.h"
 #include <string.h>
 
-#include "telnet.h"
+#include "module_telnet.h"
 
 #ifndef SIMULATION
 #include "esp32_perfmon.h"
@@ -144,12 +144,21 @@ JSValue js_process_memory_usage(JSContext *ctx, JSValueConst this_val, int argc,
 #endif
 
     JSValue obj = JS_NewObject(ctx) ;
-    JS_SetPropertyStr(ctx, obj, "heap_total", JS_NewUint32(ctx, heap_total)) ;
-    JS_SetPropertyStr(ctx, obj, "heap_used", JS_NewUint32(ctx, heap_used)) ;
-    JS_SetPropertyStr(ctx, obj, "psram_total", JS_NewUint32(ctx, psram_total)) ;
-    JS_SetPropertyStr(ctx, obj, "psram_used", JS_NewUint32(ctx, psram_used)) ;
-    JS_SetPropertyStr(ctx, obj, "dma_total", JS_NewUint32(ctx, dma_total)) ;
-    JS_SetPropertyStr(ctx, obj, "dma_used", JS_NewUint32(ctx, dma_used)) ;
+
+    JSValue objHeap = JS_NewObject(ctx) ;
+    JS_SetPropertyStr(ctx, obj, "heap", objHeap) ;
+    JS_SetPropertyStr(ctx, objHeap, "total", JS_NewUint32(ctx, heap_total)) ;
+    JS_SetPropertyStr(ctx, objHeap, "used", JS_NewUint32(ctx, heap_used)) ;
+
+    JSValue objPsram = JS_NewObject(ctx) ;
+    JS_SetPropertyStr(ctx, obj, "psram", objPsram) ;
+    JS_SetPropertyStr(ctx, objPsram, "total", JS_NewUint32(ctx, psram_total)) ;
+    JS_SetPropertyStr(ctx, objPsram, "used", JS_NewUint32(ctx, psram_used)) ;
+
+    JSValue objDma = JS_NewObject(ctx) ;
+    JS_SetPropertyStr(ctx, obj, "dma", objDma) ;
+    JS_SetPropertyStr(ctx, objDma, "total", JS_NewUint32(ctx, dma_total)) ;
+    JS_SetPropertyStr(ctx, objDma, "used", JS_NewUint32(ctx, dma_used)) ;
 
     return obj ;
 }

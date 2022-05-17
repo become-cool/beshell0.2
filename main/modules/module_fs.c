@@ -15,6 +15,7 @@
 #include "diskio_wl.h"
 #include "esp_littlefs.h"
 #include "vfs_fat_internal.h"
+#include <esp_heap_caps.h>
 LOG_TAG("fs")
 #endif
 
@@ -273,7 +274,12 @@ JSValue js_fs_read_file_sync(JSContext *ctx, JSValueConst this_val, int argc, JS
         return JS_NewArrayBuffer(ctx, NULL, 0, freeArrayBuffer, NULL, false) ;
     }
 
+#ifndef SIMULATION
+    char * buff = heap_caps_malloc( readlen, MALLOC_CAP_SPIRAM);
+#elif
     char * buff = malloc(readlen) ;
+#endif
+
     if(!buff) {
         free(path) ;
         THROW_EXCEPTION("Failed to malloc buff");

@@ -75,3 +75,16 @@ beconsoled.createAppFolder = function(name, uuid) {
     }
     return path
 }
+beconsoled.usage = function(fs) {
+    let mem = process.memoryUsage()
+    let usage = {
+        cpu0: process.cpuUsage(0) ,
+        cpu1: process.cpuUsage(1) ,
+        mem: Math.round(100*(mem.heap.used+mem.psram.used)/(mem.heap.total+mem.psram.total))
+    }
+    if(fs) {
+        usage.root = beapi.fs.info("/")
+        usage.home = beapi.fs.info("/home")
+    }
+    return usage
+}

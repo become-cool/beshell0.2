@@ -251,8 +251,12 @@ static esp_err_t cam_dma_config(const camera_config_t *config)
     cam_obj->dma_buffer = NULL;
     cam_obj->dma = NULL;
 
-    cam_obj->frames = (cam_frame_t *)heap_caps_calloc(1, cam_obj->frame_cnt * sizeof(cam_frame_t), MALLOC_CAP_DEFAULT);
-    CAM_CHECK(cam_obj->frames != NULL, "frames malloc failed", ESP_FAIL);
+    // cam_obj->frames = (cam_frame_t *) malloc(cam_obj->frame_cnt * sizeof(cam_frame_t)) ; // heap_caps_calloc(1, cam_obj->frame_cnt * sizeof(cam_frame_t), MALLOC_CAP_DEFAULT);
+    cam_obj->frames = (cam_frame_t *) heap_caps_calloc(1, cam_obj->frame_cnt * sizeof(cam_frame_t), MALLOC_CAP_DEFAULT);
+    CAM_CHECK(cam_obj->frames != NULL, "frames malloc failed (%d)", ESP_FAIL);
+    // if(!cam_obj->frames) {
+        // printf("xxxxxxxxx cam_obj->frame_cnt * sizeof(cam_frame_t) %d\n",cam_obj->frame_cnt * sizeof(cam_frame_t)) ;
+    // }
 
     uint8_t dma_align = 0;
     size_t fb_size = cam_obj->fb_size;
@@ -275,14 +279,14 @@ static esp_err_t cam_dma_config(const camera_config_t *config)
         cam_obj->frames[x].dma = NULL;
         cam_obj->frames[x].fb_offset = 0;
         cam_obj->frames[x].en = 0;
-        ESP_LOGI(TAG, "Allocating %d Byte frame buffer in %s", alloc_size, _caps & MALLOC_CAP_SPIRAM ? "PSRAM" : "OnBoard RAM");
+        printf("Allocating %d Byte frame buffer in %s\n", alloc_size, _caps & MALLOC_CAP_SPIRAM ? "PSRAM" : "OnBoard RAM");
         cam_obj->frames[x].fb.buf = (uint8_t *)heap_caps_malloc(alloc_size, _caps);
         CAM_CHECK(cam_obj->frames[x].fb.buf != NULL, "frame buffer malloc failed", ESP_FAIL);
         if (cam_obj->psram_mode) {
             //align PSRAM buffer. TODO: save the offset so proper address can be freed later
             cam_obj->frames[x].fb_offset = dma_align - ((uint32_t)cam_obj->frames[x].fb.buf & (dma_align - 1));
             cam_obj->frames[x].fb.buf += cam_obj->frames[x].fb_offset;
-            ESP_LOGI(TAG, "Frame[%d]: Offset: %u, Addr: 0x%08X", x, cam_obj->frames[x].fb_offset, (uint32_t)cam_obj->frames[x].fb.buf);
+            printf( "Frame[%d]: Offset: %u, Addr: 0x%08X\n", x, cam_obj->frames[x].fb_offset, (uint32_t)cam_obj->frames[x].fb.buf);
             cam_obj->frames[x].dma = allocate_dma_descriptors(cam_obj->dma_node_cnt, cam_obj->dma_node_buffer_size, cam_obj->frames[x].fb.buf);
             CAM_CHECK(cam_obj->frames[x].dma != NULL, "frame dma malloc failed", ESP_FAIL);
         }
@@ -292,7 +296,7 @@ static esp_err_t cam_dma_config(const camera_config_t *config)
     if (!cam_obj->psram_mode) {
         cam_obj->dma_buffer = (uint8_t *)heap_caps_malloc(cam_obj->dma_buffer_size * sizeof(uint8_t), MALLOC_CAP_DMA);
         if(NULL == cam_obj->dma_buffer) {
-            ESP_LOGE(TAG,"%s(%d): DMA buffer %d Byte malloc failed, the current largest free block:%d Byte", __FUNCTION__, __LINE__, 
+            printf("%s(%d): DMA buffer %d Byte malloc failed, the current largest free block:%d Byte\n", __FUNCTION__, __LINE__, 
                      cam_obj->dma_buffer_size, heap_caps_get_largest_free_block(MALLOC_CAP_DMA));
             return ESP_FAIL;
         }
@@ -348,6 +352,10 @@ esp_err_t cam_config(const camera_config_t *config, framesize_t frame_size, uint
 #else
     cam_obj->psram_mode = (config->xclk_freq_hz == 16000000);
 #endif
+
+    // printf("config->xclk_freq_hz = %d\n", config->xclk_freq_hz);
+    // printf("cam_obj->psram_mode = %d\n", cam_obj->psram_mode);
+
     cam_obj->frame_cnt = config->fb_count;
     cam_obj->width = resolution[frame_size].width;
     cam_obj->height = resolution[frame_size].height;

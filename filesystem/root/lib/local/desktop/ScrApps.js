@@ -1,6 +1,8 @@
 const lv = require("lv")
 const AppIcon = require("./AppIcon")
-const NewAppDialog = require("workspace/NewAppDialog")
+try{
+    var NewAppDialog = require("workspace/NewAppDialog")
+}catch(e){}
 
 let selectedAppFolder = null
 
@@ -28,34 +30,53 @@ module.exports = class ScrApps extends lv.Obj {
                 } ,
                 children: [
                     {
-                        class: "Obj" ,
-                        width: 48 ,
-                        height: 48 ,
-                        clear: true ,
-                        ref: "btnNew" ,
-                        children: [
-                            {
-                                class: "Btn" ,
-                                width: 32 ,
-                                height: 32 ,
-                                center: true ,
-                                children: [{
-                                    class: "Label" ,
-                                    text: lv.symbol.plus ,
-                                    center: true ,
-                                }] ,
-    
-                                clicked: ()=>{
-                                    try{
-                                        this.dlgNewApp().start()
-                                    }catch(e){
-                                        console.log(e)
-                                        console.log(e.stack)
-                                    }
-                                }
-                            }
-                        ]
+                        class:AppIcon ,
+                        "text": "设置" ,
+                        "src": "/lib/icon/32/setting.png"
+                    } , 
+                    {
+                        class:AppIcon ,
+                        "text": "文件" ,
+                        "src": "/lib/icon/32/folder.png"
                     }
+                    , {
+                        class:AppIcon ,
+                        "text": "音乐" ,
+                        "src": "/lib/icon/32/music.png"
+                    }
+                    , {
+                        class:AppIcon ,
+                        "text": "游戏" ,
+                        "src": "/lib/icon/32/game.png"
+                    } ,
+                    // {
+                    //     class: "Obj" ,
+                    //     width: 48 ,
+                    //     height: 48 ,
+                    //     clear: true ,
+                    //     ref: "btnNew" ,
+                    //     children: [
+                    //         {
+                    //             class: "Btn" ,
+                    //             width: 32 ,
+                    //             height: 32 ,
+                    //             center: true ,
+                    //             children: [{
+                    //                 class: "Label" ,
+                    //                 text: lv.symbol.plus ,
+                    //                 center: true ,
+                    //             }] ,
+    
+                    //             clicked: ()=>{
+                    //                 try{
+                    //                     this.dlgNewApp().start()
+                    //                 }catch(e){
+                    //                     console.log(e)
+                    //                 }
+                    //             }
+                    //         }
+                    //     ]
+                    // }
                 ]
             }],
         })
@@ -64,7 +85,7 @@ module.exports = class ScrApps extends lv.Obj {
     }
 
     dlgNewApp() {
-        if(!this._dlgNewApp) {
+        if(NewAppDialog && !this._dlgNewApp) {
             this._dlgNewApp = new NewAppDialog(lv.active())
             this._dlgNewApp.on("new-app",(appPath, startWorkspace)=>{
                 this.loadAppIcon(appPath)

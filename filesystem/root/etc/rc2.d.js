@@ -6,6 +6,5 @@ try{
     console.log('BeShell is ready.')
 }
 catch(e) {
-    console.log(e.message)
-    console.log(e.stack)
+    console.log(e)
 }

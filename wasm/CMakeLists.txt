@@ -12,7 +12,7 @@ include_directories(./src)
 file(GLOB_RECURSE INCLUDES "./src/*.h")
 
 file(GLOB_RECURSE LIB_SOURCES "../components/lvgl/*.c")
-file(GLOB MY_SOURCES "./src/*.c")
+file(GLOB MY_SOURCES "./src/*.c" "../main/modules/lvgl/font/font_msyh.c")
 
 set(SOURCES ${LIB_SOURCES} ${MY_SOURCES})
 

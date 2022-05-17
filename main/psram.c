@@ -69,29 +69,61 @@ void psram_init() {
 }
 
 
+void echo_DMA(const char * where) {
+#ifndef SIMULATION
+    printf( "%s [Free DMA: %d]\n", where, heap_caps_get_free_size(MALLOC_CAP_DMA) ) ;
+#endif
+}
 
-unsigned int getHeapSize(void)
-{
+
+unsigned int getDMATotal(void) {
+    multi_heap_info_t info;
+    heap_caps_get_info(&info, MALLOC_CAP_DMA);
+    return info.total_free_bytes + info.total_allocated_bytes;
+}
+unsigned int getDMAUsed(void) {
+    multi_heap_info_t info;
+    heap_caps_get_info(&info, MALLOC_CAP_DMA);
+    return info.total_allocated_bytes;
+}
+
+unsigned int getDMAFree(void) {
+    return heap_caps_get_free_size(MALLOC_CAP_DMA);
+}
+
+
+
+unsigned int getHeapTotal(void) {
     multi_heap_info_t info;
     heap_caps_get_info(&info, MALLOC_CAP_INTERNAL);
     return info.total_free_bytes + info.total_allocated_bytes;
 }
 
-unsigned int getFreeHeap(void)
-{
+unsigned int getHeapUsed(void) {
+    multi_heap_info_t info;
+    heap_caps_get_info(&info, MALLOC_CAP_INTERNAL);
+    return info.total_allocated_bytes;
+}
+
+unsigned int getHeapFree(void) {
     return heap_caps_get_free_size(MALLOC_CAP_INTERNAL);
 }
 
 
-unsigned int getPsramSize(void)
-{
+unsigned int getPsramTotal(void) {
     multi_heap_info_t info;
     heap_caps_get_info(&info, MALLOC_CAP_SPIRAM);
     return info.total_free_bytes + info.total_allocated_bytes;
 }
 
-unsigned int getFreePsram(void)
-{
+
+unsigned int getPsramUsed(void) {
+    multi_heap_info_t info;
+    heap_caps_get_info(&info, MALLOC_CAP_SPIRAM);
+    return info.total_allocated_bytes;
+}
+
+unsigned int getPsramFree(void) {
     return heap_caps_get_free_size(MALLOC_CAP_SPIRAM);
 }
 

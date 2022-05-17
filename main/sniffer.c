@@ -8,7 +8,7 @@
 #include "logging.h"
 #include <sys/errno.h>
 
-#include "telnet.h"
+#include "module_telnet.h"
 #include "lwip/err.h"
 #include "lwip/sockets.h"
 #include "lwip/sys.h"

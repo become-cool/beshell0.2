@@ -1,7 +1,5 @@
 #include "utils.h"
 #include "module_serial.h"
-#include "driver/spi_master.h"
-#include "driver/i2c.h"
 #include <string.h>
 
 #define DMA_CHAN        2
@@ -386,36 +384,6 @@ const unsigned char dmpcfgupddata[239] = {
     0x00, 0x60, 0x04, 0x00, 0x40, 0x00, 0x00};
 
 
-#define I2C_IS_SETUP(busnum) (_i2c_bus_setup & (1<<(busnum)))
-
-#define ARGV_I2C_BUSNUM(i, var)                     \
-    ARGV_TO_UINT8(i, var)                           \
-    if(var<0 || var>1) {                            \
-        THROW_EXCEPTION("Bus num must be 0-1")      \
-    }
-
-#define I2C_BEGIN(addr, act)                                        \
-	i2c_cmd_handle_t cmd = i2c_cmd_link_create();                   \
-	i2c_master_start(cmd);                                          \
-    i2c_master_write_byte(cmd, (addr << 1) | I2C_MASTER_##act, true);
-    
-#define I2C_BEGIN_READ(addr)    I2C_BEGIN(addr, READ)
-#define I2C_BEGIN_WRITE(addr)   I2C_BEGIN(addr, WRITE)
-
-#define I2C_RECV(buffer, len)                                       \
-    if(len>1) {                                                     \
-	    i2c_master_read(cmd, buffer, len-1, I2C_MASTER_ACK);        \
-	    i2c_master_read(cmd, (buffer)+len-1, 1, I2C_MASTER_NACK);   \
-    }                                                               \
-    else {                                                          \
-	    i2c_master_read(cmd, buffer, 1, I2C_MASTER_NACK);           \
-    }
-
-#define I2C_COMMIT(bus)                                                     \
-	i2c_master_stop(cmd);                                                   \
-	esp_err_t res=i2c_master_cmd_begin(bus, cmd, 10/portTICK_PERIOD_MS) ;   \
-	i2c_cmd_link_delete(cmd);
-
 
 
 esp_err_t i2c_send(uint8_t bus, uint8_t addr, uint8_t * data, size_t len) {
@@ -637,6 +605,27 @@ JSValue js_i2c_bus_send(JSContext *ctx, JSValueConst this_val, int argc, JSValue
     return res==ESP_OK? JS_TRUE: JS_FALSE ;
 }
 
+
+static JSValue _i2c_bus_recv(JSContext *ctx, int argc, JSValueConst *argv, unsigned char * buffer, size_t readlen){
+
+    ARGV_I2C_BUSNUM(0, busnum)
+    if(!I2C_IS_SETUP(busnum)) {
+        THROW_EXCEPTION("i2c bus has not setup") ;
+    }
+
+    ARGV_TO_UINT8(1, addr)
+
+	I2C_BEGIN_READ(addr)
+    I2C_RECV(buffer,readlen)
+	I2C_COMMIT(busnum)
+
+    if(ESP_OK!=res) {
+        THROW_EXCEPTION("i2c recv failed") ;
+    }
+
+    return JS_TRUE ;
+}
+
 /**
  * i2c bus num 0-1
  * addr
@@ -645,33 +634,35 @@ JSValue js_i2c_bus_send(JSContext *ctx, JSValueConst this_val, int argc, JSValue
 JSValue js_i2c_bus_recv(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
 
     CHECK_ARGC(3)
-    ARGV_I2C_BUSNUM(0, busnum)
-    if(!I2C_IS_SETUP(busnum))
-        return JS_FALSE ;
-
-    ARGV_TO_UINT8(1, addr)
     ARGV_TO_UINT8(2, readlen)
 
-    // JS_DupValue(ctx, data) ;
     if(readlen<1) {
         return JS_NULL ;
     }
-
     uint8_t * buffer = malloc(readlen) ;
     if(!buffer) {
         THROW_EXCEPTION("malloc() failed, out of memory?") ;
     }
     
-    JSValue data = JS_NewArrayBuffer(ctx, buffer, readlen, freeArrayBuffer, NULL, false) ;
-
-	I2C_BEGIN_READ(addr)
-    I2C_RECV(buffer,readlen)
-	I2C_COMMIT(busnum)
-
-    if(ESP_OK!=res) {
-        return JS_NULL ;
+    if(_i2c_bus_recv(ctx,argc,argv,buffer,readlen)==JS_EXCEPTION) {
+        return JS_EXCEPTION ;
     }
-    return data ;
+    
+    return JS_NewArrayBuffer(ctx, buffer, readlen, freeArrayBuffer, NULL, false) ;
+}
+
+
+/**
+ * i2c bus num 0-1
+ * addr
+ */
+JSValue js_i2c_bus_recv_byte(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    CHECK_ARGC(2)
+    unsigned char byte = 0 ;
+    if(_i2c_bus_recv(ctx,argc,argv,&byte,1)==JS_EXCEPTION) {
+        return JS_EXCEPTION ;
+    }
+    return JS_NewUint32(ctx,byte) ;
 }
 
 /**
@@ -708,18 +699,6 @@ JSValue js_i2c_bus_read(JSContext *ctx, JSValueConst this_val, int argc, JSValue
 
     return data ;
 }
-
-#define I2C_READ_INT(var, type, size)                                   \
-    CHECK_ARGC(3)                                                       \
-    ARGV_I2C_BUSNUM(0, busnum)                                          \
-    if(!I2C_IS_SETUP(busnum))                                           \
-        return JS_NULL ;                                                \
-    ARGV_TO_UINT8(1, addr)                                              \
-    ARGV_TO_UINT8(2, reg)                                               \
-    type var = 0 ;                                                      \
-    if( i2c_read(busnum, addr, reg, (uint8_t*)&var, size)!=ESP_OK ) {   \
-        return JS_NULL ;                                                \
-    }
 
 
 /**
@@ -819,6 +798,7 @@ void be_module_serial_require(JSContext *ctx) {
     JS_SetPropertyStr(ctx, i2c, "ping", JS_NewCFunction(ctx, js_i2c_bus_ping, "ping", 1));
     JS_SetPropertyStr(ctx, i2c, "send", JS_NewCFunction(ctx, js_i2c_bus_send, "send", 1));
     JS_SetPropertyStr(ctx, i2c, "recv", JS_NewCFunction(ctx, js_i2c_bus_recv, "recv", 1));
+    JS_SetPropertyStr(ctx, i2c, "recvByte", JS_NewCFunction(ctx, js_i2c_bus_recv_byte, "recvByte", 1));
     JS_SetPropertyStr(ctx, i2c, "read", JS_NewCFunction(ctx, js_i2c_bus_read, "read", 1));
     JS_SetPropertyStr(ctx, i2c, "readInt8", JS_NewCFunction(ctx, js_i2c_bus_read_int8, "readInt8", 1));
     JS_SetPropertyStr(ctx, i2c, "readInt16", JS_NewCFunction(ctx, js_i2c_bus_read_int16, "readInt16", 1));
@@ -834,8 +814,6 @@ void be_module_serial_require(JSContext *ctx) {
     JS_FreeValue(ctx, beapi);
 }
 
-#define FREE_BUS_SPI(busnum)    if(_spi_bus_setup&(1<<(busnum))){ dn(busnum); spi_bus_free(busnum); }
-#define FREE_BUS_I2C(busnum)    if(_i2c_bus_setup&(1<<(busnum))){ dn(busnum); i2c_driver_delete(busnum); }
 void be_module_serial_reset(JSContext *ctx) {
     // 回收 SPI 资源
     for(uint8_t h=0; h<8; h++) {

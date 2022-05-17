@@ -10,6 +10,7 @@
 
 #ifndef SIMULATION
 // #include "touch_driver.h"
+#include "psram.h"
 #include "xpt2046.h"
 #include "tp_spi.h"
 #include "disp_st77xx.h"
@@ -20,11 +21,9 @@
 #else
 #endif
 
-typedef struct {
-    void * spi_dev ;
-    JSValue jsobj ;
-} disp_drv_data_t ;
 
+#define DISP_BUFF_LINES 20
+#define DISP_BUFF_AUX_SIZE 16        // 附加数据，记录 area(x1,y1,x2,y2)，放在 DMA_BUFF 前面
 
 void free_disp_drv(JSContext * ctx, lv_disp_t * disp) {
     printf("free_disp_drv()") ;
@@ -35,6 +34,16 @@ void free_disp_drv(JSContext * ctx, lv_disp_t * disp) {
 
         if(disp->driver->user_data) {
             disp_drv_data_t * drvdata = (disp_drv_data_t*)disp->driver->user_data ;
+            if(drvdata->buff1) {
+                printf("free disp buff1\n") ;
+                free(drvdata->buff1) ;
+                drvdata->buff1 = NULL ;
+            }
+            if(drvdata->buff2) {
+                printf("free disp buff2\n") ;
+                free(drvdata->buff2) ;
+                drvdata->buff2 = NULL ;
+            }
 #ifndef SIMULATION
             st77xx_dev_t * dev = drvdata->spi_dev ;
             if(dev) {
@@ -54,10 +63,6 @@ void free_disp_drv(JSContext * ctx, lv_disp_t * disp) {
         }
     }
 }
-
-
-uint8_t * disp_buff1 = NULL ;
-uint8_t * disp_buff2 = NULL ;
 
 lv_indev_drv_t indev_drv ;
 lv_indev_t * indev = NULL ;
@@ -192,31 +197,11 @@ typedef struct {
 draw_param_t draw_param ;
 
 bool lock_spi_transfering = false ;
-uint8_t * dma_buff = NULL ;
 
 QueueHandle_t disp_queue;
 
 
 spi_device_handle_t device_touch = NULL;
-
-// static void task_disp(void *arg) {
-
-//     draw_param_t * param ;
-    
-//     while(1) {
-// 		xQueueReceive(disp_queue, &param, portMAX_DELAY);
-
-//         // printf("draw %d,%d - %d,%d \n", param->x1,param->y1, param->x2, param->y2) ;
-
-//         memcpy(dma_buff, param->buff, DMA_BUFF_LEN) ;
-        
-//         lock_spi_transfering = true ;
-//         st77xx_draw_rect(param->disp->user_data, param->x1,param->y1, param->x2, param->y2, dma_buff) ;
-//         lock_spi_transfering = false ;
-
-//         lv_disp_flush_ready(param->disp) ;
-// 	}
-// }
 
 void disp_st7789_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color_p) {
     if(!disp->user_data) {
@@ -268,11 +253,11 @@ void input_driver_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
 }
 #endif
 
-static JSClassID js_lvgl_disp_class_id ;
+static JSClassID js_lv_disp_class_id ;
 
 static void js_lvgl_disp_finalizer(JSRuntime *rt, JSValue val) {
     printf("js_lvgl_disp_finalizer\n") ;
-    lv_disp_t * disp = (lv_disp_t *)JS_GetOpaque(val, js_lvgl_disp_class_id) ;
+    lv_disp_t * disp = (lv_disp_t *)JS_GetOpaque(val, js_lv_disp_class_id) ;
     if(!disp) {
         printf("disp is NULL\n") ;
         return ;
@@ -288,7 +273,7 @@ static JSClassDef js_lvgl_disp_class = {
 
 
 #define THIS_DISP                                                                               \
-    lv_disp_t * thisdisp = JS_GetOpaque(this_val, js_lvgl_disp_class_id);                       \
+    lv_disp_t * thisdisp = JS_GetOpaque(this_val, js_lv_disp_class_id);                       \
     if(!thisdisp) {                                                                             \
         THROW_EXCEPTION("must be called as a lvgl.Display method")  \
     }
@@ -297,20 +282,7 @@ static JSClassDef js_lvgl_disp_class = {
 static JSValue js_lvgl_disp_active_screen(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     THIS_DISP
     lv_obj_t * scr = lv_disp_get_scr_act(thisdisp) ;
-    if(!scr) {
-        return JS_NULL ;
-    }
-
-    JSValue jsobj = JS_UNDEFINED ;
-    void * objptr = lv_obj_get_user_data(scr) ;
-    if(objptr) {
-        jsobj = JS_MKPTR(JS_TAG_OBJECT, objptr) ;
-    }
-    else {
-        jsobj = js_lv_obj_wrapper(ctx,scr,JS_UNDEFINED,lv_obj_js_class_id()) ;
-    }
-
-    return jsobj ;
+    return js_lv_obj_wrapper(ctx,scr,JS_UNDEFINED,lv_obj_js_class_id()) ;
 }
 
 static JSValue js_lvgl_disp_get_screens(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
@@ -337,7 +309,6 @@ static JSValue js_lvgl_disp_layer(JSContext *ctx, JSValueConst this_val, int arg
     }
     JSValue jslayer = js_lv_obj_wrapper(ctx, layer, JS_UNDEFINED, 0) ;
     return jslayer ;
-    // return js_lv_obj_wrapper(ctx, layer, JS_UNDEFINED, lv_obj_js_class_id()) ;
 }
 
 
@@ -363,6 +334,22 @@ static const JSCFunctionListEntry js_display_proto_funcs[] = {
 // }
 
 
+
+static void * malloc_buffer(size_t size) {
+#ifndef SIMULATION
+    // echo_DMA("before malloc_buffer()") ;
+    void * buff = heap_caps_malloc( size + DISP_BUFF_AUX_SIZE, MALLOC_CAP_DMA);
+    if(!buff) {
+        printf("heap_caps_malloc(%d, MALLOC_CAP_DMA) failed, try malloc().\n", size+DISP_BUFF_AUX_SIZE) ;
+        buff = malloc(size + DISP_BUFF_AUX_SIZE) ;
+    }
+    // echo_DMA("after malloc_buffer()") ;
+#else
+    void * buff = malloc(size + DISP_BUFF_AUX_SIZE) ;
+#endif
+    return buff ;
+}
+
 /**
  * 
  * @param type "ST7789"
@@ -370,12 +357,6 @@ static const JSCFunctionListEntry js_display_proto_funcs[] = {
  * @return JSValue 
  */
 JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-
-    printf("js_lvgl_create_display()\n") ;
-
-    if(!disp_buff1) {
-        THROW_EXCEPTION("DMA Buff is NULL")
-    }
 
     CHECK_ARGC(2)
 
@@ -390,18 +371,23 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
     GET_INT_PROP(argv[1], "width", width, excp)
     GET_INT_PROP(argv[1], "height", height, excp)
     
+    disp_drv_data_t * dvrdata = malloc(sizeof(disp_drv_data_t)) ;
+
     // 创建缓冲区
-    size_t buflen = (DMA_BUFF_LEN / width) * width ;
+    size_t bufsize = width * DISP_BUFF_LINES ;
+    dvrdata->buff1 = malloc_buffer(bufsize*2) ;
+    dvrdata->buff2 = malloc_buffer(bufsize*2) ;
+
     drawbuf = malloc(sizeof(lv_disp_draw_buf_t)) ;
     if(!drawbuf){
         JS_ThrowReferenceError(ctx, "out of memory?");
         goto excp ;
     }
-    if(disp_buff2) {
-        lv_disp_draw_buf_init(drawbuf, disp_buff1+DMA_BUFF_AUX_SIZE, disp_buff2+DMA_BUFF_AUX_SIZE, buflen/2);
+    if(dvrdata->buff2) {
+        lv_disp_draw_buf_init(drawbuf, dvrdata->buff1+DISP_BUFF_AUX_SIZE, dvrdata->buff2+DISP_BUFF_AUX_SIZE, bufsize);
     }
     else {
-        lv_disp_draw_buf_init(drawbuf, disp_buff1+DMA_BUFF_AUX_SIZE, NULL, buflen/2);
+        lv_disp_draw_buf_init(drawbuf, dvrdata->buff1+DISP_BUFF_AUX_SIZE, NULL, bufsize);
     }
 
     // 创建设备驱动对象
@@ -415,7 +401,6 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
     dispdrv->hor_res = width;
     dispdrv->ver_res = height;
 
-    disp_drv_data_t * dvrdata = malloc(sizeof(disp_drv_data_t)) ;
     dispdrv->user_data = dvrdata ;
 
     if( strcmp(typestr, "ST7789")==0 ) {
@@ -454,7 +439,7 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
 
     lv_disp_t * disp = lv_disp_drv_register(dispdrv); 
     
-    JSValue jsdisp = JS_NewObjectClass(ctx, js_lvgl_disp_class_id) ;
+    JSValue jsdisp = JS_NewObjectClass(ctx, js_lv_disp_class_id) ;
     JS_SetPropertyStr(ctx, jsdisp, "type", argv[0]) ;
     // JS_SetPropertyStr(ctx, jsdisp, "options", argv[1]) ;
     JS_SetOpaque(jsdisp, disp);
@@ -463,7 +448,7 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
 
     // 触摸设备
 #ifndef SIMULATION
-    tp_spi_add_device(1, 18, &device_touch);
+    tp_spi_add_device(1, 21, &device_touch);
     xpt2046_init();
 #endif
 
@@ -496,24 +481,9 @@ excp:
     return JS_EXCEPTION ;
 }
 
-void be_module_lvgl_malloc_buffer() {
-#ifndef SIMULATION
-    dma_buff = heap_caps_malloc( DMA_BUFF_LEN + DMA_BUFF_AUX_SIZE, MALLOC_CAP_DMA);
-    if(!dma_buff) {
-        printf("heap_caps_malloc(%d) faild for display buff.\n", DMA_BUFF_LEN) ;
-    }
-    disp_buff1 = dma_buff ;
-    disp_buff2 = NULL ;
-#else
-    disp_buff1 = malloc(DMA_BUFF_LEN + DMA_BUFF_AUX_SIZE) ;
-    disp_buff2 = malloc(DMA_BUFF_LEN + DMA_BUFF_AUX_SIZE) ;
-#endif
-}
-
-
 void be_lv_display_init() {
     // class id 全局, 分配一次
-    JS_NewClassID(&js_lvgl_disp_class_id);
+    JS_NewClassID(&js_lv_disp_class_id);
 
 #ifndef SIMULATION
     // vlgl_js_display_ws_init() ;
@@ -557,10 +527,10 @@ void be_lv_display_require(JSContext *ctx, JSValue lvgl) {
     js_indev_global_cb_pressing = JS_UNDEFINED;
     
     // lvgl.Display
-    JS_NewClass(JS_GetRuntime(ctx), js_lvgl_disp_class_id, &js_lvgl_disp_class);
+    JS_NewClass(JS_GetRuntime(ctx), js_lv_disp_class_id, &js_lvgl_disp_class);
     JSValue dispDriverProto = JS_NewObject(ctx);
     JS_SetPropertyFunctionList(ctx, dispDriverProto, js_display_proto_funcs, countof(js_display_proto_funcs));
-    JS_SetClassProto(ctx, js_lvgl_disp_class_id, dispDriverProto);
+    JS_SetClassProto(ctx, js_lv_disp_class_id, dispDriverProto);
 
     JS_SetPropertyStr(ctx, lvgl, "createDisplay", JS_NewCFunction(ctx, js_lvgl_create_display, "createDisplay", 1));
     // JS_SetPropertyStr(ctx, lvgl, "actionDisplay", JS_NewCFunction(ctx, js_lvgl_set_default_display, "actionDisplay", 1));
@@ -612,4 +582,9 @@ void be_lv_display_reset(JSContext * ctx) {
     heap_caps_get_info(&info, MALLOC_CAP_SPIRAM);
     dn2(info.total_free_bytes, info.total_allocated_bytes)
 #endif
+}
+
+
+JSClassID lv_disp_js_class_id() {
+    return js_lv_disp_class_id ;
 }

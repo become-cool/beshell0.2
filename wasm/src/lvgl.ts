@@ -486,6 +486,13 @@ export class Obj extends EventEmitter {
     }
 }
 export class Label extends Obj {
+    public font(selector=0) {
+        return Module.ccall("lv_label_get_font", "string", ["number","number"], [this.ptr, selector])
+    }
+    public setFont(font: string, selector=0) {
+        return Module.ccall("lv_label_set_font", "bool", ["number","string","number"], [this.ptr, font, selector])
+    }
+
     protected _createWidget(parent: Obj|null) {
         this.ptr = Module._lv_label_create(parent?parent.ptr:null)
         this.registerPointer()
@@ -659,12 +666,12 @@ export class Btn extends Obj {
     setText(text: string) {
         this.label?.setText(text)
     }
-    // font() {
-    //     return this.label?.font()
-    // }
-    // setFont(font: string) {
-    //     this.label?.setFont(font)
-    // }
+    font() {
+        return this.label?.font()
+    }
+    setFont(font: string) {
+        this.label?.setFont(font)
+    }
     
 }
 export class BtnMatrix extends Obj {

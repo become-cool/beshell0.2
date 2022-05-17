@@ -219,6 +219,7 @@ esp_err_t esp_camera_init(const camera_config_t *config)
     err = cam_init(config);
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "Camera init failed with error 0x%x", err);
+        printf("Camera init failed with error 0x%x\n", err);
         return err;
     }
 
@@ -226,6 +227,7 @@ esp_err_t esp_camera_init(const camera_config_t *config)
     err = camera_probe(config, &camera_model);
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "Camera probe failed with error 0x%x(%s)", err, esp_err_to_name(err));
+        printf("Camera probe failed with error 0x%x(%s)\n", err, esp_err_to_name(err));
         goto fail;
     }
 
@@ -234,6 +236,7 @@ esp_err_t esp_camera_init(const camera_config_t *config)
 
     if (PIXFORMAT_JPEG == pix_format && (!camera_sensor[camera_model].support_jpeg)) {
         ESP_LOGE(TAG, "JPEG format is not supported on this sensor");
+        printf("JPEG format is not supported on this sensor\n");
         err = ESP_ERR_NOT_SUPPORTED;
         goto fail;
     }
@@ -246,6 +249,7 @@ esp_err_t esp_camera_init(const camera_config_t *config)
     err = cam_config(config, frame_size, s_state->sensor.id.PID);
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "Camera config failed with error 0x%x", err);
+        printf("Camera config failed with error 0x%x\n", err);
         goto fail;
     }
 
@@ -254,6 +258,7 @@ esp_err_t esp_camera_init(const camera_config_t *config)
     ESP_LOGD(TAG, "Setting frame size to %dx%d", resolution[frame_size].width, resolution[frame_size].height);
     if (s_state->sensor.set_framesize(&s_state->sensor, frame_size) != 0) {
         ESP_LOGE(TAG, "Failed to set frame size");
+        printf("Failed to set frame size\n");
         err = ESP_ERR_CAMERA_FAILED_TO_SET_FRAME_SIZE;
         goto fail;
     }

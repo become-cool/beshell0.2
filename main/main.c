@@ -26,7 +26,7 @@
 #include <esp_event_loop.h>
 
 #include "psram.h"
-#include "task_js.h"
+#include "js_main_loop.h"
 #include "http_server.h"
 
 #ifdef CONFIG_IDF_TARGET_ESP32S2
@@ -233,15 +233,15 @@ void app_main(void)
 
 #ifdef CONFIG_IDF_TARGET_ESP32S2
     init_usb_cdc() ;
-    task_js_main() ;
+    js_main_loop(NULL) ;
 #else
 
-    printf("Total heap: %d\n", getHeapSize());
-    printf("Free heap: %d\n", getFreeHeap());
-    printf("Total PSRAM: %d\n", getPsramSize());
-    printf("Free PSRAM: %d\n", getFreePsram());
+    printf("Heap  (free/total): %d/%d\n", getHeapUsed(),getHeapTotal());
+    printf("DMA   (free/total): %d/%d\n", getDMAUsed(),getDMATotal());
+    printf("PSRAM (free/total): %d/%d\n", getPsramUsed(),getPsramTotal());
 
-    xTaskCreatePinnedToCore(&task_js_main, "task_js_main", 16*1024, NULL, 5, NULL, 0);
+    xTaskCreatePinnedToCore(&js_main_loop, "js_main_loop", 16*1024, NULL, 5, NULL, 0);
+    // js_main_loop(NULL) ;
 #endif
 
 }

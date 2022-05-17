@@ -74,9 +74,9 @@ static void js_lv_event_cb(lv_event_t * event) {
 /**
  * 3种调用方法：
  *  1. js_lv_obj_wrapper(ctx, obj, Cotr, 0)
- *      js 中派生的 类需要提供 构造函数
+ *      js 中定义的 lv.Obj派生类, 需要提供构造函数
  *  2. js_lv_obj_wrapper(ctx, obj, JS_UNDEFINED, clsid)
- *      lv 原生对象
+ *      lv 原生对象(c 实现的类)
  *  3. js_lv_obj_wrapper(ctx, obj, JS_UNDEFINED, 0)
  *      根据 obj 类型确定 clsid
  */

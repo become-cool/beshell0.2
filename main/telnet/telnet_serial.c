@@ -1,6 +1,6 @@
 
 #include "telnet_serial.h"
-#include "telnet.h"
+#include "module_telnet.h"
 #include "telnet_protocal.h"
 #include "module_fs.h"
 #include "driver/uart.h"
@@ -8,7 +8,7 @@
 #include <sys/fcntl.h>
 #include "esp_vfs.h"
 #include "utils.h"
-#include "task_js.h"
+#include "js_main_loop.h"
 #include "esp_vfs_dev.h"
 #include "logging.h"
 #include <sys/errno.h>
@@ -134,6 +134,8 @@ void telnet_serial_send_pkg(char pkgid, char cmd, char * data, uint16_t datalen)
 	telnet_send_one_pkg(pkgid, 0, cmd, data, datalen%PKGLEN_MAX_DATA) ;
 }
 
+
+
 void telnet_serial_send_pkg_str(char pkgid, char cmd, char * data) {
 	telnet_serial_send_pkg(pkgid, cmd, data, strlen(data)) ;
 }
@@ -142,9 +144,6 @@ void telnet_serial_send_pkg_str(char pkgid, char cmd, char * data) {
 bool write_file(char pkgid, const char * path, const char * src, size_t len, bool append) {
 	int fd = fopen(path, append? "a+": "w");
     if(fd<=0) {
-
-		// printf("%s\n", path) ;
-
 		char * msg = mallocf("Failed to open path %s", path) ;
 		if(msg) {
 			telnet_serial_send_pkg_str(pkgid, CMD_EXCEPTION, msg) ;
@@ -153,7 +152,6 @@ bool write_file(char pkgid, const char * path, const char * src, size_t len, boo
 		else {
 			printf("memory low ?") ;
 		}
-		
         return false ;
     }
 
@@ -199,6 +197,9 @@ void on_pkg_receive (uint8_t pkgid, uint8_t remain, uint8_t cmd, uint8_t * data,
 	 * 后续包: 文件内容
 	 */
 	else if(cmd==CMD_FILE_PUSH_REQ || cmd==CMD_FILE_APPEND_REQ) {
+
+		// printf("file push: %d ? %d\n", _file_pushing_pkgid, pkgid) ;
+
 		if(_file_pushing_pkgid>-1 && _file_pushing_pkgid!=pkgid) {
 			_file_pushing_pkgid = -1 ;
 			if(_file_pushing_path) {
@@ -265,6 +266,8 @@ void on_pkg_receive (uint8_t pkgid, uint8_t remain, uint8_t cmd, uint8_t * data,
 				}
 			}
 		}
+
+		// printf("file push done\n") ;
 	}
 
 	else if(cmd==CMD_FILE_PULL_REQ){
@@ -283,27 +286,33 @@ void on_pkg_receive (uint8_t pkgid, uint8_t remain, uint8_t cmd, uint8_t * data,
 		}
 
 		uint32_t offset = * (uint32_t*)(data + pathlen + 1) ;
-		uint16_t bytelen = * (uint16_t*)(data + pathlen + 5) ;
+		uint32_t bytelen = * (uint16_t*)(data + pathlen + 5) ;
 
 		// printf("offset=%d, bytelen=%d\n", offset, bytelen) ;
-
-		if((bytelen) > PKGLEN_MAX_DATA*255) {
-			telnet_serial_send_pkg_str(pkgid, CMD_EXCEPTION, "read length too large") ;
-			return ;
-		}
-
 		char * realpath = mallocf(PATH_PREFIX"%s", (char *)data) ;
 		if(!realpath) {
 			telnet_serial_send_pkg_str(pkgid, CMD_EXCEPTION, "failed to malloc for path, memory low?") ;
+			return ;
+		}
+		struct stat statbuf;
+		if(stat(realpath,&statbuf)<0 || !S_ISREG(statbuf.st_mode)){
+			telnet_serial_send_pkg_str(pkgid, CMD_EXCEPTION, "failed to stat file") ;
+			free(realpath) ;
+			return ;
 		}
 
-		if((bytelen)==0) {
-			struct stat statbuf;
-    		if(stat(realpath,&statbuf)<0 || !S_ISREG(statbuf.st_mode)){
-				telnet_serial_send_pkg_str(pkgid, CMD_EXCEPTION, "failed to open file") ;
-			}
-			bytelen = statbuf.st_size ;
-			// printf("file size: %d\n", bytelen) ;
+		if(offset>=statbuf.st_size){
+			telnet_serial_send_pkg_str(pkgid, CMD_EXCEPTION, "offset larger than file size.") ;
+			free(realpath) ;
+			return ;
+		}
+
+		if( bytelen==0 || bytelen+offset>statbuf.st_size ) {
+			bytelen = statbuf.st_size - offset ;
+		}
+
+		if((bytelen) > PKGLEN_MAX_DATA*255) {
+			bytelen = PKGLEN_MAX_DATA*255 ;
 		}
 		
 		int fd = fopen(realpath, "r");
@@ -314,7 +323,7 @@ void on_pkg_receive (uint8_t pkgid, uint8_t remain, uint8_t cmd, uint8_t * data,
 			return ;
 		}
 
-		char * bytes = malloc(bytelen) ;
+		char * bytes = malloc(PKGLEN_MAX_DATA) ;
 		if(!bytes) {
 			telnet_serial_send_pkg_str(pkgid, CMD_EXCEPTION, "failed to malloc, memory low?") ;
 			return ;
@@ -324,11 +333,28 @@ void on_pkg_receive (uint8_t pkgid, uint8_t remain, uint8_t cmd, uint8_t * data,
         	fseek(fd, offset, SEEK_SET) ;
 		}
 
-		size_t readbytes = fread(bytes, 1, bytelen, fd) ;
-		// printf("req size: %d, readed size: %d, errno=%d\n",bytelen,readbytes,errno ) ;
-		fclose(fd) ;
 
-		telnet_serial_send_pkg(pkgid, CMD_DATA, bytes, readbytes) ;
+		int pkgcnt = (int) ceil( (float)bytelen/(float)PKGLEN_MAX_DATA ) ;
+		size_t readed = 0 ;
+		size_t remain = bytelen ;
+
+		// printf("send file>total len=%d, pkgcnt=%d\n", datalen, pkgcnt) ;
+
+		for(int i=pkgcnt-1; i>=1; i--) {
+    		vTaskDelay(1) ;
+			readed = fread(bytes, 1, PKGLEN_MAX_DATA, fd) ;
+			telnet_send_one_pkg(pkgid, i, CMD_DATA, bytes, readed) ;
+			remain-= readed ;
+			// printf("[%d] sended data %d, remain: %d\n", i, readed, remain) ;
+		}
+
+		// 最后一个包
+		vTaskDelay(1) ;
+		readed = fread(bytes, 1, remain, fd) ;
+		telnet_send_one_pkg(pkgid, 0, CMD_DATA, bytes, readed) ;
+		// printf("[0] sended data %d\n", readed) ;
+
+		fclose(fd) ;
 		free(bytes) ;
 	}
 

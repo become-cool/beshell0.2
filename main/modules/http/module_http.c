@@ -12,7 +12,7 @@
 
 #include "cutils.h"
 #include "esp_log.h"
-#include "task_js.h"
+#include "js_main_loop.h"
 #include "eventloop.h"
 
 #include "esp_vfs.h"

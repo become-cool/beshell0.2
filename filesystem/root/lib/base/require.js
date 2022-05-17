@@ -202,7 +202,6 @@ global.prequire = async function(scripts, require, cb) {
             loaded ++
         }catch(e){
             console.log(e)
-            console.log(e.stack)
         }
         await sleep(0)
     }

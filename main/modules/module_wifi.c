@@ -1,7 +1,7 @@
 #include "module_wifi.h"
 #include "logging.h"
 #include "eventloop.h"
-#include "task_js.h"
+#include "js_main_loop.h"
 #include "utils.h"
 
 #include <lwip/apps/sntp.h>

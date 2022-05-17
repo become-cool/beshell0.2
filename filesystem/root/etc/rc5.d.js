@@ -18,8 +18,11 @@
         await require("./init.d/display.js")()
         sleep(0)
         
-        require("./init.d/desktop.js")
-        sleep(0)
+        // BePad (003)
+        // if(beapi.utils.partId()==3) {
+            await require("./init.d/desktop.js")()
+            sleep(0)
+        // }
 
         let rcpath = process.env.HOME + "/.beshellrc.js"
         if(beapi.fs.isFileSync(rcpath)) {
@@ -33,7 +36,6 @@
         sleep(0)
     }
     catch(e) {
-        console.log(e.message)
-        console.log(e.stack)
+        console.log(e)
     }
 })()

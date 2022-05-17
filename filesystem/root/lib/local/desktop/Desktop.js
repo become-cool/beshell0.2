@@ -1,7 +1,7 @@
 const lv = require("lv")
 const Dashboard = require("./dashboard/Dashboard.js")
 const ScrApps = require("./ScrApps")
-const ScrSysApps = require("./ScrSysApps")
+// const ScrSysApps = require("./ScrSysApps")
 
 
 class Desktop extends lv.Obj {
@@ -16,8 +16,6 @@ class Desktop extends lv.Obj {
     constructor(disp) {
         try{
             super()
-
-            console.log("Desktop")
             
             lv.loadScreen(this)
             this.clearFlag("scrollable")
@@ -33,29 +31,28 @@ class Desktop extends lv.Obj {
             // this._wallpaper = new lv.Img(this._wallpaperOuter)
             // this._wallpaper.setSrc("/home/become/bg.png")
 
-
             this._panels = new lv.CleanObj(this)
             this._panels.setWidth(width)
             this._panels.setHeight("100%")
             this._panels.setStyle("bg-opa",0)
 
             
-            this._sysApps = new ScrSysApps(this._panels)
-            this._sysApps.setWidth(width)
-            this._sysApps.setHeight("100%")
+            // this._sysApps = new ScrSysApps(this._panels)
+            // this._sysApps.setWidth(width)
+            // this._sysApps.setHeight("100%")
 
             this._dashboard = new Dashboard(this._panels)
             this._dashboard.setWidth(width)
             this._dashboard.setHeight("100%")
-            this._dashboard.setX(width)
+            this._dashboard.setX(0)
 
             this._apps = new ScrApps(this._panels)
             this._apps.setWidth(width)
             this._apps.setHeight("100%")
-            this._apps.setX(width*2)
+            this._apps.setX(width)
 
             this.on("gesture",(e, target, dir)=>{
-                console.log("<<<------------>>>", e, target, dir)
+                // console.log("<<<------------>>>", e, target, dir)
                 if(dir=="left") {
                     this.setActivePanel(this.activePanel+1, true)
                 }
@@ -64,11 +61,10 @@ class Desktop extends lv.Obj {
                 }
             })
 
-            this.setActivePanel(1)
+            this.setActivePanel(1, true)
 
         }catch(e){
             console.log(e)
-            console.log(e.stack)
         }
     }
     setActivePanel(i, anim) {
@@ -82,8 +78,6 @@ class Desktop extends lv.Obj {
                 this._wallpaperOuter.scrollToX(i*(ww/2), !!anim)
             }
         }
-
-        console.log(444)
         
     }
 }

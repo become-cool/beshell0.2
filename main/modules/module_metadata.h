@@ -3,6 +3,8 @@
 
 #include "quickjs-libc.h"
 
+int readPartId() ;
+int readPartVersion() ;
 
 #define META_VERIFY_BYTE 55
 

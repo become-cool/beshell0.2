@@ -55,6 +55,15 @@ const lvExtraDef = {
         }
         this.sharedKeyboard.popup(txtarea)
     }
+` ,
+
+    Label: `
+    public font(selector=0) {
+        return Module.ccall("lv_label_get_font", "string", ["number","number"], [this.ptr, selector])
+    }
+    public setFont(font: string, selector=0) {
+        return Module.ccall("lv_label_set_font", "bool", ["number","string","number"], [this.ptr, font, selector])
+    }
 `
 }
 
@@ -92,12 +101,12 @@ const createWidgetMethods = {
     setText(text: string) {
         this.label?.setText(text)
     }
-    // font() {
-    //     return this.label?.font()
-    // }
-    // setFont(font: string) {
-    //     this.label?.setFont(font)
-    // }
+    font() {
+        return this.label?.font()
+    }
+    setFont(font: string) {
+        this.label?.setFont(font)
+    }
     `,
     
     TextArea: `
@@ -107,7 +116,7 @@ const createWidgetMethods = {
         this.on("clicked",()=>{
             this.disp().popupSharedKeyboard(this)
         })
-    }`
+    }`,
 }
 
 // 转换为驼峰命令风格，去掉前导get

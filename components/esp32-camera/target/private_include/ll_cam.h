@@ -50,11 +50,13 @@
 
 #define CAM_CHECK(a, str, ret) if (!(a)) {                                          \
         ESP_LOGE(TAG,"%s(%d): %s", __FUNCTION__, __LINE__, str);                    \
+        printf("%s(%d): %s\n", __FUNCTION__, __LINE__, str);                    \
         return (ret);                                                               \
         }
 
 #define CAM_CHECK_GOTO(a, str, lab) if (!(a)) {                                     \
         ESP_LOGE(TAG,"%s(%d): %s", __FUNCTION__, __LINE__, str);                    \
+        printf("%s(%d): %s\n", __FUNCTION__, __LINE__, str);                    \
         goto lab;                                                                   \
         }
 

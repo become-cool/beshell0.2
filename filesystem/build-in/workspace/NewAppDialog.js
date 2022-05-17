@@ -231,7 +231,6 @@ function createApp(title, iconpath) {
             lv.msg.error(e.title, e.desc)
         } else {
             console.log(e)
-            console.log(e.stack)
         }
     }
     return null

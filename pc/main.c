@@ -1,6 +1,6 @@
 #include "utils.h"
 #include "module_fs.h"
-#include "task_js.h"
+#include "js_main_loop.h"
 #include "anchor9.h"
 
 void main( int argc, char *argv[] ){

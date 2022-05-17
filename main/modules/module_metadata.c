@@ -2,15 +2,37 @@
 #include "utils.h"
 #include <string.h>
 
+#ifndef SIMULATION
+#include "soc/soc.h"
+#endif
+
 const char * field_names[] = {
     "",
     "PART_ID", 
     "PART_VERSION", 
 } ;
 
+
+
+int readPartId() {
+#ifdef SIMULATION
+    return 255 ;
+#else
+    return REG_READ(0x3FF5A078) ;
+#endif
+}
+
+int readPartVersion() {
+#ifdef SIMULATION
+    return 255 ;
+#else
+    return REG_READ(0x3FF5A079) ;
+#endif
+}
+
+
 #ifndef SIMULATION
 
-#include "soc/soc.h"
 
 /**
  * @brief 

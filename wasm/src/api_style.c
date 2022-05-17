@@ -44,6 +44,7 @@ uint8_t _style_datatype(lv_style_prop_t prop) {
         case LV_STYLE_BASE_DIR:
         case LV_STYLE_BORDER_SIDE:
         case LV_STYLE_TEXT_ALIGN:
+        case LV_STYLE_TEXT_FONT:
             return STYLE_TYPE_STRING ;
 
         case LV_STYLE_WIDTH: 
@@ -155,6 +156,8 @@ char * lv_style_value_to_string(lv_style_prop_t prop, lv_style_value_t value) {
             return lv_border_side_to_name((uint32_t)value.num) ;
         case LV_STYLE_TEXT_ALIGN:
             return lv_text_align_to_name((uint32_t)value.num) ;
+        case LV_STYLE_TEXT_FONT:
+            return value.ptr;
     }
     
     return "unknow type" ;
@@ -220,13 +223,22 @@ EMSCRIPTEN_KEEPALIVE bool js_lv_obj_set_style_string(lv_obj_t * obj, char * styl
     if(((int32_t)prop)<0) {
         return false ;
     }
-    if(_style_datatype(prop)!=STYLE_TYPE_STRING) {
-        return false ;
-    }
 
     lv_style_value_t styleValue ;
-    if(!lv_style_string_to_value(prop, value, &styleValue.num)) {
-        return false ;
+    if(prop==LV_STYLE_TEXT_FONT) {
+        styleValue.ptr = stylename ;
+    }
+
+    else {
+
+        if(_style_datatype(prop)!=STYLE_TYPE_STRING) {
+            return false ;
+        }
+
+        if(!lv_style_string_to_value(prop, value, &styleValue.num)) {
+            return false ;
+        }
+
     }
 
     lv_obj_set_local_style_prop(obj, prop, styleValue, selector) ;

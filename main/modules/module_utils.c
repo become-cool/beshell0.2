@@ -10,7 +10,8 @@
 #include "module_fs.h"
 #include "eventloop.h"
 #include "uuid.h"
-#include "telnet.h"
+#include "module_telnet.h"
+#include "module_metadata.h"
 
 #ifndef SIMULATION
 #include "esp_system.h"
@@ -268,17 +269,8 @@ JSValue js_eval_bin(JSContext *ctx, JSValueConst this_val, int argc, JSValueCons
     return ret ;
 }
 
-int readPartId() {
-#ifdef SIMULATION
-    return 255 ;
-#else
-    return REG_READ(0x3FF5A078) ;
-#endif
-}
 
-int readPartVersion() {
-    return 0 ;
-}
+
 
 JSValue js_utils_part_id(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     return JS_NewInt32(ctx, readPartId()) ;

@@ -1,8 +1,8 @@
 #include "telnet_ws.h"
-#include "telnet.h"
+#include "module_telnet.h"
 
 #include "beshell.h"
-#include "task_js.h"
+#include "js_main_loop.h"
 #include "display.h"
 #include "utils.h"
 #include "mongoose.h"

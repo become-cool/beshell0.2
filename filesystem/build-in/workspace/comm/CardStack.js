@@ -106,7 +106,6 @@ class CardStack extends lv.CleanObj{
                         lv.tickIndev()
                     }catch(e){
                         console.log(e)
-                        console.log(e.stack)
                     }
                 }, 0)
             }

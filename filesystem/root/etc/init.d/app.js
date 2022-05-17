@@ -6,8 +6,7 @@ exports.autoBoot = function() {
             require(json["active-app"])
         }
     }catch(e){
-        console.log(e.message)
-        console.log(e.stack)
+        console.log(e)
     }
 }
 exports.setAutoBootPath = function(path) {

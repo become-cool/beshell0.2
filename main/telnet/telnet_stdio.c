@@ -1,5 +1,5 @@
 #include "telnet_stdio.h"
-#include "telnet.h"
+#include "module_telnet.h"
 #include "utils.h"
 #include <string.h>
 #include "beshell.h"

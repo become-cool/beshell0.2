@@ -34,7 +34,12 @@ console.log = function() {
                 vals.push(v)
                 break
             default:
-                vals.push(console.stringify(v))
+                if(v instanceof Error) {
+                    vals.push(v.message+"\r\n"+v.stack)
+                }
+                else {
+                    vals.push(console.stringify(v))
+                }
                 break
         }
     }

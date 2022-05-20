@@ -35,16 +35,22 @@
 	esp_err_t res=i2c_master_cmd_begin(bus, cmd, 10/portTICK_PERIOD_MS) ;   \
 	i2c_cmd_link_delete(cmd);
 
-#define I2C_READ_INT(var, type, size)                                   \
-    CHECK_ARGC(3)                                                       \
-    ARGV_I2C_BUSNUM(0, busnum)                                          \
-    if(!I2C_IS_SETUP(busnum))                                           \
-        return JS_NULL ;                                                \
-    ARGV_TO_UINT8(1, addr)                                              \
-    ARGV_TO_UINT8(2, reg)                                               \
-    type var = 0 ;                                                      \
-    if( i2c_read(busnum, addr, reg, (uint8_t*)&var, size)!=ESP_OK ) {   \
-        return JS_NULL ;                                                \
+#define I2C_READ_INT(var, type, size)                                       \
+    CHECK_ARGC(2)                                                           \
+    ARGV_I2C_BUSNUM(0, busnum)                                              \
+    if(!I2C_IS_SETUP(busnum))                                               \
+        return JS_NULL ;                                                    \
+    ARGV_TO_UINT8(1, addr)                                                  \
+    type var = 0 ;                                                          \
+    if(argc>2) {                                                            \
+        ARGV_TO_UINT8(2, reg)                                               \
+        if( i2c_read(busnum, addr, reg, (uint8_t*)&var, size)!=ESP_OK ) {   \
+            return JS_NULL ;                                                \
+        }                                                                   \
+    } else {                                                                \
+        I2C_BEGIN_READ(addr)                                                \
+        I2C_RECV((uint8_t*)&var, size)                                      \
+        I2C_COMMIT(busnum)                                                  \
     }
 
 #define FREE_BUS_SPI(busnum)    if(_spi_bus_setup&(1<<(busnum))){ dn(busnum); spi_bus_free(busnum); }

@@ -11,16 +11,15 @@ module.exports = async function() {
         let [dtplst,dtpreq] = require("desktop/prequire")
 
         let loaded = 0
-        let total = lvlst.length + dtplst.length
+        let total = lvlst.length + dtplst.length + otherlst.length
+        function require_cb(l,t,p) {
+            if(l==t) { return }
+            screen.loading.setValue((loaded++)*100/total)
+        }
 
-        await prequire(lvlst,lvreq,(l,t,p)=>{
-            if(l==t) { return }
-            screen.loading.setValue((loaded++)*100/total)
-        })
-        await prequire(dtplst,dtpreq,(l,t,p)=>{
-            if(l==t) { return }
-            screen.loading.setValue((loaded++)*100/total)
-        })
+        await prequire(lvlst,lvreq,require_cb)
+        await prequire(dtplst,dtpreq,require_cb)
+        await prequire(otherlst,require,require_cb)
         screen.loading.setValue(100)
         await sleep(100)
     }

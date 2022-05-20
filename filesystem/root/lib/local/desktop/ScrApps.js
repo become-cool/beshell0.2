@@ -47,7 +47,11 @@ module.exports = class ScrApps extends lv.Obj {
                     , {
                         class:AppIcon ,
                         "text": "游戏" ,
-                        "src": "/lib/icon/32/game.png"
+                        "src": "/lib/icon/32/game.png" ,
+                        clicked () {
+                            console.log("游戏")
+                            require("gameemulator/index.js")
+                        }
                     } ,
                     // {
                     //     class: "Obj" ,

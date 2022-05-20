@@ -523,6 +523,20 @@ module.exports = [
             'LV_SCROLL_SNAP_CENTER' ,
         ]
     }
+
+    , {
+        prefix: 'LV_INDEV_TYPE_' ,
+        type: 'lv_indev_type_t' ,
+        name: 'lv_indev_type' ,
+        end: 'LV_INDEV_TYPE_ENCODER+1' ,
+        def: [
+            'LV_INDEV_TYPE_NONE' ,
+            'LV_INDEV_TYPE_POINTER' ,
+            'LV_INDEV_TYPE_KEYPAD' ,
+            'LV_INDEV_TYPE_BUTTON' ,
+            'LV_INDEV_TYPE_ENCODER' ,
+        ]
+    }
 ]
 
 

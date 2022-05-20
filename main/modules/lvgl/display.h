@@ -6,13 +6,15 @@
 #include <stdbool.h>
 
 
+#define DISP_BUFF_LINES 20
+#define DISP_BUFF_AUX_SIZE 16        // 附加数据，记录 area(x1,y1,x2,y2)，放在 DMA_BUFF 前面
 
 typedef struct {
     void * spi_dev ;
-    JSValue jsobj ;
+    void * jsobj ; // JS_MKPTR(JS_TAG_OBJECT, <JSObject *>)
     void * buff1 ;
     void * buff2 ;
-} disp_drv_data_t ;
+} disp_drv_spec_t ;
 
 
 JSClassID lv_disp_js_class_id() ;

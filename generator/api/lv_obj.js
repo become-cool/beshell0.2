@@ -308,7 +308,7 @@ module.exports = {
     // "lv_obj_swap": [null, [], "void"],
     "lv_obj_move_to_index": [null, [["int32_t","index"]], "void"],
     "lv_obj_get_screen": [null, [], "_lv_obj_t *"],
-    "lv_obj_get_disp": [null, [], "lv_disp_t *"],
+    // "lv_obj_get_disp": [null, [], "lv_disp_t *"],
     "lv_obj_get_parent": [null, [], "_lv_obj_t *"],
     "lv_obj_get_child": [null, [["int32_t","id"]], "_lv_obj_t *"],
     "lv_obj_get_child_cnt": [null, [], "uint32_t"],

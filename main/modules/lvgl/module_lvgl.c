@@ -11,6 +11,8 @@
 #include "cutils.h"
 #include "be_gl.h"
 #include "be_gl_js.h"
+#include "indev.h"
+
 
 #ifndef SIMULATION
 #include "freertos/FreeRTOS.h"
@@ -267,6 +269,7 @@ void be_module_lvgl_init() {
     be_lv_structs_init() ;
     be_lv_draggable_init() ;
     be_gl_init() ;
+    be_lv_indev_init() ;
 
 #ifndef SIMULATION
     // lvgl 时钟
@@ -331,6 +334,7 @@ void be_module_lvgl_require(JSContext *ctx) {
     be_lv_structs_require(ctx, lvgl) ;
     be_lv_draggable_require(ctx, lvgl) ;
     be_gl_require(ctx, lvgl) ;
+    be_lv_indev_require(ctx, lvgl) ;
 
     JS_FreeValue(ctx, global);
     JS_FreeValue(ctx, beapi);
@@ -341,6 +345,7 @@ void be_module_lvgl_require(JSContext *ctx) {
 
 void be_module_lvgl_reset(JSContext *ctx) {
     be_lv_display_reset(ctx) ;
+    be_lv_indev_reset(ctx) ;
 }
 
 void be_module_lvgl_loop(JSContext *ctx)  {

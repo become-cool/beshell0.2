@@ -1,7 +1,7 @@
 const lv = require("lv")
 const Dashboard = require("./dashboard/Dashboard.js")
 const ScrApps = require("./ScrApps")
-// const ScrSysApps = require("./ScrSysApps")
+const Joypad = require("besdk/driver/joypad")
 
 
 class Desktop extends lv.Obj {
@@ -16,6 +16,8 @@ class Desktop extends lv.Obj {
     constructor(disp) {
         try{
             super()
+
+            this.setupInputDev()
             
             lv.loadScreen(this)
             this.clearFlag("scrollable")
@@ -36,7 +38,6 @@ class Desktop extends lv.Obj {
             this._panels.setHeight("100%")
             this._panels.setStyle("bg-opa",0)
 
-            
             // this._sysApps = new ScrSysApps(this._panels)
             // this._sysApps.setWidth(width)
             // this._sysApps.setHeight("100%")
@@ -78,7 +79,18 @@ class Desktop extends lv.Obj {
                 this._wallpaperOuter.scrollToX(i*(ww/2), !!anim)
             }
         }
-        
+    }
+
+    setupInputDev() {
+        this.joypad1 = new Joypad(0, 4, 5, 0x33)
+        if(this.joypad1.setup()) {
+            this.joypad1.register()
+            console.log("found joypad1(0x33)")
+
+            this.joypad1.indev.enableEvent()
+        } else {
+            console.log("not found joypad1(0x33)")
+        }
     }
 }
 module.exports = Desktop

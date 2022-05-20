@@ -32,7 +32,7 @@ static JSValue js_gameplayer_set_display(JSContext *ctx, JSValueConst this_val, 
         THROW_EXCEPTION("arg disp is a invalid lv.Disp object")
     }
 
-    st77xx = (st77xx_dev_t*) ((disp_drv_data_t*)disp->driver->user_data)->spi_dev ;
+    st77xx = (st77xx_dev_t*) ((disp_drv_spec_t*)disp->driver->user_data)->spi_dev ;
 
     return JS_UNDEFINED;
 }
@@ -245,22 +245,22 @@ typedef struct BottonEvent {
 	uint8_t bit ;
 };
 struct BottonEvent joypad1_btns[] = {
-	{ event_joypad1_a, 0x01 } ,
-	{ event_joypad1_b, 0x02 } ,
-	{ event_joypad1_up, 0x04 } ,
-	{ event_joypad1_down, 0x08 } ,
-	{ event_joypad1_left, 0x10 } ,
-	{ event_joypad1_right, 0x20 } ,
+	{ event_joypad1_up, 0x01 } ,
+	{ event_joypad1_down, 0x02 } ,
+	{ event_joypad1_left, 0x04 } ,
+	{ event_joypad1_right, 0x08 } ,
+	{ event_joypad1_a, 0x010 } ,
+	{ event_joypad1_b, 0x020 } ,
 	{ event_joypad1_start, 0x40 } ,
 	{ event_joypad1_select, 0x80 } ,
 } ;
 struct BottonEvent joypad2_btns[] = {
-	{ event_joypad2_a, 0x01 } ,
-	{ event_joypad2_b, 0x02 } ,
-	{ event_joypad2_up, 0x04 } ,
-	{ event_joypad2_down, 0x08 } ,
-	{ event_joypad2_left, 0x10 } ,
-	{ event_joypad2_right, 0x20 } ,
+	{ event_joypad2_up, 0x01 } ,
+	{ event_joypad2_down, 0x02 } ,
+	{ event_joypad2_left, 0x04 } ,
+	{ event_joypad2_right, 0x08 } ,
+	{ event_joypad2_a, 0x010 } ,
+	{ event_joypad2_b, 0x020 } ,
 	{ event_joypad2_start, 0x40 } ,
 	{ event_joypad2_select, 0x80 } ,
 } ;

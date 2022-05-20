@@ -1714,6 +1714,51 @@ const char * lv_scroll_snap_const_to_str(lv_scroll_snap_t code) {
 JSValue lv_scroll_snap_const_to_jsstr(JSContext *ctx, lv_scroll_snap_t code) {
     return JS_NewString(ctx, lv_scroll_snap_const_to_str(code));
 }
+
+bool lv_indev_type_str_to_const(const char * name, lv_indev_type_t* out) {
+        if(strcmp(name,"none")==0) {
+        (*out) = LV_INDEV_TYPE_NONE ;
+    }
+    else if(strcmp(name,"pointer")==0) {
+        (*out) = LV_INDEV_TYPE_POINTER ;
+    }
+    else if(strcmp(name,"keypad")==0) {
+        (*out) = LV_INDEV_TYPE_KEYPAD ;
+    }
+    else if(strcmp(name,"button")==0) {
+        (*out) = LV_INDEV_TYPE_BUTTON ;
+    }
+    else if(strcmp(name,"encoder")==0) {
+        (*out) = LV_INDEV_TYPE_ENCODER ;
+    }
+
+    else {
+        return false ;
+    }
+    return true ;
+}
+bool lv_indev_type_jsstr_to_const(JSContext *ctx, JSValue jsstr, lv_indev_type_t* out) {
+    char * cstr = (char *)JS_ToCString(ctx, jsstr) ;
+    bool suc = lv_indev_type_str_to_const(cstr, out) ;
+    JS_FreeCString(ctx, cstr) ;
+    return suc ;
+}
+const char * lv_indev_type_const_to_str(lv_indev_type_t code) {
+
+    switch(code) {
+        case LV_INDEV_TYPE_NONE: return "none";
+        case LV_INDEV_TYPE_POINTER: return "pointer";
+        case LV_INDEV_TYPE_KEYPAD: return "keypad";
+        case LV_INDEV_TYPE_BUTTON: return "button";
+        case LV_INDEV_TYPE_ENCODER: return "encoder";
+
+        default:
+            return "unknow";
+    }
+}
+JSValue lv_indev_type_const_to_jsstr(JSContext *ctx, lv_indev_type_t code) {
+    return JS_NewString(ctx, lv_indev_type_const_to_str(code));
+}
 // AUTO GENERATE CODE END [CONST MAPPING] --------
 
 // AUTO GENERATE CODE START [DEFINE CLASS] --------

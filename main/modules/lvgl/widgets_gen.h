@@ -121,6 +121,11 @@ bool lv_scroll_snap_str_to_const(const char * str, lv_scroll_snap_t* out) ;
 bool lv_scroll_snap_jsstr_to_const(JSContext *ctx, JSValue jsstr, lv_scroll_snap_t* out) ;
 const char *  lv_scroll_snap_const_to_str(lv_scroll_snap_t code) ;
 JSValue lv_scroll_snap_const_to_jsstr(JSContext *ctx, lv_scroll_snap_t code) ;
+
+bool lv_indev_type_str_to_const(const char * str, lv_indev_type_t* out) ;
+bool lv_indev_type_jsstr_to_const(JSContext *ctx, JSValue jsstr, lv_indev_type_t* out) ;
+const char *  lv_indev_type_const_to_str(lv_indev_type_t code) ;
+JSValue lv_indev_type_const_to_jsstr(JSContext *ctx, lv_indev_type_t code) ;
 // AUTO GENERATE CODE END [CONST CONVERT] --------
 
 

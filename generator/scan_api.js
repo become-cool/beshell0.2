@@ -1,5 +1,5 @@
 const fs = require("fs")
-const inc_path = __dirname + "/../../../../components/lvgl/src"
+const inc_path = __dirname + "/../components/lvgl/src"
 
 
 function findHeadFile(dir, callback) {
@@ -34,6 +34,12 @@ function main() {
         console.error("node scan_api.js <func_prefix>")
         return
     }
+
+    let thisType = "lv_obj_t *"
+    if(process.argv.length>3) {
+        thisType = process.argv[3].trim()
+    }
+
     let func_prefix = process.argv[2]
 
     let funclst = []
@@ -52,6 +58,7 @@ function main() {
                 continue
             }
 
+            let isStatic = 'false'
             returntype = tidyType(returntype)
             try{
                 arglst = arglstdef.trim().split(",")
@@ -61,19 +68,30 @@ function main() {
                                     throw new Error()
                                 let v = segs.pop().trim()
                                 let t = tidyType(segs.join(' '))
-                                if(t=="lv_obj_t *"){
-                                    return null
-                                }
-                                return `["${t}","${v}"]`
+                                return [t, v]
                             })
-                            .filter(arg=>arg!=null)
+                            // .filter(arg=>arg!=null)
+                
+                // 第一个参数做为 this 对象
+                if(arglst[0] && arglst[0][0] == thisType) {
+                    arglst.shift()
+                }
+                // 静态方法
+                else {
+                    isStatic = 'true'
+                }
+
+                arglst = arglst.map(([t,v])=>{
+                    return `["${t}","${v}"]`
+                })
+
             }catch(e){
                 continue
             }
 
             funclst.push(funcname)
 
-            out+= `    "${funcname}": [null, [${arglst.join(",")}], "${returntype}"],\r\n`
+            out+= `    "${funcname}": [null, [${arglst.join(",")}], "${returntype}", ${isStatic}],\r\n`
         }
     }
 

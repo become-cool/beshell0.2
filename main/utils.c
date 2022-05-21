@@ -82,6 +82,46 @@ void eval_code_len(JSContext *ctx,const char * str,size_t len,const char * filen
 	JS_FreeValue(ctx, ret) ;
 }
 
+JSValue qjs_def_class2(
+        JSContext *ctx,
+        const char * className,
+        JSClassID js_class_id,
+        JSClassDef * js_class_p,
+        const char * cotrName,
+        JSCFunction cotr,
+        const JSCFunctionListEntry* funcLst,
+        uint16_t funcs,
+        const JSCFunctionListEntry* staticFuncLst,
+        uint16_t staticFuncs,
+        JSValue parentProto ,
+        JSValue pkg
+) {    
+    JS_NewClass(JS_GetRuntime(ctx), js_class_id, js_class_p);
+
+    JSValue proto = JS_NewObject(ctx);
+    JS_SetPropertyFunctionList(ctx, proto, funcLst, funcs);
+    JS_SetClassProto(ctx, js_class_id, proto);
+
+	if(!JS_IsUndefined(parentProto)) {
+    	JS_SetPropertyStr(ctx, proto, "__proto__", parentProto);
+	}
+
+	if(cotr) {
+		JSValue jscotr = JS_NewCFunction2(ctx, cotr, cotrName, 1, JS_CFUNC_constructor, 0) ;
+		JS_SetConstructor(ctx, jscotr, proto) ;
+		
+		if(staticFuncs>0) {
+    		JS_SetPropertyFunctionList(ctx, jscotr, staticFuncLst, staticFuncs);
+		}
+		
+		if(!JS_IsUndefined(pkg)) {
+			JS_SetPropertyStr(ctx, pkg, className, jscotr);
+		}
+	}
+
+    return proto ;
+}
+
 JSValue qjs_def_class(
         JSContext *ctx,
         const char * className,
@@ -93,27 +133,8 @@ JSValue qjs_def_class(
         uint16_t funcs,
         JSValue parentProto ,
         JSValue pkg
-) {    
-    JS_NewClass(JS_GetRuntime(ctx), js_class_id, js_class_p);
-
-    JSValue proto = JS_NewObject(ctx);
-    JS_SetPropertyFunctionList(ctx, proto, funclst, funcs);
-    JS_SetClassProto(ctx, js_class_id, proto);
-
-	if(!JS_IsUndefined(parentProto)) {
-    	JS_SetPropertyStr(ctx, proto, "__proto__", parentProto);
-	}
-
-	if(cotr) {
-		JSValue jscotr = JS_NewCFunction2(ctx, cotr, cotrName, 1, JS_CFUNC_constructor, 0) ;
-		JS_SetConstructor(ctx, jscotr, proto) ;
-		
-		if(!JS_IsUndefined(pkg)) {
-			JS_SetPropertyStr(ctx, pkg, className, jscotr);
-		}
-	}
-
-    return proto ;
+) {
+    return qjs_def_class2(ctx,className,js_class_id,js_class_p,cotrName,cotr,funclst,funcs,NULL,0,parentProto,pkg) ;
 }
 
 bool qjs_instanceof(JSContext *ctx, JSValue obj, JSClassID clz_id) {

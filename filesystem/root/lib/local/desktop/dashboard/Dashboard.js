@@ -4,9 +4,8 @@ const WiFiStatus = require('./WiFiStatus')
 const SysStatus = require('./SysStatus')
 
 class Dashboard extends lv.Column {
-    constructor(parent) {
+    constructor(parent,desktop) {
         super(parent)
-        
         this.refs = this.fromJson({
             width: "100%" ,
             height: "100%" ,
@@ -58,7 +57,10 @@ class Dashboard extends lv.Column {
         for(let name in this.refs) {
             global[name] = this.refs[name]
         }
-        global.dashboard = this
+
+        desktop.disp().on("ipt.btn.press",()=>{
+            desktop.setActivePanel(1, true)
+        })
     }
 }
 module.exports = Dashboard

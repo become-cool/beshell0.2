@@ -30,6 +30,28 @@ draw_param_t draw_param ;
 QueueHandle_t disp_queue;
 
 
+JSValue js_lv_disp_wrapper(JSContext *ctx, lv_disp_t * disp) {
+    if(!disp->driver) {
+        return JS_NULL ;
+    }
+    disp_drv_spec_t * spec = (disp_drv_spec_t*) disp->driver->user_data ;
+
+    // 该屏幕对象由 js 创建
+    if(spec) {
+        if(!spec->jsobj) {
+            THROW_EXCEPTION("spec->jsobj is null ?") ;
+        }
+        return JS_DupValue(ctx, JS_MKPTR(JS_TAG_OBJECT,spec->jsobj)) ;
+    }
+
+    // 屏幕对象 不是 js 创建
+    else {
+        // @todo 包装成 js 对象 (不在 js_lv_disp_finalizer 中 free)
+        THROW_EXCEPTION("disp not created by js runtime") ;
+    }
+}
+
+
 void disp_st7789_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color_p) {
     if(!disp->user_data) {
         printf("spidev is NULL\n") ;
@@ -152,12 +174,36 @@ static JSValue js_lv_disp_layer(JSContext *ctx, JSValueConst this_val, int argc,
     return jslayer ;
 }
 
+static JSValue js_lv_disp_enable_input_event(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    THIS_DISP
+    if(!thisdisp->driver->user_data) {
+        return ;
+    }
+    disp_drv_spec_t * thisspec = (disp_drv_spec_t *) thisdisp->driver->user_data ;
+    thisspec->enable_input_event = true ;
+    thisspec->ctx = ctx ;
+    return JS_UNDEFINED ;
+}
+
+static JSValue js_lv_disp_disable_input_event(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    THIS_DISP
+    if(!thisdisp->driver->user_data) {
+        return ;
+    }
+    disp_drv_spec_t * thisspec = (disp_drv_spec_t *) thisdisp->driver->user_data ;
+    thisspec->enable_input_event = false ;
+    thisspec->ctx = ctx ;
+    return JS_UNDEFINED ;
+}
+
 
 static const JSCFunctionListEntry js_lv_disp_proto_funcs[] = {
     JS_CFUNC_DEF("activeScreen", 0, js_lv_disp_active_screen),
     JS_CFUNC_MAGIC_DEF("sysLayer", 0, js_lv_disp_layer, 1),
     JS_CFUNC_MAGIC_DEF("topLayer", 0, js_lv_disp_layer, 2),
     JS_CFUNC_DEF("getScreens", 0, js_lv_disp_get_screens),
+    JS_CFUNC_DEF("enableInputEvent", 0, js_lv_disp_enable_input_event),
+    JS_CFUNC_DEF("disableInputEvent", 0, js_lv_disp_disable_input_event),
 };
 
 
@@ -218,6 +264,9 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
     size_t bufsize = width * DISP_BUFF_LINES ;
     dvrdata->buff1 = malloc_buffer(bufsize*2) ;
     dvrdata->buff2 = malloc_buffer(bufsize*2) ;
+
+    dvrdata->enable_input_event = true ;
+    dvrdata->ctx = ctx ;
 
     drawbuf = malloc(sizeof(lv_disp_draw_buf_t)) ;
     if(!drawbuf){

@@ -84,8 +84,13 @@ const lstClasses = [
             "js_lv_list_add_btn": "addBtn" ,
             // "js_lv_list_add_text": "addText" ,
         }
-
     },
+    {
+        className: "Group" ,
+        cusConstructor: true ,
+        cusFinalizer: true ,
+        isWidget: false ,
+    } ,
 ]
 
 /*
@@ -110,6 +115,8 @@ for(let clzconf of lstClasses) {
     }
 
     clzconf.cusConstructor = !!clzconf.cusConstructor
+    clzconf.cusFinalizer = !!clzconf.cusFinalizer
+    clzconf.isWidget = (clzconf.isWidget==undefined)? true: (!!clzconf.isWidget)
 
     if(!clzconf.typeName) {
         clzconf.typeName = "lv_"+clzconf.className.toLowerCase()

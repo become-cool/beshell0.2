@@ -7,9 +7,9 @@ try{
 let selectedAppFolder = null
 
 module.exports = class ScrApps extends lv.Obj {
-    constructor(parent) {
+    constructor(parent,desktop) {
         super(parent)
-
+        this.group = new lv.Group()
         this.refs = this.fromJson({
 
             width: "100%" ,
@@ -32,22 +32,26 @@ module.exports = class ScrApps extends lv.Obj {
                     {
                         class:AppIcon ,
                         "text": "设置" ,
-                        "src": "/lib/icon/32/setting.png"
+                        "src": "/lib/icon/32/setting.png" ,
+                        group: this.group
                     } , 
                     {
                         class:AppIcon ,
                         "text": "文件" ,
-                        "src": "/lib/icon/32/folder.png"
+                        "src": "/lib/icon/32/folder.png",
+                        group: this.group
                     }
                     , {
                         class:AppIcon ,
                         "text": "音乐" ,
-                        "src": "/lib/icon/32/music.png"
+                        "src": "/lib/icon/32/music.png",
+                        group: this.group
                     }
                     , {
                         class:AppIcon ,
                         "text": "游戏" ,
                         "src": "/lib/icon/32/game.png" ,
+                        group: this.group ,
                         clicked () {
                             console.log("游戏")
                             require("gameemulator/index.js")
@@ -86,6 +90,12 @@ module.exports = class ScrApps extends lv.Obj {
         })
 
         this.loadAppIconFromLib("/home/become")
+        
+        desktop.disp().on("ipt.btn.press",(key)=>{
+            if(key=='b') {
+                desktop.setActivePanel(0, true)
+            }
+        })
     }
 
     dlgNewApp() {

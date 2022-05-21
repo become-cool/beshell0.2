@@ -36,6 +36,9 @@ class AppIcon extends lv.Column {
         if(json.text) {
             this.refs.label.setText(json.text)
         }
+        if(json.group) {
+            json.group.addObj(this)
+        }
 
         if(json.src) {
             this.refs.icon.setSrc(json.src)

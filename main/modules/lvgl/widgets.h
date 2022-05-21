@@ -12,6 +12,11 @@ inline void lv_obj_set_coord_y(lv_obj_t * obj, lv_coord_t y) ;
 
 JSValue js_lv_obj_wrapper(JSContext *ctx, lv_obj_t * cobj, JSValue cotr, JSClassID clsid) ;
 
+JSValue js_lv_group_wrapper(JSContext *ctx, lv_group_t * group) ;
+JSValue js_lv_group_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv) ;
+void js_lv_group_finalizer(JSRuntime *rt, JSValue val) ;
+
+
 JSValue js_lv_obj_as(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
 JSValue js_lv_obj_ptr(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
 JSValue js_lv_obj_from_ptr(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;

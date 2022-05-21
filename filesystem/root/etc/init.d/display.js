@@ -38,7 +38,5 @@ module.exports = function(){
         loading.setValue(0)
         loading.addFlag("hidden")
         screen.loading = loading
-
-        _defaultDisp.on("*",console.log)
     }
 }

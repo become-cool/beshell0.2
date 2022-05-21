@@ -29,6 +29,7 @@
 inline JSClassID lv_obj_js_class_id() ;
 inline JSClassID lv_label_js_class_id() ;
 inline JSClassID lv_btn_js_class_id() ;
+inline JSClassID lv_group_js_class_id() ;
 
 void be_lv_widgets_gen_init() ;
 void be_lv_widgets_gen_require(JSContext *ctx, JSValue lvgl) ;
@@ -126,6 +127,11 @@ bool lv_indev_type_str_to_const(const char * str, lv_indev_type_t* out) ;
 bool lv_indev_type_jsstr_to_const(JSContext *ctx, JSValue jsstr, lv_indev_type_t* out) ;
 const char *  lv_indev_type_const_to_str(lv_indev_type_t code) ;
 JSValue lv_indev_type_const_to_jsstr(JSContext *ctx, lv_indev_type_t code) ;
+
+bool lv_group_refocus_policy_str_to_const(const char * str, lv_group_refocus_policy_t* out) ;
+bool lv_group_refocus_policy_jsstr_to_const(JSContext *ctx, JSValue jsstr, lv_group_refocus_policy_t* out) ;
+const char *  lv_group_refocus_policy_const_to_str(lv_group_refocus_policy_t code) ;
+JSValue lv_group_refocus_policy_const_to_jsstr(JSContext *ctx, lv_group_refocus_policy_t code) ;
 // AUTO GENERATE CODE END [CONST CONVERT] --------
 
 

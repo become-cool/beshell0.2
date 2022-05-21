@@ -155,6 +155,43 @@ JSValue js_lv_obj_as(JSContext *ctx, JSValueConst this_val, int argc, JSValueCon
     return JS_DupValue( ctx, js_lv_obj_wrapper(ctx, thisobj, argv[0], classid) );
 }
 
+
+
+
+JSValue js_lv_group_wrapper(JSContext *ctx, lv_group_t * group) {
+    if(!group) {
+        return JS_NULL ;
+    }
+    void * ptr = (void*) group->user_data ;
+
+    // 该对象由 js 创建
+    if(ptr) {
+        return JS_DupValue(ctx, JS_MKPTR(JS_TAG_OBJECT,ptr)) ;
+    }
+
+    // 对象 不是 js 创建
+    else {
+        // @todo 包装成 js 对象 (不在 js_lv_disp_finalizer 中 free)
+        THROW_EXCEPTION("disp not created by js runtime") ;
+    }
+}
+
+
+JSValue js_lv_group_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv) {
+    JSValue jsobj = JS_NewObjectClass(ctx, lv_group_js_class_id()) ;
+    lv_group_t * cgrp = lv_group_create() ;
+    JS_SetOpaque(jsobj, cgrp) ;
+    cgrp->user_data = JS_VALUE_GET_PTR(jsobj) ;
+    return jsobj ;
+}
+void js_lv_group_finalizer(JSRuntime *rt, JSValue val){
+    lv_group_t * cgrp = (lv_group_t *) JS_GetOpaque(val, lv_group_js_class_id()) ;
+    if(cgrp) {
+        lv_group_del(cgrp) ;
+        JS_SetOpaque(val, NULL) ;
+    }
+}
+
 typedef struct _lv_event_dsc_t {
     lv_event_cb_t cb;
     void * user_data;

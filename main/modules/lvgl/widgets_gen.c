@@ -1,5 +1,6 @@
 #include "widgets_gen.h"
 #include "widgets.h"
+#include "display.h"
 #include "style.h"
 #include "be_lv_struct_wrapper.h"
 
@@ -13,7 +14,7 @@
 // AUTO GENERATE CODE START [CONST MAPPING] --------
 
 bool lv_flex_flow_str_to_const(const char * name, lv_flex_flow_t* out) {
-        if(strcmp(name,"row")==0) {
+    if(strcmp(name,"row")==0) {
         (*out) = LV_FLEX_FLOW_ROW ;
     }
     else if(strcmp(name,"column")==0) {
@@ -70,7 +71,7 @@ JSValue lv_flex_flow_const_to_jsstr(JSContext *ctx, lv_flex_flow_t code) {
 }
 
 bool lv_flex_align_str_to_const(const char * name, lv_flex_align_t* out) {
-        if(strcmp(name,"start")==0) {
+    if(strcmp(name,"start")==0) {
         (*out) = LV_FLEX_ALIGN_START ;
     }
     else if(strcmp(name,"end")==0) {
@@ -119,7 +120,7 @@ JSValue lv_flex_align_const_to_jsstr(JSContext *ctx, lv_flex_align_t code) {
 }
 
 bool lv_event_code_str_to_const(const char * name, lv_event_code_t* out) {
-        if(strcmp(name,"all")==0) {
+    if(strcmp(name,"all")==0) {
         (*out) = LV_EVENT_ALL ;
     }
     else if(strcmp(name,"pressed")==0) {
@@ -324,7 +325,7 @@ JSValue lv_event_code_const_to_jsstr(JSContext *ctx, lv_event_code_t code) {
 }
 
 bool lv_dir_str_to_const(const char * name, lv_dir_t* out) {
-        if(strcmp(name,"none")==0) {
+    if(strcmp(name,"none")==0) {
         (*out) = LV_DIR_NONE ;
     }
     else if(strcmp(name,"left")==0) {
@@ -381,7 +382,7 @@ JSValue lv_dir_const_to_jsstr(JSContext *ctx, lv_dir_t code) {
 }
 
 bool lv_align_str_to_const(const char * name, lv_align_t* out) {
-        if(strcmp(name,"default")==0) {
+    if(strcmp(name,"default")==0) {
         (*out) = LV_ALIGN_DEFAULT ;
     }
     else if(strcmp(name,"top-left")==0) {
@@ -494,7 +495,7 @@ JSValue lv_align_const_to_jsstr(JSContext *ctx, lv_align_t code) {
 }
 
 bool lv_border_side_str_to_const(const char * name, lv_border_side_t* out) {
-        if(strcmp(name,"none")==0) {
+    if(strcmp(name,"none")==0) {
         (*out) = LV_BORDER_SIDE_NONE ;
     }
     else if(strcmp(name,"bottom")==0) {
@@ -547,7 +548,7 @@ JSValue lv_border_side_const_to_jsstr(JSContext *ctx, lv_border_side_t code) {
 }
 
 bool lv_base_dir_str_to_const(const char * name, lv_base_dir_t* out) {
-        if(strcmp(name,"ltr")==0) {
+    if(strcmp(name,"ltr")==0) {
         (*out) = LV_BASE_DIR_LTR ;
     }
     else if(strcmp(name,"rtl")==0) {
@@ -592,7 +593,7 @@ JSValue lv_base_dir_const_to_jsstr(JSContext *ctx, lv_base_dir_t code) {
 }
 
 bool lv_style_prop_str_to_const(const char * name, lv_style_prop_t* out) {
-        if(strcmp(name,"prop-inv")==0) {
+    if(strcmp(name,"prop-inv")==0) {
         (*out) = LV_STYLE_PROP_INV ;
     }
     else if(strcmp(name,"width")==0) {
@@ -999,7 +1000,7 @@ JSValue lv_style_prop_const_to_jsstr(JSContext *ctx, lv_style_prop_t code) {
 }
 
 bool lv_scr_load_anim_str_to_const(const char * name, lv_scr_load_anim_t* out) {
-        if(strcmp(name,"none")==0) {
+    if(strcmp(name,"none")==0) {
         (*out) = LV_SCR_LOAD_ANIM_NONE ;
     }
     else if(strcmp(name,"over-left")==0) {
@@ -1064,7 +1065,7 @@ JSValue lv_scr_load_anim_const_to_jsstr(JSContext *ctx, lv_scr_load_anim_t code)
 }
 
 bool lv_state_str_to_const(const char * name, lv_state_t* out) {
-        if(strcmp(name,"default")==0) {
+    if(strcmp(name,"default")==0) {
         (*out) = LV_STATE_DEFAULT ;
     }
     else if(strcmp(name,"checked")==0) {
@@ -1145,7 +1146,7 @@ JSValue lv_state_const_to_jsstr(JSContext *ctx, lv_state_t code) {
 }
 
 bool lv_obj_flag_str_to_const(const char * name, lv_obj_flag_t* out) {
-        if(strcmp(name,"hidden")==0) {
+    if(strcmp(name,"hidden")==0) {
         (*out) = LV_OBJ_FLAG_HIDDEN ;
     }
     else if(strcmp(name,"clickable")==0) {
@@ -1270,7 +1271,7 @@ JSValue lv_obj_flag_const_to_jsstr(JSContext *ctx, lv_obj_flag_t code) {
 }
 
 bool lv_text_align_str_to_const(const char * name, lv_text_align_t* out) {
-        if(strcmp(name,"auto")==0) {
+    if(strcmp(name,"auto")==0) {
         (*out) = LV_TEXT_ALIGN_AUTO ;
     }
     else if(strcmp(name,"left")==0) {
@@ -1311,7 +1312,7 @@ JSValue lv_text_align_const_to_jsstr(JSContext *ctx, lv_text_align_t code) {
 }
 
 bool lv_palette_str_to_const(const char * name, lv_palette_t* out) {
-        if(strcmp(name,"red")==0) {
+    if(strcmp(name,"red")==0) {
         (*out) = LV_PALETTE_RED ;
     }
     else if(strcmp(name,"pink")==0) {
@@ -1420,7 +1421,7 @@ JSValue lv_palette_const_to_jsstr(JSContext *ctx, lv_palette_t code) {
 }
 
 bool lv_label_long_mode_str_to_const(const char * name, lv_label_long_mode_t* out) {
-        if(strcmp(name,"wrap")==0) {
+    if(strcmp(name,"wrap")==0) {
         (*out) = LV_LABEL_LONG_WRAP ;
     }
     else if(strcmp(name,"dot")==0) {
@@ -1465,7 +1466,7 @@ JSValue lv_label_long_mode_const_to_jsstr(JSContext *ctx, lv_label_long_mode_t c
 }
 
 bool lv_keyboard_mode_str_to_const(const char * name, lv_keyboard_mode_t* out) {
-        if(strcmp(name,"text-lower")==0) {
+    if(strcmp(name,"text-lower")==0) {
         (*out) = LV_KEYBOARD_MODE_TEXT_LOWER ;
     }
     else if(strcmp(name,"text-upper")==0) {
@@ -1522,7 +1523,7 @@ JSValue lv_keyboard_mode_const_to_jsstr(JSContext *ctx, lv_keyboard_mode_t code)
 }
 
 bool lv_img_cf_str_to_const(const char * name, lv_img_cf_t* out) {
-        if(strcmp(name,"unknown")==0) {
+    if(strcmp(name,"unknown")==0) {
         (*out) = LV_IMG_CF_UNKNOWN ;
     }
     else if(strcmp(name,"raw")==0) {
@@ -1675,7 +1676,7 @@ JSValue lv_img_cf_const_to_jsstr(JSContext *ctx, lv_img_cf_t code) {
 }
 
 bool lv_scroll_snap_str_to_const(const char * name, lv_scroll_snap_t* out) {
-        if(strcmp(name,"none")==0) {
+    if(strcmp(name,"none")==0) {
         (*out) = LV_SCROLL_SNAP_NONE ;
     }
     else if(strcmp(name,"start")==0) {
@@ -1716,7 +1717,7 @@ JSValue lv_scroll_snap_const_to_jsstr(JSContext *ctx, lv_scroll_snap_t code) {
 }
 
 bool lv_indev_type_str_to_const(const char * name, lv_indev_type_t* out) {
-        if(strcmp(name,"none")==0) {
+    if(strcmp(name,"none")==0) {
         (*out) = LV_INDEV_TYPE_NONE ;
     }
     else if(strcmp(name,"pointer")==0) {
@@ -1759,6 +1760,39 @@ const char * lv_indev_type_const_to_str(lv_indev_type_t code) {
 JSValue lv_indev_type_const_to_jsstr(JSContext *ctx, lv_indev_type_t code) {
     return JS_NewString(ctx, lv_indev_type_const_to_str(code));
 }
+
+bool lv_group_refocus_policy_str_to_const(const char * name, lv_group_refocus_policy_t* out) {
+    if(strcmp(name,"next")==0) {
+        (*out) = LV_GROUP_REFOCUS_POLICY_NEXT ;
+    }
+    else if(strcmp(name,"prev")==0) {
+        (*out) = LV_GROUP_REFOCUS_POLICY_PREV ;
+    }
+
+    else {
+        return false ;
+    }
+    return true ;
+}
+bool lv_group_refocus_policy_jsstr_to_const(JSContext *ctx, JSValue jsstr, lv_group_refocus_policy_t* out) {
+    char * cstr = (char *)JS_ToCString(ctx, jsstr) ;
+    bool suc = lv_group_refocus_policy_str_to_const(cstr, out) ;
+    JS_FreeCString(ctx, cstr) ;
+    return suc ;
+}
+const char * lv_group_refocus_policy_const_to_str(lv_group_refocus_policy_t code) {
+
+    switch(code) {
+        case LV_GROUP_REFOCUS_POLICY_NEXT: return "next";
+        case LV_GROUP_REFOCUS_POLICY_PREV: return "prev";
+
+        default:
+            return "unknow";
+    }
+}
+JSValue lv_group_refocus_policy_const_to_jsstr(JSContext *ctx, lv_group_refocus_policy_t code) {
+    return JS_NewString(ctx, lv_group_refocus_policy_const_to_str(code));
+}
 // AUTO GENERATE CODE END [CONST MAPPING] --------
 
 // AUTO GENERATE CODE START [DEFINE CLASS] --------
@@ -1788,6 +1822,7 @@ static JSValue js_lv_obj_constructor(JSContext *ctx, JSValueConst new_target, in
     // JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
+
 static void js_lv_obj_finalizer(JSRuntime *rt, JSValue val){
     // printf("js_lv_obj_finalizer()\n") ;
     lv_obj_t * thisobj = JS_GetOpaqueInternal(val) ;
@@ -1796,6 +1831,7 @@ static void js_lv_obj_finalizer(JSRuntime *rt, JSValue val){
     }
     // lv_obj_del(thisobj) ;
 }
+
 static JSClassDef js_lv_obj_class = {
     "Obj",
     .finalizer = js_lv_obj_finalizer,
@@ -1827,6 +1863,7 @@ static JSValue js_lv_label_constructor(JSContext *ctx, JSValueConst new_target, 
     // JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
+
 static void js_lv_label_finalizer(JSRuntime *rt, JSValue val){
     // printf("js_lv_label_finalizer()\n") ;
     lv_label_t * thisobj = JS_GetOpaqueInternal(val) ;
@@ -1835,6 +1872,7 @@ static void js_lv_label_finalizer(JSRuntime *rt, JSValue val){
     }
     // lv_obj_del(thisobj) ;
 }
+
 static JSClassDef js_lv_label_class = {
     "Label",
     .finalizer = js_lv_label_finalizer,
@@ -1866,6 +1904,7 @@ static JSValue js_lv_arc_constructor(JSContext *ctx, JSValueConst new_target, in
     // JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
+
 static void js_lv_arc_finalizer(JSRuntime *rt, JSValue val){
     // printf("js_lv_arc_finalizer()\n") ;
     lv_arc_t * thisobj = JS_GetOpaqueInternal(val) ;
@@ -1874,6 +1913,7 @@ static void js_lv_arc_finalizer(JSRuntime *rt, JSValue val){
     }
     // lv_obj_del(thisobj) ;
 }
+
 static JSClassDef js_lv_arc_class = {
     "Arc",
     .finalizer = js_lv_arc_finalizer,
@@ -1905,6 +1945,7 @@ static JSValue js_lv_bar_constructor(JSContext *ctx, JSValueConst new_target, in
     // JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
+
 static void js_lv_bar_finalizer(JSRuntime *rt, JSValue val){
     // printf("js_lv_bar_finalizer()\n") ;
     lv_bar_t * thisobj = JS_GetOpaqueInternal(val) ;
@@ -1913,6 +1954,7 @@ static void js_lv_bar_finalizer(JSRuntime *rt, JSValue val){
     }
     // lv_obj_del(thisobj) ;
 }
+
 static JSClassDef js_lv_bar_class = {
     "Bar",
     .finalizer = js_lv_bar_finalizer,
@@ -1944,6 +1986,7 @@ static JSValue js_lv_btn_constructor(JSContext *ctx, JSValueConst new_target, in
     // JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
+
 static void js_lv_btn_finalizer(JSRuntime *rt, JSValue val){
     // printf("js_lv_btn_finalizer()\n") ;
     lv_btn_t * thisobj = JS_GetOpaqueInternal(val) ;
@@ -1952,6 +1995,7 @@ static void js_lv_btn_finalizer(JSRuntime *rt, JSValue val){
     }
     // lv_obj_del(thisobj) ;
 }
+
 static JSClassDef js_lv_btn_class = {
     "Btn",
     .finalizer = js_lv_btn_finalizer,
@@ -1983,6 +2027,7 @@ static JSValue js_lv_btnmatrix_constructor(JSContext *ctx, JSValueConst new_targ
     // JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
+
 static void js_lv_btnmatrix_finalizer(JSRuntime *rt, JSValue val){
     // printf("js_lv_btnmatrix_finalizer()\n") ;
     lv_btnmatrix_t * thisobj = JS_GetOpaqueInternal(val) ;
@@ -1991,6 +2036,7 @@ static void js_lv_btnmatrix_finalizer(JSRuntime *rt, JSValue val){
     }
     // lv_obj_del(thisobj) ;
 }
+
 static JSClassDef js_lv_btnmatrix_class = {
     "BtnMatrix",
     .finalizer = js_lv_btnmatrix_finalizer,
@@ -2022,6 +2068,7 @@ static JSValue js_lv_canvas_constructor(JSContext *ctx, JSValueConst new_target,
     // JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
+
 static void js_lv_canvas_finalizer(JSRuntime *rt, JSValue val){
     // printf("js_lv_canvas_finalizer()\n") ;
     lv_canvas_t * thisobj = JS_GetOpaqueInternal(val) ;
@@ -2030,6 +2077,7 @@ static void js_lv_canvas_finalizer(JSRuntime *rt, JSValue val){
     }
     // lv_obj_del(thisobj) ;
 }
+
 static JSClassDef js_lv_canvas_class = {
     "Canvas",
     .finalizer = js_lv_canvas_finalizer,
@@ -2061,6 +2109,7 @@ static JSValue js_lv_checkbox_constructor(JSContext *ctx, JSValueConst new_targe
     // JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
+
 static void js_lv_checkbox_finalizer(JSRuntime *rt, JSValue val){
     // printf("js_lv_checkbox_finalizer()\n") ;
     lv_checkbox_t * thisobj = JS_GetOpaqueInternal(val) ;
@@ -2069,6 +2118,7 @@ static void js_lv_checkbox_finalizer(JSRuntime *rt, JSValue val){
     }
     // lv_obj_del(thisobj) ;
 }
+
 static JSClassDef js_lv_checkbox_class = {
     "Checkbox",
     .finalizer = js_lv_checkbox_finalizer,
@@ -2100,6 +2150,7 @@ static JSValue js_lv_dropdown_constructor(JSContext *ctx, JSValueConst new_targe
     // JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
+
 static void js_lv_dropdown_finalizer(JSRuntime *rt, JSValue val){
     // printf("js_lv_dropdown_finalizer()\n") ;
     lv_dropdown_t * thisobj = JS_GetOpaqueInternal(val) ;
@@ -2108,6 +2159,7 @@ static void js_lv_dropdown_finalizer(JSRuntime *rt, JSValue val){
     }
     // lv_obj_del(thisobj) ;
 }
+
 static JSClassDef js_lv_dropdown_class = {
     "Dropdown",
     .finalizer = js_lv_dropdown_finalizer,
@@ -2139,6 +2191,7 @@ static JSValue js_lv_img_constructor(JSContext *ctx, JSValueConst new_target, in
     // JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
+
 static void js_lv_img_finalizer(JSRuntime *rt, JSValue val){
     // printf("js_lv_img_finalizer()\n") ;
     lv_img_t * thisobj = JS_GetOpaqueInternal(val) ;
@@ -2147,6 +2200,7 @@ static void js_lv_img_finalizer(JSRuntime *rt, JSValue val){
     }
     // lv_obj_del(thisobj) ;
 }
+
 static JSClassDef js_lv_img_class = {
     "Img",
     .finalizer = js_lv_img_finalizer,
@@ -2178,6 +2232,7 @@ static JSValue js_lv_line_constructor(JSContext *ctx, JSValueConst new_target, i
     // JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
+
 static void js_lv_line_finalizer(JSRuntime *rt, JSValue val){
     // printf("js_lv_line_finalizer()\n") ;
     lv_line_t * thisobj = JS_GetOpaqueInternal(val) ;
@@ -2186,6 +2241,7 @@ static void js_lv_line_finalizer(JSRuntime *rt, JSValue val){
     }
     // lv_obj_del(thisobj) ;
 }
+
 static JSClassDef js_lv_line_class = {
     "Line",
     .finalizer = js_lv_line_finalizer,
@@ -2217,6 +2273,7 @@ static JSValue js_lv_roller_constructor(JSContext *ctx, JSValueConst new_target,
     // JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
+
 static void js_lv_roller_finalizer(JSRuntime *rt, JSValue val){
     // printf("js_lv_roller_finalizer()\n") ;
     lv_roller_t * thisobj = JS_GetOpaqueInternal(val) ;
@@ -2225,6 +2282,7 @@ static void js_lv_roller_finalizer(JSRuntime *rt, JSValue val){
     }
     // lv_obj_del(thisobj) ;
 }
+
 static JSClassDef js_lv_roller_class = {
     "Roller",
     .finalizer = js_lv_roller_finalizer,
@@ -2256,6 +2314,7 @@ static JSValue js_lv_slider_constructor(JSContext *ctx, JSValueConst new_target,
     // JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
+
 static void js_lv_slider_finalizer(JSRuntime *rt, JSValue val){
     // printf("js_lv_slider_finalizer()\n") ;
     lv_slider_t * thisobj = JS_GetOpaqueInternal(val) ;
@@ -2264,6 +2323,7 @@ static void js_lv_slider_finalizer(JSRuntime *rt, JSValue val){
     }
     // lv_obj_del(thisobj) ;
 }
+
 static JSClassDef js_lv_slider_class = {
     "Slider",
     .finalizer = js_lv_slider_finalizer,
@@ -2295,6 +2355,7 @@ static JSValue js_lv_switch_constructor(JSContext *ctx, JSValueConst new_target,
     // JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
+
 static void js_lv_switch_finalizer(JSRuntime *rt, JSValue val){
     // printf("js_lv_switch_finalizer()\n") ;
     lv_switch_t * thisobj = JS_GetOpaqueInternal(val) ;
@@ -2303,6 +2364,7 @@ static void js_lv_switch_finalizer(JSRuntime *rt, JSValue val){
     }
     // lv_obj_del(thisobj) ;
 }
+
 static JSClassDef js_lv_switch_class = {
     "Switch",
     .finalizer = js_lv_switch_finalizer,
@@ -2334,6 +2396,7 @@ static JSValue js_lv_table_constructor(JSContext *ctx, JSValueConst new_target, 
     // JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
+
 static void js_lv_table_finalizer(JSRuntime *rt, JSValue val){
     // printf("js_lv_table_finalizer()\n") ;
     lv_table_t * thisobj = JS_GetOpaqueInternal(val) ;
@@ -2342,6 +2405,7 @@ static void js_lv_table_finalizer(JSRuntime *rt, JSValue val){
     }
     // lv_obj_del(thisobj) ;
 }
+
 static JSClassDef js_lv_table_class = {
     "Table",
     .finalizer = js_lv_table_finalizer,
@@ -2373,6 +2437,7 @@ static JSValue js_lv_textarea_constructor(JSContext *ctx, JSValueConst new_targe
     // JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
+
 static void js_lv_textarea_finalizer(JSRuntime *rt, JSValue val){
     // printf("js_lv_textarea_finalizer()\n") ;
     lv_textarea_t * thisobj = JS_GetOpaqueInternal(val) ;
@@ -2381,6 +2446,7 @@ static void js_lv_textarea_finalizer(JSRuntime *rt, JSValue val){
     }
     // lv_obj_del(thisobj) ;
 }
+
 static JSClassDef js_lv_textarea_class = {
     "TextArea",
     .finalizer = js_lv_textarea_finalizer,
@@ -2388,6 +2454,7 @@ static JSClassDef js_lv_textarea_class = {
 
  // beapi.lvgl.MsgBox --
 static JSClassID js_lv_msgbox_class_id ;
+
 static void js_lv_msgbox_finalizer(JSRuntime *rt, JSValue val){
     // printf("js_lv_msgbox_finalizer()\n") ;
     lv_msgbox_t * thisobj = JS_GetOpaqueInternal(val) ;
@@ -2396,6 +2463,7 @@ static void js_lv_msgbox_finalizer(JSRuntime *rt, JSValue val){
     }
     // lv_obj_del(thisobj) ;
 }
+
 static JSClassDef js_lv_msgbox_class = {
     "MsgBox",
     .finalizer = js_lv_msgbox_finalizer,
@@ -2427,6 +2495,7 @@ static JSValue js_lv_keyboard_constructor(JSContext *ctx, JSValueConst new_targe
     // JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
+
 static void js_lv_keyboard_finalizer(JSRuntime *rt, JSValue val){
     // printf("js_lv_keyboard_finalizer()\n") ;
     lv_keyboard_t * thisobj = JS_GetOpaqueInternal(val) ;
@@ -2435,6 +2504,7 @@ static void js_lv_keyboard_finalizer(JSRuntime *rt, JSValue val){
     }
     // lv_obj_del(thisobj) ;
 }
+
 static JSClassDef js_lv_keyboard_class = {
     "Keyboard",
     .finalizer = js_lv_keyboard_finalizer,
@@ -2466,6 +2536,7 @@ static JSValue js_lv_tileview_constructor(JSContext *ctx, JSValueConst new_targe
     // JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
+
 static void js_lv_tileview_finalizer(JSRuntime *rt, JSValue val){
     // printf("js_lv_tileview_finalizer()\n") ;
     lv_tileview_t * thisobj = JS_GetOpaqueInternal(val) ;
@@ -2474,6 +2545,7 @@ static void js_lv_tileview_finalizer(JSRuntime *rt, JSValue val){
     }
     // lv_obj_del(thisobj) ;
 }
+
 static JSClassDef js_lv_tileview_class = {
     "TileView",
     .finalizer = js_lv_tileview_finalizer,
@@ -2505,6 +2577,7 @@ static JSValue js_lv_list_constructor(JSContext *ctx, JSValueConst new_target, i
     // JS_DupValue(ctx, jsobj) ;
     return jsobj ;
 }
+
 static void js_lv_list_finalizer(JSRuntime *rt, JSValue val){
     // printf("js_lv_list_finalizer()\n") ;
     lv_obj_t * thisobj = JS_GetOpaqueInternal(val) ;
@@ -2513,9 +2586,18 @@ static void js_lv_list_finalizer(JSRuntime *rt, JSValue val){
     }
     // lv_obj_del(thisobj) ;
 }
+
 static JSClassDef js_lv_list_class = {
     "List",
     .finalizer = js_lv_list_finalizer,
+};
+
+ // beapi.lvgl.Group --
+static JSClassID js_lv_group_class_id ;
+
+static JSClassDef js_lv_group_class = {
+    "Group",
+    .finalizer = js_lv_group_finalizer,
 };
 
 // AUTO GENERATE CODE END [DEFINE CLASS] --------
@@ -2654,6 +2736,26 @@ static JSValue js_lv_obj_has_state(JSContext *ctx, JSValueConst this_val, int ar
         return JS_EXCEPTION ;
     }
     JSValue retval = JS_NewBool(ctx,lv_obj_has_state(thisobj, state)) ;
+    return retval ;
+}
+
+static JSValue js_lv_obj_get_group(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    void * lv_userdata = JS_GetOpaqueInternal(this_val) ;
+    if(!lv_userdata) {
+        THROW_EXCEPTION("Obj.group() must be called as a Obj method")
+    }
+    lv_obj_t * thisobj = lv_userdata ;
+    JSValue retval = js_lv_group_wrapper(ctx,lv_obj_get_group(thisobj)) ;
+    return retval ;
+}
+
+static JSValue js_lv_obj_is_group_def(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    void * lv_userdata = JS_GetOpaqueInternal(this_val) ;
+    if(!lv_userdata) {
+        THROW_EXCEPTION("Obj.isGroupDef() must be called as a Obj method")
+    }
+    lv_obj_t * thisobj = lv_userdata ;
+    JSValue retval = JS_NewBool(ctx,lv_obj_is_group_def(thisobj)) ;
     return retval ;
 }
 
@@ -4061,6 +4163,16 @@ static JSValue js_lv_obj_get_screen(JSContext *ctx, JSValueConst this_val, int a
     return retval ;
 }
 
+static JSValue js_lv_obj_get_disp(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    void * lv_userdata = JS_GetOpaqueInternal(this_val) ;
+    if(!lv_userdata) {
+        THROW_EXCEPTION("Obj.disp() must be called as a Obj method")
+    }
+    lv_obj_t * thisobj = lv_userdata ;
+    JSValue retval = js_lv_disp_wrapper(ctx,lv_obj_get_disp(thisobj)) ;
+    return retval ;
+}
+
 static JSValue js_lv_obj_get_parent(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     void * lv_userdata = JS_GetOpaqueInternal(this_val) ;
     if(!lv_userdata) {
@@ -4285,6 +4397,8 @@ static const JSCFunctionListEntry js_lv_obj_proto_funcs[] = {
     JS_CFUNC_DEF("hasFlagAny", 0, js_lv_obj_has_flag_any),
     JS_CFUNC_DEF("state", 0, js_lv_obj_get_state),
     JS_CFUNC_DEF("hasState", 0, js_lv_obj_has_state),
+    JS_CFUNC_DEF("group", 0, js_lv_obj_get_group),
+    JS_CFUNC_DEF("isGroupDef", 0, js_lv_obj_is_group_def),
     JS_CFUNC_DEF("allocateSpecAttr", 0, js_lv_obj_allocate_spec_attr),
     JS_CFUNC_DEF("isValid", 0, js_lv_obj_is_valid),
     JS_CFUNC_DEF("dpx", 0, js_lv_obj_dpx),
@@ -4365,6 +4479,7 @@ static const JSCFunctionListEntry js_lv_obj_proto_funcs[] = {
     JS_CFUNC_DEF("setParent", 0, js_lv_obj_set_parent),
     JS_CFUNC_DEF("moveToIndex", 0, js_lv_obj_move_to_index),
     JS_CFUNC_DEF("screen", 0, js_lv_obj_get_screen),
+    JS_CFUNC_DEF("disp", 0, js_lv_obj_get_disp),
     JS_CFUNC_DEF("parent", 0, js_lv_obj_get_parent),
     JS_CFUNC_DEF("child", 0, js_lv_obj_get_child),
     JS_CFUNC_DEF("childCnt", 0, js_lv_obj_get_child_cnt),
@@ -4380,6 +4495,9 @@ static const JSCFunctionListEntry js_lv_obj_proto_funcs[] = {
 } ;
 #define __def_js_lv_obj_proto_funcs__
 
+
+static const JSCFunctionListEntry js_lv_obj_static_funcs[] = {
+} ;
 static JSValue js_lv_label_set_text(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     if(argc<1) {
         THROW_EXCEPTION("Label.setText() missing arg")
@@ -4693,6 +4811,9 @@ static const JSCFunctionListEntry js_lv_label_proto_funcs[] = {
 } ;
 #define __def_js_lv_label_proto_funcs__
 
+
+static const JSCFunctionListEntry js_lv_label_static_funcs[] = {
+} ;
 static JSValue js_lv_arc_set_start_angle(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     if(argc<1) {
         THROW_EXCEPTION("Arc.setStartAngle() missing arg")
@@ -5007,6 +5128,9 @@ static const JSCFunctionListEntry js_lv_arc_proto_funcs[] = {
 } ;
 #define __def_js_lv_arc_proto_funcs__
 
+
+static const JSCFunctionListEntry js_lv_arc_static_funcs[] = {
+} ;
 static JSValue js_lv_bar_set_value(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     if(argc<1) {
         THROW_EXCEPTION("Bar.setValue() missing arg")
@@ -5153,10 +5277,16 @@ static const JSCFunctionListEntry js_lv_bar_proto_funcs[] = {
 #define __def_js_lv_bar_proto_funcs__
 
 
+static const JSCFunctionListEntry js_lv_bar_static_funcs[] = {
+} ;
+
 static const JSCFunctionListEntry js_lv_btn_proto_funcs[] = {
 } ;
 #define __def_js_lv_btn_proto_funcs__
 
+
+static const JSCFunctionListEntry js_lv_btn_static_funcs[] = {
+} ;
 static JSValue js_lv_btnmatrix_get_popovers(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     void * lv_userdata = JS_GetOpaqueInternal(this_val) ;
     if(!lv_userdata) {
@@ -5377,6 +5507,9 @@ static const JSCFunctionListEntry js_lv_btnmatrix_proto_funcs[] = {
 } ;
 #define __def_js_lv_btnmatrix_proto_funcs__
 
+
+static const JSCFunctionListEntry js_lv_btnmatrix_static_funcs[] = {
+} ;
 static JSValue js_lv_canvas_set_px_color(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     if(argc<3) {
         THROW_EXCEPTION("Canvas.setPxColor() missing arg")
@@ -5708,6 +5841,9 @@ static const JSCFunctionListEntry js_lv_canvas_proto_funcs[] = {
 } ;
 #define __def_js_lv_canvas_proto_funcs__
 
+
+static const JSCFunctionListEntry js_lv_canvas_static_funcs[] = {
+} ;
 static JSValue js_lv_checkbox_set_text(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     if(argc<1) {
         THROW_EXCEPTION("Checkbox.setText() missing arg")
@@ -5759,6 +5895,9 @@ static const JSCFunctionListEntry js_lv_checkbox_proto_funcs[] = {
 } ;
 #define __def_js_lv_checkbox_proto_funcs__
 
+
+static const JSCFunctionListEntry js_lv_checkbox_static_funcs[] = {
+} ;
 static JSValue js_lv_dropdown_set_text(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     if(argc<1) {
         THROW_EXCEPTION("Dropdown.setText() missing arg")
@@ -6024,6 +6163,9 @@ static const JSCFunctionListEntry js_lv_dropdown_proto_funcs[] = {
 } ;
 #define __def_js_lv_dropdown_proto_funcs__
 
+
+static const JSCFunctionListEntry js_lv_dropdown_static_funcs[] = {
+} ;
 static JSValue js_lv_img_set_offset_x(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     if(argc<1) {
         THROW_EXCEPTION("Img.setOffsetX() missing arg")
@@ -6264,6 +6406,9 @@ static const JSCFunctionListEntry js_lv_img_proto_funcs[] = {
 } ;
 #define __def_js_lv_img_proto_funcs__
 
+
+static const JSCFunctionListEntry js_lv_img_static_funcs[] = {
+} ;
 static JSValue js_lv_line_set_y_invert(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     if(argc<1) {
         THROW_EXCEPTION("Line.setYInvert() missing arg")
@@ -6297,6 +6442,9 @@ static const JSCFunctionListEntry js_lv_line_proto_funcs[] = {
 } ;
 #define __def_js_lv_line_proto_funcs__
 
+
+static const JSCFunctionListEntry js_lv_line_static_funcs[] = {
+} ;
 static JSValue js_lv_roller_set_options(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     if(argc<2) {
         THROW_EXCEPTION("Roller.setOptions() missing arg")
@@ -6416,6 +6564,9 @@ static const JSCFunctionListEntry js_lv_roller_proto_funcs[] = {
 } ;
 #define __def_js_lv_roller_proto_funcs__
 
+
+static const JSCFunctionListEntry js_lv_roller_static_funcs[] = {
+} ;
 static JSValue js_lv_slider_set_value(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     if(argc<1) {
         THROW_EXCEPTION("Slider.setValue() missing arg")
@@ -6576,10 +6727,16 @@ static const JSCFunctionListEntry js_lv_slider_proto_funcs[] = {
 #define __def_js_lv_slider_proto_funcs__
 
 
+static const JSCFunctionListEntry js_lv_slider_static_funcs[] = {
+} ;
+
 static const JSCFunctionListEntry js_lv_switch_proto_funcs[] = {
 } ;
 #define __def_js_lv_switch_proto_funcs__
 
+
+static const JSCFunctionListEntry js_lv_switch_static_funcs[] = {
+} ;
 static JSValue js_lv_table_set_cell_value(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     if(argc<3) {
         THROW_EXCEPTION("Table.setCellValue() missing arg")
@@ -6813,6 +6970,9 @@ static const JSCFunctionListEntry js_lv_table_proto_funcs[] = {
 } ;
 #define __def_js_lv_table_proto_funcs__
 
+
+static const JSCFunctionListEntry js_lv_table_static_funcs[] = {
+} ;
 static JSValue js_lv_textarea_add_text(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     if(argc<1) {
         THROW_EXCEPTION("TextArea.addText() missing arg")
@@ -7264,6 +7424,9 @@ static const JSCFunctionListEntry js_lv_textarea_proto_funcs[] = {
 } ;
 #define __def_js_lv_textarea_proto_funcs__
 
+
+static const JSCFunctionListEntry js_lv_textarea_static_funcs[] = {
+} ;
 static JSValue js_lv_msgbox_get_title(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     void * lv_userdata = JS_GetOpaqueInternal(this_val) ;
     if(!lv_userdata) {
@@ -7395,6 +7558,9 @@ static const JSCFunctionListEntry js_lv_msgbox_proto_funcs[] = {
 } ;
 #define __def_js_lv_msgbox_proto_funcs__
 
+
+static const JSCFunctionListEntry js_lv_msgbox_static_funcs[] = {
+} ;
 static JSValue js_lv_keyboard_set_textarea(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     if(argc<1) {
         THROW_EXCEPTION("Keyboard.setTextarea() missing arg")
@@ -7481,6 +7647,9 @@ static const JSCFunctionListEntry js_lv_keyboard_proto_funcs[] = {
 } ;
 #define __def_js_lv_keyboard_proto_funcs__
 
+
+static const JSCFunctionListEntry js_lv_keyboard_static_funcs[] = {
+} ;
 static JSValue js_lv_tileview_add_tile(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     if(argc<3) {
         THROW_EXCEPTION("TileView.addTile() missing arg")
@@ -7533,6 +7702,9 @@ static const JSCFunctionListEntry js_lv_tileview_proto_funcs[] = {
 } ;
 #define __def_js_lv_tileview_proto_funcs__
 
+
+static const JSCFunctionListEntry js_lv_tileview_static_funcs[] = {
+} ;
 static JSValue js_lv_list_add_text(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     if(argc<1) {
         THROW_EXCEPTION("List.addText() missing arg")
@@ -7578,6 +7750,276 @@ static const JSCFunctionListEntry js_lv_list_proto_funcs[] = {
 } ;
 #define __def_js_lv_list_proto_funcs__
 
+
+static const JSCFunctionListEntry js_lv_list_static_funcs[] = {
+} ;
+static JSValue js_lv_group_del(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    void * lv_userdata = JS_GetOpaqueInternal(this_val) ;
+    if(!lv_userdata) {
+        THROW_EXCEPTION("Group.del() must be called as a Group method")
+    }
+    lv_obj_t * thisobj = lv_userdata ;
+    lv_group_del(thisobj) ;
+    JSValue retval = JS_UNDEFINED ;
+    return retval ;
+}
+
+static JSValue js_lv_group_set_default(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    void * lv_userdata = JS_GetOpaqueInternal(this_val) ;
+    if(!lv_userdata) {
+        THROW_EXCEPTION("Group.setDefault() must be called as a Group method")
+    }
+    lv_obj_t * thisobj = lv_userdata ;
+    lv_group_set_default(thisobj) ;
+    JSValue retval = JS_UNDEFINED ;
+    return retval ;
+}
+
+static JSValue js_lv_group_add_obj(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    if(argc<1) {
+        THROW_EXCEPTION("Group.addObj() missing arg")
+    }
+    void * lv_userdata = JS_GetOpaqueInternal(this_val) ;
+    if(!lv_userdata) {
+        THROW_EXCEPTION("Group.addObj() must be called as a Group method")
+    }
+    lv_obj_t * thisobj = lv_userdata ;
+    lv_obj_t * obj = (lv_obj_t *)JS_GetOpaqueInternal(argv[0]) ;
+    if( !obj ){
+        THROW_EXCEPTION("arg obj of method Group.addObj() must be a beapi.lvgl.Obj")
+    }
+    lv_group_add_obj(thisobj, obj) ;
+    JSValue retval = JS_UNDEFINED ;
+    return retval ;
+}
+
+static JSValue js_lv_group_swap_obj(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    if(argc<2) {
+        THROW_EXCEPTION("Group.swapObj() missing arg")
+    }
+    lv_obj_t * obj1 = (lv_obj_t *)JS_GetOpaqueInternal(argv[0]) ;
+    if( !obj1 ){
+        THROW_EXCEPTION("arg obj1 of method Group.swapObj() must be a beapi.lvgl.Obj")
+    }
+    lv_obj_t * obj2 = (lv_obj_t *)JS_GetOpaqueInternal(argv[1]) ;
+    if( !obj2 ){
+        THROW_EXCEPTION("arg obj2 of method Group.swapObj() must be a beapi.lvgl.Obj")
+    }
+    lv_group_swap_obj(obj1, obj2) ;
+    JSValue retval = JS_UNDEFINED ;
+    return retval ;
+}
+
+static JSValue js_lv_group_remove_obj(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    if(argc<1) {
+        THROW_EXCEPTION("Group.removeObj() missing arg")
+    }
+    lv_obj_t * obj = (lv_obj_t *)JS_GetOpaqueInternal(argv[0]) ;
+    if( !obj ){
+        THROW_EXCEPTION("arg obj of method Group.removeObj() must be a beapi.lvgl.Obj")
+    }
+    lv_group_remove_obj(obj) ;
+    JSValue retval = JS_UNDEFINED ;
+    return retval ;
+}
+
+static JSValue js_lv_group_remove_all_objs(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    void * lv_userdata = JS_GetOpaqueInternal(this_val) ;
+    if(!lv_userdata) {
+        THROW_EXCEPTION("Group.removeAllObjs() must be called as a Group method")
+    }
+    lv_obj_t * thisobj = lv_userdata ;
+    lv_group_remove_all_objs(thisobj) ;
+    JSValue retval = JS_UNDEFINED ;
+    return retval ;
+}
+
+static JSValue js_lv_group_focus_obj(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    if(argc<1) {
+        THROW_EXCEPTION("Group.focusObj() missing arg")
+    }
+    lv_obj_t * obj = (lv_obj_t *)JS_GetOpaqueInternal(argv[0]) ;
+    if( !obj ){
+        THROW_EXCEPTION("arg obj of method Group.focusObj() must be a beapi.lvgl.Obj")
+    }
+    lv_group_focus_obj(obj) ;
+    JSValue retval = JS_UNDEFINED ;
+    return retval ;
+}
+
+static JSValue js_lv_group_focus_next(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    void * lv_userdata = JS_GetOpaqueInternal(this_val) ;
+    if(!lv_userdata) {
+        THROW_EXCEPTION("Group.focusNext() must be called as a Group method")
+    }
+    lv_obj_t * thisobj = lv_userdata ;
+    lv_group_focus_next(thisobj) ;
+    JSValue retval = JS_UNDEFINED ;
+    return retval ;
+}
+
+static JSValue js_lv_group_focus_prev(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    void * lv_userdata = JS_GetOpaqueInternal(this_val) ;
+    if(!lv_userdata) {
+        THROW_EXCEPTION("Group.focusPrev() must be called as a Group method")
+    }
+    lv_obj_t * thisobj = lv_userdata ;
+    lv_group_focus_prev(thisobj) ;
+    JSValue retval = JS_UNDEFINED ;
+    return retval ;
+}
+
+static JSValue js_lv_group_focus_freeze(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    if(argc<1) {
+        THROW_EXCEPTION("Group.focusFreeze() missing arg")
+    }
+    void * lv_userdata = JS_GetOpaqueInternal(this_val) ;
+    if(!lv_userdata) {
+        THROW_EXCEPTION("Group.focusFreeze() must be called as a Group method")
+    }
+    lv_obj_t * thisobj = lv_userdata ;
+    bool en = JS_ToBool(ctx, argv[0]) ;
+    lv_group_focus_freeze(thisobj, en) ;
+    JSValue retval = JS_UNDEFINED ;
+    return retval ;
+}
+
+static JSValue js_lv_group_send_data(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    if(argc<1) {
+        THROW_EXCEPTION("Group.sendData() missing arg")
+    }
+    void * lv_userdata = JS_GetOpaqueInternal(this_val) ;
+    if(!lv_userdata) {
+        THROW_EXCEPTION("Group.sendData() must be called as a Group method")
+    }
+    lv_obj_t * thisobj = lv_userdata ;
+    uint32_t c ;
+    if(JS_ToUint32(ctx, (uint32_t *) &c, argv[0])!=0){
+        THROW_EXCEPTION("arg c of method Group.sendData() must be a number")
+    }
+    JSValue retval = JS_NewBool(ctx,lv_group_send_data(thisobj, c)) ;
+    return retval ;
+}
+
+static JSValue js_lv_group_set_refocus_policy(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    if(argc<1) {
+        THROW_EXCEPTION("Group.setRefocusPolicy() missing arg")
+    }
+    void * lv_userdata = JS_GetOpaqueInternal(this_val) ;
+    if(!lv_userdata) {
+        THROW_EXCEPTION("Group.setRefocusPolicy() must be called as a Group method")
+    }
+    lv_obj_t * thisobj = lv_userdata ;
+    lv_group_refocus_policy_t policy ;
+    if(!lv_group_refocus_policy_jsstr_to_const(ctx, argv[0], &policy)) {
+        return JS_EXCEPTION ;
+    }
+    lv_group_set_refocus_policy(thisobj, policy) ;
+    JSValue retval = JS_UNDEFINED ;
+    return retval ;
+}
+
+static JSValue js_lv_group_set_editing(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    if(argc<1) {
+        THROW_EXCEPTION("Group.setEditing() missing arg")
+    }
+    void * lv_userdata = JS_GetOpaqueInternal(this_val) ;
+    if(!lv_userdata) {
+        THROW_EXCEPTION("Group.setEditing() must be called as a Group method")
+    }
+    lv_obj_t * thisobj = lv_userdata ;
+    bool edit = JS_ToBool(ctx, argv[0]) ;
+    lv_group_set_editing(thisobj, edit) ;
+    JSValue retval = JS_UNDEFINED ;
+    return retval ;
+}
+
+static JSValue js_lv_group_set_wrap(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    if(argc<1) {
+        THROW_EXCEPTION("Group.setWrap() missing arg")
+    }
+    void * lv_userdata = JS_GetOpaqueInternal(this_val) ;
+    if(!lv_userdata) {
+        THROW_EXCEPTION("Group.setWrap() must be called as a Group method")
+    }
+    lv_obj_t * thisobj = lv_userdata ;
+    bool en = JS_ToBool(ctx, argv[0]) ;
+    lv_group_set_wrap(thisobj, en) ;
+    JSValue retval = JS_UNDEFINED ;
+    return retval ;
+}
+
+static JSValue js_lv_group_get_focused(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    void * lv_userdata = JS_GetOpaqueInternal(this_val) ;
+    if(!lv_userdata) {
+        THROW_EXCEPTION("Group.focused() must be called as a Group method")
+    }
+    lv_obj_t * thisobj = lv_userdata ;
+    JSValue retval = JS_NULL ;
+    void * lvobj = lv_group_get_focused(thisobj);
+    if(lvobj) {
+        retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, 0) ;
+        JS_DupValue(ctx, retval) ;
+    }
+    return retval ;
+}
+
+static JSValue js_lv_group_get_editing(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    void * lv_userdata = JS_GetOpaqueInternal(this_val) ;
+    if(!lv_userdata) {
+        THROW_EXCEPTION("Group.editing() must be called as a Group method")
+    }
+    lv_obj_t * thisobj = lv_userdata ;
+    JSValue retval = JS_NewBool(ctx,lv_group_get_editing(thisobj)) ;
+    return retval ;
+}
+
+static JSValue js_lv_group_get_wrap(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    void * lv_userdata = JS_GetOpaqueInternal(this_val) ;
+    if(!lv_userdata) {
+        THROW_EXCEPTION("Group.wrap() must be called as a Group method")
+    }
+    lv_obj_t * thisobj = lv_userdata ;
+    JSValue retval = JS_NewBool(ctx,lv_group_get_wrap(thisobj)) ;
+    return retval ;
+}
+
+static JSValue js_lv_group_get_obj_count(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    void * lv_userdata = JS_GetOpaqueInternal(this_val) ;
+    if(!lv_userdata) {
+        THROW_EXCEPTION("Group.objCount() must be called as a Group method")
+    }
+    lv_obj_t * thisobj = lv_userdata ;
+    JSValue retval = JS_NewUint32(ctx,lv_group_get_obj_count(thisobj)) ;
+    return retval ;
+}
+
+
+static const JSCFunctionListEntry js_lv_group_proto_funcs[] = {
+    JS_CFUNC_DEF("del", 0, js_lv_group_del),
+    JS_CFUNC_DEF("setDefault", 0, js_lv_group_set_default),
+    JS_CFUNC_DEF("addObj", 0, js_lv_group_add_obj),
+    JS_CFUNC_DEF("removeAllObjs", 0, js_lv_group_remove_all_objs),
+    JS_CFUNC_DEF("focusNext", 0, js_lv_group_focus_next),
+    JS_CFUNC_DEF("focusPrev", 0, js_lv_group_focus_prev),
+    JS_CFUNC_DEF("focusFreeze", 0, js_lv_group_focus_freeze),
+    JS_CFUNC_DEF("sendData", 0, js_lv_group_send_data),
+    JS_CFUNC_DEF("setRefocusPolicy", 0, js_lv_group_set_refocus_policy),
+    JS_CFUNC_DEF("setEditing", 0, js_lv_group_set_editing),
+    JS_CFUNC_DEF("setWrap", 0, js_lv_group_set_wrap),
+    JS_CFUNC_DEF("focused", 0, js_lv_group_get_focused),
+    JS_CFUNC_DEF("editing", 0, js_lv_group_get_editing),
+    JS_CFUNC_DEF("wrap", 0, js_lv_group_get_wrap),
+    JS_CFUNC_DEF("objCount", 0, js_lv_group_get_obj_count),
+} ;
+#define __def_js_lv_group_proto_funcs__
+
+
+static const JSCFunctionListEntry js_lv_group_static_funcs[] = {
+    JS_CFUNC_DEF("swapObj", 0, js_lv_group_swap_obj),
+    JS_CFUNC_DEF("removeObj", 0, js_lv_group_remove_obj),
+    JS_CFUNC_DEF("focusObj", 0, js_lv_group_focus_obj),
+} ;
 // AUTO GENERATE CODE END [METHOD LIST] --------
 
 
@@ -7683,84 +8125,172 @@ void be_lv_widgets_gen_require(JSContext *ctx, JSValue lvgl) {
 
 // AUTO GENERATE CODE START [REGISTER CLASS] --------
     // define js class lvgl.lv_obj    
-    JSValue proto_lv_obj = qjs_def_class(ctx, "Obj", js_lv_obj_class_id, &js_lv_obj_class
-                , "Obj", js_lv_obj_constructor, js_lv_obj_proto_funcs, countof(js_lv_obj_proto_funcs), EventEmitterProto, lvgl) ;
+    JSValue proto_lv_obj = qjs_def_class2(
+                ctx, "Obj", js_lv_obj_class_id, &js_lv_obj_class, "Obj"
+                , js_lv_obj_constructor
+                , js_lv_obj_proto_funcs, countof(js_lv_obj_proto_funcs)
+                , js_lv_obj_static_funcs, countof(js_lv_obj_static_funcs)
+                , EventEmitterProto, lvgl) ;
 
     // define js class lvgl.lv_label    
-    JSValue proto_lv_label = qjs_def_class(ctx, "Label", js_lv_label_class_id, &js_lv_label_class
-                , "Label", js_lv_label_constructor, js_lv_label_proto_funcs, countof(js_lv_label_proto_funcs), proto_lv_obj, lvgl) ;
+    JSValue proto_lv_label = qjs_def_class2(
+                ctx, "Label", js_lv_label_class_id, &js_lv_label_class, "Label"
+                , js_lv_label_constructor
+                , js_lv_label_proto_funcs, countof(js_lv_label_proto_funcs)
+                , js_lv_label_static_funcs, countof(js_lv_label_static_funcs)
+                , proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_arc    
-    JSValue proto_lv_arc = qjs_def_class(ctx, "Arc", js_lv_arc_class_id, &js_lv_arc_class
-                , "Arc", js_lv_arc_constructor, js_lv_arc_proto_funcs, countof(js_lv_arc_proto_funcs), proto_lv_obj, lvgl) ;
+    JSValue proto_lv_arc = qjs_def_class2(
+                ctx, "Arc", js_lv_arc_class_id, &js_lv_arc_class, "Arc"
+                , js_lv_arc_constructor
+                , js_lv_arc_proto_funcs, countof(js_lv_arc_proto_funcs)
+                , js_lv_arc_static_funcs, countof(js_lv_arc_static_funcs)
+                , proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_bar    
-    JSValue proto_lv_bar = qjs_def_class(ctx, "Bar", js_lv_bar_class_id, &js_lv_bar_class
-                , "Bar", js_lv_bar_constructor, js_lv_bar_proto_funcs, countof(js_lv_bar_proto_funcs), proto_lv_obj, lvgl) ;
+    JSValue proto_lv_bar = qjs_def_class2(
+                ctx, "Bar", js_lv_bar_class_id, &js_lv_bar_class, "Bar"
+                , js_lv_bar_constructor
+                , js_lv_bar_proto_funcs, countof(js_lv_bar_proto_funcs)
+                , js_lv_bar_static_funcs, countof(js_lv_bar_static_funcs)
+                , proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_btn    
-    JSValue proto_lv_btn = qjs_def_class(ctx, "Btn", js_lv_btn_class_id, &js_lv_btn_class
-                , "Btn", js_lv_btn_constructor, js_lv_btn_proto_funcs, countof(js_lv_btn_proto_funcs), proto_lv_obj, lvgl) ;
+    JSValue proto_lv_btn = qjs_def_class2(
+                ctx, "Btn", js_lv_btn_class_id, &js_lv_btn_class, "Btn"
+                , js_lv_btn_constructor
+                , js_lv_btn_proto_funcs, countof(js_lv_btn_proto_funcs)
+                , js_lv_btn_static_funcs, countof(js_lv_btn_static_funcs)
+                , proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_btnmatrix    
-    JSValue proto_lv_btnmatrix = qjs_def_class(ctx, "BtnMatrix", js_lv_btnmatrix_class_id, &js_lv_btnmatrix_class
-                , "BtnMatrix", js_lv_btnmatrix_constructor, js_lv_btnmatrix_proto_funcs, countof(js_lv_btnmatrix_proto_funcs), proto_lv_obj, lvgl) ;
+    JSValue proto_lv_btnmatrix = qjs_def_class2(
+                ctx, "BtnMatrix", js_lv_btnmatrix_class_id, &js_lv_btnmatrix_class, "BtnMatrix"
+                , js_lv_btnmatrix_constructor
+                , js_lv_btnmatrix_proto_funcs, countof(js_lv_btnmatrix_proto_funcs)
+                , js_lv_btnmatrix_static_funcs, countof(js_lv_btnmatrix_static_funcs)
+                , proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_canvas    
-    JSValue proto_lv_canvas = qjs_def_class(ctx, "Canvas", js_lv_canvas_class_id, &js_lv_canvas_class
-                , "Canvas", js_lv_canvas_constructor, js_lv_canvas_proto_funcs, countof(js_lv_canvas_proto_funcs), proto_lv_obj, lvgl) ;
+    JSValue proto_lv_canvas = qjs_def_class2(
+                ctx, "Canvas", js_lv_canvas_class_id, &js_lv_canvas_class, "Canvas"
+                , js_lv_canvas_constructor
+                , js_lv_canvas_proto_funcs, countof(js_lv_canvas_proto_funcs)
+                , js_lv_canvas_static_funcs, countof(js_lv_canvas_static_funcs)
+                , proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_checkbox    
-    JSValue proto_lv_checkbox = qjs_def_class(ctx, "Checkbox", js_lv_checkbox_class_id, &js_lv_checkbox_class
-                , "Checkbox", js_lv_checkbox_constructor, js_lv_checkbox_proto_funcs, countof(js_lv_checkbox_proto_funcs), proto_lv_obj, lvgl) ;
+    JSValue proto_lv_checkbox = qjs_def_class2(
+                ctx, "Checkbox", js_lv_checkbox_class_id, &js_lv_checkbox_class, "Checkbox"
+                , js_lv_checkbox_constructor
+                , js_lv_checkbox_proto_funcs, countof(js_lv_checkbox_proto_funcs)
+                , js_lv_checkbox_static_funcs, countof(js_lv_checkbox_static_funcs)
+                , proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_dropdown    
-    JSValue proto_lv_dropdown = qjs_def_class(ctx, "Dropdown", js_lv_dropdown_class_id, &js_lv_dropdown_class
-                , "Dropdown", js_lv_dropdown_constructor, js_lv_dropdown_proto_funcs, countof(js_lv_dropdown_proto_funcs), proto_lv_obj, lvgl) ;
+    JSValue proto_lv_dropdown = qjs_def_class2(
+                ctx, "Dropdown", js_lv_dropdown_class_id, &js_lv_dropdown_class, "Dropdown"
+                , js_lv_dropdown_constructor
+                , js_lv_dropdown_proto_funcs, countof(js_lv_dropdown_proto_funcs)
+                , js_lv_dropdown_static_funcs, countof(js_lv_dropdown_static_funcs)
+                , proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_img    
-    JSValue proto_lv_img = qjs_def_class(ctx, "Img", js_lv_img_class_id, &js_lv_img_class
-                , "Img", js_lv_img_constructor, js_lv_img_proto_funcs, countof(js_lv_img_proto_funcs), proto_lv_obj, lvgl) ;
+    JSValue proto_lv_img = qjs_def_class2(
+                ctx, "Img", js_lv_img_class_id, &js_lv_img_class, "Img"
+                , js_lv_img_constructor
+                , js_lv_img_proto_funcs, countof(js_lv_img_proto_funcs)
+                , js_lv_img_static_funcs, countof(js_lv_img_static_funcs)
+                , proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_line    
-    JSValue proto_lv_line = qjs_def_class(ctx, "Line", js_lv_line_class_id, &js_lv_line_class
-                , "Line", js_lv_line_constructor, js_lv_line_proto_funcs, countof(js_lv_line_proto_funcs), proto_lv_obj, lvgl) ;
+    JSValue proto_lv_line = qjs_def_class2(
+                ctx, "Line", js_lv_line_class_id, &js_lv_line_class, "Line"
+                , js_lv_line_constructor
+                , js_lv_line_proto_funcs, countof(js_lv_line_proto_funcs)
+                , js_lv_line_static_funcs, countof(js_lv_line_static_funcs)
+                , proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_roller    
-    JSValue proto_lv_roller = qjs_def_class(ctx, "Roller", js_lv_roller_class_id, &js_lv_roller_class
-                , "Roller", js_lv_roller_constructor, js_lv_roller_proto_funcs, countof(js_lv_roller_proto_funcs), proto_lv_obj, lvgl) ;
+    JSValue proto_lv_roller = qjs_def_class2(
+                ctx, "Roller", js_lv_roller_class_id, &js_lv_roller_class, "Roller"
+                , js_lv_roller_constructor
+                , js_lv_roller_proto_funcs, countof(js_lv_roller_proto_funcs)
+                , js_lv_roller_static_funcs, countof(js_lv_roller_static_funcs)
+                , proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_slider    
-    JSValue proto_lv_slider = qjs_def_class(ctx, "Slider", js_lv_slider_class_id, &js_lv_slider_class
-                , "Slider", js_lv_slider_constructor, js_lv_slider_proto_funcs, countof(js_lv_slider_proto_funcs), proto_lv_obj, lvgl) ;
+    JSValue proto_lv_slider = qjs_def_class2(
+                ctx, "Slider", js_lv_slider_class_id, &js_lv_slider_class, "Slider"
+                , js_lv_slider_constructor
+                , js_lv_slider_proto_funcs, countof(js_lv_slider_proto_funcs)
+                , js_lv_slider_static_funcs, countof(js_lv_slider_static_funcs)
+                , proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_switch    
-    JSValue proto_lv_switch = qjs_def_class(ctx, "Switch", js_lv_switch_class_id, &js_lv_switch_class
-                , "Switch", js_lv_switch_constructor, js_lv_switch_proto_funcs, countof(js_lv_switch_proto_funcs), proto_lv_obj, lvgl) ;
+    JSValue proto_lv_switch = qjs_def_class2(
+                ctx, "Switch", js_lv_switch_class_id, &js_lv_switch_class, "Switch"
+                , js_lv_switch_constructor
+                , js_lv_switch_proto_funcs, countof(js_lv_switch_proto_funcs)
+                , js_lv_switch_static_funcs, countof(js_lv_switch_static_funcs)
+                , proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_table    
-    JSValue proto_lv_table = qjs_def_class(ctx, "Table", js_lv_table_class_id, &js_lv_table_class
-                , "Table", js_lv_table_constructor, js_lv_table_proto_funcs, countof(js_lv_table_proto_funcs), proto_lv_obj, lvgl) ;
+    JSValue proto_lv_table = qjs_def_class2(
+                ctx, "Table", js_lv_table_class_id, &js_lv_table_class, "Table"
+                , js_lv_table_constructor
+                , js_lv_table_proto_funcs, countof(js_lv_table_proto_funcs)
+                , js_lv_table_static_funcs, countof(js_lv_table_static_funcs)
+                , proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_textarea    
-    JSValue proto_lv_textarea = qjs_def_class(ctx, "TextArea", js_lv_textarea_class_id, &js_lv_textarea_class
-                , "TextArea", js_lv_textarea_constructor, js_lv_textarea_proto_funcs, countof(js_lv_textarea_proto_funcs), proto_lv_obj, lvgl) ;
+    JSValue proto_lv_textarea = qjs_def_class2(
+                ctx, "TextArea", js_lv_textarea_class_id, &js_lv_textarea_class, "TextArea"
+                , js_lv_textarea_constructor
+                , js_lv_textarea_proto_funcs, countof(js_lv_textarea_proto_funcs)
+                , js_lv_textarea_static_funcs, countof(js_lv_textarea_static_funcs)
+                , proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_msgbox    
-    JSValue proto_lv_msgbox = qjs_def_class(ctx, "MsgBox", js_lv_msgbox_class_id, &js_lv_msgbox_class
-                , "MsgBox", js_lv_msgbox_constructor, js_lv_msgbox_proto_funcs, countof(js_lv_msgbox_proto_funcs), proto_lv_obj, lvgl) ;
+    JSValue proto_lv_msgbox = qjs_def_class2(
+                ctx, "MsgBox", js_lv_msgbox_class_id, &js_lv_msgbox_class, "MsgBox"
+                , js_lv_msgbox_constructor
+                , js_lv_msgbox_proto_funcs, countof(js_lv_msgbox_proto_funcs)
+                , js_lv_msgbox_static_funcs, countof(js_lv_msgbox_static_funcs)
+                , proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_keyboard    
-    JSValue proto_lv_keyboard = qjs_def_class(ctx, "Keyboard", js_lv_keyboard_class_id, &js_lv_keyboard_class
-                , "Keyboard", js_lv_keyboard_constructor, js_lv_keyboard_proto_funcs, countof(js_lv_keyboard_proto_funcs), proto_lv_obj, lvgl) ;
+    JSValue proto_lv_keyboard = qjs_def_class2(
+                ctx, "Keyboard", js_lv_keyboard_class_id, &js_lv_keyboard_class, "Keyboard"
+                , js_lv_keyboard_constructor
+                , js_lv_keyboard_proto_funcs, countof(js_lv_keyboard_proto_funcs)
+                , js_lv_keyboard_static_funcs, countof(js_lv_keyboard_static_funcs)
+                , proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_tileview    
-    JSValue proto_lv_tileview = qjs_def_class(ctx, "TileView", js_lv_tileview_class_id, &js_lv_tileview_class
-                , "TileView", js_lv_tileview_constructor, js_lv_tileview_proto_funcs, countof(js_lv_tileview_proto_funcs), proto_lv_obj, lvgl) ;
+    JSValue proto_lv_tileview = qjs_def_class2(
+                ctx, "TileView", js_lv_tileview_class_id, &js_lv_tileview_class, "TileView"
+                , js_lv_tileview_constructor
+                , js_lv_tileview_proto_funcs, countof(js_lv_tileview_proto_funcs)
+                , js_lv_tileview_static_funcs, countof(js_lv_tileview_static_funcs)
+                , proto_lv_obj, lvgl) ;
 
     // define js class lvgl.lv_list    
-    JSValue proto_lv_list = qjs_def_class(ctx, "List", js_lv_list_class_id, &js_lv_list_class
-                , "List", js_lv_list_constructor, js_lv_list_proto_funcs, countof(js_lv_list_proto_funcs), proto_lv_obj, lvgl) ;
+    JSValue proto_lv_list = qjs_def_class2(
+                ctx, "List", js_lv_list_class_id, &js_lv_list_class, "List"
+                , js_lv_list_constructor
+                , js_lv_list_proto_funcs, countof(js_lv_list_proto_funcs)
+                , js_lv_list_static_funcs, countof(js_lv_list_static_funcs)
+                , proto_lv_obj, lvgl) ;
+
+    // define js class lvgl.lv_group    
+    JSValue proto_lv_group = qjs_def_class2(
+                ctx, "Group", js_lv_group_class_id, &js_lv_group_class, "Group"
+                , js_lv_group_constructor
+                , js_lv_group_proto_funcs, countof(js_lv_group_proto_funcs)
+                , js_lv_group_static_funcs, countof(js_lv_group_static_funcs)
+                , proto_lv_obj, lvgl) ;
 
 // AUTO GENERATE CODE END [REGISTER CLASS] --------
 
@@ -7797,6 +8327,7 @@ void be_lv_widgets_gen_init() {
     JS_NewClassID(&js_lv_keyboard_class_id);
     JS_NewClassID(&js_lv_tileview_class_id);
     JS_NewClassID(&js_lv_list_class_id);
+    JS_NewClassID(&js_lv_group_class_id);
 // AUTO GENERATE CODE END [REGISTER CLASS ID] --------
 }
 
@@ -7808,4 +8339,7 @@ JSClassID lv_label_js_class_id() {
 }
 JSClassID lv_btn_js_class_id() {
     return js_lv_btn_class_id ;
+}
+JSClassID lv_group_js_class_id() {
+    return js_lv_group_class_id ;
 }

@@ -219,6 +219,20 @@ JSValue qjs_def_class(
         JSValue parentProto ,
         JSValue pkg
 ) ;
+JSValue qjs_def_class2(
+        JSContext *ctx,
+        const char * className,
+        JSClassID js_class_id,
+        JSClassDef * js_class_p,
+        const char * cotrName,
+        JSCFunction cotr,
+        const JSCFunctionListEntry* funcLst,
+        uint16_t funcs,
+        const JSCFunctionListEntry* staticFuncLst,
+        uint16_t staticFuncs,
+        JSValue parentProto ,
+        JSValue pkg
+) ;
 
 bool qjs_instanceof(JSContext *ctx, JSValue obj, JSClassID clz_id) ;
 

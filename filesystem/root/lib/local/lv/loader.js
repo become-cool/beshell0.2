@@ -134,6 +134,10 @@ beapi.lvgl.Obj.prototype.fromJson = function fromJson(json, refs){
                 }
             }
 
+            if(json.group) {
+                json.group.addObj(this)
+            }
+
             if(json.children) {
                 beapi.lvgl.fromJson(json.children, this, refs)
             }

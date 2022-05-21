@@ -14,6 +14,9 @@ typedef struct {
     void * jsobj ; // JS_MKPTR(JS_TAG_OBJECT, <JSObject *>)
     void * buff1 ;
     void * buff2 ;
+
+    bool enable_input_event ;
+    JSContext * ctx ;
 } disp_drv_spec_t ;
 
 
@@ -26,5 +29,7 @@ void be_lv_display_init() ;
 void be_lv_display_require(JSContext *ctx, JSValue lvgl) ;
 
 void be_lv_display_reset(JSContext * ctx) ;
+
+JSValue js_lv_disp_wrapper(JSContext *ctx, lv_disp_t * disp) ;
 
 #endif

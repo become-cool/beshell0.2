@@ -537,6 +537,17 @@ module.exports = [
             'LV_INDEV_TYPE_ENCODER' ,
         ]
     }
+
+    , {
+        prefix: 'LV_GROUP_REFOCUS_POLICY_' ,
+        type: 'lv_group_refocus_policy_t' ,
+        name: 'lv_group_refocus_policy' ,
+        end: 'LV_GROUP_REFOCUS_POLICY_PREV+1' ,
+        def: [
+            'LV_GROUP_REFOCUS_POLICY_NEXT' ,
+            'LV_GROUP_REFOCUS_POLICY_PREV' ,
+        ]
+    }
 ]
 
 

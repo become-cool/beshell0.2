@@ -24,7 +24,7 @@ class Desktop extends lv.Obj {
             this.setStyle("bg-color", lv.rgb(242))
 
             this.updateLayout()
-            let width = this.width()
+            let height = this.height()
 
             // this._wallpaperOuter = new lv.CleanObj(this)
             // this._wallpaperOuter.setWidth(width)
@@ -34,7 +34,7 @@ class Desktop extends lv.Obj {
             // this._wallpaper.setSrc("/home/become/bg.png")
 
             this._panels = new lv.CleanObj(this)
-            this._panels.setWidth(width)
+            this._panels.setWidth("100%")
             this._panels.setHeight("100%")
             this._panels.setStyle("bg-opa",0)
 
@@ -42,43 +42,38 @@ class Desktop extends lv.Obj {
             // this._sysApps.setWidth(width)
             // this._sysApps.setHeight("100%")
 
-            this._dashboard = new Dashboard(this._panels)
-            this._dashboard.setWidth(width)
-            this._dashboard.setHeight("100%")
-            this._dashboard.setX(0)
 
-            this._apps = new ScrApps(this._panels)
-            this._apps.setWidth(width)
-            this._apps.setHeight("100%")
-            this._apps.setX(width)
+            this._dashboard = new Dashboard(this._panels, this)
+            this._dashboard.setY(0)
+
+            this._apps = new ScrApps(this._panels, this)
+            this._apps.setY(height)
 
             this.on("gesture",(e, target, dir)=>{
                 // console.log("<<<------------>>>", e, target, dir)
-                if(dir=="left") {
+                if(dir=="up") {
                     this.setActivePanel(this.activePanel+1, true)
                 }
-                else if(dir=="right") {
+                else if(dir=="down") {
                     this.setActivePanel(this.activePanel-1, true)
                 }
             })
-
-            this.setActivePanel(1, true)
 
         }catch(e){
             console.log(e)
         }
     }
     setActivePanel(i, anim) {
-        let width = this.width()
+        let height = this.height()
         this.activePanel = i
-        this._panels.scrollToX(i*width, !!anim)
+        this._panels.scrollToY(i*height, !!anim)
 
-        if(this._wallpaper) {
-            let ww = this._wallpaper.width() - this.width()
-            if(ww>0) {
-                this._wallpaperOuter.scrollToX(i*(ww/2), !!anim)
-            }
-        }
+        // if(this._wallpaper) {
+        //     let ww = this._wallpaper.width() - this.width()
+        //     if(ww>0) {
+        //         this._wallpaperOuter.scrollToX(i*(ww/2), !!anim)
+        //     }
+        // }
     }
 
     setupInputDev() {
@@ -86,8 +81,6 @@ class Desktop extends lv.Obj {
         if(this.joypad1.setup()) {
             this.joypad1.register()
             console.log("found joypad1(0x33)")
-
-            this.joypad1.indev.enableEvent()
         } else {
             console.log("not found joypad1(0x33)")
         }

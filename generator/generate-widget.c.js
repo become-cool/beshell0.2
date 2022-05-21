@@ -132,6 +132,7 @@ const MapC2JS_Conver = {
     "lv_align_t": create_conver_mappingconst('lv_align_t', 'lv_align_jsstr_to_const') ,
     "lv_dir_t": create_conver_mappingconst('lv_dir_t', 'lv_dir_jsstr_to_const'),
     "bool": conver_bool ,
+    "lv_res_t": conver_bool ,
     "char *": conver_string ,
     "const char *": conver_string ,
     "lv_anim_enable_t": conver_bool,
@@ -166,6 +167,7 @@ const MapC2JS_Conver = {
     "lv_obj_flag_t": create_conver_mappingconst('lv_obj_flag_t', 'lv_obj_flag_jsstr_to_const'),
     "lv_label_long_mode_t": create_conver_mappingconst('lv_label_long_mode_t', 'lv_label_long_mode_jsstr_to_const'),
     "lv_keyboard_mode_t": create_conver_mappingconst('lv_keyboard_mode_t', 'lv_keyboard_mode_jsstr_to_const'),
+    "lv_group_refocus_policy_t": create_conver_mappingconst('lv_group_refocus_policy_t', 'lv_group_refocus_policy_jsstr_to_const'),
     "lv_style_t *": conver_style ,
     "lv_draw_rect_dsc_t *": struct_wrapper('lv_draw_rect_dsc_t', 'js_lv_draw_rect_dsc_class_id', 'lv.DrawRectDsc') ,
     "lv_draw_arc_dsc_t *": struct_wrapper('lv_draw_arc_dsc_t', 'js_lv_draw_arc_dsc_class_id', 'lv.DrawArcDsc') ,
@@ -199,7 +201,8 @@ const MapModifyArgLst = {
 
 
 
-
+// c struct 指针 -> js 对象
+// 用于js方法返回值 
 const MapJS2C_Conver = {
     "char *": "JS_NewString",   
     "int8_t": "JS_NewInt32" ,
@@ -238,14 +241,15 @@ const MapJS2C_Conver = {
     "lv_border_side_t": 'lv_border_side_const_to_jsstr',
     "lv_style_prop_t": 'lv_style_prop_const_to_jsstr',
     "lv_obj_flag_t": 'lv_obj_flag_const_to_jsstr',
-    "lv_obj_t *": '',
-    "_lv_obj_t *": '',
+    "lv_disp_t *": 'js_lv_disp_wrapper',
+    "lv_group_t *": 'js_lv_group_wrapper',
+    "lv_res_t": 'JS_NewBool',
 }
 
 function mk_lvobj_converfunc(type) {
     return function(cfunc, cargvLst) {
         return `    JSValue retval = JS_NULL ;
-    void * lvobj = ${cfunc}(thisobj${cargvLst});
+    void * lvobj = ${cfunc}(${cargvLst});
     if(lvobj) {
         retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, 0) ;
         JS_DupValue(ctx, retval) ;
@@ -256,7 +260,7 @@ function mk_lvobj_converfunc(type) {
 
 const MapJS2C_ConverFunc = {
     "lv_color_t": function(cfunc, cargvLst){
-        return `    JSValue retval = JS_NewUint32(ctx,${cfunc}(thisobj${cargvLst}).full) ;\r\n`
+        return `    JSValue retval = JS_NewUint32(ctx,${cfunc}(${cargvLst}).full) ;\r\n`
     },
     "lv_obj_t *": mk_lvobj_converfunc("obj") ,
     "_lv_obj_t *": mk_lvobj_converfunc("obj") ,
@@ -269,6 +273,7 @@ function gen_lv_methods(clzConf) {
 
     let codeFuncDef = ""
     let codeMethedList = `static const JSCFunctionListEntry js_${clzConf.typeName}_proto_funcs[] = {\r\n`
+    let codeStaticMethedList = `static const JSCFunctionListEntry js_${clzConf.typeName}_static_funcs[] = {\r\n`
 
     for(let cfuncName in clzConf.cusMethods) {
         codeMethedList+= `    JS_CFUNC_DEF("${clzConf.cusMethods[cfuncName]}", 0, ${cfuncName}),\r\n`
@@ -276,8 +281,8 @@ function gen_lv_methods(clzConf) {
 
     for(let cfunc in clzConf.methods) {
 
-        let [jsmethod, argLstConf, returnType] = clzConf.methods[cfunc]
-
+        let [jsmethod, argLstConf, returnType, isStatic] = clzConf.methods[cfunc]
+        // js 方法名
         if(!jsmethod) {
             if( cfunc.substr(0, clzConf.typeName.length+1) == (clzConf.typeName+'_') ){
                 jsmethod = cfunc.substr(clzConf.typeName.length+1)
@@ -296,6 +301,7 @@ function gen_lv_methods(clzConf) {
         }
         
         codeFuncDef+= `static JSValue js_${cfunc}(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {\r\n`
+        // 转换参数
         if(argLstConf.length) {
 
             let argcMin = 0
@@ -310,15 +316,21 @@ function gen_lv_methods(clzConf) {
                 codeFuncDef+= `    }\r\n`
             }
         }
-        codeFuncDef+= `    void * lv_userdata = JS_GetOpaqueInternal(this_val) ;\r\n`
-        codeFuncDef+= `    if(!lv_userdata) {\r\n`
-        codeFuncDef+= `        THROW_EXCEPTION("${clzConf.className}.${jsmethod}() must be called as a ${clzConf.className} method")\r\n`
-        codeFuncDef+= `    }\r\n`
-        codeFuncDef+= `    lv_obj_t * thisobj = lv_userdata ;\r\n`
+        // 转换 this
+        if(!isStatic) {
+            codeFuncDef+= `    void * lv_userdata = JS_GetOpaqueInternal(this_val) ;\r\n`
+            codeFuncDef+= `    if(!lv_userdata) {\r\n`
+            codeFuncDef+= `        THROW_EXCEPTION("${clzConf.className}.${jsmethod}() must be called as a ${clzConf.className} method")\r\n`
+            codeFuncDef+= `    }\r\n`
+            codeFuncDef+= `    lv_obj_t * thisobj = lv_userdata ;\r\n`
+        }
 
         codeFreeArgvs = ''
 
-        let cargvLst = ''
+        let cargvLst = []
+        if(!isStatic) {
+            cargvLst.push('thisobj')
+        }
         if(argLstConf) {
             for(let i=0;i<argLstConf.length;i++) {
                 let [argtype, cargv, defaultVal] = argLstConf[i]
@@ -331,31 +343,32 @@ function gen_lv_methods(clzConf) {
                     continue
                 }
 
-                cargvLst+= `, ` + (MapModifyArgLst[argtype]? MapModifyArgLst[argtype](cargv): cargv)
+                cargvLst.push( MapModifyArgLst[argtype]? MapModifyArgLst[argtype](cargv): cargv )
 
                 if(MapFreeArgTypes[argtype]){
                     codeFreeArgvs+= MapFreeArgTypes[argtype](cargv) ;
                 }
             }
         }
+        cargvLst = cargvLst.join(', ')
 
         // js method 返回 this
         if(returnType=="this") {
-            codeFuncDef+= `    ${cfunc}(thisobj${cargvLst}) ;\r\n`
+            codeFuncDef+= `    ${cfunc}(${cargvLst}) ;\r\n`
             codeFuncDef+= `    JSValue retval = JS_DupValue(ctx, this_val) ;\r\n`
         }
         else if(returnType=="void") {
-            codeFuncDef+= `    ${cfunc}(thisobj${cargvLst}) ;\r\n`
+            codeFuncDef+= `    ${cfunc}(${cargvLst}) ;\r\n`
             codeFuncDef+= `    JSValue retval = JS_UNDEFINED ;\r\n`
         }
         else if(returnType=="bool") {
-            codeFuncDef+= `    JSValue retval = JS_NewBool(ctx,${cfunc}(thisobj${cargvLst})) ;\r\n`
+            codeFuncDef+= `    JSValue retval = JS_NewBool(ctx,${cfunc}(${cargvLst})) ;\r\n`
         }
         else if(MapJS2C_ConverFunc[returnType]) {
             codeFuncDef+= MapJS2C_ConverFunc[returnType](cfunc, cargvLst)
         }
         else if(MapJS2C_Conver[returnType]) {
-            codeFuncDef+= `    JSValue retval = ${MapJS2C_Conver[returnType]}(ctx,${cfunc}(thisobj${cargvLst})) ;\r\n`
+            codeFuncDef+= `    JSValue retval = ${MapJS2C_Conver[returnType]}(ctx,${cfunc}(${cargvLst})) ;\r\n`
         }
         else {
             console.error("unknow return type",returnType, "for function", cfunc)
@@ -366,13 +379,19 @@ function gen_lv_methods(clzConf) {
         codeFuncDef+= "    return retval ;\r\n"
         codeFuncDef+= "}\r\n\r\n"
 
-        codeMethedList+= `    JS_CFUNC_DEF("${jsmethod}", 0, js_${cfunc}),\r\n`
+        if(!isStatic) {
+            codeMethedList+= `    JS_CFUNC_DEF("${jsmethod}", 0, js_${cfunc}),\r\n`
+        }
+        else {
+            codeStaticMethedList+= `    JS_CFUNC_DEF("${jsmethod}", 0, js_${cfunc}),\r\n`
+        }
     }
 
     codeMethedList+= "} ;\r\n"
+    codeStaticMethedList+= "} ;\r\n"
     codeMethedList+= `#define __def_js_${clzConf.typeName}_proto_funcs__\r\n\r\n`
 
-    return codeFuncDef + "\r\n" + codeMethedList
+    return codeFuncDef + "\r\n" + codeMethedList + "\r\n" + codeStaticMethedList
 }
 
 function generateClassDefine() {
@@ -410,8 +429,10 @@ static JSClassID js_${clzConf.typeName}_class_id ;
 }
 `
         }
-
-        code+= `static void js_${clzConf.typeName}_finalizer(JSRuntime *rt, JSValue val){
+        
+        if(!clzConf.cusFinalizer) {
+            code+= `
+static void js_${clzConf.typeName}_finalizer(JSRuntime *rt, JSValue val){
     // printf("js_${clzConf.typeName}_finalizer()\\n") ;
     ${clzConf.ctypeName} thisobj = JS_GetOpaqueInternal(val) ;
     if( thisobj && lv_obj_get_user_data(thisobj) == JS_VALUE_GET_PTR(val) ){
@@ -419,6 +440,10 @@ static JSClassID js_${clzConf.typeName}_class_id ;
     }
     // lv_obj_del(thisobj) ;
 }
+`
+        }
+
+        code+= `
 static JSClassDef js_${clzConf.typeName}_class = {
     "${clzConf.fullClassName}",
     .finalizer = js_${clzConf.typeName}_finalizer,
@@ -433,6 +458,9 @@ function generateMapTypeToProto() {
     let code = '' 
 
     for(let clzConf of WidgetsMeta) {
+        if(!clzConf.isWidget) {
+            continue
+        }
         code+= `    ${code?'else ':''}if(lv_obj_check_type(obj, & ${clzConf.typeName}_class)) {
         return js_${clzConf.typeName}_class_id ;
     }
@@ -459,8 +487,12 @@ function generateClassRegister() {
             var parentProtoName = "proto_lv_obj"
         code+= 
 `    // define js class lvgl.${clzConf.typeName}    
-    JSValue proto_${clzConf.typeName} = qjs_def_class(ctx, "${clzConf.className}", js_${clzConf.typeName}_class_id, &js_${clzConf.typeName}_class
-                , "${clzConf.fullClassName}", js_${clzConf.typeName}_constructor, js_${clzConf.typeName}_proto_funcs, countof(js_${clzConf.typeName}_proto_funcs), ${parentProtoName}, lvgl) ;
+    JSValue proto_${clzConf.typeName} = qjs_def_class2(
+                ctx, "${clzConf.className}", js_${clzConf.typeName}_class_id, &js_${clzConf.typeName}_class, "${clzConf.fullClassName}"
+                , js_${clzConf.typeName}_constructor
+                , js_${clzConf.typeName}_proto_funcs, countof(js_${clzConf.typeName}_proto_funcs)
+                , js_${clzConf.typeName}_static_funcs, countof(js_${clzConf.typeName}_static_funcs)
+                , ${parentProtoName}, lvgl) ;
 
 `
     }
@@ -506,7 +538,7 @@ function generateConstMapping(defConst) {
 
     let code = `
 bool ${defConst.name}_str_to_const(const char * name, ${defConst.type}* out) {
-    ${mappingCode}
+${mappingCode}
     else {
         return false ;
     }

@@ -53,10 +53,7 @@ typedef struct {
             uint32_t release ;
         } buttons ;
     } data ;
-
-    bool emit_js ;
-    JSContext * ctx ;
-    
+  
 } indev_driver_spec_t ;
 
 
@@ -78,28 +75,28 @@ typedef struct {
 
 
 inline static void indev_emit_js_event(lv_indev_drv_t * drv, indev_driver_spec_t * drv_spec, const char * event_name, const char * key) {
-    if( !drv_spec->emit_js || !drv->disp || !drv->disp->driver || !drv->disp->driver->user_data ) {
+    if( !drv->disp || !drv->disp->driver || !drv->disp->driver->user_data ) {
         return ;
     }
     disp_drv_spec_t * disp_spec = (disp_drv_spec_t*)drv->disp->driver->user_data ;
-    if(!disp_spec->jsobj) {
+    if(!disp_spec->enable_input_event || !disp_spec->jsobj) {
         return ;
     }
     JSValue jsobj = JS_MKPTR(JS_TAG_OBJECT, disp_spec->jsobj) ;
-    JSValue emit = JS_GetPropertyStr(drv_spec->ctx,jsobj,"emit") ;
-    if( JS_IsFunction(drv_spec->ctx, emit) ) {
+    JSValue emit = JS_GetPropertyStr(disp_spec->ctx,jsobj,"emit") ;
+    if( JS_IsFunction(disp_spec->ctx, emit) ) {
         
-        MAKE_ARGV2(argv, JS_NewString(drv_spec->ctx, event_name), JS_NewString(drv_spec->ctx, key)) 
+        MAKE_ARGV2(argv, JS_NewString(disp_spec->ctx, event_name), JS_NewString(disp_spec->ctx, key)) 
 
-        JSValue ret = JS_Call(drv_spec->ctx, emit, jsobj, 2, argv ) ;
+        JSValue ret = JS_Call(disp_spec->ctx, emit, jsobj, 2, argv ) ;
         if (JS_IsException(ret)) {
-            js_std_dump_error(drv_spec->ctx);
+            js_std_dump_error(disp_spec->ctx);
         }
 
         free(argv) ;
     }
     
-    JS_FreeValue(drv_spec->ctx, emit);
+    JS_FreeValue(disp_spec->ctx, emit);
 }
 
 JSContext * js_indev_global_cb_ctx = NULL ;
@@ -269,7 +266,6 @@ static JSValue js_lv_indev_pointer_constructor(JSContext *ctx, JSValueConst new_
     driver_spec->data.pointer.x = 0 ;
     driver_spec->data.pointer.y = 0 ;
     driver_spec->data.pointer.state = LV_INDEV_STATE_RELEASED ;
-    driver_spec->emit_js = false ;
 
     lv_indev_drv_t * indev_drv = malloc(sizeof(lv_indev_drv_t)) ;
     lv_indev_drv_init(indev_drv);
@@ -346,24 +342,9 @@ static JSValue js_lv_indev_pointer_set(JSContext *ctx, JSValueConst this_val, in
 }
 
 
-static JSValue js_lv_indev_enable_event(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-    THIS_SPEC(thisspec)
-    thisspec->emit_js = true ;
-    thisspec->ctx = ctx ;
-    return JS_UNDEFINED ;
-}
-static JSValue js_lv_indev_disable_event(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-    THIS_SPEC(thisspec)
-    thisspec->emit_js = false ;
-    thisspec->ctx = ctx ;
-    return JS_UNDEFINED ;
-}
-
 static const JSCFunctionListEntry js_lv_indev_pointer_proto_funcs[] = {
     JS_CFUNC_DEF("set", 0, js_lv_indev_pointer_set),
     JS_CFUNC_DEF("tick", 0, js_lv_indev_tick),
-    JS_CFUNC_DEF("enableEvent", 0, js_lv_indev_enable_event),
-    JS_CFUNC_DEF("disableEvent", 0, js_lv_indev_disable_event),
 } ;
 
 
@@ -392,8 +373,7 @@ static void _indev_nav_set_value(indev_driver_spec_t * driver_spec, uint32_t v) 
         data->key = INDEV_KEY ;                                         \
         data->state = LV_INDEV_STATE_##STATE ;                          \
         driver_spec->data.buttons.mem&= ~NAVKEY_##KEY ;                 \
-        printf(#STATE ":" #KEY "\n") ;                                  \
-        indev_emit_js_event(drv, driver_spec, "input.button."eventName, keyName ) ; \
+        indev_emit_js_event(drv, driver_spec, "ipt.btn."eventName, keyName ) ; \
         return ;                                                        \
     }
 #define PROC_PRESS(key, NAV_KEY, INDEV_KEY)      PROC_EVENT(press,NAV_KEY, INDEV_KEY,PRESSED, key, "press")
@@ -444,7 +424,6 @@ static JSValue js_lv_indev_nav_constructor(JSContext *ctx, JSValueConst new_targ
 
     indev_driver_spec_t driver_spec ;
     memset(&driver_spec, 0, sizeof(indev_driver_spec_t)) ;
-    driver_spec.emit_js = false ;
     
     if(argc>0) {
 
@@ -550,8 +529,6 @@ static const JSCFunctionListEntry js_lv_indev_nav_proto_funcs[] = {
     JS_CFUNC_DEF("set", 0, js_lv_indev_nav_set),
     JS_CFUNC_DEF("tick", 0, js_lv_indev_tick),
     JS_CFUNC_DEF("state", 0, js_lv_indev_nav_state),
-    JS_CFUNC_DEF("enableEvent", 0, js_lv_indev_enable_event),
-    JS_CFUNC_DEF("disableEvent", 0, js_lv_indev_disable_event),
 } ;
 
 

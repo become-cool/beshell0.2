@@ -261,9 +261,20 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
     disp_drv_spec_t * dvrdata = malloc(sizeof(disp_drv_spec_t)) ;
 
     // 创建缓冲区
+#ifndef SIMULATION
     size_t bufsize = width * DISP_BUFF_LINES ;
     dvrdata->buff1 = malloc_buffer(bufsize*2) ;
+    if(getPsramTotal()>0) {
+        dvrdata->buff2 = malloc_buffer(bufsize*2) ;
+    }
+    else {
+        dvrdata->buff2 = NULL ;
+    }
+#else
+    size_t bufsize = width * DISP_BUFF_LINES_ENOUGH ;
+    dvrdata->buff1 = malloc_buffer(bufsize*2) ;
     dvrdata->buff2 = malloc_buffer(bufsize*2) ;
+#endif
 
     dvrdata->enable_input_event = true ;
     dvrdata->ctx = ctx ;

@@ -1793,6 +1793,71 @@ const char * lv_group_refocus_policy_const_to_str(lv_group_refocus_policy_t code
 JSValue lv_group_refocus_policy_const_to_jsstr(JSContext *ctx, lv_group_refocus_policy_t code) {
     return JS_NewString(ctx, lv_group_refocus_policy_const_to_str(code));
 }
+
+bool lv_part_str_to_const(const char * name, lv_part_t* out) {
+    if(strcmp(name,"main")==0) {
+        (*out) = LV_PART_MAIN ;
+    }
+    else if(strcmp(name,"scrollbar")==0) {
+        (*out) = LV_PART_SCROLLBAR ;
+    }
+    else if(strcmp(name,"indicator")==0) {
+        (*out) = LV_PART_INDICATOR ;
+    }
+    else if(strcmp(name,"knob")==0) {
+        (*out) = LV_PART_KNOB ;
+    }
+    else if(strcmp(name,"selected")==0) {
+        (*out) = LV_PART_SELECTED ;
+    }
+    else if(strcmp(name,"items")==0) {
+        (*out) = LV_PART_ITEMS ;
+    }
+    else if(strcmp(name,"ticks")==0) {
+        (*out) = LV_PART_TICKS ;
+    }
+    else if(strcmp(name,"cursor")==0) {
+        (*out) = LV_PART_CURSOR ;
+    }
+    else if(strcmp(name,"custom-first")==0) {
+        (*out) = LV_PART_CUSTOM_FIRST ;
+    }
+    else if(strcmp(name,"any")==0) {
+        (*out) = LV_PART_ANY ;
+    }
+
+    else {
+        return false ;
+    }
+    return true ;
+}
+bool lv_part_jsstr_to_const(JSContext *ctx, JSValue jsstr, lv_part_t* out) {
+    char * cstr = (char *)JS_ToCString(ctx, jsstr) ;
+    bool suc = lv_part_str_to_const(cstr, out) ;
+    JS_FreeCString(ctx, cstr) ;
+    return suc ;
+}
+const char * lv_part_const_to_str(lv_part_t code) {
+
+    switch(code) {
+        case LV_PART_MAIN: return "main";
+        case LV_PART_SCROLLBAR: return "scrollbar";
+        case LV_PART_INDICATOR: return "indicator";
+        case LV_PART_KNOB: return "knob";
+        case LV_PART_SELECTED: return "selected";
+        case LV_PART_ITEMS: return "items";
+        case LV_PART_TICKS: return "ticks";
+        case LV_PART_CURSOR: return "cursor";
+        case LV_PART_CUSTOM_FIRST: return "custom-first";
+        case LV_PART_ANY: return "any";
+
+        default:
+            return "unknow";
+    }
+}
+JSValue lv_part_const_to_jsstr(JSContext *ctx, lv_part_t code) {
+    return JS_NewString(ctx, lv_part_const_to_str(code));
+}
 // AUTO GENERATE CODE END [CONST MAPPING] --------
 
 // AUTO GENERATE CODE START [DEFINE CLASS] --------

@@ -34,6 +34,13 @@ beapi.lvgl.Obj.prototype.toggle = function hide() {
         return true
     }
 }
+beapi.lvgl.Obj.prototype.setVisible = function setVisible(visible) {
+    if(visible) {
+        this.clearFlag("hidden")
+    } else {
+        this.addFlag("hidden")
+    }
+}
 
 beapi.lvgl.Obj.prototype.asRow = function asRow() {
     this.removeStyleAll()
@@ -119,6 +126,13 @@ beapi.lvgl.Obj.prototype.setWidth = function(val) {
 beapi.lvgl.Obj.prototype.primitiveSetHeight = beapi.lvgl.Obj.prototype.setHeight
 beapi.lvgl.Obj.prototype.setHeight = function(val) {
     return this.primitiveSetHeight(size(val))
+}
+beapi.lvgl.Obj.prototype.children = function() {
+    let children = []
+    for(let i=0;i<this.childCnt();i++){
+        children.push(this.child(i))
+    }
+    return children
 }
 
 

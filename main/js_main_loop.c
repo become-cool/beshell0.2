@@ -20,6 +20,7 @@
 #include "module_camera.h"
 #include "module_gameplayer.h"
 #include "module_media.h"
+#include "module_drivers.h"
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -134,6 +135,7 @@ static JSContext * init_custom_context(JSRuntime *rt) {
     // be_module_telnet_require(ctx) ;
     be_module_serial_require(ctx) ;
     be_module_socks_require(ctx) ;
+    be_module_drivers_require(ctx) ;
     be_module_camera_require(ctx) ;
     be_module_gameplayer_require(ctx) ;
     be_module_media_require(ctx) ;
@@ -159,14 +161,16 @@ static const JSMallocFunctions def_malloc_funcs = {
 // 在初始化前，先占用整块的 DMA 内存，在初始化完成后释放
 // 迫使各个模块使用 PSRAM
 #ifndef SIMULATION
-#define HOLD_MEM(p, size)                               \
-    p = heap_caps_malloc(size, MALLOC_CAP_DMA) ;        \
-    vTaskDelay(1) ;                                     \
-    if(!p) {                                            \
-        echo_DMA("retain memory failed") ;              \
-    }                                                   \
-    else {                                              \
-        printf("remain memory successed\n") ;           \
+#define HOLD_MEM(p, size)                                   \
+    if(getPsramTotal()>1024) {                              \
+        p = heap_caps_malloc(size, MALLOC_CAP_DMA) ;        \
+        vTaskDelay(1) ;                                     \
+        if(!p) {                                            \
+            echo_DMA("retain memory failed") ;              \
+        }                                                   \
+        else {                                              \
+            printf("remain memory successed\n") ;           \
+        }                                                   \
     }
 #define FREE_MEM(p) if(p) { free(p) ; p=NULL; }
 #else
@@ -181,7 +185,12 @@ static void quickjs_init() {
 
 #ifndef SIMULATION
     // esp32 平台优先使用 PSRAM内存
-    rt = JS_NewRuntime2(&def_malloc_funcs, NULL);
+    if( getPsramTotal()>1024 ) {
+        rt = JS_NewRuntime2(&def_malloc_funcs, NULL);
+    }
+    else {
+        rt = JS_NewRuntime();
+    }
 #elif
     rt = JS_NewRuntime();
 #endif

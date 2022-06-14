@@ -181,7 +181,8 @@ void be_module_gameplayer_reset(JSContext *ctx) {
 #include "pwm_audio.h"
 
 #define  EMULATOR_SAMPLERATE   44200
-#define  EMULATOR_FRAGSIZE     1024
+#define  EMULATOR_FRAGSIZE     400
+// #define  EMULATOR_FRAGSIZE     1024
 
 #define  VIDEO_WIDTH        256
 #define  VIDEO_HEIGHT       240
@@ -306,77 +307,57 @@ void osd_setsound(void (*playfunc)(void *buffer, int length)) {
 
 static void osd_stopsound(void) {
 }
-static int osd_init_sound(void) {
 
-	audio_frame = malloc(2*EMULATOR_FRAGSIZE);
+
+#define AUDIO_PIN_LRC 27
+#define AUDIO_PIN_BCLK 26
+#define AUDIO_PIN_DATA 32
+static int osd_init_sound_i2s(void) {
+    
+	printf("init audio i2s dev\n") ;
+
+	audio_frame = malloc(4*EMULATOR_FRAGSIZE);
     if(!audio_frame) {
         printf("audio_frame: %p\n",audio_frame) ;
     }
-
-    // echo_DMA("before i2s_driver_install()") ;
-	// i2s_config_t cfg = {
-    //     .mode = I2S_MODE_MASTER | I2S_MODE_TX | I2S_MODE_DAC_BUILT_IN,
-    //     .sample_rate = EMULATOR_SAMPLERATE,
-    //     .bits_per_sample = 16,
-    //     .channel_format = I2S_CHANNEL_FMT_RIGHT_LEFT,
-    //     .communication_format = I2S_COMM_FORMAT_I2S_MSB, //I2S_COMM_FORMAT_STAND_PCM_SHORT,
-    //     // .intr_alloc_flags = ESP_INTR_FLAG_LEVEL1, // high interrupt priority
-    //     .intr_alloc_flags = 0, // high interrupt priority
-    //     .dma_buf_count = 2,
-    //     .dma_buf_len = EMULATOR_FRAGSIZE
-    // } ;
-    // esp_err_t res = i2s_driver_install(I2S_NUM_0, &cfg, 0, NULL) ;
-	// if(res!=ESP_OK) {
-    //     printf("i2s_driver_install() failed: %d\n",res) ;
-    //     return ;
-    // }
-    // echo_DMA("after i2s_driver_install()") ;
-    // // if(i2s_set_sample_rates(I2S_NUM_0, 22050)!=ESP_OK) {
-    // //     printf("i2s_set_sample_rates() failed\n") ;
-    // //     return ;
-    // // }
-	// if(i2s_set_pin(0, NULL)!=ESP_OK) {
-    //     printf("i2s_set_pin() failed\n") ;
-    //     return ;
-    // }
-	// if(i2s_set_dac_mode(I2S_DAC_CHANNEL_BOTH_EN)!=ESP_OK) {
-    //     printf("i2s_set_dac_mode() failed\n") ;
-    //     return ;
-    // }
-
-    // if(i2s_start(I2S_NUM_0)!=ESP_OK) {
-    //     printf("i2s_start() failed\n") ;
-    //     return ;
-    // }
-	
-
-    pwm_audio_config_t pac;
-    pac.duty_resolution    = LEDC_TIMER_10_BIT;
-    pac.gpio_num_left      = 26;
-    pac.ledc_channel_left  = LEDC_CHANNEL_0;
-    pac.gpio_num_right     = 25;
-    pac.ledc_channel_right = LEDC_CHANNEL_1;
-    pac.ledc_timer_sel     = LEDC_TIMER_0;
-    pac.tg_num             = TIMER_GROUP_0;
-    pac.timer_num          = TIMER_0;
-    pac.ringbuf_len        = 1024 * 8;
-    pwm_audio_init(&pac);
-
-    pwm_audio_set_param(EMULATOR_SAMPLERATE, 16, 1);
-
     
-	fd = fopen("/fs/home/become/gamemusic.wav", "w");
-    is_open = true ;
-    char header[44] = {0} ;
-    fwrite(header, 1, 44, fd);
-    fflush(fd) ;
+	i2s_config_t i2s_config = {
+		.mode = I2S_MODE_MASTER | I2S_MODE_TX,
+		.sample_rate=EMULATOR_SAMPLERATE,
+		.bits_per_sample=I2S_BITS_PER_SAMPLE_16BIT,
+		.channel_format=I2S_CHANNEL_FMT_RIGHT_LEFT,
+		.communication_format=I2S_COMM_FORMAT_I2S_MSB,
+		.intr_alloc_flags = 0, // default interrupt priority
+		.dma_buf_count=4,
+		.dma_buf_len=512,
+		.use_apll = false
+	};
 
-    file_writen = 0 ;
+	i2s_pin_config_t pin_config = {
+		.bck_io_num = AUDIO_PIN_BCLK,
+		.ws_io_num = AUDIO_PIN_LRC,
+		.data_out_num = AUDIO_PIN_DATA,
+		.data_in_num = I2S_PIN_NO_CHANGE
+	};
+	printf("i2s data:%d, bclk:%d, lrc:%d\n",AUDIO_PIN_DATA,AUDIO_PIN_BCLK,AUDIO_PIN_LRC) ;
 
-	audio_callback = NULL;
-
-
-	return 0;
+    esp_err_t res = i2s_driver_install(0, &i2s_config, 0, NULL);
+    if(res!=ESP_OK) {
+        dn(res)
+        return res ;
+    }
+    res = i2s_set_pin(0, &pin_config);
+    if(res!=ESP_OK) {
+        dn(res)
+        return res ;
+    }
+    res = i2s_set_sample_rates(0, 22050);
+    if(res!=ESP_OK) {
+        dn(res)
+        return res ;
+    }
+	
+    return 0;
 }
 
 void osd_getsoundinfo(sndinfo_t *info) {
@@ -517,56 +498,33 @@ static void custom_blit(bitmap_t *bmp, int num_dirties, rect_t *dirty_rects) {
 
 	xQueueSend(vidQueue, &bmp, 0);
 
-	// framerate() ;
-	// int left=EMULATOR_SAMPLERATE / ((dynamic_frames>10)? dynamic_frames: NES_REFRESH_RATE) ;
-	int left=EMULATOR_SAMPLERATE / NES_REFRESH_RATE ;
-	// printf("dfr=%d, left=%d\n",dynamic_frames,left) ;
 
-	esp_err_t res = ESP_FAIL ;
+	framerate() ;
+    dd
+    dn2(dynamic_frames, NES_REFRESH_RATE)
+	int left=EMULATOR_SAMPLERATE / ((dynamic_frames>10)? dynamic_frames: NES_REFRESH_RATE) ;
+    dn(left)
+
 	while(left) {
-
 		int n=EMULATOR_FRAGSIZE;
-		if (n>left) n=left;
+		if (n>left)
+			n=left;
 		audio_callback(audio_frame, n); //get more data
-		// // 8 bit -> 16 bit
-		// for (int i=n-1; i>=0; i--) {
-		// 	audio_frame[i*2+1]=audio_frame[i];
-		// 	audio_frame[i*2]=audio_frame[i];
-		// }
-		// printf("(%d) ... %x,%x,%x,%x,%x,%x,%x,%x\n", n, audio_frame[n-8], audio_frame[n-7], audio_frame[n-6], audio_frame[n-5], audio_frame[n-4], audio_frame[n-3], audio_frame[n-2], audio_frame[n-1]) ;
 
-        if(!start_save && audio_frame[0]!=0 && audio_frame[2]!=0 && audio_frame[3]!=0) {
-            start_save = true ;
-            printf("music start \n") ;
-        }
-        if(start_save) {
-            if(file_writen<=1048576) {
-                file_writen+= fwrite((void *)audio_frame, 2, n, fd) * 2 ;
-                fflush(fd) ;
-            }
-            else {
-                if(is_open) {
-                    dn(file_writen)
-                    is_open = false ;
-                    fclose(fd) ;
-                }
-            }
-        }
+		// printf("audio %d/%d\n", n, left) ;
 
-		size_t bytes_written = 0 ;
-		// res = i2s_write(0, audio_frame, 2*n, &bytes_written, 100);
-        // pwm_audio_write(audio_frame, 2*n, &bytes_written, 100);
-        if(bytes_written!=2*n) {
-		    // printf("i2s written: %d/%d\n", 2*n, bytes_written) ;
-        }
-
-        
+		//16 bit mono -> 32-bit (16 bit r+l)
+		for (int i=n-1; i>=0; i--) {
+			audio_frame[i*2+1]=audio_frame[i];
+			audio_frame[i*2]=audio_frame[i];
+		}
+		size_t bytes_written ;
+        dd
+		i2s_write(0, audio_frame, 4*n, &bytes_written, 100);
+        dn(bytes_written)
 
 		left-=n;
 	}
-
-// 	printf("audio frame end\n") ;
-
 }
 
 static uint16_t rgb565_conv_inv(uint16_t r,uint16_t g,uint16_t b) {
@@ -677,8 +635,7 @@ int osd_init() {
 
 	log_chain_logfunc(logprint);
 
-	if (osd_init_sound())
-		return -1;
+	osd_init_sound_i2s() ;
     
 	vidQueue=xQueueCreate(1, sizeof(bitmap_t *));
 	xTaskCreatePinnedToCore(&videoTask, "videoTask", 2048, NULL, 5, NULL, 1);

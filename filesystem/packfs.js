@@ -1,7 +1,7 @@
 const fs = require("fs")
 const {execSync} = require("child_process")
 
-
+const compile = false
 
 function packdir(from, to, packpath, ignores) {
     let bytes = 0

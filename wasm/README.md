@@ -9,8 +9,13 @@
 . emsdk/emsdk_env.fish
 ```
 
-编译：
 
+生成 lvgl 的 C-JS 代码:
+```
+make gen
+```
+
+编译：
 ```
 make
 ```
@@ -21,12 +26,7 @@ make
 make dev
 ```
 
-生成 JS 代码:
-```
-make gen
-```
-
-
+修改过 `CMakeLists.txt` 需要 `make cmake`
 
 ## Install Emscripten SDK
 Download the [Emscripten SDK](https://kripken.github.io/emscripten-site/) and make sure it is in your PATH.

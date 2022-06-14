@@ -100,7 +100,7 @@ EMSCRIPTEN_KEEPALIVE bool lv_label_set_font(lv_obj_t * obj, const char * fontnam
     else if( strcmp("m48", fontname)==0 ) {
         font = &lv_font_montserrat_48 ;
     }
-    else if( strcmp("msyh", fontname)==0 ) {
+    else if( strcmp("source-han-sans", fontname)==0 ) {
         font = font_msyh() ;
     }
     // else if( strcmp("s16", fontname)==0 ) {
@@ -146,7 +146,7 @@ EMSCRIPTEN_KEEPALIVE char * lv_label_get_font(lv_obj_t * obj, lv_style_selector_
         return "m48" ;
     }
     else if( font_msyh() == font ) {
-        return "msyh" ;
+        return "source-han-sans" ;
     }
     else {
         return "unknow" ;

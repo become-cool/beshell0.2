@@ -548,6 +548,28 @@ module.exports = [
             'LV_GROUP_REFOCUS_POLICY_PREV' ,
         ]
     }
+
+    , {
+        prefix: 'LV_PART_' ,
+        type: 'lv_part_t' ,
+        name: 'lv_part' ,
+        def: parseCSource(`
+        enum {
+            LV_PART_MAIN         = 0x000000,   /**< A background like rectangle*/
+            LV_PART_SCROLLBAR    = 0x010000,   /**< The scrollbar(s)*/
+            LV_PART_INDICATOR    = 0x020000,   /**< Indicator, e.g. for slider, bar, switch, or the tick box of the checkbox*/
+            LV_PART_KNOB         = 0x030000,   /**< Like handle to grab to adjust the value*/
+            LV_PART_SELECTED     = 0x040000,   /**< Indicate the currently selected option or section*/
+            LV_PART_ITEMS        = 0x050000,   /**< Used if the widget has multiple similar elements (e.g. table cells)*/
+            LV_PART_TICKS        = 0x060000,   /**< Ticks on scale e.g. for a chart or meter*/
+            LV_PART_CURSOR       = 0x070000,   /**< Mark a specific place e.g. for text area's cursor or on a chart*/
+        
+            LV_PART_CUSTOM_FIRST = 0x080000,    /**< Extension point for custom widgets*/
+        
+            LV_PART_ANY          = 0x0F0000,    /**< Special value can be used in some functions to target all parts*/
+        };
+        `)
+    }
 ]
 
 
@@ -557,3 +579,5 @@ function constC2JS(src, prefix) {
         console.log("'"+name+"':",res[2], ",")
     }
 }
+
+// console.log(module.exports)

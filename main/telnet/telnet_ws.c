@@ -1,5 +1,6 @@
 #include "telnet_ws.h"
 #include "module_telnet.h"
+#include "module_metadata.h"
 
 #include "beshell.h"
 #include "js_main_loop.h"
@@ -22,7 +23,11 @@
 #define WS_DISP_BUFF_JPEG 2
 
 
-
+#define CROS_RSPN_HEADERS                                       \
+        "Access-Control-Allow-Origin: *\r\n"                    \
+        "Access-Control-Request-Method: GET, POST, OPTIONS\r\n" \
+        "Access-Control-Request-Headers: content-type\r\n"      \
+        "Content-Type: application/octet-stream\r\n"
 
 
 char * fs_root = NULL;
@@ -219,7 +224,9 @@ static void response_fs(struct mg_connection *c, struct mg_http_message *hm, con
     if(mg_vcmp(&hm->method, "GET")==0) {
         // 文件
         if(S_ISREG(statbuf.st_mode)) {
-            mg_http_reply(c, 200, "", "file:%s", path);
+            struct mg_http_serve_opts opts = {.mime_types = "application/octet-stream"};
+            mg_http_serve_file(c, hm, path, &opts);  // Send file
+
         }
         // 目录
         else if(S_ISDIR(statbuf.st_mode)) {
@@ -230,13 +237,10 @@ static void response_fs(struct mg_connection *c, struct mg_http_message *hm, con
             mg_http_reply(c, 500,  "Content-Type: application/json\r\n", "{error: \"%s\"}", "Unknow File Type");
         }
     }
-    // 上传文件  (CROS 浏览器跨域时的预检请求)
+    // 上传文件 CROS 浏览器跨域时的预检请求
     else if(mg_vcmp(&hm->method, "OPTIONS")==0){
-        mg_http_reply(c, 204,  
-                "Access-Control-Allow-Origin: *\r\n"
-                "Access-Control-Request-Method: GET, POST, OPTIONS\r\n"
-                "Access-Control-Request-Headers: content-type\r\n"
-                "Content-Type: application/octet-stream\r\n"
+        printf("CROS\n") ;
+        mg_http_reply(c, 204,  CROS_RSPN_HEADERS
         , "", "");
     }
     else if(mg_vcmp(&hm->method, "POST")==0) {
@@ -253,8 +257,8 @@ static void response_fs(struct mg_connection *c, struct mg_http_message *hm, con
             if( mg_vcmp(&part.name, "file")==0 ) {
 
                 const char * fullpath = mallocf("%s/%.*s", path, part.filename.len, part.filename.ptr) ;
-                ds(fullpath)
-                dn(part.body.len)
+                // ds(fullpath)
+                // dn(part.body.len)
                 
                 FILE * fd = fopen(fullpath, "w");
                 if(NULL==fd) {
@@ -268,10 +272,10 @@ static void response_fs(struct mg_connection *c, struct mg_http_message *hm, con
                 fclose(fd) ;
 
                 if(wroteBytes==part.body.len) {
-                    mg_http_reply(c, 200, NULL, NULL, NULL) ;
+                    mg_http_reply(c, 200, CROS_RSPN_HEADERS, "%s", "ok") ;
                 }
                 else {
-                    mg_http_reply(c, 200, NULL, "{error: \"%s\"}", "some error occur") ;
+                    mg_http_reply(c, 200, CROS_RSPN_HEADERS, "{error: \"%s\"}", "some error occur") ;
                 }
                 return ;
             }
@@ -281,7 +285,7 @@ static void response_fs(struct mg_connection *c, struct mg_http_message *hm, con
     }
     // 删除文件/目录
     else if(mg_vcmp(&hm->method, "DELETE")==0) {
-        dd
+        // dd
     }
     // 无效请求
     else {
@@ -300,6 +304,23 @@ static void response(struct mg_connection *c, int ev, void *ev_data, void *fn_da
         else if (mg_http_match_uri(hm, "/display")) {
             upgrade_ws(c, hm, WS_DISP) ;
         }
+        else if(mg_http_match_uri(hm, "/") || mg_http_match_uri(hm, "/telweb")) {
+            char * extra_headers = mallocf(
+                    "Content-Encoding: gzip\r\n"
+                    "Content-Type: text/html\r\n" 
+                    "BECOME-PartID: %d(v%d)\r\n"
+                    , readPartId()
+                    , readPartVersion()
+            ) ;
+            struct mg_http_serve_opts opts = {
+                    .mime_types = "text/html",
+                    .extra_headers = extra_headers
+            };
+            mg_http_serve_file(c, hm, "/fs/lib/local/telweb/index.html.gz", &opts);  // Send file
+
+            free(extra_headers) ;
+        }
+        // /fs
         else if( hm->uri.len>=3 && hm->uri.ptr[0]=='/' && hm->uri.ptr[1]=='f' && hm->uri.ptr[2]=='s'
             && (hm->uri.len==3 || hm->uri.ptr[3]=='/')
         ) {
@@ -328,6 +349,9 @@ static void response(struct mg_connection *c, int ev, void *ev_data, void *fn_da
             response_fs(c, hm, path) ;
 
             free(path) ;
+        }
+        else if(mg_http_match_uri(hm, "/hello")) {
+            mg_http_reply(c, 200, "", "%s", "hello, you!");
         }
         else {
             mg_http_reply(c, 403, "", "%s", "Invalid Path");

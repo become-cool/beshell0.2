@@ -86,8 +86,10 @@ inline static void indev_emit_js_event(lv_indev_drv_t * drv, indev_driver_spec_t
     JSValue emit = JS_GetPropertyStr(disp_spec->ctx,jsobj,"emit") ;
     if( JS_IsFunction(disp_spec->ctx, emit) ) {
         
-        MAKE_ARGV2(argv, JS_NewString(disp_spec->ctx, event_name), JS_NewString(disp_spec->ctx, key)) 
-
+        MAKE_ARGV2(argv
+            , JS_NewString(disp_spec->ctx, event_name)
+            , JS_NewString(disp_spec->ctx, key)
+        )
         JSValue ret = JS_Call(disp_spec->ctx, emit, jsobj, 2, argv ) ;
         if (JS_IsException(ret)) {
             js_std_dump_error(disp_spec->ctx);
@@ -197,6 +199,17 @@ static void indev_global_cb_proc(lv_indev_data_t *data) {
 }
 
 
+
+static JSValue js_lv_indev_set_group(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+    lv_group_t * group = JS_GetOpaque(argv[0], lv_group_js_class_id()) ;
+    if(!group) {
+        THROW_EXCEPTION("invalid arg group")
+    }
+    THIS_INDEV(thisobj)
+    lv_indev_set_group(thisobj, group) ;
+    return JS_UNDEFINED ;
+}
 
 // ------------
 // InDevPointer 
@@ -345,6 +358,7 @@ static JSValue js_lv_indev_pointer_set(JSContext *ctx, JSValueConst this_val, in
 static const JSCFunctionListEntry js_lv_indev_pointer_proto_funcs[] = {
     JS_CFUNC_DEF("set", 0, js_lv_indev_pointer_set),
     JS_CFUNC_DEF("tick", 0, js_lv_indev_tick),
+    JS_CFUNC_DEF("setGroup", 0, js_lv_indev_set_group),
 } ;
 
 
@@ -368,12 +382,12 @@ static void _indev_nav_set_value(indev_driver_spec_t * driver_spec, uint32_t v) 
     driver_spec->data.buttons.state = v ;
 }
 
-#define PROC_EVENT(mem, KEY, INDEV_KEY, STATE, keyName, eventName)      \
+#define PROC_EVENT(mem, KEY, INDEV_KEY, STATE, keyName, keyStat)        \
     if(driver_spec->data.buttons.mem&NAVKEY_##KEY) {                    \
         data->key = INDEV_KEY ;                                         \
         data->state = LV_INDEV_STATE_##STATE ;                          \
         driver_spec->data.buttons.mem&= ~NAVKEY_##KEY ;                 \
-        indev_emit_js_event(drv, driver_spec, "ipt.btn."eventName, keyName ) ; \
+        indev_emit_js_event(drv, driver_spec, "ipt.btn."keyStat, keyName ) ; \
         return ;                                                        \
     }
 #define PROC_PRESS(key, NAV_KEY, INDEV_KEY)      PROC_EVENT(press,NAV_KEY, INDEV_KEY,PRESSED, key, "press")
@@ -524,11 +538,11 @@ static JSValue js_lv_indev_nav_state(JSContext *ctx, JSValueConst this_val, int 
     return JS_UNDEFINED ;
 }
 
-
 static const JSCFunctionListEntry js_lv_indev_nav_proto_funcs[] = {
     JS_CFUNC_DEF("set", 0, js_lv_indev_nav_set),
     JS_CFUNC_DEF("tick", 0, js_lv_indev_tick),
     JS_CFUNC_DEF("state", 0, js_lv_indev_nav_state),
+    JS_CFUNC_DEF("setGroup", 0, js_lv_indev_set_group),
 } ;
 
 

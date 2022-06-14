@@ -10,7 +10,7 @@ module.exports = class ScrApps extends lv.Obj {
     constructor(parent,desktop) {
         super(parent)
         this.group = new lv.Group()
-        this.refs = this.fromJson({
+        this.fromJson({
 
             width: "100%" ,
             height: "100%" ,
@@ -21,7 +21,7 @@ module.exports = class ScrApps extends lv.Obj {
                 height: "100%" ,
                 clear: true ,
                 flex: "row-wrap" ,
-                ref: "appPad" ,
+                ref: "grid" ,
                 style: {
                     "pad-row": 16 ,
                     "pad-column": 16 ,
@@ -33,29 +33,51 @@ module.exports = class ScrApps extends lv.Obj {
                         class:AppIcon ,
                         "text": "设置" ,
                         "src": "/lib/icon/32/setting.png" ,
-                        group: this.group
+                        group: this.group ,
+                        ref: 'settings'
                     } , 
                     {
                         class:AppIcon ,
                         "text": "文件" ,
                         "src": "/lib/icon/32/folder.png",
-                        group: this.group
+                        group: this.group ,
+                        ref: 'files'
+                    }
+                    , {
+                        class:AppIcon ,
+                        "text": "相册" ,
+                        "src": "/lib/icon/32/album.png" ,
+                        group: this.group ,
+                        ref: 'album'
                     }
                     , {
                         class:AppIcon ,
                         "text": "音乐" ,
                         "src": "/lib/icon/32/music.png",
-                        group: this.group
+                        group: this.group ,
+                        ref: 'musicPlayer',
+                        clicked: () => {
+                            this.music = new beapi.lvgl.Obj()
+                            lv.loadScreen(this.music)
+                            beapi.media.createMusicPlayer(this.music)
+                        }
                     }
                     , {
                         class:AppIcon ,
                         "text": "游戏" ,
                         "src": "/lib/icon/32/game.png" ,
                         group: this.group ,
+                        ref: 'gameEmulator' ,
                         clicked () {
-                            console.log("游戏")
-                            require("gameemulator/index.js")
+                            require("gameemulator")
                         }
+                    } ,
+                    {
+                        class:AppIcon ,
+                        "text": "应用商店" ,
+                        "src": "/lib/icon/32/store.png" ,
+                        group: this.group ,
+                        ref: 'appStore'
                     } ,
                     // {
                     //     class: "Obj" ,
@@ -87,15 +109,38 @@ module.exports = class ScrApps extends lv.Obj {
                     // }
                 ]
             }],
-        })
+        },this)
 
         this.loadAppIconFromLib("/home/become")
         
-        desktop.disp().on("ipt.btn.press",(key)=>{
+        this.holdKeys()
+        this.on("ipt.btn.press",key=>{
             if(key=='b') {
-                desktop.setActivePanel(0, true)
+                desktop.lockScreen(true)
+            }
+            else if(key=='left') {
+                this.group.focusPrev()
+            }
+            else if(key=='right') {
+                this.group.focusNext()
+            }
+            else if(key=='a') {
+                let icon = this.group.focused()
+                icon && icon.run()
+                console.log(icon)
             }
         })
+
+        this.styleFocused = new lv.Style({
+            "border-width": 1,
+            "border-color": lv.palette("green"),
+            "radius": 3,
+        })
+        for(let child of this.grid.children()){
+            child.addStyle(this.styleFocused, 2) // LV_STATE_FOCUSED: 2
+        }
+
+        lv.Group.focusObj(this.settings)
     }
 
     dlgNewApp() {
@@ -175,14 +220,14 @@ module.exports = class ScrApps extends lv.Obj {
         if(!this._appMenu) {
             this._appMenu = new lv.Menu(null, {
                 items: [
-                    { value:"运行", font:"msyh", callback:()=>{
+                    { value:"运行", font:"source-han-sans", callback:()=>{
                     }} ,
-                    { value:"开机时运行", font:"msyh", callback:()=>{
+                    { value:"开机时运行", font:"source-han-sans", callback:()=>{
                     }} ,
-                    { value:"工作台", font:"msyh", callback:()=>{
+                    { value:"工作台", font:"source-han-sans", callback:()=>{
                         require("workspace").start( path )
                     }} ,
-                    { value:"删除", font:"msyh", callback:()=>{
+                    { value:"删除", font:"source-han-sans", callback:()=>{
                         
                     }} ,
                 ]

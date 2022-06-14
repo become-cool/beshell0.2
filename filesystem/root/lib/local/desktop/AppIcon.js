@@ -21,7 +21,7 @@ class AppIcon extends lv.Column {
             }, {
                 class: 'Label' ,
                 ref: 'label' ,
-                font: "msyh" ,
+                font: "source-han-sans" ,
                 width:"100%" ,
                 longMode: "scroll-circular" ,
                 text: "" ,
@@ -32,27 +32,35 @@ class AppIcon extends lv.Column {
         })
     }
 
-    fromJson(json) {
+    fromJson(json,refs) {
         if(json.text) {
             this.refs.label.setText(json.text)
-        }
-        if(json.group) {
-            json.group.addObj(this)
+            delete json.text
         }
 
         if(json.src) {
             this.refs.icon.setSrc(json.src)
+            delete json.src
         }
         else if(json.symbol) {
             this.refs.icon.setSymbol(json.symbol)
+            delete json.symbol
         }
         
         if(json.clicked) {
             this.refs.icon.on("clicked", json.clicked)
+            delete json.clicked
         }
         if(json.longPressed) {
             this.refs.icon.on("long-pressed", json.longPressed)
+            delete json.longPressed
         }
+        if(json.longPressed) {
+        }
+        lv.Obj.prototype.fromJson.call(this, json, refs)
+    }
+    run() {
+        this.refs.icon.emit("clicked")
     }
 }
 

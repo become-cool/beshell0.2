@@ -1,4 +1,4 @@
-
+//@ todo C实现
 const stepms = 50
 
 beapi.lvgl.Obj.prototype.animate = function(props, duration, easing, callback) {

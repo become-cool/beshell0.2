@@ -1,0 +1,388 @@
+make.exe all --print-data-base --no-builtin-variables --no-builtin-rules --question
+# GNU Make 3.82.90
+# Built for i686-pc-mingw32
+# Copyright (C) 1988-2012 Free Software Foundation, Inc.
+# License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+# This is free software: you are free to change and redistribute it.
+# There is NO WARRANTY, to the extent permitted by law.
+ 
+
+# Make data base, printed on Sun May 22 22:31:59 2022
+
+# Variables
+
+# automatic
+<D = $(patsubst %/,%,$(patsubst %\,%,$(dir $<)))
+# automatic
+?F = $(notdir $?)
+# default
+.SHELLFLAGS := -c
+# makefile
+MAKEFLAGS = Rrqp
+# environment
+VSCODE_LOG_NATIVE = false
+# automatic
+?D = $(patsubst %/,%,$(patsubst %\,%,$(dir $?)))
+# automatic
+@D = $(patsubst %/,%,$(patsubst %\,%,$(dir $@)))
+# environment
+HOMEDRIVE = C:
+# automatic
+@F = $(notdir $@)
+# automatic
+^D = $(patsubst %/,%,$(patsubst %\,%,$(dir $^)))
+# makefile
+CUR 
+DIR := d:/project/robot/beshell
+# default
+SHELL := sh.exe
+# environment
+UGII_BASE_DIR = C:\Program Files\Siemens\NX 12.0
+# environment
+UGII_ROOT_DIR = C:\Program Files\Siemens\NX 10.0\UGII\
+# environment
+WINDIR = C:\WINDOWS
+# environment
+VSCODE_NLS_CONFIG = {"locale":"zh-cn","availableLanguages":{"*":"zh-cn"},"_languagePackId":"42e84e0914b17800d483f69e299e1b00.zh-cn","_translationsConfigFile":"C:\\Users\\alee\\AppData\\Roaming\\Code\\clp\\42e84e0914b17800d483f69e299e1b00.zh-cn\\tcf.json","_cacheRoot":"C:\\Users\\alee\\AppData\\Roaming\\Code\\clp\\42e84e0914b17800d483f69e299e1b00.zh-cn","_resolvedLanguagePackCoreLocation":"C:\\Users\\alee\\AppData\\Roaming\\Code\\clp\\42e84e0914b17800d483f69e299e1b00.zh-cn\\da15b6fd3ef856477bf6f4fb29ba1b7af717770d","_corruptedFile":"C:\\Users\\alee\\AppData\\Roaming\\Code\\clp\\42e84e0914b17800d483f69e299e1b00.zh-cn\\corrupted.info","_languagePackSupport":true}
+# environment
+OPENCV_LIB_DIR = D:\lib\opencv\opencv-4.5.3\build\x64\vc15\lib
+# environment
+ONEDRIVE = C:\Users\alee\OneDrive
+# environment
+PATHEXT = .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+# makefile (from 'Makefile', line 1)
+MAKEFILE_LIST :=  Makefile
+# environment
+TMP = C:\Users\alee\AppData\Local\Temp
+# environment
+GYP_MSVS_VERSION = 2015
+# environment
+OPENCV_INCLUDE_DIR = D:\lib\opencv\opencv-4.5.3\build\include
+# environment
+VSCODE_VERBOSE_LOGGING = true
+# environment
+PROGRAMW6432 = C:\Program Files
+# environment
+PROGRAMDATA = C:\ProgramData
+# environment
+VSCODE_IPC_HOOK_EXTHOST = \\.\pipe\vscode-ipc-f17a336c-6aea-4d8c-b07f-06635d841827-sock
+# environment
+VSCODE_CWD = D:\project\robot\beshell
+# environment
+UGII_CAM_ENABLE_GUIDED_CURVE = 1
+# environment
+PATH = C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\Program Files\Espressif\ESP-IDF Tools\mconf-idf;C:\Program Files\Espressif\ESP-IDF Tools\tools\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Program Files (x86)\Windows Kits\8.1\Windows Performance Toolkit\;C:\Program Files\Microsoft SQL Server\Client SDK\ODBC\110\Tools\Binn\;C:\Program Files (x86)\Microsoft SQL Server\120\Tools\Binn\;C:\Program Files\Microsoft SQL Server\120\Tools\Binn\;C:\Program Files\Microsoft SQL Server\120\DTS\Binn\;C:\Program Files (x86)\STMicroelectronics\STM32 ST-LINK Utility\ST-LINK Utility;C:\Program Files\Git\cmd;C:\Program Files\nodejs\;C:\ProgramData\chocolatey\bin;D:\toolchain\CMake\bin;C:\Users\alee\AppData\Local\Programs\Microsoft VS Code\bin;C:\Python27;C:\Python27\Scripts;C:\Users\alee\AppData\Local\Programs\Python\Python38;C:\Users\alee\AppDa;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files (x86)\Tencent\΢��web�����߹���\dll;C:\Users\alee\miniconda2;C:\Users\alee\miniconda2\Library\mingw-w64\bin;C:\Users\alee\miniconda2\Library\usr\bin;C:\Users\alee\miniconda2\Library\bin;C:\Users\alee\miniconda2\Scripts;C:\Users\alee\AppData\Roaming\npm;C:\MinGW\bin;C:\Gradle\gradle-6.4.1\bin;D:\app\glo663wb\bin;D:\lib\apache-maven-3.6.3\bin;C:\Users\alee\AppData\Local\Microsoft\WindowsApps;D:\app\HBuilderX\plugins\launcher\tools\adbs
+# environment
+SPLM_LICENSE_SERVER = 27800@DESKTOP-J2RG355
+# environment
+COMMONPROGRAMW6432 = C:\Program Files\Common Files
+# environment
+CHOCOLATEYLASTPATHUPDATE = 132332707837301922
+# environment
+PROCESSOR_ARCHITECTURE = x86
+# environment
+USERPROFILE = C:\Users\alee
+# environment
+CHOCOLATEYINSTALL = C:\ProgramData\chocolatey
+# environment
+ALLUSERSPROFILE = C:\ProgramData
+# environment
+VSCODE_LOG_STACK = false
+# environment
+NUMBER_OF_PROCESSORS = 12
+# environment
+ELECTRON_RUN_AS_NODE = 1
+# default
+.FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell archives jobserver
+# automatic
+%F = $(notdir $%)
+# environment
+CHROME_CRASHPAD_PIPE_NAME = \\.\pipe\crashpad_18944_DULYEEXEJZOZAGGK
+# environment
+VSCODE_PIPE_LOGGING = true
+# environment
+COMPUTERNAME = DESKTOP-J2RG355
+# environment
+PROGRAMFILES = C:\Program Files (x86)
+# environment
+DRIVERDATA = C:\Windows\System32\Drivers\DriverData
+# environment
+ORIGINAL_XDG_CURRENT_DESKTOP = undefined
+# environment
+USERNAME = alee
+# environment
+PUBLIC = C:\Users\Public
+# environment
+VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
+# environment
+VSCODE_CODE_CACHE_PATH = C:\Users\alee\AppData\Roaming\Code\CachedData\da15b6fd3ef856477bf6f4fb29ba1b7af717770d
+# environment
+APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = 1
+# environment
+COMMONPROGRAMFILES = C:\Program Files (x86)\Common Files
+# environment
+LOGONSERVER = \\DESKTOP-J2RG355
+# environment
+VSCODE_HANDLES_UNCAUGHT_ERRORS = true
+# environment
+USERDOMAIN = DESKTOP-J2RG355
+# environment
+MAKELEVEL := 0
+# default
+MAKE = $(MAKE_COMMAND)
+# default
+MAKECMDGOALS := all
+# environment
+KEYSHOT9 = C:\Users\Public\Documents\KeyShot 9
+# environment
+UGII_LANG = simpl_chinese
+# environment
+JAVA_HOME = C:\Program Files\Java\jdk1.8.0_281
+# default
+MAKE_VERSION := 3.82.90
+# makefile
+.DEFAULT_GOAL := all
+# environment
+PROGRAMFILES(X86) = C:\Program Files (x86)
+# automatic
+%D = $(patsubst %/,%,$(patsubst %\,%,$(dir $%)))
+# environment
+LOCALAPPDATA = C:\Users\alee\AppData\Local
+# environment
+PSMODULEPATH = %ProgramFiles%\WindowsPowerShell\Modules;C:\WINDOWS\system32\WindowsPowerShell\v1.0\Modules;C:\Program Files (x86)\Microsoft SQL Server\120\Tools\PowerShell\Modules\
+# default
+MAKE_COMMAND := make.exe
+# environment
+PROCESSOR_ARCHITEW6432 = AMD64
+# default
+.VARIABLES := 
+# automatic
+*F = $(notdir $*)
+# environment
+PROCESSOR_IDENTIFIER = Intel64 Family 6 Model 158 Stepping 10, GenuineIntel
+# environment
+OS = Windows_NT
+# environment
+VSCODE_IPC_HOOK = \\.\pipe\2906a43202bfb1387b84a8552ff9437a-1.67.1-main-sock
+# environment
+HOMEPATH = \Users\alee
+# environment
+COMMONPROGRAMFILES(X86) = C:\Program Files (x86)\Common Files
+# environment
+PROMPT = $P$G
+# environment
+MFLAGS = -Rrqp
+# automatic
+*D = $(patsubst %/,%,$(patsubst %\,%,$(dir $*)))
+# environment
+SYSTEMROOT = C:\WINDOWS
+# automatic
++D = $(patsubst %/,%,$(patsubst %\,%,$(dir $+)))
+# automatic
++F = $(notdir $+)
+# environment
+APPDATA = C:\Users\alee\AppData\Roaming
+# environment
+TEMP = C:\Users\alee\AppData\Local\Temp
+# environment
+COMSPEC = C:\WINDOWS\system32\cmd.exe
+# default
+MAKEFILES := 
+# environment
+IDF_TOOLS_PATH = C:\Users\alee\.espressif
+# automatic
+<F = $(notdir $<)
+# environment
+LC_ALL = C
+# automatic
+^F = $(notdir $^)
+# default
+SUFFIXES := 
+# environment
+SYSTEMDRIVE = C:
+# environment
+PROCESSOR_REVISION = 9e0a
+# default
+.INCLUDE_DIRS = C:/MinGW/include
+# environment
+ADSK_CLM_WPAD_PROXY_CHECK = FALSE
+# default
+.RECIPEPREFIX := 
+# environment
+OPENOCD_SCRIPTS = C:\Program Files\Espressif\ESP-IDF Tools\tools\share\openocd\scripts
+# environment
+LANG = C
+# environment
+PROCESSOR_LEVEL = 6
+# environment
+VSCODE_PID = 18944
+# environment
+USERDOMAIN_ROAMINGPROFILE = DESKTOP-J2RG355
+# variable set hash-table stats:
+# Load=103/1024=10%, Rehash=0, Collisions=13/125=10%
+
+# Pattern-specific Variable Values
+
+# No pattern-specific variable values.
+
+# Directories
+
+# C:\Program Files\Microsoft SQL Server\Client SDK\ODBC\110\Tools\Binn\ (key C:/Program Files/Microsoft SQL Server/Client SDK/ODBC/110/Tools/Binn/, mtime 1588441243): 6 files, no impossibilities.
+# C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR (key C:/Program Files/NVIDIA Corporation/NVIDIA NvDLISR, mtime 1588420787): 5 files, no impossibilities.
+# C:\Python27\Scripts: could not be stat'd.
+# C:\Windows\System32\WindowsPowerShell\v1.0\ (key C:/Windows/System32/WindowsPowerShell/v1.0/, mtime 1643085953): 32 files, no impossibilities.
+# C:\WINDOWS\System32\Wbem (key C:/WINDOWS/System32/Wbem, mtime 1644818737): 182 files, no impossibilities.
+# . (key d:/project/robot/beshell, mtime 1653148619): 35 files, no impossibilities.
+# C:\Users\alee\AppData\Local\Programs\Python\Python38 (key C:/Users/alee/AppData/Local/Programs/Python/Python38, mtime 1614106702): 4 files, no impossibilities.
+# C:\Python27: could not be stat'd.
+# C:\MinGW\bin (key C:/MinGW/bin, mtime 1600435093): 144 files, no impossibilities.
+# C:\Program Files (x86)\Common Files\Oracle\Java\javapath (key C:/Program Files (x86)/Common Files/Oracle/Java/javapath, mtime 1617203727): 5 files, no impossibilities.
+# C:\Users\alee\miniconda2 (key C:/Users/alee/miniconda2, mtime 1614330553): 32 files, no impossibilities.
+# C:\Program Files\Git\cmd (key C:/Program Files/Git/cmd, mtime 1588794742): 8 files, no impossibilities.
+# C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common (key C:/Program Files (x86)/NVIDIA Corporation/PhysX/Common, mtime 1619717301): 11 files, no impossibilities.
+# C:\Program Files (x86)\Microsoft SQL Server\120\Tools\Binn\ (key C:/Program Files (x86)/Microsoft SQL Server/120/Tools/Binn/, mtime 1588441229): 12 files, no impossibilities.
+# C:\Users\alee\miniconda2\Library\usr\bin: could not be stat'd.
+# C:\Program Files\Microsoft SQL Server\120\DTS\Binn\ (key C:/Program Files/Microsoft SQL Server/120/DTS/Binn/, mtime 1588441243): 38 files, no impossibilities.
+# C:\Users\alee\miniconda2\Library\bin (key C:/Users/alee/miniconda2/Library/bin, mtime 1614330546): 25 files, no impossibilities.
+# C:\WINDOWS (key C:/WINDOWS, mtime 1591719946): 129 files, no impossibilities.
+# C:\Program Files (x86)\STMicroelectronics\STM32 ST-LINK Utility\ST-LINK Utility (key C:/Program Files (x86)/STMicroelectronics/STM32 ST-LINK Utility/ST-LINK Utility, mtime 1588846911): 12 files, no impossibilities.
+# C:\Users\alee\miniconda2\Scripts (key C:/Users/alee/miniconda2/Scripts, mtime 1614330546): 31 files, no impossibilities.
+# D:\app\HBuilderX\plugins\launcher\tools\adbs (key D:/app/HBuilderX/plugins/launcher/tools/adbs, mtime 1644679848): 7 files, no impossibilities.
+# C:\ProgramData\chocolatey\bin (key C:/ProgramData/chocolatey/bin, mtime 1588797186): 22 files, no impossibilities.
+# C:\Windows (key C:/Windows, mtime 1591719946): 129 files, no impossibilities.
+# C:\WINDOWS\System32\OpenSSH\: could not be stat'd.
+# C:\Users\alee\AppData\Roaming\npm (key C:/Users/alee/AppData/Roaming/npm, mtime 1645720564): 43 files, no impossibilities.
+# D:\toolchain\CMake\bin (key D:/toolchain/CMake/bin, mtime 1597839461): 7 files, no impossibilities.
+# C:\Windows\System32\Wbem (key C:/Windows/System32/Wbem, mtime 1644818737): 182 files, no impossibilities.
+# C:\Program Files (x86)\Windows Kits\8.1\Windows Performance Toolkit\ (key C:/Program Files (x86)/Windows Kits/8.1/Windows Performance Toolkit/, mtime 1588420858): 73 files, no impossibilities.
+# D:\app\glo663wb\bin (key D:/app/glo663wb/bin, mtime 1597427475): 12 files, no impossibilities.
+# D:\lib\apache-maven-3.6.3\bin (key D:/lib/apache-maven-3.6.3/bin, mtime 1607417790): 8 files, no impossibilities.
+# C:\Users\alee\AppData\Local\Microsoft\WindowsApps (key C:/Users/alee/AppData/Local/Microsoft/WindowsApps, mtime 1653143163): 21 files, no impossibilities.
+# C:\Program Files (x86)\Tencent\΢��web�����߹���\dll (key C:/Program Files (x86)/Tencent/΢��web�����߹���/dll, mtime 1644415156): 9 files, no impossibilities.
+# C:\Program Files\nodejs\ (key C:/Program Files/nodejs/, mtime 1588797146): 11 files, no impossibilities.
+# C:\WINDOWS\System32\WindowsPowerShell\v1.0\ (key C:/WINDOWS/System32/WindowsPowerShell/v1.0/, mtime 1643085953): 32 files, no impossibilities.
+# C:\Windows\system32 (key C:/Windows/system32, mtime 1650875286): 3192 files, no impossibilities.
+# C:\Users\alee\miniconda2\Library\mingw-w64\bin: could not be stat'd.
+# C:\Program Files\Espressif\ESP-IDF Tools\mconf-idf (key C:/Program Files/Espressif/ESP-IDF Tools/mconf-idf, mtime 1589703436): 9 files, no impossibilities.
+# C:\Users\alee\AppData\Local\Programs\Microsoft VS Code\bin (key C:/Users/alee/AppData/Local/Programs/Microsoft VS Code/bin, mtime 1652247655): 4 files, no impossibilities.
+# C:\Program Files\Microsoft SQL Server\120\Tools\Binn\ (key C:/Program Files/Microsoft SQL Server/120/Tools/Binn/, mtime 1588441229): 14 files, no impossibilities.
+# C:\Users\alee\AppDa: could not be stat'd.
+# C:\Windows\System32\OpenSSH\: could not be stat'd.
+# C:\Gradle\gradle-6.4.1\bin (key C:/Gradle/gradle-6.4.1/bin, mtim 
+e 1590236287): 4 files, no impossibilities.
+# C:\Program Files\Espressif\ESP-IDF Tools\tools\bin (key C:/Program Files/Espressif/ESP-IDF Tools/tools/bin, mtime 1589703442): 50 files, no impossibilities.
+# C:\WINDOWS\system32 (key C:/WINDOWS/system32, mtime 1650875286): 3192 files, no impossibilities.
+
+# 7732 files, no impossibilities in 44 directories.
+
+# Implicit Rules
+
+# No implicit rules.
+
+# Files
+
+clear:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 11):
+	find filesystem -name "*.js.bin" | xargs rm -f
+
+pack:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 14):
+	node filesystem/packfs.js
+	bin/mklittlefs -c filesystem/tmp/root -s 524288 filesystem/img/fs-root.img -d 5
+	bin/mklittlefs -c filesystem/tmp/home -s 262144 filesystem/img/fs-home.img -d 5
+	cp filesystem/img/fs-root.img ../beconsole.next/platform/nw.js/assets/firmware/beshell-0.2.0/flash/fs-root.img
+	cp filesystem/img/fs-home.img ../beconsole.next/platform/nw.js/assets/firmware/beshell-0.2.0/flash/fs-home.img
+	
+	python2 /mnt/d/lib/esp-idf/components/partition_table/gen_esp32part.py filesystem/partitions-4MB.csv filesystem/img/partitions-4MB.bin
+	python2 /mnt/d/lib/esp-idf/components/partition_table/gen_esp32part.py filesystem/partitions-16MB.csv filesystem/img/partitions-16MB.bin
+	cp filesystem/img/partitions-4MB.bin ../beconsole.next/platform/nw.js/assets/firmware/beshell-0.2.0/flash/partitions-4MB.bin
+	cp filesystem/img/partitions-16MB.bin ../beconsole.next/platform/nw.js/assets/firmware/beshell-0.2.0/flash/partitions-16MB.bin
+
+all:
+#  Command line target.
+#  Implicit rule search has not been done.
+#  Implicit/static pattern stem: ''
+#  File does not exist.
+#  File has been updated.
+#  Needs to be updated (-q is set).
+# automatic
+# @ := all
+# automatic
+# % := 
+# automatic
+# * := 
+# automatic
+# + := 
+# automatic
+# | := 
+# automatic
+# < := 
+# au 
+tomatic
+# ^ := 
+# automatic
+# ? := 
+# variable set hash-table stats:
+# Load=8/32=25%, Rehash=0, Collisions=1/11=9%
+#  recipe to execute (from 'Makefile', line 3):
+	./build.sh
+	
+
+# Not a target:
+.SUFFIXES:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
+Makefile:
+#  Implicit rule search has been done.
+#  Last modified 2022-05-22 21:33:53
+#  File has been updated.
+#  Successfully updated.
+
+compile:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 6):
+	# 编译js
+	./pc/build/beshell --root ./filesystem/root --script ./pc/compile-fs.js
+
+# Not a target:
+.DEFAULT:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+fs: compile pack
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# files hash-table stats:
+# Load=8/1024=1%, Rehash=0, Collisions=0/22=0%
+# VPATH Search Paths
+
+# No 'vpath' search paths.
+
+# No general ('VPATH' variable) search path.
+
+# strcache buffers: 8 (6) / strings = 4131 / storage = 64271 B / avg = 15 B
+# current buf: size = 8174 B / used = 7135 B / count = 453 / avg = 15 B
+# other used: total = 56097 B / count = 3678 / avg = 15 B
+# other free: total = 82 B / max = 33 B / min = 2 B / avg = 11 B
+
+# strcache performance: lookups = 7795 / hit rate = 47%
+# hash-table stats:
+# Load=4131/8192=50%, Rehash=0, Col 
+lisions=3141/7795=40%
+# Finished Make data base on Sun May 22 22:31:59 2022
+
+ 

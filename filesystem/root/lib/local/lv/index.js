@@ -91,9 +91,9 @@ function msgbox() {
 beapi.lvgl.msg = {
     info(title, desc) {
         let box = new lv.MsgBox(beapi.lvgl.active(), title||"", desc||"", [], true)
-        box.title().setFont("msyh")
+        box.title().setFont("source-han-sans")
         let text = box.text()
-        if(text) text.setFont("msyh")
+        if(text) text.setFont("source-han-sans")
         box.center()
     }
 }

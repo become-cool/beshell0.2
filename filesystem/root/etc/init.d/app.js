@@ -1,9 +1,12 @@
 exports.autoBoot = function() {
     try{
     let json = JSON.load("/etc/config/boot.json")
-        if(json["active-app"]) {
-            console.log("run app:", json["active-app"])
-            require(json["active-app"])
+        if(json["script"]) {
+            eval(json["script"])
+        }
+        if(json["path"]) {
+            console.log("run path:", json["path"])
+            require(json["path"])
         }
     }catch(e){
         console.log(e)
@@ -14,6 +17,6 @@ exports.setAutoBootPath = function(path) {
         throw new Error("path not exists")
     }
     let json = JSON.load("/etc/config/boot.json")
-    json["active-app"] = path
+    json["path"] = path
     beapi.fs.writeFileSync("/etc/config/boot.json", JSON.stringify(json,null,4))
 }

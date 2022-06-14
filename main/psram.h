@@ -2,7 +2,7 @@
 #define _PSRAM_H
 
 void psram_init() ;
-inline void echo_DMA(const char * where) ;
+void echo_DMA(const char * where) ;
 
 unsigned int getHeapTotal(void) ;
 unsigned int getHeapUsed(void) ;

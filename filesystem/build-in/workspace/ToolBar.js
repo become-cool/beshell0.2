@@ -85,15 +85,15 @@ class ToolBar extends lv.Obj {
 
         this.menu = new lv.Menu(null, {
             items: [
-                { value:"设置", font:"msyh", callback:()=>{
+                { value:"设置", font:"source-han-sans", callback:()=>{
                 }} ,
-                { value:"保存", font:"msyh", callback:()=>{
+                { value:"保存", font:"source-han-sans", callback:()=>{
                     workspace.loader.save()
                 }} ,
-                { value:"运行", font:"msyh", callback:()=>{
+                { value:"运行", font:"source-han-sans", callback:()=>{
                     process.reset(3, workspace.model.folderPath)
                 }} ,
-                { value:"退出", font:"msyh", callback:()=>{
+                { value:"退出", font:"source-han-sans", callback:()=>{
                     process.reboot()
                 }} ,
             ]

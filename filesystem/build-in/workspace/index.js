@@ -17,7 +17,7 @@ exports.start = function(folder) {
                     {
                         class: lv.Label ,
                         text: "正在启动工作台" ,
-                        font: "msyh" ,
+                        font: "source-han-sans" ,
                     } ,
                     
                     {

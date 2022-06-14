@@ -35,23 +35,28 @@ JSValue js_gpio_pin_mode(JSContext *ctx, JSValueConst this_val, int argc, JSValu
     ARGV_TO_UINT8(0, pin)
     char * mode = JS_ToCString(ctx, argv[1]) ;
 
+    esp_err_t err ;
     if(strcmp(mode,"input")==0) {
-        gpio_set_direction(pin, GPIO_MODE_INPUT) ;
+        err = gpio_set_direction(pin, GPIO_MODE_INPUT) ;
     }
     else if(strcmp(mode,"output")==0) {
-        gpio_set_direction(pin, GPIO_MODE_OUTPUT) ;
+        err = gpio_set_direction(pin, GPIO_MODE_OUTPUT) ;
     }
     else if(strcmp(mode,"output-od")==0) {
-        gpio_set_direction(pin, GPIO_MODE_OUTPUT_OD) ;
+        err = gpio_set_direction(pin, GPIO_MODE_OUTPUT_OD) ;
     }
     else if(strcmp(mode,"input-output")==0) {
-        gpio_set_direction(pin, GPIO_MODE_INPUT_OUTPUT) ;
+        err = gpio_set_direction(pin, GPIO_MODE_INPUT_OUTPUT) ;
     }
     else if(strcmp(mode,"input-output-od")==0) {
-        gpio_set_direction(pin, GPIO_MODE_INPUT_OUTPUT_OD) ;
+        err = gpio_set_direction(pin, GPIO_MODE_INPUT_OUTPUT_OD) ;
     }
     else {
         THROW_EXCEPTION("unknow pin mode(input, output, output-od, input-output, input-output-od)")
+    }
+
+    if(err!=ESP_OK) {
+        THROW_EXCEPTION("set pin mode failed, arg invalid?")
     }
 
     JS_FreeCString(ctx, mode) ;
@@ -84,7 +89,7 @@ JSValue js_gpio_pin_pull(JSContext *ctx, JSValueConst this_val, int argc, JSValu
         gpio_pulldown_dis(pin) ;
     }
     else {
-        THROW_EXCEPTION("unknow pin pull mode(up/down/updown/floating)")
+        THROW_EXCEPTION("unknow pin pull mode(up|down|updown|floating)")
     }
 
     JS_FreeCString(ctx, mode) ;
@@ -331,7 +336,7 @@ JSValue js_pwm_config_timer(JSContext *ctx, JSValueConst this_val, int argc, JSV
 }
 
 /**
- * gpio 0-3
+ * gpio 0-39
  * duty
  * channel 0-7
  * timer 0-3

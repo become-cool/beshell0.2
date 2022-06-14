@@ -6,7 +6,9 @@
 #include <stdbool.h>
 
 
-#define DISP_BUFF_LINES 20
+#define DISP_BUFF_LINES_POOR 20
+#define DISP_BUFF_LINES_ENOUGH 20
+#define DISP_BUFF_LINES ( (getPsramTotal()>1024)? DISP_BUFF_LINES_ENOUGH: DISP_BUFF_LINES_POOR)
 #define DISP_BUFF_AUX_SIZE 16        // 附加数据，记录 area(x1,y1,x2,y2)，放在 DMA_BUFF 前面
 
 typedef struct {

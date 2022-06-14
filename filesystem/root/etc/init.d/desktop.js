@@ -1,34 +1,28 @@
-module.exports = async function() {
+
+exports.setup = function(preqLst) {
+    preqLst.push(
+        require("desktop/prequire")
+        , [["besdk/driver/joypad"], require]
+    )
+}
+
+exports.begin = async function() {
     if(typeof beapi.lvgl.defaultDisplay!='function') {
         console.log("desktop.js dependent by display.js")
         return
     }
+    let disp = beapi.lvgl.defaultDisplay()
 
-    let screen = beapi.lvgl.defaultDisplay().activeScreen()
-    if(screen.splash) {
-        screen.loading.clearFlag("hidden")
-        let [lvlst,lvreq] = require("lv/prequire")
-        let [dtplst,dtpreq] = require("desktop/prequire")
-
-        let loaded = 0
-        let total = lvlst.length + dtplst.length + otherlst.length
-        function require_cb(l,t,p) {
-            if(l==t) { return }
-            screen.loading.setValue((loaded++)*100/total)
-        }
-
-        await prequire(lvlst,lvreq,require_cb)
-        await prequire(dtplst,dtpreq,require_cb)
-        await prequire(otherlst,require,require_cb)
-        screen.loading.setValue(100)
-        await sleep(100)
+    const Joypad = require("besdk/driver/joypad")    
+    disp.joypad1 = new Joypad(0, 4, 5, 0x33)
+    if(disp.joypad1.setup()) {
+        disp.joypad1.register()
+        console.log("found joypad1(0x33)")
+    } else {
+        console.log("not found joypad1(0x33)")
     }
-    else {
-        await prequire(... require("lv/prequire"))
-        await prequire(... require("desktop/prequire"))
-    }
+    disp.keys = new lv.KeysRouter(disp)
 
     const Desktop = require("desktop/Desktop")
-    global.desktop = new Desktop(beapi.lvgl.defaultDisplay())
+    global.desktop = new Desktop(disp)
 }
-

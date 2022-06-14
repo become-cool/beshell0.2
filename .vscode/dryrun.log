@@ -1,0 +1,5 @@
+make.exe --dry-run --keep-going --print-directory
+make.exe: Entering directory 'd:/project/robot/beshell'
+./build.sh
+make.exe: Leaving directory 'd:/project/robot/beshell'
+ 

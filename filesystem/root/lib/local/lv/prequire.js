@@ -4,5 +4,6 @@ module.exports = [[
     "./color.js",
     "./loader.js",
     "./animate.js",
+    "./input.js",
     "./index.js",
 ], require]

@@ -1,8 +1,12 @@
 #include "module_media.h"
+#include "widgets_gen.h"
 #include "utils.h"
 #include "driver/i2s.h"
 #include "pwm_audio.h"
 #include "dac_audio.h"
+
+#include "lv_demo_music_main.h"
+#include "lv_demo_music_list.h"
 
 #include "esp_log.h"
 #include <stdio.h>
@@ -215,6 +219,24 @@ static JSValue js_i2s_setup(JSContext *ctx, JSValueConst this_val, int argc, JSV
 }
 
 
+static lv_obj_t * ctrl;
+static lv_obj_t * list;
+
+static JSValue js_music_player_create(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+
+    // CHECK_INSOF_LVOBJ("Obj", argv[0], "arg parent must a lv.Obj object")
+    // lv_obj_t * cparent = JS_GetOpaqueInternal(argv[0]) ;
+
+    // lv_obj_set_style_bg_color(cparent, lv_color_hex(0x343247), 0);
+
+    // list = _lv_demo_music_list_create(cparent);
+    // ctrl = _lv_demo_music_main_create(cparent);
+
+    return JS_UNDEFINED ;
+}
+
+
 void be_module_media_require(JSContext *ctx) {
 
     JSValue beapi = js_get_glob_prop(ctx, 1, "beapi") ;
@@ -223,6 +245,7 @@ void be_module_media_require(JSContext *ctx) {
 
     JS_SetPropertyStr(ctx, media, "test", JS_NewCFunction(ctx, js_i2s_test, "test", 1));
     JS_SetPropertyStr(ctx, media, "setup", JS_NewCFunction(ctx, js_i2s_setup, "setup", 1));
+    JS_SetPropertyStr(ctx, media, "createMusicPlayer", JS_NewCFunction(ctx, js_music_player_create, "createMusicPlayer", 1));
 
     JS_FreeValue(ctx, beapi);
 }

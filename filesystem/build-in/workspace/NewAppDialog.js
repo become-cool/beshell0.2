@@ -21,7 +21,7 @@ module.exports = class NewAppDialog extends lv.Obj {
                     {
                         class: "Label" ,
                         text: "创建应用" ,
-                        font: "msyh" ,
+                        font: "source-han-sans" ,
                     } ,
                     {
                         class: "Row" ,
@@ -68,7 +68,7 @@ module.exports = class NewAppDialog extends lv.Obj {
                             {
                                 class: lv.Checkbox ,
                                 text: "进入工作台" ,
-                                font: "msyh" , 
+                                font: "source-han-sans" , 
                                 style: {
                                     "text-color": lv.rgb(160)
                                 } ,

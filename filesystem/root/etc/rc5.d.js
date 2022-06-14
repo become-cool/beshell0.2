@@ -14,15 +14,20 @@
             require("./init.d/beconsoled.js")
             sleep(0)
         }
+
+        let preqLst = []
         
-        await require("./init.d/display.js")()
+        const display = require("./init.d/display.js")
+        display.setup(preqLst)
         sleep(0)
         
-        // BePad (003)
-        // if(beapi.utils.partId()==3) {
-            await require("./init.d/desktop.js")()
-            sleep(0)
-        // }
+        const desktop = require("./init.d/desktop.js")
+        desktop.setup(preqLst)
+        sleep(0)
+
+        await display.prequire(preqLst)
+
+        desktop.begin()
 
         let rcpath = process.env.HOME + "/.beshellrc.js"
         if(beapi.fs.isFileSync(rcpath)) {
@@ -34,6 +39,15 @@
         
         require("./init.d/app").autoBoot()
         sleep(0)
+
+        
+
+        
+
+        // beapi.i2c.setup(0, 4, 5)
+        // beapi.gameplayer.setJoypad(0,51,-1,0)
+        // beapi.gameplayer.setDisplay(beapi.lvgl.defaultDisplay())
+        // beapi.gameplayer.play("/home/become/games/mario.nes")
     }
     catch(e) {
         console.log(e)

@@ -2,9 +2,11 @@
 #include "style.h"
 #include "be_lv_struct_wrapper.h"
 #include "utils.h"
-#include "font_msyh.h"
 #include "module_fs.h"
 
+#include "font_msyh.h"
+#include "font_wqy-zenhei.h"
+#include "font_source-han-sans.h"
 
 
 
@@ -537,8 +539,14 @@ JSValue js_lv_label_set_font(JSContext *ctx, JSValueConst this_val, int argc, JS
     else if( strcmp("m48", fontname)==0 ) {
         font = &lv_font_montserrat_48 ;
     }
-    else if( strcmp("msyh", fontname)==0 ) {
-        font = font_msyh() ;
+    // else if( strcmp("msyh", fontname)==0 ) {
+    //     font = font_msyh() ;
+    // }
+    // else if( strcmp("source-han-sans", fontname)==0 ) {
+    //     font = font_wqy_zenhei() ;
+    // }
+    else if( strcmp("source-han-sans", fontname)==0 ) {
+        font = font_source_han_sans() ;
     }
     // else if( strcmp("s16", fontname)==0 ) {
     //     font = & be_font_symbol_16 ;

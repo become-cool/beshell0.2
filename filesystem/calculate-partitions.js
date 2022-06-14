@@ -4,7 +4,7 @@
 // fsroot,       data, fat,      0x180000,  0x280000
 // fshome,       data, fat,      0x180000,  0x280000
 
-let parttables = [
+let parttables4MB = [
     {
         name: "nvs",
         type: "data",
@@ -28,7 +28,7 @@ let parttables = [
         name: "fsroot",
         type: "data",
         subtype: "fat",
-        size: 512*1024,
+        size: (512+128)*1024,
     } ,
     {
         name: "fshome",
@@ -37,6 +37,38 @@ let parttables = [
     } ,
 ]
 
+let parttables16MB = [
+    {
+        name: "nvs",
+        type: "data",
+        subtype: "nvs",
+        offset: 0x9000,
+        size: 24*1024,
+    } ,
+    {
+        name: "phy_init",
+        type: "data",
+        subtype: "phy",
+        size: 4*1024,
+    } ,
+    {
+        name: "factory",
+        type: "app",
+        subtype: "factory",
+        size: 4*1024*1024,
+    } ,
+    {
+        name: "fsroot",
+        type: "data",
+        subtype: "fat",
+        size: (512+128)*1024,
+    } ,
+    {
+        name: "fshome",
+        type: "data",
+        subtype: "fat",
+    } ,
+]
 
 function generatePartitionsTable(parts, flashSize) {
 
@@ -65,5 +97,5 @@ function generatePartitionsTable(parts, flashSize) {
 
 
 
-generatePartitionsTable(parttables, 4*1024*1024)
-generatePartitionsTable(parttables, 16*1024*1024)
+generatePartitionsTable(parttables4MB, 4*1024*1024)
+generatePartitionsTable(parttables16MB, 16*1024*1024)

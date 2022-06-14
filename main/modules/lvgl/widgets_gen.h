@@ -132,6 +132,11 @@ bool lv_group_refocus_policy_str_to_const(const char * str, lv_group_refocus_pol
 bool lv_group_refocus_policy_jsstr_to_const(JSContext *ctx, JSValue jsstr, lv_group_refocus_policy_t* out) ;
 const char *  lv_group_refocus_policy_const_to_str(lv_group_refocus_policy_t code) ;
 JSValue lv_group_refocus_policy_const_to_jsstr(JSContext *ctx, lv_group_refocus_policy_t code) ;
+
+bool lv_part_str_to_const(const char * str, lv_part_t* out) ;
+bool lv_part_jsstr_to_const(JSContext *ctx, JSValue jsstr, lv_part_t* out) ;
+const char *  lv_part_const_to_str(lv_part_t code) ;
+JSValue lv_part_const_to_jsstr(JSContext *ctx, lv_part_t code) ;
 // AUTO GENERATE CODE END [CONST CONVERT] --------
 
 

@@ -43,7 +43,7 @@ class Saver extends lv.CleanObj{
                                     text: "" ,
                                     width: "100%" ,
                                     height: -1 ,
-                                    font: "source-han-sans" ,
+                                    font: "msyh" ,
                                     ref: "title" ,
                                     style: {
                                         "text-align": "center"

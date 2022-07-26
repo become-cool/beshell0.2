@@ -4,11 +4,13 @@
 #include "widgets_gen.h"
 #include "utils.h"
 #include "cutils.h"
-#include "module_serial.h"
+
+
 
 
 #ifndef SIMULATION
 
+#include "module_serial.h"
 #include "xpt2046.h"
 #include "tp_spi.h"
 
@@ -22,7 +24,6 @@ static JSClassID js_lv_indev_nav_class_id ;
 
 typedef enum {
     INDEV_DRIVER_FAKE ,
-
     INDEV_DRIVER_XPT2046 ,
     INDEV_DRIVER_JOYPAD ,
 } indev_driver_t ;
@@ -30,6 +31,8 @@ typedef enum {
 typedef struct {
 
     indev_driver_t driver ;
+    
+#ifndef SIMULATION
     union  {
         struct {
             spi_host_device_t handle ;
@@ -39,6 +42,7 @@ typedef struct {
             uint8_t addr ;
         } i2c ;
     } conf ;
+#endif
 
     bool fake ;
     union  {
@@ -365,6 +369,9 @@ static const JSCFunctionListEntry js_lv_indev_pointer_proto_funcs[] = {
 
 // ------------
 // InDevNav 
+
+#ifndef SIMULATION
+
 typedef enum {
     NAVKEY_UP = 0x1 ,
     NAVKEY_DOWN = 0x2 ,
@@ -457,7 +464,7 @@ static JSValue js_lv_indev_nav_constructor(JSContext *ctx, JSValueConst new_targ
         driver_spec.conf.i2c.bus = bus ;
         driver_spec.conf.i2c.addr = addr ;
     }
-    
+
     lv_indev_drv_t * indev_drv = malloc(sizeof(lv_indev_drv_t));
     lv_indev_drv_init(indev_drv);
     indev_drv->type = LV_INDEV_TYPE_KEYPAD;
@@ -546,6 +553,7 @@ static const JSCFunctionListEntry js_lv_indev_nav_proto_funcs[] = {
 } ;
 
 
+#endif
 
 void be_lv_indev_reset(JSContext * ctx) {
 
@@ -570,7 +578,9 @@ void be_lv_indev_init() {
 
 void be_lv_indev_require(JSContext *ctx, JSValue lvgl) {
 
+#ifndef SIMULATION
     QJS_DEF_CLASS(lv_indev_nav, "InDevNav", "lv.InDevNav", JS_UNDEFINED, lvgl)
+#endif
     QJS_DEF_CLASS(lv_indev_pointer, "InDevPointer", "lv.InDevPointer", JS_UNDEFINED, lvgl)
     
     js_indev_global_cb_ctx = NULL ;

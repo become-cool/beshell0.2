@@ -9,7 +9,7 @@ class Card extends lv.Label {
         this.fromJson({
             width: 120 ,
             height: CardHeight ,
-            font: "source-han-sans" ,
+            font: "msyh" ,
             style: {
                 "bg-opa": 180 ,
                 "pad-left": 5 ,

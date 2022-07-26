@@ -1,4 +1,6 @@
-(async function(){
+require("besdk")
+
+; (async function(){
     try{
         require("./init.d/repl.js")
         sleep(0)
@@ -6,28 +8,28 @@
         require("./init.d/banner.js")()
         sleep(0)
 
-
         if(!process.simulate) {
             global.WiFi = require("besdk/wifi")
             WiFi.autostart()
-
-            require("./init.d/beconsoled.js")
-            sleep(0)
         }
 
-        let preqLst = []
-        
-        const display = require("./init.d/display.js")
-        display.setup(preqLst)
-        sleep(0)
-        
-        const desktop = require("./init.d/desktop.js")
-        desktop.setup(preqLst)
+        require("./init.d/time.js")
         sleep(0)
 
-        await display.prequire(preqLst)
+        require("./init.d/beconsoled.js")
+        sleep(0)
 
-        desktop.begin()
+        let setupConf = require("./init.d/setup.js") ()
+
+        if(be.dev?.disp?.length){
+            let desktop = require("./init.d/desktop.js")
+
+            await require("./init.d/display.js") ( desktop.disp? desktop.scripts: [] )
+
+            if(desktop.disp) {
+                desktop.init( setupConf )
+            }
+        }
 
         let rcpath = process.env.HOME + "/.beshellrc.js"
         if(beapi.fs.isFileSync(rcpath)) {
@@ -37,17 +39,12 @@
 
         console.log('BeShell is ready.')
         
-        require("./init.d/app").autoBoot()
+        if(require("./init.d/app").autorun()) {
+            if(setupConf.autorun) {
+                require(setupConf.autorun)
+            }
+        }
         sleep(0)
-
-        
-
-        
-
-        // beapi.i2c.setup(0, 4, 5)
-        // beapi.gameplayer.setJoypad(0,51,-1,0)
-        // beapi.gameplayer.setDisplay(beapi.lvgl.defaultDisplay())
-        // beapi.gameplayer.play("/home/become/games/mario.nes")
     }
     catch(e) {
         console.log(e)

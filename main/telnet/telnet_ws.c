@@ -2,6 +2,11 @@
 #include "module_telnet.h"
 #include "module_metadata.h"
 
+#ifndef SIMULATION
+#include "driver_camera.h"
+#include "esp_camera.h"
+#endif
+
 #include "beshell.h"
 #include "js_main_loop.h"
 #include "display.h"
@@ -22,6 +27,7 @@
 #define WS_DISP_BUFF_RAW 1
 #define WS_DISP_BUFF_JPEG 2
 
+#define TELNET_WS_ADDR "ws://0.0.0.0:8022"
 
 #define CROS_RSPN_HEADERS                                       \
         "Access-Control-Allow-Origin: *\r\n"                    \
@@ -31,27 +37,28 @@
 
 
 char * fs_root = NULL;
+struct mg_connection * conn ;
 
-void indev_global_cb_proc(lv_indev_data_t *data) ;
+// void indev_global_cb_proc(lv_indev_data_t *data) ;
 
-void ws_driver_input_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
-    // if(!ws_input_update) {
-    //     return ;
-    // }
-    if(!be_lv_fake_indev(data)) {
-        if(indev_input_pressed) {
-            data->state = LV_INDEV_STATE_PRESSED ;
-            data->point.x = indev_input_x ;
-            data->point.y = indev_input_y ;
-        }
-        else {
-            data->state = LV_INDEV_STATE_RELEASED ;
-        }
-    }
-    // ws_input_update = false ;
+// void ws_driver_input_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
+//     // if(!ws_input_update) {
+//     //     return ;
+//     // }
+//     if(!be_lv_fake_indev(data)) {
+//         if(indev_input_pressed) {
+//             data->state = LV_INDEV_STATE_PRESSED ;
+//             data->point.x = indev_input_x ;
+//             data->point.y = indev_input_y ;
+//         }
+//         else {
+//             data->state = LV_INDEV_STATE_RELEASED ;
+//         }
+//     }
+//     // ws_input_update = false ;
 
-    indev_global_cb_proc(data) ;
-}
+//     indev_global_cb_proc(data) ;
+// }
 
 
 typedef enum {
@@ -77,7 +84,7 @@ ws_client_t *lst_clients_search_by_conn(ws_client_t *lst, struct mg_connection *
 }
 
 
-static const char *s_listen_on = "ws://0.0.0.0:8022";
+
 
 
 void ws_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p) {
@@ -103,7 +110,9 @@ void ws_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color
 
     size+= 8 ;
     STACK_FOREACH(lst_clients, client, ws_client_t) {
-        mg_ws_send(client->conn, (char *)buff, size, WEBSOCKET_OP_BINARY);
+        if(client->type==WS_DISP) {
+            mg_ws_send(client->conn, (char *)buff, size, WEBSOCKET_OP_BINARY);
+        }
     }
 
     lv_disp_flush_ready(disp) ;
@@ -294,15 +303,20 @@ static void response_fs(struct mg_connection *c, struct mg_http_message *hm, con
 }
 
 static void response(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
+    (void)fn_data;
+    
+#ifndef SIMULATION
+    // camera
+    if(be_module_driver_camera_response(c,ev,ev_data)) {
+        return ;
+    }
+#endif
 
     if (ev == MG_EV_HTTP_MSG) {
         struct mg_http_message *hm = (struct mg_http_message *)ev_data;
         
         if (mg_http_match_uri(hm, "/repl")) {
             upgrade_ws(c, hm, WS_REPL) ;
-        }
-        else if (mg_http_match_uri(hm, "/display")) {
-            upgrade_ws(c, hm, WS_DISP) ;
         }
         else if(mg_http_match_uri(hm, "/") || mg_http_match_uri(hm, "/telweb")) {
             char * extra_headers = mallocf(
@@ -316,7 +330,11 @@ static void response(struct mg_connection *c, int ev, void *ev_data, void *fn_da
                     .mime_types = "text/html",
                     .extra_headers = extra_headers
             };
+#ifndef SIMULATION
             mg_http_serve_file(c, hm, "/fs/lib/local/telweb/index.html.gz", &opts);  // Send file
+#else
+            mg_http_serve_file(c, hm, "../filesystem/root/lib/local/telweb/index.html.gz", &opts);  // Send file
+#endif
 
             free(extra_headers) ;
         }
@@ -352,6 +370,10 @@ static void response(struct mg_connection *c, int ev, void *ev_data, void *fn_da
         }
         else if(mg_http_match_uri(hm, "/hello")) {
             mg_http_reply(c, 200, "", "%s", "hello, you!");
+        }
+
+        else if (mg_http_match_uri(hm, "/display")) {
+            upgrade_ws(c, hm, WS_DISP) ;
         }
         else {
             mg_http_reply(c, 403, "", "%s", "Invalid Path");
@@ -411,8 +433,6 @@ static void response(struct mg_connection *c, int ev, void *ev_data, void *fn_da
         }
     }
     else if (ev == MG_EV_CLOSE) {
-        printf("MG_EV_CLOSE\n");
-
         ws_client_t *client = lst_clients_search_by_conn(lst_clients, c);
         if (!client) {
             printf("unknow client close ?\n");
@@ -422,7 +442,6 @@ static void response(struct mg_connection *c, int ev, void *ev_data, void *fn_da
         }
         // printf("lst_clients count: %d\n", stack_count(lst_clients));
     }
-    (void)fn_data;
 }
 
 
@@ -442,8 +461,12 @@ void telnet_ws_output(uint8_t cmd, int pkgid, const char * data, size_t datalen)
 	free(pkg) ;
 }
 
-
 void be_telnet_ws_init() {
     fs_root = mallocf("/fs/=%s", vfs_path_prefix) ;
-    mg_http_listen(be_module_mg_mgr(), s_listen_on, response, NULL); // Create HTTP listener
+    conn = mg_http_listen(be_module_mg_mgr(), TELNET_WS_ADDR, response, NULL);
+    printf("telnet websocket addr: %s\n", TELNET_WS_ADDR) ;
+}
+void be_telnet_ws_require(JSContext * ctx, JSValue telnet) {
+    JSValue server = be_http_server_new(ctx, conn, JS_UNDEFINED) ;
+    JS_SetPropertyStr(ctx, telnet, "server", server) ;
 }

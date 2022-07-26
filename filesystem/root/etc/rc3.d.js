@@ -9,7 +9,7 @@
             WiFi.autostart()
         }
 
-        await require("./init.d/display.js")()
+        require("./init.d/setup.js") ()
         
         require("lv")
         await sleep(0)

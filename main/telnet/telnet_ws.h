@@ -9,6 +9,7 @@ void ws_disp_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * co
 void ws_driver_input_read(lv_indev_drv_t *drv, lv_indev_data_t *data) ;
 
 void be_telnet_ws_init() ;
+void be_telnet_ws_require(JSContext * ctx, JSValue telnet) ;
 
 void telnet_ws_output(uint8_t cmd, int pkgid, const char * data, size_t datalen) ;
 

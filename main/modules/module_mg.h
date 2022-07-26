@@ -5,6 +5,15 @@
 #include <stdbool.h>
 #include "mongoose.h"
 
+
+typedef struct _be_http_server {
+    struct mg_connection * conn ;
+    JSContext * ctx ;
+    JSValue callback ;
+} be_http_server_t ;
+
+JSValue be_http_server_new(JSContext *ctx, struct mg_connection * conn, JSValue callback) ;
+
 bool mg_url_is_listening(const char * url) ;
 
 const char * mg_event_const_to_name(int ev) ;

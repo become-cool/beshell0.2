@@ -115,7 +115,64 @@ static void delay(int ms) {
 }
 
 
-void st77xx_init(st77xx_dev_t * dev, int width, int height, int offsetx, int offsety) {
+void st7789_init(st77xx_dev_t * dev, int width, int height, int offsetx, int offsety, uint8_t MADCTL) {
+
+	dev->_width = width;
+	dev->_height = height;
+	dev->_offsetx = offsetx;
+	dev->_offsety = offsety;
+
+	st77xx_command(dev, 0x01);	//Power Control 1
+	delay(150);
+
+	st77xx_command(dev, 0x11);	// 唤醒
+	delay(120);
+
+	// 关于 0x36, 0x37 旋转屏幕，参考 st7789 文档，以及：
+	// https://github.com/notro/fbtft/issues/523
+
+	// 方向: 0x20, 0x40, 0x80 组合确定
+	// if(rotation==90) {
+	// 	st77xx_command(dev, 0x36);
+	// 	st77xx_data_byte(dev, 0x20|0x80);	
+	// 	// 屏幕开始位置偏移80像素
+	// 	st77xx_command(dev, 0x37);
+	// 	st77xx_data_byte(dev, 0);	
+	// 	st77xx_data_byte(dev, 0x50);	
+	// }
+	// else {
+		st77xx_command(dev, 0x36);	
+		st77xx_data_byte(dev, MADCTL);	
+	// }
+	
+	st77xx_command(dev, 0x3A);	// 颜色模式： RGB565 (16Bit)
+	st77xx_data_byte(dev, 0x05);
+
+	st77xx_command(dev, 0xC6);	// 帧率: 60hz
+	st77xx_data_byte(dev, 0x0F);
+	
+	st77xx_command(dev, 0xD0);	// power control
+	st77xx_data_byte(dev, 0xA4);
+	st77xx_data_byte(dev, 0xA1);
+
+	st77xx_command(dev, 0x21);	// 反色
+	st77xx_command(dev, 0x29);	// 打开屏幕
+
+	// 屏幕尺寸
+	st77xx_command(dev, 0x2A);
+	st77xx_data_byte(dev, 0);
+	st77xx_data_byte(dev, 0);
+	st77xx_data_byte(dev, 0);
+	st77xx_data_byte(dev, 240);
+	
+	st77xx_command(dev, 0x2B);
+	st77xx_data_byte(dev, 0);
+	st77xx_data_byte(dev, 0);
+	st77xx_data_byte(dev, 0);
+	st77xx_data_byte(dev, 240);	
+}
+
+void st7789v_init(st77xx_dev_t * dev, int width, int height, int offsetx, int offsety, uint8_t MADCTL) {
 
 	dev->_width = width;
 	dev->_height = height;
@@ -134,7 +191,7 @@ void st77xx_init(st77xx_dev_t * dev, int width, int height, int offsetx, int off
 	// 方向: 0x20, 0x40, 0x80 组合确定
 	// if(rotation==90) {
 		st77xx_command(dev, 0x36);
-		st77xx_data_byte(dev, 0x20|0x80);	
+		st77xx_data_byte(dev, MADCTL);	
 	// }
 	// else {
 	// 	st77xx_command(dev, 0x36);	
@@ -210,8 +267,6 @@ void st77xx_init(st77xx_dev_t * dev, int width, int height, int offsetx, int off
 	st77xx_data_byte(dev, 0x1b);
 	st77xx_data_byte(dev, 0x1e);
 	st77xx_command(dev, 0x29); 
-
-
 }
 
 

@@ -28,6 +28,6 @@ cmake -G "MinGW Makefiles" ..
 ```
 cd build
 rm CMakeCache.txt
- cmake -G Ninja -S .. -B .
+cmake -G Ninja -S .. -B .
 ninja
 ```

@@ -39,7 +39,7 @@ static level_t levels[] = {
 	{NULL, 0}
 };
 
-JSValue js_util_set_log_level(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+static JSValue js_util_set_log_level(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     if(argc<2) {
         JS_ThrowReferenceError(ctx, "Missing param");
         return JS_EXCEPTION ;
@@ -69,10 +69,10 @@ JSValue js_util_set_log_level(JSContext *ctx, JSValueConst this_val, int argc, J
 #endif
 
 
-JSValue js_util_time(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+static JSValue js_util_time(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
 	return JS_NewInt64(ctx, gettime()) ;
 }
-JSValue js_util_set_time(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+static JSValue js_util_set_time(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(1)
     ARGV_TO_INT64(0, now)
 
@@ -83,7 +83,7 @@ JSValue js_util_set_time(JSContext *ctx, JSValueConst this_val, int argc, JSValu
     return clock_gettime(CLOCK_REALTIME, &tm)>=0? JS_TRUE: JS_FALSE ;
 }
 
-JSValue js_util_sleep(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+static JSValue js_util_sleep(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     struct timeval tv;
     gettimeofday(&tv, NULL);
     
@@ -122,7 +122,7 @@ JSValue js_util_sleep(JSContext *ctx, JSValueConst this_val, int argc, JSValueCo
     return JS_UNDEFINED ;
 }
 
-JSValue js_util_var_refcount(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+static JSValue js_util_var_refcount(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
 	if(argc<1) {
         JS_ThrowReferenceError(ctx, "Missing param");
         return JS_EXCEPTION ;
@@ -132,7 +132,7 @@ JSValue js_util_var_refcount(JSContext *ctx, JSValueConst this_val, int argc, JS
 
 
 
-JSValue __js_util_set_timer(JSContext *ctx, int argc, JSValueConst *argv, bool repeat){
+static JSValue __js_util_set_timer(JSContext *ctx, int argc, JSValueConst *argv, bool repeat){
     if(argc<2) {
         JS_ThrowReferenceError(ctx, "Missing param");
         return JS_EXCEPTION ;
@@ -146,14 +146,14 @@ JSValue __js_util_set_timer(JSContext *ctx, int argc, JSValueConst *argv, bool r
 	return JS_NewInt32(ctx, addr) ;
 }
 
-JSValue js_util_set_timeout(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+static JSValue js_util_set_timeout(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
 	return __js_util_set_timer(ctx, argc, argv, false) ;
 }
-JSValue js_util_set_interval(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+static JSValue js_util_set_interval(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
 	return __js_util_set_timer(ctx, argc, argv, true) ;
 }
 
-JSValue js_util_clear_timeout(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+static JSValue js_util_clear_timeout(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
 	if(argc<1) {
         JS_ThrowReferenceError(ctx, "Missing param");
         return JS_EXCEPTION ;
@@ -207,7 +207,7 @@ void evalScript(JSContext *ctx, const char * path, bool asBin) {
     free(buff) ;
 }
 
-JSValue js_eval_script(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+static JSValue js_eval_script(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     JS2VSFPath(path, argv[0])
     CHECK_ARGV0_NOT_DIR(path)
     evalScript(ctx, path, false) ;
@@ -216,7 +216,7 @@ JSValue js_eval_script(JSContext *ctx, JSValueConst this_val, int argc, JSValueC
 }
 
 
-JSValue js_eval_as_file(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+static JSValue js_eval_as_file(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(2)
 
     ARGV_TO_STRING_LEN_E(0, code, codelen, "argv code must be a string")
@@ -231,7 +231,7 @@ JSValue js_eval_as_file(JSContext *ctx, JSValueConst this_val, int argc, JSValue
     return ret ;
 }
 
-JSValue js_compile_script(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+static JSValue js_compile_script(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(2)
 
     ARGV_TO_STRING_LEN_E(0, code, codelen, "argv code must be a string")
@@ -259,7 +259,7 @@ JSValue js_compile_script(JSContext *ctx, JSValueConst this_val, int argc, JSVal
     return JS_NewArrayBuffer(ctx, bytecode, bytecode_len, freeArrayBuffer, NULL, false ) ; ;
 }
 
-JSValue js_eval_bin(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+static JSValue js_eval_bin(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(1)
     ARGV_TO_ARRAYBUFFER(0, bytecodes, bytelen)
 
@@ -272,14 +272,14 @@ JSValue js_eval_bin(JSContext *ctx, JSValueConst this_val, int argc, JSValueCons
 
 
 
-JSValue js_utils_part_id(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+static JSValue js_utils_part_id(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     return JS_NewInt32(ctx, readPartId()) ;
 }
-JSValue js_utils_part_version(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+static JSValue js_utils_part_version(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     return JS_NewInt32(ctx, readPartVersion()) ;
 }
 
-JSValue js_util_part_uuid(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+static JSValue js_util_part_uuid(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
 #ifdef SIMULATION
     return JS_NewString(ctx, "123456789AEF") ;
 #else
@@ -294,7 +294,7 @@ JSValue js_util_part_uuid(JSContext *ctx, JSValueConst this_val, int argc, JSVal
 #endif
 }
 
-JSValue js_util_generate_uuid(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+static JSValue js_util_generate_uuid(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     uuid_t uu ;
     char uu_str[UUID_STR_LEN];
     uuid_generate(uu);
@@ -303,7 +303,7 @@ JSValue js_util_generate_uuid(JSContext *ctx, JSValueConst this_val, int argc, J
 }
 
 #ifndef SIMULATION
-JSValue js_utils_base64_encode(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+static JSValue js_utils_base64_encode(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(1)
     size_t srclen = 0 ;
     char * src = JS_ToCStringLen(ctx, &srclen, argv[0]) ;
@@ -326,7 +326,7 @@ JSValue js_utils_base64_encode(JSContext *ctx, JSValueConst this_val, int argc, 
 
     return ret ;
 }
-JSValue js_utils_base64_decode(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+static JSValue js_utils_base64_decode(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(1)
     size_t codelen = 0 ;
     char * code = JS_ToCStringLen(ctx, &codelen, argv[0]) ;
@@ -379,7 +379,7 @@ JSValue js_utils_gamma8_correct(JSContext *ctx, JSValueConst this_val, int argc,
 
 #ifndef SIMULATION
 int untar_dist_fd = NULL;
-int untar_entry_header_cb(header_translated_t *proper, int entry_index, void *context_data) {
+static int untar_entry_header_cb(header_translated_t *proper, int entry_index, void *context_data) {
     if(proper->type == T_NORMAL) {
         char * distpath = mallocf("%s/%s", (char *)context_data, proper->filename) ;
         printf(distpath) ;
@@ -405,12 +405,12 @@ int untar_entry_header_cb(header_translated_t *proper, int entry_index, void *co
 
     return 0 ;
 }
-int untar_entry_data_cb(header_translated_t *proper, int entry_index, void *context_data, unsigned char *block, int length) {
+static int untar_entry_data_cb(header_translated_t *proper, int entry_index, void *context_data, unsigned char *block, int length) {
     if(untar_dist_fd != NULL)
         fwrite(block, length, 1, untar_dist_fd);
     return 0 ;
 }
-int untar_entry_end_cb(header_translated_t *proper, int entry_index, void *context_data) {
+static int untar_entry_end_cb(header_translated_t *proper, int entry_index, void *context_data) {
     if(untar_dist_fd != NULL) {
         fclose(untar_dist_fd);
         untar_dist_fd = NULL;
@@ -418,7 +418,7 @@ int untar_entry_end_cb(header_translated_t *proper, int entry_index, void *conte
     return 0 ;
 }
 
-JSValue js_utils_untar(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+static JSValue js_utils_untar(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(2)
 
     char * srcpath = js_arg_to_vfspath(ctx, argv[0])  ;
@@ -440,7 +440,7 @@ JSValue js_utils_untar(JSContext *ctx, JSValueConst this_val, int argc, JSValueC
 
 #endif
 
-JSValue js_string_bytes(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+static JSValue js_string_bytes(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(1)
     ARGV_TO_STRING_LEN(0, str, len)
 
@@ -448,7 +448,7 @@ JSValue js_string_bytes(JSContext *ctx, JSValueConst this_val, int argc, JSValue
     return JS_NewUint32(ctx, len) ;
 }
 
-JSValue js_pack(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+static JSValue js_pack(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     size_t totalsize = 0 ;
     char * str ;
     size_t num = 0 ;
@@ -494,7 +494,7 @@ JSValue js_pack(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *a
     return pkg ;
 }
 
-JSValue js_pack_int32(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+static JSValue js_pack_int32(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(3)
     ARGV_TO_ARRAYBUFFER(0, buff, bufflen)
     ARGV_TO_UINT16(1, offset)
@@ -505,7 +505,7 @@ JSValue js_pack_int32(JSContext *ctx, JSValueConst this_val, int argc, JSValueCo
     memcpy(buff+offset, (void *)&num, 4) ;
     return JS_NewUint32(ctx, offset+4) ;
 }
-JSValue js_unpack_int32(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+static JSValue js_unpack_int32(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(2)
     ARGV_TO_ARRAYBUFFER(0, buff, bufflen)
     ARGV_TO_UINT16(1, offset)
@@ -514,7 +514,7 @@ JSValue js_unpack_int32(JSContext *ctx, JSValueConst this_val, int argc, JSValue
     }
     return JS_NewInt32(ctx, * (int32_t *)(buff+offset)) ;
 }
-JSValue js_pack_string(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+static JSValue js_pack_string(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(3)
     ARGV_TO_ARRAYBUFFER(0, buff, bufflen)
     ARGV_TO_UINT16(1, offset)
@@ -536,7 +536,7 @@ JSValue js_pack_string(JSContext *ctx, JSValueConst this_val, int argc, JSValueC
     JS_FreeCString(ctx, str) ;
     return JS_NewUint32(ctx, offset+strlen+1) ;
 }
-JSValue js_unpack_string(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+static JSValue js_unpack_string(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(2)
     ARGV_TO_ARRAYBUFFER(0, buff, bufflen)
     ARGV_TO_UINT16(1, offset)
@@ -547,7 +547,7 @@ JSValue js_unpack_string(JSContext *ctx, JSValueConst this_val, int argc, JSValu
     return JS_NewStringLen(ctx, (char*)(buff+offset+1), strlen) ;
 }
 
-JSValue js_write_string_to_ArrayBuffer(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+static JSValue js_write_string_to_ArrayBuffer(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(2)
     ARGV_TO_ARRAYBUFFER(0, buff, bufflen)
     ARGV_TO_STRING_LEN(1, str, strlen)
@@ -568,7 +568,7 @@ JSValue js_write_string_to_ArrayBuffer(JSContext *ctx, JSValueConst this_val, in
     return JS_UNDEFINED ;
 }
 
-JSValue js_read_string_from_ArrayBuffer(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+static JSValue js_read_string_from_ArrayBuffer(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(1)
     ARGV_TO_ARRAYBUFFER(0, buff, bufflen)
 
@@ -595,7 +595,7 @@ JSValue js_read_string_from_ArrayBuffer(JSContext *ctx, JSValueConst this_val, i
     return JS_NewStringLen(ctx, (char*)(buff+offset), strlen) ;
 }
 
-JSValue js_arraybuffer_as_string(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+static JSValue js_arraybuffer_as_string(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     size_t size ;
     char * buff = (char *)JS_GetArrayBuffer(ctx, &size, this_val) ;
     if(!buff || !size) {
@@ -605,10 +605,35 @@ JSValue js_arraybuffer_as_string(JSContext *ctx, JSValueConst this_val, int argc
 }
 
 
-JSValue js_feed_watchdog(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+static JSValue js_feed_watchdog(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
 #ifndef SIMULATION
     esp_task_wdt_reset() ;
 #endif
+    return JS_UNDEFINED ;
+}
+
+
+static JSValue js_set_timezone_offset(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+    ARGV_TO_INT32(0, minute)
+
+    setTimezoneOffset(minute) ;
+
+    return JS_UNDEFINED ;
+}
+
+static JSValue js_set_time(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+    ARGV_TO_INT64(0, ms)
+    
+    struct timeval tv;
+    tv.tv_sec = ms/1000;  // epoch time (seconds)
+    tv.tv_usec = (ms%1000)*1000;    // microseconds
+
+    printf("%lu.%lu\n",tv.tv_sec,tv.tv_usec);
+
+    settimeofday(&tv, NULL);
+
     return JS_UNDEFINED ;
 }
 
@@ -669,6 +694,8 @@ void be_module_utils_require(JSContext *ctx) {
     JS_SetPropertyStr(ctx, utils, "writeStringToArrayBuffer", JS_NewCFunction(ctx, js_write_string_to_ArrayBuffer, "writeStringToArrayBuffer", 1));
     JS_SetPropertyStr(ctx, utils, "readStringFromArrayBuffer", JS_NewCFunction(ctx, js_read_string_from_ArrayBuffer, "readStringFromArrayBuffer", 1));
     JS_SetPropertyStr(ctx, utils, "feed", JS_NewCFunction(ctx, js_feed_watchdog, "feed", 1));
+    JS_SetPropertyStr(ctx, utils, "setTimezoneOffset", JS_NewCFunction(ctx, js_set_timezone_offset, "setTimezoneOffset", 1));
+    JS_SetPropertyStr(ctx, utils, "setTime", JS_NewCFunction(ctx, js_set_time, "setTime", 1));
 
 	// global
     JS_SetPropertyStr(ctx, global, "sleep", JS_NewCFunction(ctx, js_util_sleep, "sleep", 1));

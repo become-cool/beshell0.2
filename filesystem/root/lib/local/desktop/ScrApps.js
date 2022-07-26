@@ -220,14 +220,14 @@ module.exports = class ScrApps extends lv.Obj {
         if(!this._appMenu) {
             this._appMenu = new lv.Menu(null, {
                 items: [
-                    { value:"运行", font:"source-han-sans", callback:()=>{
+                    { value:"运行", font:"msyh", callback:()=>{
                     }} ,
-                    { value:"开机时运行", font:"source-han-sans", callback:()=>{
+                    { value:"开机时运行", font:"msyh", callback:()=>{
                     }} ,
-                    { value:"工作台", font:"source-han-sans", callback:()=>{
+                    { value:"工作台", font:"msyh", callback:()=>{
                         require("workspace").start( path )
                     }} ,
-                    { value:"删除", font:"source-han-sans", callback:()=>{
+                    { value:"删除", font:"msyh", callback:()=>{
                         
                     }} ,
                 ]

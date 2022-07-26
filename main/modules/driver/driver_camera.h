@@ -1,0 +1,17 @@
+#ifndef __H_MODULE_CAMERA__
+#define __H_MODULE_CAMERA__
+
+#include "quickjs-libc.h"
+#include <stdbool.h>
+#include "mongoose.h"
+
+bool driver_camera_has_inited() ;
+
+bool be_module_driver_camera_response(struct mg_connection *c, int ev, void *ev_data) ;
+
+void be_module_driver_camera_init() ;
+void be_module_driver_camera_require(JSContext *ctx, JSValue driver) ;
+void be_module_driver_camera_loop(JSContext *ctx) ;
+void be_module_driver_camera_reset(JSContext *ctx) ;
+
+#endif

@@ -15,11 +15,7 @@
             sleep(0)
         }
 
-        let preqLst = []
-        
-        const display = require("./init.d/display.js")
-        display.setup(preqLst)
-        display.prequire(preqLst)
+        require("./init.d/setup.js") ()
 
         let rcpath = process.env.HOME + "/.beshellrc.js"
         if(beapi.fs.isFileSync(rcpath)) {

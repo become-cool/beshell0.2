@@ -14,20 +14,6 @@
 #include <freertos/queue.h>
 #endif
 
-#ifndef SIMULATION
-
-typedef struct {
-    lv_coord_t x1 ;
-    lv_coord_t x2 ;
-    lv_coord_t y1 ;
-    lv_coord_t y2 ;
-    uint8_t * buff ;
-    lv_disp_drv_t * disp ;
-} draw_param_t ;
-
-draw_param_t draw_param ;
-
-QueueHandle_t disp_queue;
 
 
 JSValue js_lv_disp_wrapper(JSContext *ctx, lv_disp_t * disp) {
@@ -51,12 +37,26 @@ JSValue js_lv_disp_wrapper(JSContext *ctx, lv_disp_t * disp) {
     }
 }
 
+#ifndef SIMULATION
+typedef struct {
+    lv_coord_t x1 ;
+    lv_coord_t x2 ;
+    lv_coord_t y1 ;
+    lv_coord_t y2 ;
+    uint8_t * buff ;
+    lv_disp_drv_t * disp ;
+} draw_param_t ;
 
-void disp_st7789_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color_p) {
+draw_param_t draw_param ;
+
+QueueHandle_t disp_queue;
+
+static void disp_st77XX_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color_p) {
     if(!disp->user_data) {
         printf("spidev is NULL\n") ;
         return ;
     }
+    // printf("disp_st77XX_flush(%d,%d,%d,%d)\n",area->x1,area->y1,area->x2,area->y2) ;
 
     // draw_param.x1 = area->x1 ;
     // draw_param.x2 = area->x2 ;
@@ -103,9 +103,12 @@ void free_disp_drv(JSContext * ctx, lv_disp_t * disp) {
                 free(dev) ;
             }
 #endif
-            JS_SetOpaque(drv_spec->jsobj, NULL) ;
-            dn(VAR_REFCNT(drv_spec->jsobj))
-            JS_FreeValue(ctx,drv_spec->jsobj) ;
+
+            JSValue jsvar = JS_MKPTR(JS_TAG_OBJECT, drv_spec->jsobj) ;
+            JS_SetOpaque(jsvar, NULL) ;
+            dn(VAR_REFCNT(jsvar))
+            JS_FreeValue(ctx,jsvar) ;
+            drv_spec->jsobj = NULL ;
 
             free(disp->driver->user_data) ;
             disp->driver->user_data = NULL ;
@@ -239,8 +242,8 @@ static void * malloc_buffer(size_t size) {
 
 /**
  * 
- * @param type "ST7789"
- * @param options
+ * @param type "st7789"|"st7789v"|"virtual-display"
+ * @param options: {cs,dc,spi,freq,width,height}
  * @return JSValue 
  */
 JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
@@ -304,7 +307,7 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
 
     dispdrv->user_data = dvrdata ;
 
-    if( strcmp(typestr, "ST7789")==0 ) {
+    if( strncmp(typestr, "st7789", 6)==0 ) {
 
 #ifndef SIMULATION
 
@@ -313,22 +316,35 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
         GET_INT_PROP_DEFAULT(argv[1], "spi", spi, 1, excp)
         GET_INT_PROP_DEFAULT(argv[1], "freq", freq, 26000000, excp)
 
-        // printf("spi=%d, cs=%d, dc=%d, freq=%d, width=%d, height=%d\n",spi,cs,dc,freq,width,height) ;
+        printf("spi=%d, cs=%d, dc=%d, freq=%d, width=%d, height=%d\n",spi,cs,dc,freq,width,height) ;
 
         // 初始化 spi
         st77xx_dev_t * spidev = malloc(sizeof(st77xx_dev_t));
         st77xx_spi_init(spidev, spi, cs, dc, freq);
-        st77xx_init(spidev, width, height, 0, 0);
 
+        if( strcmp(typestr, "st7789v")==0 ) {
+            GET_INT_PROP_DEFAULT(argv[1], "MADCTL", MADCTL, 0x20|0x80, excp)
+            st7789v_init(spidev, width, height, 0, 0, (uint8_t)MADCTL);
+            dn(MADCTL)
+        }
+        else if(strcmp(typestr, "st7789")==0) {
+            GET_INT_PROP_DEFAULT(argv[1], "MADCTL", MADCTL, 0, excp)
+            st7789_init(spidev, width, height, 0, 0, (uint8_t)MADCTL);
+            dn(MADCTL)
+        }
+        else {
+            JS_ThrowReferenceError(ctx, "unknow disp driver: %s", typestr);
+            goto excp ;
+        }
 
         // 注册设备驱动对象
-        dispdrv->flush_cb = disp_st7789_flush ;
+        dispdrv->flush_cb = disp_st77XX_flush ;
         dvrdata->spi_dev = spidev ;
 #endif
     }
 
     // 虚拟屏幕
-    else if( strcmp(typestr, "VIRTUAL")==0 ) {
+    else if( strcmp(typestr, "virtual-display")==0 ) {
 
         // 注册设备驱动对象
         dispdrv->flush_cb = ws_disp_flush ;
@@ -366,7 +382,6 @@ void be_lv_display_init() {
 
 #ifndef SIMULATION
     // vlgl_js_display_ws_init() ;
-    
 	// disp_queue = xQueueCreate(1, sizeof(draw_param_t *));
 	// xTaskCreatePinnedToCore(task_disp, "task_disp", 2048, NULL, 5, NULL, 1);
 #endif

@@ -3,8 +3,11 @@
 #include "be_lv_struct_wrapper.h"
 #include "utils.h"
 #include "module_fs.h"
+#include "images.h"
 
 #include "font_msyh.h"
+#include "font_msyh_3500.h"
+#include "font_msyh_5000.h"
 #include "font_wqy-zenhei.h"
 #include "font_source-han-sans.h"
 
@@ -76,7 +79,7 @@ static void js_lv_event_cb(lv_event_t * event) {
 /**
  * 3种调用方法：
  *  1. js_lv_obj_wrapper(ctx, obj, Cotr, 0)
- *      js 中定义的 lv.Obj派生类, 需要提供构造函数
+ *      js 中定义的 lv.Obj派生类, 需要提供 JS构造函数
  *  2. js_lv_obj_wrapper(ctx, obj, JS_UNDEFINED, clsid)
  *      lv 原生对象(c 实现的类)
  *  3. js_lv_obj_wrapper(ctx, obj, JS_UNDEFINED, 0)
@@ -539,15 +542,12 @@ JSValue js_lv_label_set_font(JSContext *ctx, JSValueConst this_val, int argc, JS
     else if( strcmp("m48", fontname)==0 ) {
         font = &lv_font_montserrat_48 ;
     }
-    // else if( strcmp("msyh", fontname)==0 ) {
-    //     font = font_msyh() ;
-    // }
-    // else if( strcmp("source-han-sans", fontname)==0 ) {
-    //     font = font_wqy_zenhei() ;
-    // }
-    else if( strcmp("source-han-sans", fontname)==0 ) {
-        font = font_source_han_sans() ;
+    else if( strcmp("msyh", fontname)==0 ) {
+        font = font_msyh_3500() ;
     }
+    // else if( strcmp("source-han-sans", fontname)==0 ) {
+    //     font = font_source_han_sans() ;
+    // }
     // else if( strcmp("s16", fontname)==0 ) {
     //     font = & be_font_symbol_16 ;
     // }
@@ -766,6 +766,31 @@ JSValue js_lv_obj_abort_scroll(JSContext *ctx, JSValueConst this_val, int argc, 
     return JS_FALSE ;
 }
 
+static JSValue js_lv_weather_img(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(2)
+
+    CHECK_INSOF_LVOBJ("Obj", argv[0], "arg parent must a lvgl.Obj object")
+    lv_obj_t * cparent = JS_GetOpaqueInternal(argv[0]) ;
+    if(!cparent) {
+        THROW_EXCEPTION("invalid arg parent")
+    }
+
+    ARGV_TO_UINT8(1, idx)
+    if(idx>13) {
+        THROW_EXCEPTION("weather image index must >=0 and <=8")
+    }
+
+    lv_obj_t * weatherImg = lv_img_create(cparent);
+    if(idx==0) {
+        lv_img_set_src(weatherImg, &ali);
+    }
+    else {
+        lv_img_set_src(weatherImg, &cat);
+    }
+
+    return js_lv_obj_wrapper(ctx, weatherImg, JS_UNDEFINED, 0) ;
+}
+
 void be_lv_widgets_init() {
 }
 
@@ -773,6 +798,7 @@ void be_lv_widgets_require(JSContext *ctx, JSValue lvgl) {
     JS_SetPropertyStr(ctx, lvgl, "isEventName", JS_NewCFunction(ctx, js_lvgl_is_event_name, "isEventName", 1));
     JS_SetPropertyStr(ctx, lvgl, "isStyleName", JS_NewCFunction(ctx, js_lv_obj_is_style_name, "isStyleName", 1));
     JS_SetPropertyStr(ctx, lvgl, "fromPtr", JS_NewCFunction(ctx, js_lv_obj_from_ptr, "fromPtr", 1));
+    JS_SetPropertyStr(ctx, lvgl, "weatherImg", JS_NewCFunction(ctx, js_lv_weather_img, "weatherImg", 1));
 #ifndef SIMULATION
     // JS_SetPropertyStr(ctx, lvgl, "setDebugLog", JS_NewCFunction(ctx, js_lv_set_debug_log, "setDebugLog", 1));
 #endif

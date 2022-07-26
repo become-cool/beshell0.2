@@ -59,13 +59,13 @@ beapi.lvgl.state = {
 }
 
 beapi.lvgl.active = function () {
-    return beapi.lvgl.defaultDisplay().activeScreen()
+    return be.dev.sreen[0].activeScreen()
 }
 beapi.lvgl.sysLayer = function () {
-    return beapi.lvgl.defaultDisplay().sysLayer()
+    return be.dev.sreen[0].sysLayer()
 }
 beapi.lvgl.topLayer = function () {
-    return beapi.lvgl.defaultDisplay().topLayer()
+    return be.dev.sreen[0].topLayer()
 }
 
 let sharedKeyboard = null
@@ -91,9 +91,9 @@ function msgbox() {
 beapi.lvgl.msg = {
     info(title, desc) {
         let box = new lv.MsgBox(beapi.lvgl.active(), title||"", desc||"", [], true)
-        box.title().setFont("source-han-sans")
+        box.title().setFont("msyh")
         let text = box.text()
-        if(text) text.setFont("source-han-sans")
+        if(text) text.setFont("msyh")
         box.center()
     }
 }

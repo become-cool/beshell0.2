@@ -21,7 +21,7 @@ class AppIcon extends lv.Column {
             }, {
                 class: 'Label' ,
                 ref: 'label' ,
-                font: "source-han-sans" ,
+                font: "msyh" ,
                 width:"100%" ,
                 longMode: "scroll-circular" ,
                 text: "" ,

@@ -1043,6 +1043,8 @@ int JS_GetClassIDFromProto(JSContext *ctx, JSValue proto, JSClassID * out) ;
 
 void JS_FreeLeaks(JSRuntime *rt,JSContext * ctx) ;
 
+void setTimezoneOffset(int hour) ;
+
 #ifdef __cplusplus
 } /* extern "C" { */
 #endif

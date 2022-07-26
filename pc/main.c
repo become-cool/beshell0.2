@@ -25,5 +25,5 @@ void main( int argc, char *argv[] ){
     
     module_fs_set_vfs_path_prefix(rootpath) ;
 
-    task_js_main(scriptpath) ;
+    js_main_loop(scriptpath) ;
 }

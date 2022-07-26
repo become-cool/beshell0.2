@@ -164,7 +164,7 @@ void freeArrayBuffer(JSRuntime *rt, void *opaque, void *ptr) ;
     }
 
 #define ASSIGN_INT_PROP_DEFAULT(obj, propName, cvar, default, error_goto)               \
-    if(JS_IsUndefined(obj)||JS_IsNULL(obj)) {                                           \
+    if(obj==JS_UNDEFINED||obj==JS_NULL) {                                               \
         cvar = default ;                                                                \
     } else {                                                                            \
         JSValue jsvar = JS_GetPropertyStr(ctx, obj, propName) ;                         \
@@ -177,7 +177,7 @@ void freeArrayBuffer(JSRuntime *rt, void *opaque, void *ptr) ;
                 JS_ThrowReferenceError(ctx, "property %s is not a number", propName) ;  \
                 goto error_goto ;                                                       \
             }                                                                           \
-            JS_ToInt32(ctx, &cvar, jsvar) ;                                             \
+            JS_ToInt32(ctx, (int*)&cvar, jsvar) ;                                       \
         }                                                                               \
     }
 
@@ -189,7 +189,7 @@ void freeArrayBuffer(JSRuntime *rt, void *opaque, void *ptr) ;
             JS_ThrowReferenceError(ctx, "property %s is not a number", propName) ;      \
             goto error_goto ;                                                           \
         }                                                                               \
-        JS_ToInt32(ctx, &cvar, jsvar) ;                                                 \
+        JS_ToInt32(ctx, (int*)&cvar, jsvar) ;                                           \
     }
 
 #define ASSIGN_UINT_PROP(obj, propName, cvar, error_goto)                               \

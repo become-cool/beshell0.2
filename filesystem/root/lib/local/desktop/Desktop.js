@@ -12,7 +12,7 @@ class Desktop extends lv.Obj {
 
     _switchingPanel = false
 
-    constructor(disp) {
+    constructor() {
         try{
             super()
             
@@ -60,6 +60,8 @@ class Desktop extends lv.Obj {
                 this.unlockScreen(true)
             })
             this.holdKeys()
+
+            console.log("Desktop constructor")
 
         }catch(e){
             console.log(e)

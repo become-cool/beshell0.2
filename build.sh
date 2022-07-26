@@ -11,7 +11,9 @@ ls -lh build/beshell.bin
 echo ''
 echo ===============================
 echo copy to beconsole dist dir ...
+echo cp build/beshell.bin ../beconsole.next/platform/nw.js/assets/firmware/beshell-0.2.0/flash/beshell.bin
 cp build/beshell.bin ../beconsole.next/platform/nw.js/assets/firmware/beshell-0.2.0/flash/beshell.bin
+echo cp build/beshell.bin ../beconsole.next/platform/nw.js/tmp/assets/firmware/beshell-0.2.0/flash/beshell.bin
 cp build/beshell.bin ../beconsole.next/platform/nw.js/tmp/assets/firmware/beshell-0.2.0/flash/beshell.bin
 
 echo ''

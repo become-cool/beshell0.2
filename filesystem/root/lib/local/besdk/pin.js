@@ -113,9 +113,18 @@ class Pin extends beapi.EventEmitter {
             beapi.gpio.pwmWrite( this.gpio, value )
         }
     }
-
     pwmStop() {
         beapi.gpio.pwmStop(this.gpio)
+    }
+
+    blink(dur){
+        this.setMode("input-output")
+        let level = 1
+        this.write(level)
+        return setInterval(()=>{
+            level = level? 0: 1
+            this.write(level)
+        }, dur||1000)
     }
 }
 

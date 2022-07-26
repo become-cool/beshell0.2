@@ -162,6 +162,8 @@ void be_telnet_require(JSContext *ctx) {
 	JS_FreeValue(ctx, beapi);
 	JS_FreeValue(ctx, global);
 	
+	be_telnet_ws_require(ctx, telnet) ;
+
 #ifdef SIMULATION
 	be_telnet_stdio_require(ctx) ;
 #else

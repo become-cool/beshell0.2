@@ -24,7 +24,7 @@ typedef struct {
 
 JSClassID lv_disp_js_class_id() ;
 
-bool be_lv_fake_indev(lv_indev_data_t *data) ;
+// bool be_lv_fake_indev(lv_indev_data_t *data) ;
 
 void be_lv_display_init() ;
 

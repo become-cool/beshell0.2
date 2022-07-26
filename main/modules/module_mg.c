@@ -13,11 +13,6 @@ static JSClassID js_mg_http_message_class_id ;
 static JSClassID js_mg_ws_message_class_id ;
 static JSClassID js_mg_http_rspn_class_id ;
 
-typedef struct _server {
-    struct mg_connection * conn ;
-    JSContext * ctx ;
-    JSValue callback ;
-} server_t ;
 
 typedef struct _response {
     struct mg_connection * conn ;
@@ -95,10 +90,10 @@ bool mg_url_is_listening(const char * url) {
 // =================================================
 // class Connection
 
-#define THIS_SERVER(var)                                                  \
-    server_t * var = JS_GetOpaque(this_val, js_mg_server_class_id) ;    \
+#define THIS_SERVER(var)                                                    \
+    be_http_server_t * var = JS_GetOpaque(this_val, js_mg_server_class_id) ;\
     if(!var || !var->conn) {                                                \
-        JS_ThrowReferenceError(var->ctx, "mg.Server object has free.");   \
+        JS_ThrowReferenceError(var->ctx, "mg.Server object has free.");     \
         return JS_EXCEPTION ;                                               \
     }
 
@@ -362,7 +357,7 @@ static void http_event_handler(struct mg_connection * conn, int ev, void *ev_dat
         return ;
     }
 
-    server_t * server = (server_t *)fn_data ;
+    be_http_server_t * server = (be_http_server_t *)fn_data ;
     if(!JS_IsFunction(server->ctx, server->callback)) {
         printf("callback is not a function， event:%s\n", mg_event_const_to_name(ev)) ;
         return ;
@@ -466,6 +461,21 @@ static void http_event_handler(struct mg_connection * conn, int ev, void *ev_dat
     }
 }
 
+JSValue be_http_server_new(JSContext *ctx, struct mg_connection * conn, JSValue callback) {
+
+    be_http_server_t * server = malloc(sizeof(be_http_server_t)) ;
+    server->ctx  = ctx ;
+    server->callback = JS_DupValue(ctx,callback) ;
+
+    server->conn = conn ;
+    conn->userdata = server ;
+
+    JSValue jsobj = JS_NewObjectClass(ctx, js_mg_server_class_id) ;
+    JS_SetOpaque(jsobj, server) ;
+    
+    return jsobj ;
+}
+
 static JSValue js_mg_mgr_http_listen(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
 
     CHECK_ARGC(2)
@@ -480,50 +490,155 @@ static JSValue js_mg_mgr_http_listen(JSContext *ctx, JSValueConst this_val, int 
         return JS_EXCEPTION ;
     }
 
-    server_t * server = malloc(sizeof(server_t)) ;
-    server->ctx  = ctx ;
-    server->callback = argv[1] ;
-    server->conn = NULL ;
-
-    server->conn = mg_http_listen(&mgr, addr, http_event_handler, server) ;
+    struct mg_connection * conn = mg_http_listen(&mgr, addr, http_event_handler, NULL) ;
     JS_FreeCString(ctx, addr) ;
 
-    if(server->conn==NULL) {
-        free(server) ;
+    if(conn==NULL) {
         THROW_EXCEPTION(ctx,"could not listen addr: %s", addr)
     }
-
-    JS_DupValue(ctx,argv[1]) ;
-
-    JSValue jsobj = JS_NewObjectClass(ctx, js_mg_server_class_id) ;
-    JS_SetOpaque(jsobj, server) ;
     
-    return jsobj ;
+    return be_http_server_new(ctx, conn, argv[1]) ;
 }
 
 
-static void sntp_event_handler(struct mg_connection * conn, int ev, void *ev_data, void *fn_data) {
-    if(ev==MG_EV_POLL)
-        return ;
-    ds( mg_event_const_to_name(ev) ) ;
-    if (ev == MG_EV_SNTP_TIME) {
-        // Time received
-        struct timeval *tv = (struct timeval *)ev_data;
+struct sntp_req_data_t {
+    JSContext * ctx;
+    JSValue callback ;
+    uint32_t poll_times ;
+};
+
+static void sntp_callback(struct sntp_req_data_t * req, int64_t time) {
+    MAKE_ARGV1( argv, JS_NewInt64(req->ctx, time) )
+    JS_Call(req->ctx, req->callback, JS_UNDEFINED, 1, argv) ;
+    free(argv) ;
+}
+
+static void sntp_cb(struct mg_connection *c, int ev, void *evd, void *fnd) {
+    if (ev == MG_EV_POLL) {
+        struct sntp_req_data_t * req_data = (struct sntp_req_data_t *)fnd ;
+        req_data->poll_times++ ;
+        if(++req_data->poll_times > 3000 ){
+            sntp_callback((struct sntp_req_data_t *)fnd, -1) ;
+            c->is_closing = 1 ;
+        }
+    } else if (ev == MG_EV_CONNECT) {
+        if (c->is_resolving) {
+            sntp_callback((struct sntp_req_data_t *)fnd, -2) ;
+            c->is_closing = 1 ;
+        }
+        else {
+            uint8_t buf[48] = {0};
+            buf[0] = (0 << 6) | (4 << 3) | 3;
+            mg_send(c, buf, sizeof(buf));
+        }
+    } else if (ev == MG_EV_READ) {
+        struct timeval tv = {0, 0};
+        if (mg_sntp_parse(c->recv.buf, c->recv.len, &tv) == 0) {
+            struct sntp_req_data_t * req_data = (struct sntp_req_data_t *)fnd ;
+            int64_t ms = tv.tv_sec ;
+            ms*= 1000 ;
+            sntp_callback((struct sntp_req_data_t *)fnd, ms) ;
+        }
+        c->recv.len = 0;  // Clear receive buffer
+        c->is_closing = 1 ;
+    } else if (ev==MG_EV_ERROR) {
+        struct sntp_req_data_t * req_data = (struct sntp_req_data_t *)fnd ;
+        sntp_callback((struct sntp_req_data_t *)fnd, -3) ;
+        c->is_closing = 1 ;
+    } else if (ev == MG_EV_CLOSE) {
+        struct sntp_req_data_t * req_data = (struct sntp_req_data_t *)fnd ;
+        JS_FreeValue(req_data->ctx, req_data->callback) ;
+        free(req_data) ;
+        req_data = NULL ;
+        fnd = NULL ;
     }
+    (void) evd;
 }
 
-static JSValue js_mg_sntp_connect(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-    // CHECK_ARGC(0)
+static JSValue js_mg_sntp_request(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
 
-    mg_sntp_connect(&mgr, "udp://pool.ntp.org:123" /* connect to time.google.com */, sntp_event_handler, NULL);
+    CHECK_ARGC(2)
+
+    ARGV_TO_STRING_E(0, url, "arg url must be a string")
+    if(!JS_IsFunction(ctx, argv[1])) {
+        THROW_EXCEPTION("arg callback must be a function")
+    }
+
+    struct sntp_req_data_t * req_data = malloc(sizeof(struct sntp_req_data_t)) ;
+    if(!req_data) {
+        THROW_EXCEPTION("out of memory?")
+    }
+    req_data->ctx = ctx ;
+    req_data->callback = JS_DupValue(ctx,argv[1]) ;
+    req_data->poll_times = 0 ;    
+
+    struct mg_connection * conn = mg_sntp_connect(&mgr, url, sntp_cb, req_data) ;
+    if(!conn) {
+        sntp_callback(req_data, -4) ;
+        free(req_data) ;
+        JS_FreeValue(ctx,argv[1]) ;
+    }
+    else {
+        // mg 内部机制 有 sntp 1小时访问一次的全局限制
+        // 取消 mg 的 sntp 实现，在 sntp_cb() 函数中接管
+        conn->pfn = NULL ;
+    }
+
+    if(url) {
+        JS_FreeCString(ctx, url) ;
+    }
 
     return JS_UNDEFINED ;
 }
 
+static JSValue js_mg_conn_peer(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
 
+    CHECK_ARGC(1)
+    ARGV_TO_UINT16(0, idx)
+
+    struct mg_connection * conn = mgr.conns ;
+    uint16_t i = idx ;
+    for(; conn && i--; conn=conn->next)
+    {}
+    if(!conn) {
+        THROW_EXCEPTION("conn idx not exist: %d", idx) ;
+    }
+
+    dn(conn->peer.port)
+
+    char addr[30] ;
+    mg_straddr(conn,addr,sizeof(addr)) ;
+
+    return JS_NewString(ctx, addr) ;
+}
+
+static JSValue js_mg_conn_cnt(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    int cnt = 0 ;
+    for(struct mg_connection * conn = mgr.conns ; conn; conn=conn->next) {
+        cnt ++ ;
+    }
+    return JS_NewUint32(ctx, cnt) ;
+}
+
+
+static JSValue js_mg_get_dns(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    return JS_NewString(ctx,mgr.dns4.url) ;
+}
+
+
+static JSValue js_mg_set_log(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+    ARGV_TO_STRING_E(0, log, "arg loglevel must be a string")
+
+    mg_log_set(log) ;
+
+    JS_FreeCString(ctx, log) ;
+    return JS_UNDEFINED ;
+}
 
 void be_module_mg_init() {
     mg_mgr_init(&mgr) ;
+    // mgr.dns4.url = "udp://1.1.1.1:53";
 
     JS_NewClassID(&js_mg_server_class_id);
     JS_NewClassID(&js_mg_http_message_class_id);
@@ -544,7 +659,11 @@ void be_module_mg_require(JSContext *ctx) {
     QJS_DEF_CLASS(mg_http_rspn, "HttpResponse", "mg.HttpResponse", JS_UNDEFINED, pkgShadow)
 
     JS_SetPropertyStr(ctx, mg, "httpListen", JS_NewCFunction(ctx, js_mg_mgr_http_listen, "httpListen", 1));
-    JS_SetPropertyStr(ctx, mg, "sntpConnect", JS_NewCFunction(ctx, js_mg_sntp_connect, "sntpConnect", 1));
+    JS_SetPropertyStr(ctx, mg, "sntpRequest", JS_NewCFunction(ctx, js_mg_sntp_request, "sntpRequest", 1));
+    JS_SetPropertyStr(ctx, mg, "connCnt", JS_NewCFunction(ctx, js_mg_conn_cnt, "connCnt", 1));
+    JS_SetPropertyStr(ctx, mg, "connPeer", JS_NewCFunction(ctx, js_mg_conn_peer, "connPeer", 1));
+    JS_SetPropertyStr(ctx, mg, "getDNS", JS_NewCFunction(ctx, js_mg_get_dns, "getDNS", 1));
+    JS_SetPropertyStr(ctx, mg, "setLog", JS_NewCFunction(ctx, js_mg_set_log, "setLog", 1));
     
     // JS_FreeValue(ctx, mg);
     JS_FreeValue(ctx, beapi);
@@ -560,7 +679,7 @@ void be_module_mg_reset(JSContext *ctx) {
     // assert(VAR_REFCNT(pkgShadow)==0) ;
 
     // @todo
-    // 关闭所有的 server_t.conn
+    // 关闭所有的 be_http_server_t.conn
 }
 
 

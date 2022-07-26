@@ -1,36 +1,36 @@
 // wifi mode
-const MODE_NONE = 0
+// const MODE_NONE = 0
 const MODE_STA = 1
 const MODE_AP = 2
-const MODE_APSTA = 3
+// const MODE_APSTA = 3
 
 // event type
 EVENT_WIFI = 1
 EVENT_IP = 2 
 
 // WiFi events
-const WIFI_READY = 0
+// const WIFI_READY = 0
 const WIFI_SCAN_DONE = 1
 const WIFI_STA_START = 2
 const WIFI_STA_STOP = 3
 const WIFI_STA_CONNECTED = 4
 const WIFI_STA_DISCONNECTED = 5
-const WIFI_STA_AUTHMODE_CHANGE = 6
-const WIFI_STA_WPS_ER_SUCCESS = 7
-const WIFI_STA_WPS_ER_FAILED = 8
-const WIFI_STA_WPS_ER_TIMEOUT = 9
-const WIFI_STA_WPS_ER_PIN = 10
-const WIFI_STA_WPS_ER_PBC_OVERLAP = 11
+// const WIFI_STA_AUTHMODE_CHANGE = 6
+// const WIFI_STA_WPS_ER_SUCCESS = 7
+// const WIFI_STA_WPS_ER_FAILED = 8
+// const WIFI_STA_WPS_ER_TIMEOUT = 9
+// const WIFI_STA_WPS_ER_PIN = 10
+// const WIFI_STA_WPS_ER_PBC_OVERLAP = 11
 const WIFI_AP_START = 12
 const WIFI_AP_STOP = 13
 const WIFI_AP_STACONNECTED = 14
 const WIFI_AP_STADISCONNECTED = 15
-const WIFI_AP_PROBEREQRECVED = 16
-const WIFI_FTM_REPORT = 17
-const WIFI_STA_BSS_RSSI_LOW = 18
-const WIFI_ACTION_TX_STATUS = 19
-const WIFI_ROC_DONE = 21
-const WIFI_STA_BEACON_TIMEOUT = 21
+// const WIFI_AP_PROBEREQRECVED = 16
+// const WIFI_FTM_REPORT = 17
+// const WIFI_STA_BSS_RSSI_LOW = 18
+// const WIFI_ACTION_TX_STATUS = 19
+// const WIFI_ROC_DONE = 21
+// const WIFI_STA_BEACON_TIMEOUT = 21
 
 let evtNames = []
 evtNames[WIFI_SCAN_DONE] = "scan.done"
@@ -46,11 +46,11 @@ evtNames[WIFI_AP_STADISCONNECTED] = "ap.sta.disconnected"
 // IP events
 const STA_GOT_IP = 0
 const STA_LOST_IP = 1
-const AP_STAIPASSIGNED = 2
-const GOT_IP6 = 3
-const ETH_GOT_IP = 4
-const PPP_GOT_IP = 5
-const PPP_LOST_IP = 6
+// const AP_STAIPASSIGNED = 2
+// const GOT_IP6 = 3
+// const ETH_GOT_IP = 4
+// const PPP_GOT_IP = 5
+// const PPP_LOST_IP = 6
 
 let ipEvtNames = []
 ipEvtNames[STA_GOT_IP] = "ip.got"
@@ -59,8 +59,8 @@ ipEvtNames[STA_LOST_IP] = "ip.lost"
 
 // power safe
 const PS_NONE = 0
-const PS_MIN_MODEM = 1
-const PS_MAX_MODEM = 2 
+// const PS_MIN_MODEM = 1
+// const PS_MAX_MODEM = 2 
 
 
 const wifi = module.exports = new beapi.EventEmitter()
@@ -159,7 +159,6 @@ wifi.startAP = function(ssid, password, callback) {
         beapi.wifi.setAPConfig({ssid, password})
         wifi.start()
     })
-    
 }
 wifi.stopAP = function(callback) {
     if(!wifi.apStarted()) {
@@ -206,7 +205,7 @@ wifi.status = function(netif) {
     }
 }
 
-wifi.autostart = async function() {
+wifi.autostart = function() {
     wifi.start(()=>{
         console.log("wifi auto start")
         if(wifi.mode()&MODE_STA) {

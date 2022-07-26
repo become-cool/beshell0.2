@@ -17,10 +17,10 @@
 #include "module_gpio.h"
 #include "module_serial.h"
 #include "module_socks.h"
-#include "module_camera.h"
 #include "module_gameplayer.h"
 #include "module_media.h"
-#include "module_drivers.h"
+#include "module_driver.h"
+#include "driver_camera.h"
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -135,8 +135,7 @@ static JSContext * init_custom_context(JSRuntime *rt) {
     // be_module_telnet_require(ctx) ;
     be_module_serial_require(ctx) ;
     be_module_socks_require(ctx) ;
-    be_module_drivers_require(ctx) ;
-    be_module_camera_require(ctx) ;
+    be_module_driver_require(ctx) ;
     be_module_gameplayer_require(ctx) ;
     be_module_media_require(ctx) ;
 #endif
@@ -191,7 +190,7 @@ static void quickjs_init() {
     else {
         rt = JS_NewRuntime();
     }
-#elif
+#else
     rt = JS_NewRuntime();
 #endif
 
@@ -273,11 +272,14 @@ void js_main_loop(const char * script){
     be_module_sniffer_init() ;
     be_module_gpio_init() ;
     // be_module_http_init() ;
+    be_module_driver_init() ;
 #endif
 
     quickjs_init() ;
 
+#ifndef SIMULATION
     FREE_MEM(retain_mem)
+#endif
 
     rc_init() ;
 
@@ -285,7 +287,9 @@ void js_main_loop(const char * script){
         evalScript(ctx, script, false) ;
     }
 
+#ifndef SIMULATION
     echo_DMA("loop start") ;
+#endif
     while(1) {
 
         if(requst_reset) {
@@ -300,6 +304,7 @@ void js_main_loop(const char * script){
             be_module_serial_reset(ctx) ;
             be_module_socks_reset(ctx) ;
             // be_module_http_reset(ctx) ;
+            be_module_driver_reset(ctx) ;
             be_module_wifi_reset(ctx) ;
 #endif
             quickjs_deinit() ;

@@ -5,33 +5,6 @@ source esp-idf/export.sh
 ./make
 ```
 
-## quickjs 连接错误:
-```
-1: undefined reference to `fesetround'
-```
-
-
-## quickjs / c 对象混合编程
-
-JSValue 是多种类型的联合体，按值传递，在 c 语言里记录 JSValue 的指针没有意义 (lvgl/moogoose 等库需要保存上下文数据的指针)，应该持有 JSValue 指向的 JSObject 指针。
-
-通过 `JS_VALUE_GET_PTR(<JSValue>)` 宏可以取出 JSValue 指向的 JSObject 指针（如果该 JSValue 是object类型）；
-
-通过 `JS_MKPTR(JS_TAG_OBJECT, <JSObject *>)` 宏将 JSObject 包装成一个 JSValue 传递给 js
-
-
-##  quickjs / c 内存管理
-
-* `JS_NewObject` 创建一个 js 对象，确保有js变量指向这个对象，例如：可以 JS_SetPropertyStr(ctx, other, "xx", newobj) 设为其他对象的属性。否则 gc 无法自动回收，会造成内存邪路
-
-* `JS_Eval` 返回值必须 JS_FreeValue ，否则可能内存泄漏
-```
-JSValue ret = JS_Eval(ctx, code, len, "filepath", JS_EVAL_TYPE_XXX)
-JS_FreeValue(ctx, ret)
-```
-
-
-
 ## GPIO12 启动时上拉状态
 
 在 ESP32 中，GPIO12 是硬件 SPI 的 MISO MUX引脚, SPI 使用 MUX 引脚可高达 80MHz 频率，其它任意引进仅为 26MHz。

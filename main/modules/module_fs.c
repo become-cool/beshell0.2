@@ -24,6 +24,7 @@ void module_fs_set_vfs_path_prefix(char * path) {
     vfs_path_prefix = path ;
 }
 
+// 返回值 由调用者 free
 char * vfspath_to_fs(const char * path) {
     size_t pathlen = strlen(path) ;
     size_t prefixlen = strlen(vfs_path_prefix) ;
@@ -276,7 +277,7 @@ JSValue js_fs_read_file_sync(JSContext *ctx, JSValueConst this_val, int argc, JS
 
 #ifndef SIMULATION
     char * buff = heap_caps_malloc( readlen, MALLOC_CAP_SPIRAM);
-#elif
+#else
     char * buff = malloc(readlen) ;
 #endif
 

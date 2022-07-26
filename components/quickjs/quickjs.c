@@ -41637,9 +41637,12 @@ static JSValue js___date_clock(JSContext *ctx, JSValueConst this_val,
     return JS_NewInt64(ctx, d);
 }
 
+int timezone_offset = 0 ;
+
 /* OS dependent. d = argv[0] is in ms from 1970. Return the difference
    between local time and UTC time 'd' in minutes */
 static int getTimezoneOffset(int64_t time) {
+    return timezone_offset ;
 #if defined(_WIN32)
     /* XXX: TODO */
     return 0;
@@ -53768,3 +53771,7 @@ int JS_GetClassIDFromProto(JSContext *ctx, JSValue proto, JSClassID * out) {
 //         }
 //     }
 // }
+
+void setTimezoneOffset(int minute) {
+    timezone_offset = minute ; 
+}

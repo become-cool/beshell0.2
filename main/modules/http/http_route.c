@@ -5,9 +5,6 @@
 
 
 
-
-
-/* Handler to delete a file from the server */
 static esp_err_t http_server_handler(httpd_req_t *req) {
 
     req_t * creq = http_request(req) ;

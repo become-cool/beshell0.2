@@ -2,7 +2,7 @@
 #include "module_serial.h"
 #include <string.h>
 
-#define DMA_CHAN        2
+// #define DMA_CHAN        2
 
 uint8_t _spi_bus_setup = 0 ;
 spi_device_handle_t _spi_handle_pool1[8] = {0,0,0,0,0,0,0,0} ;
@@ -29,35 +29,36 @@ spi_device_handle_t _spi_handle(uint8_t idx) {
 }
 
 /**
- * spi bus num 1-2
- * clk
- * mosi
+ * spi bus num 1-3
  * miso
+ * mosi
+ * clk
  */
 JSValue js_spi_bus_setup(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
 
     CHECK_ARGC(4)
 
-    ARGV_TO_UINT8(0, busnum)
-    if(busnum<0 || busnum>2) {
-        THROW_EXCEPTION("Bus num must be 1-2")
-    }
-    ARGV_TO_UINT8(1, clkpin)
-
-    int8_t mosipin = -1 ;
     int8_t misopin = -1 ;
-    if(!JS_IsUndefined(argv[2])) {
+    int8_t mosipin = -1 ;
+    if(!JS_IsUndefined(argv[1]) && !JS_IsNull(argv[1])) {
+        if( JS_ToUint32(ctx, &misopin, argv[1])!=0 ){
+            THROW_EXCEPTION("MISO pin invalid.")
+        }
+    }
+    if(!JS_IsUndefined(argv[2]) && !JS_IsNull(argv[2])) {
         if( JS_ToUint32(ctx, &mosipin, argv[2])!=0 ){
             THROW_EXCEPTION("MOSI pin invalid.")
         }
     }
-    if(!JS_IsUndefined(argv[3])) {
-        if( JS_ToUint32(ctx, &misopin, argv[3])!=0 ){
-            THROW_EXCEPTION("MISO pin invalid.")
-        }
-    }
 
-    // pf("mosi=%d, miso=%d, clk=%d", mosipin, misopin, clkpin)
+    ARGV_TO_UINT8(0, busnum)
+    if(busnum<0 || busnum>3) {
+        THROW_EXCEPTION("Bus num must be 1-3")
+    }
+    ARGV_TO_UINT8(3, clkpin)
+
+    // pf("miso=%d, mosi=%d, clk=%d", misopin, mosipin, clkpin)
+    // dn(busnum)
 
     spi_bus_config_t buscfg = {
         .miso_io_num=misopin,
@@ -68,7 +69,7 @@ JSValue js_spi_bus_setup(JSContext *ctx, JSValueConst this_val, int argc, JSValu
         .max_transfer_sz=20480
     } ;
 
-    esp_err_t ret = spi_bus_initialize(busnum, &buscfg, DMA_CHAN);
+    esp_err_t ret = spi_bus_initialize(busnum, &buscfg, SPI_DMA_CH2);
     if(ret==0) {
         _spi_bus_setup|= 1<<busnum ;
     }

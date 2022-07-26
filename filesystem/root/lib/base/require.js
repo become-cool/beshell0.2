@@ -185,6 +185,9 @@ const Module = {
 }
 
 JSON.load = function(path) {
+    if(!beapi.fs.isFileSync(path)) {
+        throw new Error("path not exists: "+path)
+    }
     return JSON.parse(beapi.fs.readFileSync(path).asString())
 }
 

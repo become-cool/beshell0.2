@@ -13,6 +13,7 @@ LINK_LIBRARIES(pthread)
 
 add_definitions(-g)
 add_definitions(-DSIMULATION)
+add_definitions(-DMG_ENABLE_OPENSSL)
 # add_definitions(-DWIN32)
 # add_definitions(-DMG_ENABLE_LINES)
 add_definitions(-DLV_THEME_DEFAULT_DARK)

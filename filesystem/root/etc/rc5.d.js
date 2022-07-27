@@ -1,4 +1,5 @@
 require("besdk")
+require("besdk/http")
 
 ; (async function(){
     try{

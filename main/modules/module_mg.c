@@ -8,6 +8,8 @@ struct mg_mgr mgr ;
 
 JSValue pkgShadow ;
 
+char * ca_path = NULL ;
+
 static JSClassID js_mg_server_class_id ;
 static JSClassID js_mg_http_message_class_id ;
 static JSClassID js_mg_ws_message_class_id ;
@@ -86,14 +88,185 @@ bool mg_url_is_listening(const char * url) {
     return true ;
 }
 
-
 // =================================================
 // class Connection
+
+
+#define THIS_CONNECTION(var)                                                \
+    mg_req_t * var = JS_GetOpaque(this_val, js_mg_connection_class_id) ;    \
+    if(!var || !var->conn) {                                                \
+        JS_ThrowReferenceError(ctx, "mg.Connection object has closed.");    \
+        return JS_EXCEPTION ;                                               \
+    }
+
+typedef struct _mg_req {
+    struct mg_connection * conn ;
+    JSValue jsconn ;
+
+    JSContext * ctx ;
+    JSValue callback ;
+    uint16_t poll_times ;
+} mg_req_t ;
+
+
+static JSClassID js_mg_connection_class_id ;
+static JSValue js_mg_connection_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
+    JSValue jsobj = JS_NewObjectClass(ctx, js_mg_connection_class_id) ;
+    return jsobj ;
+}
+static void js_mg_connection_finalizer(JSRuntime *rt, JSValue this_val){
+    printf("js_mg_connection_finalizer()\n") ;
+}
+static JSClassDef js_mg_connection_class = {
+    "mg.Connection",
+    .finalizer = js_mg_connection_finalizer,
+} ;
+
+static JSValue js_mg_connection_send(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+    THIS_CONNECTION(req)
+
+    ARGV_TO_STRING_LEN_E(0, data, len, "arg data must be a string")
+    bool res = mg_send(req->conn, data, len) ;
+    JS_FreeCString(ctx, data) ;
+
+    return res? JS_TRUE : JS_FALSE;
+}
+
+static JSValue js_mg_connection_close(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    THIS_CONNECTION(req)
+    req->conn->is_closing = true ;
+    return JS_UNDEFINED ;
+}
+
+
+static JSValue js_mg_connection_init_tls(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+    ARGV_TO_STRING_E(0, host, "arg host must be a string")
+
+    THIS_CONNECTION(req)
+
+    struct mg_tls_opts opts = {.ca = ca_path, .srvname = mg_str(host) };
+    mg_tls_init(req->conn, &opts);
+    
+    JS_FreeCString(ctx, host) ;
+    return JS_UNDEFINED ;
+}
+
+
+static const JSCFunctionListEntry js_mg_connection_proto_funcs[] = {
+    JS_CFUNC_DEF("close", 0, js_mg_connection_close),
+    JS_CFUNC_DEF("send", 0, js_mg_connection_send),
+    JS_CFUNC_DEF("initTLS", 0, js_mg_connection_init_tls),
+} ;
+
+
+// enum {
+//   MG_EV_ERROR,       // Error                         char *error_message
+//   MG_EV_OPEN,        // Connection created           NULL
+//   MG_EV_POLL,        // mg_mgr_poll iteration        unsigned long *millis
+//   MG_EV_RESOLVE,     // Host name is resolved        NULL
+//   MG_EV_CONNECT,     // Connection established       NULL
+//   MG_EV_ACCEPT,      // Connection accepted          NULL
+//   MG_EV_READ,        // Data received from socket    struct mg_str *
+//   MG_EV_WRITE,       // Data written to socket       long *bytes_written
+//   MG_EV_CLOSE,       // Connection closed            NULL
+//   MG_EV_HTTP_MSG,    // HTTP request/response        struct mg_http_message *
+//   MG_EV_HTTP_CHUNK,  // HTTP chunk (partial msg)     struct mg_http_message *
+//   MG_EV_WS_OPEN,     // Websocket handshake done     struct mg_http_message *
+//   MG_EV_WS_MSG,      // Websocket msg, text or bin   struct mg_ws_message *
+//   MG_EV_WS_CTL,      // Websocket control msg        struct mg_ws_message *
+//   MG_EV_MQTT_CMD,    // MQTT low-level command       struct mg_mqtt_message *
+//   MG_EV_MQTT_MSG,    // MQTT PUBLISH received        struct mg_mqtt_message *
+//   MG_EV_MQTT_OPEN,   // MQTT CONNACK received        int *connack_status_code
+//   MG_EV_SNTP_TIME,   // SNTP time received           struct timeval *
+//   MG_EV_USER,        // Starting ID for user events
+// };
+static void http_connection_event_handler(struct mg_connection * conn, int ev, void *ev_data, void *fnd) {
+    mg_req_t * req = (mg_req_t *)fnd ;
+    switch(ev) {
+        case MG_EV_POLL:
+            req->poll_times++ ;
+            if(++req->poll_times > 5000 ){
+                JS_CALL_ARG1(req->ctx, req->callback, JS_NewString(req->ctx, "timeout"))
+                conn->is_closing = 1 ;
+            }
+            break ;
+
+        case MG_EV_HTTP_MSG: 
+        case MG_EV_HTTP_CHUNK: 
+        {
+            struct mg_http_message *hm = (struct mg_http_message *) ev_data;
+
+            JSValue jsmsg = JS_NewObjectClass(req->ctx, js_mg_http_message_class_id) ;
+            JS_SetOpaque(jsmsg, hm) ;
+
+            JS_CALL_ARG2(req->ctx, req->callback
+                , JS_NewString(req->ctx, mg_event_const_to_name(ev))
+                , jsmsg)
+            break ;
+        }
+
+        case MG_EV_CLOSE : 
+            JS_SetOpaque(req->jsconn, NULL) ;
+            JS_FreeValue(req->ctx, req->callback) ;
+            JS_FreeValue(req->ctx, req->jsconn) ;
+            
+            free(req) ;
+            req = NULL ;
+            fnd = NULL ;
+            break ;
+
+        default:
+            JS_CALL_ARG1(req->ctx, req->callback, JS_NewString(req->ctx, mg_event_const_to_name(ev)))
+            break ;
+    }
+
+}
+
+static JSValue js_mg_connect(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+
+    CHECK_ARGC(2)
+    if( !JS_IsFunction(ctx, argv[1]) ) {
+        THROW_EXCEPTION("arg callback must be a function")
+    }
+    ARGV_TO_STRING_E(0, url, "arg url must be a string") ;
+
+    mg_req_t * req = malloc(sizeof(mg_req_t)) ;
+    if(!req) {
+        JS_FreeCString(ctx, url) ;
+        THROW_EXCEPTION("out of memory?") ;
+    }
+    
+    req->ctx  = ctx ;
+    req->callback = JS_DupValue(ctx,argv[1]) ;
+    req->jsconn = JS_NewObjectClass(ctx, js_mg_connection_class_id) ;
+    JS_SetOpaque(req->jsconn, req) ;
+    
+    struct mg_connection * conn = mg_http_connect(&mgr, url, http_connection_event_handler, req) ;
+    
+    JS_FreeCString(ctx, url) ;
+
+    if(conn==NULL) {
+        free(req) ;
+        THROW_EXCEPTION_FREE({ JS_FreeCString(ctx, url) ;}, "could not listen addr: %s", url)
+    }
+    
+    req->conn = conn ;
+    return JS_DupValue(ctx, req->jsconn) ;
+}
+
+
+
+
+
+// =================================================
+// class Server
 
 #define THIS_SERVER(var)                                                    \
     be_http_server_t * var = JS_GetOpaque(this_val, js_mg_server_class_id) ;\
     if(!var || !var->conn) {                                                \
-        JS_ThrowReferenceError(var->ctx, "mg.Server object has free.");     \
+        JS_ThrowReferenceError(var->ctx, "mg.Server object has closed.");     \
         return JS_EXCEPTION ;                                               \
     }
 
@@ -102,7 +275,8 @@ static JSValue js_mg_server_constructor(JSContext *ctx, JSValueConst new_target,
     return jsobj ;
 }
 static void js_mg_server_finalizer(JSRuntime *rt, JSValue this_val){
-    // printf("js_mg_server_finalizer()\n") ;
+
+    // @TODO: 改为在 MG_EV_CLOSE 事件里 free(server)
     THIS_SERVER(server)
     free(server) ;
 
@@ -352,7 +526,7 @@ static const JSCFunctionListEntry js_mg_http_rspn_proto_funcs[] = {
 //   MG_EV_SNTP_TIME,   // SNTP time received           struct timeval *
 //   MG_EV_USER,        // Starting ID for user events
 // };
-static void http_event_handler(struct mg_connection * conn, int ev, void *ev_data, void *fn_data) {
+static void http_server_event_handler(struct mg_connection * conn, int ev, void *ev_data, void *fn_data) {
     if(ev== MG_EV_POLL || !fn_data) {
         return ;
     }
@@ -490,24 +664,19 @@ static JSValue js_mg_mgr_http_listen(JSContext *ctx, JSValueConst this_val, int 
         return JS_EXCEPTION ;
     }
 
-    struct mg_connection * conn = mg_http_listen(&mgr, addr, http_event_handler, NULL) ;
-    JS_FreeCString(ctx, addr) ;
-
+    struct mg_connection * conn = mg_http_listen(&mgr, addr, http_server_event_handler, NULL) ;
     if(conn==NULL) {
-        THROW_EXCEPTION(ctx,"could not listen addr: %s", addr)
+        THROW_EXCEPTION_FREE({
+            JS_FreeCString(ctx, addr) ;
+        }, "could not listen addr: %s", addr)
     }
     
+    JS_FreeCString(ctx, addr) ;
     return be_http_server_new(ctx, conn, argv[1]) ;
 }
 
 
-struct sntp_req_data_t {
-    JSContext * ctx;
-    JSValue callback ;
-    uint32_t poll_times ;
-};
-
-static void sntp_callback(struct sntp_req_data_t * req, int64_t time) {
+static void sntp_callback(mg_req_t * req, int64_t time) {
     MAKE_ARGV1( argv, JS_NewInt64(req->ctx, time) )
     JS_Call(req->ctx, req->callback, JS_UNDEFINED, 1, argv) ;
     free(argv) ;
@@ -515,15 +684,15 @@ static void sntp_callback(struct sntp_req_data_t * req, int64_t time) {
 
 static void sntp_cb(struct mg_connection *c, int ev, void *evd, void *fnd) {
     if (ev == MG_EV_POLL) {
-        struct sntp_req_data_t * req_data = (struct sntp_req_data_t *)fnd ;
-        req_data->poll_times++ ;
-        if(++req_data->poll_times > 3000 ){
-            sntp_callback((struct sntp_req_data_t *)fnd, -1) ;
+        mg_req_t * req = (mg_req_t *)fnd ;
+        req->poll_times++ ;
+        if(++req->poll_times > 3000 ){
+            sntp_callback((mg_req_t *)fnd, -1) ;
             c->is_closing = 1 ;
         }
     } else if (ev == MG_EV_CONNECT) {
         if (c->is_resolving) {
-            sntp_callback((struct sntp_req_data_t *)fnd, -2) ;
+            sntp_callback((mg_req_t *)fnd, -2) ;
             c->is_closing = 1 ;
         }
         else {
@@ -534,22 +703,22 @@ static void sntp_cb(struct mg_connection *c, int ev, void *evd, void *fnd) {
     } else if (ev == MG_EV_READ) {
         struct timeval tv = {0, 0};
         if (mg_sntp_parse(c->recv.buf, c->recv.len, &tv) == 0) {
-            struct sntp_req_data_t * req_data = (struct sntp_req_data_t *)fnd ;
+            mg_req_t * req = (mg_req_t *)fnd ;
             int64_t ms = tv.tv_sec ;
             ms*= 1000 ;
-            sntp_callback((struct sntp_req_data_t *)fnd, ms) ;
+            sntp_callback((mg_req_t *)fnd, ms) ;
         }
         c->recv.len = 0;  // Clear receive buffer
         c->is_closing = 1 ;
     } else if (ev==MG_EV_ERROR) {
-        struct sntp_req_data_t * req_data = (struct sntp_req_data_t *)fnd ;
-        sntp_callback((struct sntp_req_data_t *)fnd, -3) ;
+        mg_req_t * req = (mg_req_t *)fnd ;
+        sntp_callback((mg_req_t *)fnd, -3) ;
         c->is_closing = 1 ;
     } else if (ev == MG_EV_CLOSE) {
-        struct sntp_req_data_t * req_data = (struct sntp_req_data_t *)fnd ;
-        JS_FreeValue(req_data->ctx, req_data->callback) ;
-        free(req_data) ;
-        req_data = NULL ;
+        mg_req_t * req = (mg_req_t *)fnd ;
+        JS_FreeValue(req->ctx, req->callback) ;
+        free(req) ;
+        req = NULL ;
         fnd = NULL ;
     }
     (void) evd;
@@ -564,18 +733,18 @@ static JSValue js_mg_sntp_request(JSContext *ctx, JSValueConst this_val, int arg
         THROW_EXCEPTION("arg callback must be a function")
     }
 
-    struct sntp_req_data_t * req_data = malloc(sizeof(struct sntp_req_data_t)) ;
-    if(!req_data) {
+    mg_req_t * req = malloc(sizeof(mg_req_t)) ;
+    if(!req) {
         THROW_EXCEPTION("out of memory?")
     }
-    req_data->ctx = ctx ;
-    req_data->callback = JS_DupValue(ctx,argv[1]) ;
-    req_data->poll_times = 0 ;    
+    req->ctx = ctx ;
+    req->callback = JS_DupValue(ctx,argv[1]) ;
+    req->poll_times = 0 ;    
 
-    struct mg_connection * conn = mg_sntp_connect(&mgr, url, sntp_cb, req_data) ;
+    struct mg_connection * conn = mg_sntp_connect(&mgr, url, sntp_cb, req) ;
     if(!conn) {
-        sntp_callback(req_data, -4) ;
-        free(req_data) ;
+        sntp_callback(req, -4) ;
+        free(req) ;
         JS_FreeValue(ctx,argv[1]) ;
     }
     else {
@@ -604,8 +773,6 @@ static JSValue js_mg_conn_peer(JSContext *ctx, JSValueConst this_val, int argc, 
         THROW_EXCEPTION("conn idx not exist: %d", idx) ;
     }
 
-    dn(conn->peer.port)
-
     char addr[30] ;
     mg_straddr(conn,addr,sizeof(addr)) ;
 
@@ -625,6 +792,21 @@ static JSValue js_mg_get_dns(JSContext *ctx, JSValueConst this_val, int argc, JS
     return JS_NewString(ctx,mgr.dns4.url) ;
 }
 
+static JSValue js_mg_parse_url(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+    ARGV_TO_STRING_E(0,url,"arg url must be a string")
+
+    JSValue obj = JS_NewObject(ctx) ;
+
+    struct mg_str host = mg_url_host(url) ;
+    JS_SetPropertyStr(ctx, obj, "host", JS_NewStringLen(ctx,host.ptr,host.len)) ;
+    JS_SetPropertyStr(ctx, obj, "port", JS_NewUint32(ctx,mg_url_port(url))) ;
+    JS_SetPropertyStr(ctx, obj, "uri", JS_NewString(ctx,mg_url_uri(url))) ;
+
+    JS_FreeCString(ctx,url);
+
+    return obj ;
+}
 
 static JSValue js_mg_set_log(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(1)
@@ -640,11 +822,15 @@ void be_module_mg_init() {
     mg_mgr_init(&mgr) ;
     // mgr.dns4.url = "udp://1.1.1.1:53";
 
+    JS_NewClassID(&js_mg_connection_class_id);
     JS_NewClassID(&js_mg_server_class_id);
     JS_NewClassID(&js_mg_http_message_class_id);
     JS_NewClassID(&js_mg_http_rspn_class_id);
 
     pkgShadow = JS_UNDEFINED ;
+
+    ca_path = vfspath_to_fs("/var/ca.pem") ;
+    mg_log_set("1") ;
 }
 
 void be_module_mg_require(JSContext *ctx) {
@@ -654,16 +840,19 @@ void be_module_mg_require(JSContext *ctx) {
 
     pkgShadow = JS_NewObject(ctx);
 
+    QJS_DEF_CLASS(mg_connection, "Connection", "mg.Connection", JS_UNDEFINED, pkgShadow)
     QJS_DEF_CLASS(mg_server, "Server", "mg.Server", JS_UNDEFINED, pkgShadow)
     QJS_DEF_CLASS(mg_http_message, "HttpMessage", "mg.HttpMessage", JS_UNDEFINED, pkgShadow)
     QJS_DEF_CLASS(mg_http_rspn, "HttpResponse", "mg.HttpResponse", JS_UNDEFINED, pkgShadow)
 
     JS_SetPropertyStr(ctx, mg, "httpListen", JS_NewCFunction(ctx, js_mg_mgr_http_listen, "httpListen", 1));
+    JS_SetPropertyStr(ctx, mg, "connect", JS_NewCFunction(ctx, js_mg_connect, "connect", 1));
     JS_SetPropertyStr(ctx, mg, "sntpRequest", JS_NewCFunction(ctx, js_mg_sntp_request, "sntpRequest", 1));
     JS_SetPropertyStr(ctx, mg, "connCnt", JS_NewCFunction(ctx, js_mg_conn_cnt, "connCnt", 1));
     JS_SetPropertyStr(ctx, mg, "connPeer", JS_NewCFunction(ctx, js_mg_conn_peer, "connPeer", 1));
     JS_SetPropertyStr(ctx, mg, "getDNS", JS_NewCFunction(ctx, js_mg_get_dns, "getDNS", 1));
     JS_SetPropertyStr(ctx, mg, "setLog", JS_NewCFunction(ctx, js_mg_set_log, "setLog", 1));
+    JS_SetPropertyStr(ctx, mg, "parseUrl", JS_NewCFunction(ctx, js_mg_parse_url, "parseUrl", 1));
     
     // JS_FreeValue(ctx, mg);
     JS_FreeValue(ctx, beapi);

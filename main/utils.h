@@ -22,6 +22,11 @@ void echo_error(JSContext *) ;
     JS_ThrowReferenceError(ctx, __VA_ARGS__);               \
     return JS_EXCEPTION ;
 
+#define THROW_EXCEPTION_FREE(exec, ...)                     \
+    JS_ThrowReferenceError(ctx, __VA_ARGS__);               \
+    exec                                                    \
+    return JS_EXCEPTION ;
+
 #define CHECK_ARGC(num)                                     \
     if(argc<num) {                                          \
         THROW_EXCEPTION("Missing param")                    \
@@ -115,6 +120,33 @@ void eval_code_len(JSContext *ctx, const char * str,size_t len,const char * file
     argv[1] = arg2 ;                                                                \
     argv[2] = arg3 ;                                                                \
     argv[3] = arg4 ;
+
+#define JS_CALL_ARG1(ctx, func, arg1)                           \
+    {                                                           \
+        MAKE_ARGV1(argv, arg1)                                  \
+        JS_Call(ctx, func, JS_UNDEFINED, 1, argv) ;             \
+        free(argv) ;                                            \
+    }
+
+#define JS_CALL_ARG2(ctx, func, arg1, arg2)                     \
+    {                                                           \
+        MAKE_ARGV2(argv, arg1, arg2)                            \
+        JS_Call(ctx, func, JS_UNDEFINED, 2, argv) ;             \
+        free(argv) ;                                            \
+    }
+#define JS_CALL_ARG3(ctx, func, arg1, arg2, arg3)               \
+    {                                                           \
+        MAKE_ARGV3(argv, arg1, arg2, arg3)                      \
+        JS_Call(ctx, func, JS_UNDEFINED, 3, argv) ;             \
+        free(argv) ;                                            \
+    }
+#define JS_CALL_ARG4(ctx, func, arg1, arg2, arg3, arg4)         \
+    {                                                           \
+        MAKE_ARGV4(argv, arg1, arg2, arg3, arg4)                \
+        JS_Call(ctx, func, JS_UNDEFINED, 4, argv) ;             \
+        free(argv) ;                                            \
+    }
+
 
 #define STR1(R)  #R
 #define STR2(R)  STR1(R)

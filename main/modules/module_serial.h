@@ -53,8 +53,8 @@
         I2C_COMMIT(busnum)                                                  \
     }
 
-#define FREE_BUS_SPI(busnum)    if(_spi_bus_setup&(1<<(busnum))){ dn(busnum); spi_bus_free(busnum); }
-#define FREE_BUS_I2C(busnum)    if(_i2c_bus_setup&(1<<(busnum))){ dn(busnum); i2c_driver_delete(busnum); }
+#define FREE_BUS_SPI(busnum)    if(_spi_bus_setup&(1<<(busnum))){ spi_bus_free(busnum); }
+#define FREE_BUS_I2C(busnum)    if(_i2c_bus_setup&(1<<(busnum))){ i2c_driver_delete(busnum); }
 
 
 void be_module_serial_require(JSContext *ctx) ;

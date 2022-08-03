@@ -1,8 +1,11 @@
 # FLASH Size: 4.00MB
 # Name,   Type, SubType, Offset,  Size, Flags
 # Note: if you change the phy_init or app partition offset, make sure to change the offset in Kconfig.projbuild
-nvs, data, nvs, 0x9000, 0x6000
-phy_init, data, phy, 0xF000, 0x1000
-factory, app, factory, 0x10000, 0x300000
-fsroot, data, fat, 0x310000, 0xA0000
-fshome, data, fat, 0x3B0000, 0x50000
+nvs, data, nvs, 0x9000, 0x6000 
+phy_init, data, phy, 0xF000, 0x1000 
+factory, app, factory, 0x10000, 0x340000 
+fshome, data, fat, 0x350000, 0xB0000 
+
+
+
+

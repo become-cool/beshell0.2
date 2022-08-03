@@ -5,6 +5,7 @@
 #include <string.h>
 #include <math.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #define IS_BASE256_ENCODED(buffer) (((unsigned char)buffer[0] & 0x80) > 0)
 #define GET_NUM_BLOCKS(filesize) (int)ceil((double)filesize / (double)TAR_BLOCK_SIZE)
@@ -78,6 +79,9 @@ struct header_translated_s
 	char group_name[32];
 	unsigned long long device_major;
 	unsigned long long device_minor;
+
+	unsigned int offset ;
+
 };
 
 typedef struct header_translated_s header_translated_t;

@@ -1,7 +1,7 @@
 
 all:
 	./build.sh
-	
+
 clear-jsbin:
 	find filesystem -name "*.js.bin" | xargs rm -f
 
@@ -9,29 +9,25 @@ compile:
 	# 编译js
 	./pc/build/beshell --root ./filesystem/root --script ./pc/compile-fs.js
 
-packfs:
-	node filesystem/packfs.js
+tree-shaking:
+	node filesystem/tree-shaking.js
 
 mkfs-root:
-	bin/mklittlefs -c filesystem/tmp/root -s 655360 filesystem/img/fs-root.img -d 5
-	cp filesystem/img/fs-root.img ../beconsole.next/platform/nw.js/assets/firmware/beshell-0.2.0/flash/fs-root.img
-	cp filesystem/img/fs-root.img ../beconsole.next/platform/nw.js/tmp/assets/firmware/beshell-0.2.0/flash/fs-root.img
+	node filesystem/pack-dir.js
 
 mkfs-home:
 	bin/mklittlefs -c filesystem/tmp/home -s 131072 filesystem/img/fs-home.img -d 5
-	cp filesystem/img/fs-home.img ../beconsole.next/platform/nw.js/assets/firmware/beshell-0.2.0/flash/fs-home.img
-	cp filesystem/img/fs-home.img ../beconsole.next/platform/nw.js/tmp/assets/firmware/beshell-0.2.0/flash/fs-home.img
+
+dist:
+	node filesystem/dispense-to-beconsole.js
 
 partition:
+	node filesystem/mk-partitions.js
 	python2 /mnt/d/lib/esp-idf/components/partition_table/gen_esp32part.py filesystem/partitions-4MB.csv filesystem/img/partitions-4MB.bin
 	python2 /mnt/d/lib/esp-idf/components/partition_table/gen_esp32part.py filesystem/partitions-16MB.csv filesystem/img/partitions-16MB.bin
-	cp filesystem/img/partitions-4MB.bin ../beconsole.next/platform/nw.js/assets/firmware/beshell-0.2.0/flash/partitions-4MB.bin
-	cp filesystem/img/partitions-4MB.bin ../beconsole.next/platform/nw.js/tmp/assets/firmware/beshell-0.2.0/flash/partitions-4MB.bin
-	cp filesystem/img/partitions-16MB.bin ../beconsole.next/platform/nw.js/assets/firmware/beshell-0.2.0/flash/partitions-16MB.bin
-	cp filesystem/img/partitions-16MB.bin ../beconsole.next/platform/nw.js/tmp/assets/firmware/beshell-0.2.0/flash/partitions-16MB.bin
 
 
-pack-all: packfs mkfs-root mkfs-home partition
+pack-all: tree-shaking mkfs-root mkfs-home partition dist
 	ls -lh filesystem/img/
 
 # 编译js, 打包 / 和 /home 分区，并制作 img 文件
@@ -48,7 +44,26 @@ telweb-build:
 	ls -lh filesystem/root/lib/local/telweb
 
 
-telweb-pack: packfs mkfs-root
+telweb-pack: tree-shaking mkfs-root
 
 telweb: telweb-build telweb-pack
 
+
+help:
+	@echo "make"
+	@echo "make compiled		# compile all .js file to .bin"
+	@echo "make tree-shaking"
+	@echo "make mkfs-root"
+	@echo "make mkfs-home"
+	@echo "make partition"
+	@echo "make pack-all		# tree-shaking + mkfs-root + mkfs-home + partition + dist"
+	@echo "make dist		# dispense to BeConsole"
+	@echo "make fs			# compile + pack-all"
+	@echo "make fs-src		# clear-jsbin + pack-all"
+	@echo "make telweb-build"
+	@echo "make telweb-pack"
+	@echo "make telweb		# telweb-build + telweb-pack"
+
+?: help
+
+# cd filesystem/tmp/root; tar -cvf ../root.tar  *

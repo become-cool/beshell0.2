@@ -1,0 +1,63 @@
+{
+    "name": "BeShell" ,
+    "version": "0.2.0" ,
+    "home": "https://become.cool" ,
+    "description": "" ,
+    "chips": ["esp32"] ,
+    "author": "BECOME" ,
+    "priority": 5 ,
+    "write-options": {
+        "argvs": ["-z"] ,
+        "baud": [921600] ,
+        "flash_mode": "dio" ,
+        "flash_freq": "80m"
+    } ,
+    "bin": [
+        {
+            "address": "0x1000" ,
+            "path": "flash/bootloader.bin"
+        } ,
+        {
+            "address": "0x8000" ,
+            "path": "flash/partitions-4MB.bin" ,
+            "flashsize": "4"
+        },
+        {
+            "address": "0x8000" ,
+            "path": "flash/partitions-16MB.bin",
+            "flashsize": "16"
+        },
+        {
+            "address": "0x10000" ,
+            "path": "flash/beshell.bin" 
+        } ,
+
+        {
+            "address": "0x310000" ,
+            "path": "flash/fs-root.img" ,
+            "flashsize": "4"
+        } ,
+        {
+            "address": "0x410000" ,
+            "path": "flash/fs-root.img" ,
+            "flashsize": "16"
+        } ,
+
+        {
+            "address": "0x3B0000" ,
+            "path": "flash/fs-home.img" ,
+            "flashsize": "4"
+        } ,
+        {
+            "address": "0x4B0000" ,
+            "path": "flash/fs-home.img" ,
+            "flashsize": "16"
+        } ,
+        {
+            "address": "0x3B0000" ,
+            "path": "flash/fs-home-oem-crystalclock.img" ,
+            "flashsize": "4" ,
+            "enable": false
+        }
+    ]
+}

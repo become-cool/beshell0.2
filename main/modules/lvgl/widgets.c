@@ -629,7 +629,6 @@ JSValue js_lv_msgbox_constructor(JSContext *ctx, JSValueConst new_target, int ar
         JSValue btnTxt = JS_GetPropertyUint32(ctx, argv[3], i) ;
         btns[i] = JS_ToCString(ctx, btnTxt) ;
         JS_FreeValue(ctx, btnTxt) ;
-        ds(btns[i])
     }
 
     bool useCloseBtn = JS_ToBool(ctx, argv[4]) ;

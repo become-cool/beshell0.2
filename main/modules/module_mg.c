@@ -625,7 +625,6 @@ static void http_server_event_handler(struct mg_connection * conn, int ev, void 
                 if( JS_IsException(ret) ){
                     js_std_dump_error(server->ctx) ;
                 }
-                dd
                 JS_FreeValue(server->ctx, jsmsg) ;
                 free(cbargv) ;
 

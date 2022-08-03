@@ -11,7 +11,9 @@ exports.scripts = [
 ]
 
 exports.init = function(setupConf) {
+    console.log("require desktop")
     if(setupConf.desktop) {
+        console.log(setupConf.desktop)
         require(setupConf.desktop)
     }
     else {

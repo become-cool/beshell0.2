@@ -106,7 +106,6 @@ void free_disp_drv(JSContext * ctx, lv_disp_t * disp) {
 
             JSValue jsvar = JS_MKPTR(JS_TAG_OBJECT, drv_spec->jsobj) ;
             JS_SetOpaque(jsvar, NULL) ;
-            dn(VAR_REFCNT(jsvar))
             JS_FreeValue(ctx,jsvar) ;
             drv_spec->jsobj = NULL ;
 
@@ -325,12 +324,10 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
         if( strcmp(typestr, "st7789v")==0 ) {
             GET_INT_PROP_DEFAULT(argv[1], "MADCTL", MADCTL, 0x20|0x80, excp)
             st7789v_init(spidev, width, height, 0, 0, (uint8_t)MADCTL);
-            dn(MADCTL)
         }
         else if(strcmp(typestr, "st7789")==0) {
             GET_INT_PROP_DEFAULT(argv[1], "MADCTL", MADCTL, 0, excp)
             st7789_init(spidev, width, height, 0, 0, (uint8_t)MADCTL);
-            dn(MADCTL)
         }
         else {
             JS_ThrowReferenceError(ctx, "unknow disp driver: %s", typestr);
@@ -417,7 +414,7 @@ void be_lv_display_reset(JSContext * ctx) {
 #ifndef SIMULATION
     multi_heap_info_t info;
     heap_caps_get_info(&info, MALLOC_CAP_SPIRAM);
-    dn2(info.total_free_bytes, info.total_allocated_bytes)
+    // dn2(info.total_free_bytes, info.total_allocated_bytes)
 #endif
 
     // 清理 disp (timer,indev,lv_obj_t) / driver 
@@ -442,7 +439,7 @@ void be_lv_display_reset(JSContext * ctx) {
     
 #ifndef SIMULATION
     heap_caps_get_info(&info, MALLOC_CAP_SPIRAM);
-    dn2(info.total_free_bytes, info.total_allocated_bytes)
+    // dn2(info.total_free_bytes, info.total_allocated_bytes)
 #endif
 }
 

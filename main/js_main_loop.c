@@ -21,6 +21,7 @@
 #include "module_media.h"
 #include "module_driver.h"
 #include "driver_camera.h"
+#include "rawfs.h"
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -230,7 +231,7 @@ static void quickjs_deinit() {
     multi_heap_info_t info;
     heap_caps_get_info(&info, MALLOC_CAP_SPIRAM);
     printf("quickjs_deinit()\n") ;
-    dn2(info.total_free_bytes, info.total_allocated_bytes)
+    DN2(info.total_free_bytes, info.total_allocated_bytes)
 #endif
 
     js_std_free_handlers(rt);
@@ -243,7 +244,7 @@ static void quickjs_deinit() {
 
 #ifndef SIMULATION
     heap_caps_get_info(&info, MALLOC_CAP_SPIRAM);
-    dn2(info.total_free_bytes, info.total_allocated_bytes)
+    DN2(info.total_free_bytes, info.total_allocated_bytes)
 #endif
 }
 
@@ -256,6 +257,7 @@ void js_main_loop(const char * script){
     HOLD_MEM(retain_mem, 90*1024)
     
     be_module_wifi_init() ;
+    be_rawfs_mount("/fs") ;
     be_module_fs_init() ;
     vTaskDelay(1) ;
     echo_DMA( "after wifi init" ) ;

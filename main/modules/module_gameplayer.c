@@ -343,17 +343,14 @@ static int osd_init_sound_i2s(void) {
 
     esp_err_t res = i2s_driver_install(0, &i2s_config, 0, NULL);
     if(res!=ESP_OK) {
-        dn(res)
         return res ;
     }
     res = i2s_set_pin(0, &pin_config);
     if(res!=ESP_OK) {
-        dn(res)
         return res ;
     }
     res = i2s_set_sample_rates(0, 22050);
     if(res!=ESP_OK) {
-        dn(res)
         return res ;
     }
 	
@@ -500,10 +497,9 @@ static void custom_blit(bitmap_t *bmp, int num_dirties, rect_t *dirty_rects) {
 
 
 	framerate() ;
-    dd
-    dn2(dynamic_frames, NES_REFRESH_RATE)
+    // dn2(dynamic_frames, NES_REFRESH_RATE)
 	int left=EMULATOR_SAMPLERATE / ((dynamic_frames>10)? dynamic_frames: NES_REFRESH_RATE) ;
-    dn(left)
+    // dn(left)
 
 	while(left) {
 		int n=EMULATOR_FRAGSIZE;
@@ -519,9 +515,8 @@ static void custom_blit(bitmap_t *bmp, int num_dirties, rect_t *dirty_rects) {
 			audio_frame[i*2]=audio_frame[i];
 		}
 		size_t bytes_written ;
-        dd
 		i2s_write(0, audio_frame, 4*n, &bytes_written, 100);
-        dn(bytes_written)
+        // dn(bytes_written)
 
 		left-=n;
 	}

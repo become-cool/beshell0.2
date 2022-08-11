@@ -16,10 +16,14 @@ mkfs-root:
 	node filesystem/pack-dir.js
 
 mkfs-home:
-	bin/mklittlefs -c filesystem/tmp/home -s 131072 filesystem/img/fs-home.img -d 5
+	bin/mklittlefs -c filesystem/tmp/home -s 196608 filesystem/img/fs-home.img -d 5
 
 dist:
 	node filesystem/dispense-to-beconsole.js
+dist-root:
+	node filesystem/dispense-to-beconsole.js fs-root
+dist-home:
+	node filesystem/dispense-to-beconsole.js fs-home
 
 partition:
 	node filesystem/mk-partitions.js
@@ -36,6 +40,9 @@ fs: compile pack-all
 # 使用 js 源文件打包 / 和 /home 分区，并制作 img 文件
 fs-src: clear-jsbin pack-all
 
+# 编译js, 打包 / 分区，并制作 img 文件
+fs-root: compile tree-shaking mkfs-root dist-root
+
 # 编译 telweb (vue3) ，并打包制作 / 分区 img文件
 telweb-build:
 	cd ../beconsole.telweb/source; npm run build
@@ -51,15 +58,18 @@ telweb: telweb-build telweb-pack
 
 help:
 	@echo "make"
-	@echo "make compiled		# compile all .js file to .bin"
+	@echo "make compile		# compile all .js file to .bin"
 	@echo "make tree-shaking"
 	@echo "make mkfs-root"
 	@echo "make mkfs-home"
 	@echo "make partition"
 	@echo "make pack-all		# tree-shaking + mkfs-root + mkfs-home + partition + dist"
 	@echo "make dist		# dispense to BeConsole"
+	@echo "make dist-root		# dispense fs root img file to BeConsole"
+	@echo "make dist-home		# dispense fs home img file to BeConsole"
 	@echo "make fs			# compile + pack-all"
 	@echo "make fs-src		# clear-jsbin + pack-all"
+	@echo "make fs-root		# compile tree-shaking mkfs-root dist-root"
 	@echo "make telweb-build"
 	@echo "make telweb-pack"
 	@echo "make telweb		# telweb-build + telweb-pack"

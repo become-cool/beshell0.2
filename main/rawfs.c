@@ -15,8 +15,8 @@
 
 #define MAX_OPEN_FD 16
 
-extern const uint8_t rawfs_root_start[] asm("_binary_root_raw_start");
-extern const uint8_t rawfs_root_end[] asm("_binary_root_raw_end");
+// extern const uint8_t rawfs_root_start[] asm("_binary_root_raw_start");
+// extern const uint8_t rawfs_root_end[] asm("_binary_root_raw_end");
 
 
 #define VFS_NODE_DIR 1
@@ -53,8 +53,8 @@ typedef struct {
 
 typedef struct _vfs_rawfs {
     vfs_node_t * root ;
-    uint8_t * raw ;
-    uint8_t * raw_data ;
+    void * raw ;
+    void * raw_data ;
     size_t * size ;
 
     vfs_rawfs_fd_t fds[MAX_OPEN_FD] ;
@@ -77,9 +77,9 @@ static void free_node(vfs_node_t * node) {
     free(node) ;
 }
 
-static vfs_node_t * vfs_node_get_child_by_name(vfs_node_t * parent, const char * name) {
+static vfs_node_t * vfs_node_get_child_by_name(vfs_node_t * parent, const char * name, size_t namelen) {
     for(vfs_node_t * child=parent->children; child!=NULL; child=child->next) {
-        if(strcmp(child->filename, name) == 0) {
+        if(strlen(child->filename)==namelen && strncmp(child->filename, name, namelen) == 0) {
             return child;
         }
     }
@@ -87,52 +87,66 @@ static vfs_node_t * vfs_node_get_child_by_name(vfs_node_t * parent, const char *
 }
 
 
-static vfs_node_t * vfs_node_walk_path(vfs_node_t * parent, char * path) {
+static vfs_node_t * vfs_node_walk_path(vfs_node_t * parent, const char * path, size_t len) {
+// ds(path)
+// dn(len)
+
+    // 跳过开头的 /
     if(path[0]=='/') {
         path ++ ;
+        len -- ;
     }
-    // 末尾 / 
-    if(strlen(path)==0) {
+    if(len==0) {
+        // ds(parent->filename)
         return parent ;
     }
-
-    char * p = strchr(path,'/') ;
     int namelen = 0 ;
+    char * p = strchr(path,'/') ;
     if(p) {
         namelen = p - path ;
     }
     else {
-        namelen = strlen(path) ;
+        namelen = len ;
     }
 
     if( namelen==0 || (namelen==1 && path[0]=='.') ) {
-        return vfs_node_walk_path(parent, p) ;
+        return vfs_node_walk_path(parent, p, len-namelen) ;
     }
     
-    char e = path[namelen] ;
-    path[namelen] = 0 ;
+    // char e = path[namelen] ;
+    // path[namelen] = 0 ;
 
-    vfs_node_t * node = vfs_node_get_child_by_name(parent, path) ;
+    vfs_node_t * node = vfs_node_get_child_by_name(parent, path, namelen) ;
     if(node==NULL) {
+        // printf("return null");
         return NULL ;
     }
 
-    path[namelen] = e ;
+    // path[namelen] = e ;
 
     // 叶节点
     if(!p) {
+        // printf("%s, offset=%d, size=%d\n", node->filename, node->offset, node->filesize) ;
+        // ds(node->filename)
+        // dn(node->offset)
+        // dn(node->filesize)
         return node ;
     }
+    
+    len-= namelen ;
+
     if(*p=='/'){
         p ++ ;
+        len -- ;
     }
-    if(strlen(p)<=0) {
+    if(len<=0) {
         // over
+        // ds(node->filename)
         return node ;
     }
 
     // 递归
-    return vfs_node_walk_path(node, p) ;
+    return vfs_node_walk_path(node, p, len) ;
 }
 
 
@@ -141,7 +155,7 @@ static vfs_node_t * vfs_node_walk_path(vfs_node_t * parent, char * path) {
 #define RAWFS ((vfs_rawfs_t *)ctx)
 
 static int vfs_rawfs_open(void* ctx, const char * path, int flags, int mode) {
-    vfs_node_t * node = vfs_node_walk_path(RAWFS->root, path) ;
+    vfs_node_t * node = vfs_node_walk_path(RAWFS->root, path, strlen(path));
     if(!node) {
         return -1 ;
     }
@@ -181,7 +195,9 @@ static ssize_t vfs_rawfs_read(void* ctx, int fd, void * dst, size_t size) {
         size = RAWFS->fds[fd].node->filesize - RAWFS->fds[fd].offset ;
     }
 
-    memcpy(dst, RAWFS->raw_data+RAWFS->fds[fd].node->offset + RAWFS->fds[fd].offset, size) ;
+    // printf("read(fd:%d): offset=%d, size=%d\n", fd, RAWFS->fds[fd].node->offset + RAWFS->fds[fd].offset, size) ;
+
+    memcpy(dst, RAWFS->raw_data + RAWFS->fds[fd].node->offset + RAWFS->fds[fd].offset, size) ;
     RAWFS->fds[fd].offset+= size ;
 
     return size ;
@@ -194,6 +210,7 @@ static int vfs_rawfs_close(void* ctx, int fd) {
     if(fd<0 || fd>=MAX_OPEN_FD) {
         return -1 ;
     }
+    // dfunc
     RAWFS->fds[fd].node = NULL ;
     RAWFS->fds[fd].offset = 0 ;
     return 0 ;
@@ -217,7 +234,7 @@ static ssize_t vfs_rawfs_pread(void *ctx, int fd, void *dst, size_t size, off_t 
     return vfs_rawfs_read(ctx,fd,dst,size) ;
 }
 static int vfs_rawfs_stat(void* ctx, const char * path, struct stat * st) {
-    vfs_node_t * node = vfs_node_walk_path(RAWFS->root, path) ;
+    vfs_node_t * node = vfs_node_walk_path(RAWFS->root, path, strlen(path)) ;
     if(!node) {
         return -1 ;
     }
@@ -241,7 +258,7 @@ static int vfs_rawfs_rename(void* ctx, const char *src, const char *dst) {
     return -1 ;
 }
 static DIR* vfs_rawfs_opendir(void* ctx, const char* name) {
-    vfs_node_t * dirnode = vfs_node_walk_path(RAWFS->root, name) ;
+    vfs_node_t * dirnode = vfs_node_walk_path(RAWFS->root, name, strlen(name)) ;
     if(!dirnode) {
         return NULL ;
     }
@@ -344,10 +361,24 @@ vfs_node_t * parse_tree(char * raw, vfs_node_t * parent, char ** out_raw) {
 
 void be_rawfs_mount(const char * mntPoint) {
 
+	const esp_partition_t * part = esp_partition_find_first(0x01, 0x81, "fsroot");
+    if(!part) {
+        printf("not found partition: fsroot.\n") ;
+        return ;
+    }
+
+	char* romdata = NULL ;
+	spi_flash_mmap_handle_t hrom ;
+    esp_err_t ret = esp_partition_mmap(part, 0, part->size, SPI_FLASH_MMAP_DATA, (const void**)&romdata, &hrom) ;
+	if(ret!= ESP_OK) {
+        printf("mmap failed: %d\n", ret) ;
+        return ;
+    }
+
     vfs_rawfs_t * rawfs = malloc( sizeof(vfs_rawfs_t) ) ;
-    rawfs->root = parse_tree(rawfs_root_start, NULL, &rawfs->raw_data) ;
-    rawfs->raw = rawfs_root_start ;
-    rawfs->size = rawfs_root_end - rawfs_root_start ;
+    rawfs->root = parse_tree(romdata, NULL, &rawfs->raw_data) ;
+    rawfs->raw = romdata ;
+    rawfs->size = part->size ;
 
     memset(rawfs->fds, 0, sizeof(vfs_rawfs_fd_t)*MAX_OPEN_FD) ;
 

@@ -3,6 +3,7 @@
 cmake_minimum_required(VERSION 3.5)
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
+include($ENV{ADF_PATH}/CMakeLists.txt)
 project(beshell)
 
 target_link_libraries(${CMAKE_PROJECT_NAME}.elf "-lm")

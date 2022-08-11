@@ -2,11 +2,17 @@ const fs = require("fs")
 const exec = require("child_process").execSync
 const beconsolePath = __dirname + "/../../beconsole.next/platform/nw.js"
 
-// 计算 beshell.bin 文件的大小，按 128 取整做为分区的尺寸
-const appsize = require('./app-partition-size.js')
+// 计算 beshell.bin 文件的大小，按 8 取整做为分区的尺寸
+const [appsize, rootsize] = require('./app-partition-size.js')
 
 const version = require("./version")
 
+let target = "all"
+for(let t of ['fs', 'fs-home', 'fs-root']) {
+    if( process.argv.includes(t) ) {
+        target = t
+    }
+}
 
 const meta = {
     "name": "BeShell" ,
@@ -44,6 +50,12 @@ const meta = {
 
         {
             "address": '0x'+(0x10000+appsize).toString(16) ,
+            "path": "fs-root.img" ,
+            "flashsize": "4"
+        } ,
+
+        {
+            "address": '0x'+(0x10000+appsize+rootsize).toString(16) ,
             "path": "fs-home.img" ,
             "flashsize": "4"
         }
@@ -59,23 +71,30 @@ function mkdir(path) {
 }
 function cp(from, to) {
     let cmd = `cp ${__dirname}/${from} ${to}`
+    console.log(cmd)
     exec(cmd)
 }
 function dist(targetDir) {
 
     let path = targetDir + "/beshell-"+version
 
-    console.log("dispense to", path)
+    console.log("\r\ndispense to", path)
 
     mkdir(path)
 
-    cp("img/bootloader.bin", path+"/")
-    cp("../build/beshell.bin", path+"/")
-    cp("img/partitions-4MB.bin", path+"/")
-    cp("img/partitions-16MB.bin", path+"/")
-    cp("img/fs-home.img", path+"/")
-
-    fs.writeFileSync(path+'/firmware.json', metastring)
+    if(target=='all') {
+        fs.writeFileSync(path+'/firmware.json', metastring)
+        cp("img/bootloader.bin", path+"/")
+        cp("img/partitions-4MB.bin", path+"/")
+        cp("img/partitions-16MB.bin", path+"/")
+        cp("../build/beshell.bin", path+"/")
+    }
+    if(target=='all' || target=='fs' || target=='fs-root') {
+        cp("img/fs-root.img", path+"/")
+    }
+    if(target=='all' || target=='fs' || target=='fs-home') {
+        cp("img/fs-home.img", path+"/")
+    }
 }
 
 dist(__dirname+"/firmware/")

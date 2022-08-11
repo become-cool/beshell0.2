@@ -231,7 +231,7 @@ static void quickjs_deinit() {
     multi_heap_info_t info;
     heap_caps_get_info(&info, MALLOC_CAP_SPIRAM);
     printf("quickjs_deinit()\n") ;
-    DN2(info.total_free_bytes, info.total_allocated_bytes)
+    dn2(info.total_free_bytes, info.total_allocated_bytes)
 #endif
 
     js_std_free_handlers(rt);
@@ -244,7 +244,7 @@ static void quickjs_deinit() {
 
 #ifndef SIMULATION
     heap_caps_get_info(&info, MALLOC_CAP_SPIRAM);
-    DN2(info.total_free_bytes, info.total_allocated_bytes)
+    dn2(info.total_free_bytes, info.total_allocated_bytes)
 #endif
 }
 

@@ -20,7 +20,8 @@
         "stat.h": "c",
         "stdbool.h": "c",
         "signal.h": "c",
-        "time.h": "c"
+        "time.h": "c",
+        "ES8156.C": "cpp"
     },
     "cmake.configureOnOpen": false
 }

@@ -647,7 +647,7 @@ static JSValue js_partition_read(JSContext *ctx, JSValueConst this_val, int argc
     esp_partition_t * partition = esp_partition_find_first(0x01, 0x81, name);
 
     JS_FreeCString(ctx,name) ;
-    DP(partition)
+    // DP(partition)
     if(!partition) {
         THROW_EXCEPTION("partition not found:%s", name)
         return ;

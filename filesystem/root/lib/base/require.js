@@ -25,7 +25,6 @@ beapi.fs.normalize = normalize
 beapi.fs.dirname = dirname
 
 function resolveExtName(path) {
-
     if( beapi.fs.isDirSync(path) ) {
         // npm package 
         let pkgpath = path + "/package.json"
@@ -42,12 +41,10 @@ function resolveExtName(path) {
                 console.log(e)
             }
         }
-
         else {
             path+= '/index.js'
         }
     }
-
     let srcExists = beapi.fs.isFileSync(path)
     if(!srcExists) {
         if(path.substr(-3).toLowerCase()!='.js') {
@@ -131,10 +128,9 @@ function __mkrequire(__dirname) {
         // JS 文件
         else {
             let isBinFile = path.substr(-4).toLowerCase()==".bin"
-            if( 
-                isBinFile
-                || (Module.autoBin==2 && binExists)                 // 优先二进制文件
-                || (Module.autoBin==1 && !srcExists && binExists)  // 备选二进制文件
+            if( isBinFile
+                || (Module.autoBin==2 && binExists) // 优先二进制文件
+                || (Module.autoBin==1 && !srcExists && binExists) // 备选二进制文件
             ) {
                 let bytecode = beapi.fs.readFileSync(isBinFile? path: (path+".bin"))
                 result = evalBin(bytecode)

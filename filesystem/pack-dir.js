@@ -56,7 +56,7 @@ function write_node(node, fd){
     if(node.type == TYPE_FILE) {
         buflen+= 4  // for offset
     }
-    console.log(buflen)
+    // console.log(buflen)
     let buf = Buffer.alloc(buflen, 0)
 
     let offset = 0
@@ -78,7 +78,7 @@ function write_node(node, fd){
     buf.writeUInt32LE(node.size,offset)
     offset+= 4
 
-    console.log(node, buf)
+    // console.log(node, buf)
 
     fs.writeSync(fd, buf)
 
@@ -94,7 +94,7 @@ console.log(root)
 let tar = packdir(__dirname+'/tmp/root', Buffer.from([]), root)
 console.log("tar size:", tar.length)
 
-let fd = fs.openSync(__dirname+"/../main/root.raw", 'w')
+let fd = fs.openSync(__dirname+"/img/fs-root.img", 'w')
 
 write_node(root, fd)
 fs.writeSync(fd, tar)

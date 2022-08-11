@@ -2,7 +2,7 @@
 const fs = require("fs")
 
 // 计算 beshell.bin 文件的大小，按 128 取整做为分区的尺寸
-const appsize = require('./app-partition-size.js')
+const [appsize, rootsize] = require('./app-partition-size.js')
 
 
 // nvs,      data, nvs,      0x9000,      0x6000
@@ -30,12 +30,12 @@ let parttables4MB = [
         subtype: "factory",
         size: appsize,
     } ,
-    // {
-    //     name: "fsroot",
-    //     type: "data",
-    //     subtype: "fat",
-    //     size: (512+128)*1024,
-    // } ,
+    {
+        name: "fsroot",
+        type: "data",
+        subtype: "fat",
+        size: rootsize,
+    } ,
     {
         name: "fshome",
         type: "data",
@@ -63,12 +63,12 @@ let parttables16MB = [
         subtype: "factory",
         size: appsize,
     } ,
-    // {
-    //     name: "fsroot",
-    //     type: "data",
-    //     subtype: "fat",
-    //     size: (512+128)*1024,
-    // } ,
+    {
+        name: "fsroot",
+        type: "data",
+        subtype: "fat",
+        size: rootsize,
+    } ,
     {
         name: "fshome",
         type: "data",

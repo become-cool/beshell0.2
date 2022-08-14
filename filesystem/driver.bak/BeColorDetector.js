@@ -72,7 +72,7 @@ class ColorDetector extends BeSensorBase {
         return this.i2c.readInt16(0x29, 0x9A)
     }
 
-    start() {
+    begin() {
         if(this._itid>-1) {
             clearInterval(this._itid)
         }
@@ -87,7 +87,7 @@ class ColorDetector extends BeSensorBase {
         }, 100)
     }
 
-    stop() {
+    end() {
         if(this._itid>-1) {
             clearInterval(this._itid)
             this._itid = -1

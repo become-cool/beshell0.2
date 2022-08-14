@@ -1,22 +1,9 @@
-class BeJoypad extends beapi.EventEmitter {
+const I2CDevice = require("./I2CDevice")
+class Joypad extends I2CDevice {
     constructor() {
-        super()
+        super("joypad")
         this._timer=-1
         this.raw = 0
-    }
-    setup(bus,sda,scl,addr) {
-        if(typeof bus=='object') {
-            var {bus,sda,scl,addr} = bus
-        }
-        if(bus!=0 && bus!=1) {
-            throw new Error("i2c bus num must be 0 or 1")
-        }
-        this.bus=bus
-        this.sda=sda
-        this.scl=scl
-        this.addr=addr
-        beapi.i2c.setup(this.bus, this.sda, this.scl)
-        return this.scan(this.addr)
     }
     scan(addr) {
         return beapi.i2c.ping(this.bus, addr||this.addr)
@@ -29,6 +16,7 @@ class BeJoypad extends beapi.EventEmitter {
             clearTimeout(this._timer)
             this._timer = -1
         }
+        super.end()
     }
     read() {
         if( this.addr!=51 && this.addr!=52 ) {
@@ -48,4 +36,4 @@ class BeJoypad extends beapi.EventEmitter {
         return btns
     }
 }
-module.exports = BeJoypad
+module.exports = Joypad

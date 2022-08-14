@@ -36,7 +36,7 @@
         "Content-Type: application/octet-stream\r\n"
 
 
-char * fs_root = NULL;
+static char * fs_root = NULL;
 struct mg_connection * conn ;
 
 // void indev_global_cb_proc(lv_indev_data_t *data) ;

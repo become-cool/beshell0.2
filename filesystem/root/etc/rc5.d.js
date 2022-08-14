@@ -10,8 +10,7 @@ require("besdk/http")
         sleep(0)
 
         if(!process.simulate) {
-            global.WiFi = require("besdk/wifi")
-            WiFi.autostart()
+            require("besdk/wifi").autostart()
         }
 
         require("./init.d/time.js")
@@ -22,7 +21,8 @@ require("besdk/http")
 
         let setupConf = require("./init.d/setup.js") ()
 
-        if(be.dev?.disp?.length){
+        console.log(be.disp)
+        if(be.disp?.length){
             let desktop = require("./init.d/desktop.js")
 
             await require("./init.d/display.js") ( desktop.disp? desktop.scripts: [] )

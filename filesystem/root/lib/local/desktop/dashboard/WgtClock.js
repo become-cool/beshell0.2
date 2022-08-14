@@ -44,11 +44,10 @@ class WgtClock extends lv.Obj {
         }, 1000)
 
         this.freshTime()
-
     }
 
     freshTime() {
-        let tm = new Date(Date.now() + 8*3600000)
+        let tm = new Date(Date.now())
         this.refs.labTime.setText( fill2(tm.getHours()) + ':' + fill2(tm.getMinutes()) + ":" + fill2(tm.getSeconds()) )
         this.refs.labDate.setText( fill2(tm.getFullYear()) + '/' + fill2(tm.getMonth()+1) + '/' + fill2(tm.getDate()) )
     }

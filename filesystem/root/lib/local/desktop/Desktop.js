@@ -48,9 +48,10 @@ class Desktop extends lv.Obj {
             this._dashboard.setY(0)
 
             this.on("gesture",(e, target, dir)=>{
-                if(dir=="up") {
+                console.log("gesture",dir)
+                if(dir=="top") {
                     this.unlockScreen(true)
-                } else if(dir=="down") {
+                } else if(dir=="bottom") {
                     this.lockScreen(true)
                 }
             })
@@ -61,7 +62,7 @@ class Desktop extends lv.Obj {
             })
             this.holdKeys()
 
-            console.log("Desktop constructor")
+            // console.log("Desktop constructor")
 
         }catch(e){
             console.log(e)

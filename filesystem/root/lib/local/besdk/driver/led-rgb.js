@@ -1,6 +1,8 @@
-class LEDRGB {
+const DeviceDriver = require("./DeviceDriver")
+class LEDRGB extends DeviceDriver {
 
     constructor(){
+        super("led-rgb")
     }
 
     /**
@@ -55,4 +57,4 @@ class LEDRGB {
 }
 
 
-module.exports = RGBLED
+module.exports = LEDRGB

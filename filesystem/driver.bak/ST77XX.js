@@ -9,7 +9,7 @@ class ST77XX {
         this.height = 0
     }
 
-    begin(bus, cs, dc, freq) {
+    setup(bus, cs, dc, freq) {
         this.spi = beapi.spi.addDevice(bus, cs, freq||26000000, 0)
         this.dc = dc
         pinMode(dc, "output")

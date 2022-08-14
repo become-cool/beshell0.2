@@ -28,7 +28,7 @@ static JSValue js_driver_mount_sd(JSContext *ctx, JSValueConst this_val, int arg
 
     esp_err_t ret;
     esp_vfs_fat_sdmmc_mount_config_t mount_config = {
-        .format_if_mount_failed = true,
+        .format_if_mount_failed = false,
         .max_files = 5,
         .allocation_unit_size = 16 * 1024
     };
@@ -44,8 +44,11 @@ static JSValue js_driver_mount_sd(JSContext *ctx, JSValueConst this_val, int arg
     host.slot = spi ;
 
     ret = esp_vfs_fat_sdspi_mount(mntPath, &host, &slot_config, &mount_config, &card);
+
     free(mntPath) ;
+
     if (ret != ESP_OK) {
+        dn(ret)
         if (ret == ESP_FAIL) {
             THROW_EXCEPTION("Failed to mount the card .\n")
         } else {

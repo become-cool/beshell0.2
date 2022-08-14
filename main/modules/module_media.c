@@ -247,17 +247,17 @@ static JSValue js_i2s_setup(JSContext *ctx, JSValueConst this_val, int argc, JSV
     int sample_rate = 8000 ;
 
 i2s_config_t i2s_config = {
-.mode = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_TX | I2S_MODE_RX),
-.sample_rate = 8000,
-.bits_per_sample = I2S_BITS_PER_SAMPLE_16BIT,
-.channel_format = I2S_CHANNEL_FMT_RIGHT_LEFT,
-.communication_format = I2S_COMM_FORMAT_STAND_I2S,
-.intr_alloc_flags = ESP_INTR_FLAG_LEVEL2 | ESP_INTR_FLAG_IRAM,
-.dma_buf_count = 2,
-.dma_buf_len = 1024,
-.use_apll = true,
-.tx_desc_auto_clear = true,
-.fixed_mclk = 0
+    .mode = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_TX | I2S_MODE_RX),
+    .sample_rate = 8000,
+    .bits_per_sample = I2S_BITS_PER_SAMPLE_16BIT,
+    .channel_format = I2S_CHANNEL_FMT_RIGHT_LEFT,
+    .communication_format = I2S_COMM_FORMAT_STAND_I2S,
+    .intr_alloc_flags = ESP_INTR_FLAG_LEVEL2 | ESP_INTR_FLAG_IRAM,
+    .dma_buf_count = 2,
+    .dma_buf_len = 1024,
+    .use_apll = true,
+    .tx_desc_auto_clear = true,
+    .fixed_mclk = 0
 };
 
 i2s_pin_config_t pin_config = {
@@ -555,12 +555,12 @@ static bool play_mp3(char *path)
                 int fulllen = mp3FrameInfo.outputSamps * 2 ;
                 uint8_t * pb = NULL ;
                 if(mp3FrameInfo.bitsPerSample==16){
-                    for(int i=mp3FrameInfo.outputSamps-2;i>=0;i-=2) {
-                        writeBuf[i*2] = 0 ;
-                        writeBuf[i*2+1] = 0 ;
-                        writeBuf[i*2+2] = output[i] ;
-                        writeBuf[i*2+3] = output[i+1] ;
-                    }
+                for(int i=mp3FrameInfo.outputSamps-2;i>=0;i-=2) {
+                    writeBuf[i*2] = 0 ;
+                    writeBuf[i*2+1] = 0 ;
+                    writeBuf[i*2+2] = output[i] ;
+                    writeBuf[i*2+3] = output[i+1] ;
+                }
                 }
 
                 else if(mp3FrameInfo.bitsPerSample==8){

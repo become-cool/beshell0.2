@@ -1,6 +1,6 @@
-for(let part of be.dev.disp) {
-    if(part.desktop!=false) {
-        exports.disp = part
+for(let dev of be.disp) {
+    if(dev.desktop!=false) {
+        exports.disp = dev
         break
     }
 }

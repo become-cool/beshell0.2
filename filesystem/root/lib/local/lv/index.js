@@ -3,6 +3,7 @@ require("./menu.js")
 require("./loader.js")
 beapi.lvgl.Color = require("./color.js")
 require("./animate.js")
+require("./input.js")
 
 
 beapi.lvgl.dir = {

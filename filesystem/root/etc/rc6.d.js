@@ -8,8 +8,7 @@
 
 
         if(!process.simulate) {
-            global.WiFi = require("besdk/wifi")
-            WiFi.autostart()
+            require("besdk/wifi").autostart()
 
             require("./init.d/beconsoled.js")
             sleep(0)

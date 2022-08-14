@@ -1,7 +1,7 @@
 const fs = require("fs")
 const {execSync} = require("child_process")
 
-const compile = false
+const extFilters = ['.md']
 
 function packdir(from, to, packpath, ignores) {
     let bytes = 0
@@ -20,7 +20,14 @@ function packdir(from, to, packpath, ignores) {
             bytes+= packdir(itemFull, to+'/'+item, vfspath, ignores)
         }
         else if(stat.isFile()) {
-            if(item.substr(-3).toLowerCase()==".js") {
+            let extname = item.substr(-3).toLowerCase()
+
+            if(extFilters.includes(extname)) {
+                console.log("ignore by ext:", item)
+                continue
+            }
+
+            if(extname==".js") {
                 let binFull = itemFull+".bin"
                 if( fs.existsSync(binFull) ) {
                     console.log("skip source:", itemFull)

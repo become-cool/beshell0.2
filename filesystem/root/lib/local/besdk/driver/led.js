@@ -1,8 +1,10 @@
+const DeviceDriver = require("./DeviceDriver")
 require("../pin.js")
 
-class LED {
+class LED extends DeviceDriver{
 
     constructor(){
+        super("led")
     }
 
     /**

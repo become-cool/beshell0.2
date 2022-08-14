@@ -40,19 +40,13 @@ module.exports = function() {
             beapi.i2c.setup(num, i2c.sda, i2c.scl)
         }
     }
-    // part
-    for(let partConf of setupConf.part||[]){
+    // dev
+    for(let devConf of setupConf.dev||[]){
         try {
-            if(partConf.disable) {
+            if(devConf.disable) {
                 continue
             }
-            let part = new createPartFromDriver(partConf)
-            if(!part){
-                continue
-            }
-            if(partConf.varname) {
-                be.part[partConf.varname] = part
-            }
+            createDevFromDriver(devConf)
         }catch(e){
             console.log(e)
         }
@@ -62,19 +56,18 @@ module.exports = function() {
 
 const LibDefaultConf = {
     1:{0:{
-            part:[ { driver: "ledrgb" ,"r": 5 , "g": 9 , "b": 16 , "com": 1 } ]
+            dev:[ { driver: "led-rgb" ,"r": 5 , "g": 9 , "b": 16 , "com": 1 } ]
     }} ,
     3: {0:{
         spi: { 1: {miso:12,mosi:13,sck:14} } ,
-        i2c: { 0: {sda:4,scl:5} } ,
-        part: [
-            {driver:'st7789v', varname:'disp1', setup:{dc:17, cs:15, spi:1, width:320, height:240, freq:80000000, MADCTL: 0x20|0x80, touch:{driver:'xpt2046', spi: 1, cs: 21}}}
-            // , {driver:"BeJoypad", setup:{addr:0x33}}
+        dev: [
+            {"driver":"ST7789V", "setup":{"dc":18, "cs":19, "spi":1, "width":320, "height":240, "freq":80000000, "MADCTL": 0x40|0x20}}
+            , {"driver":"XPT2046", "setup":{"spi":1, "cs":21}}
         ]
     }} ,
     19: {0:{
         spi: { 1: {miso:12,mosi:13,sck:14} } ,
-        part: [
+        dev: [
             {driver:'sdspi',setup:{cs:25,spi:1,mount:'/mnt/sd'}} ,
             {driver:'camera',setup:{d0:39,d1:37,d2:36,d3:38,d4:34,d5:19,d6:9,d7:22,xclk:5,pclk:35,vsync:23,href:27,sda:21,scl:18,pwdn:-1,reset:-1,ledc_channel:1,ledc_timer:1,jpeg_quality:10,fb_count:2,xclk_freq:20000000,size:"QVGA",format:"jpeg"}}
         ]
@@ -87,48 +80,21 @@ function defaultSetupConf() {
     return LibDefaultConf[partId] && LibDefaultConf[partId][partVersion]
 }
 
-function createDisplayTouch(disp, touchConf) {
-    if(!disp || !touchConf) {
+function createDevFromDriver(devConf) {
+    try{
+        var driver = require("/lib/local/besdk/driver/"+devConf.driver+'.js')
+    }catch(e){
+        console.error("unknow driver", devConf.driver)
+    }
+    let dev = new driver
+    if(dev.setup(devConf.setup)==false) {
+        console.log(devConf.driver,'device setup failed.')
         return
     }
-    disp.touch = new beapi.lvgl.InDevPointer( touchConf.driver, touchConf.spi, touchConf.cs )
-}
-
-function createDisplay(partConf) {
-    let part = beapi.lvgl.createDisplay(partConf.driver, partConf.setup||{}) 
-    createDisplayTouch(part, partConf.touch)
-    if(!partConf.type) { 
-        partConf.type = 'display'
-    }
-    if(partConf.desktop==false) {
-        part.desktop = false
-    }
-    be.dev.disp.push(part)
-    return part
-}
-function createPartFromDriver(partConf) {
-    if(process.simulate && !(['virtual-display']).includes(partConf.driver)) {
+    if(dev.begin(devConf.begin)==false) {
+        console.log(devConf.driver,'device begin failed.')
         return
     }
-    if((['st7789v','st7789','virtual-display']).includes(partConf.driver)) {
-        return createDisplay(partConf)
-    }
-    else if(partConf.driver=='sdspi') {
-        if(!partConf.setup.cs || !partConf.setup.spi || !partConf.setup.mount) {
-            return
-        }
-        try{
-            beapi.driver.mountSD(partConf.setup.spi, partConf.setup.cs, partConf.setup.mount)
-            console.log("mount sd to", partConf.setup.mount)
-        }catch(e){
-            console.log("failed to mount sd")
-            console.log(e)
-        }
-    }
-    else if(partConf.driver=="camera") {
-        beapi.driver.camera.setup(partConf.setup)
-    } else {
-        console.log("unknow part driver: ",partConf.driver)
-
-    }
+    dev.register(devConf.varname)
+    return dev
 }

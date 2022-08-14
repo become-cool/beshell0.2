@@ -175,3 +175,60 @@ xtensa-esp32-elf-addr2line -pfiaC -e build/beshell.elf 0x4010971f:0x3ffcc350 0x4
 0x400ddb0e: task_js_main at /mnt/d/project/robot/beshell/build/../main/task_js.c:220
 0x4009337e: vPortTaskWrapper at /mnt/d/lib/esp-idf/components/freertos/port/xtensa/port.c:168
 ```
+
+## 自动下载电路的调试
+
+可以手动控制 usb芯片输出 RTS 和 DTR 的电平，以便于调试 自动下载电路(GPIO0/EN) 
+
+在 PowerShell 中执行
+```
+python
+
+Python 3.8.7 (tags/v3.8.7:6503f05, Dec 21 2020, 17:59:51) [MSC v.1928 64 bit (AMD64)] on win32
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import serial
+>>> s = serial.Serial("COM5")
+>>> s.setRTS(1)
+>>> s.setDTR(1)
+```
+
+> 注意： setRTS()/setDTR() 函数的参数和实际输出的电平相反：参数0代表高电平；1代表低电平
+
+> 拉高 GPIO0 ，拉低 EN
+```
+s.setDTR(0); s.setRTS(1)
+```
+
+> 拉低 GPIO0 ，拉高 EN
+```
+s.setDTR(1); s.setRTS(0)
+```
+
+> esppool.py 中相关的代码：
+
+```
+        # issue reset-to-bootloader:
+        # RTS = either CH_PD/EN or nRESET (both active low = chip in reset
+        # DTR = GPIO0 (active low = boot to flasher)
+        #
+        # DTR & RTS are active low signals,
+        # ie True = pin @ 0V, False = pin @ VCC.
+        if mode != 'no_reset':
+            self._setDTR(False)  # IO0=HIGH
+            self._setRTS(True)   # EN=LOW, chip in reset
+            time.sleep(0.1)
+            if esp32r0_delay:
+                # Some chips are more likely to trigger the esp32r0
+                # watchdog reset silicon bug if they're held with EN=LOW
+                # for a longer period
+                time.sleep(1.2)
+            self._setDTR(True)   # IO0=LOW
+            self._setRTS(False)  # EN=HIGH, chip out of reset
+            if esp32r0_delay:
+                # Sleep longer after reset.
+                # This workaround only works on revision 0 ESP32 chips,
+                # it exploits a silicon bug spurious watchdog reset.
+                time.sleep(0.4)  # allow watchdog reset to occur
+            time.sleep(0.05)
+            self._setDTR(False)  # IO0=HIGH, done
+```

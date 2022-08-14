@@ -16,6 +16,7 @@
 #include "esp_littlefs.h"
 #include "vfs_fat_internal.h"
 #include <esp_heap_caps.h>
+#include "rawfs.h"
 LOG_TAG("fs")
 #endif
 
@@ -525,31 +526,31 @@ JSValue js_fs_rename_sync(JSContext *ctx, JSValueConst this_val, int argc, JSVal
 }
 
 JSValue js_fs_info(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+
+    CHECK_ARGC(1)
+    ARGV_TO_STRING(0, jslabel)
+
     size_t total = 0 ;
     size_t used = 0 ;
 
-    const char * plabel = PARTITION_LABEL_ROOT ;
-    if(argc>0) {
-        ARGV_TO_STRING(0, jslabel)
-        if(strcmp(jslabel,"/")==0) {
-            plabel = PARTITION_LABEL_ROOT ;
+    if(strcmp(jslabel,"/home")==0){
+        if( esp_littlefs_info(PARTITION_LABEL_HOME, &total, &used) != ESP_OK ) {
+            THROW_EXCEPTION("esp_littlefs_info() bad")
         }
-        else if(strcmp(jslabel,"/home")==0){
-            plabel = PARTITION_LABEL_HOME ;
+    }
+    else if(strcmp(jslabel,"/")==0) {
+        vfs_rawfs_t * fs = be_rawfs_root() ;
+        if(fs) {
+            used = fs->size ;
+            total = fs->partition_size ;
         }
-        else {
-            JS_ThrowReferenceError(ctx, "unknow mount point: %s", jslabel) ;
-            JS_FreeCString(ctx, jslabel) ;
-            return JS_EXCEPTION ;
-        }
+    }
+    else {
+        JS_ThrowReferenceError(ctx, "unknow mount point: %s", jslabel) ;
         JS_FreeCString(ctx, jslabel) ;
+        return JS_EXCEPTION ;
     }
-
-#ifndef SIMULATION
-    if( esp_littlefs_info(plabel, &total, &used) != ESP_OK ) {
-        THROW_EXCEPTION("esp_littlefs_info() bad")
-    }
-#endif
+    JS_FreeCString(ctx, jslabel) ;
 
     JSValue obj = JS_NewObject(ctx) ;
     JS_SetPropertyStr(ctx, obj, "total", JS_NewUint32(ctx, total));

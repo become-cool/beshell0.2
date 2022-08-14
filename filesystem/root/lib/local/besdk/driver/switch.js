@@ -1,9 +1,10 @@
+const DeviceDriver = require("./DeviceDriver")
 const Pin = require("../pin")
 
-class Switch extends beapi.EventEmitter {
+class Switch extends DeviceDriver {
 
     constructor(){
-        super()
+        super('switch')
         this._callback = (val)=>{
             this.emit( "change", val!=this._trigger )
             this.emit( (val==this._trigger? "on": "off"), val )

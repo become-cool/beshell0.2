@@ -5,8 +5,7 @@
         require("./init.d/banner.js")()
 
         if(!process.simulate) {
-            global.WiFi = require("besdk/wifi")
-            WiFi.autostart()
+            require("besdk/wifi").autostart()
         }
 
         require("./init.d/setup.js") ()

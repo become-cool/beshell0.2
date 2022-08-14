@@ -9,7 +9,7 @@ EVENT_WIFI = 1
 EVENT_IP = 2 
 
 // WiFi events
-// const WIFI_READY = 0
+const WIFI_READY = 0
 const WIFI_SCAN_DONE = 1
 const WIFI_STA_START = 2
 const WIFI_STA_STOP = 3
@@ -33,6 +33,7 @@ const WIFI_AP_STADISCONNECTED = 15
 // const WIFI_STA_BEACON_TIMEOUT = 21
 
 let evtNames = []
+evtNames[WIFI_READY] = "ready"
 evtNames[WIFI_SCAN_DONE] = "scan.done"
 evtNames[WIFI_STA_START] = "sta.start"
 evtNames[WIFI_STA_STOP] = "sta.stop"
@@ -64,6 +65,8 @@ const PS_NONE = 0
 
 
 const wifi = module.exports = new beapi.EventEmitter()
+global.WiFi = wifi
+
 wifi.start = beapi.wifi.start
 wifi.stop = beapi.wifi.stop
 wifi.mode = beapi.wifi.getMode
@@ -122,12 +125,16 @@ wifi.connect = function(ssid,password,callback) {
     wifi.setMode(mode|MODE_STA)
 
     wifi.start(()=>{
+        console.log("disconnect first")
         wifi.disconnect(()=>{
             wifi.race(["sta.disconnected","sta.connected"], (evt, ...args)=>{
+                console.log("race",evt,args)
                 _connecting = false
                 callback && callback(evt=="sta.connected", ...args)
             })
             beapi.wifi.setStaConfig({ssid, password})
+            
+            console.log("connecting")
             beapi.wifi.connect()
         })
     })
@@ -205,7 +212,23 @@ wifi.status = function(netif) {
     }
 }
 
+function autoAP() {
+    if( !(wifi.mode()&MODE_AP) ) {
+        return
+    }
+    let config = beapi.wifi.getConfig(MODE_AP)
+    if(!config||!config.ssid) {
+        return
+    }
+    let res = config.ssid.match(/^ESP_([0-9A-F]{6})$/)
+    if(!res) {
+        return
+    }
+    let ssid = 'BECOME-'+res[1]
+    beapi.wifi.setAPConfig({ssid, password: config.password})
+}
 wifi.autostart = function() {
+    autoAP()
     wifi.start(()=>{
         console.log("wifi auto start")
         if(wifi.mode()&MODE_STA) {

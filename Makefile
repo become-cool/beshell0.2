@@ -43,6 +43,9 @@ fs-src: clear-jsbin pack-all
 # 编译js, 打包 / 分区，并制作 img 文件
 fs-root: compile tree-shaking mkfs-root dist-root
 
+# 编译js, 打包 /home 分区，并制作 img 文件
+fs-home: compile tree-shaking mkfs-home partition dist-home
+
 # 编译 telweb (vue3) ，并打包制作 / 分区 img文件
 telweb-build:
 	cd ../beconsole.telweb/source; npm run build

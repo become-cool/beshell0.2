@@ -306,7 +306,8 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
 
     dispdrv->user_data = dvrdata ;
 
-    if( strncmp(typestr, "st7789", 6)==0 ) {
+    // ST7789/ST7789V
+    if( strncmp(typestr, "ST7789", 6)==0 ) {
 
 #ifndef SIMULATION
 
@@ -321,11 +322,11 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
         st77xx_dev_t * spidev = malloc(sizeof(st77xx_dev_t));
         st77xx_spi_init(spidev, spi, cs, dc, freq);
 
-        if( strcmp(typestr, "st7789v")==0 ) {
-            GET_INT_PROP_DEFAULT(argv[1], "MADCTL", MADCTL, 0x20|0x80, excp)
+        if( strcmp(typestr, "ST7789V")==0 ) {
+            GET_INT_PROP_DEFAULT(argv[1], "MADCTL", MADCTL, 0, excp)
             st7789v_init(spidev, width, height, 0, 0, (uint8_t)MADCTL);
         }
-        else if(strcmp(typestr, "st7789")==0) {
+        else if(strcmp(typestr, "ST7789")==0) {
             GET_INT_PROP_DEFAULT(argv[1], "MADCTL", MADCTL, 0, excp)
             st7789_init(spidev, width, height, 0, 0, (uint8_t)MADCTL);
         }

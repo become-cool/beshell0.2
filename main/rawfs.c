@@ -1,7 +1,6 @@
 #include "rawfs.h"
 
 #include <unistd.h>
-#include <dirent.h>
 #include <sys/errno.h>
 #include <sys/fcntl.h>
 #include <sys/lock.h>
@@ -13,53 +12,11 @@
 
 
 
-#define MAX_OPEN_FD 16
 
 // extern const uint8_t rawfs_root_start[] asm("_binary_root_raw_start");
 // extern const uint8_t rawfs_root_end[] asm("_binary_root_raw_end");
 
 
-#define VFS_NODE_DIR 1
-#define VFS_NODE_FILE 2
-
-typedef struct _vfs_node {
-
-    unsigned char type ;
-    char * filename ;
-    uint32_t offset ;
-    uint32_t filesize ;
-
-    struct _vfs_node * next ;
-    struct _vfs_node * children ;
-
-} vfs_node_t ;
-
-
-typedef struct {
-    DIR dir;            /*!< VFS DIR struct */
-    struct dirent e;    /*!< Last open dirent */
-
-    vfs_node_t * node ;
-    vfs_node_t * walk_child ;
-
-} vfs_rawfs_dir_t;
-
-
-typedef struct {
-    vfs_node_t * node ;
-    uint32_t offset ;
-} vfs_rawfs_fd_t;
-
-
-typedef struct _vfs_rawfs {
-    vfs_node_t * root ;
-    void * raw ;
-    void * raw_data ;
-    size_t * size ;
-
-    vfs_rawfs_fd_t fds[MAX_OPEN_FD] ;
-
-} vfs_rawfs_t ;
 
 static vfs_node_t * vfs_node_malloc(vfs_node_t * parent) {  
     vfs_node_t * node = malloc( sizeof(vfs_node_t) ) ;
@@ -219,6 +176,7 @@ static off_t vfs_rawfs_lseek(void* ctx, int fd, off_t offset, int mode) {
     if(fd<0 || fd>=MAX_OPEN_FD) {
         return -1 ;
     }
+
     if(!RAWFS->fds[fd].node) {
         return -2 ;
     }
@@ -226,8 +184,19 @@ static off_t vfs_rawfs_lseek(void* ctx, int fd, off_t offset, int mode) {
         return -3 ;
     }
 
-    RAWFS->fds[fd].offset = offset ;
-    return 0 ;
+    if(mode==SEEK_SET) {
+        RAWFS->fds[fd].offset = offset ;
+    }
+    else if(mode==SEEK_CUR) {
+        RAWFS->fds[fd].offset+= offset ;
+    }
+    else if(mode==SEEK_END) {
+        if(offset<=0) {
+            RAWFS->fds[fd].offset = RAWFS->fds[fd].node->filesize + offset ;
+        }
+    }
+    
+    return RAWFS->fds[fd].offset ;
 }
 static ssize_t vfs_rawfs_pread(void *ctx, int fd, void *dst, size_t size, off_t offset) {
     vfs_rawfs_lseek(ctx, fd, offset, 0) ;
@@ -325,7 +294,7 @@ static int vfs_rawfs_fsync(void* ctx, int fd) {
     return 0 ;
 }
 
-vfs_node_t * parse_tree(char * raw, vfs_node_t * parent, char ** out_raw) {
+vfs_node_t * parse_tree(char * raw, vfs_node_t * parent, char ** out_raw, size_t * out_total) {
     
     vfs_node_t * node = vfs_node_malloc(parent) ;
     if(!node) {
@@ -346,9 +315,11 @@ vfs_node_t * parse_tree(char * raw, vfs_node_t * parent, char ** out_raw) {
     node->filesize = * ((uint32_t *)raw) ;
     raw+= sizeof(uint32_t) ;
 
+    (*out_total)+= node->filesize ;
+
     if(node->type==VFS_NODE_DIR) {
         for(int i=0;i<node->filesize;i++) {
-            parse_tree(raw, node, &raw) ;
+            parse_tree(raw, node, &raw, out_total) ;
         }
     }
 
@@ -358,6 +329,8 @@ vfs_node_t * parse_tree(char * raw, vfs_node_t * parent, char ** out_raw) {
 
     return node ;
 }
+
+static vfs_rawfs_t * fs_root = NULL ;
 
 void be_rawfs_mount(const char * mntPoint) {
 
@@ -375,12 +348,14 @@ void be_rawfs_mount(const char * mntPoint) {
         return ;
     }
 
-    vfs_rawfs_t * rawfs = malloc( sizeof(vfs_rawfs_t) ) ;
-    rawfs->root = parse_tree(romdata, NULL, &rawfs->raw_data) ;
-    rawfs->raw = romdata ;
-    rawfs->size = part->size ;
+    fs_root = malloc(sizeof(vfs_rawfs_t)) ;
+    fs_root->partition_size = part->size ;
+    fs_root->size = 0 ;
+    fs_root->raw = romdata ;
+    fs_root->root = parse_tree(romdata, NULL, &fs_root->raw_data, &fs_root->size) ;
+    fs_root->size+= (fs_root->raw_data-(void*)romdata) ; // raw header size
 
-    memset(rawfs->fds, 0, sizeof(vfs_rawfs_fd_t)*MAX_OPEN_FD) ;
+    memset(fs_root->fds, 0, sizeof(vfs_rawfs_fd_t)*MAX_OPEN_FD) ;
 
     const esp_vfs_t vfs = {
         .flags       = ESP_VFS_FLAG_CONTEXT_PTR,
@@ -410,16 +385,21 @@ void be_rawfs_mount(const char * mntPoint) {
         .utime_p     = NULL,
     };
 
-    esp_err_t err = esp_vfs_register(mntPoint, &vfs, rawfs);
+    esp_err_t err = esp_vfs_register(mntPoint, &vfs, fs_root);
     if (err != ESP_OK) {
         printf("Failed to register tar fs");
         return ;
     }
 
     // untar
-    // read_tar_from_flash(rawfs) ;
+    // read_tar_from_flash(fs_root) ;
 
     return ;
+}
+
+
+vfs_rawfs_t * be_rawfs_root() {
+    return fs_root ;
 }
 
 // esp_partition_read

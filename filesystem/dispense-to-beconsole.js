@@ -51,13 +51,11 @@ const meta = {
         {
             "address": '0x'+(0x10000+appsize).toString(16) ,
             "path": "fs-root.img" ,
-            "flashsize": "4"
         } ,
 
         {
             "address": '0x'+(0x10000+appsize+rootsize).toString(16) ,
             "path": "fs-home.img" ,
-            "flashsize": "4"
         }
     ]
 }

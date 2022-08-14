@@ -40,6 +40,7 @@ esp_event_handler_instance_t instance_got_ip;
 bool _sta_started = false ;
 bool _sta_connected = false ;
 bool _ap_started = false ;
+bool _scanning = false ;
 
 
 // typedef enum {
@@ -137,6 +138,10 @@ static void esp32_wifi_eventHandler(void* arg, esp_event_base_t event_base, int3
         }
         else if(event_id == WIFI_EVENT_AP_STOP) {
             _ap_started = false ;
+        }
+        else if(event_id == WIFI_EVENT_SCAN_DONE ) {
+            printf("WIFI_EVENT_SCAN_DONE\n") ;
+            _scanning = false ;
         }
     }
     else if(event_base==IP_EVENT) {
@@ -479,6 +484,94 @@ JSValue js_wifi_ap_all_sta(JSContext *ctx, JSValueConst this_val, int argc, JSVa
     return arr ;
 }
 
+JSValue js_wifi_scan_start(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    wifi_scan_config_t scanConf = {
+        .ssid = NULL,
+        .bssid = NULL,
+        .channel = 0,
+        .show_hidden = true
+    };
+
+    if(esp_wifi_scan_start(&scanConf, false) == ESP_OK) {
+        _scanning = true ;
+        return JS_TRUE ;
+    }
+    else{
+        _scanning = false ;
+        return JS_FALSE ;
+    }
+}
+JSValue js_wifi_scan_stop(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    return esp_wifi_scan_stop() == ESP_OK? JS_TRUE : JS_FALSE;
+}
+JSValue js_wifi_is_scanning(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    return _scanning? JS_TRUE : JS_FALSE;
+}
+
+// typedef enum {
+//     WIFI_AUTH_OPEN = 0,         /**< authenticate mode : open */
+//     WIFI_AUTH_WEP,              /**< authenticate mode : WEP */
+//     WIFI_AUTH_WPA_PSK,          /**< authenticate mode : WPA_PSK */
+//     WIFI_AUTH_WPA2_PSK,         /**< authenticate mode : WPA2_PSK */
+//     WIFI_AUTH_WPA_WPA2_PSK,     /**< authenticate mode : WPA_WPA2_PSK */
+//     WIFI_AUTH_WPA2_ENTERPRISE,  /**< authenticate mode : WPA2_ENTERPRISE */
+//     WIFI_AUTH_WPA3_PSK,         /**< authenticate mode : WPA3_PSK */
+//     WIFI_AUTH_WPA2_WPA3_PSK,    /**< authenticate mode : WPA2_WPA3_PSK */
+//     WIFI_AUTH_WAPI_PSK,         /**< authenticate mode : WAPI_PSK */
+//     WIFI_AUTH_OWE,              /**< authenticate mode : OWE */
+//     WIFI_AUTH_MAX
+// } wifi_auth_mode_t;
+static char * authmode_names(wifi_auth_mode_t auto_mode) {
+    switch(auto_mode) {
+        case WIFI_AUTH_OPEN: return "OPEN" ;
+        case WIFI_AUTH_WEP: return "WEP" ;
+        case WIFI_AUTH_WPA_PSK: return "WPA_PSK" ;
+        case WIFI_AUTH_WPA2_PSK: return "WPA2_PSK" ;
+        case WIFI_AUTH_WPA_WPA2_PSK: return "WPA_WPA2_PSK" ;
+        case WIFI_AUTH_WPA2_ENTERPRISE: return "WPA_WPA2_PSK" ;
+        case WIFI_AUTH_WPA3_PSK: return "WPA3_PSK" ;
+        case WIFI_AUTH_WPA2_WPA3_PSK: return "WPA2_WPA3_PSK" ;
+        case WIFI_AUTH_WAPI_PSK: return "WAPI_PSK" ;
+        // case WIFI_AUTH_OWE: return "OWE" ;
+        default:
+            return "unknow" ;
+    }
+}
+JSValue js_wifi_scan_records(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+
+    JSValue array = JS_NewArray(ctx) ;
+
+    uint16_t apCount = 0;
+    esp_wifi_scan_get_ap_num(&apCount);
+
+    // printf("Number of access points found: %d\n",event->event_info.scan_done.number);
+    if (apCount == 0) {
+        return array ;
+    }
+
+    wifi_ap_record_t *list = (wifi_ap_record_t *)malloc(sizeof(wifi_ap_record_t) * apCount);
+    if(!list) {
+        THROW_EXCEPTION("out of memory?")
+    }
+
+    esp_wifi_scan_get_ap_records(&apCount, list) ;
+
+    for (int i=0; i<apCount; i++) {        
+        JSValue apobj = JS_NewObject(ctx) ;
+        JS_SetPropertyStr(ctx, apobj, "bssid", JS_NewString(ctx, (char*)list[i].bssid)) ;
+        JS_SetPropertyStr(ctx, apobj, "ssid", JS_NewString(ctx, (char*)list[i].ssid)) ;
+        JS_SetPropertyStr(ctx, apobj, "channel", JS_NewInt32(ctx, list[i].primary)) ;
+        JS_SetPropertyStr(ctx, apobj, "rssi", JS_NewInt32(ctx, list[i].rssi)) ;
+        JS_SetPropertyStr(ctx, apobj, "authmode", JS_NewInt32(ctx, authmode_names(list[i].authmode))) ;
+        JS_SetPropertyUint32(ctx, array, i, apobj) ;
+    }
+
+    free(list) ;
+
+    return array ;
+}
+
+
 
 void be_module_wifi_init() {
 
@@ -515,8 +608,13 @@ void be_module_wifi_require(JSContext *ctx) {
     JS_SetPropertyStr(ctx, wifi, "disconnect", JS_NewCFunction(ctx, js_wifi_disconnect, "disconnect", 1));
     JS_SetPropertyStr(ctx, wifi, "getIpInfo", JS_NewCFunction(ctx, js_wifi_get_ip_info, "getIpInfo", 1));
     JS_SetPropertyStr(ctx, wifi, "setHostname", JS_NewCFunction(ctx, js_wifi_set_hostname, "setHostname", 1));
-    JS_SetPropertyStr(ctx, wifi, "apAllSta", JS_NewCFunction(ctx, js_wifi_ap_all_sta, "apAllSta", 1));
+    JS_SetPropertyStr(ctx, wifi, "allSta", JS_NewCFunction(ctx, js_wifi_ap_all_sta, "allSta", 1));
     JS_SetPropertyStr(ctx, wifi, "registerEventHandle", JS_NewCFunction(ctx, js_wifi_register_event_handle, "registerEventHandle", 1));
+
+    JS_SetPropertyStr(ctx, wifi, "scanStart", JS_NewCFunction(ctx, js_wifi_scan_start, "scanStart", 1));
+    JS_SetPropertyStr(ctx, wifi, "scanStop", JS_NewCFunction(ctx, js_wifi_scan_stop, "scanStop", 1));
+    JS_SetPropertyStr(ctx, wifi, "isScanning", JS_NewCFunction(ctx, js_wifi_is_scanning, "isScanning", 1));
+    JS_SetPropertyStr(ctx, wifi, "scanRecords", JS_NewCFunction(ctx, js_wifi_scan_records, "scanRecords", 1));
     
     JS_SetPropertyStr(ctx, wifi, "staStarted", JS_NewCFunction(ctx, js_wifi_sta_started, "staStarted", 1));
     JS_SetPropertyStr(ctx, wifi, "staConnected", JS_NewCFunction(ctx, js_wifi_sta_connected, "staConnected", 1));

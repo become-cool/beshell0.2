@@ -256,7 +256,7 @@ static JSValue js_lv_indev_pointer_constructor(JSContext *ctx, JSValueConst new_
         driver_spec->driver = INDEV_DRIVER_FAKE ;
     }
 #ifndef SIMULATION
-    else if(strcmp(driver, "xpt2046")==0) {
+    else if(strcmp(driver, "XPT2046")==0) {
         if(argc<3) {
             THROW_EXCEPTION("Missing argv")
         }

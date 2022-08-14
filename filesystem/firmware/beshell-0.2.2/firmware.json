@@ -38,14 +38,12 @@
             "path": "beshell.bin"
         },
         {
-            "address": "0x310000",
-            "path": "fs-root.img",
-            "flashsize": "4"
+            "address": "0x2d0000",
+            "path": "fs-root.img"
         },
         {
-            "address": "0x344000",
-            "path": "fs-home.img",
-            "flashsize": "4"
+            "address": "0x304000",
+            "path": "fs-home.img"
         }
     ]
 }

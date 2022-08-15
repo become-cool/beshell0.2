@@ -12,6 +12,16 @@ typedef struct _be_http_server {
     JSValue callback ;
 } be_http_server_t ;
 
+
+typedef struct _response {
+    struct mg_connection * conn ;
+    JSValue jsrspn ;
+} response_t ;
+
+
+JSClassID js_mg_http_message_class_id ;
+JSClassID js_mg_http_rspn_class_id ;
+
 JSValue be_http_server_new(JSContext *ctx, struct mg_connection * conn, JSValue callback) ;
 
 bool mg_url_is_listening(const char * url) ;

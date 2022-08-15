@@ -512,7 +512,7 @@ JSValue js_fs_rm_sync(JSContext *ctx, JSValueConst this_val, int argc, JSValueCo
 
     return ret? JS_TRUE: JS_FALSE ;
 }
-JSValue js_fs_rename_sync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+static JSValue js_fs_rename_sync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(2)
     JS2VSFPath(oldpath, argv[0]) ;
     JS2VSFPath(newpath, argv[1]) ;
@@ -525,7 +525,7 @@ JSValue js_fs_rename_sync(JSContext *ctx, JSValueConst this_val, int argc, JSVal
     return JS_NewInt32(ctx, ret) ;
 }
 
-JSValue js_fs_info(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+static JSValue js_fs_info(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
 
     CHECK_ARGC(1)
     ARGV_TO_STRING(0, jslabel)
@@ -533,6 +533,7 @@ JSValue js_fs_info(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst
     size_t total = 0 ;
     size_t used = 0 ;
 
+#ifndef SIMULATION
     if(strcmp(jslabel,"/home")==0){
         if( esp_littlefs_info(PARTITION_LABEL_HOME, &total, &used) != ESP_OK ) {
             THROW_EXCEPTION("esp_littlefs_info() bad")
@@ -550,6 +551,7 @@ JSValue js_fs_info(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst
         JS_FreeCString(ctx, jslabel) ;
         return JS_EXCEPTION ;
     }
+#endif
     JS_FreeCString(ctx, jslabel) ;
 
     JSValue obj = JS_NewObject(ctx) ;

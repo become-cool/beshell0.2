@@ -42,6 +42,8 @@ bool _sta_connected = false ;
 bool _ap_started = false ;
 bool _scanning = false ;
 
+#define WIFI_EVENT_STA_CONNECTING 101
+#define WIFI_EVENT_STA_DISCONNECTING 102
 
 // typedef enum {
 //     WIFI_EVENT_WIFI_READY = 0,           /**< ESP32 WiFi ready */
@@ -161,7 +163,6 @@ static void esp32_wifi_eventHandler(void* arg, esp_event_base_t event_base, int3
 
         eventloop_push_with_argv(__event_handle_ctx, __event_handle, 3, argv) ;
     }
-
 }
 
 JSValue js_wifi_sta_started(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
@@ -182,6 +183,11 @@ JSValue js_wifi_disconnect(JSContext *ctx, JSValueConst this_val, int argc, JSVa
 }
 
 JSValue js_wifi_connect(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    if( JS_IsFunction(ctx, __event_handle) ) {
+        MAKE_ARGV2(argv, JS_NewInt32(__event_handle_ctx, 1), JS_NewInt32(__event_handle_ctx, WIFI_EVENT_STA_CONNECTING))
+        JS_Call(ctx, __event_handle, JS_UNDEFINED, 2, argv) ;
+        free(argv) ;
+    }
     return JS_NewInt32(ctx, esp_wifi_connect()) ;
 }
 

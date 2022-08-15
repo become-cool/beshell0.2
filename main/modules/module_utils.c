@@ -12,12 +12,12 @@
 #include "uuid.h"
 #include "module_telnet.h"
 #include "module_metadata.h"
-#include "esp_partition.h"
 
 #ifndef SIMULATION
 #include "esp_system.h"
 #include "esp_task_wdt.h"
 #include "soc/soc.h"
+#include "esp_partition.h"
 
 #include "untar.h"
 #include "libb64/cdecode.h"
@@ -638,6 +638,7 @@ static JSValue js_set_time(JSContext *ctx, JSValueConst this_val, int argc, JSVa
 }
 
 
+#ifndef SIMULATION
 static JSValue js_partition_read(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(2)
     ARGV_TO_STRING(0, name) ;
@@ -663,6 +664,7 @@ static JSValue js_partition_read(JSContext *ctx, JSValueConst this_val, int argc
 
     return JS_NewArrayBuffer(ctx, (uint8_t *)buffer, size, freeArrayBuffer, NULL, false) ;
 }
+#endif
 
 // static const JSCFunctionListEntry js_utils_funcs[] = {
 //     JS_CFUNC_DEF("time", 0, js_util_time ),
@@ -702,6 +704,7 @@ void be_module_utils_require(JSContext *ctx) {
     JS_SetPropertyStr(ctx, utils, "untar", JS_NewCFunction(ctx, js_utils_untar, "untar", 1));
     JS_SetPropertyStr(ctx, utils, "base64Encode", JS_NewCFunction(ctx, js_utils_base64_encode, "base64Encode", 1));
     JS_SetPropertyStr(ctx, utils, "base64Decode", JS_NewCFunction(ctx, js_utils_base64_decode, "base64Decode", 1));
+    JS_SetPropertyStr(ctx, utils, "partitionRead", JS_NewCFunction(ctx, js_partition_read, "partitionRead", 1));
 #endif
     JS_SetPropertyStr(ctx, utils, "time", JS_NewCFunction(ctx, js_util_time, "time", 1));
     JS_SetPropertyStr(ctx, utils, "setTime", JS_NewCFunction(ctx, js_util_set_time, "setTime", 1));
@@ -723,7 +726,6 @@ void be_module_utils_require(JSContext *ctx) {
     JS_SetPropertyStr(ctx, utils, "feed", JS_NewCFunction(ctx, js_feed_watchdog, "feed", 1));
     JS_SetPropertyStr(ctx, utils, "setTimezoneOffset", JS_NewCFunction(ctx, js_set_timezone_offset, "setTimezoneOffset", 1));
     JS_SetPropertyStr(ctx, utils, "setTime", JS_NewCFunction(ctx, js_set_time, "setTime", 1));
-    JS_SetPropertyStr(ctx, utils, "partitionRead", JS_NewCFunction(ctx, js_partition_read, "partitionRead", 1));
 
 	// global
     JS_SetPropertyStr(ctx, global, "sleep", JS_NewCFunction(ctx, js_util_sleep, "sleep", 1));

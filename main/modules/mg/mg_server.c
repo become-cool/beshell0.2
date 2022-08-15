@@ -1,6 +1,7 @@
 #include "mg_server.h"
 #include "module_mg.h"
 #include "module_fs.h"
+#include "telnet_ws.h"
 #include "utils.h"
 #include "cutils.h"
 

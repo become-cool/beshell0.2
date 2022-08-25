@@ -178,7 +178,7 @@ void be_module_gameplayer_reset(JSContext *ctx) {
 #include "sdkconfig.h"
 
 
-#include "pwm_audio.h"
+// #include "pwm_audio.h"
 
 #define  EMULATOR_SAMPLERATE   44200
 #define  EMULATOR_FRAGSIZE     400

@@ -22,7 +22,7 @@ beapi.EventEmitter = class EventEmitter {
                 this.on(eventName, handle, repeat)
             }
         }
-        return
+        return this
     }
 
     /**
@@ -37,7 +37,7 @@ beapi.EventEmitter = class EventEmitter {
         }
         wrapper.__origin = this.originHanlde(handle)
         this.on(eventName, wrapper, norepeat)
-        return
+        return this
     }
 
     /**
@@ -54,6 +54,7 @@ beapi.EventEmitter = class EventEmitter {
             callback(evt, ...args)
         }
         this.on("*", h)
+        return this
     }
 
     off(eventName, handle, all) {
@@ -75,7 +76,7 @@ beapi.EventEmitter = class EventEmitter {
             if(eventName!="#EVENT.ADD#"&&eventName!="#EVENT.CLEAR#")
                 this.emit("#EVENT.CLEAR#",eventName)
         }
-        return
+        return this
     }
 
     originHanlde(handle) {
@@ -104,7 +105,7 @@ beapi.EventEmitter = class EventEmitter {
                 handle.apply(this, [eventName, ...args])
             }
         }
-        return
+        return this
     }
 
     destroy() {

@@ -1,4 +1,4 @@
-const Display = require("./Display")
+const Display = require("./display")
 class VirtualDisplay extends Display {
     constructor(){
         super("virtual-display")

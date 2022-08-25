@@ -1,6 +1,5 @@
 #include "indev.h"
 #include "display.h"
-#include "lvgl.h"
 #include "widgets_gen.h"
 #include "utils.h"
 #include "cutils.h"
@@ -10,55 +9,34 @@
 
 #ifndef SIMULATION
 
+#include "tp_spi.h"
 #include "module_serial.h"
 #include "xpt2046.h"
-#include "tp_spi.h"
 
 // @todo 由用户校正
-#define OFFSET_X 11
+#define OFFSET_X 0
+// #define OFFSET_X 11
 
 #endif
 
 static JSClassID js_lv_indev_pointer_class_id ;
 static JSClassID js_lv_indev_nav_class_id ;
 
-typedef enum {
-    INDEV_DRIVER_FAKE ,
-    INDEV_DRIVER_XPT2046 ,
-    INDEV_DRIVER_JOYPAD ,
-} indev_driver_t ;
 
-typedef struct {
+static uint8_t _indev_id = 0 ;
 
-    indev_driver_t driver ;
-    
-#ifndef SIMULATION
-    union  {
-        struct {
-            spi_host_device_t handle ;
-        } spi ;
-        struct {
-            uint8_t bus ;
-            uint8_t addr ;
-        } i2c ;
-    } conf ;
-#endif
-
-    bool fake ;
-    union  {
-        struct {
-            lv_coord_t x ;
-            lv_coord_t y ;
-            lv_indev_state_t state ;
-        } pointer ;
-        struct {
-            uint32_t state ;
-            uint32_t press ;
-            uint32_t release ;
-        } buttons ;
-    } data ;
-  
-} indev_driver_spec_t ;
+indev_driver_spec_t * find_indev_spec_by_id(uint8_t id) {
+    lv_indev_t * indev=NULL ;
+    while((indev=lv_indev_get_next(indev))) {
+        if( !indev->driver || !indev->driver->user_data ) {
+            continue;
+        }
+        if( ((indev_driver_spec_t *)indev->driver->user_data)->id == id ){
+            return indev->driver->user_data ;
+        }
+    }
+    return NULL ;
+}
 
 
 #define THIS_INDEV(thisobj)     \
@@ -219,20 +197,20 @@ static JSValue js_lv_indev_set_group(JSContext *ctx, JSValueConst this_val, int 
 // InDevPointer 
 
 static void indev_pointer_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
+    
     if(!drv->user_data) {
         return ;
     }
-    indev_driver_spec_t * driver_spec = (indev_driver_spec_t *) drv->user_data ;
-
-    if(driver_spec->fake) {
-        driver_spec->fake = false ;
-        data->point.x = driver_spec->data.pointer.x ;
-        data->point.y = driver_spec->data.pointer.y ;
-        data->state = driver_spec->data.pointer.state ;
+    indev_driver_spec_touch_t * driver_spec = (indev_driver_spec_t *) drv->user_data ;
+    if(driver_spec->spec.fake) {
+        driver_spec->spec.fake = false ;
+        data->point.x = driver_spec->spec.data.pointer.x ;
+        data->point.y = driver_spec->spec.data.pointer.y ;
+        data->state = driver_spec->spec.data.pointer.state ;
         data->continue_reading = false ;
     }
 #ifndef SIMULATION
-    else if(INDEV_DRIVER_XPT2046 == driver_spec->driver) {
+    else if(INDEV_DRIVER_XPT2046 == driver_spec->spec.driver) {
         data->continue_reading = xpt2046_read(drv, data) ;
         if( data->point.x > OFFSET_X ) {
             data->point.x -= OFFSET_X ;
@@ -243,46 +221,78 @@ static void indev_pointer_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
         return ;
     }
 
+    if(driver_spec->swap_xy) {
+        lv_coord_t y = data->point.x ;
+        data->point.x = data->point.y ;
+        data->point.y = y ;
+    }
+    if(driver_spec->inv_x && driver_spec->max_x>0) {
+        // if(data->state) {
+        //     lv_coord_t x = driver_spec->max_x - data->point.x ;
+        //     dn3( data->point.x,  driver_spec->max_x, x)
+        // }
+        data->point.x = driver_spec->max_x - data->point.x ;
+    }
+    if(driver_spec->inv_y && driver_spec->max_y>0) {
+        data->point.y = driver_spec->max_y - data->point.y ;
+    }
+
+
     indev_global_cb_proc(data) ;
 }
 
 static JSValue js_lv_indev_pointer_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
-    CHECK_ARGC(1)
-    ARGV_TO_STRING_E(0, driver, "arg driver must be a string")
 
-    indev_driver_spec_t * driver_spec = NULL ;
+    if(lv_disp_get_default()==NULL) {
+        THROW_EXCEPTION("There is no default display.")
+    }
+    if(_indev_id>=255){
+        THROW_EXCEPTION("max indev count 255") ;
+    }
+
+    CHECK_ARGC(1)
+    ARGV_TO_STRING(0, driver)
+
+    indev_driver_spec_touch_t * driver_spec = malloc(sizeof(indev_driver_spec_touch_t)) ;
+    memset(driver_spec, 0, sizeof(indev_driver_spec_touch_t)) ;
+
     if(strcmp(driver, "fake")==0) {
-        driver_spec = malloc(sizeof(indev_driver_spec_t)) ;
-        driver_spec->driver = INDEV_DRIVER_FAKE ;
+        driver_spec->spec.driver = INDEV_DRIVER_FAKE ;
     }
 #ifndef SIMULATION
     else if(strcmp(driver, "XPT2046")==0) {
+        printf("XPT2046\n")  ;
         if(argc<3) {
+            free(driver_spec) ;
+            JS_FreeCString(ctx, driver) ;
             THROW_EXCEPTION("Missing argv")
         }
 
         ARGV_TO_UINT8(2, cs)
         ARGV_TO_UINT8(1, busnum)
 
-        driver_spec = malloc(sizeof(indev_driver_spec_t)) ;
-        driver_spec->driver = INDEV_DRIVER_XPT2046 ;
+        driver_spec->spec.driver = INDEV_DRIVER_XPT2046 ;
 
-        esp_err_t res = tp_spi_add_device(busnum, cs, &driver_spec->conf.spi.handle) ;
+        esp_err_t res = tp_spi_add_device(busnum, cs, &driver_spec->spec.conf.spi.handle) ;
         if(res!=ESP_OK) {
             free(driver_spec) ;
+            JS_FreeCString(ctx, driver) ;
             THROW_EXCEPTION("spi_add_device failed: %d",res)
         }
         xpt2046_init() ;
     }
 #endif
     else {
+        free(driver_spec) ;
+        JS_FreeCString(ctx, driver) ;
         THROW_EXCEPTION("unknow InDevPointer driver")
     }
     
-    driver_spec->fake = false ;
-    driver_spec->data.pointer.x = 0 ;
-    driver_spec->data.pointer.y = 0 ;
-    driver_spec->data.pointer.state = LV_INDEV_STATE_RELEASED ;
+    driver_spec->spec.id = _indev_id ++ ;
+    driver_spec->spec.fake = false ;
+    driver_spec->spec.data.pointer.x = 0 ;
+    driver_spec->spec.data.pointer.y = 0 ;
+    driver_spec->spec.data.pointer.state = LV_INDEV_STATE_RELEASED ;
 
     lv_indev_drv_t * indev_drv = malloc(sizeof(lv_indev_drv_t)) ;
     lv_indev_drv_init(indev_drv);
@@ -297,6 +307,9 @@ static JSValue js_lv_indev_pointer_constructor(JSContext *ctx, JSValueConst new_
 
     JSValue jsobj = JS_NewObjectClass(ctx, js_lv_indev_pointer_class_id) ;
     JS_SetOpaque(jsobj, indev) ;
+    JS_SetPropertyStr(ctx, jsobj, "driver", JS_NewString(ctx, driver)) ;
+
+    JS_FreeCString(ctx, driver) ;
     return jsobj ;
 }
 static void js_lv_indev_pointer_finalizer(JSRuntime *rt, JSValue this_val){
@@ -338,9 +351,13 @@ static JSValue js_lv_indev_tick(JSContext *ctx, JSValueConst this_val, int argc,
     return JS_UNDEFINED ;
 }
 
+static JSValue js_lv_indev_id(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    THIS_INDEV(thisobj)
+    return JS_NewUint32(ctx, ((indev_driver_spec_t*)thisobj->driver->user_data)->id) ;
+}
 
 static JSValue js_lv_indev_pointer_set(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-    THIS_OBJ("lv.InDevNav", "set", thisobj, lv_indev_t)
+    THIS_OBJ("lv.InDevPointer", "set", thisobj, lv_indev_t)
     CHECK_ARGC(3)
     ARGV_TO_INT32(0, x)
     ARGV_TO_INT32(1, y)
@@ -358,11 +375,73 @@ static JSValue js_lv_indev_pointer_set(JSContext *ctx, JSValueConst this_val, in
     return JS_UNDEFINED ;
 }
 
+static JSValue js_lv_indev_point_prop(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv, int magic) {
+    int propId = magic & 0xF ;
+
+    THIS_OBJ("lv.InDevPointer", "set", thisobj, lv_indev_t)
+    indev_driver_spec_touch_t * spec = (indev_driver_spec_t *)thisobj->driver->user_data ;
+
+    // setter
+    if( magic & 0x10 ) {
+        CHECK_ARGC(1)
+        switch(propId) {
+            case 0x01 :
+                JS_ToUint32(ctx, &spec->max_x, argv[0]) ;
+                break ;
+            case 0x02 :
+                JS_ToUint32(ctx, &spec->max_y, argv[0]) ;
+                break ;
+            case 0x03 :
+                spec->swap_xy = JS_ToBool(ctx, argv[0]) ;
+                break ;
+            case 0x04 :
+                spec->inv_x = JS_ToBool(ctx, argv[0]) ;
+                break ;
+            case 0x05 :
+                spec->inv_y = JS_ToBool(ctx, argv[0]) ;
+                break ;
+        }
+    }
+
+    // getter
+    else {
+        switch(propId) {
+            case 0x01 :
+                return JS_NewUint32(ctx, spec->max_x) ;
+            case 0x02 :
+                return JS_NewUint32(ctx, spec->max_y) ;
+            case 0x03 :
+                return JS_NewBool(ctx, spec->swap_xy) ;
+            case 0x04 :
+                return JS_NewBool(ctx, spec->inv_x) ;
+            case 0x05 :
+                return JS_NewBool(ctx, spec->inv_y) ;
+        }
+    }
+
+    return JS_UNDEFINED ;
+}
+
+
 
 static const JSCFunctionListEntry js_lv_indev_pointer_proto_funcs[] = {
     JS_CFUNC_DEF("set", 0, js_lv_indev_pointer_set),
     JS_CFUNC_DEF("tick", 0, js_lv_indev_tick),
     JS_CFUNC_DEF("setGroup", 0, js_lv_indev_set_group),
+    JS_CFUNC_DEF("id", 0, js_lv_indev_id),
+
+    JS_CFUNC_MAGIC_DEF("maxX", 0, js_lv_indev_point_prop, 0x01),
+    JS_CFUNC_MAGIC_DEF("maxY", 0, js_lv_indev_point_prop, 0x02),
+    JS_CFUNC_MAGIC_DEF("swapXY", 0, js_lv_indev_point_prop, 0x03),
+    JS_CFUNC_MAGIC_DEF("invX", 0, js_lv_indev_point_prop, 0x04),
+    JS_CFUNC_MAGIC_DEF("invY", 0, js_lv_indev_point_prop, 0x05),
+
+    JS_CFUNC_MAGIC_DEF("setMaxX", 0, js_lv_indev_point_prop, 0x11),
+    JS_CFUNC_MAGIC_DEF("setMaxY", 0, js_lv_indev_point_prop, 0x12),
+    JS_CFUNC_MAGIC_DEF("setSwapXY", 0, js_lv_indev_point_prop, 0x13),
+    JS_CFUNC_MAGIC_DEF("setInvX", 0, js_lv_indev_point_prop, 0x14),
+    JS_CFUNC_MAGIC_DEF("setInvY", 0, js_lv_indev_point_prop, 0x15),
+    
 } ;
 
 
@@ -443,9 +522,18 @@ static void indev_nav_read_cb(struct _lv_indev_drv_t * drv, lv_indev_data_t * da
 
 static JSValue js_lv_indev_nav_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
 
+    if(lv_disp_get_default()==NULL) {
+        THROW_EXCEPTION("There is no default display.")
+    }
+    if(_indev_id>=255){
+        THROW_EXCEPTION("max indev count 255") ;
+    }
+
     indev_driver_spec_t driver_spec ;
     memset(&driver_spec, 0, sizeof(indev_driver_spec_t)) ;
-    
+
+    driver_spec.id = _indev_id ++ ;
+
     if(argc>0) {
 
         CHECK_ARGC(3)
@@ -550,6 +638,7 @@ static const JSCFunctionListEntry js_lv_indev_nav_proto_funcs[] = {
     JS_CFUNC_DEF("tick", 0, js_lv_indev_tick),
     JS_CFUNC_DEF("state", 0, js_lv_indev_nav_state),
     JS_CFUNC_DEF("setGroup", 0, js_lv_indev_set_group),
+    JS_CFUNC_DEF("id", 0, js_lv_indev_id),
 } ;
 
 

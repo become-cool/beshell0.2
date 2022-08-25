@@ -89,3 +89,33 @@ beconsoled.usage = function(fs) {
     }
     return usage
 }
+function findFakeIndev() {
+    for(let indev of be.indev) {
+        if(indev.driver=='fake') {
+            return indev
+        }
+    }
+}
+beconsoled.prepareVirtualDesktop = function(width,height) {
+    if(!be.disp.length) {
+        let VirtualDisplay = require("besdk/driver/virtual-display")
+        let dev = new VirtualDisplay()
+        dev.setup({width: width||320, height: height||240 })
+        dev.register()
+    }
+    if(!be.desktop) {
+        const Desktop = require("desktop/Desktop")
+        be.desktop = new Desktop()
+    }
+
+    let fakeIndev = findFakeIndev()
+    if(!fakeIndev){
+        let FakeIndev = require("besdk/driver/fake-indev")
+        let dev = new FakeIndev()
+        dev.setup()
+        dev.register()
+        fakeIndev = dev.indev
+    }
+
+    return [be.desktop.disp().id(), fakeIndev.id()]
+}

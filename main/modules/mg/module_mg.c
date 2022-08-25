@@ -2,7 +2,6 @@
 #include "utils.h"
 #include "cutils.h"
 #include "stack.h"
-#include "module_fs.h"
 #include "mg_client.h"
 #include "mg_server.h"
 #include "mg_request.h"

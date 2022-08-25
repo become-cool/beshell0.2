@@ -7,5 +7,7 @@ idf_component_register(
 # for mongoose tls/ssl
 add_definitions(-DMG_ENABLE_OPENSSL)
 
-# for nofrendo    
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-error=char-subscripts -Wno-error=attributes")
+# for nofrendo
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wno-error=char-subscripts -Wno-error=attributes")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-error=char-subscripts -Wno-error=attributes")
+

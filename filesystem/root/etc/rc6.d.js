@@ -2,6 +2,9 @@
     try{
         require("./init.d/repl.js")
         sleep(0)
+    
+        require("./init.d/telweb.js")
+        sleep(0)
 
         require("./init.d/banner.js")()
         sleep(0)

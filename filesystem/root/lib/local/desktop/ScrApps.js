@@ -34,22 +34,25 @@ module.exports = class ScrApps extends lv.Obj {
                         "text": "设置" ,
                         "src": "/lib/icon/32/setting.png" ,
                         group: this.group ,
-                        ref: 'settings'
-                    } , 
-                    {
-                        class:AppIcon ,
-                        "text": "文件" ,
-                        "src": "/lib/icon/32/folder.png",
-                        group: this.group ,
-                        ref: 'files'
+                        ref: 'settings' ,
+                        clicked: ()=>{
+                            this.emit("setting-popup()")
+                        }
                     }
-                    , {
-                        class:AppIcon ,
-                        "text": "相册" ,
-                        "src": "/lib/icon/32/album.png" ,
-                        group: this.group ,
-                        ref: 'album'
-                    }
+                    // {
+                    //     class:AppIcon ,
+                    //     "text": "文件" ,
+                    //     "src": "/lib/icon/32/folder.png",
+                    //     group: this.group ,
+                    //     ref: 'files'
+                    // }
+                    // , {
+                    //     class:AppIcon ,
+                    //     "text": "相册" ,
+                    //     "src": "/lib/icon/32/album.png" ,
+                    //     group: this.group ,
+                    //     ref: 'album'
+                    // }
                     , {
                         class:AppIcon ,
                         "text": "音乐" ,
@@ -72,13 +75,13 @@ module.exports = class ScrApps extends lv.Obj {
                             require("gameemulator")
                         }
                     } ,
-                    {
-                        class:AppIcon ,
-                        "text": "应用商店" ,
-                        "src": "/lib/icon/32/store.png" ,
-                        group: this.group ,
-                        ref: 'appStore'
-                    } ,
+                    // {
+                    //     class:AppIcon ,
+                    //     "text": "应用商店" ,
+                    //     "src": "/lib/icon/32/store.png" ,
+                    //     group: this.group ,
+                    //     ref: 'appStore'
+                    // } ,
                     // {
                     //     class: "Obj" ,
                     //     width: 48 ,

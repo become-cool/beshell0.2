@@ -20,6 +20,8 @@ mkfs-home:
 
 dist:
 	node filesystem/dispense-to-beconsole.js
+dist-fs:
+	node filesystem/dispense-to-beconsole.js fs
 dist-root:
 	node filesystem/dispense-to-beconsole.js fs-root
 dist-home:
@@ -35,7 +37,8 @@ pack-all: tree-shaking mkfs-root mkfs-home partition dist
 	ls -lh filesystem/img/
 
 # 编译js, 打包 / 和 /home 分区，并制作 img 文件
-fs: compile pack-all
+fs: compile tree-shaking mkfs-root mkfs-home partition dist-fs
+	ls -lh filesystem/img/
 
 # 使用 js 源文件打包 / 和 /home 分区，并制作 img 文件
 fs-src: clear-jsbin pack-all
@@ -56,7 +59,7 @@ telweb-build:
 
 telweb-pack: tree-shaking mkfs-root
 
-telweb: telweb-build telweb-pack
+telweb: telweb-build fs-root
 
 
 help:

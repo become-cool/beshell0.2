@@ -1,6 +1,7 @@
 const lv = require("lv")
 const Dashboard = require("./dashboard/Dashboard.js")
-const ScrApps = require("./ScrApps")
+const ScrApps = require("./ScrApps.js")
+const Setting = require("./setting/Setting.js")
 
 
 class Desktop extends lv.Obj {
@@ -44,6 +45,13 @@ class Desktop extends lv.Obj {
             this._apps = new ScrApps(this, this)
             this._apps.setY(0)
 
+            this._apps.on("setting-popup()", ()=>{
+                if(!this.setting) {
+                    this.setting = new Setting()
+                }
+                lv.loadScreen(this.setting)
+            })
+
             this._dashboard = new Dashboard(this, this)
             this._dashboard.setY(0)
 
@@ -63,6 +71,9 @@ class Desktop extends lv.Obj {
             this.holdKeys()
 
             // console.log("Desktop constructor")
+            be.bus.on("return-desktop", ()=>{
+                lv.loadScreen(this)
+            })
 
         }catch(e){
             console.log(e)
@@ -71,14 +82,18 @@ class Desktop extends lv.Obj {
     _lockDur = 200
     lockScreen(anim) {
         if(anim) {
-            this._dashboard.animate({'y': 0},this._lockDur)
+            this._dashboard.animate({'y': 0},this._lockDur,undefined,()=>{
+                this._apps.hide()
+            })
         }
         else {
             this._dashboard.setY(0)
+            this._apps.hide()
         }
         this.holdKeys()
     }
     unlockScreen(anim) {
+        this._apps.show()
         let height = this.height()
         if(anim) {
             this._dashboard.animate({'y': -height},this._lockDur)

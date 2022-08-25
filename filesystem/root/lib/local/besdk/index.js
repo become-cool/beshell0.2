@@ -1,6 +1,11 @@
 global.be = {
-    part: {} ,
+    dev: [] ,
+    disp: [] ,
+    indev: [] ,
+    part: [] ,
     var: {} ,
+    server: [] ,
+    desktop: null ,
     bus: new beapi.EventEmitter,
     ui: {
         set(widgetName, methodName, ...argv) {

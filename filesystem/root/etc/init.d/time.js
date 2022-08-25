@@ -1,22 +1,26 @@
 
 beapi.utils.setTimezoneOffset(-8*60)
 
+const sntpUrl = "udp://203.107.6.88:123"
+
+function sntp_request(retry) {
+    console.log("require time from",sntpUrl)
+    beapi.mg.sntpRequest(sntpUrl,(t)=>{ // ntp.aliyun.com
+        if(t>0) {
+            beapi.utils.setTime(t)
+        } else {
+            retry = parseInt(retry)
+            if(!isNaN(retry)) {
+                console.log("sntp request failed, retry ...")
+                setTimeout(()=>sntp_request(retry-1), 3000)
+            }
+        }
+    })
+}
+
 if(!process.simulate) {
     const wifi = require("besdk/wifi")
     wifi.on("ip.got", ()=>{
-        let retry = 5
-        function sntp_request() {
-            beapi.mg.sntpRequest("udp://ntp.aliyun.com:123",(t)=>{
-                if(t>0) {
-                    beapi.utils.setTime(t)
-                } else {
-                    if(retry--) {
-                        console.log("sntp request failed, retry ...")
-                        setTimeout(sntp_request, 3000)
-                    }
-                }
-            })
-        }
-        sntp_request()
+        sntp_request(10)
     })
 }

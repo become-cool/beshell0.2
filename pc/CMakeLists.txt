@@ -43,9 +43,9 @@ AUX_SOURCE_DIRECTORY(../components/mongoose SRC_LIST)
 include_directories(../components/mongoose)
 
 
-AUX_SOURCE_DIRECTORY(. SRC_LIST)
+AUX_SOURCE_DIRECTORY(./src SRC_LIST)
 
-include_directories(./)
+include_directories(./src)
 include_directories(../main)
 include_directories(../main/telnet)
 include_directories(../main/anchor9)
@@ -67,6 +67,7 @@ list(APPEND SRC_LIST ../main/uuid.c)
 list(APPEND SRC_LIST ../main/font/s16.c)
 list(APPEND SRC_LIST ../main/anchor9/anchor9.c)
 list(APPEND SRC_LIST ../main/anchor9/anchor9_lvgl.c)
+# list(APPEND SRC_LIST ../main/media/tiny_jpeg.c)
 list(APPEND SRC_LIST ../main/modules/module_fs.c)
 list(APPEND SRC_LIST ../main/modules/module_utils.c)
 list(APPEND SRC_LIST ../main/modules/mg/module_mg.c)
@@ -88,9 +89,20 @@ list(APPEND SRC_LIST ../main/modules/lvgl/be_gl.c)
 list(APPEND SRC_LIST ../main/modules/lvgl/be_gl_js.c)
 list(APPEND SRC_LIST ../main/modules/lvgl/font/font_msyh_3500.c)
 list(APPEND SRC_LIST ../main/modules/lvgl/lv_obj_init.js.c)
+list(APPEND SRC_LIST beapi.simulate.c)
+
 
 ADD_EXECUTABLE(beshell ${SRC_LIST})
 target_link_libraries(beshell libssl.a libcrypto.a dl)
 target_link_libraries(beshell dl pthread)
 
 set_property(TARGET beshell PROPERTY C_STANDARD 99)
+
+
+add_custom_command(OUTPUT beapi.simulate.c
+    PRE_BUILD
+    COMMAND xxd -i ../src/beapi.simulate.js beapi.simulate.c
+    COMMAND echo "xxd -i ../src/beapi.simulate.js beapi.simulate.c"
+    DEPENDS ../src/beapi.simulate.js
+    VERBATIM
+)

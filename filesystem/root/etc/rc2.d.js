@@ -1,5 +1,7 @@
 try{    
     require("./init.d/repl.js")
+    
+    require("./init.d/telweb.js")
 
     require("./init.d/banner.js")()
 

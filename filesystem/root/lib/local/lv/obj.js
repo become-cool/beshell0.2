@@ -59,7 +59,10 @@ beapi.lvgl.Btn.prototype.text = function text() {
 }
 beapi.lvgl.Btn.prototype.setText = function setText(text) {
     if(!this.label) {
-        this.label = new beapi.lvgl.Label(this)
+        this.label = this.child(0)
+        if(!this.label || this.label.constructor!=beapi.lvgl.Label) {
+            this.label = new beapi.lvgl.Label(this)
+        }
     }
     this.label.setText(text)
 }
@@ -118,14 +121,14 @@ function size(val) {
     return val
 }
 
-beapi.lvgl.Obj.prototype.primitiveSetWidth = beapi.lvgl.Obj.prototype.setWidth
+beapi.lvgl.Obj.prototype._setWidth = beapi.lvgl.Obj.prototype.setWidth
 beapi.lvgl.Obj.prototype.setWidth = function(val) {
-    return this.primitiveSetWidth(size(val))
+    return this._setWidth(size(val))
 }
 
-beapi.lvgl.Obj.prototype.primitiveSetHeight = beapi.lvgl.Obj.prototype.setHeight
+beapi.lvgl.Obj.prototype._setHeight = beapi.lvgl.Obj.prototype.setHeight
 beapi.lvgl.Obj.prototype.setHeight = function(val) {
-    return this.primitiveSetHeight(size(val))
+    return this._setHeight(size(val))
 }
 beapi.lvgl.Obj.prototype.children = function() {
     let children = []
@@ -133,6 +136,14 @@ beapi.lvgl.Obj.prototype.children = function() {
         children.push(this.child(i))
     }
     return children
+}
+
+beapi.lvgl.Label.prototype._setText = beapi.lvgl.Label.prototype.setText
+beapi.lvgl.Label.prototype.setText = function(text) {
+    if(this.text() == text) {
+        return
+    }
+    this._setText(text)
 }
 
 

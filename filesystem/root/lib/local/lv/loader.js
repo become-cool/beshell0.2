@@ -35,7 +35,9 @@ beapi.lvgl.fromJson = function fromJson(json, parent, refs){
     try{
         if(json instanceof Array) {
             for(let childJson of json) {
-                beapi.lvgl.fromJson(childJson, parent, refs)
+                if(childJson){
+                    beapi.lvgl.fromJson(childJson, parent, refs)
+                }
             }
         }
         else {

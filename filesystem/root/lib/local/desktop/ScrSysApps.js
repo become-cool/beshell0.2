@@ -55,18 +55,6 @@ module.exports = class ScrSysApps extends lv.Obj {
                     ref: "btn1" ,
                     "src": "/lib/icon/32/camera.png"
                 }
-                , {
-                    class:AppIcon ,
-                    "text": "示波器" ,
-                    ref: "btn1" ,
-                    "src": "/lib/icon/32/oscilloscope.png"
-                }
-                , {
-                    class:AppIcon ,
-                    "text": "应用商店" ,
-                    ref: "btn1" ,
-                    "src": "/lib/icon/32/store.png"
-                }
             ]
         })
     }

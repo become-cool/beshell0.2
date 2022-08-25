@@ -3,6 +3,7 @@
 #include "module_fs.h"
 #include "utils.h"
 #include "cutils.h"
+#include "telnet_ws.h"
 
 
 
@@ -42,18 +43,59 @@ static JSClassDef js_mg_http_rspn_class = {
 static JSValue js_mg_rspn_reply(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(1)
     THIS_HTTP_RSPN(rspn)
-    NOT_WS_FUNC("mg.HttpResponse.replay")
+    NOT_WS_FUNC("mg.HttpResponse.reply")
     
+    int code = 200 ;
+    if(argc>1) {
+        if( JS_ToInt32(ctx, &code, argv[1])!=0 ){
+            THROW_EXCEPTION("arg code must be a number")
+        }
+    }
+
     if( JS_IsString(argv[0]) ) {
-        const char * str = JS_ToCString(ctx, argv[0]) ;
-        mg_http_reply(rspn->conn, 200, "", str) ;
-        JS_FreeCString(ctx, str) ;
+        const char * body = JS_ToCString(ctx, argv[0]) ;
+
+        char * header = NULL ;
+        if(argc>2){
+            header = JS_ToCString(ctx, argv[2]) ;
+        }
+
+        mg_http_reply(rspn->conn, code, header, body) ;
+
+        JS_FreeCString(ctx, body) ;
+        if(header) {
+            JS_FreeCString(ctx, header) ;
+        }
     }
 
     else {
         THROW_EXCEPTION("invalid type of arg body")
     }
 
+    return JS_UNDEFINED ;
+}
+
+
+static JSValue js_mg_rspn_redirect(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+    THIS_HTTP_RSPN(rspn)
+    const char * url = JS_ToCString(ctx, argv[0]) ;
+    
+    char * header = mallocf("Location: %s\r\n", url) ;
+    if(!header) {
+        THROW_EXCEPTION("out of memory?") ;
+    }
+
+    mg_http_reply(rspn->conn, 302, header, "Redirection") ;
+
+    JS_FreeCString(ctx, url) ;
+    free(header) ;
+    return JS_UNDEFINED ;
+}
+
+static JSValue js_mg_rspn_close(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    THIS_HTTP_RSPN(rspn)
+    rspn->conn->is_closing = 1 ;
     return JS_UNDEFINED ;
 }
 
@@ -117,11 +159,41 @@ static JSValue js_mg_rspn_ws_send(JSContext *ctx, JSValueConst this_val, int arg
     return JS_UNDEFINED ;
 }
 
+/**
+ * @param string event
+ * @param mg.HttpMessage req
+ */
+// static JSValue js_mg_rspn_as_telweb(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+//     CHECK_ARGC(2)
+//     THIS_HTTP_RSPN(rspn)
+
+//     struct mg_http_message * msg ;
+//     if( JS_IsUndefined(argv[1]) || JS_IsNull(argv[1]) ) {
+//         msg = NULL ;
+//     }
+//     else {
+//         msg = JS_GetOpaque(argv[1], js_mg_http_message_class_id) ;
+//         if(!msg) {
+//             THROW_EXCEPTION("arg reply must be a mg.HttpRequest")    
+//         }
+//     }
+//     ARGV_TO_STRING(0, strev)
+
+//     int ev = mg_event_name_to_const(strev) ;
+//     JS_FreeCString(ctx, strev) ;
+
+//     bool ret = telnet_ws_response(rspn->conn, ev, msg, NULL) ;
+
+//     return ret ? JS_TRUE: JS_FALSE ;
+// }
+
 static const JSCFunctionListEntry js_mg_http_rspn_proto_funcs[] = {
     JS_CFUNC_DEF("reply", 0, js_mg_rspn_reply),
+    JS_CFUNC_DEF("redirect", 0, js_mg_rspn_redirect),
     JS_CFUNC_DEF("serveDir", 0, js_mg_rspn_serve_dir),
     JS_CFUNC_DEF("upgrade", 0, js_mg_http_rspn_upgrade),
     JS_CFUNC_DEF("wsSend", 0, js_mg_rspn_ws_send),
+    JS_CFUNC_DEF("close", 0, js_mg_rspn_close),
 } ;
 
 

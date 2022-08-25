@@ -8252,6 +8252,12 @@ static int add_fast_array_element(JSContext *ctx, JSObject *p,
         p->u.array.u.values = new_array_prop;
         p->u.array.u1.size = new_size;
     }
+    if(p->u.array.u.values==0) {
+        printf("p->u.array.u.values[%d - 1] -> 0 !?\n",new_len) ;
+        printf("p->u.array.count = %d \n",p->u.array.count) ;
+        JS_ThrowInternalError(ctx,"p->u.array.u.values==NULL ?") ;
+        return -2 ;
+    }
     p->u.array.u.values[new_len - 1] = val;
     p->u.array.count = new_len;
     return TRUE;

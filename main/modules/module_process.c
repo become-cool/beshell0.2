@@ -2,6 +2,7 @@
 #include "js_main_loop.h"
 #include "beshell.h"
 #include "utils.h"
+#include "lvgl.h"
 #include <string.h>
 
 #include "module_telnet.h"
@@ -259,6 +260,11 @@ void be_module_process_require(JSContext *ctx) {
     JS_SetPropertyStr(ctx, process, "exit", JS_NewCFunction(ctx, js_process_exit, "exit", 1));
 #endif
     JS_SetPropertyStr(ctx, versions, "quickjs", JS_NewString(ctx, QUICKJS_VERSION));
+    
+    char lvgl_ver[16] ;
+    sprintf(lvgl_ver, "%d.%d.%d", LVGL_VERSION_MAJOR, LVGL_VERSION_MINOR, LVGL_VERSION_PATCH) ;
+    JS_SetPropertyStr(ctx, versions, "lvgl", JS_NewString(ctx, lvgl_ver));
+    
     JS_SetPropertyStr(ctx, process, "versions", versions);
     
     char buff[32] ;

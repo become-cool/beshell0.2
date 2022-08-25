@@ -11,13 +11,15 @@
 
 
 
+// JSValue _func_repl_output ;
 JSValue _func_repl_input ;
-JSValue js_repl_register_handle(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+
+JSValue js_repl_register_handler(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(1)
     if(!JS_IsFunction(ctx, argv[0])) {
         THROW_EXCEPTION("REPL input function must be a function type")
     }
-    
+
 	if(!JS_IsNull(_func_repl_input)) {
 		JS_FreeValue(ctx, _func_repl_input) ;
 	}
@@ -26,7 +28,6 @@ JSValue js_repl_register_handle(JSContext *ctx, JSValueConst this_val, int argc,
 
     return JS_UNDEFINED ;
 }
-
 
 uint8_t _echo_pkgid = 0 ;
 uint8_t mk_echo_pkgid() {
@@ -153,11 +154,10 @@ void be_telnet_require(JSContext *ctx) {
     JSValue global = JS_GetGlobalObject(ctx);
     JSValue beapi = JS_GetPropertyStr(ctx, global, "beapi") ;
 
-
     JSValue telnet = JS_NewObject(ctx) ;
     JS_SetPropertyStr(ctx, beapi, "telnet", telnet);
     JS_SetPropertyStr(ctx, telnet, "rspn", JS_NewCFunction(ctx, js_repl_rspn, "rspn", 1));
-    JS_SetPropertyStr(ctx, telnet, "registerHandle", JS_NewCFunction(ctx, js_repl_register_handle, "registerHandle", 1));
+    JS_SetPropertyStr(ctx, telnet, "registerHandler", JS_NewCFunction(ctx, js_repl_register_handler, "registerHandler", 1));
 
 	JS_FreeValue(ctx, beapi);
 	JS_FreeValue(ctx, global);

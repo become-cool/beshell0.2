@@ -5,6 +5,9 @@ require("besdk/http")
     try{
         require("./init.d/repl.js")
         sleep(0)
+    
+        require("./init.d/telweb.js")
+        sleep(0)
 
         require("./init.d/banner.js")()
         sleep(0)
@@ -19,9 +22,8 @@ require("besdk/http")
         require("./init.d/beconsoled.js")
         sleep(0)
 
-        let setupConf = require("./init.d/setup.js") ()
+        var setupConf = require("./init.d/setup.js") ()
 
-        console.log(be.disp)
         if(be.disp?.length){
             let desktop = require("./init.d/desktop.js")
 

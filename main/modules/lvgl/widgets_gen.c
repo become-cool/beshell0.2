@@ -8178,6 +8178,14 @@ JSClassID be_lv_type_to_js_class(lv_obj_t * obj) {
     }
 // AUTO GENERATE CODE END [TYPE TO PROTO] --------
 
+
+    else if(lv_obj_check_type(obj, & lv_list_text_class)) {
+        return js_lv_label_class_id ;
+    }
+    else if(lv_obj_check_type(obj, & lv_list_btn_class)) {
+        return js_lv_btn_class_id ;
+    }
+
     printf("unknow lv_obj_t class\n") ;
     return js_lv_obj_class_id ;
 }

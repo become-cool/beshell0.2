@@ -37,6 +37,7 @@ esp_event_handler_instance_t instance_any_id;
 esp_event_handler_instance_t instance_got_ip;
 
 
+bool _started = false ;
 bool _sta_started = false ;
 bool _sta_connected = false ;
 bool _ap_started = false ;
@@ -123,7 +124,13 @@ static void esp32_wifi_eventHandler(void* arg, esp_event_base_t event_base, int3
     if(event_base==WIFI_EVENT) {
         eventType = 1 ;
         
-        if(event_id == WIFI_EVENT_STA_START) {
+        if(event_id == WIFI_EVENT_WIFI_READY) {
+            printf("WIFI_EVENT_WIFI_READY\n") ;
+        }
+        else if(event_id == WIFI_EVENT_SCAN_DONE) {
+            _scanning = false ;
+        }
+        else if(event_id == WIFI_EVENT_STA_START) {
             _sta_started = true ;
         }
         else if(event_id == WIFI_EVENT_STA_STOP) {
@@ -140,10 +147,6 @@ static void esp32_wifi_eventHandler(void* arg, esp_event_base_t event_base, int3
         }
         else if(event_id == WIFI_EVENT_AP_STOP) {
             _ap_started = false ;
-        }
-        else if(event_id == WIFI_EVENT_SCAN_DONE ) {
-            printf("WIFI_EVENT_SCAN_DONE\n") ;
-            _scanning = false ;
         }
     }
     else if(event_base==IP_EVENT) {
@@ -450,10 +453,13 @@ JSValue js_wifi_register_event_handle(JSContext *ctx, JSValueConst this_val, int
 
 JSValue js_wifi_start(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     esp_err_t err = esp_wifi_start() ;
+    _started = err == ESP_OK ;
     return JS_NewInt32(ctx, err);
 }
 JSValue js_wifi_stop(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-    return JS_NewInt32(ctx, esp_wifi_stop());
+    esp_err_t err = esp_wifi_stop() ;
+    _started = ! (err == ESP_OK) ;
+    return JS_NewInt32(ctx, err);
 }
 
 // typedef struct {

@@ -521,15 +521,37 @@ JSValue js_lv_label_set_font(JSContext *ctx, JSValueConst this_val, int argc, JS
     if( strcmp("m8", fontname)==0 ) {
         font = &lv_font_montserrat_8 ;
     }
+#ifdef LV_FONT_MONTSERRAT_10
     if( strcmp("m10", fontname)==0 ) {
         font = &lv_font_montserrat_10 ;
     }
+#endif
     else if( strcmp("m12", fontname)==0 ) {
         font = &lv_font_montserrat_12 ;
     }
+#ifdef LV_FONT_MONTSERRAT_14
+    else if( strcmp("m14", fontname)==0 ) {
+        font = &lv_font_montserrat_14 ;
+    }
+#endif
     else if( strcmp("m16", fontname)==0 ) {
         font = &lv_font_montserrat_16 ;
     }
+#ifdef LV_FONT_MONTSERRAT_18
+    else if( strcmp("m18", fontname)==0 ) {
+        font = &lv_font_montserrat_18 ;
+    }
+#endif
+#ifdef LV_FONT_MONTSERRAT_20
+    else if( strcmp("m20", fontname)==0 ) {
+        font = &lv_font_montserrat_20 ;
+    }
+#endif
+#ifdef LV_FONT_MONTSERRAT_22
+    else if( strcmp("m22", fontname)==0 ) {
+        font = &lv_font_montserrat_22 ;
+    }
+#endif
     else if( strcmp("m24", fontname)==0 ) {
         font = &lv_font_montserrat_24 ;
     }

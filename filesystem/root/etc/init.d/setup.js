@@ -19,18 +19,18 @@ module.exports = function() {
     }catch(e) {}
 
 
-    try{
-        var setupConf = JSON.load("/home/become/config/setup.json")
-    } catch(e) {
-        console.log("~/config/setup.json not exists, use default setup config.") ;
-        var setupConf = defaultSetupConf()
-    }
-    if(!setupConf) {
-        console.log("setup failed: unknown part")
-        return
-    }
-    // serial bus
     if(!process.simulate) {
+        try{
+            var setupConf = JSON.load("/home/become/config/setup.json")
+        } catch(e) {
+            console.log("~/config/setup.json not exists or invalid, use default setup config.") ;
+            var setupConf = defaultSetupConf()
+        }
+        if(!setupConf) {
+            console.error("setup failed: unknown part")
+            return
+        }
+        // serial bus
         for(let num in setupConf.spi||{}){
             let spi = setupConf.spi[num]
             beapi.spi.setup(num, spi.miso, spi.mosi, spi.sck)
@@ -39,19 +39,19 @@ module.exports = function() {
             let i2c = setupConf.i2c[num]
             beapi.i2c.setup(num, i2c.sda, i2c.scl)
         }
-    }
-    // dev
-    for(let devConf of setupConf.dev||[]){
-        try {
-            if(devConf.disable) {
-                continue
+        // dev
+        for(let devConf of setupConf.dev||[]){
+            try {
+                if(devConf.disable) {
+                    continue
+                }
+                createDevFromDriver(devConf)
+            }catch(e){
+                console.log(e)
             }
-            createDevFromDriver(devConf)
-        }catch(e){
-            console.log(e)
         }
+        return setupConf
     }
-    return setupConf
 }
 
 const LibDefaultConf = {
@@ -62,7 +62,7 @@ const LibDefaultConf = {
         spi: { 1: {miso:12,mosi:13,sck:14} } ,
         dev: [
             {"driver":"ST7789V", "setup":{"dc":18, "cs":19, "spi":1, "width":320, "height":240, "freq":80000000, "MADCTL": 0x40|0x20}}
-            , {"driver":"XPT2046", "setup":{"spi":1, "cs":21}}
+            , {"driver":"XPT2046", "setup":{"spi":1, "cs":21, "invX":true, "invY":true, maxX:320, maxY:240}}
         ]
     }} ,
     19: {0:{
@@ -82,17 +82,19 @@ function defaultSetupConf() {
 
 function createDevFromDriver(devConf) {
     try{
+        console.log("/lib/local/besdk/driver/"+devConf.driver+'.js')
         var driver = require("/lib/local/besdk/driver/"+devConf.driver+'.js')
     }catch(e){
+        console.error(e)
         console.error("unknow driver", devConf.driver)
     }
     let dev = new driver
     if(dev.setup(devConf.setup)==false) {
-        console.log(devConf.driver,'device setup failed.')
+        console.error(devConf.driver,'device setup failed.')
         return
     }
     if(dev.begin(devConf.begin)==false) {
-        console.log(devConf.driver,'device begin failed.')
+        console.error(devConf.driver,'device begin failed.')
         return
     }
     dev.register(devConf.varname)

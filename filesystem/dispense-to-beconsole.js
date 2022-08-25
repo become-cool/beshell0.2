@@ -81,11 +81,13 @@ function dist(targetDir) {
     mkdir(path)
 
     if(target=='all') {
+        cp("../build/beshell.bin", path+"/")
+    }
+    if(target=='all' || target=='fs') {
         fs.writeFileSync(path+'/firmware.json', metastring)
         cp("img/bootloader.bin", path+"/")
         cp("img/partitions-4MB.bin", path+"/")
         cp("img/partitions-16MB.bin", path+"/")
-        cp("../build/beshell.bin", path+"/")
     }
     if(target=='all' || target=='fs' || target=='fs-root') {
         cp("img/fs-root.img", path+"/")

@@ -1,6 +1,5 @@
 #include "mg_request.h"
 #include "module_mg.h"
-#include "module_fs.h"
 #include "utils.h"
 #include "cutils.h"
 
@@ -12,7 +11,7 @@ JSClassID js_mg_http_message_class_id ;
 #define THIS_HTTP_MSG(var)                                                                  \
     struct mg_http_message * var = JS_GetOpaque(this_val, js_mg_http_message_class_id) ;    \
     if(!var) {                                                                              \
-        JS_ThrowReferenceError(ctx, "mg.HttpMessage object has free.");                \
+        JS_ThrowReferenceError(ctx, "mg.HttpMessage object has free.");                     \
         return JS_EXCEPTION ;                                                               \
     }
 
@@ -80,6 +79,14 @@ static JSValue js_mg_http_message_rawHead(JSContext *ctx, JSValueConst this_val,
     THIS_HTTP_MSG(msg)
     return JS_NewStringLen(ctx, msg->head.ptr, msg->head.len) ;
 }
+static JSValue js_mg_http_message_match_uri(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+    THIS_HTTP_MSG(msg)
+    ARGV_TO_STRING(0, uri) ;
+    bool ret = mg_http_match_uri(msg, uri) ;
+    JS_FreeCString(ctx, uri) ;
+    return ret? JS_TRUE: JS_FALSE ;
+}
 
 static const JSCFunctionListEntry js_mg_http_message_proto_funcs[] = {
     JS_CFUNC_DEF("method", 0, js_mg_http_message_method),
@@ -92,6 +99,7 @@ static const JSCFunctionListEntry js_mg_http_message_proto_funcs[] = {
     JS_CFUNC_DEF("chunk", 0, js_mg_http_message_chunk),
     JS_CFUNC_DEF("raw", 0, js_mg_http_message_raw),
     JS_CFUNC_DEF("rawHead", 0, js_mg_http_message_rawHead),
+    JS_CFUNC_DEF("matchURI", 0, js_mg_http_message_match_uri),
 } ;
 
 

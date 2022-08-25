@@ -215,31 +215,14 @@ public:
     }
 };
 
-bool fmt2jpg(uint8_t *src, size_t src_len, uint16_t width, uint16_t height, pixformat_t format, uint8_t quality, uint8_t ** out, size_t * out_len)
+bool fmt2jpg(uint8_t *src, size_t src_len, uint16_t width, uint16_t height, pixformat_t format, uint8_t quality, uint8_t * out, size_t * out_len)
 {
-    //todo: allocate proper buffer for holding JPEG data
-    //this should be enough for CIF frame size
-    int jpg_buf_len = 128*1024;
-
-
-    uint8_t * jpg_buf = (uint8_t *)_malloc(jpg_buf_len);
-    if(jpg_buf == NULL) {
-        ESP_LOGE(TAG, "JPG buffer malloc failed");
-        return false;
-    }
-    memory_stream dst_stream(jpg_buf, jpg_buf_len);
+    memory_stream dst_stream(out, *out_len);
 
     if(!convert_image(src, width, height, format, quality, &dst_stream)) {
-        free(jpg_buf);
         return false;
     }
 
-    *out = jpg_buf;
     *out_len = dst_stream.get_size();
     return true;
-}
-
-bool frame2jpg(camera_fb_t * fb, uint8_t quality, uint8_t ** out, size_t * out_len)
-{
-    return fmt2jpg(fb->buf, fb->len, fb->width, fb->height, fb->format, quality, out, out_len);
 }

@@ -8,7 +8,6 @@ class DeviceDriver extends beapi.EventEmitter {
     end() {}
     unsetup() {}
     register(insName) {
-        console.log(insName)
         if(!be.dev) {
             be.dev = {}
         }

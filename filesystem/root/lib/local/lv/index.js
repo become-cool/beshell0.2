@@ -1,4 +1,5 @@
 require("./obj.js")
+require("./list.js")
 require("./menu.js")
 require("./loader.js")
 beapi.lvgl.Color = require("./color.js")

@@ -249,7 +249,7 @@ static JSValue js_i2s_setup(JSContext *ctx, JSValueConst this_val, int argc, JSV
 i2s_config_t i2s_config = {
     .mode = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_TX | I2S_MODE_RX),
     .sample_rate = 8000,
-    .bits_per_sample = I2S_BITS_PER_SAMPLE_16BIT,
+    .bits_per_sample = I2S_BITS_PER_SAMPLE_32BIT,
     .channel_format = I2S_CHANNEL_FMT_RIGHT_LEFT,
     .communication_format = I2S_COMM_FORMAT_STAND_I2S,
     .intr_alloc_flags = ESP_INTR_FLAG_LEVEL2 | ESP_INTR_FLAG_IRAM,
@@ -261,9 +261,9 @@ i2s_config_t i2s_config = {
 };
 
 i2s_pin_config_t pin_config = {
-    .bck_io_num = 4,
-    .ws_io_num = 26,
-    .data_out_num = 33,
+    .ws_io_num = 33,
+    .data_out_num = 4,
+    .bck_io_num = 26,
     .data_in_num = -1                                                       //Not used
 };
 i2s_driver_install(i2s, &i2s_config, 0, NULL);
@@ -299,55 +299,7 @@ i2s_set_pin(i2s, &pin_config);
 	I2CWRNBYTE_CODEC(0x0A,0x01);	
 	I2CWRNBYTE_CODEC(0x0B,0x01);	
 	I2CWRNBYTE_CODEC(0x11,NORMAL_I2S + (Format_Len<<4));
-	I2CWRNBYTE_CODEC(0x14,DAC_Volume);	
-	if(Ratio == 1536)//Ratio=MCLK/LRCK=1536：12M288/8K；24M576/16K
-    {
-        I2CWRNBYTE_CODEC(0x01,0x26 - (0x03*EQ7bandOn));//1536 Ratio(MCLK/LRCK)	
-        I2CWRNBYTE_CODEC(0x09,0x00);//1536 Ratio(MCLK/LRCK)	
-        I2CWRNBYTE_CODEC(0x03,0x06);//LRCK H		
-        I2CWRNBYTE_CODEC(0x04,0x00);//LRCK=MCLK/1536
-        I2CWRNBYTE_CODEC(0x05,SCLK_DIV);//BCLK=MCLK/4									
-    }
-	if(Ratio == 1024)//Ratio=MCLK/LRCK=1024：12M288/12K；24M576/24K
-    {
-        I2CWRNBYTE_CODEC(0x01,0x24 - (0x02*EQ7bandOn));//256 Ratio(MCLK/LRCK)	
-        I2CWRNBYTE_CODEC(0x09,0x00);//256 Ratio(MCLK/LRCK)	
-        I2CWRNBYTE_CODEC(0x03,0x04);//LRCK H		
-        I2CWRNBYTE_CODEC(0x04,0x00);//LRCK=MCLK/256
-        I2CWRNBYTE_CODEC(0x05,SCLK_DIV);//BCLK=MCLK/4									
-    }
-	if(Ratio == 768)//Ratio=MCLK/LRCK=768：12M288/16K；24M576/32K；
-    {
-        I2CWRNBYTE_CODEC(0x01,0x23 + (0x40*EQ7bandOn));//768 Ratio(MCLK/LRCK)	
-        I2CWRNBYTE_CODEC(0x09,0x00);//768 Ratio(MCLK/LRCK)	
-        I2CWRNBYTE_CODEC(0x03,0x03);//LRCK H		
-        I2CWRNBYTE_CODEC(0x04,0x00);//LRCK=MCLK/768
-        I2CWRNBYTE_CODEC(0x05,SCLK_DIV);//BCLK=MCLK/4									
-    }
-	if(Ratio == 512)//Ratio=MCLK/LRCK=512：12M288/24K；24M576/48K；
-    {
-        I2CWRNBYTE_CODEC(0x01,0x22 - (0x01*EQ7bandOn));//512 Ratio(MCLK/LRCK)	
-        I2CWRNBYTE_CODEC(0x09,0x00);//512 Ratio(MCLK/LRCK)	
-        I2CWRNBYTE_CODEC(0x03,0x02);//LRCK H		
-        I2CWRNBYTE_CODEC(0x04,0x00);//LRCK=MCLK/512
-        I2CWRNBYTE_CODEC(0x05,SCLK_DIV);//BCLK=MCLK/4									
-    }
-	if(Ratio == 384)//Ratio=MCLK/LRCK=384：12M288/32K；6M144/16K
-    {
-        I2CWRNBYTE_CODEC(0x01,0x63 + (0x40*EQ7bandOn));//384 Ratio(MCLK/LRCK)
-        I2CWRNBYTE_CODEC(0x09,0x00);//384 Ratio(MCLK/LRCK)					
-        I2CWRNBYTE_CODEC(0x03,0x01);//LRCK H		
-        I2CWRNBYTE_CODEC(0x04,0x80);//LRCK=MCLK/384
-        I2CWRNBYTE_CODEC(0x05,SCLK_DIV);//BCLK=MCLK/4		
-    }
-	if(Ratio == 256)//Ratio=MCLK/LRCK=256：12M288/48K；
-    {
-        I2CWRNBYTE_CODEC(0x01,0x21 + (0x40*EQ7bandOn));//256 Ratio(MCLK/LRCK)	
-        I2CWRNBYTE_CODEC(0x09,0x00);//256 Ratio(MCLK/LRCK)	
-        I2CWRNBYTE_CODEC(0x03,0x01);//LRCK H		
-        I2CWRNBYTE_CODEC(0x04,0x00);//LRCK=MCLK/256
-        I2CWRNBYTE_CODEC(0x05,SCLK_DIV);//BCLK=MCLK/4									
-    }
+	I2CWRNBYTE_CODEC(0x14,DAC_Volume);
 	if(Ratio == 128)//Ratio=MCLK/LRCK=128：6M144/48K；
     {
         I2CWRNBYTE_CODEC(0x01,0x61 + (0x40*EQ7bandOn));//128 Ratio(MCLK/LRCK)  256
@@ -356,7 +308,7 @@ i2s_set_pin(i2s, &pin_config);
         I2CWRNBYTE_CODEC(0x04,0x80);//LRCK=MCLK/128
         I2CWRNBYTE_CODEC(0x05,SCLK_DIV);//BCLK=MCLK/4		
     }
-	if(Ratio == 64)//Ratio=MCLK/LRCK=64：3M072/48K；   512
+	else if(Ratio == 64)//Ratio=MCLK/LRCK=64：3M072/48K；   512
     {
         I2CWRNBYTE_CODEC(0x01,0xA1);//64 Ratio(MCLK/LRCK)	
         I2CWRNBYTE_CODEC(0x09,0x02);//64 Ratio(MCLK/LRCK)	
@@ -427,22 +379,22 @@ static JSValue js_music_player_create(JSContext *ctx, JSValueConst this_val, int
 
 static bool play_mp3(char *path)
 {
-    uint8_t simples [1024] ;
-    for(int i=0; i<sizeof(simples); i++) {
-        simples[i] = (i%9) + 1 ;
-    }
-    
-    // for(int i=sizeof(simples)/2-2;i>=0;i-=2) {
-    //     simples[i*2] = simples[i] ;
-    //     simples[i*2+1] = simples[i+1] ;
-    //     simples[i*2+2] = 0 ;
-    //     simples[i*2+3] = 0 ;
+    // uint8_t simples [1024] ;
+    // for(int i=0; i<sizeof(simples); i++) {
+    //     simples[i] = (i%9) + 1 ;
     // }
+    
+    // // for(int i=sizeof(simples)/2-2;i>=0;i-=2) {
+    // //     simples[i*2] = simples[i] ;
+    // //     simples[i*2+1] = simples[i+1] ;
+    // //     simples[i*2+2] = 0 ;
+    // //     simples[i*2+3] = 0 ;
+    // // }
 
-    size_t cnt = 0 ;
-    i2s_write(I2S_NUM_0, simples, sizeof(simples), &cnt, 1000 / portTICK_PERIOD_MS);
+    // size_t cnt = 0 ;
+    // i2s_write(I2S_NUM_0, simples, sizeof(simples), &cnt, 1000 / portTICK_PERIOD_MS);
 
-    return ;
+    // return ;
     
 
     printf("start to decode ...\n");
@@ -538,8 +490,8 @@ static bool play_mp3(char *path)
             if(samplerate!=mp3FrameInfo.samprate)
             {
                 samplerate=mp3FrameInfo.samprate;
-                //hal_i2s_init(0,samplerate,16,mp3FrameInfo.nChans);
-                i2s_set_clk(0,samplerate,32,mp3FrameInfo.nChans);
+                // hal_i2s_init(0,samplerate,16,mp3FrameInfo.nChans);
+                i2s_set_clk(0,samplerate*(Ratio/64),32,mp3FrameInfo.nChans);
                 //wm8978_samplerate_set(samplerate);
                 printf("mp3file info---bitrate=%d,layer=%d,bitsPerSample=%d,nChans=%d,samprate=%d,outputSamps=%d\n"
                     ,mp3FrameInfo.bitrate,mp3FrameInfo.layer,mp3FrameInfo.bitsPerSample,
@@ -547,43 +499,57 @@ static bool play_mp3(char *path)
             }
 
             size_t cnt = 0 ;
-            if(mp3FrameInfo.bitsPerSample>=32) {
+            // ES8156 如果省略 MCLK ，由 SCLK 提供主时钟，
+            // 则 SCLK/LRSLK >=64 , 因此 sample 最小 32bit，而 esp-idf 最大支持 32bit
+            // 因此统一 32bit/sample
+            if(mp3FrameInfo.bitsPerSample!=32) {
+                // 扩展到 32 sample
+                i2s_write_expand(I2S_NUM_0, output,
+                    mp3FrameInfo.outputSamps * mp3FrameInfo.nChans,
+                    mp3FrameInfo.bitsPerSample,
+                    32, &cnt, portMAX_DELAY );
+            }
+            else {
                 i2s_write(I2S_NUM_0, output, mp3FrameInfo.outputSamps*2, &cnt, 1000 / portTICK_PERIOD_MS);
             }
-            // 标准 i2s 不低于32位，不足32位，高字节填充0
-            else {
-                int fulllen = mp3FrameInfo.outputSamps * 2 ;
-                uint8_t * pb = NULL ;
-                if(mp3FrameInfo.bitsPerSample==16){
-                for(int i=mp3FrameInfo.outputSamps-2;i>=0;i-=2) {
-                    writeBuf[i*2] = 0 ;
-                    writeBuf[i*2+1] = 0 ;
-                    writeBuf[i*2+2] = output[i] ;
-                    writeBuf[i*2+3] = output[i+1] ;
-                }
-                }
 
-                else if(mp3FrameInfo.bitsPerSample==8){
-                    // @todo
-                }
+//             if(mp3FrameInfo.bitsPerSample>=32) {
+//                 i2s_write(I2S_NUM_0, output, mp3FrameInfo.outputSamps*2, &cnt, 1000 / portTICK_PERIOD_MS);
+//             }
+//             // 标准 i2s 不低于32位，不足32位，高字节填充0
+//             else {
+//                 int fulllen = mp3FrameInfo.outputSamps * 2 ;
+//                 uint8_t * pb = NULL ;
+//                 if(mp3FrameInfo.bitsPerSample==16){
+//                 for(int i=mp3FrameInfo.outputSamps-2;i>=0;i-=2) {
+//                     writeBuf[i*2] = 0 ;
+//                     writeBuf[i*2+1] = 0 ;
+//                     writeBuf[i*2+2] = output[i] ;
+//                     writeBuf[i*2+3] = output[i+1] ;
+//                 }
+//                 }
+
+//                 else if(mp3FrameInfo.bitsPerSample==8){
+//                     // @todo
+//                 }
                 
-if(!printed) {
-    printf("%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",
-        writeBuf[0],
-        writeBuf[1],
-        writeBuf[2],
-        writeBuf[3],
-        writeBuf[4],
-        writeBuf[5],
-        writeBuf[6],
-        writeBuf[7],
-        writeBuf[8],
-        writeBuf[9]
-    ) ;
-    printed = true ;
-}
-                i2s_write(I2S_NUM_0, writeBuf, mp3FrameInfo.outputSamps*4, &cnt, 1000 / portTICK_PERIOD_MS);
-            }
+// // if(!printed) {
+// //     printf("%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",
+// //         writeBuf[0],
+// //         writeBuf[1],
+// //         writeBuf[2],
+// //         writeBuf[3],
+// //         writeBuf[4],
+// //         writeBuf[5],
+// //         writeBuf[6],
+// //         writeBuf[7],
+// //         writeBuf[8],
+// //         writeBuf[9]
+// //     ) ;
+// //     printed = true ;
+// // }
+//                 i2s_write(I2S_NUM_0, writeBuf, mp3FrameInfo.outputSamps*4, &cnt, 1000 / portTICK_PERIOD_MS);
+//             }
 
             // i2s_write(I2S_NUM_0, simples, mp3FrameInfo.outputSamps*2, &cnt, 1000 / portTICK_PERIOD_MS);
             // printf("%d.",cnt) ;
@@ -615,7 +581,7 @@ void be_module_media_require(JSContext *ctx) {
     JSValue media = JS_NewObject(ctx);
     JS_SetPropertyStr(ctx, beapi, "media", media);
 
-    JS_SetPropertyStr(ctx, media, "test", JS_NewCFunction(ctx, js_i2s_test, "test", 1));
+    // JS_SetPropertyStr(ctx, media, "test", JS_NewCFunction(ctx, js_i2s_test, "test", 1));
 
     JS_SetPropertyStr(ctx, media, "setup", JS_NewCFunction(ctx, js_i2s_setup, "setup", 1));
     JS_SetPropertyStr(ctx, media, "createMusicPlayer", JS_NewCFunction(ctx, js_music_player_create, "createMusicPlayer", 1));

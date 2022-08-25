@@ -316,6 +316,10 @@ bool be_module_driver_camera_response(struct mg_connection *c, int ev, void *ev_
     else if (ev == MG_EV_HTTP_MSG) {
 
         struct mg_http_message *hm = (struct mg_http_message *)ev_data;
+        if(!hm) {
+            mg_http_reply(c, 500, "", "%s", "Invalid mg_http_message");
+            return true ;
+        }
 
         if (mg_http_match_uri(hm, "/camera/capture")) {
             if(!inited) {

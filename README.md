@@ -232,3 +232,51 @@ s.setDTR(1); s.setRTS(0)
             time.sleep(0.05)
             self._setDTR(False)  # IO0=HIGH, done
 ```
+
+
+### IRAM 问题
+
+连接时报错：
+```
+/home/alee/.espressif/tools/xtensa-esp32-elf/esp-2020r3-8.4.0/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/8.4.0/../../../../xtensa-esp32-elf/bin/ld: beshell.elf section `.iram0.text' will not fit in region `iram0_0_seg'
+/home/alee/.espressif/tools/xtensa-esp32-elf/esp-2020r3-8.4.0/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/8.4.0/../../../../xtensa-esp32-elf/bin/ld: IRAM0 segment data does not fit.
+/home/alee/.espressif/tools/xtensa-esp32-elf/esp-2020r3-8.4.0/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/8.4.0/../../../../xtensa-esp32-elf/bin/ld: region `iram0_0_seg' overflowed by 52 bytes
+```
+
+`iram0` 是用于存放指令的 IRAM , 可以用于避免函数在执行时从 flash 加载缓慢。
+
+在函数前加上 `IRAM_ATTR` 宏，可将该函数加载到 `iram0` 。
+
+一般用于中断函数。 BeShell 里目前只有 module_gpio.c 用到 IRAM_ATTR 终端。
+
+如果 iram0 不够，可以减少 IRAM_ATTR 声明。
+
+编译器优化选项 -Os 也可以大幅减少 iram0 占用。
+
+
+### 读写空指针、野指针、悬空指针
+
+```
+Guru Meditation Error: Core  0panic'ed (StoreProhibited). Exception was unhandled.
+
+Core  0register dump:
+PC      : 0x401818f6  PS      : 0x00060830  A0    : 0x8018ba0e  A1      : 0x3ffd32c0
+A2      : 0x00000000A3      : 0x3f830acc  A4      :0x3f83508c  A5      : 0xfffffff9
+A6      : 0x00000000  A7 : 0x00000001  A8      : 0x20000000  A9      : 0x3ffd32a0
+A10     : 0x3f81daf4  A11     : 0x3f81daf4  A12     : 0x00000000A13     : 0x3ffd32c0
+A14: 0x3ffd3350  A15     : 0x3ffd3160  SAR     : 0x0000001d  EXCCAUSE: 0x0000001d
+EXCVADDR: 0x00000000  LBEG    : 0x4008cb06  LEND    : 0x4008cb11  LCOUNT  : 0x00000000
+
+Backtrace:0x401818f3:0x3ffd32c0 0x4018ba0b:0x3ffd3300 0x4018c781:0x3ffd3350 0x401a7b9a:0x3ffd3380 0x40194b69:0x3ffd3430 0x40176
+c79:0x3ffd34b0 0x4017bd82:0x3ffd35c0 0x401a5ebd:0x3ffd3610 0x40194b69:0x3ffd36a0 0x40176c79:0x3ffd3730 0x40177a41:0x3ffd3840 0x
+401778d1:0x3ffd39800x401a7fa7:0x3ffd3b10 0x400e0ea8:0x3ffd3b50 0x400e133a:0x3ffd3b90 0x40104a7d:0x3ffd3c00 0x40104aab:0x3ffd3c2
+0 0x400e11cf:0x3ffd3c40 0x400e104d:0x3ffd3c60 0x400dffe3:0x3ffd3c80 0x4009544d:0x3ffd3ca0
+```
+
+`StoreProhibited` 表示正在对无效的指针进行读写操作，该指针指向的地址存在寄存器 `EXCVADDR` 中，参考其后的 `Core  0register dump:` 。 `Backtrace:` 记录了具体的堆栈
+
+
+`LoadProhibited`(禁止加载)
+
+当应用程序尝试读取或写入无效的内存位置时,会发生此 CPU 异常. 写入/读取的地址可在寄存器转储中的 EXCVADDR 寄存器中找到. 如果此地址为零,则通常表示应用程序尝试取消引用 NULL 指针. 如果此地址接近于零,则通常意味着应用程序尝试访问结构的成员,但指向该结构的指针为 NULL. 如果该地址是别的(垃圾值,不在 0x3fxxxxxx - 0x6xxxxxxx 范围内),则可能意味着用于访问数据的指针未初始化或已损坏.
+

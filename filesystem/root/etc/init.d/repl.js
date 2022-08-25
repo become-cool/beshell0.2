@@ -10,7 +10,7 @@ const CMD_EXCEPTION = 5 ;
 let _pending_pkg_id = -1
 let _pending_code = ''
 
-beapi.telnet.registerHandle(function(pkgid, remain, pkgcmd, code){
+beapi.telnet.registerHandler(function(pkgid, remain, pkgcmd, code){
 
     if(_pending_pkg_id>0 && _pending_pkg_id!=pkgid) {
         _pending_pkg_id = -1

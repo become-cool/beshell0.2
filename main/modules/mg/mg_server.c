@@ -1,6 +1,5 @@
 #include "mg_server.h"
 #include "module_mg.h"
-#include "module_fs.h"
 #include "telnet_ws.h"
 #include "utils.h"
 #include "cutils.h"
@@ -45,11 +44,41 @@ static JSValue js_mg_server_close(JSContext *ctx, JSValueConst this_val, int arg
     return JS_UNDEFINED ;
 }
 
+static JSValue js_mg_server_start_telweb(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    THIS_SERVER(server)
+    server->telweb = true ;
+    return JS_UNDEFINED ;
+}
+static JSValue js_mg_server_stop_telweb(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    THIS_SERVER(server)
+    server->telweb = false ;
+    return JS_UNDEFINED ;
+}
+
+static JSValue js_mg_server_set_handler(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+    if( !JS_IsFunction(ctx, argv[0]) ){
+        THROW_EXCEPTION("arg callback must be a function")
+    }
+    THIS_SERVER(server)
+    server->callback = JS_DupValue(ctx,argv[0]) ;
+    return JS_UNDEFINED ;
+}
+
 static const JSCFunctionListEntry js_mg_server_proto_funcs[] = {
     JS_CFUNC_DEF("close", 0, js_mg_server_close),
+    JS_CFUNC_DEF("startTelweb", 0, js_mg_server_start_telweb),
+    JS_CFUNC_DEF("stopTelweb", 0, js_mg_server_stop_telweb),
+    JS_CFUNC_DEF("setHandler", 0, js_mg_server_set_handler),
 } ;
 
-
+static response_t * response_new(JSContext *ctx, struct mg_connection * conn) {
+    response_t * rspn = malloc(sizeof(response_t)) ;
+    rspn->conn = conn ;
+    rspn->jsrspn = JS_NewObjectClass(ctx, js_mg_http_rspn_class_id) ;
+    JS_SetOpaque(rspn->jsrspn, rspn) ;
+    return rspn ;
+}
 
 // enum {
 //   MG_EV_ERROR,       // Error                         char *error_message
@@ -78,13 +107,24 @@ static void http_server_event_handler(struct mg_connection * conn, int ev, void 
     }
 
     be_http_server_t * server = (be_http_server_t *)fn_data ;
+    // printf("\nevent:%s, conn:%p, server:%p, server->conn:%p, \n", mg_event_const_to_name(ev), conn, server, server->conn) ;
+    // printf("%s %s \n", ((server->conn==NULL || server->conn==conn)?"server":"client"), mg_event_const_to_name(ev)) ;
+
+    if(server->telweb) {
+        if( telnet_ws_response(conn, ev, ev_data, fn_data) ) {
+            return ;
+        }
+        // c telweb 函数没有处理的请求, 由 js 函数接着处理
+        // 这种情况下 open 事件是在 c 函数内处理的，
+        // 需要在此创建 response_t 
+        if(!conn->userdata){
+            conn->userdata = response_new(server->ctx, conn) ;
+        }
+    }
     if(!JS_IsFunction(server->ctx, server->callback)) {
         printf("callback is not a function， event:%s\n", mg_event_const_to_name(ev)) ;
         return ;
     }
-
-    // printf("event:%s, conn:%p, server:%p, server->conn:%p, \n", mg_event_const_to_name(ev), conn, server, server->conn) ;
-    // printf("%s %s \n", ((server->conn==NULL || server->conn==conn)?"server":"client"), mg_event_const_to_name(ev)) ;
 
     // server connection
     if(server->conn==NULL || server->conn==conn) {
@@ -99,16 +139,20 @@ static void http_server_event_handler(struct mg_connection * conn, int ev, void 
     else {
         switch(ev) {
             case MG_EV_OPEN: {
-                response_t * rspn = malloc(sizeof(response_t)) ;
-                rspn->conn = conn ;
-                rspn->jsrspn = JS_NewObjectClass(server->ctx, js_mg_http_rspn_class_id) ;
-                JS_SetOpaque(rspn->jsrspn, rspn) ;
-                conn->userdata = rspn ;
+                conn->userdata = response_new(server->ctx, conn) ; 
                 return ;
             }
             case MG_EV_CLOSE:
                 if(conn->userdata) {
                     response_t * rspn = (response_t *)conn->userdata ;
+
+                    MAKE_ARGV3(cbargv, JS_NewString(server->ctx, "close"), JS_NULL, rspn->jsrspn)
+                    JSValue ret = JS_Call(server->ctx, server->callback, JS_UNDEFINED, 3, cbargv) ;
+                    free(cbargv) ;
+                    if(JS_IsException(ret)) {
+                        js_std_dump_error(server->ctx) ;
+                    }
+
                     JS_SetOpaque(rspn->jsrspn, NULL) ;
                     JS_FreeValue(server->ctx, rspn->jsrspn) ;
                     free(rspn) ;
@@ -187,8 +231,9 @@ JSValue be_http_server_new(JSContext *ctx, struct mg_connection * conn, JSValue 
     server->ctx  = ctx ;
     server->callback = JS_DupValue(ctx,callback) ;
 
+    server->telweb = false ;
     server->conn = conn ;
-    conn->userdata = server ;
+    conn->fn_data = server ;
 
     JSValue jsobj = JS_NewObjectClass(ctx, js_mg_server_class_id) ;
     JS_SetOpaque(jsobj, server) ;
@@ -228,6 +273,5 @@ void be_module_mg_server_init() {
 }
 void be_module_mg_server_require(JSContext *ctx, JSValue mg, JSValue pkgShadow) {
     QJS_DEF_CLASS(mg_server, "Server", "mg.Server", JS_UNDEFINED, pkgShadow)
-    
     JS_SetPropertyStr(ctx, mg, "httpListen", JS_NewCFunction(ctx, js_mg_mgr_http_listen, "httpListen", 1));
 }

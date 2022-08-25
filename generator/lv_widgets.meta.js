@@ -77,6 +77,7 @@ const lstClasses = [
     } ,
     "Keyboard" ,
     "TileView",
+    "TabView",
     {
         className: "List" ,
         ctypeName: "lv_obj_t *" ,

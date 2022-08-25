@@ -1,4 +1,4 @@
-build:
+all:
 	ninja -C build
 
 config:
@@ -7,10 +7,11 @@ config:
 debug:
 	gdbgui build/beshell
 
-all: build
-
 help:
-	echo make build|config
+	@echo "make"
+	@echo "make config		# Ninja"
+	@echo "make debug		# gdbgui"
+	@echo "rlwrap build/beshell"
 
 
 	

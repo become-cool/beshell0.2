@@ -10,14 +10,8 @@ exports.scripts = [
     , [["besdk/driver/BeJoypad"], require]
 ]
 
-exports.init = function(setupConf) {
+exports.init = function() {
     console.log("require desktop")
-    if(setupConf.desktop) {
-        console.log(setupConf.desktop)
-        require(setupConf.desktop)
-    }
-    else {
-        const Desktop = require("desktop/Desktop")
-        global.desktop = new Desktop()
-    }
+    const Desktop = require("desktop/Desktop")
+    be.desktop = new Desktop()
 }

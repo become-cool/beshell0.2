@@ -8,10 +8,12 @@ class XPT2046 extends DeviceDriver {
         let setConf = (prop,method) => {
             if(opts[prop]!=undefined) {
                 this.indev[method]( opts[prop] )
-            }
+            } 
         }
         setConf('maxX','setMaxX')
         setConf('maxY','setMaxY')
+        setConf('offsetX','setOffsetX')
+        setConf('offsetY','setOffsetY')
         setConf('swapXY','setSwapXY')
         setConf('invX','setInvX')
         setConf('invY','setInvY')

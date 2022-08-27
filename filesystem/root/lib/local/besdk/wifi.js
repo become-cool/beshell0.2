@@ -31,6 +31,7 @@ const WIFI_AP_STADISCONNECTED = 15
 // const WIFI_ACTION_TX_STATUS = 19
 // const WIFI_ROC_DONE = 21
 // const WIFI_STA_BEACON_TIMEOUT = 21
+const WIFI_STA_CONNECTING = 101
 
 let evtNames = {}
 evtNames[WIFI_READY] = "ready"
@@ -43,7 +44,7 @@ evtNames[WIFI_AP_START] = "ap.start"
 evtNames[WIFI_AP_STOP] = "ap.stop"
 evtNames[WIFI_AP_STACONNECTED] = "ap.sta.connected"
 evtNames[WIFI_AP_STADISCONNECTED] = "ap.sta.disconnected"
-evtNames[101] = "sta.connecting"
+evtNames[WIFI_STA_CONNECTING] = "sta.connecting"
 evtNames[102] = "sta.disconnecting"
 
 // IP events
@@ -150,12 +151,12 @@ wifi.connect = async function(ssid,password,retry,retryDur) {
     }
 
     while((retry--)>0) {
-        console.log("connect to ap:",ssid,'...')
+        // console.log("connect to ap:",ssid,'...')
         _connecting = true
         beapi.wifi.connect()
         var res = await waitConnecting()
         _connecting = false
-        console.log("connect", res?"failed":"sucess", res)
+        // console.log("connect", res?"failed":"sucess", res)
         if(res!=0 && res!=202) {
             console.log("retry", retryDur, "ms later ...")
             await sleep(retryDur)
@@ -264,7 +265,7 @@ function deamon() {
             return
         }
         wifi.connect(staconf.ssid, staconf.password)
-    },5000)
+    },10000)
 }
 wifi.autostart = async function() {
     console.log("auto start wifi")

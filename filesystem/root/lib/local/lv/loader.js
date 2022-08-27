@@ -17,6 +17,12 @@ const MapPropFuncs = {
     y: 'setY' ,
     leftValue: 'setLeftValue' ,
 }
+const MapPropStyles = {
+    "mainAlign": "flex-main-place" ,
+    "crossAlign": "flex-cross-place" ,
+    "trackAlign": "flex-track-place" ,
+    "textAlign": "text-align" ,
+}
 const MapPressEvents = {
     pressed:'pressed',
     pressing:'pressing',
@@ -80,6 +86,9 @@ beapi.lvgl.Obj.prototype.fromJson = function fromJson(json, refs){
             }
 
             for(let propName in json) {
+                if(propName=="style") {
+                    continue
+                }
                 if(MapPropFuncs[propName]) {
                     let methodName = MapPropFuncs[propName]
                     if(typeof this[methodName]=='function') {
@@ -94,9 +103,13 @@ beapi.lvgl.Obj.prototype.fromJson = function fromJson(json, refs){
                     }
                     continue
                 }
-                let setter = 'set' + propName[0] + propName.substr(1)
+                let setter = 'set' + propName[0].toUpperCase() + propName.slice(1)
                 if(typeof this[setter]=='function') {
                     this[setter](json[propName])
+                    continue
+                }
+                if(MapPropStyles[propName]) {
+                    this.setStyle(MapPropStyles[propName], json[propName])
                     continue
                 }
             }
@@ -155,8 +168,6 @@ beapi.lvgl.Obj.prototype.fromJson = function fromJson(json, refs){
         console.error(e)
         console.error(e.stack)
     }
-
-
 
     return refs
 }

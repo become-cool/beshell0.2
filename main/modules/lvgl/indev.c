@@ -14,8 +14,8 @@
 #include "xpt2046.h"
 
 // @todo 由用户校正
-#define OFFSET_X 0
-// #define OFFSET_X 11
+// #define OFFSET_X 0
+#define OFFSET_X 11
 
 #endif
 
@@ -212,14 +212,17 @@ static void indev_pointer_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
 #ifndef SIMULATION
     else if(INDEV_DRIVER_XPT2046 == driver_spec->spec.driver) {
         data->continue_reading = xpt2046_read(drv, data) ;
-        if( data->point.x > OFFSET_X ) {
-            data->point.x -= OFFSET_X ;
-        }
+        // if( data->point.x > OFFSET_X ) {
+        //     data->point.x += OFFSET_X ;
+        // }
     }
 #endif
     else {
         return ;
     }
+
+    data->point.x+= driver_spec->offset_x ;
+    data->point.y+= driver_spec->offset_y ;
 
     if(driver_spec->swap_xy) {
         lv_coord_t y = data->point.x ;
@@ -392,12 +395,18 @@ static JSValue js_lv_indev_point_prop(JSContext *ctx, JSValueConst this_val, int
                 JS_ToUint32(ctx, &spec->max_y, argv[0]) ;
                 break ;
             case 0x03 :
-                spec->swap_xy = JS_ToBool(ctx, argv[0]) ;
+                JS_ToUint32(ctx, &spec->offset_x, argv[0]) ;
                 break ;
             case 0x04 :
-                spec->inv_x = JS_ToBool(ctx, argv[0]) ;
+                JS_ToUint32(ctx, &spec->offset_y, argv[0]) ;
                 break ;
             case 0x05 :
+                spec->swap_xy = JS_ToBool(ctx, argv[0]) ;
+                break ;
+            case 0x06 :
+                spec->inv_x = JS_ToBool(ctx, argv[0]) ;
+                break ;
+            case 0x07 :
                 spec->inv_y = JS_ToBool(ctx, argv[0]) ;
                 break ;
         }
@@ -411,10 +420,14 @@ static JSValue js_lv_indev_point_prop(JSContext *ctx, JSValueConst this_val, int
             case 0x02 :
                 return JS_NewUint32(ctx, spec->max_y) ;
             case 0x03 :
-                return JS_NewBool(ctx, spec->swap_xy) ;
+                return JS_NewUint32(ctx, spec->offset_x) ;
             case 0x04 :
-                return JS_NewBool(ctx, spec->inv_x) ;
+                return JS_NewUint32(ctx, spec->offset_y) ;
             case 0x05 :
+                return JS_NewBool(ctx, spec->swap_xy) ;
+            case 0x06 :
+                return JS_NewBool(ctx, spec->inv_x) ;
+            case 0x07 :
                 return JS_NewBool(ctx, spec->inv_y) ;
         }
     }
@@ -432,15 +445,19 @@ static const JSCFunctionListEntry js_lv_indev_pointer_proto_funcs[] = {
 
     JS_CFUNC_MAGIC_DEF("maxX", 0, js_lv_indev_point_prop, 0x01),
     JS_CFUNC_MAGIC_DEF("maxY", 0, js_lv_indev_point_prop, 0x02),
-    JS_CFUNC_MAGIC_DEF("swapXY", 0, js_lv_indev_point_prop, 0x03),
-    JS_CFUNC_MAGIC_DEF("invX", 0, js_lv_indev_point_prop, 0x04),
-    JS_CFUNC_MAGIC_DEF("invY", 0, js_lv_indev_point_prop, 0x05),
+    JS_CFUNC_MAGIC_DEF("offsetX", 0, js_lv_indev_point_prop, 0x03),
+    JS_CFUNC_MAGIC_DEF("offsetY", 0, js_lv_indev_point_prop, 0x04),
+    JS_CFUNC_MAGIC_DEF("swapXY", 0, js_lv_indev_point_prop, 0x05),
+    JS_CFUNC_MAGIC_DEF("invX", 0, js_lv_indev_point_prop, 0x06),
+    JS_CFUNC_MAGIC_DEF("invY", 0, js_lv_indev_point_prop, 0x07),
 
     JS_CFUNC_MAGIC_DEF("setMaxX", 0, js_lv_indev_point_prop, 0x11),
     JS_CFUNC_MAGIC_DEF("setMaxY", 0, js_lv_indev_point_prop, 0x12),
-    JS_CFUNC_MAGIC_DEF("setSwapXY", 0, js_lv_indev_point_prop, 0x13),
-    JS_CFUNC_MAGIC_DEF("setInvX", 0, js_lv_indev_point_prop, 0x14),
-    JS_CFUNC_MAGIC_DEF("setInvY", 0, js_lv_indev_point_prop, 0x15),
+    JS_CFUNC_MAGIC_DEF("setOffsetX", 0, js_lv_indev_point_prop, 0x13),
+    JS_CFUNC_MAGIC_DEF("setOffsetY", 0, js_lv_indev_point_prop, 0x14),
+    JS_CFUNC_MAGIC_DEF("setSwapXY", 0, js_lv_indev_point_prop, 0x15),
+    JS_CFUNC_MAGIC_DEF("setInvX", 0, js_lv_indev_point_prop, 0x16),
+    JS_CFUNC_MAGIC_DEF("setInvY", 0, js_lv_indev_point_prop, 0x17),
     
 } ;
 

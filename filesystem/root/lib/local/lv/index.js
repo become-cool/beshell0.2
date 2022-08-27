@@ -1,5 +1,5 @@
 require("./obj.js")
-require("./list.js")
+require("./widgets.js")
 require("./menu.js")
 require("./loader.js")
 beapi.lvgl.Color = require("./color.js")
@@ -61,13 +61,13 @@ beapi.lvgl.state = {
 }
 
 beapi.lvgl.active = function () {
-    return be.dev.sreen[0].activeScreen()
+    return be.disp[0].activeScreen()
 }
 beapi.lvgl.sysLayer = function () {
-    return be.dev.sreen[0].sysLayer()
+    return be.disp[0].sysLayer()
 }
 beapi.lvgl.topLayer = function () {
-    return be.dev.sreen[0].topLayer()
+    return be.disp[0].topLayer()
 }
 
 let sharedKeyboard = null

@@ -825,3 +825,48 @@ void be_lv_widgets_require(JSContext *ctx, JSValue lvgl) {
     // JS_SetPropertyStr(ctx, lvgl, "setDebugLog", JS_NewCFunction(ctx, js_lv_set_debug_log, "setDebugLog", 1));
 #endif
 }
+
+
+JSValue js_lv_tabview_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
+    
+    int16_t tab_size = 30 ;
+    if(argc>=3 && JS_ToInt32(ctx, (int32_t *) &tab_size, argv[2])!=0){
+        THROW_EXCEPTION("arg tab_size of method TabView.create() must be a number")
+    }
+
+    lv_dir_t tab_pos = LV_DIR_TOP ;
+    if(argc>=2 && !lv_dir_jsstr_to_const(ctx, argv[1], &tab_pos)) {
+        return JS_EXCEPTION ;
+    }
+
+    lv_obj_t * cparent = NULL ;
+    if(argc>=1 && !JS_IsUndefined(argv[0]) && !JS_IsNull(argv[0])) {
+        CHECK_INSOF_LVOBJ("Obj", argv[0], "arg parent must a lvgl.Obj object")
+        cparent = JS_GetOpaqueInternal(argv[0]) ;
+    }
+    lv_tabview_t * cobj = lv_tabview_create(cparent, tab_pos, tab_size) ;
+    JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, lv_tabview_js_class_id()) ;
+    return jsobj ;
+}
+
+
+JSValue js_lv_spinner_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
+    
+    uint32_t spin_time = 1500 ;
+    if(argc>=2 && JS_ToUint32(ctx, &spin_time, argv[1])!=0){
+        THROW_EXCEPTION("arg tab_size of method TabView.create() must be a number")
+    }
+    uint32_t arc_length = 60 ;
+    if(argc>=3 && JS_ToUint32(ctx, &arc_length, argv[2])!=0){
+        THROW_EXCEPTION("arg tab_size of method TabView.create() must be a number")
+    }
+
+    lv_obj_t * cparent = NULL ;
+    if(argc>=1 && !JS_IsUndefined(argv[0]) && !JS_IsNull(argv[0])) {
+        CHECK_INSOF_LVOBJ("Obj", argv[0], "arg parent must a lvgl.Obj object")
+        cparent = JS_GetOpaqueInternal(argv[0]) ;
+    }
+    lv_arc_t * cobj = lv_spinner_create(cparent, spin_time, arc_length) ;
+    JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, lv_spinner_js_class_id()) ;
+    return jsobj ;
+}

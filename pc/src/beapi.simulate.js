@@ -1,3 +1,5 @@
+;(function(){
+
 // wifi mode
 // const MODE_NONE = 0
 const MODE_STA = 1
@@ -31,6 +33,7 @@ const WIFI_AP_STADISCONNECTED = 15
 // const WIFI_ACTION_TX_STATUS = 19
 // const WIFI_ROC_DONE = 21
 // const WIFI_STA_BEACON_TIMEOUT = 21
+const WIFI_STA_CONNECTING = 101
 
 const STA_GOT_IP = 0
 const STA_LOST_IP = 1
@@ -46,9 +49,19 @@ let ipInfo = {
     2: {"ip":"192.168.4.1","netmask":"255.255.255.0","gw":"192.168.4.1"} ,
 }
 
+let isStaConnected = false
+
 beapi.wifi = {
-    start() { eventHandler(EVENT_WIFI, WIFI_STA_START|WIFI_AP_START) } ,
-    stop() { eventHandler(EVENT_WIFI, WIFI_STA_STOP|WIFI_AP_STOP) } ,
+    start() {
+        setTimeout(function(){
+            eventHandler(EVENT_WIFI, WIFI_STA_START|WIFI_AP_START)
+        }, 0)
+    } ,
+    stop() {
+        setTimeout(function(){
+            eventHandler(EVENT_WIFI, WIFI_STA_STOP|WIFI_AP_STOP)
+        }, 0)
+    } ,
     setPS() {} ,
     setMode(m) { mode = m } ,
     getMode() { return mode } ,
@@ -56,15 +69,31 @@ beapi.wifi = {
     setStaConfig(config) {} ,
     setAPConfig(config) {} ,
     getConfig(type) {
-        return config[type]
+        return JSON.parse(JSON.stringify(config[type]))
     } ,
     allSta() {return []} ,
 
     connect() {
-        eventHandler(EVENT_WIFI, WIFI_STA_CONNECTED)
+        eventHandler(EVENT_WIFI, WIFI_STA_CONNECTING)
+        setTimeout(function(){
+            isStaConnected = true
+            eventHandler(EVENT_WIFI, WIFI_STA_CONNECTED)
+            setTimeout(function(){
+                eventHandler(EVENT_IP, STA_GOT_IP)
+            },1000)
+        }, 3000)
     } ,
-    disconnect() { eventHandler(EVENT_WIFI, WIFI_STA_DISCONNECTED) } ,
-    getIpInfo(type) { return ipInfo[type] } ,
+    disconnect() {
+        setTimeout(function(){
+            isStaConnected = false
+            eventHandler(EVENT_WIFI, WIFI_STA_DISCONNECTED)
+            setTimeout(function(){
+                eventHandler(EVENT_IP, STA_LOST_IP)
+            },0)
+        }, 0)
+    } ,
+
+    getIpInfo(type) { return JSON.parse(JSON.stringify(ipInfo[type])) } ,
     setHostname() {} ,
 
     registerEventHandle(callback) { eventHandler = callback } ,
@@ -75,6 +104,8 @@ beapi.wifi = {
     scanRecords() {return []} ,
 
     staStarted() { return true } ,
-    staConnected() { return true } ,
+    staConnected() { return isStaConnected } ,
     apStarted() { return true } ,
 }
+
+})() ;

@@ -64,4 +64,8 @@ JSValue js_lv_canvas_malloc(JSContext *ctx, JSValueConst new_target, int argc, J
 
 JSValue js_lv_obj_abort_scroll(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
 
+JSValue js_lv_tabview_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv) ;
+
+JSValue js_lv_spinner_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv) ;
+
 #endif

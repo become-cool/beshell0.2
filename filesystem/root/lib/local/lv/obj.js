@@ -88,25 +88,6 @@ beapi.lvgl.CleanObj = class CleanObj extends beapi.lvgl.Obj {
     }
 }
 
-class Row extends beapi.lvgl.Obj {
-    constructor(parent) {
-        super(parent)
-        this.asRow()
-        this.setWidth("100%")
-        this.setHeight(-1)
-    }
-}
-beapi.lvgl.Row = Row
-class Column extends beapi.lvgl.Obj {
-    constructor(parent) {
-        super(parent)
-        this.asColumn()
-        this.setWidth(-1)
-        this.setHeight("100%")
-    }
-}
-beapi.lvgl.Column = Column
-
 function size(val) {
     if(typeof val=='string' && val[val.length-1]=='%') {
         let _val = Math.round(val.substr(0,val.length-1))
@@ -148,6 +129,9 @@ beapi.lvgl.Label.prototype.setText = function(text) {
 
 
 beapi.lvgl.Keyboard.prototype.popup = function(textarea, cb) {
+    if( !textarea instanceof beapi.lvgl.TextArea) {
+        throw new Error("arg textarea of Keyboard.popup() must be an instance of beapi.lvgl.TextArea")
+    }
     if( !this._doneCb ){
         this._doneCb = (event)=>{
             if(!this._popupCb){

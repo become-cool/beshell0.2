@@ -58,16 +58,6 @@ static void disp_st77XX_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_c
     }
     // printf("disp_st77XX_flush(%d,%d,%d,%d)\n",area->x1,area->y1,area->x2,area->y2) ;
 
-    // draw_param.x1 = area->x1 ;
-    // draw_param.x2 = area->x2 ;
-    // draw_param.y1 = area->y1 ;
-    // draw_param.y2 = area->y2 ;
-    // draw_param.buff = (uint8_t*)color_p ;
-    // draw_param.disp = disp ;
-
-    // draw_param_t * pp = &draw_param ;
-	// xQueueSend(disp_queue, (void *)&pp, 0);
-
     st77xx_draw_rect(((disp_drv_spec_t*)disp->user_data)->spi_dev, area->x1,area->y1, area->x2, area->y2, color_p) ;
 
     ws_disp_flush(disp, area, color_p) ;
@@ -223,6 +213,60 @@ static JSValue js_lv_disp_id(JSContext *ctx, JSValueConst this_val, int argc, JS
     return JS_NewInt32(ctx, ((disp_drv_spec_t*)thisdisp->driver->user_data)->id) ;
 }
 
+JSValue be_lv_display_inv_area(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    THIS_DISP
+    CHECK_ARGC(4)
+    ARGV_TO_UINT32(0, x1)
+    ARGV_TO_UINT32(1, y1)
+    ARGV_TO_UINT32(2, x2)
+    ARGV_TO_UINT32(3, y2)
+
+    lv_area_t area;
+    memset(&area, 0, sizeof(lv_area_t));
+    area.x1 = x1 ;
+    area.y1 = y1 ;
+    area.x2 = x2 ;
+    area.y2 = y2 ;
+    
+    _lv_inv_area(thisdisp, &area);
+
+
+    uint64_t t0 = gettime() ;
+    lv_task_handler();
+    printf("lv_task_handler() ms %llu\n",gettime() - t0) ;
+
+    return JS_UNDEFINED;
+}
+
+#ifndef SIMULATION
+JSValue be_lv_display_st77xx_init(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    THIS_DISP
+    CHECK_ARGC(4)
+
+    ARGV_TO_STRING(0, typestr)
+    ARGV_TO_UINT32(1, width)
+    ARGV_TO_UINT32(2, height)
+    ARGV_TO_UINT32(3, MADCTL)
+
+    ds(typestr)
+    dn3(width,height,MADCTL)
+
+    disp_drv_spec_t * spec = (disp_drv_spec_t *)thisdisp->driver->user_data ;
+    
+    if( strcmp(typestr, "ST7789V")==0 ) {
+        st7789v_init(spec->spi_dev, width, height, 0, 0, (uint8_t)MADCTL);
+    }
+    else if(strcmp(typestr, "ST7789")==0) {
+        st7789_init(spec->spi_dev, width, height, 0, 0, (uint8_t)MADCTL);
+    }
+
+    JS_FreeCString(ctx,typestr) ;
+    return JS_UNDEFINED ;
+}
+#endif
+
+
+
 static const JSCFunctionListEntry js_lv_disp_proto_funcs[] = {
     JS_CFUNC_DEF("activeScreen", 0, js_lv_disp_active_screen),
     JS_CFUNC_MAGIC_DEF("sysLayer", 0, js_lv_disp_layer, 1),
@@ -233,6 +277,10 @@ static const JSCFunctionListEntry js_lv_disp_proto_funcs[] = {
     JS_CFUNC_DEF("width", 0, js_lv_disp_width),
     JS_CFUNC_DEF("height", 0, js_lv_disp_height),
     JS_CFUNC_DEF("id", 0, js_lv_disp_id),
+    JS_CFUNC_DEF("invArea", 0, be_lv_display_inv_area),
+#ifndef SIMULATION
+    JS_CFUNC_DEF("initST77xx", 0, be_lv_display_st77xx_init),
+#endif
 };
 
 
@@ -300,7 +348,8 @@ static JSValue js_lvgl_all_displays(JSContext *ctx, JSValueConst this_val, int a
 static void * malloc_buffer(size_t size) {
 #ifndef SIMULATION
     // echo_DMA("before malloc_buffer()") ;
-    void * buff = heap_caps_malloc( size + DISP_BUFF_AUX_SIZE, MALLOC_CAP_SPIRAM);  // MALLOC_CAP_DMA
+    // void * buff = heap_caps_malloc( size + DISP_BUFF_AUX_SIZE, MALLOC_CAP_SPIRAM); 
+    void * buff = heap_caps_malloc( size + DISP_BUFF_AUX_SIZE, MALLOC_CAP_DMA);
     if(!buff) {
         printf("heap_caps_malloc(%d, MALLOC_CAP_DMA) failed, try malloc().\n", size+DISP_BUFF_AUX_SIZE) ;
         buff = malloc(size + DISP_BUFF_AUX_SIZE) ;
@@ -462,6 +511,8 @@ void be_lv_display_init() {
 #endif
 }
 
+
+
 void be_lv_display_require(JSContext *ctx, JSValue lvgl) {
 
     _disp_id = 0 ;
@@ -491,8 +542,8 @@ void be_lv_display_require(JSContext *ctx, JSValue lvgl) {
 void be_lv_display_reset(JSContext * ctx) {
     
 #ifndef SIMULATION
-    multi_heap_info_t info;
-    heap_caps_get_info(&info, MALLOC_CAP_SPIRAM);
+    // multi_heap_info_t info;
+    // heap_caps_get_info(&info, MALLOC_CAP_SPIRAM);
     // dn2(info.total_free_bytes, info.total_allocated_bytes)
 #endif
 
@@ -517,7 +568,7 @@ void be_lv_display_reset(JSContext * ctx) {
 
     
 #ifndef SIMULATION
-    heap_caps_get_info(&info, MALLOC_CAP_SPIRAM);
+    // heap_caps_get_info(&info, MALLOC_CAP_SPIRAM);
     // dn2(info.total_free_bytes, info.total_allocated_bytes)
 #endif
 }

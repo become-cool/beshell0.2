@@ -53,6 +53,8 @@ typedef struct {
 
     lv_coord_t max_x ;
     lv_coord_t max_y ;
+    lv_coord_t offset_x ;
+    lv_coord_t offset_y ;
     bool swap_xy:1 ;
     bool inv_x:1 ;
     bool inv_y:1 ;

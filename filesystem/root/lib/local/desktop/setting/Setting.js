@@ -2,7 +2,7 @@ const lv = require("lv")
 const WiFiSetting = require("./WiFiSetting.js")
 const Versions = require("./Versions.js")
 
-class Setting extends lv.Row {
+class Setting extends lv.CleanObj {
 
     constructor(parent) {
         super(parent)
@@ -12,54 +12,59 @@ class Setting extends lv.Row {
             "pad-right": 5 ,
         }
         this.fromJson({
-            height: "100%" ,
-            style: {
-                "pad-column": 10
-            } ,
             children: [
                 {
-                    class:"List" ,
-                    width: 80 ,
+                    class: "Row" ,
                     height: "100%" ,
-                    ref: 'menu' ,
                     style: {
-                        "pad-left": 0 ,
-                        "pad-right": 0 ,
-                        'border-width': 0
+                        "pad-column": 10
                     } ,
-                    items: [
+                    children: [
                         {
-                            text: "版本信息" ,
-                            font: "msyh" ,
-                            clicked: () => {
-                                this.switchSetting('versions')
+                            class:"List" ,
+                            width: 80 ,
+                            height: "100%" ,
+                            ref: 'menu' ,
+                            style: {
+                                "pad-left": 0 ,
+                                "pad-right": 0 ,
+                                'border-width': 0
                             } ,
-                            style: itemStyle
+                            items: [
+                                {
+                                    text: "版本信息" ,
+                                    font: "msyh" ,
+                                    clicked: () => {
+                                        this.switchSetting('versions')
+                                    } ,
+                                    style: itemStyle
+                                } ,
+                                {
+                                    text: "WiFi" ,
+                                    clicked: () => {
+                                        this.switchSetting('wifi')
+                                    } ,
+                                    style: itemStyle
+                                } ,
+                                {
+                                    text: "返回" ,
+                                    font: "msyh" ,
+                                    clicked: () => {
+                                        be.bus.emit("return-desktop")
+                                    } ,
+                                    style: itemStyle
+                                }
+                            ]
                         } ,
                         {
-                            text: "WiFi" ,
-                            clicked: () => {
-                                this.switchSetting('wifi')
-                            } ,
-                            ref: 'wifi' ,
-                            style: itemStyle
-                        } ,
-                        {
-                            text: "返回" ,
-                            font: "msyh" ,
-                            clicked: () => {
-                                be.bus.emit("return-desktop")
-                            } ,
-                            style: itemStyle
+                            height: "100%" ,
+                            grow: true ,
+                            ref: "pageOutter"
                         }
                     ]
-                } ,
-                {
-                    height: "100%" ,
-                    grow: true ,
-                    ref: "pageOutter"
                 }
             ]
+
         }, this)
 
         this.activePage = null
@@ -69,7 +74,7 @@ class Setting extends lv.Row {
             'versions': Versions ,
         }
 
-        this.switchSetting("versions")
+        this.switchSetting(this.activePageName)
     }
 
     switchSetting(page) {
@@ -85,6 +90,10 @@ class Setting extends lv.Row {
         this.activePageName = page
         this.activePage = this.pages[page]
         this.activePage.show()
+
+        if(typeof this.activePage.onActive=='function') {
+            this.activePage.onActive()
+        }
     }
 }
 module.exports = Setting

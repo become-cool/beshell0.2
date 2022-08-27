@@ -2616,6 +2616,40 @@ static JSClassDef js_lv_tileview_class = {
     .finalizer = js_lv_tileview_finalizer,
 };
 
+ // beapi.lvgl.TabView --
+static JSClassID js_lv_tabview_class_id ;
+
+static void js_lv_tabview_finalizer(JSRuntime *rt, JSValue val){
+    // printf("js_lv_tabview_finalizer()\n") ;
+    lv_tabview_t * thisobj = JS_GetOpaqueInternal(val) ;
+    if( thisobj && lv_obj_get_user_data(thisobj) == JS_VALUE_GET_PTR(val) ){
+        lv_obj_set_user_data(thisobj, NULL) ;
+    }
+    // lv_obj_del(thisobj) ;
+}
+
+static JSClassDef js_lv_tabview_class = {
+    "TabView",
+    .finalizer = js_lv_tabview_finalizer,
+};
+
+ // beapi.lvgl.Spinner --
+static JSClassID js_lv_spinner_class_id ;
+
+static void js_lv_spinner_finalizer(JSRuntime *rt, JSValue val){
+    // printf("js_lv_spinner_finalizer()\n") ;
+    lv_arc_t * thisobj = JS_GetOpaqueInternal(val) ;
+    if( thisobj && lv_obj_get_user_data(thisobj) == JS_VALUE_GET_PTR(val) ){
+        lv_obj_set_user_data(thisobj, NULL) ;
+    }
+    // lv_obj_del(thisobj) ;
+}
+
+static JSClassDef js_lv_spinner_class = {
+    "Spinner",
+    .finalizer = js_lv_spinner_finalizer,
+};
+
  // beapi.lvgl.List --
 static JSClassID js_lv_list_class_id ;
 static JSValue js_lv_list_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
@@ -7770,6 +7804,133 @@ static const JSCFunctionListEntry js_lv_tileview_proto_funcs[] = {
 
 static const JSCFunctionListEntry js_lv_tileview_static_funcs[] = {
 } ;
+static JSValue js_lv_tabview_add_tab(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    if(argc<1) {
+        THROW_EXCEPTION("TabView.addTab() missing arg")
+    }
+    void * lv_userdata = JS_GetOpaqueInternal(this_val) ;
+    if(!lv_userdata) {
+        THROW_EXCEPTION("TabView.addTab() must be called as a TabView method")
+    }
+    lv_obj_t * thisobj = lv_userdata ;
+    char * name = (char *)JS_ToCString(ctx, argv[0]) ;
+    JSValue retval = JS_NULL ;
+    void * lvobj = lv_tabview_add_tab(thisobj, name);
+    if(lvobj) {
+        retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, 0) ;
+        JS_DupValue(ctx, retval) ;
+    }
+    JS_FreeCString(ctx, name) ;
+    return retval ;
+}
+
+static JSValue js_lv_tabview_get_content(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    void * lv_userdata = JS_GetOpaqueInternal(this_val) ;
+    if(!lv_userdata) {
+        THROW_EXCEPTION("TabView.content() must be called as a TabView method")
+    }
+    lv_obj_t * thisobj = lv_userdata ;
+    JSValue retval = JS_NULL ;
+    void * lvobj = lv_tabview_get_content(thisobj);
+    if(lvobj) {
+        retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, 0) ;
+        JS_DupValue(ctx, retval) ;
+    }
+    return retval ;
+}
+
+static JSValue js_lv_tabview_get_tab_btns(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    void * lv_userdata = JS_GetOpaqueInternal(this_val) ;
+    if(!lv_userdata) {
+        THROW_EXCEPTION("TabView.tabBtns() must be called as a TabView method")
+    }
+    lv_obj_t * thisobj = lv_userdata ;
+    JSValue retval = JS_NULL ;
+    void * lvobj = lv_tabview_get_tab_btns(thisobj);
+    if(lvobj) {
+        retval = js_lv_obj_wrapper(ctx, lvobj, JS_UNDEFINED, 0) ;
+        JS_DupValue(ctx, retval) ;
+    }
+    return retval ;
+}
+
+static JSValue js_lv_tabview_set_act(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    if(argc<2) {
+        THROW_EXCEPTION("TabView.setAct() missing arg")
+    }
+    void * lv_userdata = JS_GetOpaqueInternal(this_val) ;
+    if(!lv_userdata) {
+        THROW_EXCEPTION("TabView.setAct() must be called as a TabView method")
+    }
+    lv_obj_t * thisobj = lv_userdata ;
+    uint32_t id ;
+    if(JS_ToUint32(ctx, (uint32_t *) &id, argv[0])!=0){
+        THROW_EXCEPTION("arg id of method TabView.setAct() must be a number")
+    }
+    bool anim_en = JS_ToBool(ctx, argv[1]) ;
+    lv_tabview_set_act(thisobj, id, anim_en) ;
+    JSValue retval = JS_UNDEFINED ;
+    return retval ;
+}
+
+static JSValue js_lv_tabview_get_tab_act(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    void * lv_userdata = JS_GetOpaqueInternal(this_val) ;
+    if(!lv_userdata) {
+        THROW_EXCEPTION("TabView.tabAct() must be called as a TabView method")
+    }
+    lv_obj_t * thisobj = lv_userdata ;
+    JSValue retval = JS_NewUint32(ctx,lv_tabview_get_tab_act(thisobj)) ;
+    return retval ;
+}
+
+static JSValue js_lv_tabview_set_anim(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    if(argc<1) {
+        THROW_EXCEPTION("TabView.setAnim() missing arg")
+    }
+    void * lv_userdata = JS_GetOpaqueInternal(this_val) ;
+    if(!lv_userdata) {
+        THROW_EXCEPTION("TabView.setAnim() must be called as a TabView method")
+    }
+    lv_obj_t * thisobj = lv_userdata ;
+    bool anim_en = JS_ToBool(ctx, argv[0]) ;
+    lv_tabview_set_anim(thisobj, anim_en) ;
+    JSValue retval = JS_UNDEFINED ;
+    return retval ;
+}
+
+static JSValue js_lv_tabview_get_anim(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    void * lv_userdata = JS_GetOpaqueInternal(this_val) ;
+    if(!lv_userdata) {
+        THROW_EXCEPTION("TabView.anim() must be called as a TabView method")
+    }
+    lv_obj_t * thisobj = lv_userdata ;
+    JSValue retval = JS_NewBool(ctx,lv_tabview_get_anim(thisobj)) ;
+    return retval ;
+}
+
+
+static const JSCFunctionListEntry js_lv_tabview_proto_funcs[] = {
+    JS_CFUNC_DEF("addTab", 0, js_lv_tabview_add_tab),
+    JS_CFUNC_DEF("content", 0, js_lv_tabview_get_content),
+    JS_CFUNC_DEF("tabBtns", 0, js_lv_tabview_get_tab_btns),
+    JS_CFUNC_DEF("setAct", 0, js_lv_tabview_set_act),
+    JS_CFUNC_DEF("tabAct", 0, js_lv_tabview_get_tab_act),
+    JS_CFUNC_DEF("setAnim", 0, js_lv_tabview_set_anim),
+    JS_CFUNC_DEF("anim", 0, js_lv_tabview_get_anim),
+} ;
+#define __def_js_lv_tabview_proto_funcs__
+
+
+static const JSCFunctionListEntry js_lv_tabview_static_funcs[] = {
+} ;
+
+static const JSCFunctionListEntry js_lv_spinner_proto_funcs[] = {
+} ;
+#define __def_js_lv_spinner_proto_funcs__
+
+
+static const JSCFunctionListEntry js_lv_spinner_static_funcs[] = {
+} ;
 static JSValue js_lv_list_add_text(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     if(argc<1) {
         THROW_EXCEPTION("List.addText() missing arg")
@@ -8173,6 +8334,12 @@ JSClassID be_lv_type_to_js_class(lv_obj_t * obj) {
     else if(lv_obj_check_type(obj, & lv_tileview_class)) {
         return js_lv_tileview_class_id ;
     }
+    else if(lv_obj_check_type(obj, & lv_tabview_class)) {
+        return js_lv_tabview_class_id ;
+    }
+    else if(lv_obj_check_type(obj, & lv_spinner_class)) {
+        return js_lv_spinner_class_id ;
+    }
     else if(lv_obj_check_type(obj, & lv_list_class)) {
         return js_lv_list_class_id ;
     }
@@ -8349,6 +8516,22 @@ void be_lv_widgets_gen_require(JSContext *ctx, JSValue lvgl) {
                 , js_lv_tileview_static_funcs, countof(js_lv_tileview_static_funcs)
                 , proto_lv_obj, lvgl) ;
 
+    // define js class lvgl.lv_tabview    
+    JSValue proto_lv_tabview = qjs_def_class2(
+                ctx, "TabView", js_lv_tabview_class_id, &js_lv_tabview_class, "TabView"
+                , js_lv_tabview_constructor
+                , js_lv_tabview_proto_funcs, countof(js_lv_tabview_proto_funcs)
+                , js_lv_tabview_static_funcs, countof(js_lv_tabview_static_funcs)
+                , proto_lv_obj, lvgl) ;
+
+    // define js class lvgl.lv_spinner    
+    JSValue proto_lv_spinner = qjs_def_class2(
+                ctx, "Spinner", js_lv_spinner_class_id, &js_lv_spinner_class, "Spinner"
+                , js_lv_spinner_constructor
+                , js_lv_spinner_proto_funcs, countof(js_lv_spinner_proto_funcs)
+                , js_lv_spinner_static_funcs, countof(js_lv_spinner_static_funcs)
+                , proto_lv_obj, lvgl) ;
+
     // define js class lvgl.lv_list    
     JSValue proto_lv_list = qjs_def_class2(
                 ctx, "List", js_lv_list_class_id, &js_lv_list_class, "List"
@@ -8399,6 +8582,8 @@ void be_lv_widgets_gen_init() {
     JS_NewClassID(&js_lv_msgbox_class_id);
     JS_NewClassID(&js_lv_keyboard_class_id);
     JS_NewClassID(&js_lv_tileview_class_id);
+    JS_NewClassID(&js_lv_tabview_class_id);
+    JS_NewClassID(&js_lv_spinner_class_id);
     JS_NewClassID(&js_lv_list_class_id);
     JS_NewClassID(&js_lv_group_class_id);
 // AUTO GENERATE CODE END [REGISTER CLASS ID] --------
@@ -8412,6 +8597,12 @@ JSClassID lv_label_js_class_id() {
 }
 JSClassID lv_btn_js_class_id() {
     return js_lv_btn_class_id ;
+}
+JSClassID lv_tabview_js_class_id() {
+    return js_lv_tabview_class_id ;
+}
+JSClassID lv_spinner_js_class_id() {
+    return js_lv_spinner_class_id ;
 }
 JSClassID lv_group_js_class_id() {
     return js_lv_group_class_id ;

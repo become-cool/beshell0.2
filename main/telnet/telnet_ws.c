@@ -97,7 +97,7 @@ void ws_disp_flush(lv_disp_drv_t *dispdrv, const lv_area_t *area, lv_color_t *co
 
     size_t size = (area->x2-area->x1+1) * (area->y2-area->y1+1) * sizeof(lv_color_t) ;
 
-    uint64_t t0 = gettime() ;
+    // uint64_t t0 = gettime() ;
 
     //todo: allocate proper buffer for holding JPEG data
     //this should be enough for CIF frame size

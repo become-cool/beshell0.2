@@ -244,6 +244,7 @@ const MapJS2C_Conver = {
     "lv_disp_t *": 'js_lv_disp_wrapper',
     "lv_group_t *": 'js_lv_group_wrapper',
     "lv_res_t": 'JS_NewBool',
+    "lv_anim_enable_t": 'JS_NewBool',
 }
 
 function mk_lvobj_converfunc(type) {

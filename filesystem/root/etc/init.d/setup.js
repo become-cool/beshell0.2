@@ -62,7 +62,7 @@ const LibDefaultConf = {
         spi: { 1: {miso:12,mosi:13,sck:14} } ,
         dev: [
             {"driver":"ST7789V", "setup":{"dc":18, "cs":19, "spi":1, "width":320, "height":240, "freq":80000000, "MADCTL": 0x40|0x20}}
-            , {"driver":"XPT2046", "setup":{"spi":1, "cs":21, "invX":true, "invY":true, maxX:320, maxY:240}}
+            , {"driver":"XPT2046", "setup":{spi:1, cs:21, invX:true, invY:true, maxX:320, maxY:240, offsetX:11}}
         ]
     }} ,
     19: {0:{

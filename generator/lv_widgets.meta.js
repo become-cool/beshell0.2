@@ -77,7 +77,19 @@ const lstClasses = [
     } ,
     "Keyboard" ,
     "TileView",
-    "TabView",
+
+    {
+        className: "TabView" ,
+        ctypeName: "lv_tabview_t *" ,
+        cusMethods: {} ,
+        cusConstructor: true ,
+    },
+    {
+        className: "Spinner" ,
+        ctypeName: "lv_arc_t *" ,
+        cusMethods: {} ,
+        cusConstructor: true ,
+    },
     {
         className: "List" ,
         ctypeName: "lv_obj_t *" ,
@@ -86,6 +98,7 @@ const lstClasses = [
             // "js_lv_list_add_text": "addText" ,
         }
     },
+
     {
         className: "Group" ,
         cusConstructor: true ,

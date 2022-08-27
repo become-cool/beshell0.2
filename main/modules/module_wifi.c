@@ -44,7 +44,7 @@ bool _ap_started = false ;
 bool _scanning = false ;
 
 #define WIFI_EVENT_STA_CONNECTING 101
-#define WIFI_EVENT_STA_DISCONNECTING 102
+// #define WIFI_EVENT_STA_DISCONNECTING 102
 
 // typedef enum {
 //     WIFI_EVENT_WIFI_READY = 0,           /**< ESP32 WiFi ready */
@@ -396,7 +396,7 @@ JSValue js_wifi_set_ap_config(JSContext *ctx, JSValueConst this_val, int argc, J
 
 
 
-JSValue js_wifi_get_config(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+static JSValue js_wifi_get_config(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     
     CHECK_ARGC(1)
     ARGV_TO_UINT8(0,netif)

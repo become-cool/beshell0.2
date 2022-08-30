@@ -383,8 +383,8 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
     lv_disp_draw_buf_t * drawbuf = NULL ;
     lv_disp_drv_t * dispdrv = NULL ;
 
-    GET_INT_PROP(argv[1], "width", width, excp)
-    GET_INT_PROP(argv[1], "height", height, excp)
+    GET_INT_PROP(argv[1], "width", width, { goto excp ;})
+    GET_INT_PROP(argv[1], "height", height, { goto excp ;})
     
     disp_drv_spec_t * dvrdata = malloc(sizeof(disp_drv_spec_t)) ;
     dvrdata->id = _disp_id ++ ;
@@ -438,10 +438,10 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
 
 #ifndef SIMULATION
 
-        GET_INT_PROP(argv[1], "cs", cs, excp)
-        GET_INT_PROP(argv[1], "dc", dc, excp)
-        GET_INT_PROP_DEFAULT(argv[1], "spi", spi, 1, excp)
-        GET_INT_PROP_DEFAULT(argv[1], "freq", freq, 26000000, excp)
+        GET_INT_PROP(argv[1], "cs", cs, { goto excp ;})
+        GET_INT_PROP(argv[1], "dc", dc, { goto excp ;})
+        GET_INT_PROP_DEFAULT(argv[1], "spi", spi, 1)
+        GET_INT_PROP_DEFAULT(argv[1], "freq", freq, 26000000)
 
         printf("spi=%d, cs=%d, dc=%d, freq=%d, width=%d, height=%d\n",spi,cs,dc,freq,width,height) ;
 
@@ -450,11 +450,11 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
         st77xx_spi_init(spidev, spi, cs, dc, freq);
 
         if( strcmp(typestr, "ST7789V")==0 ) {
-            GET_INT_PROP_DEFAULT(argv[1], "MADCTL", MADCTL, 0, excp)
+            GET_INT_PROP_DEFAULT(argv[1], "MADCTL", MADCTL, 0)
             st7789v_init(spidev, width, height, 0, 0, (uint8_t)MADCTL);
         }
         else if(strcmp(typestr, "ST7789")==0) {
-            GET_INT_PROP_DEFAULT(argv[1], "MADCTL", MADCTL, 0, excp)
+            GET_INT_PROP_DEFAULT(argv[1], "MADCTL", MADCTL, 0)
             st7789_init(spidev, width, height, 0, 0, (uint8_t)MADCTL);
         }
         else {

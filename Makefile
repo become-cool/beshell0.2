@@ -16,7 +16,7 @@ mkfs-root:
 	node filesystem/pack-dir.js
 
 mkfs-home:
-	bin/mklittlefs -c filesystem/tmp/home -s 196608 filesystem/img/fs-home.img -d 5
+	bin/mklittlefs -c filesystem/tmp/home -s 524288 filesystem/img/fs-home.img -d 5
 
 dist:
 	node filesystem/dispense-to-beconsole.js

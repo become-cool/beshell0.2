@@ -63,7 +63,7 @@ function packdir(from, to, packpath, ignores) {
 
 execSync(`rm -rf "${__dirname}/tmp/"`)
 
-var bytes = packdir(__dirname+"/root", __dirname+"/tmp/root", "", ["/home/become"])
+var bytes = packdir(__dirname+"/root", __dirname+"/tmp/root", "", ["/home/become","/mnt/sd"])
 console.log("/root:", bytes, "bytes")
 
 bytes = packdir(__dirname+"/home", __dirname+"/tmp/home", "/home")

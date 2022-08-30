@@ -4,7 +4,7 @@ class SDSPI extends DeviceDriver {
         super("sdspi")
     }
     setup(opts) {
-        return beapi.driver.mountSD(opts.spi, opts.cs, opts.mount)
+        return beapi.driver.mountSD(opts.spi, opts.cs, opts.mount, opts.khz)
     }
 }
 module.exports = SDSPI

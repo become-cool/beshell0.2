@@ -130,6 +130,11 @@ beapi.lvgl.Obj.prototype.fromJson = function fromJson(json, refs){
                     this.addState(state)
                 }
             }
+            
+            if(json.full) {
+                this.setWidth("100%")
+                this.setHeight("100%")
+            }
 
             if(json.bubble) {
                 this.addFlag("event-bubble")
@@ -166,7 +171,7 @@ beapi.lvgl.Obj.prototype.fromJson = function fromJson(json, refs){
 
     }catch(e){
         console.error(e)
-        console.error(e.stack)
+        console.error(e?.stack)
     }
 
     return refs

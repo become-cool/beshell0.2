@@ -1,4 +1,6 @@
-(async function(){
+require("besdk")
+
+;(async function(){
     try{
         require("./init.d/repl.js")
         sleep(0)
@@ -9,13 +11,12 @@
         require("./init.d/banner.js")()
         sleep(0)
 
-
         if(!process.simulate) {
             require("besdk/wifi").autostart()
-
-            require("./init.d/beconsoled.js")
-            sleep(0)
         }
+
+        require("./init.d/beconsoled.js")
+        sleep(0)
 
         require("./init.d/setup.js") ()
 
@@ -27,8 +28,7 @@
 
         console.log('BeShell is ready.')
         
-        require("./init.d/app").autoBoot()
-        sleep(0)
+        setTimeout(()=>require("./init.d/boot.js").autorun(), 0)
     }
     catch(e) {
         console.log(e)

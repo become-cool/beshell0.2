@@ -42,12 +42,7 @@ require("besdk/http")
 
         console.log('BeShell is ready.')
         
-        if(require("./init.d/app").autorun()) {
-            if(setupConf.autorun) {
-                require(setupConf.autorun)
-            }
-        }
-        sleep(0)
+        setTimeout(()=>require("./init.d/boot.js").autorun(), 0)
     }
     catch(e) {
         console.log(e)

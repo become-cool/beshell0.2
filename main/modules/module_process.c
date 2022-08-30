@@ -100,6 +100,8 @@ JSValue js_process_reset(JSContext *ctx, JSValueConst this_val, int argc, JSValu
 JSValue js_process_reboot(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
 #ifndef SIMULATION
     esp_restart() ;
+#else
+    exit(99) ;
 #endif
     return JS_UNDEFINED ;
 }
@@ -108,10 +110,9 @@ JSValue js_process_reboot(JSContext *ctx, JSValueConst this_val, int argc, JSVal
 #ifdef SIMULATION
 JSValue js_process_exit(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     int code = 0 ;
-    if(argc>1) {
+    if(argc>=1) {
         JS_ToInt32(ctx, &code, argv[0]) ;
     }
-
     exit(code) ;
     return JS_UNDEFINED ;
 }

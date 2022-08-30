@@ -18,11 +18,18 @@ exports.autorun = function() {
     }
     return false
 }
-exports.setAutoRunPath = function(path) {
+function setAutoScript(path) {
     if(!path||!beapi.fs.existsSync(path)) {
         throw new Error("path not exists")
     }
     let json = JSON.load(confPath)
     json["path"] = path
     beapi.fs.writeFileSync(confPath, JSON.stringify(json,null,4))
+}
+exports.setAutoScript = setAutoScript
+
+exports.rebootToScript = function(path) {
+    setAutoScript(path)
+    beapi.nvs.setNextBootLevel(6)
+    process.reboot()
 }

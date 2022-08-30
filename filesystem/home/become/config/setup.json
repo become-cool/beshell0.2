@@ -1,0 +1,29 @@
+{
+    "spi": {
+        "1": {
+            "miso": 12,
+            "mosi": 13,
+            "sck": 14
+        }
+    },
+    "i2c": {
+        "0": {
+            "scl": 2 ,
+            "sda": 0
+        }
+    } ,
+    "i2s": {
+        "0": {
+            "lrclk": 33 ,
+            "sclk": 4 ,
+            "sout": 26
+        }
+    } ,
+
+
+    "dev": [
+        {"driver":"sdspi","setup":{"cs":25,"spi":1,"mount":"/mnt/sd", "khz":10000}}
+        , {"driver":"ES8156","setup":{"i2c":0,"i2s":0}}
+        , {"driver":"ST7789", "setup":{"dc":32, "cs":15, "spi":1, "width":240, "height":240, "freq":60000000, "MADCTL": 0}}
+    ]
+}

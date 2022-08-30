@@ -133,28 +133,28 @@ static JSValue js_camera_setup(JSContext *ctx, JSValueConst this_val, int argc, 
     camera_config_t config ;
     memset(&config, 0, sizeof(camera_config_t));
 
-    ASSIGN_INT_PROP(argv[0], "d0", config.pin_d0, error)
-    ASSIGN_INT_PROP(argv[0], "d1", config.pin_d1, error)
-    ASSIGN_INT_PROP(argv[0], "d2", config.pin_d2, error)
-    ASSIGN_INT_PROP(argv[0], "d3", config.pin_d3, error)
-    ASSIGN_INT_PROP(argv[0], "d4", config.pin_d4, error)
-    ASSIGN_INT_PROP(argv[0], "d5", config.pin_d5, error)
-    ASSIGN_INT_PROP(argv[0], "d6", config.pin_d6, error)
-    ASSIGN_INT_PROP(argv[0], "d7", config.pin_d7, error)
-    ASSIGN_INT_PROP(argv[0], "xclk", config.pin_xclk, error)
-    ASSIGN_INT_PROP(argv[0], "pclk", config.pin_pclk, error)
-    ASSIGN_INT_PROP(argv[0], "vsync", config.pin_vsync, error)
-    ASSIGN_INT_PROP(argv[0], "href", config.pin_href, error)
-    ASSIGN_INT_PROP(argv[0], "sda", config.pin_sscb_sda, error)
-    ASSIGN_INT_PROP(argv[0], "scl", config.pin_sscb_scl, error)
-    ASSIGN_INT_PROP_DEFAULT(argv[0], "pwdn", config.pin_pwdn, -1, error)
-    ASSIGN_INT_PROP_DEFAULT(argv[0], "reset", config.pin_reset, -1, error)
+    ASSIGN_INT_PROP(argv[0], "d0", config.pin_d0)
+    ASSIGN_INT_PROP(argv[0], "d1", config.pin_d1)
+    ASSIGN_INT_PROP(argv[0], "d2", config.pin_d2)
+    ASSIGN_INT_PROP(argv[0], "d3", config.pin_d3)
+    ASSIGN_INT_PROP(argv[0], "d4", config.pin_d4)
+    ASSIGN_INT_PROP(argv[0], "d5", config.pin_d5)
+    ASSIGN_INT_PROP(argv[0], "d6", config.pin_d6)
+    ASSIGN_INT_PROP(argv[0], "d7", config.pin_d7)
+    ASSIGN_INT_PROP(argv[0], "xclk", config.pin_xclk)
+    ASSIGN_INT_PROP(argv[0], "pclk", config.pin_pclk)
+    ASSIGN_INT_PROP(argv[0], "vsync", config.pin_vsync)
+    ASSIGN_INT_PROP(argv[0], "href", config.pin_href)
+    ASSIGN_INT_PROP(argv[0], "sda", config.pin_sscb_sda)
+    ASSIGN_INT_PROP(argv[0], "scl", config.pin_sscb_scl)
+    ASSIGN_INT_PROP_DEFAULT(argv[0], "pwdn", config.pin_pwdn, -1)
+    ASSIGN_INT_PROP_DEFAULT(argv[0], "reset", config.pin_reset, -1)
 
-    ASSIGN_INT_PROP_DEFAULT(argv[0], "ledc_channel", config.ledc_channel, 1, error)
-    ASSIGN_INT_PROP_DEFAULT(argv[0], "ledc_timer", config.ledc_timer, 1, error)
-    ASSIGN_INT_PROP_DEFAULT(argv[0], "jpeg_quality", config.jpeg_quality, 10, error)
-    ASSIGN_INT_PROP_DEFAULT(argv[0], "fb_count", config.fb_count, 2, error)
-    ASSIGN_INT_PROP_DEFAULT(argv[0], "xclk_freq", config.xclk_freq_hz, 20000000, error)
+    ASSIGN_INT_PROP_DEFAULT(argv[0], "ledc_channel", config.ledc_channel, 1)
+    ASSIGN_INT_PROP_DEFAULT(argv[0], "ledc_timer", config.ledc_timer, 1)
+    ASSIGN_INT_PROP_DEFAULT(argv[0], "jpeg_quality", config.jpeg_quality, 10)
+    ASSIGN_UINT_PROP_DEFAULT(argv[0], "fb_count", config.fb_count, 2)
+    ASSIGN_INT_PROP_DEFAULT(argv[0], "xclk_freq", config.xclk_freq_hz, 20000000)
     
     JSValue format = JS_GetPropertyStr(ctx, argv[0], "format") ;
     if( format==JS_UNDEFINED ) {
@@ -234,9 +234,6 @@ static JSValue js_camera_setup(JSContext *ctx, JSValueConst this_val, int argc, 
     // esp_camera_fb_return(fb);
 
     return JS_TRUE ;
-
-error:
-    return JS_EXCEPTION ;
 }
 
 static JSValue js_camera_unsetup(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {

@@ -37,12 +37,13 @@
 #include "module_lvgl.h"
 #include "module_process.h"
 #include "module_metadata.h"
+#include "module_nvs.h"
 
 JSRuntime *rt;
 JSContext *ctx;
 uint8_t boot_level = 5 ;
 bool requst_reset = false ;
-char * requst_app = NULL ;
+char * request_app = NULL ;
 
 
 uint8_t task_boot_level() {
@@ -53,12 +54,12 @@ void task_reset(int level, char * script) {
     if(level>-1 && level<256)
         boot_level = (uint8_t)level ;
     if(script) {
-        if(requst_app) {
-            free(requst_app) ;
+        if(request_app) {
+            free(request_app) ;
         }
         size_t size = strlen(script)+1 ;
-        requst_app = malloc( size ) ;
-        memcpy(requst_app, script, size) ;
+        request_app = malloc( size ) ;
+        memcpy(request_app, script, size) ;
     }
     requst_reset = true ;
 }
@@ -150,6 +151,7 @@ static JSContext * init_custom_context(JSRuntime *rt) {
     be_telnet_require(ctx) ;
     be_module_lvgl_require(ctx) ;
     module_metadata_require(ctx) ;
+    be_module_nvs_require(ctx) ;
 
     return ctx;
 }
@@ -212,14 +214,14 @@ static void rc_init() {
     if(boot_level>0) { 
         echof("init level: %d\n", boot_level) ;
         
-        if(requst_app) {
+        if(request_app) {
 
             JSValue beapi = js_get_glob_prop(ctx, 1, "beapi") ;
-            JS_SetPropertyStr(ctx, beapi, "reset_app", JS_NewString(ctx, requst_app)) ;
+            JS_SetPropertyStr(ctx, beapi, "reset_app", JS_NewString(ctx, request_app)) ;
             JS_FreeValue(ctx, beapi) ;
 
-            free(requst_app) ;
-            requst_app = NULL ;
+            free(request_app) ;
+            request_app = NULL ;
         }
 
         char * initScriptCodeBuff = mallocf(InitScriptTpl, boot_level) ;
@@ -256,6 +258,9 @@ static void quickjs_deinit() {
 
 
 void js_main_loop(const char * script){
+
+    boot_level = 5 ;
+    load_boot_level_from_nvs(& boot_level) ;
     
 #ifndef SIMULATION    
 

@@ -345,6 +345,7 @@ JSValue js_lv_obj_move_y(JSContext *ctx, JSValueConst this_val, int argc, JSValu
 JSValue js_lv_obj_get_all_style_values(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     THIS_LVOBJ("Obj", "allStyleValues", thisobj)
     JSValue jsstyles = JS_NewObject(ctx) ;
+    dd
     for(int i = 0; i < thisobj->style_cnt; i++) {
 
         lv_style_t * style = thisobj->styles[i].style ;
@@ -353,7 +354,7 @@ JSValue js_lv_obj_get_all_style_values(JSContext *ctx, JSValueConst this_val, in
             const char * propName = lv_style_prop_const_to_str(style->prop1) ;
             JSValue jsval = lv_style_value_to_js(ctx, style->prop1, style->v_p.value1) ;
             JS_SetPropertyStr(ctx, jsstyles, propName, jsval) ;
-            JS_FreeValue(ctx,jsval) ;
+            // JS_FreeValue(ctx,jsval) ;
         }
         else {
             lv_style_value_t * values = (lv_style_value_t *)style->v_p.values_and_props;
@@ -364,7 +365,7 @@ JSValue js_lv_obj_get_all_style_values(JSContext *ctx, JSValueConst this_val, in
                 const char * propName = lv_style_prop_const_to_str(props[j]) ;
                 JSValue jsval = lv_style_value_to_js(ctx, props[j], values[j]) ;
                 JS_SetPropertyStr(ctx, jsstyles, propName, jsval) ;
-                JS_FreeValue(ctx,jsval) ;
+                // JS_FreeValue(ctx,jsval) ;
             }
         }
     }

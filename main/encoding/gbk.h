@@ -3,6 +3,6 @@
 
 #include <stdint.h>
 
-uint8_t GBKToStrUTF8( char *gbkin,char *utf8out) ;
+uint16_t GBKToStrUTF8( char *gbkin,char *utf8out, uint16_t outlen) ;
 
 #endif

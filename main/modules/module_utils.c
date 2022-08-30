@@ -12,6 +12,7 @@
 #include "uuid.h"
 #include "module_telnet.h"
 #include "module_metadata.h"
+#include "gbk.h"
 
 #ifndef SIMULATION
 #include "esp_system.h"
@@ -40,7 +41,7 @@ static level_t levels[] = {
 	{NULL, 0}
 };
 
-static JSValue js_util_set_log_level(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+static JSValue js_utils_set_log_level(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     if(argc<2) {
         JS_ThrowReferenceError(ctx, "Missing param");
         return JS_EXCEPTION ;
@@ -70,10 +71,10 @@ static JSValue js_util_set_log_level(JSContext *ctx, JSValueConst this_val, int 
 #endif
 
 
-static JSValue js_util_time(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+static JSValue js_utils_time(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
 	return JS_NewInt64(ctx, gettime()) ;
 }
-static JSValue js_util_set_time(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+static JSValue js_utils_set_time(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(1)
     ARGV_TO_INT64(0, now)
 
@@ -84,7 +85,7 @@ static JSValue js_util_set_time(JSContext *ctx, JSValueConst this_val, int argc,
     return clock_gettime(CLOCK_REALTIME, &tm)>=0? JS_TRUE: JS_FALSE ;
 }
 
-static JSValue js_util_sleep(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+static JSValue js_utils_sleep(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     struct timeval tv;
     gettimeofday(&tv, NULL);
     
@@ -123,7 +124,7 @@ static JSValue js_util_sleep(JSContext *ctx, JSValueConst this_val, int argc, JS
     return JS_UNDEFINED ;
 }
 
-static JSValue js_util_var_refcount(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+static JSValue js_utils_var_refcount(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
 	if(argc<1) {
         JS_ThrowReferenceError(ctx, "Missing param");
         return JS_EXCEPTION ;
@@ -133,7 +134,7 @@ static JSValue js_util_var_refcount(JSContext *ctx, JSValueConst this_val, int a
 
 
 
-static JSValue __js_util_set_timer(JSContext *ctx, int argc, JSValueConst *argv, bool repeat){
+static JSValue __js_utils_set_timer(JSContext *ctx, int argc, JSValueConst *argv, bool repeat){
     if(argc<2) {
         JS_ThrowReferenceError(ctx, "Missing param");
         return JS_EXCEPTION ;
@@ -147,14 +148,14 @@ static JSValue __js_util_set_timer(JSContext *ctx, int argc, JSValueConst *argv,
 	return JS_NewInt32(ctx, addr) ;
 }
 
-static JSValue js_util_set_timeout(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
-	return __js_util_set_timer(ctx, argc, argv, false) ;
+static JSValue js_utils_set_timeout(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+	return __js_utils_set_timer(ctx, argc, argv, false) ;
 }
-static JSValue js_util_set_interval(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
-	return __js_util_set_timer(ctx, argc, argv, true) ;
+static JSValue js_utils_set_interval(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+	return __js_utils_set_timer(ctx, argc, argv, true) ;
 }
 
-static JSValue js_util_clear_timeout(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+static JSValue js_utils_clear_timeout(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
 	if(argc<1) {
         JS_ThrowReferenceError(ctx, "Missing param");
         return JS_EXCEPTION ;
@@ -280,7 +281,7 @@ static JSValue js_utils_part_version(JSContext *ctx, JSValueConst this_val, int 
     return JS_NewInt32(ctx, readPartVersion()) ;
 }
 
-static JSValue js_util_part_uuid(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+static JSValue js_utils_part_uuid(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
 #ifdef SIMULATION
     return JS_NewString(ctx, "123456789AEF") ;
 #else
@@ -295,7 +296,7 @@ static JSValue js_util_part_uuid(JSContext *ctx, JSValueConst this_val, int argc
 #endif
 }
 
-static JSValue js_util_generate_uuid(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+static JSValue js_utils_generate_uuid(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     uuid_t uu ;
     char uu_str[UUID_STR_LEN];
     uuid_generate(uu);
@@ -667,13 +668,13 @@ static JSValue js_partition_read(JSContext *ctx, JSValueConst this_val, int argc
 #endif
 
 // static const JSCFunctionListEntry js_utils_funcs[] = {
-//     JS_CFUNC_DEF("time", 0, js_util_time ),
+//     JS_CFUNC_DEF("time", 0, js_utils_time ),
 // };
 
 // static int js_utils_init(JSContext *ctx, JSModuleDef *m) {
 //     printf("js_utils_init()\n") ;
-//     JS_SetModuleExport(ctx, m, "time", JS_NewCFunction(ctx, js_util_time, "time", 1));
-//     JS_SetModuleExport(ctx, m, "default", JS_NewCFunction(ctx, js_util_time, "time", 1));
+//     JS_SetModuleExport(ctx, m, "time", JS_NewCFunction(ctx, js_utils_time, "time", 1));
+//     JS_SetModuleExport(ctx, m, "default", JS_NewCFunction(ctx, js_utils_time, "time", 1));
 //     return 0;
 // }
 
@@ -690,6 +691,25 @@ static JSValue js_partition_read(JSContext *ctx, JSValueConst this_val, int argc
 // }
 
 
+// static JSValue js_utils_encoding(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+//     CHECK_ARGC(2)
+//     ARGV_TO_INT32(1, code)
+//     ARGV_TO_STRING(0, str)
+
+//     if(code!=936) {
+//         JS_FreeCString(ctx, str) ;
+//         THROW_EXCEPTION("not support encoding code: %d", code)
+//     }
+
+//     char filename[256] ;
+//     uint16_t len = GBKToStrUTF8( str, filename, 255 ) ;
+//     filename[len] = 0 ;
+
+//     JS_FreeCString(ctx, str) ;
+
+//     return JS_NewStringLen(ctx, filename, len) ;
+// }
+
 
 void be_module_utils_require(JSContext *ctx) {
 
@@ -700,20 +720,20 @@ void be_module_utils_require(JSContext *ctx) {
     JSValue utils = JS_NewObject(ctx);
     JS_SetPropertyStr(ctx, beapi, "utils", utils);
 #ifndef SIMULATION
-    JS_SetPropertyStr(ctx, utils, "setLogLevel", JS_NewCFunction(ctx, js_util_set_log_level, "setLogLevel", 1));
+    JS_SetPropertyStr(ctx, utils, "setLogLevel", JS_NewCFunction(ctx, js_utils_set_log_level, "setLogLevel", 1));
     JS_SetPropertyStr(ctx, utils, "untar", JS_NewCFunction(ctx, js_utils_untar, "untar", 1));
     JS_SetPropertyStr(ctx, utils, "base64Encode", JS_NewCFunction(ctx, js_utils_base64_encode, "base64Encode", 1));
     JS_SetPropertyStr(ctx, utils, "base64Decode", JS_NewCFunction(ctx, js_utils_base64_decode, "base64Decode", 1));
     JS_SetPropertyStr(ctx, utils, "partitionRead", JS_NewCFunction(ctx, js_partition_read, "partitionRead", 1));
 #endif
-    JS_SetPropertyStr(ctx, utils, "time", JS_NewCFunction(ctx, js_util_time, "time", 1));
-    JS_SetPropertyStr(ctx, utils, "setTime", JS_NewCFunction(ctx, js_util_set_time, "setTime", 1));
-    // JS_SetPropertyStr(ctx, utils, "freeStacks", JS_NewCFunction(ctx, js_util_free_stacks, "freeStacks", 1));
+    JS_SetPropertyStr(ctx, utils, "time", JS_NewCFunction(ctx, js_utils_time, "time", 1));
+    JS_SetPropertyStr(ctx, utils, "setTime", JS_NewCFunction(ctx, js_utils_set_time, "setTime", 1));
+    // JS_SetPropertyStr(ctx, utils, "freeStacks", JS_NewCFunction(ctx, js_utils_free_stacks, "freeStacks", 1));
     JS_SetPropertyStr(ctx, utils, "partId", JS_NewCFunction(ctx, js_utils_part_id, "partId", 1));
     JS_SetPropertyStr(ctx, utils, "partVersion", JS_NewCFunction(ctx, js_utils_part_version, "partVersion", 1));
-    JS_SetPropertyStr(ctx, utils, "partUUID", JS_NewCFunction(ctx, js_util_part_uuid, "partUUID", 1));
-    JS_SetPropertyStr(ctx, utils, "genUUID", JS_NewCFunction(ctx, js_util_generate_uuid, "genUUID", 1));
-    JS_SetPropertyStr(ctx, utils, "varRefCnt", JS_NewCFunction(ctx, js_util_var_refcount, "varRefCnt", 1));
+    JS_SetPropertyStr(ctx, utils, "partUUID", JS_NewCFunction(ctx, js_utils_part_uuid, "partUUID", 1));
+    JS_SetPropertyStr(ctx, utils, "genUUID", JS_NewCFunction(ctx, js_utils_generate_uuid, "genUUID", 1));
+    JS_SetPropertyStr(ctx, utils, "varRefCnt", JS_NewCFunction(ctx, js_utils_var_refcount, "varRefCnt", 1));
     JS_SetPropertyStr(ctx, utils, "gamma8Correct", JS_NewCFunction(ctx, js_utils_gamma8_correct, "gamma8Correct", 1));
     JS_SetPropertyStr(ctx, utils, "stringBytes", JS_NewCFunction(ctx, js_string_bytes, "stringBytes", 1));
     JS_SetPropertyStr(ctx, utils, "pack", JS_NewCFunction(ctx, js_pack, "pack", 1));
@@ -726,13 +746,14 @@ void be_module_utils_require(JSContext *ctx) {
     JS_SetPropertyStr(ctx, utils, "feed", JS_NewCFunction(ctx, js_feed_watchdog, "feed", 1));
     JS_SetPropertyStr(ctx, utils, "setTimezoneOffset", JS_NewCFunction(ctx, js_set_timezone_offset, "setTimezoneOffset", 1));
     JS_SetPropertyStr(ctx, utils, "setTime", JS_NewCFunction(ctx, js_set_time, "setTime", 1));
+    // JS_SetPropertyStr(ctx, utils, "toUnicode", JS_NewCFunction(ctx, js_utils_encoding, "toUnicode", 1));
 
 	// global
-    JS_SetPropertyStr(ctx, global, "sleep", JS_NewCFunction(ctx, js_util_sleep, "sleep", 1));
-    JS_SetPropertyStr(ctx, global, "setTimeout", JS_NewCFunction(ctx, js_util_set_timeout, "setTimeout", 1));
-    JS_SetPropertyStr(ctx, global, "setInterval", JS_NewCFunction(ctx, js_util_set_interval, "setInterval", 1));
-    JS_SetPropertyStr(ctx, global, "clearTimeout", JS_NewCFunction(ctx, js_util_clear_timeout, "clearTimeout", 1));
-    JS_SetPropertyStr(ctx, global, "clearInterval", JS_NewCFunction(ctx, js_util_clear_timeout, "clearInterval", 1));
+    JS_SetPropertyStr(ctx, global, "sleep", JS_NewCFunction(ctx, js_utils_sleep, "sleep", 1));
+    JS_SetPropertyStr(ctx, global, "setTimeout", JS_NewCFunction(ctx, js_utils_set_timeout, "setTimeout", 1));
+    JS_SetPropertyStr(ctx, global, "setInterval", JS_NewCFunction(ctx, js_utils_set_interval, "setInterval", 1));
+    JS_SetPropertyStr(ctx, global, "clearTimeout", JS_NewCFunction(ctx, js_utils_clear_timeout, "clearTimeout", 1));
+    JS_SetPropertyStr(ctx, global, "clearInterval", JS_NewCFunction(ctx, js_utils_clear_timeout, "clearInterval", 1));
     JS_SetPropertyStr(ctx, global, "evalScript", JS_NewCFunction(ctx, js_eval_script, "evalScript", 1));
     JS_SetPropertyStr(ctx, global, "evalAsFile", JS_NewCFunction(ctx, js_eval_as_file, "evalAsFile", 1));
     JS_SetPropertyStr(ctx, global, "compileScript", JS_NewCFunction(ctx, js_compile_script, "compileScript", 1));

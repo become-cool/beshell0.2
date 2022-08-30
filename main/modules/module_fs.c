@@ -38,6 +38,7 @@ char * vfspath_to_fs(const char * path) {
 }
 
 // esp32 vfs 不能挂在根目录，将整个系统挂载到 /fs 下，访问时自动加上
+// 返回值 由调用者 free
 char * js_arg_to_vfspath(JSContext *ctx, JSValueConst argv) {
     char * jspath = JS_ToCString(ctx, argv) ;
     const char * path = vfspath_to_fs(jspath) ;

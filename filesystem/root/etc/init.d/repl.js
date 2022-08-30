@@ -84,16 +84,20 @@ function ls(path) {
     if(!path) {
         path = process.env.PWD
     }
-    for(let item of beapi.fs.readdirSync(path)) {
+    for(let item of beapi.fs.readdirSync(resolvepath(path))) {
         if(item=='.' || item=='..')
             continue
-        if( beapi.fs.isDirSync(process.env.PWD+'/'+item) ) {
+        if( beapi.fs.isDirSync(resolvepath(path+'/'+item)) ) {
             console.log(item+'/')
         }
         else {
             console.log(item)
         }
     }
+}
+
+function stat(path) {
+    console.log(beapi.fs.statSync(resolvepath(path)))
 }
 
 
@@ -178,7 +182,7 @@ function reboot() {
 }
 
 const ShellCmds = {
-    cd, pwd, ls, cp, rm, mv, touch, cat
+    cd, pwd, ls, cp, rm, mv, touch, cat, stat
     , require:cmd_require
     , free, reset, reboot
     , compile

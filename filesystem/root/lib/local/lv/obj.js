@@ -72,6 +72,12 @@ beapi.lvgl.Btn.prototype.setFont = function setFont(font) {
     }
     this.label.setFont(font)
 }
+beapi.lvgl.Btn.prototype.setTextColor = function setTextColor(color) {
+    if(!this.label) {
+        this.label = new beapi.lvgl.Label(this)
+    }
+    this.label.setStyle("text-color",color)
+}
 
 beapi.lvgl.CleanObj = class CleanObj extends beapi.lvgl.Obj {
     constructor(parent) {

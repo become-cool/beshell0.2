@@ -1,11 +1,4 @@
 module.exports = function() {
-    if(!be.dev) {
-        be.dev = {disp:[], button:[]}
-    }
-    if(!be.part) {
-        be.part = []
-    }
-
     try{
         let partJson = JSON.load("/home/become/config/part.json")
         if(partJson.id!=undefined) {
@@ -37,8 +30,13 @@ module.exports = function() {
         }
         for(let num in setupConf.i2c||{}){
             let i2c = setupConf.i2c[num]
-            beapi.i2c.setup(num, i2c.sda, i2c.scl)
+            beapi.i2c.setup(parseInt(num), i2c.sda, i2c.scl)
         }
+        for(let num in setupConf.i2s||{}){
+            let opts = setupConf.i2s[num]
+            beapi.i2s.setup(parseInt(num), opts)
+        }
+
         // dev
         for(let devConf of setupConf.dev||[]){
             try {
@@ -61,8 +59,9 @@ const LibDefaultConf = {
     3: {0:{
         spi: { 1: {miso:12,mosi:13,sck:14} } ,
         dev: [
-            {"driver":"ST7789V", "setup":{"dc":18, "cs":19, "spi":1, "width":320, "height":240, "freq":80000000, "MADCTL": 0x40|0x20}}
+            {"driver":"ST7789V", "setup":{"dc":18, "cs":19, "spi":1, "width":320, "height":240, "freq":60000000, "MADCTL": 0x40|0x20}}
             , {"driver":"XPT2046", "setup":{spi:1, cs:21, invX:true, invY:true, maxX:320, maxY:240, offsetX:11}}
+            
         ]
     }} ,
     19: {0:{
@@ -88,15 +87,19 @@ function createDevFromDriver(devConf) {
         console.error(e)
         console.error("unknow driver", devConf.driver)
     }
+    try {
     let dev = new driver
-    if(dev.setup(devConf.setup)==false) {
-        console.error(devConf.driver,'device setup failed.')
-        return
+        if(dev.setup(devConf.setup)==false) {
+            console.error(devConf.driver,'device setup failed.')
+            return
+        }
+        if(dev.begin(devConf.begin)==false) {
+            console.error(devConf.driver,'device begin failed.')
+            return
+        }
+        dev.register(devConf.varname)
+        return dev
+    }catch(e) {
+        console.error(e)
     }
-    if(dev.begin(devConf.begin)==false) {
-        console.error(devConf.driver,'device begin failed.')
-        return
-    }
-    dev.register(devConf.varname)
-    return dev
 }

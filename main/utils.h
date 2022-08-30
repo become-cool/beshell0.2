@@ -154,7 +154,7 @@ void eval_code_len(JSContext *ctx, const char * str,size_t len,const char * file
 
 
 
-#define dref(var,when) printf( "[%s]" #var " ref:%d\n", when, VAR_REFCNT(var)) ;
+#define dref(var) printf( #var " ref:%d @%d\n", VAR_REFCNT(var), __LINE__) ;
 
 uint64_t gettime() ;
 
@@ -162,23 +162,23 @@ char * mallocf(char * format, ...) ;
 
 void freeArrayBuffer(JSRuntime *rt, void *opaque, void *ptr) ;
 
-#define GET_INT_PROP(obj, propName, cvar, error_goto)                               \
+#define GET_INT_PROP(obj, propName, cvar, excp)                                     \
     int32_t cvar = 0 ;                                                              \
     {                                                                               \
         JSValue jsvar = JS_GetPropertyStr(ctx, obj, propName) ;                     \
         if( JS_IsUndefined(jsvar) ) {                                               \
             JS_ThrowReferenceError(ctx, "property %s not exists", propName) ;       \
-            goto error_goto ;                                                       \
+            excp ;                                                                  \
         }                                                                           \
         if( !JS_IsNumber(jsvar) ) {                                                 \
             JS_FreeValue(ctx, jsvar) ;                                              \
             JS_ThrowReferenceError(ctx, "property %s is not a number", propName) ;  \
-            goto error_goto ;                                                       \
+            excp ;                                                                  \
         }                                                                           \
         JS_ToInt32(ctx, &cvar, jsvar) ;                                             \
     }
 
-#define GET_INT_PROP_DEFAULT(obj, propName, cvar, default, error_goto)                  \
+#define GET_INT_PROP_DEFAULT(obj, propName, cvar, default)                              \
     int32_t cvar = 0 ;                                                                  \
     {                                                                                   \
         JSValue jsvar = JS_GetPropertyStr(ctx, obj, propName) ;                         \
@@ -188,14 +188,13 @@ void freeArrayBuffer(JSRuntime *rt, void *opaque, void *ptr) ;
         else {                                                                          \
             if( !JS_IsNumber(jsvar) ) {                                                 \
                 JS_FreeValue(ctx, jsvar) ;                                              \
-                JS_ThrowReferenceError(ctx, "property %s is not a number", propName) ;  \
-                goto error_goto ;                                                       \
+                THROW_EXCEPTION(ctx, "property %s is not a number", propName) ;         \
             }                                                                           \
             JS_ToInt32(ctx, &cvar, jsvar) ;                                             \
         }                                                                               \
     }
 
-#define ASSIGN_INT_PROP_DEFAULT(obj, propName, cvar, default, error_goto)               \
+#define _ASSIGN_INT_PROP_DEFAULT(obj, propName, cvar, getter, default)                  \
     if(obj==JS_UNDEFINED||obj==JS_NULL) {                                               \
         cvar = default ;                                                                \
     } else {                                                                            \
@@ -206,34 +205,32 @@ void freeArrayBuffer(JSRuntime *rt, void *opaque, void *ptr) ;
         else {                                                                          \
             if( !JS_IsNumber(jsvar) ) {                                                 \
                 JS_FreeValue(ctx, jsvar) ;                                              \
-                JS_ThrowReferenceError(ctx, "property %s is not a number", propName) ;  \
-                goto error_goto ;                                                       \
+                THROW_EXCEPTION(ctx, "property %s is not a number", propName) ;         \
             }                                                                           \
-            JS_ToInt32(ctx, (int*)&cvar, jsvar) ;                                       \
+            getter(ctx, &cvar, jsvar) ;                                                 \
         }                                                                               \
     }
+#define ASSIGN_INT_PROP_DEFAULT(obj, propName, cvar, default) \
+        _ASSIGN_INT_PROP_DEFAULT(obj, propName, cvar, JS_ToInt32, default)
 
-#define ASSIGN_INT_PROP(obj, propName, cvar, error_goto)                                \
+#define ASSIGN_UINT_PROP_DEFAULT(obj, propName, cvar, default) \
+        _ASSIGN_INT_PROP_DEFAULT(obj, propName, cvar, JS_ToUint32, default)
+
+#define _ASSIGN_INT_PROP(obj, propName, ctype, cvar, getter)                            \
     {                                                                                   \
         JSValue jsvar = JS_GetPropertyStr(ctx, obj, propName) ;                         \
         if( !JS_IsNumber(jsvar) ) {                                                     \
             JS_FreeValue(ctx, jsvar) ;                                                  \
-            JS_ThrowReferenceError(ctx, "property %s is not a number", propName) ;      \
-            goto error_goto ;                                                           \
+            THROW_EXCEPTION(ctx, "property %s is not a number", propName) ;             \
         }                                                                               \
-        JS_ToInt32(ctx, (int*)&cvar, jsvar) ;                                           \
+        getter(ctx, (ctype *) &cvar, jsvar) ;                                           \
     }
 
-#define ASSIGN_UINT_PROP(obj, propName, cvar, error_goto)                               \
-    {                                                                                   \
-        JSValue jsvar = JS_GetPropertyStr(ctx, obj, propName) ;                         \
-        if( !JS_IsNumber(jsvar) ) {                                                     \
-            JS_FreeValue(ctx, jsvar) ;                                                  \
-            JS_ThrowReferenceError(ctx, "property %s is not a number", propName) ;      \
-            goto error_goto ;                                                           \
-        }                                                                               \
-        JS_ToUint32(ctx, &cvar, jsvar) ;                                                \
-    }
+#define ASSIGN_INT_PROP(obj, propName, cvar) \
+        _ASSIGN_INT_PROP(obj, propName, int, cvar, JS_ToInt32)
+
+#define ASSIGN_UINT_PROP(obj, propName, cvar) \
+        _ASSIGN_INT_PROP(obj, propName, uint, cvar, JS_ToUint32)
 
 
 JSValue js_get_prop(JSContext *ctx, JSValue obj, int depth, ...)  ;

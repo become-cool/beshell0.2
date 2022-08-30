@@ -1,3 +1,5 @@
+require("besdk")
+
 (async function(){
     try{        
         require("./init.d/repl.js")

@@ -1,6 +1,7 @@
 #include "utils.h"
 #include "module_serial.h"
 #include <string.h>
+#include "driver/i2s.h"
 
 // #define DMA_CHAN        2
 
@@ -493,6 +494,8 @@ static JSValue js_i2c_bus_setup(JSContext *ctx, JSValueConst this_val, int argc,
     ARGV_TO_UINT8(1, sdapin)
     ARGV_TO_UINT8(2, sclpin)
 
+    dn3(busnum,sdapin,sclpin)
+
     uint32_t freq = 100000 ;
     if(argc>=4) {
         if(JS_ToUint32(ctx, &freq, argv[3]) ) {
@@ -835,6 +838,74 @@ static JSValue js_i2c_bus_free(JSContext *ctx, JSValueConst this_val, int argc, 
     return JS_TRUE ;
 }
 
+
+static JSValue js_i2s_setup(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+
+    ARGV_TO_UINT8(0, i2s)
+    if(i2s!=0 && i2s!=1){
+        THROW_EXCEPTION("arg %s must be 0 or 1", "i2s")
+    }
+
+    // int bit = I2S_BITS_PER_SAMPLE_32BIT ;
+    // int sample_rate = 8000 ;
+    // if(){
+
+    // }
+    // ARGV_TO_UINT8(1, sample_rate)
+
+
+    i2s_config_t i2s_config = {
+        .mode = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_TX | I2S_MODE_RX),
+        .sample_rate = 8000,
+        .bits_per_sample = I2S_BITS_PER_SAMPLE_32BIT,
+        .channel_format = I2S_CHANNEL_FMT_RIGHT_LEFT,
+        .communication_format = I2S_COMM_FORMAT_STAND_I2S,
+        .intr_alloc_flags = ESP_INTR_FLAG_LEVEL2 | ESP_INTR_FLAG_IRAM,
+        .dma_buf_count = 2,
+        .dma_buf_len = 1024,
+        .use_apll = true,
+        .tx_desc_auto_clear = true,
+        .fixed_mclk = 0
+    };
+
+    i2s_pin_config_t pin_config = {
+        .ws_io_num = 33,
+        .data_out_num = 4,
+        .bck_io_num = 26,
+        .data_in_num = -1
+    };
+
+    if(argc>1) {
+
+        if(!JS_IsObject(argv[1])) {
+            THROW_EXCEPTION("arg %s must be an object", "opts");
+        }
+
+        ASSIGN_INT_PROP_DEFAULT(argv[1], "mode", i2s_config.mode, (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_TX | I2S_MODE_RX))
+        ASSIGN_INT_PROP_DEFAULT(argv[1], "sample_rate", i2s_config.sample_rate, 8000)
+        ASSIGN_INT_PROP_DEFAULT(argv[1], "bits_per_sample", i2s_config.bits_per_sample, I2S_BITS_PER_SAMPLE_32BIT)
+        ASSIGN_INT_PROP_DEFAULT(argv[1], "channel_format", i2s_config.channel_format, I2S_CHANNEL_FMT_RIGHT_LEFT)
+        ASSIGN_INT_PROP_DEFAULT(argv[1], "communication_format", i2s_config.communication_format, I2S_COMM_FORMAT_STAND_I2S)
+        ASSIGN_INT_PROP_DEFAULT(argv[1], "intr_alloc_flags", i2s_config.intr_alloc_flags, ESP_INTR_FLAG_LEVEL2 | ESP_INTR_FLAG_IRAM)
+        ASSIGN_INT_PROP_DEFAULT(argv[1], "dma_buf_count", i2s_config.dma_buf_count, 2)
+        ASSIGN_INT_PROP_DEFAULT(argv[1], "dma_buf_len", i2s_config.dma_buf_len, 1024)
+        
+        ASSIGN_UINT_PROP(argv[1], "lrclk", pin_config.ws_io_num)
+        ASSIGN_UINT_PROP(argv[1], "sclk", pin_config.bck_io_num)
+        ASSIGN_INT_PROP_DEFAULT(argv[1], "sout", pin_config.data_out_num, -1)
+        ASSIGN_INT_PROP_DEFAULT(argv[1], "sin", pin_config.data_in_num, -1)
+    }
+
+dn4(pin_config.ws_io_num,pin_config.bck_io_num,pin_config.data_out_num,pin_config.data_in_num)
+
+    i2s_driver_install(i2s, &i2s_config, 0, NULL);
+    i2s_set_pin(i2s, &pin_config);
+
+    return JS_UNDEFINED ;
+}
+
+
 void be_module_serial_require(JSContext *ctx) {
     
     JSValue global = JS_GetGlobalObject(ctx);
@@ -870,6 +941,11 @@ void be_module_serial_require(JSContext *ctx) {
     JS_SetPropertyStr(ctx, i2c, "free", JS_NewCFunction(ctx, js_i2c_bus_free, "free", 1));
 
     // JS_SetPropertyStr(ctx, i2c, "mpu9250load", JS_NewCFunction(ctx, js_mpu9250_load, "mpu9250load", 1));
+
+    JSValue i2s = JS_NewObject(ctx);
+    JS_SetPropertyStr(ctx, beapi, "i2s", i2s);
+    JS_SetPropertyStr(ctx, i2s, "setup", JS_NewCFunction(ctx, js_i2s_setup, "setup", 1));
+
 
     JS_FreeValue(ctx, global);
     JS_FreeValue(ctx, beapi);

@@ -124,7 +124,7 @@ class Pin extends beapi.EventEmitter {
         return setInterval(()=>{
             level = level? 0: 1
             this.write(level)
-        }, dur||1000)
+        }, dur||1500)
     }
 }
 

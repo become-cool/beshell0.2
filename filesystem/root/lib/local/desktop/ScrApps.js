@@ -58,11 +58,8 @@ module.exports = class ScrApps extends lv.Obj {
                         "text": "音乐" ,
                         "src": "/lib/icon/32/music.png",
                         group: this.group ,
-                        ref: 'musicPlayer',
                         clicked: () => {
-                            this.music = new beapi.lvgl.Obj()
-                            lv.loadScreen(this.music)
-                            beapi.media.createMusicPlayer(this.music)
+                            require("music/main.js").singleton()
                         }
                     }
                     , {
@@ -70,7 +67,6 @@ module.exports = class ScrApps extends lv.Obj {
                         "text": "游戏" ,
                         "src": "/lib/icon/32/game.png" ,
                         group: this.group ,
-                        ref: 'gameEmulator' ,
                         clicked () {
                             require("gameemulator")
                         }

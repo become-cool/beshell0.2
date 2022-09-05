@@ -216,7 +216,7 @@ void be_module_gameplayer_reset(JSContext *ctx) {
 
 
 
-FILE *fd = NULL;
+static FILE *fd = NULL;
 typedef struct {
     // The "RIFF" chunk descriptor
     uint8_t ChunkID[4];

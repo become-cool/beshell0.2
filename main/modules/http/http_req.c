@@ -302,7 +302,7 @@ req_t * http_request(httpd_req_t *req) {
 
     // req 继承 EventEmitter 属性
     JSValue reqEventHandles = JS_NewObject(route->ctx) ;
-    JS_SetPropertyStr(route->ctx, creq->jsreq, "_handles", reqEventHandles) ;
+    JS_SetPropertyStr(route->ctx, creq->jsreq, "_handlers", reqEventHandles) ;
     
     MAKE_ARGV1(cbargv, creq->jsreq)
     JSValue ret = JS_Call(route->ctx, route->callback, JS_UNDEFINED, 1, cbargv) ;

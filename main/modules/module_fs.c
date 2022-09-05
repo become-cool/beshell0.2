@@ -562,6 +562,18 @@ static JSValue js_fs_info(JSContext *ctx, JSValueConst this_val, int argc, JSVal
     return obj ;
 }
 
+
+static JSValue js_fs_opentest(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+    char * path = js_arg_to_vfspath(ctx, argv[0]) ;
+    FILE * h = fopen(path, "r") ;
+    dp(h)
+
+    free(path) ;
+
+    return JS_UNDEFINED ;
+}
+
 #ifndef SIMULATION
 void extend_partition() {
     // 检查 unextend 文件
@@ -658,6 +670,7 @@ void be_module_fs_require(JSContext *ctx) {
     JS_SetPropertyStr(ctx, fs, "isFileSync", JS_NewCFunction(ctx, js_fs_is_file_sync, "isFileSync", 1));
     JS_SetPropertyStr(ctx, fs, "renameSync", JS_NewCFunction(ctx, js_fs_rename_sync, "renameSync", 1));
     JS_SetPropertyStr(ctx, fs, "info", JS_NewCFunction(ctx, js_fs_info, "info", 1));
+    JS_SetPropertyStr(ctx, fs, "opentest", JS_NewCFunction(ctx, js_fs_opentest, "opentest", 1));
 
     JS_FreeValue(ctx, global);
     JS_FreeValue(ctx, beapi);

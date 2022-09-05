@@ -1,23 +1,23 @@
 const lv = require("lv")
 
-function createCtrlBtn(name, clicked) {
+function createCtrlBtn(name, clicked, group) {
     return {
         class: "Btn" ,
         text: lv.symbol[name] ,
         ref: 'btn'+name[0].toUpperCase()+name.slice(1) ,
-        clicked
+        clicked ,
+        group
     }
 }
 
 class Controller extends lv.Column {
     
-    constructor(parent) {
+    constructor(parent, group) {
         super(parent)
 
         this.playing = false
 
         this.fromJson({
-
             height: 80 ,
             crossAlign: "center" ,
             children: [{
@@ -48,18 +48,16 @@ class Controller extends lv.Column {
                         mainAlign: "center" ,
                         gap: 20 ,
                         children: [
-                            createCtrlBtn("prev") ,
-                            createCtrlBtn("play",()=>{
-                                if(this.playing) {
-                                    this.playing = false
-                                    this.btnPlay.setText(lv.symbol.play)
-                                }
-                                else {
-                                    this.playing = true
-                                    this.btnPlay.setText(lv.symbol.pause)
-                                }
-                            }) ,
-                            createCtrlBtn("next") ,
+                            createCtrlBtn("prev", ()=>{
+                                this.emit("prev")
+                            }, group) ,
+                            createCtrlBtn("play",()=>{                                
+                                this.setPlaying(!this.playing)
+                                this.emit(this.playing?"play":"pause")
+                            }, group) ,
+                            createCtrlBtn("next", ()=>{
+                                this.emit("next")
+                            }, group) ,
         
                         ]
         
@@ -79,6 +77,7 @@ class Controller extends lv.Column {
                             align: "center" ,
                             src: "/lib/icon/16/more.png" ,
                         }] ,
+                        group ,
                         clicked: () => {
                             this.player.menu.show()
                         }
@@ -86,6 +85,13 @@ class Controller extends lv.Column {
                 ]
             }]
         },this)
+
+        beapi.lvgl.Group.focusObj(this.btnPlay)
+    }
+
+    setPlaying(playing) {
+        this.playing = playing
+        this.btnPlay.setText(playing?lv.symbol.pause:lv.symbol.play)
     }
 }
 

@@ -309,7 +309,7 @@ void be_module_lvgl_require(JSContext *ctx) {
     JSValue lvgl = JS_NewObject(ctx);
     JS_SetPropertyStr(ctx, beapi, "lvgl", lvgl);
     JS_SetPropertyStr(ctx, lvgl, "__proto__", EventEmitterProto);
-    JS_SetPropertyStr(ctx, lvgl, "_handles", JS_NewObject(ctx));
+    JS_SetPropertyStr(ctx, lvgl, "_handlers", JS_NewObject(ctx));
     
 
     JS_SetPropertyStr(ctx, lvgl, "loop", JS_NewCFunction(ctx, js_lvgl_loop, "loop", 1));

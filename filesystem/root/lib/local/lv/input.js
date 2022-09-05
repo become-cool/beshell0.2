@@ -1,6 +1,7 @@
 
 beapi.lvgl.Obj.prototype.holdKeys = function() {
     let screen = this.screen()
+    screen.disp().keysRouter()
     if(!screen._keysHolders) {
         screen._keysHolders = []
     }
@@ -26,16 +27,22 @@ beapi.lvgl.Obj.prototype.releaseKeys = function() {
     return false
 }
 
+const mapkeys = {
+    'a': 'enter' ,
+    'start': 'enter' ,
+    'b': 'esc' ,
+    'select': 'tab' ,
+}
 class KeysRouter {
     constructor(disp) {
         this.disp = disp
         disp.on("ipt.btn.press", (key)=>{
             let obj = this._findReceiver()
-            obj && obj.emit("ipt.btn.press",key)
+            obj && obj.emit("ipt.btn.press",mapkeys[key]||key)
         })
         disp.on("ipt.btn.release", (key)=>{
             let obj = this._findReceiver()
-            obj && obj.emit("ipt.btn.release",key)
+            obj && obj.emit("ipt.btn.release",mapkeys[key]||key)
         })
     }
     _findReceiver() {
@@ -47,3 +54,9 @@ class KeysRouter {
     }
 }
 beapi.lvgl.KeysRouter = KeysRouter
+beapi.lvgl.Display.prototype.keysRouter = function(){
+    if(!this._keysRouter) {
+        this._keysRouter = new KeysRouter(this)
+    }
+    return this._keysRouter
+}

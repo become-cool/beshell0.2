@@ -8222,6 +8222,7 @@ static JSValue js_lv_group_get_obj_count(JSContext *ctx, JSValueConst this_val, 
 
 
 static const JSCFunctionListEntry js_lv_group_proto_funcs[] = {
+    JS_CFUNC_DEF("allObjs", 0, js_lv_group_all_objs),
     JS_CFUNC_DEF("del", 0, js_lv_group_del),
     JS_CFUNC_DEF("setDefault", 0, js_lv_group_set_default),
     JS_CFUNC_DEF("addObj", 0, js_lv_group_add_obj),

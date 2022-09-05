@@ -49,6 +49,10 @@
 #include "stdlib.h" // J.Sz. 21/04/2006
 #include "coder.h"
 
+#include "esp_heap_caps.h"
+
+#define malloc(s)  heap_caps_malloc(s, MALLOC_CAP_INTERNAL);
+
 /**************************************************************************************
  * Function:    ClearBuffer
  *

@@ -24,16 +24,6 @@ require("besdk/http")
 
         var setupConf = require("./init.d/setup.js") ()
 
-        if(be.disp?.length){
-            let desktop = require("./init.d/desktop.js")
-
-            await require("./init.d/display.js") ( desktop.disp? desktop.scripts: [] )
-
-            if(desktop.disp) {
-                desktop.init( setupConf )
-            }
-        }
-
         let rcpath = process.env.HOME + "/.beshellrc.js"
         if(beapi.fs.isFileSync(rcpath)) {
             require(rcpath)
@@ -41,8 +31,9 @@ require("besdk/http")
         }
 
         console.log('BeShell is ready.')
-        
-        setTimeout(()=>require("./init.d/boot.js").autorun(), 0)
+
+        sleep(0)
+        await require("./init.d/boot.js").autorun()
     }
     catch(e) {
         console.log(e)

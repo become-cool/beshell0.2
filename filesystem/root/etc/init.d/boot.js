@@ -1,22 +1,37 @@
 const confPath = "/home/become/config/boot.json"
-exports.autorun = function() {
-    if(!beapi.fs.isFileSync(confPath)) {
-        return
-    }
+exports.autorun = async function() {
+    let json = {}
     try{
-        let json = JSON.load(confPath)
-        if(json["script"]) {
-            eval(json["script"])
-        }
-        if(beapi.fs.isFileSync(json["path"])) {
-            console.log("run path:", json["path"])
-            require(json["path"])
-            return true
+        if(beapi.fs.isFileSync(confPath)) {
+            json = JSON.load(confPath)
         }
     }catch(e){
         console.log(e)
     }
-    return false
+    json.__proto__ =  {
+        desktop: "desktop/Desktop"
+    }
+    
+    if(json["script"]) {
+        try{
+            eval(json["script"])
+        }catch(e){ console.log(e) }
+    }
+    
+    if(json["app"] && beapi.fs.isFileSync(json["app"])) {
+        try{
+            console.log("run app:", json["app"])
+            require(json["app"])
+            return
+        }catch(e){ console.log(e) }
+    }
+    
+    if( be.disp?.length && json.desktop ){
+        const Desktop = require(json.desktop)
+        be.desktop = new Desktop()
+    }
+
+    return
 }
 function setAutoScript(path) {
     if(!path||!beapi.fs.existsSync(path)) {

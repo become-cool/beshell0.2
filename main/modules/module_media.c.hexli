@@ -1,0 +1,266 @@
+
+// #include <freertos/task.h>
+// #include <freertos/queue.h>
+
+#include "module_media.h"
+#include "module_serial.h"
+#include "module_fs.h"
+#include "widgets_gen.h"
+#include "cutils.h"
+#include "utils.h"
+#include "driver/i2s.h"
+#include "pwm_audio.h"
+#include "dac_audio.h"
+
+
+#include "mp3dec.h"
+
+
+#include "esp_log.h"
+#include <stdio.h>
+#include <string.h>
+#include "psram.h"
+#include <sys/stat.h>
+
+static const char *TAG = "media";
+
+
+static uint8_t player_i2s = 0 ;
+static char player_path[256] ;
+// static * player_output = NULL ;
+
+static HMP3Decoder hMP3Decoder = NULL ;
+
+static void task_mp3_player(char * path) {
+
+    printf("start to decode ...\n");
+
+    MP3FrameInfo mp3FrameInfo;
+
+    uint8_t readBuf[MAINBUF_SIZE];
+    // uint8_t readBuf[512];
+    // if(readBuf==NULL){
+    //     printf("readBuf malloc failed\n");
+    //     return false ;
+    // }
+    short output[1153*2] ;
+    // if(output==NULL){
+    //     // free(readBuf);
+    //     printf("outBuf malloc failed\n");
+    //     return false ;
+    // }
+    if (hMP3Decoder == 0){
+        // free(readBuf);
+        // free(output);
+        printf("memory is not enough..\n");
+        return false ;
+    }
+
+    int samplerate=0;
+    i2s_zero_dma_buffer(0);
+    ds(path)
+    FILE *mp3File=fopen(path,"rb");
+    // // free(path) ;
+
+    if(mp3File==NULL){
+        MP3FreeDecoder(hMP3Decoder);
+        // free(readBuf);
+        // free(output);
+        printf("open file failed\n");
+        return false ;
+    }
+    
+    char tag[10];
+    int tag_len = 0;
+    int read_bytes = fread(tag, 1, 10, mp3File);
+    // DN(read_bytes)
+    if(read_bytes == 10) 
+    {
+        if (memcmp(tag,"ID3",3) == 0) 
+        {
+            tag_len = ((tag[6] & 0x7F)<< 21)|((tag[7] & 0x7F) << 14) | ((tag[8] & 0x7F) << 7) | (tag[9] & 0x7F);
+                // printf("tag_len: %d %x %x %x %x", tag_len,tag[6],tag[7],tag[8],tag[9]);
+            fseek(mp3File, tag_len - 10, SEEK_SET);
+        }
+        else 
+        {
+            fseek(mp3File, 0, SEEK_SET);
+        }
+    }
+    unsigned char* input = &readBuf[0];
+    int bytesLeft = 0;
+    int outOfData = 0;
+    unsigned char* readPtr = readBuf;
+    bool printed = false ;
+    int64_t t0 = gettime() ;
+    while (1)
+    {
+        if (bytesLeft < MAINBUF_SIZE)
+        {
+            memmove(readBuf, readPtr, bytesLeft);
+            // t0 = gettime() ;
+            int br = fread(readBuf + bytesLeft, 1, MAINBUF_SIZE - bytesLeft, mp3File);
+            // printf("read:%lld\n",gettime() - t0);
+            if ((br == 0)&&(bytesLeft==0)) break;
+
+            bytesLeft = bytesLeft + br;
+            readPtr = readBuf;
+        }
+        int offset = MP3FindSyncWord(readPtr, bytesLeft);
+        if (offset < 0)
+        {  
+            printf("MP3FindSyncWord not find\n");
+            bytesLeft=0;
+            continue;
+        }
+        else
+        {
+            readPtr += offset;                         //data start point
+            bytesLeft -= offset;                 //in buffer
+            // t0 = gettime() ;
+            int errs = MP3Decode(hMP3Decoder, &readPtr, &bytesLeft, output, 0);
+            // printf("decode:%lld\n",gettime() - t0);
+            if (errs != 0)
+            {
+                printf("MP3Decode failed ,code is %d \n",errs);
+                break;
+            }
+            MP3GetLastFrameInfo(hMP3Decoder, &mp3FrameInfo);   
+            if(samplerate!=mp3FrameInfo.samprate)
+            {
+                samplerate=mp3FrameInfo.samprate;
+                // hal_i2s_init(player_i2s,samplerate,16,mp3FrameInfo.nChans);
+                i2s_set_clk(player_i2s,samplerate,32,mp3FrameInfo.nChans);
+                //wm8978_samplerate_set(samplerate);
+                printf("mp3file info---bitrate=%d,layer=%d,bitsPerSample=%d,nChans=%d,samprate=%d,outputSamps=%d\n"
+                    ,mp3FrameInfo.bitrate,mp3FrameInfo.layer,mp3FrameInfo.bitsPerSample,
+                    mp3FrameInfo.nChans,mp3FrameInfo.samprate,mp3FrameInfo.outputSamps);
+            }
+
+            size_t cnt = 0 ;
+            // ES8156 如果省略 MCLK ，由 SCLK 提供主时钟，
+            // 则 SCLK/LRSLK >=64 , 因此 sample 最小 32bit，而 esp-idf 最大支持 32bit
+            // 因此统一 32bit/sample
+            if(mp3FrameInfo.bitsPerSample!=32) {
+                // 扩展到 32 sample
+                i2s_write_expand(player_i2s, output,
+                    mp3FrameInfo.outputSamps * mp3FrameInfo.nChans,
+                    mp3FrameInfo.bitsPerSample,
+                    32, &cnt, portMAX_DELAY );
+                printf("write:%lld, bytes=%d, bitrate=%d\n",gettime() - t0, cnt, mp3FrameInfo.bitrate);
+                t0 = gettime() ;
+            }
+            else {
+                i2s_write(player_i2s, output, mp3FrameInfo.outputSamps*2, &cnt, 1000 / portTICK_PERIOD_MS);
+            }
+
+        }
+
+    }
+    i2s_zero_dma_buffer(0);
+    MP3FreeDecoder(hMP3Decoder);
+    // free(readBuf);
+    // free(output);  
+    fclose(mp3File);
+
+    printf("end mp3 decode ..\n");
+
+
+    while(1) {
+        vTaskDelay(1) ;
+    }
+}
+
+
+
+static JSValue js_audio_play_mp3(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+    ARGV_TO_STRING(0, path) ;
+
+    if(strlen(path) + strlen(vfs_path_prefix) + 1 > sizeof(player_path)) {
+        free(path) ;
+        THROW_EXCEPTION("path too long")
+    }
+
+    sprintf(player_path, "%s%s", vfs_path_prefix, path) ;
+    JS_FreeCString(ctx, path) ;
+
+    ds(player_path)
+    dd
+    
+    if(hMP3Decoder==NULL) {
+        hMP3Decoder = MP3InitDecoder();
+    }
+    // if(player_output==NULL) {
+    //     player_output = heap_caps_malloc(1153*4, MALLOC_CAP_INTERNAL);
+    // }
+    if(!hMP3Decoder) {
+        THROW_EXCEPTION("out of memory?")
+    }
+
+	xTaskCreatePinnedToCore(&task_mp3_player, "task_mp3_player", 1024*10, player_path, 10, NULL, 1);
+
+    return JS_UNDEFINED ;
+}
+
+
+static JSValue js_audio_play_mp3_sync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+    // ARGV_TO_STRING(0, path) ;
+
+    // if(strlen(path) + strlen(vfs_path_prefix) + 1 > sizeof(player_path)) {
+    //     free(path) ;
+    //     THROW_EXCEPTION("path too long")
+    // }
+
+    // sprintf(player_path, "%s%s", vfs_path_prefix, path) ;
+    // JS_FreeCString(ctx, path) ;
+
+    char * path = js_arg_to_vfspath(ctx, argv[0]) ;
+    
+	task_mp3_player(path) ;
+    free(path) ;
+
+    return JS_UNDEFINED ;
+}
+
+static JSValue js_audio_get_status(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+
+    return JS_UNDEFINED ;
+}
+static JSValue js_audio_pause(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    return JS_UNDEFINED ;
+}
+static JSValue js_audio_resume(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    return JS_UNDEFINED ;
+}
+static JSValue js_audio_track_info(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    return JS_UNDEFINED ;
+}
+static JSValue js_audio_stop(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    return JS_UNDEFINED ;
+}
+
+void be_module_media_init() {}
+
+void be_module_media_require(JSContext *ctx) {
+
+    JSValue beapi = js_get_glob_prop(ctx, 1, "beapi") ;
+    JSValue audio = JS_NewObject(ctx);
+    
+    JS_SetPropertyStr(ctx, beapi, "audio", audio);
+
+    JS_SetPropertyStr(ctx, audio, "playMP3", JS_NewCFunction(ctx, js_audio_play_mp3, "playMP3", 1));
+    JS_SetPropertyStr(ctx, audio, "playMP3Sync", JS_NewCFunction(ctx, js_audio_play_mp3_sync, "playMP3Sync", 1));
+    JS_SetPropertyStr(ctx, audio, "pause", JS_NewCFunction(ctx, js_audio_pause, "pause", 1));
+    JS_SetPropertyStr(ctx, audio, "resume", JS_NewCFunction(ctx, js_audio_resume, "resume", 1));
+    JS_SetPropertyStr(ctx, audio, "stop", JS_NewCFunction(ctx, js_audio_stop, "stop", 1));
+    JS_SetPropertyStr(ctx, audio, "status", JS_NewCFunction(ctx, js_audio_get_status, "status", 1));
+    JS_SetPropertyStr(ctx, audio, "trackInfo", JS_NewCFunction(ctx, js_audio_track_info, "trackInfo", 1));
+
+    JS_FreeValue(ctx, beapi);
+}
+
+
+void be_module_media_reset(JSContext *ctx) {
+}

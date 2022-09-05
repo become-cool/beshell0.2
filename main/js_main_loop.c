@@ -286,6 +286,7 @@ void js_main_loop(const char * script){
     be_module_gpio_init() ;
     // be_module_http_init() ;
     be_module_driver_init() ;
+    be_module_media_init() ;
 #endif
 
     quickjs_init() ;
@@ -319,6 +320,7 @@ void js_main_loop(const char * script){
             // be_module_http_reset(ctx) ;
             be_module_driver_reset(ctx) ;
             be_module_wifi_reset(ctx) ;
+            be_module_media_reset(ctx) ;
 #endif
             quickjs_deinit() ;
             quickjs_init() ;

@@ -68,4 +68,5 @@ JSValue js_lv_tabview_constructor(JSContext *ctx, JSValueConst new_target, int a
 
 JSValue js_lv_spinner_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv) ;
 
+JSValue js_lv_group_all_objs(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv) ;
 #endif

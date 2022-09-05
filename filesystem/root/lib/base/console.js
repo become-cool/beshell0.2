@@ -1,7 +1,7 @@
 console.stringify = function(value,format) {
     let pool = []
     let str = JSON.stringify(value, (key,value)=>{
-        if( key=="_handles" ) {
+        if( key=="_handlers" ) {
             return undefined
         }
         if(value===null) {

@@ -114,16 +114,16 @@ module.exports = class ScrApps extends lv.Obj {
         
         this.holdKeys()
         this.on("ipt.btn.press",key=>{
-            if(key=='b') {
+            if(key=='esc') {
                 desktop.lockScreen(true)
             }
             else if(key=='left') {
                 this.group.focusPrev()
             }
-            else if(key=='right') {
+            else if(key=='right'||key=='tab') {
                 this.group.focusNext()
             }
-            else if(key=='a') {
+            else if(key=='enter') {
                 let icon = this.group.focused()
                 icon && icon.run()
                 console.log(icon)
@@ -210,6 +210,10 @@ module.exports = class ScrApps extends lv.Obj {
             lv.msg.error("加载文件出错")
             return
         }
+
+        setTimeout(()=>{
+            require("music/main.js").singleton()
+        },1000)
     }
 
     popupAppMenu(path) {

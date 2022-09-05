@@ -1,5 +1,5 @@
 beapi.lvgl.__lv_obj_init = function () {
-	this._handles = {
+	this._handlers = {
 		"#EVENT.ADD#": [n=>{
 			this.enableEvent(n == "*" ? "all" : n)
 		}],

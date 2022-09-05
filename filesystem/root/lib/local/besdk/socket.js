@@ -1,19 +1,19 @@
 exports.udp = {
-    _handles: {} ,
+    _handlers: {} ,
     onmessage(port, callback) {
-        if(!this._handles[port]) {
+        if(!this._handlers[port]) {
             beapi.udp.listen(port)
-            this._handles[port] = []
+            this._handlers[port] = []
         }
-        this._handles[port].push(callback)
+        this._handlers[port].push(callback)
     } ,
 }
 
 beapi.udp.setRecvCallback((message, port, fromAddr, fromPort)=>{
-    if(!exports.udp._handles[port]) {
+    if(!exports.udp._handlers[port]) {
         return
     }
-    for(let func of exports.udp._handles[port]) {
+    for(let func of exports.udp._handlers[port]) {
         try{
             func(message)
         }catch(e){

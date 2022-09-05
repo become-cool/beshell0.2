@@ -26,7 +26,7 @@ class WgtClock extends lv.Obj {
                     {
                         class: "Label" ,
                         ref: "labTime" ,
-                        font: "m40" ,
+                        font: "m36" ,
                         text: "00:00:00" ,
                     } ,
                     {

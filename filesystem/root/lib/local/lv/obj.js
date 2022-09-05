@@ -10,12 +10,44 @@ beapi.lvgl.Obj.prototype.draggable = function(onstart, ondragging, onstop) {
     return this._draggable
 }
 
+beapi.lvgl.Obj.prototype.asModel = function asModel() {
+    this.on("visible", visible=>{
+        if(visible) {
+            this.holdKeys()
+        }
+        else {
+            this.releaseKeys()
+        }
+    })
+    this.on("ipt.btn.press",key=>{
+        if(key=='esc') {
+            this.hide()
+        }
+    })
+}
+
+
 beapi.lvgl.Obj.prototype.hitTest = function hitTest(x,y) {
     if(x==undefined || x==null || y==undefined || y==null) {
         ; ({x,y} = lv.inputPoint())
     }
     let [x1,y1] = this.coords()
     return x>x1 && y>y1 && x<x1+this.width() && y<y1+this.height() 
+}
+
+beapi.lvgl.Obj.prototype._clearFlag = beapi.lvgl.Obj.prototype.clearFlag
+beapi.lvgl.Obj.prototype.clearFlag = function (flag) {
+    this._clearFlag(flag)
+    if(flag=='hidden') {
+        this.emit("visible", true, this)
+    }
+}
+beapi.lvgl.Obj.prototype._addFlag = beapi.lvgl.Obj.prototype.addFlag
+beapi.lvgl.Obj.prototype.addFlag = function (flag) {
+    this._addFlag(flag)
+    if(flag=='hidden') {
+        this.emit("visible", false, this)
+    }
 }
 
 beapi.lvgl.Obj.prototype.show = function show() {

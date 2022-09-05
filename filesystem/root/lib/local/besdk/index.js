@@ -1,5 +1,5 @@
 global.be = {
-    dev: [] ,
+    dev: {} ,
     disp: [] ,
     indev: [] ,
     part: [] ,

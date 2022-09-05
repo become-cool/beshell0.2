@@ -1,6 +1,7 @@
 #ifndef _UTILS_H
 #define _UTILS_H
 
+#include "cutils.h"
 #include "debug.h"
 #include "quickjs-libc.h"
 #include <stdbool.h>
@@ -150,8 +151,6 @@ void eval_code_len(JSContext *ctx, const char * str,size_t len,const char * file
 
 #define STR1(R)  #R
 #define STR2(R)  STR1(R)
-
-
 
 
 #define dref(var) printf( #var " ref:%d @%d\n", VAR_REFCNT(var), __LINE__) ;

@@ -16,7 +16,7 @@ mkfs-root:
 	node filesystem/pack-dir.js
 
 mkfs-home:
-	bin/mklittlefs -c filesystem/tmp/home -s 524288 filesystem/img/fs-home.img -d 5
+	bin/mklittlefs -c filesystem/tmp/home -s 204800 filesystem/img/fs-home.img -d 5
 
 dist:
 	node filesystem/dispense-to-beconsole.js
@@ -33,18 +33,22 @@ partition:
 	python2 /mnt/d/lib/esp-idf/components/partition_table/gen_esp32part.py filesystem/partitions-16MB.csv filesystem/img/partitions-16MB.bin
 
 
+pack-fs: tree-shaking mkfs-root mkfs-home partition dist-fs
+	ls -lh filesystem/img/
 pack-all: tree-shaking mkfs-root mkfs-home partition dist
 	ls -lh filesystem/img/
 
 # 编译js, 打包 / 和 /home 分区，并制作 img 文件
-fs: compile tree-shaking mkfs-root mkfs-home partition dist-fs
-	ls -lh filesystem/img/
+fs: compile pack-fs
 
 # 使用 js 源文件打包 / 和 /home 分区，并制作 img 文件
-fs-src: clear-jsbin pack-all
+fs-src: clear-jsbin pack-fs
 
 # 编译js, 打包 / 分区，并制作 img 文件
 fs-root: compile tree-shaking mkfs-root dist-root
+
+# 编译js, 打包 / 分区，并制作 img 文件
+fs-root-src: clear-jsbin tree-shaking mkfs-root dist-root
 
 # 编译js, 打包 /home 分区，并制作 img 文件
 fs-home: compile tree-shaking mkfs-home partition dist-home
@@ -69,6 +73,7 @@ help:
 	@echo "make mkfs-root"
 	@echo "make mkfs-home"
 	@echo "make partition"
+	@echo "make pack-fs		# tree-shaking + mkfs-root + mkfs-home + partition + dist-fs"
 	@echo "make pack-all		# tree-shaking + mkfs-root + mkfs-home + partition + dist"
 	@echo "make dist		# dispense to BeConsole"
 	@echo "make dist-root		# dispense fs root img file to BeConsole"
@@ -76,6 +81,7 @@ help:
 	@echo "make fs			# compile + pack-all"
 	@echo "make fs-src		# clear-jsbin + pack-all"
 	@echo "make fs-root		# compile tree-shaking mkfs-root dist-root"
+	@echo "make fs-root-src	# clear-jsbin tree-shaking mkfs-root dist-root"
 	@echo "make telweb-build"
 	@echo "make telweb-pack"
 	@echo "make telweb		# telweb-build + telweb-pack"

@@ -559,6 +559,9 @@ JSValue js_lv_label_set_font(JSContext *ctx, JSValueConst this_val, int argc, JS
     else if( strcmp("m32", fontname)==0 ) {
         font = &lv_font_montserrat_32 ;
     }
+    else if( strcmp("m36", fontname)==0 ) {
+        font = &lv_font_montserrat_36 ;
+    }
     else if( strcmp("m40", fontname)==0 ) {
         font = &lv_font_montserrat_40 ;
     }
@@ -870,4 +873,24 @@ JSValue js_lv_spinner_constructor(JSContext *ctx, JSValueConst new_target, int a
     lv_arc_t * cobj = lv_spinner_create(cparent, spin_time, arc_length) ;
     JSValue jsobj = js_lv_obj_wrapper(ctx, cobj, new_target, lv_spinner_js_class_id()) ;
     return jsobj ;
+}
+
+
+JSValue js_lv_group_all_objs(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+
+    void * lv_userdata = JS_GetOpaqueInternal(this_val) ;
+    if(!lv_userdata) {
+        THROW_EXCEPTION("Group.del() must be called as a Group method")
+    }
+    lv_group_t * thisgrp = lv_userdata ;
+    
+    JSValue array = JS_NewArray(ctx) ;
+    uint idx = 0 ;
+    lv_obj_t ** ppobj;
+    _LV_LL_READ(&thisgrp->obj_ll, ppobj) {
+        JSValue jsobj = js_lv_obj_wrapper(ctx, *ppobj, JS_UNDEFINED, 0) ;
+        JS_SetPropertyUint32(ctx, array, idx++, jsobj) ;
+    }
+
+    return array ;
 }

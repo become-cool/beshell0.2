@@ -164,7 +164,7 @@ static void esp32_wifi_eventHandler(void* arg, esp_event_base_t event_base, int3
             argv[2] = JS_NewInt32(__event_handle_ctx, REASON(event_data)) ;
         }
 
-        eventloop_push_with_argv(__event_handle_ctx, __event_handle, 3, argv) ;
+        eventloop_push_with_argv(__event_handle_ctx, __event_handle, JS_UNDEFINED, 3, argv) ;
     }
 }
 

@@ -23,6 +23,27 @@ beapi.lvgl.TabView.prototype.fromJson = function(json, refs) {
 }
 
 
+beapi.lvgl.List.styleItemFocused = new beapi.lvgl.Style({
+    "border-width": 1,
+    "border-color": beapi.lvgl.palette("green"),
+    "radius": 3,
+})
+beapi.lvgl.List.prototype.group = function() {
+    if(!this._group) {
+        this._group = new beapi.lvgl.Group
+    }
+    return this._group
+}
+
+beapi.lvgl.List.prototype._addBtn = beapi.lvgl.List.prototype.addBtn
+beapi.lvgl.List.prototype.addBtn = function(icon, text) {
+    let btn = this._addBtn(icon, text)
+
+    this.group().addObj(btn)
+    btn.addStyle(beapi.lvgl.List.styleItemFocused, 2) // LV_STATE_FOCUSED: 2
+
+    return btn
+}
 
 beapi.lvgl.List.prototype.fromJson = function(json, refs) {
     if(json.items instanceof Array) {

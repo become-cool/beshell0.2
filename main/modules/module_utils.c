@@ -144,7 +144,7 @@ static JSValue __js_utils_set_timer(JSContext *ctx, int argc, JSValueConst *argv
         JS_ThrowReferenceError(ctx, "Invalid param type");
         return JS_EXCEPTION ;
 	}
-	uint32_t addr = eventloop_push(ctx, (JSValue)argv[0], interval, repeat) ;
+	uint32_t addr = eventloop_push(ctx, (JSValue)argv[0], JS_UNDEFINED, interval, repeat) ;
 	return JS_NewInt32(ctx, addr) ;
 }
 

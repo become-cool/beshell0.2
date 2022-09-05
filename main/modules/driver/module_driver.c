@@ -23,7 +23,7 @@
  * @param spi num 
  * @param cs 
  * @param path 
- * @param khz = 26000 
+ * @param khz = 20000 
  */
 static JSValue js_driver_mount_sd(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     
@@ -176,8 +176,55 @@ static JSValue js_driver_ES8156_setup(JSContext *ctx, JSValueConst this_val, int
 //         I2CWRNBYTE_CODEC(0x24,0x01);	
 //         I2CWRNBYTE_CODEC(0x23,0xCA + (0x30*VDDA_VOLTAGE));	
 //     }
-
 // }
+
+void * audio_dma = NULL;
+
+static JSValue js_driver_hold_dma(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(2)
+    ARGV_TO_STRING(0, type)
+    ARGV_TO_UINT32(1, size)
+
+    void ** p ;
+    if( strcmp(type,"audio")==0 ) {
+        p = & audio_dma ;
+    }
+    else {
+        THROW_EXCEPTION("unknow type: %s", type)
+    }
+
+    JS_FreeCString(ctx,type) ;
+
+    if((*p)==NULL) {
+#ifndef SIMULATION
+        (*p) = heap_caps_malloc(size, MALLOC_CAP_DMA) ;
+#else
+        (*p) = 0xFF ;
+#endif
+    }
+
+    return (*p)==0? JS_TRUE : JS_FALSE ;
+}
+static JSValue js_driver_release_dma(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+    ARGV_TO_STRING(0, type)
+
+    void ** p ;
+    if( strcmp(type,"audio")==0 ) {
+        p = & audio_dma ;
+    }
+    else {
+        THROW_EXCEPTION("unknow type: %s", type)
+    }
+    JS_FreeCString(ctx,type) ;
+
+    if(*p) {
+        free(*p) ;
+        *p = NULL ;
+    }
+
+    return JS_UNDEFINED ;
+}
 
 
 void be_module_driver_init() {
@@ -192,6 +239,8 @@ void be_module_driver_require(JSContext *ctx) {
 
     JS_SetPropertyStr(ctx, driver, "mountSD", JS_NewCFunction(ctx, js_driver_mount_sd, "mountSD", 1));
     JS_SetPropertyStr(ctx, driver, "ES8156Setup", JS_NewCFunction(ctx, js_driver_ES8156_setup, "ES8156Setup", 1));
+    JS_SetPropertyStr(ctx, driver, "holdDMA", JS_NewCFunction(ctx, js_driver_hold_dma, "holdDMA", 1));
+    JS_SetPropertyStr(ctx, driver, "releaseDMA", JS_NewCFunction(ctx, js_driver_release_dma, "releaseDMA", 1));
 
     be_module_driver_camera_require(ctx, driver) ;    
 

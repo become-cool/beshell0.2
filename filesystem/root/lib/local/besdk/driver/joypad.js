@@ -1,28 +1,28 @@
+const lv = require("lv")
 const I2CDevice = require("./I2CDevice")
 class Joypad extends I2CDevice {
     constructor() {
         super("joypad")
-        this._timer=-1
+        // this._timer=-1
         this.raw = 0
     }
     scan(addr) {
         return beapi.i2c.ping(this.bus, addr||this.addr)
     }
-    register() {
-        this.indev = new lv.InDevNav("joypad", this.bus, this.addr)
+    setup(opts){
+        this.bus = opts?.i2c || 0
+        this.addr = opts?.addr
     }
-    end() {
-        if(this._timer>-1) {
-            clearTimeout(this._timer)
-            this._timer = -1
-        }
-        super.end()
+    register(insName) {
+        super.register(insName)
+        this.indev = new lv.InDevNav("joypad", this.opts?.i2c||0, this.opts?.addr||51)
+        be.indev.push(this.indev)
     }
     read() {
         if( this.addr!=51 && this.addr!=52 ) {
             throw new Error("not set i2c device addr")
         }
-        this.raw = beapi.i2c.readUInt8(this.bus, this.addr)
+        this.raw = beapi.i2c.readU8(this.bus, this.addr)
         let btns = {
             up: !!(this.raw & 0x01) ,
             down: !!(this.raw & 0x02) ,

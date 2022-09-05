@@ -101,9 +101,14 @@ const lstClasses = [
 
     {
         className: "Group" ,
+        typeName: 'lv_group',
+        ctypeName: "lv_group_t *" ,
         cusConstructor: true ,
         cusFinalizer: true ,
         isWidget: false ,
+        cusMethods: {
+            "js_lv_group_all_objs": "allObjs" ,
+        }
     } ,
 ]
 
@@ -116,7 +121,9 @@ const lstClasses = [
     methods: {
         "lv_obj_set_flex_align": [null, [ ["lv_flex_align_t","main_place"],["lv_flex_align_t","cross_place"],["lv_flex_align_t","track_cross_place"] ], "void"],
     } ,
-    cusMethods: []
+    cusMethods: {
+        "js_lv_ooo_xxx": "xxx" ,
+    }
 }
 */
 const WidgetsMeta = []

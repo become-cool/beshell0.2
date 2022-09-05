@@ -5,7 +5,6 @@
 #include "quickjs-libc.h"
 #include <stdbool.h>
 
-
 #define DISP_BUFF_LINES_POOR 5
 #define DISP_BUFF_LINES_ENOUGH 20
 // #define DISP_BUFF_LINES ( (getPsramTotal()>1024)? DISP_BUFF_LINES_ENOUGH: DISP_BUFF_LINES_POOR)

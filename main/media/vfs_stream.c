@@ -38,6 +38,8 @@
 #include "audio_element.h"
 #include "wav_head.h"
 #include "esp_log.h"
+#include "utils.h"
+#include "module_serial.h"
 
 #define FILE_WAV_SUFFIX_TYPE  "wav"
 #define FILE_OPUS_SUFFIX_TYPE "opus"
@@ -45,6 +47,8 @@
 #define FILE_AMRWB_SUFFIX_TYPE "Wamr"
 
 static const char *TAG = "VFS_STREAM";
+
+
 
 typedef enum {
     STREAM_TYPE_UNKNOWN,
@@ -151,8 +155,10 @@ static int _vfs_read(audio_element_handle_t self, char *buffer, int len, TickTyp
     audio_element_info_t info;
     audio_element_getinfo(self, &info);
 
-    ESP_LOGD(TAG, "read len=%d, pos=%d/%d", len, (int)info.byte_pos, (int)info.total_bytes);
+    // int64_t t0=gettime() ;
     int rlen = fread(buffer, 1, len, vfs->file);
+    // printf("%d,%lld\n",rlen, gettime() -t0);
+
     if (rlen <= 0) {
         ESP_LOGW(TAG, "No more data, ret:%d", rlen);
     } else {

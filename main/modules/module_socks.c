@@ -17,7 +17,7 @@ struct timeval select_tv = {
 } ;
 
 
-int udp_listen_handles[UDP_POOR_SIZE] = {} ;
+int udp_listen_handlers[UDP_POOR_SIZE] = {} ;
 uint16_t udp_listen_ports[UDP_POOR_SIZE] = {0} ;
 uint8_t udp_listen_count = 0 ;
 fd_set udp_recv_rfds;
@@ -30,12 +30,12 @@ void be_module_socks_udp_loop(JSContext *ctx) {
     int fds = -1 ;
 
     for(int i=0;i<udp_listen_count;i++){
-        if(udp_listen_handles[i]<0) {
+        if(udp_listen_handlers[i]<0) {
             continue ;
         }
-        FD_SET(udp_listen_handles[i], &udp_recv_rfds);
-        if(udp_listen_handles[i]>fds)
-            fds = udp_listen_handles[i] ;
+        FD_SET(udp_listen_handlers[i], &udp_recv_rfds);
+        if(udp_listen_handlers[i]>fds)
+            fds = udp_listen_handlers[i] ;
     }
     if(fds<0) {
         return ;
@@ -59,11 +59,11 @@ void be_module_socks_udp_loop(JSContext *ctx) {
     
     for(int i=0;i<udp_listen_count;i++) {
 
-        if(!FD_ISSET(udp_listen_handles[i], &udp_recv_rfds)) {
+        if(!FD_ISSET(udp_listen_handlers[i], &udp_recv_rfds)) {
             continue ;
         }
 
-        uint8_t len = recvfrom(udp_listen_handles[i], rx_buffer, sizeof(rx_buffer), 0, (struct sockaddr *)&source_addr, &source_addrlen);
+        uint8_t len = recvfrom(udp_listen_handlers[i], rx_buffer, sizeof(rx_buffer), 0, (struct sockaddr *)&source_addr, &source_addrlen);
         if (len < 0) { 
             return;
         }
@@ -113,7 +113,7 @@ JSValue js_udp_listen(JSContext *ctx, JSValueConst this_val, int argc, JSValueCo
         return JS_FALSE ;
     }
 
-    udp_listen_handles[udp_listen_count] = sock ;
+    udp_listen_handlers[udp_listen_count] = sock ;
     udp_listen_ports[udp_listen_count] = port ;
 
     udp_listen_count ++ ;
@@ -251,7 +251,7 @@ JSValue js_udp_set_recv_callback(JSContext *ctx, JSValueConst this_val, int argc
 
 void be_module_socks_init() {
     for(int i=0;i<UDP_POOR_SIZE;i++) {
-        udp_listen_handles[i] = -1 ;
+        udp_listen_handlers[i] = -1 ;
     }
 }
 
@@ -322,15 +322,15 @@ void be_module_socks_reset(JSContext *ctx) {
     }
     
     for(int i=0;i<UDP_POOR_SIZE;i++) {
-        // printf("udp_listen_handles[i]=%d\n",udp_listen_handles[i]) ;
-        if(udp_listen_handles[i]<0)
+        // printf("udp_listen_handlers[i]=%d\n",udp_listen_handlers[i]) ;
+        if(udp_listen_handlers[i]<0)
             continue ;
             
-        // printf("close udp socket: %d, %d\n", i, udp_listen_handles[i]) ;
+        // printf("close udp socket: %d, %d\n", i, udp_listen_handlers[i]) ;
 
-        close(udp_listen_handles[i]) ;
+        close(udp_listen_handlers[i]) ;
 
-        udp_listen_handles[i] = -1 ;
+        udp_listen_handlers[i] = -1 ;
         udp_listen_ports[i] = 0 ;
     }
     udp_listen_count = 0 ;

@@ -18,6 +18,7 @@ module.exports = class AudioList extends lv.Column {
                     text: '返回', 
                     textColor: 0 ,
                     font: 'msyh', 
+                    ref: 'btnBack' ,
                     style: {
                         'bg-opa': 0 ,
                         "shadow-width": 0 ,
@@ -48,10 +49,28 @@ module.exports = class AudioList extends lv.Column {
         this.loading = false
 
         this.lst = []
+
+        let group = this.uilst.group()
+
+        group.addObj(this.btnBack)
+
+        this.on("ipt.btn.press",key=>{
+            if(key=='down') {
+                group.focusNext()
+            }
+            else if(key=='up'){
+                group.focusPrev()
+            }
+            else if(key=='enter') {
+                let btn = group.focused()
+                if(btn) {
+                    btn.emit("clicked")
+                }
+            }
+        })
     }
 
     load() {
-        console.log("load")
         if(this.loading) {
             return
         }
@@ -61,7 +80,16 @@ module.exports = class AudioList extends lv.Column {
         this.uilst.clean()
         this.lst.length = 0
 
-        this.loadDir("/mnt/sd", this.lst)
+        // this.lst.push({title:"demo-8000", path:"/mnt/sd/music4/music-16b-2c-8000hz.mp3"})
+        // this.lst.push({title:"demo-22050", path:"/mnt/sd/music4/music-16b-2c-22050hz.mp3"})
+        // this.lst.push({title:"demo-44100", path:"/mnt/sd/music4/music-16b-2c-44100hz.mp3"})
+
+        try{
+            this.loadDir("/mnt/sd", this.lst, 3)
+        }catch(e){
+            console.error(e)
+        }
+        console.log(this.lst.length)
         
         for(let i=0;i<Math.min(this.lst.length,10);i++){
             let item = this.lst[i]
@@ -83,18 +111,21 @@ module.exports = class AudioList extends lv.Column {
         this.loading = false
     }
 
-    loadDir(path, lst) {
-        for(let filename of beapi.fs.readdirSync(path)||[]) {
-            if(filename=='.' || filename=='..') {
+    loadDir(path, lst, dep) {
+        console.log("read", path)
+        for(let item of beapi.fs.readdirSync(path,true)||[]) {
+            if(item.name=='.' || item.name=='..' || item.name=='System Volume Information' || item.name=='$RECYCLE.BIN') {
                 continue
             }
-            let filepath = path+'/'+filename
-            if (beapi.fs.isDirSync(filepath)) {
-                this.loadDir(filepath,lst)
+            let filepath = path+'/'+item.name
+            if (item.type=='dir') {
+                if(dep) {
+                    this.loadDir(filepath,lst,dep-1)
+                }
                 continue
             }
 
-            let res = filename.match(/^(.+)\.mp3$/i)
+            let res = item.name.match(/^(.+)\.mp3$/i)
             if( res ){
                 lst.push({
                     title: res[1] ,

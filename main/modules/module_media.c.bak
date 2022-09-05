@@ -321,6 +321,318 @@ static bool play_mp3(uint8_t i2s, char *path)
     return true ;
 }
 
+
+
+
+
+// static JSClassID js_audio_player_class_id ;
+// static JSValue js_audio_player_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
+
+//     CHECK_ARGC(1)
+//     ARGV_TO_UINT8(0, i2s)
+//     if(i2s!=0 && i2s!=1) {
+//         THROW_EXCEPTION("arg %s must be 0 or 1", "i2s")
+//     }
+
+//     adf_player_t * cplayer = malloc(sizeof(adf_player_t)) ;
+//     if(!cplayer) {
+//         THROW_EXCEPTION("out of memory?")
+//     }
+
+//     audio_pipeline_cfg_t pipeline_cfg = DEFAULT_AUDIO_PIPELINE_CONFIG();
+//     cplayer->pipe = audio_pipeline_init(&pipeline_cfg);
+//     mem_assert(cplayer->pipe);
+
+//     // src
+//     vfs_stream_cfg_t vfs_cfg = VFS_STREAM_CFG_DEFAULT();
+//     vfs_cfg.type = AUDIO_STREAM_READER;
+//     cplayer->src = vfs_stream_init(&vfs_cfg);
+
+//     // i2s out
+//     i2s_stream_cfg_t i2s_cfg = I2S_STREAM_CFG_DEFAULT();
+//     i2s_cfg.type = AUDIO_STREAM_WRITER;
+//     cplayer->i2s = i2s_stream_init(&i2s_cfg);
+
+//     // decode
+//     mp3_decoder_cfg_t mp3_cfg = DEFAULT_MP3_DECODER_CONFIG();
+//     cplayer->decoder = mp3_decoder_init(&mp3_cfg);
+
+//     // ESP_LOGI(TAG, "[3.4] Register all elements to audio pipeline");
+//     audio_pipeline_register(cplayer->pipe, cplayer->src, "src");
+//     audio_pipeline_register(cplayer->pipe, cplayer->decoder, "decoder");
+//     audio_pipeline_register(cplayer->pipe, cplayer->i2s, "i2s");
+
+//     // ESP_LOGI(TAG, "[3.5] Link it together [sdcard]-->vfs_stream-->music_decoder-->i2s_stream-->[codec_chip]");
+//     const char *link_tag[3] = {"src", "decoder", "i2s"};
+//     audio_pipeline_link(cplayer->pipe, &link_tag[0], 3);
+
+//     // ESP_LOGI(TAG, "[ 4 ] Set up  event listener");
+//     audio_event_iface_cfg_t evt_cfg = AUDIO_EVENT_IFACE_DEFAULT_CFG();
+//     cplayer->evt = audio_event_iface_init(&evt_cfg);
+
+//     // ESP_LOGI(TAG, "[4.1] Listening event from all elements of pipeline");
+//     audio_pipeline_set_listener(cplayer->pipe, cplayer->evt);
+
+//     // ESP_LOGI(TAG, "[4.2] Listening event from peripherals");
+//     esp_periph_config_t periph_cfg = DEFAULT_ESP_PERIPH_SET_CONFIG();
+//     cplayer->set = esp_periph_set_init(&periph_cfg);
+//     audio_event_iface_set_listener(esp_periph_set_get_event_iface(cplayer->set), cplayer->evt);
+    
+
+//     JSValue jsobj = JS_NewObjectClass(ctx, js_audio_player_class_id) ;
+//     JS_SetOpaque(jsobj, cplayer) ;
+
+//     return jsobj ;
+// }
+
+
+// static void js_audio_player_finalizer(JSRuntime *rt, JSValue this_val){
+//     printf("js_audio_player_finalizer()\n") ;
+
+//     adf_player_t * cplayer = JS_GetOpaque(this_val, js_audio_player_class_id) ;
+//     if(!cplayer) {
+//         printf("not a %s object?\n", "beapi.audio.Player") ;
+//         return ;
+//     }
+
+//     // ESP_LOGI(TAG, "[ 7 ] Stop audio_pipeline");
+//     audio_pipeline_stop(cplayer->pipe);
+//     audio_pipeline_wait_for_stop(cplayer->pipe);
+//     audio_pipeline_terminate(cplayer->pipe);
+
+//     audio_pipeline_unregister(cplayer->pipe, cplayer->src);
+//     audio_pipeline_unregister(cplayer->pipe, cplayer->i2s);
+//     audio_pipeline_unregister(cplayer->pipe, cplayer->decoder);
+
+//     /* Terminal the pipeline before removing the listener */
+//     audio_pipeline_remove_listener(cplayer->pipe);
+
+//     /* Stop all periph before removing the listener */
+//     esp_periph_set_stop_all(cplayer->set);
+//     audio_event_iface_remove_listener(esp_periph_set_get_event_iface(cplayer->set), cplayer->evt);
+
+//     /* Make sure audio_pipeline_remove_listener & audio_event_iface_remove_listener are called before destroying event_iface */
+//     audio_event_iface_destroy(cplayer->evt);
+
+//     /* Release all resources */
+//     audio_pipeline_deinit(cplayer->pipe);
+//     audio_element_deinit(cplayer->src);
+//     audio_element_deinit(cplayer->i2s);
+//     audio_element_deinit(cplayer->decoder);
+//     esp_periph_set_destroy(cplayer->set);
+
+//     free(cplayer) ;
+//     cplayer = NULL ;
+//     JS_SetOpaque(this_val, NULL) ;
+
+// }
+// static JSClassDef js_audio_player_class = {
+//     "beapi.audio.Player",
+//     .finalizer = js_audio_player_finalizer,
+// } ;
+
+
+// static JSValue js_audio_player_play(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+//     THIS_PLAYER(cplayer)
+//     CHECK_ARGC(1)
+//     char * path = js_arg_to_vfspath(ctx,argv[0]) ;
+//     if(!path) {
+//         THROW_EXCEPTION("out of memory?")
+//     }
+    
+//     audio_element_set_uri(cplayer->src, (char *)path);
+//     free(path) ;
+
+//     audio_pipeline_run(cplayer->pipe);
+
+    
+//     while (1) {
+//         audio_event_iface_msg_t msg;
+//         esp_err_t ret = audio_event_iface_listen(cplayer->evt, &msg, portMAX_DELAY);
+//         if (ret != ESP_OK) {
+//             printf("[ * ] Event interface error : %d\n", ret);
+//             break;
+//         }
+
+//         if (msg.source_type == AUDIO_ELEMENT_TYPE_ELEMENT && msg.source == (void *) cplayer->decoder
+//             && msg.cmd == AEL_MSG_CMD_REPORT_MUSIC_INFO) {
+//             audio_element_info_t music_info = {0};
+//             audio_element_getinfo(cplayer->decoder, &music_info);
+
+//             printf("[ * ] Receive music info from mp3 decoder, sample_rates=%d, bits=%d, ch=%d\n",
+//                      music_info.sample_rates, music_info.bits, music_info.channels);
+
+//             audio_element_setinfo(cplayer->i2s, &music_info);
+//             i2s_stream_set_clk(cplayer->i2s, music_info.sample_rates, music_info.bits, music_info.channels);
+//             break;
+//         }
+
+//         /* Stop when the last pipeline element (i2s_stream_writer in this case) receives stop event */
+//         if (msg.source_type == AUDIO_ELEMENT_TYPE_ELEMENT && msg.source == (void *) cplayer->i2s
+//             && msg.cmd == AEL_MSG_CMD_REPORT_STATUS
+//             && (((int)msg.data == AEL_STATUS_STATE_STOPPED) || ((int)msg.data == AEL_STATUS_STATE_FINISHED))) {
+//             printf("Stop event received\n");
+//             break;
+//         }
+
+//         vTaskDelay(1) ;
+//     }
+
+//     return JS_UNDEFINED ;
+// }
+// static JSValue js_audio_player_pause(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+//     CHECK_ARGC(0)
+
+//     return JS_UNDEFINED ;
+// }
+// static JSValue js_audio_player_resume(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+//     CHECK_ARGC(0)
+
+//     return JS_UNDEFINED ;
+// }
+// static JSValue js_audio_player_stop(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+//     CHECK_ARGC(0)
+
+//     return JS_UNDEFINED ;
+// }
+
+// static const JSCFunctionListEntry js_audio_player_proto_funcs[] = {
+//     JS_CFUNC_DEF("play", 0, js_audio_player_play),
+//     JS_CFUNC_DEF("pause", 0, js_audio_player_pause),
+//     JS_CFUNC_DEF("resume", 0, js_audio_player_resume),
+//     JS_CFUNC_DEF("stop", 0, js_audio_player_stop),
+// } ;
+
+
+void playmp3(void * path) {
+    // audioTaskWorking = true ;
+    
+    // Example of linking elements into an audio pipeline -- START
+    audio_pipeline_handle_t pipeline;
+    audio_element_handle_t vfs_stream_reader, i2s_stream_writer, music_decoder;
+
+    // esp_log_level_set("*", ESP_LOG_WARN);
+    // esp_log_level_set(TAG, ESP_LOG_INFO);
+
+
+    // ESP_LOGI(TAG, "[3.0] Create audio pipeline for playback");
+    audio_pipeline_cfg_t pipeline_cfg = DEFAULT_AUDIO_PIPELINE_CONFIG();
+    pipeline = audio_pipeline_init(&pipeline_cfg);
+    mem_assert(pipeline);
+
+    // ESP_LOGI(TAG, "[3.1] Create vfs stream to read data from sdcard");
+    vfs_stream_cfg_t vfs_cfg = VFS_STREAM_CFG_DEFAULT();
+    vfs_cfg.type = AUDIO_STREAM_READER;
+    vfs_cfg.task_core = 1 ;
+    vfs_stream_reader = vfs_stream_init(&vfs_cfg);
+
+    // ESP_LOGI(TAG, "[3.2] Create i2s stream to write data to codec chip");
+    i2s_stream_cfg_t i2s_cfg = I2S_STREAM_CFG_DEFAULT();
+
+// dn(i2s_cfg.I2S_STREAM_CFG_DEFAULT)
+    i2s_cfg.type = AUDIO_STREAM_WRITER;
+    i2s_cfg.task_core = 1 ;
+    i2s_stream_writer = i2s_stream_init(&i2s_cfg);
+
+    // ESP_LOGI(TAG, "[3.3] Create mp3 decoder");
+    mp3_decoder_cfg_t mp3_cfg = DEFAULT_MP3_DECODER_CONFIG();
+    mp3_cfg.task_core = 1 ;
+    music_decoder = mp3_decoder_init(&mp3_cfg);
+
+    // ESP_LOGI(TAG, "[3.4] Register all elements to audio pipeline");
+    audio_pipeline_register(pipeline, vfs_stream_reader, "file");
+    audio_pipeline_register(pipeline, music_decoder, "dec");
+    audio_pipeline_register(pipeline, i2s_stream_writer, "i2s");
+
+    // ESP_LOGI(TAG, "[3.5] Link it together [sdcard]-->vfs_stream-->music_decoder-->i2s_stream-->[codec_chip]");
+    const char *link_tag[3] = {"file", "dec", "i2s"};
+    audio_pipeline_link(pipeline, &link_tag[0], 3);
+
+    // ESP_LOGI(TAG, "[3.6] Set up uri");
+    audio_element_set_uri(vfs_stream_reader, (char *)path);
+
+    // ESP_LOGI(TAG, "[ 4 ] Set up  event listener");
+    audio_event_iface_cfg_t evt_cfg = AUDIO_EVENT_IFACE_DEFAULT_CFG();
+    audio_event_iface_handle_t evt = audio_event_iface_init(&evt_cfg);
+
+    // ESP_LOGI(TAG, "[4.1] Listening event from all elements of pipeline");
+    audio_pipeline_set_listener(pipeline, evt);
+
+    // ESP_LOGI(TAG, "[4.2] Listening event from peripherals");
+    esp_periph_config_t periph_cfg = DEFAULT_ESP_PERIPH_SET_CONFIG();
+    esp_periph_set_handle_t set = esp_periph_set_init(&periph_cfg);
+    audio_event_iface_set_listener(esp_periph_set_get_event_iface(set), evt);
+
+    // ESP_LOGI(TAG, "[ 5 ] Start audio_pipeline");
+    audio_pipeline_run(pipeline);
+    // Example of linking elements into an audio pipeline -- END
+
+    // ESP_LOGI(TAG, "[ 6 ] Listen for all pipeline events");
+    while (1) {
+        audio_event_iface_msg_t msg;
+        esp_err_t ret = audio_event_iface_listen(evt, &msg, portMAX_DELAY);
+        if (ret != ESP_OK) {
+            ESP_LOGE(TAG, "[ * ] Event interface error : %d", ret);
+            continue;
+        }
+
+        if (msg.source_type == AUDIO_ELEMENT_TYPE_ELEMENT && msg.source == (void *) music_decoder
+            && msg.cmd == AEL_MSG_CMD_REPORT_MUSIC_INFO) {
+            audio_element_info_t music_info = {0};
+            audio_element_getinfo(music_decoder, &music_info);
+
+            ESP_LOGI(TAG, "[ * ] Receive music info from mp3 decoder, sample_rates=%d, bits=%d, ch=%d",
+                     music_info.sample_rates, music_info.bits, music_info.channels);
+
+            audio_element_setinfo(i2s_stream_writer, &music_info);
+            i2s_stream_set_clk(i2s_stream_writer, music_info.sample_rates, music_info.bits, music_info.channels);
+            continue;
+        }
+
+        /* Stop when the last pipeline element (i2s_stream_writer in this case) receives stop event */
+        if (msg.source_type == AUDIO_ELEMENT_TYPE_ELEMENT && msg.source == (void *) i2s_stream_writer
+            && msg.cmd == AEL_MSG_CMD_REPORT_STATUS
+            && (((int)msg.data == AEL_STATUS_STATE_STOPPED) || ((int)msg.data == AEL_STATUS_STATE_FINISHED))) {
+            ESP_LOGW(TAG, "[ * ] Stop event received");
+            break;
+        }
+
+    }
+
+    // ESP_LOGI(TAG, "[ 7 ] Stop audio_pipeline");
+    audio_pipeline_stop(pipeline);
+    audio_pipeline_wait_for_stop(pipeline);
+    audio_pipeline_terminate(pipeline);
+
+    audio_pipeline_unregister(pipeline, vfs_stream_reader);
+    audio_pipeline_unregister(pipeline, i2s_stream_writer);
+    audio_pipeline_unregister(pipeline, music_decoder);
+
+    /* Terminal the pipeline before removing the listener */
+    audio_pipeline_remove_listener(pipeline);
+
+    /* Stop all periph before removing the listener */
+    esp_periph_set_stop_all(set);
+    audio_event_iface_remove_listener(esp_periph_set_get_event_iface(set), evt);
+
+    /* Make sure audio_pipeline_remove_listener & audio_event_iface_remove_listener are called before destroying event_iface */
+    audio_event_iface_destroy(evt);
+
+    /* Release all resources */
+    audio_pipeline_deinit(pipeline);
+    audio_element_deinit(vfs_stream_reader);
+    audio_element_deinit(i2s_stream_writer);
+    audio_element_deinit(music_decoder);
+    esp_periph_set_destroy(set);
+
+    // audioTaskWorking = false ;
+    
+
+    free(path) ;
+}
+
+
+
 static JSValue js_media_play_mp3(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
 
     CHECK_ARGC(2)

@@ -6,6 +6,7 @@ module.exports = class ES8156 extends DeviceDriver {
     setup(opts) {
         this.opts = opts
         beapi.driver.ES8156Setup(opts.i2c,opts.addr||0x8)
+        beapi.driver.holdDMA("audio",30*1024)
     }
     register(insName) {
         super.register(insName)

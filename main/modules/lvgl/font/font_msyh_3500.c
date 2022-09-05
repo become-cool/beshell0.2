@@ -12,7 +12,7 @@
 #include "lvgl.h"
 
 
-static const uint8_t glyph_bitmap[] = {
+static  const uint8_t glyph_bitmap[] = {
 /*   */
 
 

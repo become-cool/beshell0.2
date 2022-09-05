@@ -48,8 +48,8 @@ typedef struct {
 
 #define VFS_STREAM_BUF_SIZE            (2048)
 #define VFS_STREAM_TASK_STACK          (3072)
-#define VFS_STREAM_TASK_CORE           (0)
-#define VFS_STREAM_TASK_PRIO           (4)
+#define VFS_STREAM_TASK_CORE           (1)
+#define VFS_STREAM_TASK_PRIO           (6)
 #define VFS_STREAM_RINGBUFFER_SIZE     (8 * 1024)
 
 #define VFS_STREAM_CFG_DEFAULT() {             \

@@ -9,6 +9,7 @@
 #include "esp_log.h"
 
 #include "disp_st77XX.h"
+#include "module_serial.h"
 
 #define TAG "ST7789"
 #define	_DEBUG_ 0
@@ -68,8 +69,8 @@ void spi_write_bytes(spi_device_handle_t dev, const uint8_t* data, size_t len) {
 		trans.length = len * 8;
 		trans.tx_buffer = data;
 		trans.flags = trans.flags & (~SPI_TRANS_USE_RXDATA) ;
-		ret = spi_device_transmit( dev, &trans );
-		// ret = spi_device_polling_transmit( dev, &trans );
+		// ret = spi_device_transmit( dev, &trans );
+		ret = spi_device_polling_transmit( dev, &trans );
 	}
 }
 
@@ -301,6 +302,12 @@ void st77xx_draw_rect(st77xx_dev_t * dev, uint16_t x1, uint16_t y1, uint16_t x2,
 
 	// printf("draw rect (%d,%d) -> (%d,%d); dc:%d\n", _x1,_y1, _x2, _y2, dev->_dc) ;
 
+	spi_device_acquire_bus(dev->spi_dev, portMAX_DELAY) ;
+	// g_spi_bus1_busy ++ ;
+	// xSemaphoreTake(g_spi_bus1_mutex, portMAX_DELAY) ;
+    // printf("draw start(P15=%d)\n", gpio_get_level(15));
+	// vTaskDelay(5/portTICK_PERIOD_MS) ;
+
 	st77xx_command(dev, 0x2A);	// set column(x) address
 	st77xx_addr(dev, _x1, _x2);
 	st77xx_command(dev, 0x2B);	// set Page(y) address
@@ -310,6 +317,14 @@ void st77xx_draw_rect(st77xx_dev_t * dev, uint16_t x1, uint16_t y1, uint16_t x2,
 	size_t size = (x2-x1+1) * (y2-y1+1) ;
 	
 	gpio_set_level( dev->_dc, SPI_Data_Mode );
-	return spi_write_bytes( dev->spi_dev, (uint8_t *)colors, size*2);
+	spi_write_bytes( dev->spi_dev, (uint8_t *)colors, size*2);
+
+	spi_device_release_bus(dev->spi_dev) ;
+
+	// g_spi_bus1_busy -- ;
+	// printf("draw end\n") ;
+	// xSemaphoreGive( g_spi_bus1_mutex );
+
+	return ;
 
 }

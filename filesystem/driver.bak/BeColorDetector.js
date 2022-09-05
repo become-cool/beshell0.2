@@ -80,8 +80,8 @@ class ColorDetector extends BeSensorBase {
             let  r = this.r, g = this.g, b = this.b
             this.read()
             if( r!=this.r || g!=this.g || b!=this.b ) {
-                for(let wid in this._handles) {
-                    this._handles[wid] (this.r, this.g, this.b)
+                for(let wid in this._handlers) {
+                    this._handlers[wid] (this.r, this.g, this.b)
                 }
             }
         }, 100)

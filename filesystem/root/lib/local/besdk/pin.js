@@ -70,13 +70,13 @@ class Pin extends beapi.EventEmitter {
 
     resetISR() {
         let mode = 0 ;
-        if(this._handles["both"]&&this._handles["both"].length) {
+        if(this._handlers["both"]&&this._handlers["both"].length) {
             mode = 3 // both
         }
-        if(this._handles["rising"]&&this._handles["rising"].length) {
+        if(this._handlers["rising"]&&this._handlers["rising"].length) {
             mode|= 1 // rising
         }
-        if(this._handles["falling"]&&this._handles["falling"].length) {
+        if(this._handlers["falling"]&&this._handlers["falling"].length) {
             mode|= 2 // falling
         }
         beapi.gpio.setPinISR(this.gpio, mode)

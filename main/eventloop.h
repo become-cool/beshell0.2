@@ -6,6 +6,7 @@
 
 typedef struct _eventloop_callback_t {
     JSValue func ;
+    JSValue thisobj ;
     uint64_t deadline ;
     uint32_t interval ;
     bool repeat ;
@@ -16,8 +17,8 @@ typedef struct _eventloop_callback_t {
 
 // inline eventloop_callback_t * eventloop_header() ;
 
-eventloop_callback_t * eventloop_push(JSContext *ctx, JSValue func, int interval, bool repeat) ;
-eventloop_callback_t * eventloop_push_with_argv(JSContext *ctx, JSValue func, int argc, JSValueConst *argv) ;
+eventloop_callback_t * eventloop_push(JSContext *ctx, JSValue func, JSValue thisobj, int interval, bool repeat) ;
+eventloop_callback_t * eventloop_push_with_argv(JSContext *ctx, JSValue func, JSValue thisobj, int argc, JSValueConst *argv) ;
 
 void be_module_eventloop_loop(JSContext *ctx) ;
 

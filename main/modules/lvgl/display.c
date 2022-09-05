@@ -43,25 +43,85 @@ typedef struct {
     lv_coord_t x2 ;
     lv_coord_t y1 ;
     lv_coord_t y2 ;
-    uint8_t * buff ;
+    uint16_t * buff ;
     lv_disp_drv_t * disp ;
-} draw_param_t ;
 
-draw_param_t draw_param ;
+    // spi 输出 和 websocket 输出可能在不同的 core 
+    // 当有一边先完成时， flushed = true
+    // 后完成的一边 调用 lv_disp_flush_ready()
+    // bool flushed ;   
+} disp_spi_param_t ;
 
-QueueHandle_t disp_queue;
+// static disp_spi_param_t disp_spi_param ;
+// static QueueHandle_t    disp_spi_queue ;
+
+// static void flush_disp_if_other_ready() {
+//     if(disp_spi_param.flushed) {
+//         lv_disp_flush_ready(disp_spi_param.disp) ;
+//     }
+//     else {
+//         disp_spi_param.flushed = true ;
+//     }
+// }
+
+// static void disp_spi_task() {
+
+// 	disp_spi_param_t * param = NULL;
+    
+//     while(1) {
+//         param = NULL ;
+// 		if( disp_spi_queue && (xQueueReceive(disp_spi_queue, &param, portMAX_DELAY)==pdFALSE || !param)) {
+//             vTaskDelay(1) ;
+//             continue ;
+//         }
+//         st77xx_draw_rect(((disp_drv_spec_t*)param->disp->user_data)->spi_dev, param->x1,param->y1, param->x2, param->y2, param->buff) ;
+
+//         flush_disp_if_other_ready() ;
+// 	}
+// }
+
+// TaskHandle_t disp_spi_task_handle = NULL;
+// bool disp_spi_task_started = false ;
+// static void disp_spi_start(){
+//     if(!disp_spi_task_started) {
+// 	    disp_spi_queue = xQueueCreate(5, sizeof(disp_spi_param_t));
+//         if(!disp_spi_queue) {
+//             printf("xQueueCreate() falided.\n") ;
+//             return ;
+//         }
+//         xTaskCreatePinnedToCore(&disp_spi_task, "disp_spi_task", 1024*10, NULL, 5, NULL, 1);
+
+//         disp_spi_task_started = true ;
+//     }
+// }
 
 static void disp_st77XX_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color_p) {
     if(!disp->user_data) {
         printf("spidev is NULL\n") ;
         return ;
     }
-    // printf("disp_st77XX_flush(%d,%d,%d,%d)\n",area->x1,area->y1,area->x2,area->y2) ;
 
+    // disp_spi_param.disp = disp ;
+    // disp_spi_param.x1 = area->x1 ;
+    // disp_spi_param.y1 = area->y1 ;
+    // disp_spi_param.x2 = area->x2 ;
+    // disp_spi_param.y2 = area->y2 ;
+    // disp_spi_param.buff = color_p ;
+    // disp_spi_param.flushed = false ;
+
+    // disp_spi_param_t * param = &disp_spi_param ;
+
+    // printf("send()\n") ;
+	// xQueueSend(disp_spi_queue, &param, 0);
+
+    
     st77xx_draw_rect(((disp_drv_spec_t*)disp->user_data)->spi_dev, area->x1,area->y1, area->x2, area->y2, color_p) ;
+    // flush_disp_if_other_ready() ;
+    
 
     ws_disp_flush(disp, area, color_p) ;
 
+    // flush_disp_if_other_ready() ;
     lv_disp_flush_ready(disp) ;
 }
 
@@ -465,6 +525,9 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
         // 注册设备驱动对象
         dispdrv->flush_cb = disp_st77XX_flush ;
         dvrdata->spi_dev = spidev ;
+
+        // 启动 spi 传输任务
+        // disp_spi_start() ;
 #endif
     }
 
@@ -483,7 +546,7 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
     
     JSValue jsdisp = JS_NewObjectClass(ctx, js_lv_disp_class_id) ;
     JS_SetPropertyStr(ctx, jsdisp, "type", argv[0]) ;
-    JS_SetPropertyStr(ctx, jsdisp, "_handles", JS_NewObject(ctx)) ;
+    JS_SetPropertyStr(ctx, jsdisp, "_handlers", JS_NewObject(ctx)) ;
     JS_SetOpaque(jsdisp, disp);
 
     dvrdata->jsobj = JS_VALUE_GET_PTR(jsdisp) ;
@@ -513,6 +576,11 @@ void be_lv_display_init() {
 
 
 
+static JSValue js_lv_display_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
+    THROW_EXCEPTION("create Display by api function beapi.lvgl.createDisplay()")
+}
+
+
 void be_lv_display_require(JSContext *ctx, JSValue lvgl) {
 
     _disp_id = 0 ;
@@ -522,9 +590,9 @@ void be_lv_display_require(JSContext *ctx, JSValue lvgl) {
     qjs_def_class(
         ctx, "Display"
         , js_lv_disp_class_id, &js_lv_disp_class
-        , "lv.Display", NULL
+        , "lv.Display", js_lv_display_constructor
         , js_lv_disp_proto_funcs, countof(js_lv_disp_proto_funcs)
-        , EventEmitterProto, JS_UNDEFINED
+        , EventEmitterProto, lvgl
     ) ;
     JS_FreeValue(ctx, EventEmitterProto) ;
     

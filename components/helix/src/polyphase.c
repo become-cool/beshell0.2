@@ -56,7 +56,7 @@
 #define DEF_NFRACBITS	(DQ_FRACBITS_OUT - 2 - 2 - 15)	
 #define CSHIFT	12	/* coefficients have 12 leading sign bits for early-terminating mulitplies */
 
-static __inline short ClipToShort(int x, int fracBits)
+static /*__inline*/ short ClipToShort(int x, int fracBits)
 {
 	int sign;
 	

@@ -8,10 +8,11 @@ eventloop_callback_t * _callback_stack_top = NULL ;
 //     return _callback_stack_top ;
 // }
 
-eventloop_callback_t * eventloop_push(JSContext *ctx, JSValue func, int interval, bool repeat) {
+eventloop_callback_t * eventloop_push(JSContext *ctx, JSValue func, JSValue thisobj, int interval, bool repeat) {
 
     eventloop_callback_t * newcb = malloc(sizeof(eventloop_callback_t)) ;
     newcb->func = JS_DupValue(ctx, func) ;
+    newcb->thisobj = thisobj ;
     newcb->interval = interval ;
     newcb->repeat = repeat ;
     newcb->next = _callback_stack_top ;
@@ -26,9 +27,10 @@ eventloop_callback_t * eventloop_push(JSContext *ctx, JSValue func, int interval
 
 
 
-eventloop_callback_t * eventloop_push_with_argv(JSContext *ctx, JSValue func, int argc, JSValueConst *argv) {
+eventloop_callback_t * eventloop_push_with_argv(JSContext *ctx, JSValue func, JSValue thisobj, int argc, JSValueConst *argv) {
     eventloop_callback_t * newcb = malloc(sizeof(eventloop_callback_t)) ;
     newcb->func = JS_DupValue(ctx, func) ;
+    newcb->thisobj = JS_DupValue(ctx, thisobj) ;
     newcb->interval = 0 ;
     newcb->repeat = 0 ;
     newcb->next = _callback_stack_top ;
@@ -58,6 +60,7 @@ void eventloop_out(JSContext *ctx, eventloop_callback_t * prev, eventloop_callba
 
     // 回收 func
     JS_FreeValue(ctx, current->func) ;
+    JS_FreeValue(ctx, current->thisobj) ;
 
     if(prev) {
         prev->next = current->next ;
@@ -97,7 +100,7 @@ void be_module_eventloop_loop(JSContext *ctx) {
             goto next ;
         }
 
-        JSValue ret = JS_Call(ctx, current->func, JS_UNDEFINED, current->argc, current->argv) ;
+        JSValue ret = JS_Call(ctx, current->func, current->thisobj, current->argc, current->argv) ;
         if( JS_IsException(ret) ) {
             js_std_dump_error(ctx) ;
         }

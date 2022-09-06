@@ -323,6 +323,17 @@ JSValue be_lv_display_st77xx_init(JSContext *ctx, JSValueConst this_val, int arg
     JS_FreeCString(ctx,typestr) ;
     return JS_UNDEFINED ;
 }
+
+JSValue js_lv_disp_dev_reg_write(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    THIS_DISP
+    CHECK_ARGC(2)
+
+    ARGV_TO_UINT8(0, reg)
+    ARGV_TO_UINT8(1, data)
+
+    return JS_UNDEFINED ;
+}
+
 #endif
 
 
@@ -340,6 +351,7 @@ static const JSCFunctionListEntry js_lv_disp_proto_funcs[] = {
     JS_CFUNC_DEF("invArea", 0, be_lv_display_inv_area),
 #ifndef SIMULATION
     JS_CFUNC_DEF("initST77xx", 0, be_lv_display_st77xx_init),
+    JS_CFUNC_DEF("devRegWrite", 0, js_lv_disp_dev_reg_write),
 #endif
 };
 

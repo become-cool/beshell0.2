@@ -26,6 +26,19 @@ beapi.lvgl.Obj.prototype.asModel = function asModel() {
     })
 }
 
+beapi.lvgl.styleHighlight = new beapi.lvgl.Style({
+    "border-width": 1 ,
+    "border-color": beapi.lvgl.palette("red") ,
+    "border-opa": 180
+})
+beapi.lvgl.Obj.prototype.highlight = function (on) {
+    if( on==undefined || (!!on) ) {
+        this.addStyle(beapi.lvgl.styleHighlight)
+    }
+    else {
+        this.removeStyle(beapi.lvgl.styleHighlight)
+    }
+}
 
 beapi.lvgl.Obj.prototype.hitTest = function hitTest(x,y) {
     if(x==undefined || x==null || y==undefined || y==null) {

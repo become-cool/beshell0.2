@@ -28,7 +28,7 @@ static JSValue js_mg_client_constructor(JSContext *ctx, JSValueConst new_target,
     return jsobj ;
 }
 static void js_mg_client_finalizer(JSRuntime *rt, JSValue this_val){
-    printf("js_mg_client_finalizer()\n") ;
+    // printf("js_mg_client_finalizer()\n") ;
 }
 static JSClassDef js_mg_client_class = {
     "mg.Client",
@@ -109,25 +109,48 @@ static void http_connection_event_handler(struct mg_connection * conn, int ev, v
         case MG_EV_HTTP_MSG: 
         case MG_EV_HTTP_CHUNK: 
         {
+            // moogose https 协议，会在 close 事件以后触发 msg 事件
+            if(!req || !req->ctx) {
+                break ;
+            }
+
             struct mg_http_message *hm = (struct mg_http_message *) ev_data;
 
             JSValue jsmsg = JS_NewObjectClass(req->ctx, js_mg_http_message_class_id) ;
             JS_SetOpaque(jsmsg, hm) ;
 
-            JS_CALL_ARG2(req->ctx, req->callback
-                , JS_NewString(req->ctx, mg_event_const_to_name(ev))
-                , jsmsg)
+            JSValue evname = JS_NewString(req->ctx, mg_event_const_to_name(ev)) ;
+
+            MAKE_ARGV2(argv, evname, jsmsg)
+            JS_Call(req->ctx, req->callback, JS_UNDEFINED, 2, argv) ;
+            free(argv) ;
+
+            JS_SetOpaque(jsmsg, NULL) ;
+            JS_FreeValue(req->ctx, jsmsg) ;
+
+            JS_FreeValue(req->ctx, evname) ;
+
             break ;
         }
 
-        case MG_EV_CLOSE : 
+        case MG_EV_CLOSE :
+
             JS_SetOpaque(req->jsconn, NULL) ;
             JS_FreeValue(req->ctx, req->callback) ;
             JS_FreeValue(req->ctx, req->jsconn) ;
             
+            req->ctx = NULL ;
+            req->callback = JS_UNDEFINED ;
+
+            // moogose https 协议，会在 close 事件以后触发 msg 事件
+            if(conn->fn_data==req) {
+                conn->fn_data = NULL ;
+            }
+
             free(req) ;
             req = NULL ;
             fnd = NULL ;
+
             break ;
 
         default:
@@ -166,6 +189,7 @@ static JSValue js_mg_connect(JSContext *ctx, JSValueConst this_val, int argc, JS
     }
     
     req->conn = conn ;
+    req->poll_times = 0 ;
     return JS_DupValue(ctx, req->jsconn) ;
 }
 

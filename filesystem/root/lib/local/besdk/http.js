@@ -11,7 +11,7 @@ beapi.mg.get = function(url) {
                     }catch(e) {
                         console.log(e)
                     }
-
+                    
                     conn.send(`GET ${info.uri} HTTP/1.0\r\n`)
                     conn.send(`Host: ${info.host}\r\n`)
                     conn.send(`User-Agent: BeShell\r\n`)

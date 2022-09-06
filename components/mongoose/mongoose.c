@@ -245,8 +245,10 @@ static void dns_cb(struct mg_connection *c, int ev, void *ev_data,
     unsigned long now = *(unsigned long *) ev_data;
     for (d = s_reqs; d != NULL; d = tmp) {
       tmp = d->next;
-      // LOG(LL_DEBUG, ("%lu %lu dns poll", d->expire, now));
-      if (now > d->expire) mg_error(d->c, "DNS timeout");
+      if (now > d->expire) {
+        printf("%lu %lu dns poll timeout\n", d->expire, now);
+        mg_error(d->c, "DNS timeout");
+      }
     }
   } else if (ev == MG_EV_READ) {
     struct mg_dns_message dm;
@@ -2509,7 +2511,7 @@ void mg_mgr_init(struct mg_mgr *mgr) {
   // won't kill the whole process.
   signal(SIGPIPE, SIG_IGN);
 #endif
-  mgr->dnstimeout = 3000;
+  mgr->dnstimeout = 5000;
   mgr->dns4.url = "udp://8.8.8.8:53";
   mgr->dns6.url = "udp://[2001:4860:4860::8888]:53";
 }
@@ -3844,7 +3846,7 @@ void mg_tls_init(struct mg_connection *c, struct mg_tls_opts *opts) {
       mbedtls_ssl_set_hostname(&tls->ssl, buf);
       if (buf != mem) free(buf);
     }
-    mbedtls_ssl_conf_authmode(&tls->conf, MBEDTLS_SSL_VERIFY_REQUIRED);
+    mbedtls_ssl_conf_authmode(&tls->conf, MBEDTLS_SSL_VERIFY_OPTIONAL);
   }
   if (opts->cert != NULL && opts->cert[0] != '\0') {
     const char *key = opts->certkey;

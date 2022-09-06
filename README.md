@@ -1,3 +1,18 @@
+
+###
+FreeRTOS 中文文档
+https://deepinout.com/freertos-tutorials/freertos-intro/freertos-tutorials.html
+
+LVGL 中文
+http://lvgl.100ask.net/8.2/
+
+Mongoose ：
+https://mongoose.ws/tutorials/
+https://mongoose.ws/documentation/#api-reference
+
+能有效压缩 png 50%左右 :
+https://tinify.cn/
+
 ## 编译
 
 ```
@@ -279,4 +294,5 @@ c79:0x3ffd34b0 0x4017bd82:0x3ffd35c0 0x401a5ebd:0x3ffd3610 0x40194b69:0x3ffd36a0
 `LoadProhibited`(禁止加载)
 
 当应用程序尝试读取或写入无效的内存位置时,会发生此 CPU 异常. 写入/读取的地址可在寄存器转储中的 EXCVADDR 寄存器中找到. 如果此地址为零,则通常表示应用程序尝试取消引用 NULL 指针. 如果此地址接近于零,则通常意味着应用程序尝试访问结构的成员,但指向该结构的指针为 NULL. 如果该地址是别的(垃圾值,不在 0x3fxxxxxx - 0x6xxxxxxx 范围内),则可能意味着用于访问数据的指针未初始化或已损坏.
+
 

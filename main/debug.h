@@ -21,4 +21,6 @@
 #define YES_OR_NO(exp) printf(#exp"? %s\n", (exp)? "yes": "no") ;
 #define IS_NULL(exp) YES_OR_NO((exp)==NULL)
 
+#define dref(var) printf(#var" ref count:%d @%d\n", ((JSRefCountHeader *)JS_VALUE_GET_PTR(var))->ref_count, __LINE__) ;
+
 #endif

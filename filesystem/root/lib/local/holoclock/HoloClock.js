@@ -1,4 +1,8 @@
+const wifi = require("besdk/wifi")
 const lv = require("lv")
+const cityCodes = require("./cities.json")
+const localeJsonPath = "/home/become/config/locale.json"
+
 function fill2(num) {
     if(num<10) {
         return '0'+num
@@ -8,9 +12,16 @@ function fill2(num) {
     }
 }
 
+const days = { 1: '一',2: '二',3: '三',4: '四',5: '五',6: '六',7: '日'}
+
 class HoloClock extends lv.Obj {
     constructor() {
         super()
+
+        this.cityName = ''
+        this.weatherCode = ''
+        this.restoreLocale()
+
         this.fromJson({
             style: {
                 "bg-color": lv.rgb(0,0,0) ,
@@ -20,47 +31,72 @@ class HoloClock extends lv.Obj {
                 width:"100%",
                 height:"100%",
                 children: [{
-                    class:"Row" ,
-                    width: "100%" ,
-                    height: 100 ,
-                    children: [
-                        {
-                            class: 'Label' ,
-                            text: '00:00:00' ,
-                            ref: 'labTime' ,
-                            font: "m40" ,
-                            style: {
-                                'text-color': lv.rgb(255,255,255) ,
-                                "pad-left": 20 ,
-                                "pad-top": 30 ,
-                            }
-                        }
-                    ]
+                    class: 'Label' ,
+                    text: '00:00:00' ,
+                    ref: 'labTime' ,
+                    font: "m40" ,
+                    style: {
+                        'text-color': lv.rgb(255,255,255) ,
+                        "pad-left": 20 ,
+                        "pad-top": 30 ,
+                    }
+                } ,
+                {
+                    class: 'Label' ,
+                    text: 'NA月NA日 /星期NA' ,
+                    ref: 'labDate' ,
+                    font: "msyh" ,
+                    style: {
+                        "pad-left": 20 ,
+                        'text-color': lv.rgb(255,255,255) 
+                    }
                 } ,
                 {
                     class:"Row" ,
-                    width: "100%" ,
                     grow: true ,
+                    style: {
+                        "pad-top": 10
+                    } ,
                     children: [
                         {
-                            class: "Img" ,
-                            src: "/lib/local/holoclock/cloudy.png",
-                            width: 160 ,
-                        } , 
+                            class: "Column" ,
+                            width: 140 ,
+                            trackAlign: "center" ,
+                            children: [
+                                {
+                                    class: "Img" ,
+                                    width: 64 ,
+                                    height: 64 ,
+                                    src: "/lib/icon/weather/999.png" ,
+                                    ref: "imgWeather" ,
+                                } ,
+                                {
+                                    class: "Label" ,
+                                    text: "联网后刷新天气信息" ,
+                                    font: 'msyh' ,
+                                    ref:'txtWeather' ,
+                                    style: {
+                                        'text-color': lv.rgb(255,255,255) ,
+                                        "pad-top": 10,
+                                    }
+                                }
+                            ]
+                        } ,
                         {
                             class: 'Column' ,
                             height:"100%",
+                            width: 100 ,
                             style: {
-                                "pad-row": 10 ,
+                                // "pad-row": 10 ,
                             } ,
                             children: [
                                 { clear: true, grow:true} ,
                                 {
                                     class: 'Label' ,
-                                    text: '苏州' ,
+                                    text: this.cityName ,
                                     font: 'msyh' ,
                                     ref: 'labCity' ,
-                                    width: 80 ,
+                                    width: '100%' ,
                                     style: {
                                         'text-color': lv.rgb(255,255,255) ,
                                         "text-align": "right" ,
@@ -69,9 +105,9 @@ class HoloClock extends lv.Obj {
                                 } ,
                                 {
                                     class: 'Label' ,
-                                    text: '34°C' ,
-                                    ref: 'labTemp' ,
-                                    width: 80 ,
+                                    text: '--°C' ,
+                                    ref: 'txtTemp' ,
+                                    width: '100%' ,
                                     style: {
                                         'text-color': lv.rgb(255,255,255) ,
                                         "text-align": "right",
@@ -91,19 +127,150 @@ class HoloClock extends lv.Obj {
         }, 1000)
 
         this.freshTime()
+        
+        wifi.on("ip.got", async ()=>{
+            if(await this.queryLocale()){
+                this.queryWeather()
+            }
+        })
 
-        global.clock = this
+        setInterval(()=>{
+            this.queryWeather()
+        }, 30* 60* 1000)
     }
 
-    
     freshTime() {
         let tm = new Date(Date.now())
         this.labTime.setText( fill2(tm.getHours()) + ':' + fill2(tm.getMinutes()) + ":" + fill2(tm.getSeconds()) )
+        this.labDate.setText( (tm.getMonth()+1) + '月' + tm.getDate() + '日  周' + days[tm.getDay()] )
+    }
+
+    restoreLocale() {
+        let locale = JSON.load(localeJsonPath)
+        if(!locale) {
+            return
+        }
+        this.cityName = locale.cityName
+        this.weatherCode = locale.weatherCode
+    }
+
+    setCity(cityName,weatherCode) {
+        this.labCity.setText(cityName)
+        this.cityName = cityName
+        this.weatherCode = weatherCode
+        
+        let locale = JSON.load(localeJsonPath) || {}
+        locale.cityName = cityName
+        locale.weatherCode = weatherCode
+        beapi.fs.writeFileSync(localeJsonPath, JSON.stringify(locale))
+    }
+
+    async queryLocale() {
+
+        for(let retry = 5 ; retry; retry--) {
+            try{
+                let body = await beapi.mg.get("https://ip.cn/api/index?type=0")
+                body = JSON.parse(body)
+                console.log(body)
+                if(!body.address || !body.address.split) {
+                    return false
+                }
+                let [,,city] = body.address.trim().split(/ +/)
+                console.log("ipcn return:",city)
+    
+                city = city.replace(/市$/,'')
+                if(!cityCodes[city]) {
+                    console.log("unknow city", city)
+                    return false
+                }
+    
+                let code = cityCodes[city].toString()
+
+                this.setCity(city, "101" + "0".repeat(6-code.length) + code)
+
+                return true
+    
+            }catch(e) {
+                console.error(e)
+                await sleep(1000)
+            }
+        }
+        return false
+    }
+    
+    async queryWeather() {
+        for(let retry = 5 ; retry; retry--) {
+            console.log("queryWeather() start", this.weatherCode)
+            if(!this.weatherCode) {
+                return
+            }
+            let url = `http://www.weather.com.cn/data/cityinfo/${this.weatherCode}.html`
+            console.log(url)
+            try{
+                let body = await beapi.mg.get(url)
+                body = JSON.parse(body)
+                console.log(body)
+                this.txtTemp.setText( parseInt(body.weatherinfo.temp2)+'/'+parseInt(body.weatherinfo.temp1) + '°C' )
+                this.txtWeather.setText( body.weatherinfo.weather )
+                this.setWeatherImg( body.weatherinfo.img1 )
+
+                return
+
+            }catch(e) {
+                console.log(e)
+                await sleep(1000)
+            }
+        }
+    }
+
+    setWeatherImg(imgName) {
+        let imgSrc = weatherIconSrc(imgName)
+        if(!imgSrc) imgSrc = '999.png'
+        this.imgWeather.setSrc("/lib/icon/weather/"+imgSrc)
     }
 }
 
+function weatherIconSrc (src) {
+    src = src.replace(/\.gif$/i,'')
+    console.log(src)
+
+    let d = src[0]
+    if(d!='d'&&d!='n') {
+        return null
+    }
+    d = d=='d'
+    let w = parseInt(src.slice(1))
+    if(isNaN(w)) {
+        return null
+    }
+    if(w>=21&&w<=25) 
+        w-= 13
+    else if(w>=26&&w<=28) 
+        w-= 11
+
+    if(w==0)        return d? '100.png': '150.png'
+    if(w==1)        return d? '104.png': '154.png'
+    if(w==2)        return '101.png'
+    if(w==3)        return d? '300.png': '350.png'
+    if(w>=4&&w<=5)  return '303.png'
+    if(w==6)        return '405.png'
+    if(w>=7&&w<=8)  return '314.png'
+    if(w>=9&&w<=10) return '315.png'
+    if(w>=11&&w<=12)return '316.png'
+    if(w>=13&&w<=14)return '400.png'
+    if(w>=15)       return '401.png'
+    if(w>=16)       return '402.png'
+    if(w<=17)       return '402.png'
+    if(w<=18)       return null
+    if(w==19)        return '405.png'
+    if(w==20)        return null
+    
+    return null
+}
+
+
 function main() {
-    const disp = be.dev.disp[0]
+    const disp = be.disp[0]
     if(!disp) {
         console.log("no disp device, exit HoloClock")
         return

@@ -49,6 +49,7 @@ typedef struct viddriver_s
    /* custom blitter - num_dirties == -1 if full blit required */
    void      (*custom_blit)(bitmap_t *primary, int num_dirties, 
                             rect_t *dirty_rects);
+   void *    (*malloc_dma)(int);
    /* immediately invalidate the buffer, i.e. full redraw */
    bool      invalidate;
 } viddriver_t;

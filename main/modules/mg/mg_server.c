@@ -1,5 +1,6 @@
 #include "mg_server.h"
 #include "module_mg.h"
+#include "module_wifi.h"
 #include "telnet_ws.h"
 #include "utils.h"
 #include "cutils.h"
@@ -242,7 +243,7 @@ JSValue be_http_server_new(JSContext *ctx, struct mg_connection * conn, JSValue 
 }
 
 static JSValue js_mg_mgr_http_listen(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-
+    CHECK_WIFI_INITED
     CHECK_ARGC(2)
     if( !JS_IsFunction(ctx, argv[1]) ) {
         THROW_EXCEPTION("arg callback must be a function")

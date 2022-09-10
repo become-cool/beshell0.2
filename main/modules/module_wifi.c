@@ -20,28 +20,29 @@ LOG_TAG("wifi");
 #define MAX_PASSWORD_CHARLEN    63
 
 
-JSValue __event_handle = JS_UNDEFINED ;
-JSContext * __event_handle_ctx = NULL ;
+static JSValue __event_handle = JS_UNDEFINED ;
+static JSContext * __event_handle_ctx = NULL ;
 
-esp_netif_t * netif_ap = NULL ;
+static esp_netif_t * netif_ap = NULL ;
 esp_netif_t * get_netif_ap() {
     return netif_ap ;
 }
 
-esp_netif_t * netif_sta = NULL ;
+static esp_netif_t * netif_sta = NULL ;
 esp_netif_t * get_netif_sta() {
     return netif_sta ;
 }
 
-esp_event_handler_instance_t instance_any_id;
-esp_event_handler_instance_t instance_got_ip;
+static esp_event_handler_instance_t instance_any_id;
+static esp_event_handler_instance_t instance_got_ip;
 
+static bool wifi_inited = false ;
 
-bool _started = false ;
-bool _sta_started = false ;
-bool _sta_connected = false ;
-bool _ap_started = false ;
-bool _scanning = false ;
+static bool _started = false ;
+static bool _sta_started = false ;
+static bool _sta_connected = false ;
+static bool _ap_started = false ;
+static bool _scanning = false ;
 
 #define WIFI_EVENT_STA_CONNECTING 101
 // #define WIFI_EVENT_STA_DISCONNECTING 102
@@ -168,24 +169,32 @@ static void esp32_wifi_eventHandler(void* arg, esp_event_base_t event_base, int3
     }
 }
 
-JSValue js_wifi_sta_started(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+static JSValue js_wifi_sta_started(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    if(!wifi_inited)
+        return JS_FALSE;
     return JS_NewBool(ctx, _sta_started) ;
 }
 
-JSValue js_wifi_sta_connected(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+static JSValue js_wifi_sta_connected(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    if(!wifi_inited)
+        return JS_FALSE;
     return JS_NewBool(ctx, _sta_connected) ;
 }
 
-JSValue js_wifi_ap_started(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+static JSValue js_wifi_ap_started(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    if(!wifi_inited)
+        return JS_FALSE;
     return JS_NewBool(ctx, _ap_started) ;
 }
 
 
-JSValue js_wifi_disconnect(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+static JSValue js_wifi_disconnect(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_WIFI_INITED
     return JS_NewInt32(ctx, esp_wifi_disconnect()) ;
 }
 
-JSValue js_wifi_connect(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+static JSValue js_wifi_connect(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_WIFI_INITED
     if( JS_IsFunction(ctx, __event_handle) ) {
         MAKE_ARGV2(argv, JS_NewInt32(__event_handle_ctx, 1), JS_NewInt32(__event_handle_ctx, WIFI_EVENT_STA_CONNECTING))
         JS_Call(ctx, __event_handle, JS_UNDEFINED, 2, argv) ;
@@ -194,8 +203,8 @@ JSValue js_wifi_connect(JSContext *ctx, JSValueConst this_val, int argc, JSValue
     return JS_NewInt32(ctx, esp_wifi_connect()) ;
 }
 
-JSValue js_wifi_get_ip_info(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-
+static JSValue js_wifi_get_ip_info(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_WIFI_INITED
     CHECK_ARGC(1)
     ARGV_TO_UINT8(0,type)
 
@@ -227,8 +236,8 @@ JSValue js_wifi_get_ip_info(JSContext *ctx, JSValueConst this_val, int argc, JSV
     return status ;
 }
 
-JSValue js_wifi_set_hostname(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-
+static JSValue js_wifi_set_hostname(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_WIFI_INITED
     CHECK_ARGC(1)
 
     char * hostname = JS_ToCString(ctx, argv[0]) ;
@@ -241,18 +250,21 @@ JSValue js_wifi_set_hostname(JSContext *ctx, JSValueConst this_val, int argc, JS
 }
 
 
-JSValue js_wifi_get_mode(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+static JSValue js_wifi_get_mode(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_WIFI_INITED
     wifi_mode_t mode_ori;
     esp_wifi_get_mode(&mode_ori) ;
     return JS_NewInt32(ctx, mode_ori);
 }
-JSValue js_wifi_set_mode(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+static JSValue js_wifi_set_mode(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_WIFI_INITED
     ARGV_TO_INT8(0, mode)
     return JS_NewInt32(ctx, esp_wifi_set_mode(mode));
 }
 
 
-JSValue js_wifi_set_ps(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+static JSValue js_wifi_set_ps(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_WIFI_INITED
     CHECK_ARGC(1)
     ARGV_TO_UINT32(0, ps_mode)
     return JS_NewInt32(ctx, esp_wifi_set_ps(ps_mode)) ;
@@ -313,8 +325,8 @@ JSValue js_wifi_set_ps(JSContext *ctx, JSValueConst this_val, int argc, JSValueC
 //     uint32_t btm_enabled:1;       /**< Whether BSS Transition Management is enabled for the connection */
 //     uint32_t reserved:30;         /**< Reserved for future feature set */
 // } wifi_sta_config_t;
-JSValue js_wifi_set_sta_config(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
-
+static JSValue js_wifi_set_sta_config(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    CHECK_WIFI_INITED
     CHECK_ARGC(1)
     if(!JS_IsObject(argv[0])) {
         THROW_EXCEPTION("missing options arg")
@@ -361,8 +373,8 @@ JSValue js_wifi_set_sta_config(JSContext *ctx, JSValueConst this_val, int argc, 
 //     wifi_cipher_type_t pairwise_cipher;   /**< pairwise cipher of SoftAP, group cipher will be derived using this. cipher values are valid starting from WIFI_CIPHER_TYPE_TKIP, enum values before that will be considered as invalid and default cipher suites(TKIP+CCMP) will be used. Valid cipher suites in softAP mode are WIFI_CIPHER_TYPE_TKIP, WIFI_CIPHER_TYPE_CCMP and WIFI_CIPHER_TYPE_TKIP_CCMP. */
 //     bool ftm_responder;         /**< Enable FTM Responder mode */
 // } wifi_ap_config_t;
-JSValue js_wifi_set_ap_config(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-
+static JSValue js_wifi_set_ap_config(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_WIFI_INITED
     CHECK_ARGC(1)
     if(!JS_IsObject(argv[0])) {
         THROW_EXCEPTION("missing options arg")
@@ -397,7 +409,7 @@ JSValue js_wifi_set_ap_config(JSContext *ctx, JSValueConst this_val, int argc, J
 
 
 static JSValue js_wifi_get_config(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-    
+    CHECK_WIFI_INITED
     CHECK_ARGC(1)
     ARGV_TO_UINT8(0,netif)
 
@@ -440,7 +452,7 @@ static JSValue js_wifi_get_config(JSContext *ctx, JSValueConst this_val, int arg
 }
 
 
-JSValue js_wifi_register_event_handle(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+static JSValue js_wifi_register_event_handle(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(1)
     if( !JS_IsFunction(ctx, argv[0]) ){
         THROW_EXCEPTION("wifi event handle must be a function")
@@ -451,12 +463,14 @@ JSValue js_wifi_register_event_handle(JSContext *ctx, JSValueConst this_val, int
     return JS_UNDEFINED ;
 }
 
-JSValue js_wifi_start(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+static JSValue js_wifi_start(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_WIFI_INITED
     esp_err_t err = esp_wifi_start() ;
     _started = err == ESP_OK ;
     return JS_NewInt32(ctx, err);
 }
-JSValue js_wifi_stop(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+static JSValue js_wifi_stop(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_WIFI_INITED
     esp_err_t err = esp_wifi_stop() ;
     _started = ! (err == ESP_OK) ;
     return JS_NewInt32(ctx, err);
@@ -479,8 +493,8 @@ JSValue js_wifi_stop(JSContext *ctx, JSValueConst this_val, int argc, JSValueCon
 //     wifi_sta_info_t sta[ESP_WIFI_MAX_CONN_NUM]; /**< station list */
 //     int       num; /**< number of stations in the list (other entries are invalid) */
 // } wifi_sta_list_t;
-JSValue js_wifi_ap_all_sta(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-    
+static JSValue js_wifi_ap_all_sta(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_WIFI_INITED
     wifi_sta_list_t clients;
     if(esp_wifi_ap_get_sta_list(&clients) != ESP_OK) {
         THROW_EXCEPTION("esp_wifi_ap_get_sta_list() failed")
@@ -496,7 +510,8 @@ JSValue js_wifi_ap_all_sta(JSContext *ctx, JSValueConst this_val, int argc, JSVa
     return arr ;
 }
 
-JSValue js_wifi_scan_start(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+static JSValue js_wifi_scan_start(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_WIFI_INITED
     wifi_scan_config_t scanConf = {
         .ssid = NULL,
         .bssid = NULL,
@@ -513,10 +528,12 @@ JSValue js_wifi_scan_start(JSContext *ctx, JSValueConst this_val, int argc, JSVa
         return JS_FALSE ;
     }
 }
-JSValue js_wifi_scan_stop(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+static JSValue js_wifi_scan_stop(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_WIFI_INITED
     return esp_wifi_scan_stop() == ESP_OK? JS_TRUE : JS_FALSE;
 }
-JSValue js_wifi_is_scanning(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+static JSValue js_wifi_is_scanning(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_WIFI_INITED
     return _scanning? JS_TRUE : JS_FALSE;
 }
 
@@ -549,8 +566,8 @@ static char * authmode_names(wifi_auth_mode_t auto_mode) {
             return "unknow" ;
     }
 }
-JSValue js_wifi_scan_records(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-
+static JSValue js_wifi_scan_records(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_WIFI_INITED
     JSValue array = JS_NewArray(ctx) ;
 
     uint16_t apCount = 0;
@@ -583,7 +600,12 @@ JSValue js_wifi_scan_records(JSContext *ctx, JSValueConst this_val, int argc, JS
     return array ;
 }
 
-
+bool wifi_has_inited() {
+    return wifi_inited ;
+}
+static JSValue js_wifi_has_inited(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    return wifi_inited? JS_TRUE: JS_FALSE ;
+}
 
 void be_module_wifi_init() {
 
@@ -597,7 +619,8 @@ void be_module_wifi_init() {
 
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
-    
+
+    wifi_inited = true ;
 }
 
 void be_module_wifi_require(JSContext *ctx) {
@@ -608,6 +631,7 @@ void be_module_wifi_require(JSContext *ctx) {
     JSValue wifi = JS_NewObject(ctx);
     JS_SetPropertyStr(ctx, beapi, "wifi", wifi);
 
+    JS_SetPropertyStr(ctx, wifi, "hasInited", JS_NewCFunction(ctx, js_wifi_has_inited, "hasInited", 1));
     JS_SetPropertyStr(ctx, wifi, "start", JS_NewCFunction(ctx, js_wifi_start, "start", 1));
     JS_SetPropertyStr(ctx, wifi, "stop", JS_NewCFunction(ctx, js_wifi_stop, "stop", 1));
     JS_SetPropertyStr(ctx, wifi, "setPS", JS_NewCFunction(ctx, js_wifi_set_ps, "setPS", 1));

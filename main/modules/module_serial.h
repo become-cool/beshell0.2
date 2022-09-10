@@ -56,11 +56,13 @@
 
 #define FREE_BUS_SPI(busnum)    if(_spi_bus_setup&(1<<(busnum))){ spi_bus_free(busnum); }
 #define FREE_BUS_I2C(busnum)    if(_i2c_bus_setup&(1<<(busnum))){ i2c_driver_delete(busnum); }
+#define FREE_BUS_I2S(busnum)    if(_i2s_bus_setup&(1<<(busnum))){ i2s_driver_uninstall(busnum); }
 
 esp_err_t i2c_write(uint8_t bus, uint8_t addr, uint8_t reg, uint8_t * data, size_t len) ;
 esp_err_t i2c_write_byte(uint8_t bus, uint8_t addr, uint8_t reg, uint8_t data) ;
 esp_err_t i2c_read(uint8_t bus, uint8_t addr, uint8_t reg, uint8_t * data, uint8_t len) ;
 
+bool i2s_has_setup(uint8_t busnum) ;
 
 void be_module_serial_require(JSContext *ctx) ;
 

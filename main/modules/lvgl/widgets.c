@@ -187,6 +187,7 @@ JSValue js_lv_group_constructor(JSContext *ctx, JSValueConst new_target, int arg
     lv_group_t * cgrp = lv_group_create() ;
     JS_SetOpaque(jsobj, cgrp) ;
     cgrp->user_data = JS_VALUE_GET_PTR(jsobj) ;
+    JS_SetPropertyStr(ctx, jsobj, "_handlers", JS_NewObject(ctx));
     return jsobj ;
 }
 void js_lv_group_finalizer(JSRuntime *rt, JSValue val){

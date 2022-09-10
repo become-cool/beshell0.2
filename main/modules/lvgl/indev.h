@@ -14,7 +14,21 @@ typedef enum {
     INDEV_DRIVER_FAKE ,
     INDEV_DRIVER_XPT2046 ,
     INDEV_DRIVER_JOYPAD ,
+    INDEV_DRIVER_BTN ,
 } indev_driver_t ;
+
+
+typedef enum {
+    NAVKEY_UP = 0x1 ,
+    NAVKEY_DOWN = 0x2 ,
+    NAVKEY_LEFT = 0x4 ,
+    NAVKEY_RIGHT = 0x8 ,
+    NAVKEY_A = 0x10 ,
+    NAVKEY_B = 0x20 ,
+    NAVKEY_START = 0x40 ,
+    NAVKEY_SELECT = 0x80 ,
+} nav_key_t ;
+
 
 typedef struct {
 
@@ -30,6 +44,11 @@ typedef struct {
             uint8_t bus ;
             uint8_t addr ;
         } i2c ;
+        struct {
+            uint8_t gpio ;
+            uint8_t key ;
+            uint8_t trigger ;
+        } btn ;
     } conf ;
 #endif
 
@@ -62,6 +81,30 @@ typedef struct {
 } indev_driver_spec_touch_t ;
 
 indev_driver_spec_t * find_indev_spec_by_id(uint8_t id) ;
+void indev_emit_js_event(lv_indev_drv_t * drv, indev_driver_spec_t * drv_spec, const char * event_name, const char * key) ;
+void indev_global_cb_proc(lv_indev_data_t *data) ;
+
+extern uint8_t _indev_id ;
+
+
+#define THIS_INDEV(thisobj)     \
+    lv_indev_t * thisobj = (lv_indev_t *)JS_GetOpaque(this_val, js_lv_indev_pointer_class_id) ; \
+    if(!thisobj) {  \
+        thisobj = (lv_indev_t *)JS_GetOpaque(this_val, js_lv_indev_nav_class_id) ; \
+    } \
+    if(!thisobj) { \
+        THROW_EXCEPTION("invalid indev obj") \
+    }
+
+#define THIS_SPEC(thisspec)                                 \
+    THIS_INDEV(thisobj)                                     \
+    if(!thisobj->driver || !thisobj->driver->user_data) {   \
+        THROW_EXCEPTION("invalid indev obj")                \
+    }                                                       \
+    indev_driver_spec_t * thisspec = (indev_driver_spec_t *) thisobj->driver->user_data ;
+
+
+
 
 void be_lv_indev_reset(JSContext * ctx) ;
 void be_lv_indev_init() ;

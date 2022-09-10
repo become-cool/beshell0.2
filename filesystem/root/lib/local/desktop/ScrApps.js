@@ -59,7 +59,9 @@ module.exports = class ScrApps extends lv.Obj {
                         "src": "/lib/icon/32/music.png",
                         group: this.group ,
                         clicked: () => {
-                            require("music/main.js").singleton()
+                            // require("music/Player.js").singleton()
+                            console.log("music")
+                            require("/etc/init.d/boot.js").rebootToApp("/lib/local/music/index.js")
                         }
                     }
                     , {
@@ -68,7 +70,7 @@ module.exports = class ScrApps extends lv.Obj {
                         "src": "/lib/icon/32/game.png" ,
                         group: this.group ,
                         clicked () {
-                            require("gameemulator")
+                            require("/lib/local/game/index.js").singleton()
                         }
                     } ,
                     // {

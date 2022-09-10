@@ -13,9 +13,9 @@ module.exports = function() {
 
 
     if(!process.simulate) {
-        try{
-            var setupConf = JSON.load("/home/become/config/setup.json")
-        } catch(e) {
+        
+        var setupConf = JSON.load("/home/become/config/setup.json")
+        if(!setupConf) {
             console.log("~/config/setup.json not exists or invalid, use default setup config.") ;
             var setupConf = defaultSetupConf()
         }
@@ -27,14 +27,17 @@ module.exports = function() {
         for(let num in setupConf.spi||{}){
             let spi = setupConf.spi[num]
             beapi.spi.setup(num, spi.miso, spi.mosi, spi.sck)
+            console.log(`setup SPI ${num}, miso:${spi.miso}, mosi:${spi.mosi}, sck:${spi.sck}`)
         }
         for(let num in setupConf.i2c||{}){
             let i2c = setupConf.i2c[num]
             beapi.i2c.setup(parseInt(num), i2c.sda, i2c.scl)
+            console.log(`setup I2C ${num}, i2c:${i2c.sda}, scl:${i2c.scl}`)
         }
         for(let num in setupConf.i2s||{}){
             let opts = setupConf.i2s[num]
             beapi.i2s.setup(parseInt(num), opts)
+            console.log(`setup I2S ${num}, opts:${JSON.stringify(opts)}`)
         }
 
         // dev
@@ -59,8 +62,9 @@ const LibDefaultConf = {
     3: {0:{
         spi: { 1: {miso:12,mosi:13,sck:14} } ,
         dev: [
-            {"driver":"ST7789V", "setup":{"dc":18, "cs":19, "spi":1, "width":320, "height":240, "freq":60000000, "MADCTL": 0x40|0x20}}
-            , {"driver":"XPT2046", "setup":{spi:1, cs:21, invX:true, invY:true, maxX:320, maxY:240, offsetX:11}}
+            // MADCTL: 0x40|0x20
+            {"driver":"ST7789V", "setup":{"dc":18, "cs":19, "spi":1, "width":320, "height":240, "freq":60000000, "MADCTL": 96}}
+            , {"driver":"XPT2046", "setup":{"spi":1, "cs":21, "invX":true, "invY":true, "maxX":320, "maxY":240, "offsetX":11}}
             
         ]
     }} ,

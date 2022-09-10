@@ -111,7 +111,7 @@ static JSValue js_driver_mount_sd(JSContext *ctx, JSValueConst this_val, int arg
 
 /**************************************************/
 
-#define I2CWRNBYTE_CODEC(r,b) i2c_write_byte(i2c,addr,r,b)
+#define I2CWRNBYTE_CODEC(r,b) if(i2c_write_byte(i2c,addr,r,b)!=ESP_OK) { return JS_FALSE ;}
 
 
 /**
@@ -155,7 +155,7 @@ static JSValue js_driver_ES8156_setup(JSContext *ctx, JSValueConst this_val, int
 	I2CWRNBYTE_CODEC(0x00,0x03);
 	I2CWRNBYTE_CODEC(0x25,0x20);
 
-    return JS_UNDEFINED ;
+    return JS_TRUE ;
 }
 
 // void js_driver_ES5168_set_mode() {

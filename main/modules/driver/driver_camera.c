@@ -1,5 +1,6 @@
 #include "driver_camera.h"
 #include "module_metadata.h"
+#include "module_wifi.h"
 #include "utils.h"
 #include "esp_camera.h"
 #include "esp_http_server.h"
@@ -72,6 +73,10 @@ static esp_err_t web_camera_stream(httpd_req_t *req) {
 }
 
 static void web_camera_init() {
+
+    if(!wifi_has_inited()) {
+        return ;
+    }
     
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
     config.max_uri_handlers = 8;

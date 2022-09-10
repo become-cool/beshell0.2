@@ -12,7 +12,8 @@ require("besdk/http")
         require("./init.d/banner.js")()
         sleep(0)
 
-        if(!process.simulate) {
+
+        if(!process.simulate && beapi.wifi.hasInited()) {
             require("besdk/wifi").autostart()
         }
 
@@ -22,7 +23,7 @@ require("besdk/http")
         require("./init.d/beconsoled.js")
         sleep(0)
 
-        var setupConf = require("./init.d/setup.js") ()
+        require("./init.d/setup.js") ()
 
         let rcpath = process.env.HOME + "/.beshellrc.js"
         if(beapi.fs.isFileSync(rcpath)) {
@@ -33,7 +34,8 @@ require("besdk/http")
         console.log('BeShell is ready.')
 
         sleep(0)
-        await require("./init.d/boot.js").autorun()
+        let bootJson = require("./init.d/boot.js")
+        await bootJson.autorun()
     }
     catch(e) {
         console.log(e)

@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <noftypes.h>
+#include <osd.h>
 #include <bitmap.h>
 
 void bmp_clear(const bitmap_t *bitmap, uint8 color)
@@ -43,8 +44,13 @@ static bitmap_t *_make_bitmap(uint8 *data_addr, bool hw, int width,
    if (NULL == data_addr)
       return NULL;
 
+
    /* Make sure to add in space for line pointers */
-   bitmap = malloc(sizeof(bitmap_t) + (sizeof(uint8 *) * height));
+   vidinfo_t video;
+   osd_getvideoinfo(&video);
+   bitmap = video.driver->malloc_dma(sizeof(bitmap_t) + (sizeof(uint8 *) * height));
+   // bitmap = malloc(sizeof(bitmap_t) + (sizeof(uint8 *) * height));
+   
    if (NULL == bitmap)
       return NULL;
 
@@ -83,7 +89,12 @@ bitmap_t *bmp_create(int width, int height, int overdraw)
 	printf("malloc %dx%d +%d\n", width, height, overdraw);
 
    pitch = width + (overdraw * 2); /* left and right */
-   addr = malloc((pitch * height) + 3); /* add max 32-bit aligned adjustment */
+
+   
+   vidinfo_t video;
+   osd_getvideoinfo(&video);
+   addr = video.driver->malloc_dma((pitch * height) + 3); /* add max 32-bit aligned adjustment */
+
    if (NULL == addr)
       return NULL;
 

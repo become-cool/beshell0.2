@@ -1,50 +1,59 @@
 const confPath = "/home/become/config/boot.json"
-exports.autorun = async function() {
-    let json = {}
-    try{
-        if(beapi.fs.isFileSync(confPath)) {
-            json = JSON.load(confPath)
+
+module.exports = JSON.load(confPath) || {}
+
+module.exports.__proto__ = {
+    desktop: "desktop/Desktop" ,
+
+    async autorun () {
+        if(this["script"]) {
+            try{
+                eval(this["script"])
+            }catch(e){ console.log(e) }
         }
-    }catch(e){
-        console.log(e)
-    }
-    json.__proto__ =  {
-        desktop: "desktop/Desktop"
-    }
-    
-    if(json["script"]) {
-        try{
-            eval(json["script"])
-        }catch(e){ console.log(e) }
-    }
-    
-    if(json["app"] && beapi.fs.isFileSync(json["app"])) {
-        try{
-            console.log("run app:", json["app"])
-            require(json["app"])
-            return
-        }catch(e){ console.log(e) }
-    }
-    
-    if( be.disp?.length && json.desktop ){
-        const Desktop = require(json.desktop)
-        be.desktop = new Desktop()
-    }
 
-    return
-}
-function setAutoScript(path) {
-    if(!path||!beapi.fs.existsSync(path)) {
-        throw new Error("path not exists")
-    }
-    let json = JSON.load(confPath)
-    json["path"] = path
-    beapi.fs.writeFileSync(confPath, JSON.stringify(json,null,4))
-}
-exports.setAutoScript = setAutoScript
+        let app = beapi.nvs.readString("rst-app",true)
+        if(app) {
+            try{
+                console.log("[reset] run app:", app)
+                require(app)
+                return
+            }catch(e){
+                console.log(e)
+                process.reboot()
+            }
+        }
 
-exports.rebootToScript = function(path) {
-    setAutoScript(path)
-    beapi.nvs.setNextBootLevel(6)
-    process.reboot()
+        if(this["app"]) {
+            try{
+                console.log("run app:", this["app"])
+                require(this["app"])
+                return
+            }catch(e){ console.log(e) }
+        }
+        
+        if( be.disp?.length && this.desktop && !beapi.nvs.readUint8("rst-nodesktop",true) ){
+            const Desktop = require(this.desktop)
+            be.desktop = new Desktop()
+        }
+    } ,
+
+    setAutoScript(path) {
+        if(!path||!beapi.fs.existsSync(path)) {
+            throw new Error("path not exists")
+        }
+        this.script = path
+        beapi.fs.writeFileSync(confPath, JSON.stringify(this,null,4))
+    } ,
+
+    rebootToApp (path, nowifi) {
+        beapi.nvs.writeString("rst-app", path)
+        if(nowifi) {
+            beapi.nvs.writeUint8("rst-nowifi", 1)
+        }
+        process.reboot()
+    } ,
+
+
 }
+

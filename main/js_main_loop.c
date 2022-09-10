@@ -260,18 +260,23 @@ static void quickjs_deinit() {
 void js_main_loop(const char * script){
 
     boot_level = 5 ;
-    load_boot_level_from_nvs(& boot_level) ;
+    nvs_read_onetime("rst-lv", &boot_level) ;
+
+    bool nowifi = false ;
+    nvs_read_onetime("rst-nowifi", (uint8_t*)&nowifi) ;
+
     
 #ifndef SIMULATION    
 
     void * retain_mem = NULL ;
     HOLD_MEM(retain_mem, 90*1024)
     
-    be_module_wifi_init() ;
+    if(!nowifi) {
+        be_module_wifi_init() ;
+    }
     be_rawfs_mount("/fs") ;
     be_module_fs_init() ;
     vTaskDelay(1) ;
-    echo_DMA( "after wifi init" ) ;
     
 #endif
 

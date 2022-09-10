@@ -318,4 +318,6 @@ beapi.wifi.registerEventHandle(function(eventType, eventId, data){
 })
 
 // 禁止 wifi 睡眠 (增加耗电)
-beapi.wifi.setPS(PS_NONE)
+if(beapi.wifi.hasInited()) {
+    beapi.wifi.setPS(PS_NONE)
+}

@@ -3,7 +3,7 @@
 
 #include "quickjs-libc.h"
 
-void load_boot_level_from_nvs() ;
+void nvs_read_onetime(const char * key, uint8_t*pvalue) ;
 
 void be_module_nvs_init() ;
 void be_module_nvs_require(JSContext *ctx) ;

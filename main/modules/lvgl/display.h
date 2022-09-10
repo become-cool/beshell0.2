@@ -17,6 +17,7 @@ typedef struct {
     void * jsobj ; // JS_MKPTR(JS_TAG_OBJECT, <JSObject *>)
     void * buff1 ;
     void * buff2 ;
+    lv_coord_t buff_lines ;
 
     bool enable_input_event ;
     JSContext * ctx ;

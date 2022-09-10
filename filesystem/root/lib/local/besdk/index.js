@@ -13,3 +13,4 @@ global.be = {
         }
     }
 }
+require("./fs.js")

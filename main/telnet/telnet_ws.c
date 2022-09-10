@@ -1,4 +1,5 @@
 #include "telnet_ws.h"
+#include "module_wifi.h"
 #include "module_telnet.h"
 #include "module_metadata.h"
 
@@ -660,6 +661,11 @@ static void captive_dns(struct mg_connection *c, int ev, void *ev_data, void *fn
 
 
 void be_telnet_ws_init() {
+
+    if(!wifi_has_inited()) {
+        return ;
+    }
+
     fs_root = mallocf("/fs/=%s", vfs_path_prefix) ;
     // conn = mg_http_listen(be_module_mg_mgr(), TELNET_WS_ADDR, telnet_ws_response, NULL);
     // printf("telnet websocket addr: %s\n", TELNET_WS_ADDR) ;

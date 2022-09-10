@@ -91,14 +91,11 @@ module.exports = class AudioList extends lv.Column {
         }
         console.log(this.lst.length)
         
-        for(let i=0;i<Math.min(this.lst.length,10);i++){
+        for(let i=0;i<this.lst.length;i++){
             let item = this.lst[i]
             let btn = this.uilst.addBtn(null, '')
 
             let title = item.title
-            if(title.length>30) {
-                title = title.slice(0,30) + '...'
-            }
 
             btn.setText(title)
             btn.setFont("msyh")

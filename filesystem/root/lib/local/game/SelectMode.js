@@ -62,7 +62,6 @@ class SelectMode extends lv.Obj {
             ]
         }, this)
         
-        lv.loadScreen(this)
 
         let allModes = ['tv', 'psp', 'custom']
         this.setMode("tv")
@@ -87,7 +86,6 @@ class SelectMode extends lv.Obj {
             }
         })
 
-        global.game = this
     }
 
     setMode(name) {

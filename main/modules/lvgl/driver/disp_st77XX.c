@@ -10,6 +10,7 @@
 
 #include "disp_st77XX.h"
 #include "module_serial.h"
+#include "debug.h"
 
 #define TAG "ST7789"
 #define	_DEBUG_ 0
@@ -279,7 +280,6 @@ void st7789v_init(st77xx_dev_t * dev, int width, int height, int offsetx, int of
 // y2:End Y coordinate
 // colors:colors
 void st77xx_draw_rect(st77xx_dev_t * dev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t * colors) {
-
 	
 	// printf("st77xx_draw_rect() dev->_width=%d, dev->_width=%d, dc=%d\n",dev->_width,dev->_height,dev->_dc) ;
 

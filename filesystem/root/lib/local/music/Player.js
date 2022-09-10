@@ -3,7 +3,7 @@ const Disk = require('./wave_anim/Disk.js')
 const Controller = require("./Controller.js")
 const AudioList = require("./AudioList.js")
 
-module.exports = class Player extends lv.CleanObj {
+class Player extends lv.CleanObj {
     constructor(parent) {
         super(parent)
         
@@ -310,3 +310,14 @@ module.exports = class Player extends lv.CleanObj {
     }
 }
 
+module.exports = Player
+
+_singleton = null
+module.exports.singleton = function() {
+    if(!_singleton) {
+        _singleton = new Player
+    }
+    
+    lv.loadScreen(_singleton)
+    global.app = _singleton
+}

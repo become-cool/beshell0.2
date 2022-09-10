@@ -240,7 +240,7 @@ void app_main(void)
     printf("DMA   (free/total): %d/%d\n", getDMAUsed(),getDMATotal());
     printf("PSRAM (free/total): %d/%d\n", getPsramUsed(),getPsramTotal());
 
-    xTaskCreatePinnedToCore(&js_main_loop, "js_main_loop", 16*1024, NULL, 5, NULL, 0);
+    xTaskCreatePinnedToCore(&js_main_loop, "js_main_loop", 20*1024, NULL, 5, NULL, 0);
     // js_main_loop(NULL) ;
 #endif
 

@@ -1,22 +1,20 @@
 
-beapi.lvgl.Obj.prototype.holdKeys = function() {
-    let screen = this.screen()
+function holdKeys(screen, receiver) {
     screen.disp().keysRouter()
     if(!screen._keysHolders) {
         screen._keysHolders = []
     }
-    if(screen._keysHolders[screen._keysHolders.length-1] == this) {
+    if(screen._keysHolders[screen._keysHolders.length-1] == receiver) {
         return
     }
-    screen._keysHolders.push(this)
+    screen._keysHolders.push(receiver)
 }
-beapi.lvgl.Obj.prototype.releaseKeys = function() {
-    let screen = this.screen()
+function releaseKeys(screen,receiver) {
     if(!screen._keysHolders) {
         return
     }
     for(let i=screen._keysHolders.length-1;i>=0;i--) {
-        if(screen._keysHolders[i] == this) {
+        if(screen._keysHolders[i] == receiver) {
             screen._keysHolders.splice(i,1)
             if(screen._keysHolders.length==0) {
                 delete screen._keysHolders
@@ -25,6 +23,48 @@ beapi.lvgl.Obj.prototype.releaseKeys = function() {
         }
     }
     return false
+}
+
+beapi.lvgl.Obj.prototype.holdKeys = function() {
+    let screen = this.screen()
+    if(!screen) {
+        throw new Error("no screen to hold keys")
+    }
+    holdKeys(screen,this)
+}
+beapi.lvgl.Obj.prototype.releaseKeys = function() {
+    let screen = this.screen()
+    if(!screen) {
+        return true
+    }
+    return releaseKeys(screen, this)
+}
+
+beapi.lvgl.Group.prototype.holdKeys = function(screen) {
+    holdKeys(screen, this)
+    this.__keysHandler = (key) => {
+        if(key=='up') {
+            this.focusPrev()
+        }
+        else if(key=='down'||key=='tab') {
+            this.focusNext()
+        }
+        else if(key=='enter') {
+            let obj = this.focused()
+            console.log(obj)
+            if(obj) {
+                obj.emit("clicked")
+            }
+        }
+    }
+    this.on("ipt.btn.press", this.__keysHandler)
+}
+beapi.lvgl.Group.prototype.releaseKeys = function(screen) {
+    releaseKeys(screen, this)
+    if(this.__keysHandler) {
+        this.off("ipt.btn.press", this.__keysHandler)
+        this.__keysHandler = null
+    }
 }
 
 const mapkeys = {

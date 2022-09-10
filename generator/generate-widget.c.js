@@ -482,7 +482,7 @@ function generateClassRegister() {
 
     let code = ""
     for(let clzConf of WidgetsMeta) {
-        if(clzConf.className=="Obj")
+        if(clzConf.className=="Obj" || !clzConf.isWidget)
             var parentProtoName = "EventEmitterProto"
         else
             var parentProtoName = "proto_lv_obj"

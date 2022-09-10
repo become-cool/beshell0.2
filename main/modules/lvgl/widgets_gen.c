@@ -8547,7 +8547,7 @@ void be_lv_widgets_gen_require(JSContext *ctx, JSValue lvgl) {
                 , js_lv_group_constructor
                 , js_lv_group_proto_funcs, countof(js_lv_group_proto_funcs)
                 , js_lv_group_static_funcs, countof(js_lv_group_static_funcs)
-                , proto_lv_obj, lvgl) ;
+                , EventEmitterProto, lvgl) ;
 
 // AUTO GENERATE CODE END [REGISTER CLASS] --------
 

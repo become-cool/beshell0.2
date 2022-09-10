@@ -17,7 +17,7 @@
 static uint8_t _disp_id = 0 ;
 
 JSValue js_lv_disp_wrapper(JSContext *ctx, lv_disp_t * disp) {
-    if(!disp->driver) {
+    if(!disp || !disp->driver) {
         return JS_NULL ;
     }
     disp_drv_spec_t * spec = (disp_drv_spec_t*) disp->driver->user_data ;
@@ -463,7 +463,8 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
 
     // 创建缓冲区
 #ifndef SIMULATION
-    size_t bufsize = width * DISP_BUFF_LINES ;
+    dvrdata->buff_lines = DISP_BUFF_LINES ;
+    size_t bufsize = width * dvrdata->buff_lines ;
     dvrdata->buff1 = malloc_buffer(bufsize*2) ;
     if(getPsramTotal()>0) {
         dvrdata->buff2 = malloc_buffer(bufsize*2) ;
@@ -472,7 +473,8 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
         dvrdata->buff2 = NULL ;
     }
 #else
-    size_t bufsize = width * DISP_BUFF_LINES_ENOUGH ;
+    dvrdata->buff_lines = DISP_BUFF_LINES_ENOUGH ;
+    size_t bufsize = width * dvrdata->buff_lines ;
     dvrdata->buff1 = malloc_buffer(bufsize*2) ;
     dvrdata->buff2 = malloc_buffer(bufsize*2) ;
 #endif

@@ -9,6 +9,7 @@
 #include <sys/errno.h>
 
 #include "module_telnet.h"
+#include "module_wifi.h"
 #include "lwip/err.h"
 #include "lwip/sockets.h"
 #include "lwip/sys.h"
@@ -35,6 +36,10 @@ socklen_t sniffer_socklen = sizeof(sniffer_source_addr);
 
 
 void be_module_sniffer_init() {
+
+    if(!wifi_has_inited()) {
+        return ;
+    }
     
     if(sniffer_sock>-1) {
         echo("udp sniffer answer startup already.\n") ;
@@ -64,7 +69,6 @@ void be_module_sniffer_init() {
 
 
 void be_module_sniffer_loop() {
-
 
     FD_ZERO(&sniffer_rfds);
 

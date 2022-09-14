@@ -107,7 +107,7 @@ void nvs_read_onetime(const char * key, uint8_t*pvalue) {
 #endif
 }
 
-
+#ifndef SIMULATION
 static JSValue js_nvs_write_str(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(2)
     ARGV_TO_STRING(0,key)
@@ -168,6 +168,7 @@ ret:
     }
     return result ;
 }
+#endif
 
 // static JSValue js_nvs_set_next_boot_level(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
 //     CHECK_ARGC(1)

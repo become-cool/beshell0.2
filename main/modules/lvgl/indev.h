@@ -86,7 +86,7 @@ void indev_global_cb_proc(lv_indev_data_t *data) ;
 
 extern uint8_t _indev_id ;
 
-
+#ifndef SIMULATION
 #define THIS_INDEV(thisobj)     \
     lv_indev_t * thisobj = (lv_indev_t *)JS_GetOpaque(this_val, js_lv_indev_pointer_class_id) ; \
     if(!thisobj) {  \
@@ -95,6 +95,13 @@ extern uint8_t _indev_id ;
     if(!thisobj) { \
         THROW_EXCEPTION("invalid indev obj") \
     }
+#else
+#define THIS_INDEV(thisobj)     \
+    lv_indev_t * thisobj = (lv_indev_t *)JS_GetOpaque(this_val, js_lv_indev_pointer_class_id) ; \
+    if(!thisobj) { \
+        THROW_EXCEPTION("invalid indev obj") \
+    }
+#endif
 
 #define THIS_SPEC(thisspec)                                 \
     THIS_INDEV(thisobj)                                     \

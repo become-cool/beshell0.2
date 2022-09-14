@@ -12,7 +12,6 @@
 #include "uuid.h"
 #include "module_telnet.h"
 #include "module_metadata.h"
-#include "gbk.h"
 
 #ifndef SIMULATION
 #include "esp_system.h"
@@ -23,6 +22,7 @@
 #include "untar.h"
 #include "libb64/cdecode.h"
 #include "libb64/cencode.h"
+// #include "gbk.h"
 
 LOG_TAG("util");
 

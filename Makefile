@@ -2,6 +2,12 @@
 all:
 	./build.sh
 
+mkonly:
+	idf.py build
+	echo ''
+	echo ''
+	ls -lh build/beshell.bin
+
 clear-jsbin:
 	find filesystem -name "*.js.bin" | xargs rm -f
 
@@ -68,6 +74,7 @@ telweb: telweb-build fs-root
 
 help:
 	@echo "make"
+	@echo "make mkonly		# idf.py build"
 	@echo "make compile		# compile all .js file to .bin"
 	@echo "make tree-shaking"
 	@echo "make mkfs-root"

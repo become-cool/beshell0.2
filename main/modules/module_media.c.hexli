@@ -87,9 +87,7 @@ static void task_mp3_player(char * path) {
             fseek(mp3File, 0, SEEK_SET);
         }
     }
-    unsigned char* input = &readBuf[0];
     int bytesLeft = 0;
-    int outOfData = 0;
     unsigned char* readPtr = readBuf;
     bool printed = false ;
     int64_t t0 = gettime() ;

@@ -265,6 +265,7 @@ void js_main_loop(const char * script){
     bool nowifi = false ;
     nvs_read_onetime("rst-nowifi", (uint8_t*)&nowifi) ;
 
+nowifi = true ;
     
 #ifndef SIMULATION    
 

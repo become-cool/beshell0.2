@@ -22,7 +22,9 @@
         "signal.h": "c",
         "time.h": "c",
         "ES8156.C": "cpp",
-        "windows.h": "c"
+        "windows.h": "c",
+        "*.helix": "c",
+        "*.next": "c"
     },
     "cmake.configureOnOpen": false
 }

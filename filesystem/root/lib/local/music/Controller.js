@@ -12,10 +12,10 @@ function createCtrlBtn(name, clicked, group) {
 
 class Controller extends lv.Column {
     
-    constructor(parent, group) {
+    constructor(parent, group, player) {
         super(parent)
 
-        this.playing = false
+        this.player = player
 
         this.fromJson({
             height: 80 ,
@@ -51,9 +51,8 @@ class Controller extends lv.Column {
                             createCtrlBtn("prev", ()=>{
                                 this.emit("prev")
                             }, group) ,
-                            createCtrlBtn("play",()=>{                                
-                                this.setPlaying(!this.playing)
-                                this.emit(this.playing?"play":"pause")
+                            createCtrlBtn("play",()=>{
+                                this.emit(this.isPlaying()?"pause":"play")
                             }, group) ,
                             createCtrlBtn("next", ()=>{
                                 this.emit("next")
@@ -87,11 +86,22 @@ class Controller extends lv.Column {
         },this)
 
         beapi.lvgl.Group.focusObj(this.btnPlay)
+
+        this.updateStatus()
+        player.on("*", ()=>this.updateStatus())
     }
 
-    setPlaying(playing) {
-        this.playing = playing
-        this.btnPlay.setText(playing?lv.symbol.pause:lv.symbol.play)
+    updateStatus() {
+        if(this.isPlaying()) {
+            this.btnPlay.setText(lv.symbol.pause)
+        }
+        else {
+            this.btnPlay.setText(lv.symbol.play)
+        }
+    }
+
+    isPlaying() {
+        return this.player.isRunning() && !this.player.isPaused()
     }
 }
 

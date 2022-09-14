@@ -43,6 +43,12 @@ AUX_SOURCE_DIRECTORY(../components/mongoose SRC_LIST)
 include_directories(../components/mongoose)
 
 
+
+# hexli
+include_directories(../components/helix/include)
+AUX_SOURCE_DIRECTORY(../components/helix/src SRC_LIST)
+
+
 AUX_SOURCE_DIRECTORY(./src SRC_LIST)
 
 include_directories(./src)
@@ -78,9 +84,11 @@ list(APPEND SRC_LIST ../main/modules/mg/mg_server.c)
 list(APPEND SRC_LIST ../main/modules/module_process.c)
 list(APPEND SRC_LIST ../main/modules/module_metadata.c)
 list(APPEND SRC_LIST ../main/modules/module_nvs.c)
+list(APPEND SRC_LIST ../main/modules/module_media.c)
 list(APPEND SRC_LIST ../main/modules/lvgl/module_lvgl.c)
 list(APPEND SRC_LIST ../main/modules/lvgl/display.c)
 list(APPEND SRC_LIST ../main/modules/lvgl/indev.c)
+list(APPEND SRC_LIST ../main/modules/lvgl/indev_pointer.c)
 list(APPEND SRC_LIST ../main/modules/lvgl/style.c)
 list(APPEND SRC_LIST ../main/modules/lvgl/be_lv_struct_wrapper.c)
 list(APPEND SRC_LIST ../main/modules/lvgl/be_lv_draggable.c)

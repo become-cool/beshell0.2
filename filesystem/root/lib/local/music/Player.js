@@ -264,8 +264,8 @@ class Player extends lv.CleanObj {
         // console.log("play", item.path)
         this.labMsg.setText("正在播放: "+item.title)
 
-        this.waveAnim.play()
-        this.ctrl.setPlaying(true)
+        // this.waveAnim.play()
+        // this.ctrl.setPlaying(true)
 
         // beapi.audio.stop()
 
@@ -304,7 +304,7 @@ class Player extends lv.CleanObj {
         this.currentPath = null
         this.currentIndex = -1
         this.waveAnim.stop()
-        this.ctrl.setPlaying(false)
+        // this.ctrl.setPlaying(false)
         beapi.audio.deinit()
         lv.loadScreen(be.desktop)
     }

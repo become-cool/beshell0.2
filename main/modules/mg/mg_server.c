@@ -1,11 +1,14 @@
 #include "mg_server.h"
 #include "module_mg.h"
-#include "module_wifi.h"
 #include "telnet_ws.h"
 #include "utils.h"
 #include "cutils.h"
 
-
+#ifndef SIMULATION
+#include "module_wifi.h"
+#else
+#define CHECK_WIFI_INITED
+#endif
 
 // =================================================
 // class Server

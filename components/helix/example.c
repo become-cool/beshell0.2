@@ -106,52 +106,52 @@ static void mp3_task(void *args) {
         //printf("sync offset: %d, left: %d\n", offset, left);
         //读满数据缓冲
         unsigned char *read_ptr;
-            read_bytes = fread(read_buffer + left, 1, sizeof(read_buffer) - left, fd1);
-            left += read_bytes;
-            if (left == 0) eof = 1;
-            read_ptr = read_buffer;
-            ret = MP3Decode(decoder, &read_ptr, &left, out, 0);
-            if (ret == ERR_MP3_NONE) {
-                int outputSamps;
-                MP3FrameInfo frame_info;
-                MP3GetLastFrameInfo(decoder, &frame_info);
-                /* set sample rate */
-                /* write to sound device */
-                outputSamps = frame_info.outputSamps;
-                //printf("sample rate: %d, channels: %d, outputSamps: %d\n", frame_info.samprate, frame_info.nChans, outputSamps);
-                if (outputSamps > 0) {
-                    if (frame_info.nChans == 1) {
-                        int i;
-                        for (i = outputSamps - 1; i >= 0; i--) {
-                            out[i * 2] = out[i];
-                            out[i * 2 + 1] = out[i];
-                        }
-                        outputSamps *= 2;
+        read_bytes = fread(read_buffer + left, 1, sizeof(read_buffer) - left, fd1);
+        left += read_bytes;
+        if (left == 0) eof = 1;
+        read_ptr = read_buffer;
+        ret = MP3Decode(decoder, &read_ptr, &left, out, 0);
+        if (ret == ERR_MP3_NONE) {
+            int outputSamps;
+            MP3FrameInfo frame_info;
+            MP3GetLastFrameInfo(decoder, &frame_info);
+            /* set sample rate */
+            /* write to sound device */
+            outputSamps = frame_info.outputSamps;
+            //printf("sample rate: %d, channels: %d, outputSamps: %d\n", frame_info.samprate, frame_info.nChans, outputSamps);
+            if (outputSamps > 0) {
+                if (frame_info.nChans == 1) {
+                    int i;
+                    for (i = outputSamps - 1; i >= 0; i--) {
+                        out[i * 2] = out[i];
+                        out[i * 2 + 1] = out[i];
                     }
-                    fwrite(out, 1, outputSamps * sizeof(short), fd2);
-                } else {
-                    //printf("no samples\n");
+                    outputSamps *= 2;
                 }
-                memmove(read_buffer, read_ptr, left);
+                fwrite(out, 1, outputSamps * sizeof(short), fd2);
             } else {
-                if (ret == ERR_MP3_INDATA_UNDERFLOW) {
-                    //printf("ERR_MP3_INDATA_UNDERFLOW\n");
-                    left = 0;
-                } else if (ret == ERR_MP3_MAINDATA_UNDERFLOW) {
-                    /* do nothing - next call to decode will provide more mainData */
-                    //printf("ERR_MP3_MAINDATA_UNDERFLOW, continue to find sys words, left: %d\n", left);
-                    if (left > 0) {
-                        memmove(read_buffer, read_ptr, left);
-                    }
-                } else {
-                    //printf("unknown error: %d, left: %d\n", ret, left);
-                    // skip this frame
-                    if (left > 0) {
-                        read_ptr++;
-                        left--;
-                        memmove(read_buffer, read_ptr, left);
-                    }
+                //printf("no samples\n");
+            }
+            memmove(read_buffer, read_ptr, left);
+        } else {
+            if (ret == ERR_MP3_INDATA_UNDERFLOW) {
+                //printf("ERR_MP3_INDATA_UNDERFLOW\n");
+                left = 0;
+            } else if (ret == ERR_MP3_MAINDATA_UNDERFLOW) {
+                /* do nothing - next call to decode will provide more mainData */
+                //printf("ERR_MP3_MAINDATA_UNDERFLOW, continue to find sys words, left: %d\n", left);
+                if (left > 0) {
+                    memmove(read_buffer, read_ptr, left);
                 }
+            } else {
+                //printf("unknown error: %d, left: %d\n", ret, left);
+                // skip this frame
+                if (left > 0) {
+                    read_ptr++;
+                    left--;
+                    memmove(read_buffer, read_ptr, left);
+                }
+            }
         }
 
     }

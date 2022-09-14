@@ -155,9 +155,9 @@ static int _vfs_read(audio_element_handle_t self, char *buffer, int len, TickTyp
     audio_element_info_t info;
     audio_element_getinfo(self, &info);
 
-    // int64_t t0=gettime() ;
+    int64_t t0=gettime() ;
     int rlen = fread(buffer, 1, len, vfs->file);
-    // printf("%d,%lld\n",rlen, gettime() -t0);
+    printf("%d,%lld\n",rlen, gettime() -t0);
 
     if (rlen <= 0) {
         ESP_LOGW(TAG, "No more data, ret:%d", rlen);

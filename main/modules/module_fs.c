@@ -277,11 +277,7 @@ JSValue js_fs_read_file_sync(JSContext *ctx, JSValueConst this_val, int argc, JS
         return JS_NewArrayBuffer(ctx, NULL, 0, freeArrayBuffer, NULL, false) ;
     }
 
-#ifndef SIMULATION
-    char * buff = heap_caps_malloc( readlen, MALLOC_CAP_SPIRAM);
-#else
     char * buff = malloc(readlen) ;
-#endif
 
     if(!buff) {
         free(path) ;

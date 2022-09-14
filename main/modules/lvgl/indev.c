@@ -4,8 +4,10 @@
 #include "utils.h"
 #include "cutils.h"
 #include "indev_pointer.h"
-#include "indev_i2c.h"
 
+#ifndef SIMULATION
+#include "indev_i2c.h"
+#endif
 
 
 
@@ -224,7 +226,9 @@ void be_lv_indev_init() {
     JS_NewClassID(&js_indev_base_class_id);
 
     be_indev_pointer_init() ;
+#ifndef SIMULATION
     be_indev_i2c_init() ;
+#endif
 }
 
 void be_lv_indev_require(JSContext *ctx, JSValue lvgl) {
@@ -241,5 +245,7 @@ void be_lv_indev_require(JSContext *ctx, JSValue lvgl) {
     JSValue baseProto = QJS_DEF_CLASS(indev_base, "IndevBase", "lv.IndevBase", JS_UNDEFINED, lvgl) ;
 
     be_indev_pointer_require(ctx, lvgl, baseProto) ;
+#ifndef SIMULATION
     be_indev_i2c_require(ctx, lvgl, baseProto) ;
+#endif
 }

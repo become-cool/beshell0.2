@@ -9,12 +9,12 @@
 #define dm(msg) printf("%s: %dKB\n", msg, esp_get_free_heap_size()/1024);
 #define dp(p)   printf(#p"@%p\n", p) ;
 #define ds(s)   printf(#s"=%s @%d\n", s, __LINE__) ;
-#define dn(v)   printf(#v"=%d\n", v) ;
+#define dn(v)   printf(#v"=%d @%d\n", v, __LINE__) ;
 #define dn64(v)   printf(#v"=%lld\n", v) ;
-#define dn2(v1,v2)              printf(#v1"=%d, "#v2"=%d\n", v1, v2) ;
-#define dn3(v1,v2,v3)           printf(#v1"=%d, "#v2"=%d, "#v3"=%d\n", v1, v2, v3) ;
-#define dn4(v1,v2,v3,v4)        printf(#v1"=%d, "#v2"=%d, "#v3"=%d, "#v4"=%d\n", v1, v2, v3, v4) ;
-#define dn5(v1,v2,v3,v4,v5)     printf(#v1"=%d, "#v2"=%d, "#v3"=%d, "#v4"=%d, "#v5"=%d\n", v1, v2, v3, v4, v5) ;
+#define dn2(v1,v2)              printf(#v1"=%d, "#v2"=%d @%d\n", v1, v2, __LINE__) ;
+#define dn3(v1,v2,v3)           printf(#v1"=%d, "#v2"=%d, "#v3"=%d @%d\n", v1, v2, v3, __LINE__) ;
+#define dn4(v1,v2,v3,v4)        printf(#v1"=%d, "#v2"=%d, "#v3"=%d, "#v4"=%d @%d\n", v1, v2, v3, v4, __LINE__) ;
+#define dn5(v1,v2,v3,v4,v5)     printf(#v1"=%d, "#v2"=%d, "#v3"=%d, "#v4"=%d, "#v5"=%d @%d\n", v1, v2, v3, v4, v5, __LINE__) ;
 
 #define dfunc   printf("%s()@%d\n", __FUNCTION__, __LINE__) ;
 
@@ -22,5 +22,14 @@
 #define IS_NULL(exp) YES_OR_NO((exp)==NULL)
 
 #define dref(var) printf(#var" ref count:%d @%d\n", ((JSRefCountHeader *)JS_VALUE_GET_PTR(var))->ref_count, __LINE__) ;
+
+#define echo_time(msg, codes)                   \
+    {                                           \
+        int64_t t = gettime() ;                 \
+        codes                                   \
+        printf(msg": %lldms\n", gettime()-t) ;  \
+    }
+#define necho_time(msg, codes)  codes
+
 
 #endif

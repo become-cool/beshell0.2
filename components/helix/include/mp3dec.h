@@ -73,6 +73,7 @@
 extern "C" {
 #endif
 
+
 /* determining MAINBUF_SIZE:
  *   max mainDataBegin = (2^9 - 1) bytes (since 9-bit offset) = 511
  *   max nSlots (concatenated with mainDataBegin bytes from before) = 1440 - 9 - 4 + 1 = 1428
@@ -91,7 +92,43 @@ typedef enum {
 	MPEG25 = 2
 } MPEGVersion;
 
-typedef void *HMP3Decoder;
+
+
+typedef struct _MP3DecInfo {
+	/* pointers to platform-specific data structures */
+	void *FrameHeaderPS;
+	void *SideInfoPS;
+	void *ScaleFactorInfoPS;
+	void *HuffmanInfoPS;
+	void *DequantInfoPS;
+	void *IMDCTInfoPS;
+	void *SubbandInfoPS;
+
+	/* buffer which must be large enough to hold largest possible main_data section */
+	unsigned char mainBuf[MAINBUF_SIZE];
+
+	/* special info for "free" bitrate files */
+	int freeBitrateFlag;
+	int freeBitrateSlots;
+
+	/* user-accessible info */
+	int bitrate;
+	int nChans;
+	int samprate;
+	int nGrans;				/* granules per frame */
+	int nGranSamps;			/* samples per granule */
+	int nSlots;
+	int layer;
+	MPEGVersion version;
+
+	int mainDataBegin;
+	int mainDataBytes;
+
+	int part23Length[MAX_NGRAN][MAX_NCHAN];
+
+} MP3DecInfo;
+
+typedef MP3DecInfo * HMP3Decoder;
 
 enum {
 	ERR_MP3_NONE =                  0,
@@ -108,7 +145,7 @@ enum {
 	ERR_MP3_INVALID_IMDCT =        -11,
 	ERR_MP3_INVALID_SUBBAND =      -12,
 
-	ERR_UNKNOWN =                  -9999
+	ERR_UNKNOWN =                  -99
 };
 
 typedef struct _MP3FrameInfo {
@@ -124,11 +161,13 @@ typedef struct _MP3FrameInfo {
 /* public API */
 HMP3Decoder MP3InitDecoder(void);
 void MP3FreeDecoder(HMP3Decoder hMP3Decoder);
-int MP3Decode(HMP3Decoder hMP3Decoder, unsigned char **inbuf, int *bytesLeft, short *outbuf, int useSize);
+int MP3Decode(HMP3Decoder hMP3Decoder, unsigned char **inbuf, int *bytesLeft, void * opaque, int useSize);
 
 void MP3GetLastFrameInfo(HMP3Decoder hMP3Decoder, MP3FrameInfo *mp3FrameInfo);
 int MP3GetNextFrameInfo(HMP3Decoder hMP3Decoder, MP3FrameInfo *mp3FrameInfo, unsigned char *buf);
 int MP3FindSyncWord(unsigned char *buf, int nBytes);
+
+void MP3ResetDecoder(MP3DecInfo * mp3DecInfo) ;
 
 #ifdef __cplusplus
 }
@@ -140,20 +179,37 @@ int MP3FindSyncWord(unsigned char *buf, int nBytes);
 // #endif
 
 
+
 #include <stdio.h>
 
-// #define pf(...) printf(__VA_ARGS__) ;printf("\n") ;
-// #define dd printf("@%d\n", __LINE__) ;
-// #define df(msg) printf("@%d %s\n", __LINE__, msg) ;
-// #define dm(msg) printf("%s: %dKB\n", msg, esp_get_free_heap_size()/1024);
-// #define dp(p)   printf(#p"@%p\n", p) ;
-// #define ds(s)   printf(#s"=%s @%d\n", s, __LINE__) ;
-// #define dn(v)   printf(#v"=%d\n", v) ;
-// #define dn64(v)   printf(#v"=%lld\n", v) ;
-// #define dn2(v1,v2)              printf(#v1"=%d, "#v2"=%d\n", v1, v2) ;
-// #define dn3(v1,v2,v3)           printf(#v1"=%d, "#v2"=%d, "#v3"=%d\n", v1, v2, v3) ;
-// #define dn4(v1,v2,v3,v4)        printf(#v1"=%d, "#v2"=%d, "#v3"=%d, "#v4"=%d\n", v1, v2, v3, v4) ;
-// #define dn5(v1,v2,v3,v4,v5)     printf(#v1"=%d, "#v2"=%d, "#v3"=%d, "#v4"=%d, "#v5"=%d\n", v1, v2, v3, v4, v5) ;
+
+// #if( configUSE_16_BIT_TICKS == 1 )
+// 	typedef uint16_t TickType_t;
+// 	#define portMAX_DELAY ( TickType_t ) 0xffff
+// #else
+// 	typedef uint32_t TickType_t;
+// 	#define portMAX_DELAY ( TickType_t ) 0xffffffffUL
+// #endif
+
+// typedef void (*func_ringbuf_send)(void * ring, void * data, size_t size, TickType_t wait);
+// void hexli_set_ringbuf(void * ring, func_ringbuf_send func) ;
+
+
+typedef void (*mp3dec_output_func_t)(void * opaque, void * data, size_t size);
+void mp3dec_set_output_func(mp3dec_output_func_t func) ;
+
+#define pf(...) printf(__VA_ARGS__) ;printf("\n") ;
+#define dd printf("@%d\n", __LINE__) ;
+#define df(msg) printf("@%d %s\n", __LINE__, msg) ;
+#define dm(msg) printf("%s: %dKB\n", msg, esp_get_free_heap_size()/1024);
+#define dp(p)   printf(#p"@%p\n", p) ;
+#define ds(s)   printf(#s"=%s @%d\n", s, __LINE__) ;
+#define dn(v)   printf(#v"=%d\n", v) ;
+#define dn64(v)   printf(#v"=%lld\n", v) ;
+#define dn2(v1,v2)              printf(#v1"=%d, "#v2"=%d\n", v1, v2) ;
+#define dn3(v1,v2,v3)           printf(#v1"=%d, "#v2"=%d, "#v3"=%d\n", v1, v2, v3) ;
+#define dn4(v1,v2,v3,v4)        printf(#v1"=%d, "#v2"=%d, "#v3"=%d, "#v4"=%d\n", v1, v2, v3, v4) ;
+#define dn5(v1,v2,v3,v4,v5)     printf(#v1"=%d, "#v2"=%d, "#v3"=%d, "#v4"=%d, "#v5"=%d\n", v1, v2, v3, v4, v5) ;
 
 // #define dfunc   printf("%s()@%d\n", __FUNCTION__, __LINE__) ;
 

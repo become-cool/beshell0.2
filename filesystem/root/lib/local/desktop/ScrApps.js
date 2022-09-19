@@ -23,10 +23,10 @@ module.exports = class ScrApps extends lv.Obj {
                 flex: "row-wrap" ,
                 ref: "grid" ,
                 style: {
-                    "pad-row": 16 ,
-                    "pad-column": 16 ,
-                    "pad-top": 8 ,
-                    "pad-left": 8 ,
+                    "pad-column": 10 ,
+                    "pad-row": 12 ,
+                    "pad-top": 12 ,
+                    "pad-left": 9 ,
                 } ,
                 children: [
                     {
@@ -38,30 +38,35 @@ module.exports = class ScrApps extends lv.Obj {
                         clicked: ()=>{
                             this.emit("setting-popup()")
                         }
+                    } ,
+                    {
+                        class:AppIcon ,
+                        "text": "模型" ,
+                        "src": "/lib/icon/32/arm.png",
+                        group: this.group ,
+                        ref: 'files'
+                    } ,
+                    {
+                        class:AppIcon ,
+                        "text": "文件" ,
+                        "src": "/lib/icon/32/files.png",
+                        group: this.group ,
+                        ref: 'files'
                     }
-                    // {
-                    //     class:AppIcon ,
-                    //     "text": "文件" ,
-                    //     "src": "/lib/icon/32/folder.png",
-                    //     group: this.group ,
-                    //     ref: 'files'
-                    // }
-                    // , {
-                    //     class:AppIcon ,
-                    //     "text": "相册" ,
-                    //     "src": "/lib/icon/32/album.png" ,
-                    //     group: this.group ,
-                    //     ref: 'album'
-                    // }
+                    , {
+                        class:AppIcon ,
+                        "text": "相册" ,
+                        "src": "/lib/icon/32/album.png" ,
+                        group: this.group ,
+                        ref: 'album'
+                    }
                     , {
                         class:AppIcon ,
                         "text": "音乐" ,
                         "src": "/lib/icon/32/music.png",
                         group: this.group ,
-                        clicked: () => {
-                            // require("music/Player.js").singleton()
-                            console.log("music")
-                            require("/etc/init.d/boot.js").rebootToApp("/lib/local/music/index.js")
+                        create () {
+                            require("/lib/local/music/PlayerUI.js").singleton()
                         }
                     }
                     , {
@@ -69,45 +74,16 @@ module.exports = class ScrApps extends lv.Obj {
                         "text": "游戏" ,
                         "src": "/lib/icon/32/game.png" ,
                         group: this.group ,
-                        clicked () {
-                            require("/lib/local/game/index.js").singleton()
+                        create () {
+                            require("/lib/local/game/Player.js").singleton()
                         }
+                    }
+                    , {
+                        class:AppIcon ,
+                        "text": "相机" ,
+                        "src": "/lib/icon/32/camera.png" ,
+                        group: this.group ,
                     } ,
-                    // {
-                    //     class:AppIcon ,
-                    //     "text": "应用商店" ,
-                    //     "src": "/lib/icon/32/store.png" ,
-                    //     group: this.group ,
-                    //     ref: 'appStore'
-                    // } ,
-                    // {
-                    //     class: "Obj" ,
-                    //     width: 48 ,
-                    //     height: 48 ,
-                    //     clear: true ,
-                    //     ref: "btnNew" ,
-                    //     children: [
-                    //         {
-                    //             class: "Btn" ,
-                    //             width: 32 ,
-                    //             height: 32 ,
-                    //             center: true ,
-                    //             children: [{
-                    //                 class: "Label" ,
-                    //                 text: lv.symbol.plus ,
-                    //                 center: true ,
-                    //             }] ,
-    
-                    //             clicked: ()=>{
-                    //                 try{
-                    //                     this.dlgNewApp().start()
-                    //                 }catch(e){
-                    //                     console.log(e)
-                    //                 }
-                    //             }
-                    //         }
-                    //     ]
-                    // }
                 ]
             }],
         },this)

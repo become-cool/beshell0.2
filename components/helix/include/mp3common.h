@@ -60,39 +60,6 @@
  * #define	SYNCWORDL		0xf0
  */
 
-typedef struct _MP3DecInfo {
-	/* pointers to platform-specific data structures */
-	void *FrameHeaderPS;
-	void *SideInfoPS;
-	void *ScaleFactorInfoPS;
-	void *HuffmanInfoPS;
-	void *DequantInfoPS;
-	void *IMDCTInfoPS;
-	void *SubbandInfoPS;
-
-	/* buffer which must be large enough to hold largest possible main_data section */
-	unsigned char mainBuf[MAINBUF_SIZE];
-
-	/* special info for "free" bitrate files */
-	int freeBitrateFlag;
-	int freeBitrateSlots;
-
-	/* user-accessible info */
-	int bitrate;
-	int nChans;
-	int samprate;
-	int nGrans;				/* granules per frame */
-	int nGranSamps;			/* samples per granule */
-	int nSlots;
-	int layer;
-	MPEGVersion version;
-
-	int mainDataBegin;
-	int mainDataBytes;
-
-	int part23Length[MAX_NGRAN][MAX_NCHAN];
-
-} MP3DecInfo;
 
 typedef struct _SFBandTable {
 	short l[23];
@@ -109,7 +76,7 @@ int DecodeHuffman(MP3DecInfo *mp3DecInfo, unsigned char *buf, int *bitOffset, in
 int Dequantize(MP3DecInfo *mp3DecInfo, int gr);
 int IMDCT(MP3DecInfo *mp3DecInfo, int gr, int ch);
 int UnpackScaleFactors(MP3DecInfo *mp3DecInfo, unsigned char *buf, int *bitOffset, int bitsAvail, int gr, int ch);
-int Subband(MP3DecInfo *mp3DecInfo, short *pcmBuf);
+int Subband(MP3DecInfo *mp3DecInfo, void * opaque);
 
 /* mp3tabs.c - global ROM tables */
 extern const int samplerateTab[3][3];

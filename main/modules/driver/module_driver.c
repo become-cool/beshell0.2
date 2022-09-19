@@ -203,7 +203,7 @@ static JSValue js_driver_hold_dma(JSContext *ctx, JSValueConst this_val, int arg
 #endif
     }
 
-    return (*p)==0? JS_TRUE : JS_FALSE ;
+    return (*p)!=0? JS_TRUE : JS_FALSE ;
 }
 static JSValue js_driver_release_dma(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(1)

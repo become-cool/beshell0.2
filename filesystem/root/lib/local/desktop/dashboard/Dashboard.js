@@ -7,6 +7,7 @@ class Dashboard extends lv.Column {
     active = false
     constructor(parent,desktop) {
         super(parent)
+
         this.fromJson({
             width: "100%" ,
             height: "100%" ,
@@ -23,7 +24,10 @@ class Dashboard extends lv.Column {
                     {
                         class: WgtClock,
                         grow: 1 ,
-                        ref: "clock"
+                        ref: "clock" ,
+                        style: {
+                            "pad-top": 40
+                        }
                     } ,
                     {
                         class: "Obj" , 
@@ -48,8 +52,6 @@ class Dashboard extends lv.Column {
                         ref: "wifistatus" ,
                         height: "100%" ,
                         width: 80 ,
-                        style: {
-                        } ,
                     } ,
                 ]
             } ,
@@ -58,10 +60,6 @@ class Dashboard extends lv.Column {
                 ref: "row2" ,
             }]
         },this)
-        
-        for(let name in this.refs) {
-            global[name] = this.refs[name]
-        }
     }
     wakeup() {
         this.active = true

@@ -84,14 +84,24 @@ function ls(path) {
     if(!path) {
         path = process.env.PWD
     }
-    for(let item of beapi.fs.readdirSync(resolvepath(path))) {
-        if(item=='.' || item=='..')
+    path = resolvepath(path)
+    let stat = beapi.fs.statSync(resolvepath(path))
+    if(!stat) {
+        console.log("path not exists:", path)
+        return ;
+    }
+    if(!stat.isDir) {
+        console.log(stat)
+        return
+    }
+    for(let item of beapi.fs.readdirSync(path,true)) {
+        if(item.name=='.' || item.name=='..')
             continue
-        if( beapi.fs.isDirSync(resolvepath(path+'/'+item)) ) {
-            console.log(item+'/')
+        if( item.type=='dir' ) {
+            console.log(item.name+'/')
         }
         else {
-            console.log(item)
+            console.log(item.name)
         }
     }
 }
@@ -99,7 +109,6 @@ function ls(path) {
 function stat(path) {
     console.log(beapi.fs.statSync(resolvepath(path)))
 }
-
 
 function cmd_require(path) {
     if(!path) {
@@ -115,8 +124,13 @@ function mv() {
 function cp(path) {
     console.log("this repl cmd not implemented")
 }
-function rm() {
-    console.log("this repl cmd not implemented")
+function rm(path) {
+    if(!path) {
+        console.log("rm <file>")
+        return
+    }
+    path = resolvepath(path)
+    beapi.fs.unlinkSync(path)
 }
 function touch() {
     console.log("this repl cmd not implemented")
@@ -130,11 +144,12 @@ function pwd() {
 function compile(path) {
     if(!path) {
         console.log("compile <script>|<dir>")
-        return
+        return false
     }
     path = resolvepath(path)
     path = beapi.fs.normalize(path)
     if(beapi.fs.isFileSync(path)) {
+        beapi.fs.unlinkSync(path+".bin")
         let script = beapi.fs.readFileSync(path).asString()
         if(path.substr(0,10)!='/lib/base/') {
             script = Module.wrapExportMeta(script, beapi.fs.dirname(path), path)
@@ -145,7 +160,7 @@ function compile(path) {
             console.error("compile failed:", path)
             console.error(e)
             console.error(e.stack)
-            return
+            return false
         }
         beapi.fs.writeFileSync( path+".bin", script)
         console.log("compile script to:", path+".bin")
@@ -162,6 +177,7 @@ function compile(path) {
     }
     else {
         console.error("path not exists: " + path)
+        return false
     }
 }
 

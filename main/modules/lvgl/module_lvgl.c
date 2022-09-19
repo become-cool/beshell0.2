@@ -321,6 +321,8 @@ void be_module_lvgl_require(JSContext *ctx) {
     JS_SetPropertyStr(ctx, lvgl, "isPct", JS_NewCFunction(ctx, js_lv_coord_is_pct, "isPct", 1));
     JS_SetPropertyStr(ctx, lvgl, "rgb", JS_NewCFunction(ctx, js_lv_rgb, "rgb", 1));
     JS_SetPropertyStr(ctx, lvgl, "setIndevActiveObj", JS_NewCFunction(ctx, js_lv_set_indev_active_obj, "setIndevActiveObj", 1));
+    JS_SetPropertyStr(ctx, lvgl, "setAllocSPIRAM", JS_NewCFunction(ctx, js_lv_set_alloc_spiram, "setAllocSPIRAM", 1));
+
 
     JS_SetPropertyStr(ctx, lvgl, "SizeContent", JS_NewUint32(ctx, LV_SIZE_CONTENT));
     JS_SetPropertyStr(ctx, lvgl, "MaxCoord", JS_NewUint32(ctx, LV_COORD_MAX));

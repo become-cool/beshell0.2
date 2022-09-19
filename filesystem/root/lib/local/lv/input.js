@@ -1,20 +1,27 @@
 
-function holdKeys(screen, receiver) {
+function holdKeys(screen, holder, onkeypress) {
     screen.disp().keysRouter()
     if(!screen._keysHolders) {
         screen._keysHolders = []
     }
-    if(screen._keysHolders[screen._keysHolders.length-1] == receiver) {
+    if(screen._keysHolders[screen._keysHolders.length-1] == holder) {
         return
     }
-    screen._keysHolders.push(receiver)
+    screen._keysHolders.push(holder)
+    if(onkeypress) {
+        holder.__keysHandler = onkeypress
+        holder.on("ipt.btn.press", onkeypress, false)
+    }
 }
-function releaseKeys(screen,receiver) {
+function releaseKeys(screen,holder) {
+    if(holder.__keysHandler) {
+        holder.off("ipt.btn.press", holder.__keysHandler)
+    }
     if(!screen._keysHolders) {
         return
     }
     for(let i=screen._keysHolders.length-1;i>=0;i--) {
-        if(screen._keysHolders[i] == receiver) {
+        if(screen._keysHolders[i] == holder) {
             screen._keysHolders.splice(i,1)
             if(screen._keysHolders.length==0) {
                 delete screen._keysHolders
@@ -25,12 +32,12 @@ function releaseKeys(screen,receiver) {
     return false
 }
 
-beapi.lvgl.Obj.prototype.holdKeys = function() {
+beapi.lvgl.Obj.prototype.holdKeys = function(onkeypress) {
     let screen = this.screen()
     if(!screen) {
         throw new Error("no screen to hold keys")
     }
-    holdKeys(screen,this)
+    holdKeys(screen,this,onkeypress)
 }
 beapi.lvgl.Obj.prototype.releaseKeys = function() {
     let screen = this.screen()
@@ -40,31 +47,21 @@ beapi.lvgl.Obj.prototype.releaseKeys = function() {
     return releaseKeys(screen, this)
 }
 
-beapi.lvgl.Group.prototype.holdKeys = function(screen) {
-    holdKeys(screen, this)
-    this.__keysHandler = (key) => {
-        if(key=='up') {
+beapi.lvgl.Group.prototype.holdKeys = function(screen, onkeypress) {
+    holdKeys(screen, this, onkeypress || (key => {
+        if(key=='up'||key=='left') {
             this.focusPrev()
         }
-        else if(key=='down'||key=='tab') {
+        else if(key=='down'||key=='right'||key=='tab') {
             this.focusNext()
         }
         else if(key=='enter') {
-            let obj = this.focused()
-            console.log(obj)
-            if(obj) {
-                obj.emit("clicked")
-            }
+            this.focused()?.emit("clicked")
         }
-    }
-    this.on("ipt.btn.press", this.__keysHandler)
+    }))
 }
 beapi.lvgl.Group.prototype.releaseKeys = function(screen) {
     releaseKeys(screen, this)
-    if(this.__keysHandler) {
-        this.off("ipt.btn.press", this.__keysHandler)
-        this.__keysHandler = null
-    }
 }
 
 const mapkeys = {

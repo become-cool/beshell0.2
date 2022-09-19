@@ -102,8 +102,7 @@ beconsoled.prepareVirtualDesktop = function(width,height) {
         let dev = new VirtualDisplay()
         dev.setup({width: width||320, height: height||240 })
         dev.register()
-    }
-    if(!be.desktop) {
+        
         const Desktop = require("desktop/Desktop")
         be.desktop = new Desktop()
     }
@@ -117,5 +116,9 @@ beconsoled.prepareVirtualDesktop = function(width,height) {
         fakeIndev = dev.indev
     }
 
-    return [be.desktop.disp().id(), fakeIndev.id()]
+    return [be.disp[0].id(), fakeIndev.id(), be.disp[0].width(), be.disp[0].height()]
+}
+beconsoled.resetModel = function(){
+    beapi.fs.unlinkSync("/home/become/config/setup.json")
+    beapi.fs.unlinkSync("/home/become/config/boot.json")
 }

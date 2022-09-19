@@ -15,18 +15,22 @@ class WgtClock extends lv.Obj {
     constructor(parent) {
         super(parent)
         this.removeStyleAll()
+
+        let screenWidth = this.screen().width()
         
-        this.refs = this.fromJson([
+        this.fromJson([
             {
                 class: "Column" ,
-                width: 180 ,
+                width: -1 ,
                 height: -1 ,
-                center: true ,
+                style: {
+                    "pad-left": 8
+                } ,
                 children: [
                     {
                         class: "Label" ,
                         ref: "labTime" ,
-                        font: "m36" ,
+                        font: screenWidth<320? "m32": "m36" ,
                         text: "00:00:00" ,
                     } ,
                     {
@@ -37,7 +41,7 @@ class WgtClock extends lv.Obj {
 
                 ] ,
             } ,
-        ])
+        ],this)
 
         setInterval(()=>{
             this.freshTime()
@@ -48,8 +52,8 @@ class WgtClock extends lv.Obj {
 
     freshTime() {
         let tm = new Date(Date.now())
-        this.refs.labTime.setText( fill2(tm.getHours()) + ':' + fill2(tm.getMinutes()) + ":" + fill2(tm.getSeconds()) )
-        this.refs.labDate.setText( fill2(tm.getFullYear()) + '/' + fill2(tm.getMonth()+1) + '/' + fill2(tm.getDate()) )
+        this.labTime.setText( fill2(tm.getHours()) + ':' + fill2(tm.getMinutes()) + ":" + fill2(tm.getSeconds()) )
+        this.labDate.setText( fill2(tm.getFullYear()) + '/' + fill2(tm.getMonth()+1) + '/' + fill2(tm.getDate()) )
     }
 }
 module.exports = WgtClock

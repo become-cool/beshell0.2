@@ -165,7 +165,7 @@ function __mkrequire(__dirname) {
 }
 
 function wrapExportMeta(script, __dirname, __filename) {
-    return `(function(require,__filename,__dirname) {var exports={};var module = {exports}; ${script} ; return module.exports})(Module.__mkrequire('${__dirname}'),'${__filename}','${__dirname}');`
+    return `(function(require,__filename,__dirname) {var exports={};var module = {exports}; ${script} ; \r\nreturn module.exports})(Module.__mkrequire('${__dirname}'),'${__filename}','${__dirname}');`
 }
 
 const Module = {

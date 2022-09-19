@@ -1,2 +1,2 @@
-const Player = require("./Player.js")
-Player.singleton()
+const PlayerUI = require("./PlayerUI.js")
+PlayerUI.singleton()

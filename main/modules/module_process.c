@@ -85,16 +85,16 @@ JSValue js_process_reset(JSContext *ctx, JSValueConst this_val, int argc, JSValu
             level = -1 ;
         }
     }
-    char * script = NULL ;
-    if(argc>1) {
-        script = JS_ToCString(ctx, argv[1]) ;
-    }
+    // char * script = NULL ;
+    // if(argc>1) {
+    //     script = JS_ToCString(ctx, argv[1]) ;
+    // }
 
-    task_reset(level, script) ;
+    task_reset(level) ;
 
-    if(script) {
-        JS_FreeCString(ctx, script) ;
-    }
+    // if(script) {
+    //     JS_FreeCString(ctx, script) ;
+    // }
     return JS_UNDEFINED ;
 }
 JSValue js_process_reboot(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){

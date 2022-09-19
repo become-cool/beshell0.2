@@ -51,6 +51,9 @@ module.exports = function() {
                 console.log(e)
             }
         }
+
+        console.log("after setup.js DMA:", process.memoryUsage().dma)
+
         return setupConf
     }
 }

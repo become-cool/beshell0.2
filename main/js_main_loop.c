@@ -43,24 +43,15 @@ JSRuntime *rt;
 JSContext *ctx;
 uint8_t boot_level = 5 ;
 bool requst_reset = false ;
-char * request_app = NULL ;
 
 
 uint8_t task_boot_level() {
     return boot_level ;
 }
 
-void task_reset(int level, char * script) {
+void task_reset(int level) {
     if(level>-1 && level<256)
         boot_level = (uint8_t)level ;
-    if(script) {
-        if(request_app) {
-            free(request_app) ;
-        }
-        size_t size = strlen(script)+1 ;
-        request_app = malloc( size ) ;
-        memcpy(request_app, script, size) ;
-    }
     requst_reset = true ;
 }
 
@@ -166,20 +157,17 @@ static const JSMallocFunctions def_malloc_funcs = {
 #endif
 
 
-// 在初始化前，先占用整块的 DMA 内存，在初始化完成后释放
-// 迫使各个模块使用 PSRAM
 #ifndef SIMULATION
-#define HOLD_MEM(p, size)                                   \
-    if(getPsramTotal()>1024) {                              \
-        p = heap_caps_malloc(size, MALLOC_CAP_DMA) ;        \
-        vTaskDelay(1) ;                                     \
-        if(!p) {                                            \
-            echo_DMA("retain memory failed") ;              \
-        }                                                   \
-        else {                                              \
-            printf("remain memory successed\n") ;           \
-        }                                                   \
-    }
+#define HOLD_MEM(p, size)                               \
+    p = heap_caps_malloc(size, MALLOC_CAP_DMA) ;        \
+    vTaskDelay(1) ;                                     \
+    if(!p) {                                            \
+        echo_DMA("retain memory failed") ;              \
+    }                                                   \
+    else {                                              \
+        printf("remain memory successed, %d\n", size) ; \
+    }                                                   \
+
 #define FREE_MEM(p) if(p) { free(p) ; p=NULL; }
 #else
 #define HOLD_MEM(p, size)
@@ -213,16 +201,6 @@ static void rc_init() {
     // 0等级，不加载任何启动脚本，作为安全模式
     if(boot_level>0) { 
         echof("init level: %d\n", boot_level) ;
-        
-        if(request_app) {
-
-            JSValue beapi = js_get_glob_prop(ctx, 1, "beapi") ;
-            JS_SetPropertyStr(ctx, beapi, "reset_app", JS_NewString(ctx, request_app)) ;
-            JS_FreeValue(ctx, beapi) ;
-
-            free(request_app) ;
-            request_app = NULL ;
-        }
 
         char * initScriptCodeBuff = mallocf(InitScriptTpl, boot_level) ;
         EVAL_CODE(initScriptCodeBuff, ":init.d")
@@ -265,12 +243,20 @@ void js_main_loop(const char * script){
     bool nowifi = false ;
     nvs_read_onetime("rst-nowifi", (uint8_t*)&nowifi) ;
 
-nowifi = true ;
+// nowifi = true ;
     
 #ifndef SIMULATION    
 
-    void * retain_mem = NULL ;
-    HOLD_MEM(retain_mem, 90*1024)
+    // 在初始化前，先占用整块的 DMA 内存，在初始化完成后释放
+    // 迫使各个模块使用 PSRAM
+    void * retain_mem1 = NULL ;
+    void * retain_mem2 = NULL ;
+    if(getPsramTotal()>1024) {
+        echo_DMA("hold mem") ;
+        HOLD_MEM(retain_mem1, 60*1024)
+        HOLD_MEM(retain_mem2, 50*1024)
+    }
+    
     
     if(!nowifi) {
         be_module_wifi_init() ;
@@ -298,7 +284,8 @@ nowifi = true ;
     quickjs_init() ;
 
 #ifndef SIMULATION
-    FREE_MEM(retain_mem)
+    FREE_MEM(retain_mem1)
+    FREE_MEM(retain_mem2)
 #endif
 
     rc_init() ;
@@ -349,7 +336,7 @@ nowifi = true ;
 
         js_std_loop(ctx) ;
 #ifndef SIMULATION
-        vTaskDelay(1) ;
+        vTaskDelay(0) ;
 #endif
     }
 }

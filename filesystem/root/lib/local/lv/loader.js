@@ -131,6 +131,12 @@ beapi.lvgl.Obj.prototype.fromJson = function fromJson(json, refs){
                 }
             }
             
+            if(json.on) {
+                for(let eventName in json.on) {
+                    this.on(eventName, json.on[eventName])
+                }
+            }
+            
             if(json.full) {
                 this.setWidth("100%")
                 this.setHeight("100%")
@@ -141,7 +147,7 @@ beapi.lvgl.Obj.prototype.fromJson = function fromJson(json, refs){
             }
 
             if(json.modal){
-                this.asModel()
+                this.asModal()
             }
             
             if(json.props && typeof json.props=="object") {

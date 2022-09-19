@@ -19,7 +19,7 @@ beapi.EventEmitter = class EventEmitter {
         }
         else if(event instanceof Array) {
             for(var eventName of event) {
-                this.on(eventName, handle, repeat)
+                this.on(eventName, handle, norepeat)
             }
         }
         return this

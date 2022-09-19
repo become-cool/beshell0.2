@@ -59,8 +59,6 @@ class Controller extends lv.Column {
                             }, group) ,
         
                         ]
-        
-        
                     } ,
 
                     {
@@ -78,7 +76,7 @@ class Controller extends lv.Column {
                         }] ,
                         group ,
                         clicked: () => {
-                            this.player.menu.show()
+                            this.top.menu.show()
                         }
                     } ,
                 ]
@@ -88,21 +86,27 @@ class Controller extends lv.Column {
         beapi.lvgl.Group.focusObj(this.btnPlay)
 
         this.updateStatus()
-        player.on("*", ()=>this.updateStatus())
+        player.on("*", (ev)=>{
+            console.log(ev)
+            this.updateStatus()
+        })
+    }
+    
+    isPlaying() {
+        return this.player.isRunning() && !this.player.isPaused()
     }
 
     updateStatus() {
         if(this.isPlaying()) {
+            console.log("lv.symbol.pause")
             this.btnPlay.setText(lv.symbol.pause)
         }
         else {
+            console.log("lv.symbol.play")
             this.btnPlay.setText(lv.symbol.play)
         }
     }
 
-    isPlaying() {
-        return this.player.isRunning() && !this.player.isPaused()
-    }
 }
 
 module.exports = Controller

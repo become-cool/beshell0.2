@@ -6,6 +6,7 @@ class AppIcon extends lv.Column {
         this.refs = lv.Obj.prototype.fromJson.call(this, {
             width:48 ,
             height:-1 ,
+            flag: ["clickable"] ,
             children: [{
                 class: "Obj" ,
                 clear: true ,
@@ -16,7 +17,9 @@ class AppIcon extends lv.Column {
                     class: 'Img' ,
                     ref:"icon" ,
                     center: true ,
-                    flag: ["clickable"]
+                    clicked: ()=>{
+                        this.run()
+                    } ,
                 }]
             }, {
                 class: 'Label' ,
@@ -25,10 +28,18 @@ class AppIcon extends lv.Column {
                 width:"100%" ,
                 longMode: "scroll-circular" ,
                 text: "" ,
+                clicked: ()=>{
+                    this.run()
+                } ,
                 style: {
                     "text-align": "center" ,
                 }
             }]
+        })
+
+        this.addFlag("clickable")
+        this.on('clicked',()=>{
+            console.log("clicked")
         })
     }
 
@@ -58,9 +69,21 @@ class AppIcon extends lv.Column {
         if(json.longPressed) {
         }
         lv.Obj.prototype.fromJson.call(this, json, refs)
+
+        this.create = json.create
     }
     run() {
-        this.refs.icon.emit("clicked")
+        beapi.lvgl.Group.focusObj(this)
+        if(this.create) {
+            let box = beapi.lvgl.msg.info("正在启动APP ...",'',false)
+            setTimeout(()=>{
+                this.create()
+                box.hide()
+            },100)
+        }
+        else {
+            beapi.lvgl.msg.info("coming soon",'APP还没有上架',false)
+        }
     }
 }
 

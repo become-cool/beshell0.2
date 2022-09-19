@@ -67,7 +67,9 @@ class SysStatus extends lv.Row {
 
         this.cpu0= new StatusBar(this, "CPU0 ")
         this.cpu1= new StatusBar(this, "CPU1 ")
-        this.flash= new StatusBar(this, "FLASH ")
+        if(this.screen().width()>=320) {
+            this.flash= new StatusBar(this, "FLASH ")
+        }
         this.mem= new StatusBar(this, "MEM ")
 
         if(!process.simulate) {
@@ -90,7 +92,7 @@ class SysStatus extends lv.Row {
 
             let {total:fstotal, used:fsused} = beapi.fs.info("/")
             let {total:fshometotal, used:fshomeused} = beapi.fs.info("/home")
-            this.flash.setValue(Math.round((fsused+fshomeused)*100 / (fshometotal+fstotal))) ;
+            this.flash?.setValue(Math.round((fsused+fshomeused)*100 / (fshometotal+fstotal))) ;
 
         }catch(e) {
             console.log(e)

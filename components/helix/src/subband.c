@@ -47,6 +47,11 @@
 #include "coder.h"
 #include "assembly.h"
 
+static mp3dec_output_func_t _output_func = NULL ;
+void mp3dec_set_output_func(mp3dec_output_func_t func) {
+	_output_func = func ;
+}
+
 /**************************************************************************************
  * Function:    Subband
  *
@@ -59,12 +64,18 @@
  *
  * Return:      0 on success,  -1 if null input pointers
  **************************************************************************************/
-int Subband(MP3DecInfo *mp3DecInfo, short *pcmBuf)
+int Subband(MP3DecInfo *mp3DecInfo, void * opaque)
 {
 	int b;
 	HuffmanInfo *hi;
 	IMDCTInfo *mi;
 	SubbandInfo *sbi;
+
+	// short * originBuf = pcmBuf ;
+	// *bytes = 0 ;
+
+	size_t subbandBytes = 0 ;
+	short pcmBuf[64] ;
 
 	/* validate pointers */
 	if (!mp3DecInfo || !mp3DecInfo->HuffmanInfoPS || !mp3DecInfo->IMDCTInfoPS || !mp3DecInfo->SubbandInfoPS)
@@ -81,7 +92,10 @@ int Subband(MP3DecInfo *mp3DecInfo, short *pcmBuf)
 			FDCT32(mi->outBuf[1][b], sbi->vbuf + 1*32, sbi->vindex, (b & 0x01), mi->gb[1]);
 			PolyphaseStereo(pcmBuf, sbi->vbuf + sbi->vindex + VBUF_LENGTH * (b & 0x01), polyCoef);
 			sbi->vindex = (sbi->vindex - (b & 0x01)) & 7;
-			pcmBuf += (2 * NBANDS);
+			// pcmBuf += (2 * NBANDS);
+
+			_output_func(opaque, pcmBuf, 4 * NBANDS) ;
+			// dn(sbi->vindex)
 		}
 	} else {
 		/* mono */
@@ -89,9 +103,13 @@ int Subband(MP3DecInfo *mp3DecInfo, short *pcmBuf)
 			FDCT32(mi->outBuf[0][b], sbi->vbuf + 0*32, sbi->vindex, (b & 0x01), mi->gb[0]);
 			PolyphaseMono(pcmBuf, sbi->vbuf + sbi->vindex + VBUF_LENGTH * (b & 0x01), polyCoef);
 			sbi->vindex = (sbi->vindex - (b & 0x01)) & 7;
-			pcmBuf += NBANDS;
+			// pcmBuf += NBANDS;
+
+			_output_func(opaque, pcmBuf, 2 * NBANDS) ;
 		}
 	}
+
+	// *bytes = pcmBuf - originBuf ;
 
 	return 0;
 }

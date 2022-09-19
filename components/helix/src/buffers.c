@@ -47,6 +47,7 @@
 
 // J.Sz. 21/04/2006 #include "hlxclib/stdlib.h"		/* for malloc, free */ 
 #include "stdlib.h" // J.Sz. 21/04/2006
+#include <string.h>
 #include "coder.h"
 
 #ifndef SIMULATION
@@ -71,13 +72,17 @@
  **************************************************************************************/
 static void ClearBuffer(void *buf, int nBytes)
 {
-	int i;
-	unsigned char *cbuf = (unsigned char *)buf;
+	if(!buf || !nBytes) {
+		return ;
+	}
+	memset(buf, 0, nBytes) ;
+	// int i;
+	// unsigned char *cbuf = (unsigned char *)buf;
 
-	for (i = 0; i < nBytes; i++)
-		cbuf[i] = 0;
+	// for (i = 0; i < nBytes; i++)
+	// 	cbuf[i] = 0;
 
-	return;
+	// return;
 }
 
 /**************************************************************************************
@@ -106,6 +111,16 @@ MP3DecInfo *AllocateBuffers(void)
 	DequantInfo *di;
 	IMDCTInfo *mi;
 	SubbandInfo *sbi;
+
+	
+	// sizeof(MP3DecInfo):2032
+	// sizeof(FrameHeader): 56
+	// sizeof(SideInfo): 328
+	// sizeof(ScaleFactorInfo): 284
+	// sizeof(HuffmanInfo): 4624
+	// sizeof(DequantInfo): 840
+	// sizeof(IMDCTInfo): 6944
+	// sizeof(SubbandInfo): 8708
 
 	mp3DecInfo = (MP3DecInfo *)malloc(sizeof(MP3DecInfo));
 	if (!mp3DecInfo)
@@ -143,6 +158,37 @@ MP3DecInfo *AllocateBuffers(void)
 	ClearBuffer(sbi, sizeof(SubbandInfo));
 
 	return mp3DecInfo;
+}
+
+void MP3ResetDecoder(MP3DecInfo * mp3DecInfo) {
+
+	FrameHeader *fh = mp3DecInfo->FrameHeaderPS ;
+	SideInfo *si = mp3DecInfo->SideInfoPS ;
+	ScaleFactorInfo *sfi = mp3DecInfo->ScaleFactorInfoPS ;
+	HuffmanInfo *hi = mp3DecInfo->HuffmanInfoPS ;
+	DequantInfo *di = mp3DecInfo->DequantInfoPS ;
+	IMDCTInfo *mi = mp3DecInfo->IMDCTInfoPS ;
+	SubbandInfo *sbi = mp3DecInfo->SubbandInfoPS ;
+
+	/* important to do this - DSP primitives assume a bunch of state variables are 0 on first use */
+	ClearBuffer(fh,  sizeof(FrameHeader));
+	ClearBuffer(si,  sizeof(SideInfo));
+	ClearBuffer(sfi, sizeof(ScaleFactorInfo));
+	ClearBuffer(hi,  sizeof(HuffmanInfo));
+	ClearBuffer(di,  sizeof(DequantInfo));
+	ClearBuffer(mi,  sizeof(IMDCTInfo));
+	ClearBuffer(sbi, sizeof(SubbandInfo));
+
+	ClearBuffer(mp3DecInfo, sizeof(MP3DecInfo));
+
+	mp3DecInfo->FrameHeaderPS =     fh;
+	mp3DecInfo->SideInfoPS =        si;
+	mp3DecInfo->ScaleFactorInfoPS = sfi;
+	mp3DecInfo->HuffmanInfoPS =     hi;
+	mp3DecInfo->DequantInfoPS =     di;
+	mp3DecInfo->IMDCTInfoPS =       mi;
+	mp3DecInfo->SubbandInfoPS =     sbi;
+	
 }
 
 #define SAFE_FREE(x)	{if (x)	free(x);	(x) = 0;}	/* helper macro */

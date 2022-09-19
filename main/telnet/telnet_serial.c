@@ -365,7 +365,7 @@ void on_pkg_receive (uint8_t pkgid, uint8_t remain, uint8_t cmd, uint8_t * data,
 		if(datalen==1) {
 			level = *data ;
 		}
-		task_reset(level, NULL) ;
+		task_reset(level) ;
 	}
 	
 	else {

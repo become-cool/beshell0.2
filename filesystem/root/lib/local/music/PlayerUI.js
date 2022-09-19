@@ -3,12 +3,16 @@ const Disk = require('./wave_anim/Disk.js')
 const Controller = require("./Controller.js")
 const AudioList = require("./AudioList.js")
 
-class Player extends lv.CleanObj {
+class PlayerUI extends lv.CleanObj {
     constructor(parent) {
         super(parent)
+
+        console.log(process.memoryUsage().dma)
+        // console.log("holdDMA",beapi.driver.holdDMA("audio",20*1024))
         
         this.group = new lv.Group()
         this.loopMethod = "循环"
+        this.player = new beapi.audio.Player
 
         this.fromJson({
             children:[{
@@ -107,9 +111,9 @@ class Player extends lv.CleanObj {
                     {
                         class: Controller ,
                         ref: "ctrl" ,
-                        args: [this.group] ,
+                        args: [this.group, this.player] ,
                         props: {
-                            player: this ,
+                            top: this ,
                         }
                     }
                 ]
@@ -134,6 +138,7 @@ class Player extends lv.CleanObj {
                         class: "Btn" ,
                         text: "歌曲列表" ,
                         font: "msyh" ,
+                        ref: 'btnLst' ,
                         clicked: ()=>{
                             this.list.show()
                             this.menu.hide()
@@ -164,10 +169,9 @@ class Player extends lv.CleanObj {
                 visible: false ,
                 ref: "list" ,
                 modal: true ,
-                props: {player:this}
+                props: {top:this}
             }]
         },this)
-
         
         this.styleFocused = new lv.Style({
             "border-width": 1,
@@ -178,40 +182,7 @@ class Player extends lv.CleanObj {
             obj.addStyle(this.styleFocused, 2) // LV_STATE_FOCUSED: 2
         }
         
-        this.holdKeys()
-        this.on("ipt.btn.press",key=>{
-            console.log(key)
-            if(key=='left'||key=='up') {
-                this.group.focusPrev()
-            }
-            else if(key=='right'||key=='down'||key=='tab') {
-                this.group.focusNext()
-            }
-            else if(key=='enter') {
-                let obj = this.group.focused()
-                if(obj) {
-                    obj.emit("clicked")
-                }
-            }
-        })
-
-        // 
-        this.menu.on("ipt.btn.press", key=>{
-            console.log(key)
-            let grp = this.menu.group()
-            if(key=='left'||key=='up') {
-                grp.focusPrev()
-            }
-            else if(key=='right'||key=='down'||key=='tab') {
-                grp.focusNext()
-            }
-            else if(key=='enter') {
-                let obj = grp.focused()
-                if(obj) {
-                    obj.emit("clicked")
-                }
-            }
-        })
+        this.group.holdKeys(this.screen())
 
         this.ctrl.on('play',()=>{
             console.log("ctrl resume")
@@ -228,12 +199,15 @@ class Player extends lv.CleanObj {
             this.play(this.currentIndex-1)
         })
 
-        beapi.audio.on("finish",()=>{
+        this.player.on("finish",()=>{
             if(this.loopMethod == "循环") {
                 setTimeout(()=>this.play(this.currentIndex + 1), 1000)
             }
             else if(this.loopMethod == "单曲循环") {
                 setTimeout(()=>this.play(this.currentIndex), 1000)
+            }
+            else if(this.loopMethod == "不循环") {
+                this.waveAnim.stop()
             }
         })
 
@@ -245,7 +219,7 @@ class Player extends lv.CleanObj {
         global.player = this
     }
 
-    play(idx) {
+    async play(idx) {
         
         if(this.list.lst.length<=0) {
             console.log("audio list is empty")
@@ -258,33 +232,46 @@ class Player extends lv.CleanObj {
             idx = 0
         }
 
-
         let item = this.list.lst[idx]
 
         // console.log("play", item.path)
         this.labMsg.setText("正在播放: "+item.title)
 
-        // this.waveAnim.play()
-        // this.ctrl.setPlaying(true)
-
-        // beapi.audio.stop()
+        this.waveAnim.play()
 
         this.currentPath = item.path
         this.currentIndex = idx
         console.log(this.currentPath)
 
         beapi.driver.releaseDMA("audio")
-        beapi.audio.playMP3(this.currentPath)
+
+        await this.stop()
+        this.player.playMP3(this.currentPath)
+        
+        console.log(process.memoryUsage())
+    }
+
+    stop() {
+        return new Promise((resolve)=>{
+            if(!this.player.isRunning()) {
+                resolve()
+                return
+            }    
+            this.player.once("stop", ()=>{
+                resolve()
+            })
+            this.player.stop()
+        })
     }
 
     pause() {
-        beapi.audio.pause()
+        this.player.pause()
         this.waveAnim.stop()
     }
 
     resume() {
         if(this.currentPath) {
-            beapi.audio.resume()
+            this.player.resume()
             this.waveAnim.play()
         }
         else {
@@ -293,6 +280,8 @@ class Player extends lv.CleanObj {
     }
 
     loadList(){
+        
+
         this.labMsg.setText("正在加载音乐...")
         setTimeout(()=>{
             this.list.load()
@@ -304,18 +293,22 @@ class Player extends lv.CleanObj {
         this.currentPath = null
         this.currentIndex = -1
         this.waveAnim.stop()
-        // this.ctrl.setPlaying(false)
-        beapi.audio.deinit()
+
+        this.player.stop()
+        this.player.detach()
+        // delete this.player
+        // delete this.ctrl.player
+
         lv.loadScreen(be.desktop)
     }
 }
 
-module.exports = Player
+module.exports = PlayerUI
 
 _singleton = null
 module.exports.singleton = function() {
     if(!_singleton) {
-        _singleton = new Player
+        _singleton = new PlayerUI
     }
     
     lv.loadScreen(_singleton)

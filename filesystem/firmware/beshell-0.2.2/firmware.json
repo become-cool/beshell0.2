@@ -42,7 +42,7 @@
             "path": "fs-root.img"
         },
         {
-            "address": "0x382000",
+            "address": "0x388000",
             "path": "fs-home.img"
         }
     ]

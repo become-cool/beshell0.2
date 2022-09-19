@@ -875,8 +875,8 @@ static JSValue js_i2s_setup(JSContext *ctx, JSValueConst this_val, int argc, JSV
         .communication_format = I2S_COMM_FORMAT_STAND_I2S,
         // .communication_format = I2S_COMM_FORMAT_I2S,
         .intr_alloc_flags = ESP_INTR_FLAG_LEVEL2 | ESP_INTR_FLAG_IRAM,
-        .dma_buf_count = 4,
-        .dma_buf_len = 1024*2,
+        .dma_buf_count = 2,
+        .dma_buf_len = 512,
         .use_apll = true,
         .tx_desc_auto_clear = true,
         .fixed_mclk = 0

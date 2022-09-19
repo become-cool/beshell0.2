@@ -61,8 +61,10 @@ class HoloClock extends lv.Obj {
                         {
                             class: "Column" ,
                             width: 140 ,
+                            height: "100%" ,
                             trackAlign: "center" ,
                             children: [
+                                { clear: true, grow:true} ,
                                 {
                                     class: "Img" ,
                                     width: 64 ,
@@ -70,16 +72,6 @@ class HoloClock extends lv.Obj {
                                     src: "/lib/icon/weather/999.png" ,
                                     ref: "imgWeather" ,
                                 } ,
-                                {
-                                    class: "Label" ,
-                                    text: "联网后刷新天气信息" ,
-                                    font: 'msyh' ,
-                                    ref:'txtWeather' ,
-                                    style: {
-                                        'text-color': lv.rgb(255,255,255) ,
-                                        "pad-top": 10,
-                                    }
-                                }
                             ]
                         } ,
                         {
@@ -106,6 +98,7 @@ class HoloClock extends lv.Obj {
                                 {
                                     class: 'Label' ,
                                     text: '--°C' ,
+                                    font: 'msyh' ,
                                     ref: 'txtTemp' ,
                                     width: '100%' ,
                                     style: {
@@ -114,11 +107,34 @@ class HoloClock extends lv.Obj {
                                         "pad-right": 20
                                     } ,
                                 } ,
-                                { clear: true, height: 50}
+                                {
+                                    class: 'Label' ,
+                                    text: '湿度：' ,
+                                    ref: 'txtHumidity' ,
+                                    font: 'msyh' ,
+                                    width: '100%' ,
+                                    style: {
+                                        'text-color': lv.rgb(255,255,255) ,
+                                        "text-align": "right",
+                                        "pad-right": 20
+                                    } ,
+                                } ,
                             ]
                         }
                     ]
-                }]
+                },
+                {
+                    class: "Label" ,
+                    text: "联网后刷新天气信息" ,
+                    font: 'msyh' ,
+                    ref:'txtDetail' ,
+                    style: {
+                        'text-color': lv.rgb(255,255,255) ,
+                        "pad-top": 10,
+                        "pad-left": 20 ,
+                    }
+                } ,
+                { clear: true, height: 20}]
             }]
         }, this)
 
@@ -129,9 +145,7 @@ class HoloClock extends lv.Obj {
         this.freshTime()
         
         wifi.on("ip.got", async ()=>{
-            if(await this.queryLocale()){
-                this.queryWeather()
-            }
+            this.queryWeather()
         })
 
         setInterval(()=>{
@@ -164,60 +178,28 @@ class HoloClock extends lv.Obj {
         locale.weatherCode = weatherCode
         beapi.fs.writeFileSync(localeJsonPath, JSON.stringify(locale))
     }
-
-    async queryLocale() {
-
-        for(let retry = 5 ; retry; retry--) {
-            try{
-                let body = await beapi.mg.get("https://ip.cn/api/index?type=0")
-                body = JSON.parse(body)
-                console.log(body)
-                if(!body.address || !body.address.split) {
-                    return false
-                }
-                let [,,city] = body.address.trim().split(/ +/)
-                console.log("ipcn return:",city)
-    
-                city = city.replace(/市$/,'')
-                if(!cityCodes[city]) {
-                    console.log("unknow city", city)
-                    return false
-                }
-    
-                let code = cityCodes[city].toString()
-
-                this.setCity(city, "101" + "0".repeat(6-code.length) + code)
-
-                return true
-    
-            }catch(e) {
-                console.error(e)
-                await sleep(1000)
-            }
-        }
-        return false
-    }
     
     async queryWeather() {
         for(let retry = 5 ; retry; retry--) {
             console.log("queryWeather() start", this.weatherCode)
-            if(!this.weatherCode) {
-                return
-            }
-            let url = `http://www.weather.com.cn/data/cityinfo/${this.weatherCode}.html`
+            let url = `http://api.service.become.cool/weather`
             console.log(url)
             try{
                 let body = await beapi.mg.get(url)
-                body = JSON.parse(body)
                 console.log(body)
-                this.txtTemp.setText( parseInt(body.weatherinfo.temp2)+'/'+parseInt(body.weatherinfo.temp1) + '°C' )
-                this.txtWeather.setText( body.weatherinfo.weather )
-                this.setWeatherImg( body.weatherinfo.img1 )
+                body = JSON.parse(body)
+                
+                this.labCity.setText( body.localText )
+                this.txtTemp.setText( body.payload.text + ' ' + parseInt(body.payload.temp)+'°C' )
+                this.txtHumidity.setText(`湿度 ${body.payload.humidity}%`)
+                this.txtDetail.setText(`${body.payload.windDir} ${body.payload.windScale}级 ${body.payload.windSpeed}km/h`)
+
+                this.imgWeather.setSrc(`/lib/icon/weather/${body.payload.icon}.png`)
 
                 return
 
             }catch(e) {
-                console.log(e)
+                console.log("error:", e)
                 await sleep(1000)
             }
         }
@@ -268,16 +250,4 @@ function weatherIconSrc (src) {
     return null
 }
 
-
-function main() {
-    const disp = be.disp[0]
-    if(!disp) {
-        console.log("no disp device, exit HoloClock")
-        return
-    }
-    let desktop = new HoloClock()
-    global.desktop = desktop
-
-    lv.loadScreen(desktop)
-}
-main()
+module.exports = HoloClock

@@ -895,3 +895,10 @@ JSValue js_lv_group_all_objs(JSContext *ctx, JSValueConst this_val, int argc, JS
 
     return array ;
 }
+
+
+JSValue js_lv_set_alloc_spiram(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    CHECK_ARGC(1)
+    lv_set_alloc_spiram( JS_ToBool(ctx,argv[0])? 1: 0 ) ;
+    return JS_UNDEFINED ;
+}

@@ -1,4 +1,3 @@
-
 beapi.lvgl.TextArea.prototype.fromJson = function(json, refs) {
     if(json.useKeyboard) {
         this.on("clicked", ()=>{
@@ -22,7 +21,6 @@ beapi.lvgl.TabView.prototype.fromJson = function(json, refs) {
     return beapi.lvgl.Obj.prototype.fromJson.call(this, json, refs)
 }
 
-
 beapi.lvgl.List.styleItemFocused = new beapi.lvgl.Style({
     "border-width": 1,
     "border-color": beapi.lvgl.palette("green"),
@@ -34,15 +32,39 @@ beapi.lvgl.List.prototype.group = function() {
     }
     return this._group
 }
+beapi.lvgl.List.prototype.asModal = function() {
+    beapi.lvgl.Obj.prototype.asModal.call(this)
+    this.on("ipt.btn.press",key=>{
+        let grp = this.group()
+        if(key=='up') {
+            grp.focusPrev()
+        }
+        else if(key=='down' || key=='tab') {
+            grp.focusNext()
+        }
+        else if(key=='enter') {
+            grp.focused()?.emit("clicked")
+        }
+        else if(key=='esc') {
+            this.hide()
+        }
+    })
+}
 
 beapi.lvgl.List.prototype._addBtn = beapi.lvgl.List.prototype.addBtn
 beapi.lvgl.List.prototype.addBtn = function(icon, text) {
     let btn = this._addBtn(icon, text)
-
     this.group().addObj(btn)
     btn.addStyle(beapi.lvgl.List.styleItemFocused, 2) // LV_STATE_FOCUSED: 2
-
     return btn
+}
+
+beapi.lvgl.List.prototype._addText = beapi.lvgl.List.prototype.addText
+beapi.lvgl.List.prototype.addText = function(icon, text) {
+    let label = this._addText(icon, text)
+    this.group().addObj(label)
+    label.addStyle(beapi.lvgl.List.styleItemFocused, 2) // LV_STATE_FOCUSED: 2
+    return label
 }
 
 beapi.lvgl.List.prototype.fromJson = function(json, refs) {

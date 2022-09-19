@@ -600,7 +600,7 @@ static JSValue js_wifi_scan_records(JSContext *ctx, JSValueConst this_val, int a
     return array ;
 }
 
-bool wifi_has_inited() {
+bool inline wifi_has_inited() {
     return wifi_inited ;
 }
 static JSValue js_wifi_has_inited(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {

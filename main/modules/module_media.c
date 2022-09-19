@@ -16,6 +16,9 @@
 #include "module_serial.h"
 #include "driver/i2s.h"
 
+
+
+
 #else
 
 // fake for pc simulation 
@@ -66,7 +69,6 @@ typedef void (*TaskFunction_t)(void * d);
 
 #include "mp3dec.h"
 
-
 #define echo_time(msg, codes)                                   \
     {                                                           \
         int64_t __tt = gettime() ;                              \
@@ -83,32 +85,47 @@ typedef void (*TaskFunction_t)(void * d);
 #define nechof_time(msg, codes, ...)  codes
 
 
-#define BUFF_SRC_SIZE   MAINBUF_SIZE
-#define BUFF_FRAME_SIZE       1024*5
+#define echo_alloc(msg, codes)                                  \
+    {                                                           \
+        size_t __m = heap_caps_get_free_size(MALLOC_CAP_DMA) ;  \
+        codes                                                   \
+        printf(msg" alloc: %d\n", __m - heap_caps_get_free_size(MALLOC_CAP_DMA)) ; \
+    }
+#define necho_alloc(msg, codes, ...)  codes
 
+#define BUFF_SRC_SIZE   MAINBUF_SIZE/2
+#define BUFF_SRC_MEMTYPE   MALLOC_CAP_DMA
 
 
 #define STAT_RUNNING        BIT1
 #define STAT_STOPPING       BIT2
 #define STAT_STOPPED        BIT3
+#define STAT_ALL_PHASE      (STAT_RUNNING | STAT_STOPPING | STAT_STOPPED)
+// 以上 bit 是互斥的
+
 #define STAT_DRAIN          BIT4
 
 typedef struct _stream_elment{
 
     TaskHandle_t task ;
     RingbufHandle_t ring ;
+    size_t ringSz ;
     EventGroupHandle_t stats ;
 
     struct _stream_elment * upstream;
     struct _stream_elment * downstream;
     void * pipe ;
 
-} stream_element_t ;
+} el_t ;
 
+static inline void el_set_stat(el_t * el, EventBits_t stat) {
+    xEventGroupClearBits(el->stats, STAT_ALL_PHASE&(~stat)) ;
+    xEventGroupSetBits(el->stats, stat) ;
+}
 
 typedef struct {
 
-    stream_element_t base ;
+    el_t base ;
 
     char src_path[256] ;
     FILE * file ;
@@ -117,20 +134,18 @@ typedef struct {
 
 typedef struct {
 
-    stream_element_t base ;
+    el_t base ;
 
-    HMP3Decoder decoder ;
-    MP3FrameInfo info ;
+    uint8_t * undecode_buff ;
+    MP3DecInfo * decoder ;
 
-#ifdef SIMULATION
-    FILE * fin ;
-    FILE * fout ;
-#endif
+    int samprate ;
+    int channels ;
 
 } el_mp3_t ;
 
 typedef struct {
-    stream_element_t base ;
+    el_t base ;
     uint8_t i2s ;
 } el_i2s_t ;
 
@@ -138,6 +153,9 @@ typedef struct _player {
 
     bool running:1 ;
     bool paused:1 ;
+    bool finished: 1 ;   // 正常播放完毕: finished=true， 中途停止: finished=false
+
+    int8_t error ;
 
     int samplerate ;
 
@@ -145,8 +163,8 @@ typedef struct _player {
     el_mp3_t * decode ;
     el_i2s_t * playback ;
 
-    stream_element_t * first ;
-    stream_element_t * last ;
+    el_t * first ;
+    el_t * last ;
     
     JSContext * ctx ;
     JSValue jsobj ;
@@ -156,7 +174,7 @@ typedef struct _player {
 
 
 static void el_init(
-        stream_element_t * el
+        el_t * el
         , TaskFunction_t pvTaskCode
         , const char *const pcName
         , const uint32_t usStackDepth
@@ -165,6 +183,7 @@ static void el_init(
         , size_t ringSz
     ) {
 
+    el->ringSz = ringSz ;
     if(ringSz) {
         el->ring = xRingbufferCreate(ringSz, RINGBUF_TYPE_BYTEBUF);
     }
@@ -173,8 +192,7 @@ static void el_init(
     }
 
     el->stats = xEventGroupCreate() ;
-    xEventGroupClearBits(el->stats, 0xFFFF) ;
-    xEventGroupSetBits(el->stats, STAT_STOPPED | STAT_DRAIN) ;
+    el_set_stat(el, STAT_STOPPED | STAT_DRAIN) ;
 
     xTaskCreatePinnedToCore(pvTaskCode, pcName, usStackDepth, el, uxPriority, &el->task, xCoreID);
 }
@@ -187,15 +205,24 @@ static void el_init(
     el_init(var, func, #func, stack, prio, core, ringsize ) ;
 
 static void task_mp3_decoder(el_mp3_t * el) ;
-static stream_element_t * el_mp3_create(player_t * pipe) {    
+static el_t * el_mp3_create(player_t * pipe) {    
     el_mp3_t * el ;
-    ELEMENT_CREATE(pipe, el_mp3_t, el, task_mp3_decoder, 1024*2+BUFF_SRC_SIZE+BUFF_FRAME_SIZE, 5, 1, BUFF_FRAME_SIZE)
+    echo_alloc("el_mp3_t",{
+        ELEMENT_CREATE(pipe, el_mp3_t, el, task_mp3_decoder, 1024*3, 5, 1, 512)
+    })
 
-    el->decoder = MP3InitDecoder();
+    echo_alloc("hexli", {
+        el->decoder = MP3InitDecoder();
+    })
+
+    el->samprate = 0 ;
+    el->channels = 0 ;
+
+    el->undecode_buff = heap_caps_malloc(BUFF_SRC_SIZE, BUFF_SRC_MEMTYPE) ;
 
     return el ;
 }
-static void el_delete(stream_element_t * el) {
+static void el_delete(el_t * el) {
     vTaskDelete(el->task) ;
     vEventGroupDelete(el->stats) ;
     if(el->ring) {
@@ -212,6 +239,8 @@ static void el_src_delete(el_src_t * el) {
 }
 static void el_mp3_delete(el_mp3_t * el) {
     MP3FreeDecoder(el->decoder);
+    free(el->undecode_buff) ;
+    el->undecode_buff = NULL ;
     el_delete(el) ;
 }
 static void el_i2s_delete(el_i2s_t * el) {
@@ -219,17 +248,54 @@ static void el_i2s_delete(el_i2s_t * el) {
     el_delete(el) ;
 }
 
+static void el_mp3_reset(el_mp3_t * el) {
+    MP3ResetDecoder(el->decoder) ;
+}
+
+
+static bool el_is_drain(el_t * el) {
+    if(!el->ring) {
+        return true ;
+    }
+    UBaseType_t uxItemsWaiting = 0 ;
+    vRingbufferGetInfo(el->ring,NULL,NULL,NULL,NULL,&uxItemsWaiting) ;
+    return uxItemsWaiting==0 ;
+}
+
+static void el_print_stats(el_t * el) {
+
+    printf("%s: %s\n", "running", (xEventGroupGetBits(el->stats)&STAT_RUNNING)? "true": "false") ;
+    printf("%s: %s\n", "stopping", (xEventGroupGetBits(el->stats)&STAT_STOPPING)? "true": "false") ;
+    printf("%s: %s\n", "stopped", (xEventGroupGetBits(el->stats)&STAT_STOPPED)? "true": "false") ;
+    printf("%s: %s\n", "drain", (xEventGroupGetBits(el->stats)&STAT_DRAIN)? "true": "false") ;
+
+    if(el->ring) {
+        UBaseType_t free = NULL ;
+        UBaseType_t read = NULL ;
+        UBaseType_t write = NULL ;
+        UBaseType_t acquire = NULL ;
+        UBaseType_t waiting = NULL ;
+        vRingbufferGetInfo(el->ring, &free, &read, &write, &acquire,&waiting) ;
+
+        #define print_ring_pos(var)  printf("ring %s@%d\n", #var, var) ;
+        print_ring_pos(write)
+        print_ring_pos(read)
+        print_ring_pos(free)
+        print_ring_pos(acquire)
+        print_ring_pos(waiting)
+    }
+}
 
 static void pipe_link(player_t * pipe, int el_cnt, ...) {
 
-    stream_element_t * el ;
+    el_t * el ;
 	va_list argptr;
 	va_start(argptr, el_cnt);
 
     pipe->first = pipe->last = NULL ;
 
 	for (int i=0;i<el_cnt; i++) {
-		el = va_arg(argptr, stream_element_t *);
+		el = va_arg(argptr, el_t *);
         if(i==0) {
             el->upstream = NULL ;
             pipe->first = pipe->last = el ;
@@ -248,45 +314,49 @@ static void pipe_link(player_t * pipe, int el_cnt, ...) {
 
 
 static void pipe_set_stats(player_t * pipe, int stats) {
-    for(stream_element_t * el=pipe->last; el; el=el->upstream) {
-        xEventGroupSetBits(el->stats, stats) ;
+    for(el_t * el=pipe->last; el; el=el->upstream) {
+        el_set_stat(el, stats) ;
     }
 }
 static void pipe_clear_stats(player_t * pipe, int stats) {
-    for(stream_element_t * el=pipe->last; el; el=el->upstream) {
+    for(el_t * el=pipe->last; el; el=el->upstream) {
         xEventGroupClearBits(el->stats, stats) ;
     }
 }
 
-static inline void emit_event(JSContext * ctx, JSValue thisobj, const char * event) {
+static void el_clear_ring(el_t * el) {
+    if(el->ring && el->ringSz) {
+        vRingbufferDelete(el->ring) ;
+        el->ring = xRingbufferCreate(el->ringSz, RINGBUF_TYPE_BYTEBUF);
+    }
+}
+
+static void pipe_clear(player_t * pipe) {
+    el_clear_ring(pipe->src);
+    el_clear_ring(pipe->decode);
+    el_clear_ring(pipe->playback);
+}
+
+static inline void emit_event(JSContext * ctx, JSValue thisobj, const char * event, JSValue param) {
 
     JSValue emit = js_get_glob_prop(ctx, 4, "beapi", "EventEmitter", "prototype", "emit") ;
 
     JSValue eventName = JS_NewString(ctx, event) ;
-    MAKE_ARGV1(argv, eventName)
-    eventloop_push_with_argv(ctx, emit, thisobj, 1, argv) ;
+
+    if(JS_IsUndefined(param) ) {
+        MAKE_ARGV1(argv, eventName)
+        eventloop_push_with_argv(ctx, emit, thisobj, 1, argv) ;
+    }
+    else {
+        MAKE_ARGV2(argv, eventName, param)
+        eventloop_push_with_argv(ctx, emit, thisobj, 2, argv) ;
+    }
 
     JS_FreeValue(ctx, eventName) ;
     JS_FreeValue(ctx, emit) ;
 
 }
 
-static void pipe_stop(player_t * player) {
-
-    // 从前到后依次关闭
-    for(stream_element_t * el=player->first; el; el=el->downstream) {
-        xEventGroupSetBits(el->stats, STAT_STOPPING) ;
-        xEventGroupWaitBits(el->stats, STAT_STOPPED, false, true, portMAX_DELAY) ;
-    }
-
-    player->running = false ;
-
-    printf("audio stop\n") ;
-
-    if( player->ctx && JS_IsObject(player->jsobj) ){
-        emit_event(player->ctx, player->jsobj, "stop") ;
-    }
-}
 
 static bool el_src_strip_pcm(el_src_t * el) {
 
@@ -326,47 +396,76 @@ static bool el_src_strip_mp3(el_src_t * el) {
         fseek(el->file, 0, SEEK_SET);
     }
 
-    printf("mp3 valid \n") ;
-
     return true ;
 }
 
 
-#define TASK_STOP(el, code)                                                                 \
-    if( xEventGroupGetBits(el->base.stats) & STAT_STOPPING ) {              \
-        xEventGroupWaitBits(el->base.stats, STAT_DRAIN, false, true, 100);                  \
-        code                                                                                \
-        xEventGroupClearBits(el->base.stats, STAT_RUNNING) ;                \
-        xEventGroupClearBits(el->base.stats, STAT_STOPPING) ;                \
-        xEventGroupSetBits(el->base.stats, STAT_STOPPED) ;                                  \
-        vTaskDelay(0) ;                                                                     \
+#define PLAYER(el) ((player_t*)el->pipe)
+static inline void el_stop_when_req(el_t * el) {
+    if( ! (xEventGroupGetBits(el->stats) & STAT_STOPPING) ) {
+        printf("not set STAT_STOPPING \n") ;
+        return ;
     }
+
+    // 等待数据流干
+    if(!el_is_drain(el)) {
+        if(el->downstream) {
+            el_set_stat(el->downstream, STAT_RUNNING);
+        }
+        xEventGroupWaitBits(el->stats, STAT_DRAIN, false, true, 100);
+    }
+
+    el_set_stat(el, STAT_STOPPED) ;
+
+    // 将 STAT_STOPPING 向后级传递
+    if(el->downstream) {
+        el_set_stat(el->downstream, STAT_STOPPING) ;
+    }
+
+    // 最后一个节点：触发 finish 事件
+    else {
+        PLAYER(el)->running = false ;
+        PLAYER(el)->paused = false ;
+        if( PLAYER(el)->ctx && JS_IsObject(PLAYER(el)->jsobj) ){
+            if(PLAYER(el)->error) {
+                emit_event(PLAYER(el)->ctx, PLAYER(el)->jsobj, "error", JS_NewInt32(NULL, PLAYER(el)->error)) ;
+            }
+            emit_event(PLAYER(el)->ctx, PLAYER(el)->jsobj, PLAYER(el)->finished? "finish": "stop", JS_UNDEFINED) ;
+        }
+
+    }
+
+    vTaskDelay(0) ;
+}
 
 
 // 任务线程：文件读入
 static void task_src(el_src_t * el) {
-    printf("task_src()\n") ;
+    // printf("task_src()\n") ;
     // int cmd ;
 
-    char buff[1024] ;
+    char buff[512] ;
     size_t read_bytes ;
+    EventBits_t bits ;
 
     while(1) {
 
-        // 停止任务
-        TASK_STOP(el, {
+        // 等待开始状态
+        bits = xEventGroupWaitBits(el->base.stats, STAT_RUNNING|STAT_STOPPING, false, false, portMAX_DELAY);
+        if( bits&STAT_STOPPING ) {
+            el_stop_when_req(el) ;
+
             if(el->file) {
                 fclose(el->file) ;
                 el->file = NULL ;
             }
-            dd
-        })
 
-        // 等待开始状态
-        xEventGroupWaitBits(el->base.stats, STAT_RUNNING, false, true, portMAX_DELAY);
+            vTaskDelay(1) ;
+            continue ;
+        }
 
         if(!el->file) {
-            pipe_stop((player_t *)el->base.pipe) ;
+            goto finish ;
             continue ;
         }
 
@@ -374,7 +473,7 @@ static void task_src(el_src_t * el) {
             read_bytes = fread(buff, 1, sizeof(buff), el->file) ;
         }, read_bytes)
         if(!read_bytes) {
-            pipe_stop((player_t *)el->base.pipe) ;
+            goto finish ;
             continue ;
         }
 
@@ -386,83 +485,131 @@ static void task_src(el_src_t * el) {
         }
         vTaskDelay(0) ;
         continue;
+finish:
+        ((player_t *)el->base.pipe)->finished = true ;
+        el_set_stat( el, STAT_STOPPING ) ;
+        vTaskDelay(10) ;
+        continue;
+
     }
 }
 
 
 
+static void mp3dec_output(el_mp3_t * el, uint8_t * data, size_t size) {
+
+    if( el->decoder->samprate!=el->samprate || el->decoder->nChans!=el->channels ) {
+        // dn2(el->decoder->samprate, el->decoder->nChans)
+
+        // 等这一帧以前的数据播放完成
+        // xEventGroupWaitBits(el->base.stats, STAT_DRAIN, false, true, 100);
+
+        printf("i2snum:%d, samprate:%d, bps:%d, chans:%d \n",
+            ((player_t*)el->base.pipe)->playback->i2s
+            , el->decoder->samprate
+            , 32
+            , el->decoder->nChans) ;
+        i2s_set_clk(
+            ((player_t*)el->base.pipe)->playback->i2s
+            , el->decoder->samprate
+            , 32
+            , el->decoder->nChans
+        );
+
+
+        el->samprate = el->decoder->samprate ;
+        el->channels = el->decoder->nChans ;
+    }
+
+#ifndef SIMULATION
+    // if(pdTRUE != xRingbufferSend(el->base.ring, buff_pcm, el->info.outputSamps * 2, portMAX_DELAY)) {
+    if(pdTRUE != xRingbufferSend(el->base.ring, data, size, portMAX_DELAY)) {
+        printf("task mp3 decode xRingbufferSend() wrong ?????\n") ;
+    }
+    else {
+        xEventGroupClearBits(el->base.stats, STAT_DRAIN) ;
+    }
+
+#else
+    // fwrite(buff_pcm,1,el->info.outputSamps * el->info.nChans,el->fout) ;
+    fwrite(data,1,size,el->fout) ;
+#endif
+}
+
 // 解码任务线程
 static void task_mp3_decoder(el_mp3_t * el) {
 
-    printf("task_mp3_decoder()\n") ;
+    // printf("task_mp3_decoder()\n") ;
 
+    EventBits_t bits ;
     int res ;
 
     size_t data_size = 0 ;
-    unsigned char buff_src[BUFF_SRC_SIZE] ;
-    unsigned char buff_pcm[BUFF_FRAME_SIZE] ;
+    // unsigned char el->undecode_buff[BUFF_SRC_SIZE] ;
 
-    unsigned char * psrc = buff_src ;
+    unsigned char * psrc = el->undecode_buff ;
     int decode_left = 0 ;
+    int offset = 0 ;
     int errs = 0 ;
 
-    int samprate = 0 ;
+    // hexli_set_ringbuf(el->base.ring, xRingbufferSend) ;
+    mp3dec_set_output_func(mp3dec_output) ;
 
     for(int i=0;i<10;) {
         vTaskDelay(0) ;
-        
-        // 停止任务
-        TASK_STOP(el, {
-            psrc = buff_src ;
-            decode_left = 0 ;
-            dd
-        })
 
         // 等待开始状态
-        xEventGroupWaitBits(el->base.stats, STAT_RUNNING, false, true, portMAX_DELAY);
+        bits = xEventGroupWaitBits(el->base.stats, STAT_RUNNING|STAT_STOPPING, false, false, portMAX_DELAY);
+        if( bits&STAT_STOPPING ) {
+            el_stop_when_req(el) ;
 
-        if (decode_left >= BUFF_SRC_SIZE) {
-            printf("????") ;
+            psrc = el->undecode_buff ;
+            decode_left = 0 ;
+
+            vTaskDelay(1) ;
             continue ;
         }
 
-        if(!el->base.upstream || !el->base.upstream->ring) {
-            vTaskDelay(10) ;
-            continue ;
+        if(decode_left && psrc) {
+            memmove(el->undecode_buff, psrc, decode_left);
         }
-
-        necho_time("memmove", {
-        memmove(buff_src, psrc, decode_left);
-        })
 
 #ifndef SIMULATION
         data_size = 0 ;
-        psrc = xRingbufferReceiveUpTo(el->base.upstream->ring, &data_size, 10, sizeof(buff_src)-decode_left);
+        psrc = xRingbufferReceiveUpTo(el->base.upstream->ring, &data_size, 20, BUFF_SRC_SIZE-decode_left);
         if(psrc) {
-            memcpy(buff_src+decode_left, psrc, data_size) ;
+            memcpy(el->undecode_buff+decode_left, psrc, data_size) ;
             vRingbufferReturnItem(el->base.upstream->ring, psrc) ;   
         }
         if ( data_size==0 || !psrc ) {
-            dd
-            xEventGroupSetBits(el->base.upstream->stats, STAT_DRAIN) ;  // 前级流干
-            vTaskDelay(1) ;
 
-            if ( decode_left==0 ) {
-                continue ;
+            // 确定前级已流干（ring buffer 里的可读数据可能分在头尾两端，需要两次才能读空）
+            if(el_is_drain(el->base.upstream)) {
+                // printf("decode's input drain\n") ;
+                xEventGroupSetBits(el->base.upstream->stats, STAT_DRAIN) ;
+
+                decode_left = 0 ;
+                psrc = NULL ;
+                
+                vTaskDelay(1) ;
             }
+            continue ;
         }
+
 #else
-        data_size = fread(buff_src+decode_left, 1, sizeof(buff_src)-decode_left, el->fin) ;
+        data_size = fread(el->undecode_buff+decode_left, 1, BUFF_SRC_SIZE-decode_left, el->fin) ;
         if(!data_size) {
             break ;
         }
 #endif
 
         decode_left = decode_left + data_size;
-        psrc = buff_src;
+        psrc = el->undecode_buff;
         
 
-        int offset = MP3FindSyncWord(psrc, decode_left);
+        offset = MP3FindSyncWord(psrc, decode_left);
+        
+        // dn3(data_size, decode_left,offset)
         if (offset < 0) {
             decode_left = 0;
             vTaskDelay(0) ;
@@ -473,51 +620,26 @@ static void task_mp3_decoder(el_mp3_t * el) {
             decode_left -= offset;                 //in buffer
 
             necho_time("MP3Decode", {
-            errs = MP3Decode(el->decoder, &psrc, &decode_left, buff_pcm, 0);
+            errs = MP3Decode(el->decoder, &psrc, &decode_left, el, 0);
             })
 
-            if (errs != 0) {
-                // printf("MP3Decode failed ,code is %d \n",errs);
+            if (errs < -1) {
+                printf("MP3Decode failed ,code is %d, receive: %d, left data: %d, sync: %d \n",errs, data_size, decode_left, offset);
+
+                // 遇到错误，停止解码
+                // emit_event(((player_t *)el->base.pipe)->ctx, ((player_t *)el->base.pipe)->jsobj, "error") ;
+
+                ((player_t *)el->base.pipe)->error = errs ;
+                ((player_t *)el->base.pipe)->finished = false ;
+
+                el_set_stat( ((player_t *)el->base.pipe)->first, STAT_STOPPING ) ;
+                
+                // xEventGroupClearBits( el->base.stats, STAT_RUNNING ) ;
+                
+
+                vTaskDelay(0) ;
                 continue ;
             }
-
-            MP3GetLastFrameInfo(el->decoder, &el->info);
-            if(el->info.samprate!=samprate) {
-                dn(el->info.samprate)
-
-                // 等这一帧以前的数据播放完成
-                xEventGroupWaitBits(el->base.stats, STAT_DRAIN, false, true, 100);
-
-                i2s_set_clk(
-                    ((player_t*)el->base.pipe)->playback->i2s
-                    , el->info.samprate
-                    , 32
-                    , el->info.nChans
-                );
-
-                printf("i2snum:%d, samprate:%d, bps:%d, chans:%d \n",
-                    ((player_t*)el->base.pipe)->playback->i2s
-                    , el->info.samprate
-                    , 32
-                    , el->info.nChans) ;
-
-                samprate = el->info.samprate ;
-            }
-
-            int used = data_size - decode_left ;
-
-
-#ifndef SIMULATION
-            if(pdTRUE != xRingbufferSend(el->base.ring, buff_pcm, el->info.outputSamps * el->info.nChans, portMAX_DELAY)) {
-                printf("task mp3 decode xRingbufferSend() wrong ?????\n") ;
-            }
-            else {
-                xEventGroupClearBits(el->base.stats, STAT_DRAIN) ;
-            }
-
-#else
-            fwrite(buff_pcm,1,el->info.outputSamps * el->info.nChans,el->fout) ;
-#endif
 
             vTaskDelay(0) ;
         }
@@ -531,12 +653,13 @@ static void task_mp3_decoder(el_mp3_t * el) {
 // 任务线程：放音
 static void task_pcm_playback(el_i2s_t * el) {
 
-    printf("task_pcm_playback()\n") ;
+    // printf("task_pcm_playback()\n") ;
 
+    EventBits_t bits ;
     int idle_ticks = 10/ portTICK_PERIOD_MS ;
     int64_t t0 = gettime(), t = 0 ;
 
-    char buff[1024] ;
+    char buff[512] ;
     uint32_t data_size ;
     size_t data_wroten ;
     char * pwrite = NULL ;
@@ -545,14 +668,16 @@ static void task_pcm_playback(el_i2s_t * el) {
         
         vTaskDelay(0) ;
 
-        // 停止任务
-        TASK_STOP(el, {
-            i2s_zero_dma_buffer(el->i2s) ;
-            dd
-        })
-
         // 等待开始状态
-        xEventGroupWaitBits(el->base.stats, STAT_RUNNING, false, true, portMAX_DELAY);
+        bits = xEventGroupWaitBits(el->base.stats, STAT_RUNNING|STAT_STOPPING, false, false, portMAX_DELAY);
+        if( bits&STAT_STOPPING ) {
+            el_stop_when_req(el) ;
+
+            // i2s_zero_dma_buffer(el->i2s) ;
+
+            vTaskDelay(1) ;
+            continue ;
+        }
 
 
         // dp(el->base.upstream->ring)
@@ -565,9 +690,14 @@ static void task_pcm_playback(el_i2s_t * el) {
         data_size = 0 ;
         pwrite = xRingbufferReceiveUpTo(el->base.upstream->ring, &data_size, 10, sizeof(buff));
         if(data_size==0 || !pwrite) {
-            dd
-            xEventGroupSetBits(el->base.upstream->stats, STAT_DRAIN) ;  // 前级流干
-            vTaskDelay(1) ;
+            
+            // 确定前级已流干（ring buffer 里的可读数据可能分在头尾两端，需要两次才能读空）
+            if(el_is_drain(el->base.upstream)) {
+                // printf("i2s's input drain\n") ;
+                xEventGroupSetBits(el->base.upstream->stats, STAT_DRAIN) ;  
+                vTaskDelay(1) ;
+            }
+
             continue ;
         }
         
@@ -601,12 +731,13 @@ static void task_pcm_playback(el_i2s_t * el) {
 #define THIS_PLAYER(thisobj)                                                \
     player_t * thisobj = JS_GetOpaque(this_val, js_audio_player_class_id) ; \
     if(!thisobj) {                                                          \
-        THROW_EXCEPTION("must be called as a Player method")           \
+        THROW_EXCEPTION("must be called as a Player method")                \
     }
 
 
 static JSClassID js_audio_player_class_id ;
 static JSValue js_audio_player_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
+    size_t mem = heap_caps_get_free_size(MALLOC_CAP_DMA) ;
     JSValue jsobj = JS_NewObjectClass(ctx, js_audio_player_class_id) ;
     JS_SetPropertyStr(ctx, jsobj, "_handlers", JS_NewObject(ctx));
 
@@ -618,9 +749,15 @@ static JSValue js_audio_player_constructor(JSContext *ctx, JSValueConst new_targ
     JS_SetOpaque(jsobj, player) ;
 
     // 初始化
-    ELEMENT_CREATE(player, el_src_t, player->src, task_src, 1024*3, 5, 1, 1024)
-    player->decode = el_mp3_create(player) ;
-    ELEMENT_CREATE(player, el_i2s_t, player->playback, task_pcm_playback, 1024*3, 5, 1, 0)
+    echo_alloc("task_src", {
+        ELEMENT_CREATE(player, el_src_t, player->src, task_src, 1024*3, 5, 0, 512)  // task_src 需要访问 sd spi bus, 和 screen spi 任务在同一cpu核可以避免 spi bus 抢占错误
+    })
+    echo_alloc("task_mp3_decode", {
+        player->decode = el_mp3_create(player) ;
+    })
+    echo_alloc("task_playback", {
+        ELEMENT_CREATE(player, el_i2s_t, player->playback, task_pcm_playback, 1024*3, 5, 1, 0)
+    })
 
     player->last = player->playback ;
 
@@ -631,7 +768,7 @@ static JSValue js_audio_player_constructor(JSContext *ctx, JSValueConst new_targ
     // 调用 detach() 方法释放这里的引用
     JS_DupValue(ctx, jsobj) ;
 
-    echo_DMA("all done") ;
+    printf("audio.Player DMA alloc: %d, free:%d\n", mem-heap_caps_get_free_size(MALLOC_CAP_DMA), heap_caps_get_free_size(MALLOC_CAP_DMA)) ;
     return jsobj ;
 }
 static void js_audio_player_finalizer(JSRuntime *rt, JSValue this_val){
@@ -677,20 +814,22 @@ static JSValue js_audio_play_pcm(JSContext *ctx, JSValueConst this_val, int argc
         THROW_EXCEPTION("file not exists") ;
     }
 
+    // 清空管道
+    pipe_clear(player) ;
+
     // src -> playback
     pipe_link( player, 2, player->src, player->playback ) ;
 
-    pipe_clear_stats(player, STAT_STOPPING) ;
-    pipe_clear_stats(player, STAT_STOPPED) ;
     pipe_set_stats(player, STAT_RUNNING) ;
 
     player->paused = false ;
     player->running = true ;
-    emit_event(ctx, player->jsobj, "play") ;
+    player->finished = false ;
+    player->error = 0 ;
+    emit_event(ctx, player->jsobj, "play", JS_UNDEFINED) ;
 
     return JS_UNDEFINED ;
 }
-
 
 
 static JSValue js_audio_play_mp3(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
@@ -713,18 +852,23 @@ static JSValue js_audio_play_mp3(JSContext *ctx, JSValueConst this_val, int argc
         THROW_EXCEPTION("file not exists") ;
     }
 
-    // src -> decode -> playback
+    // 重置 hexli 状态
+    if(xEventGroupGetBits(player->decode->base.stats) & STAT_RUNNING) {
+        THROW_EXCEPTION("decoder not close yet")
+    }
+    el_mp3_reset(player->decode) ;
+
+    // 清空管道
+    pipe_clear(player) ;
+
     pipe_link( player, 3, player->src, player->decode, player->playback ) ;
-    // dp(player->src)
-    // dp(player->decode)
-    // dp(player->playback)
 
     player->paused = false ;
     player->running = true ;
-    emit_event(ctx, player->jsobj, "play") ;
+    player->finished = false ;
+    player->error = 0 ;
+    emit_event(ctx, player->jsobj, "play", JS_UNDEFINED) ;
 
-    pipe_clear_stats(player, STAT_STOPPING) ;
-    pipe_clear_stats(player, STAT_STOPPED) ;
     pipe_set_stats(player, STAT_RUNNING) ;
 
 #else
@@ -750,14 +894,14 @@ static JSValue js_audio_pause(JSContext *ctx, JSValueConst this_val, int argc, J
     THIS_PLAYER(player)
     pipe_clear_stats(player, STAT_RUNNING) ;
     player->paused = true ;
-    emit_event(ctx, player->jsobj, "pause") ;
+    emit_event(ctx, player->jsobj, "pause", JS_UNDEFINED) ;
     return JS_UNDEFINED ;
 }
 static JSValue js_audio_resume(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     THIS_PLAYER(player)
     pipe_set_stats(player, STAT_RUNNING) ;
     player->paused = false ;
-    emit_event(ctx, player->jsobj, "resume") ;
+    emit_event(ctx, player->jsobj, "resume", JS_UNDEFINED) ;
     return JS_UNDEFINED ;
 }
 static JSValue js_audio_track_info(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
@@ -765,10 +909,37 @@ static JSValue js_audio_track_info(JSContext *ctx, JSValueConst this_val, int ar
 }
 static JSValue js_audio_stop(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     THIS_PLAYER(player)
-    pipe_stop(player) ;
+    if(!player->running) {
+        return JS_UNDEFINED ;
+    }
+    
+    pipe_set_stats(player, STAT_RUNNING) ;
+    el_set_stat(player->first, STAT_STOPPING) ;
+    vTaskDelay(0) ;
+
     return JS_UNDEFINED ;
+    // EventBits_t bits = xEventGroupWaitBits(player->last->stats, STAT_STOPPED, false, false, 1000);
+    // if(!(bits&STAT_STOPPED)) {
+    //     printf("stop time out: %d\n", bits) ;
+    // }
+
+    // return (bits&STAT_STOPPED)? JS_TRUE : JS_FALSE ;
 }
 
+static JSValue js_audio_print_stats(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    THIS_PLAYER(player)
+
+    printf("\n[task_src]\n") ;
+    el_print_stats(player->src) ;
+    
+    printf("\n[task_mp3_decode]\n") ;
+    el_print_stats(player->decode) ;
+    
+    printf("\n[task_i2s]\n") ;
+    el_print_stats(player->playback) ;
+
+    return JS_UNDEFINED ;
+}
 
 static JSValue js_audio_play_detach(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     THIS_PLAYER(player)
@@ -782,9 +953,10 @@ static const JSCFunctionListEntry js_audio_player_proto_funcs[] = {
     JS_CFUNC_DEF("pause", 0, js_audio_pause),
     JS_CFUNC_DEF("resume", 0, js_audio_resume),
     JS_CFUNC_DEF("stop", 0, js_audio_stop),
-    JS_CFUNC_DEF("isRunner", 0, js_audio_is_running),
+    JS_CFUNC_DEF("isRunning", 0, js_audio_is_running),
     JS_CFUNC_DEF("isPaused", 0, js_audio_is_paused),
     JS_CFUNC_DEF("detach", 0, js_audio_play_detach),
+    JS_CFUNC_DEF("printStats", 0, js_audio_print_stats),
 } ;
 
 void be_module_media_init() {

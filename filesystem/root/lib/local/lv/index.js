@@ -85,18 +85,24 @@ beapi.lvgl.keyboard = function () {
 let _msgbox = null
 function msgbox() {
     if(!_msgbox) {
-        _msgbox = 
+        _msgbox = new lv.MsgBox(beapi.lvgl.active(), "", "", [], true)
         _msgbox.center()
     }
     return _msgbox
 }
 beapi.lvgl.msg = {
-    info(title, desc) {
-        let box = new lv.MsgBox(beapi.lvgl.active(), title||"", desc||"", [], true)
+    info(title, desc, btnClose, btnTxts) {
+        let box = new lv.MsgBox(beapi.lvgl.active(), title||"", desc||"", btnTxts||[], btnClose||true)
         box.title().setFont("msyh")
         let text = box.text()
         if(text) text.setFont("msyh")
         box.center()
+        box.on("visible",function(visible){
+            console.log("box visible",visible)
+            if(!visible)
+                this.del()
+        })
+        return box
     }
 }
 beapi.lvgl.msg.sucess = beapi.lvgl.msg.info

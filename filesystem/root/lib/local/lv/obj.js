@@ -1,4 +1,3 @@
-
 beapi.lvgl.Obj.prototype.draggable = function(onstart, ondragging, onstop) {
     if(!this._draggable) {
         this._draggable = new beapi.lvgl.Draggable(this)
@@ -10,7 +9,7 @@ beapi.lvgl.Obj.prototype.draggable = function(onstart, ondragging, onstop) {
     return this._draggable
 }
 
-beapi.lvgl.Obj.prototype.asModel = function asModel() {
+beapi.lvgl.Obj.prototype.asModal = function asModal() {
     this.on("visible", visible=>{
         if(visible) {
             this.holdKeys()

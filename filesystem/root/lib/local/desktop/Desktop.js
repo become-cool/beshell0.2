@@ -75,6 +75,8 @@ class Desktop extends lv.Obj {
                 lv.loadScreen(this)
             })
 
+            global.desktop = this
+
         }catch(e){
             console.log(e)
         }

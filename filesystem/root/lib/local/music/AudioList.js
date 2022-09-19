@@ -4,6 +4,10 @@ module.exports = class AudioList extends lv.Column {
     
     constructor(parent) {
         super(parent)
+        this.page = 1 ;
+        this.pageCnt = 1 ;
+        this.itemsPerPage = 8 ;
+        this.itemHeight = 24
         this.fromJson({
             style: {
                 'bg-opa': 255 ,
@@ -13,7 +17,10 @@ module.exports = class AudioList extends lv.Column {
                 class: "Row" ,
                 gap: 5 ,
                 crossAlign: "center" ,
-                children: [{
+                style: {
+                    'pad-column': 10
+                }
+                , children: [{
                     class: 'Btn', 
                     text: '返回', 
                     textColor: 0 ,
@@ -24,26 +31,59 @@ module.exports = class AudioList extends lv.Column {
                         "shadow-width": 0 ,
                     } ,
                     clicked: ()=>{ this.hide() }
-                },{
+                }
+                , {clear: true, grow: true, height:1}
+                , {
+                    class:"Btn", text: "<", ref: 'btnPrevPage',
+                    clicked: () => {
+                        this.loadPage(this.page-1)
+                    }
+                }
+                , {
                     class: 'Label' ,
-                    font: 'msyh',
-                    textAlign: 'right' ,
-                    text: '' ,
+                    text: this.page + '/' + this.pageCnt ,
+                    // width: -1 ,
                     grow: true ,
-                    style: {
-                        'pad-right':10 
-                    } ,
-                    ref: 'msg'
+                    ref: 'txtPage'
+                }
+                , {
+                    class:"Btn", text: ">", ref: 'btnNextPage',
+                    clicked: () => {
+                        this.loadPage(this.page+1)
+                    }
                 }]
+                
             },{
                 class: 'List' ,
                 width: "100%" ,
                 ref: 'uilst' ,
                 grow: true ,
-                items: [
-                    { class: 'Btn', text: ''}
-                ]
+                items: []
             }]
+
+            , on:{
+                "ipt.btn.press": key=>{
+                    console.log(key)
+                    if(key=='up') {
+                        group.focusPrev()
+                    }
+                    else if(key=='down' || key=='tab') {
+                        group.focusNext()
+                    }
+                    else if(key=='left') {
+                        this.loadPage(this.page-1)
+                    }
+                    else if(key=='right') {
+                        this.loadPage(this.page+1)
+                    }
+                    else if(key=='enter') {
+                        group.focused()?.emit("clicked")
+                    }
+                    else if(key=='esc') {
+                        this.hide()
+                    }
+                }
+            }
         }, this)
 
         this.loading = false
@@ -51,23 +91,15 @@ module.exports = class AudioList extends lv.Column {
         this.lst = []
 
         let group = this.uilst.group()
-
         group.addObj(this.btnBack)
+        group.addObj(this.btnPrevPage)
+        group.addObj(this.btnNextPage)
 
-        this.on("ipt.btn.press",key=>{
-            if(key=='down') {
-                group.focusNext()
-            }
-            else if(key=='up'){
-                group.focusPrev()
-            }
-            else if(key=='enter') {
-                let btn = group.focused()
-                if(btn) {
-                    btn.emit("clicked")
-                }
-            }
-        })
+        let self = this
+        this.onItemClick = function () {
+            self.top.play(this.idx)
+            self.hide()
+        }
     }
 
     load() {
@@ -77,33 +109,20 @@ module.exports = class AudioList extends lv.Column {
 
         this.loading = true
 
-        this.uilst.clean()
         this.lst.length = 0
-
-        // this.lst.push({title:"demo-8000", path:"/mnt/sd/music4/music-16b-2c-8000hz.mp3"})
-        // this.lst.push({title:"demo-22050", path:"/mnt/sd/music4/music-16b-2c-22050hz.mp3"})
-        // this.lst.push({title:"demo-44100", path:"/mnt/sd/music4/music-16b-2c-44100hz.mp3"})
 
         try{
             this.loadDir("/mnt/sd", this.lst, 3)
         }catch(e){
             console.error(e)
         }
-        console.log(this.lst.length)
+
+        this.page = 1
+        this.pageCnt = Math.ceil(this.lst.length/this.itemsPerPage)
+
+        // beapi.lvgl.setAllocSPIRAM(true)
         
-        for(let i=0;i<this.lst.length;i++){
-            let item = this.lst[i]
-            let btn = this.uilst.addBtn(null, '')
-
-            let title = item.title
-
-            btn.setText(title)
-            btn.setFont("msyh")
-            btn.on('clicked', ((i)=>{return ()=>{
-                this.player.play(i)
-                this.hide()
-            }})(i))
-        }
+        this.loadPage(1)
 
         this.loading = false
     }
@@ -131,5 +150,59 @@ module.exports = class AudioList extends lv.Column {
                 continue
             }
         }
+    }
+
+    loadPage(page) {
+        if(page>this.pageCnt) {
+            page = 1
+        }
+        else if(page<1) {
+            page = this.pageCnt
+        }
+
+        this.page = page
+        this.txtPage.setText(this.page + '/' + this.pageCnt)
+
+        let dma = process.memoryUsage().dma.free
+
+        let from = this.itemsPerPage*(page-1)
+        let to = Math.min( this.itemsPerPage*page, this.lst.length )
+        console.log(from, to)
+        for(let i=from; i < to; i++ ){
+            let item = this.lst[i]
+            let btn = this.btn(i-from)
+
+            btn.setText(item.title)
+            btn.idx = i
+            btn.show()
+        }
+
+        for(let i=to; i<10; i++) {
+            this.btn(i,false)?.hide()
+        }
+
+        // beapi.lvgl.setAllocSPIRAM(false)
+
+        console.log(dma-process.memoryUsage().dma.free)
+    }
+
+    btn(i) {
+        if(i>=this.uilst.childCnt()) {
+            let btn = this.uilst.addText('')
+            btn.setWidth(this.uilst.width()-4)
+            btn.setHeight(this.itemHeight)
+            btn.setLongMode("dot")
+            btn.setFont("msyh")
+            btn.addFlag("clickable")
+            btn.on('clicked', this.onItemClick)
+            return btn
+        }
+        else {
+            return this.uilst.child(i)
+        }
+    }
+
+    random() {
+        
     }
 }

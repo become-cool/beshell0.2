@@ -32,6 +32,8 @@ dist-root:
 	node filesystem/dispense-to-beconsole.js fs-root
 dist-home:
 	node filesystem/dispense-to-beconsole.js fs-home
+new-version:
+	mkdir 
 
 partition:
 	node filesystem/mk-partitions.js

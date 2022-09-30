@@ -65,7 +65,9 @@ let metastring = JSON.stringify(meta,null,4)
 function mkdir(path) {
     try{ 
         fs.mkdirSync(path)
-    }catch(e){}
+    }catch(e){
+        console.log(e)
+    }
 }
 function cp(from, to) {
     let cmd = `cp ${__dirname}/${from} ${to}`

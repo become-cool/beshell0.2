@@ -11,6 +11,8 @@ ls -lh build/beshell.bin
 
 echo ''
 echo ===============================
+mkdir -p ../beconsole.next/platform/nw.js/assets/firmware/beshell-${version}
+mkdir -p ../beconsole.next/platform/nw.js/tmp/assets/firmware/beshell-${version}
 echo copy to beconsole dist dir ...
 echo cp build/beshell.bin ../beconsole.next/platform/nw.js/assets/firmware/beshell-${version}/beshell.bin
 cp build/beshell.bin ../beconsole.next/platform/nw.js/assets/firmware/beshell-${version}/beshell.bin

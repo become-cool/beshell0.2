@@ -30,20 +30,32 @@ static inline void _indev_nav_set_value(indev_driver_spec_t * driver_spec, uint3
 #define PROC_RELEASE(key, NAV_KEY, INDEV_KEY)    PROC_EVENT(release,NAV_KEY, INDEV_KEY,RELEASED, key, "release")                        
 
 
+/*
 #define INDEV_I2C_READ(spec, value)         \
     I2C_BEGIN_READ(spec->conf.i2c.addr) ;   \
     I2C_RECV(&value,1) ;                    \
     I2C_COMMIT(spec->conf.i2c.bus) ;
+*/
+inline bool indev_nav_read_i2c(indev_driver_spec_t* spec, uint8_t * byte) {
+
+    I2C_BEGIN_READ(spec->conf.i2c.addr) ;
+    I2C_RECV(byte,1) ;
+    I2C_COMMIT(spec->conf.i2c.bus) ;
+
+    return ESP_OK==res ;
+}
 
 static void indev_nav_read_cb(struct _lv_indev_drv_t * drv, lv_indev_data_t * data) {
     if(!drv->user_data) {
         return ;
     }
     indev_driver_spec_t * driver_spec = (indev_driver_spec_t*) drv->user_data ;
+    if(!driver_spec->found) {
+        return ;
+    }
     
-    uint8_t value ;
-    INDEV_I2C_READ(driver_spec, value)
-    if(ESP_OK==res) {
+    uint8_t value = 0;
+    if(indev_nav_read_i2c(driver_spec, &value)) {
         _indev_nav_set_value(driver_spec, value) ;
     }
 
@@ -78,8 +90,8 @@ static void task_nav_read(indev_driver_spec_t * spec) {
 
     while(1) {
 
-        INDEV_I2C_READ(spec, value)
-        if(ESP_OK==res) {
+        
+        if(indev_nav_read_i2c(spec, &value)) {
             if(value!=last) {
                 printf("i2c indev:%d\n",value) ;
                 last = value ;
@@ -122,6 +134,17 @@ static JSValue js_lv_indev_nav_constructor(JSContext *ctx, JSValueConst new_targ
 
         driver_spec.conf.i2c.bus = bus ;
         driver_spec.conf.i2c.addr = addr ;
+
+        if(i2c_ping(bus,addr)) {
+            dd
+        }
+        driver_spec.found = i2c_ping(bus,addr) ;
+
+
+        if(!driver_spec.found) {
+            printf("not found i2c device, bus: %d, addr: %d \n", bus,addr) ;
+        }
+
 
     }
 

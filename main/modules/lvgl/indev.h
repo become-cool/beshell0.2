@@ -52,7 +52,9 @@ typedef struct {
     } conf ;
 #endif
 
-    bool fake ;
+    bool fake:1 ;
+    bool found:1 ;
+    
     union{
         struct {
             lv_coord_t x ;

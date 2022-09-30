@@ -9,6 +9,7 @@
 #include "psram.h"
 #include "esp_system.h"
 #include "indev.h"
+#include "indev_i2c.h"
 
 static char * romdata = NULL ;
 static st77xx_dev_t * st77xx = NULL ;
@@ -68,6 +69,8 @@ static JSValue js_gameplayer_set_display(JSContext *ctx, JSValueConst this_val, 
         THROW_EXCEPTION("arg disp is a invalid lv.Disp object")
     }
 
+    // 黑屏
+    st77xx_fill_rect(st77xx,0,0,drv->hor_res-1,drv->ver_res, 0) ;
 
     return JS_UNDEFINED;
 }
@@ -85,6 +88,16 @@ static JSValue js_gameplayer_set_display(JSContext *ctx, JSValueConst this_val, 
 //     return JS_UNDEFINED;
 // }
 
+
+static JSValue js_gameplayer_set_buttons(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(2)
+    ARGV_TO_UINT8(0, pin)
+    ARGV_TO_UINT8(1, key)
+
+    dn2(pin, key)
+
+    return JS_UNDEFINED;
+}
 
 static JSValue js_gameplayer_play(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(1)
@@ -128,6 +141,7 @@ static JSValue js_gameplayer_play(JSContext *ctx, JSValueConst this_val, int arg
 
     echo_DMA("start nofrendo ...") ;
     nofrendo_main(0, NULL);
+    echo_DMA("nofrendo stop") ;
     free(romdata) ;
 
     return JS_UNDEFINED ;
@@ -143,7 +157,9 @@ void be_module_gameplayer_require(JSContext *ctx) {
     JS_SetPropertyStr(ctx, beapi, "gameplayer", gameplayer);
 
     JS_SetPropertyStr(ctx, gameplayer, "play", JS_NewCFunction(ctx, js_gameplayer_play, "play", 1));
+    JS_SetPropertyStr(ctx, gameplayer, "setBtns", JS_NewCFunction(ctx, js_gameplayer_set_buttons, "setBtns", 1));
     JS_SetPropertyStr(ctx, gameplayer, "setDisplay", JS_NewCFunction(ctx, js_gameplayer_set_display, "setDisplay", 1));
+
     // JS_SetPropertyStr(ctx, gameplayer, "setJoypad", JS_NewCFunction(ctx, js_gameplayer_set_joypad, "setJoypad", 1));
     // JS_SetPropertyStr(ctx, gameplayer, "setButtons", JS_NewCFunction(ctx, js_gameplayer_set_display, "setButtons", 1));
     // JS_SetPropertyStr(ctx, gameplayer, "setAudio", JS_NewCFunction(ctx, js_gameplayer_set_audio, "setAudio", 1));
@@ -552,8 +568,8 @@ static void task_video(void *arg) {
 
 void osd_getinput(void) {
 
-    uint32_t btns_1 = 0 ;
-    uint32_t btns_2 = 0 ;
+    uint8_t btns_1 = 0 ;
+    uint8_t btns_2 = 0 ;
 
     lv_indev_t * indev=NULL ;
     indev_driver_spec_t * spec = NULL ;
@@ -562,13 +578,15 @@ void osd_getinput(void) {
             continue;
         }
         spec = (indev_driver_spec_t *) indev->driver->user_data ;
-        if(spec->driver==INDEV_DRIVER_JOYPAD) {
+        if(spec->driver==INDEV_DRIVER_JOYPAD && spec->found) {
             // dn(spec->conf.i2c.addr)
             if(spec->conf.i2c.addr==51) {
-                btns_1 = spec->data.buttons.state ;
+                // btns_1 = spec->data.buttons.state ;
+                indev_nav_read_i2c(spec, & btns_1) ;
             }
             else if(spec->conf.i2c.addr==52) {
-                btns_2 = spec->data.buttons.state ;
+                // btns_2 = spec->data.buttons.state ;
+                indev_nav_read_i2c(spec, & btns_2) ;
             }
         }
     }
@@ -632,12 +650,11 @@ int osd_init() {
 	osd_init_sound_i2s() ;
     
 	queVideo=xQueueCreate(1, sizeof(bitmap_t *));
-    xTaskCreatePinnedToCore(&task_video, "task_video", 2048, NULL, 5, NULL, 1);
+    xTaskCreatePinnedToCore(&task_video, "task_video", 1024*4, NULL, 5, NULL, 1);
 
     if(i2s>=0) {
-	    xTaskCreatePinnedToCore(&task_audio, "task_audio", 2048, NULL, 2, NULL, 1);
+	    // xTaskCreatePinnedToCore(&task_audio, "task_audio", 2048, NULL, 2, NULL, 1);
     }
-    
 
     echo_DMA("end osd_init") ;
 	return 0;

@@ -350,16 +350,20 @@ static void response_fs(struct mg_connection *c, struct mg_http_message *hm, con
 
 // www.msftconnecttest.com
 // ipv6.msftconnecttest.com
-// http://captive.apple.com/hotspotdetect.html
+// http://captive.apple.com/hotspot-detect.html
 // http://connectivitycheck.android.com/generate_204
+// http://connectivitycheck.smartisan.com/wifi.html
 // ****/generate_204
 static bool telnet_ws_is_captive_portal_request(struct mg_connection *c, struct mg_http_message *hm) {
 
     struct mg_str * host = mg_http_get_header(hm, "Host") ;
     if(mg_strcmp(*host, mg_str("captive.apple.com"))==0) {
-        if(mg_http_match_uri(hm,"/hotspotdetect.html")) {
-            return true ;
-        }
+        return true ;
+    }
+    // http://connectivitycheck.android.com/generate_204
+    // http://connectivitycheck.smartisan.com/wifi.html
+    else if( host->len>=18 && strncmp(host->ptr, "connectivitycheck.", 18)==0 ) {
+        return true ;
     }
     else if(mg_http_match_uri(hm,"/generate_204")) {
         return true ;
@@ -367,6 +371,8 @@ static bool telnet_ws_is_captive_portal_request(struct mg_connection *c, struct 
     else if(mg_strcmp(*host, mg_str("www.msftconnecttest.com"))==0) {
         return true ;
     }
+
+    printf("%.*s/%.*s\n", host->len, host->ptr, hm->uri.len, hm->uri.ptr) ;
 
     return false ;
 }

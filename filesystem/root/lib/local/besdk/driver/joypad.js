@@ -14,10 +14,11 @@ class Joypad extends I2CDevice {
         this.addr = opts?.addr
     }
     register(insName) {
-        if(this.bus==undefined || this.addr==undefined || !beapi.i2c.ping(this.bus,this.addr)) {
-            console.log("joypad not found, addr:", this.addr)
-            return
-        }
+        // beapi.i2c.ping(this.bus,this.addr)
+        // if(this.bus==undefined || this.addr==undefined || !beapi.i2c.ping(this.bus,this.addr)) {
+        //     console.log("joypad not found, bus:", this.bus ,", addr:", this.addr)
+        //     return
+        // }
         super.register(insName)
         this.indev = new lv.InDevNav("joypad", this.bus||0, this.addr||51)
         be.indev.push(this.indev)

@@ -24,12 +24,11 @@
 JSClassID js_lv_indev_pointer_class_id = 0 ;
 
 static void indev_pointer_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
-    
     if(!drv->user_data) {
         return ;
     }
     indev_driver_spec_touch_t * driver_spec = (indev_driver_spec_t *) drv->user_data ;
-    if(driver_spec->spec.fake) {
+    if(driver_spec->spec.fake) {        
         driver_spec->spec.fake = false ;
         data->point.x = driver_spec->spec.data.pointer.x ;
         data->point.y = driver_spec->spec.data.pointer.y ;

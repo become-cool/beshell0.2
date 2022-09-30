@@ -328,3 +328,51 @@ void st77xx_draw_rect(st77xx_dev_t * dev, uint16_t x1, uint16_t y1, uint16_t x2,
 	return ;
 
 }
+
+// static bool spi_master_write_color(st77xx_dev_t * dev, uint16_t color, uint16_t size) {
+// 	// static uint8_t buff[1024];
+
+// }
+
+
+// Draw rectangle of filling
+// x1:Start X coordinate
+// y1:Start Y coordinate
+// x2:End X coordinate
+// y2:End Y coordinate
+// color:color
+void st77xx_fill_rect(st77xx_dev_t * dev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color) {
+
+	if (x1 >= dev->_width) return;
+	if (x2 >= dev->_width) x2=dev->_width-1;
+	if (y1 >= dev->_height) return;
+	if (y2 >= dev->_height) y2=dev->_height-1;
+
+	// ESP_LOGD(TAG,"offset(x)=%d offset(y)=%d",dev->_offsetx,dev->_offsety);
+	x1 = x1 + dev->_offsetx;
+	x2 = x2 + dev->_offsetx;
+	y1 = y1 + dev->_offsety;
+	y2 = y2 + dev->_offsety;
+
+	
+	uint16_t line_size = x2-x1+1;
+	uint8_t * buff = heap_caps_malloc(line_size*2, MALLOC_CAP_DMA) ;
+	int index = 0;
+	for(int i=0;i<line_size;i++) {
+		buff[index++] = (color >> 8) & 0xFF;
+		buff[index++] = color & 0xFF;
+	}
+
+	st77xx_command(dev, 0x2A);	// set column(x) address
+	st77xx_addr(dev, x1, x2);
+	st77xx_command(dev, 0x2B);	// set Page(y) address
+	st77xx_addr(dev, y1, y2);
+	st77xx_command(dev, 0x2C);	//	Memory Write
+
+	gpio_set_level( dev->_dc, SPI_Data_Mode );
+	for(int i=y1;i<=y2;i++){
+		spi_write_bytes( dev->spi_dev, (uint8_t *)buff, line_size*2);
+	}
+
+	free(buff) ;
+}

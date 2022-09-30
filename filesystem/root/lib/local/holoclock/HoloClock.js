@@ -1,7 +1,7 @@
 const wifi = require("besdk/wifi")
 const lv = require("lv")
-const cityCodes = require("./cities.json")
-const localeJsonPath = "/home/become/config/locale.json"
+
+const api = "http://api.service.become.cool/weather"
 
 function fill2(num) {
     if(num<10) {
@@ -20,7 +20,6 @@ class HoloClock extends lv.Obj {
 
         this.cityName = ''
         this.weatherCode = ''
-        this.restoreLocale()
 
         this.fromJson({
             style: {
@@ -151,6 +150,11 @@ class HoloClock extends lv.Obj {
         setInterval(()=>{
             this.queryWeather()
         }, 30* 60* 1000)
+
+        let json = JSON.load("/home/become/.data/weather.json")
+        if(json) {
+            this.update(json)
+        }
     }
 
     freshTime() {
@@ -158,44 +162,19 @@ class HoloClock extends lv.Obj {
         this.labTime.setText( fill2(tm.getHours()) + ':' + fill2(tm.getMinutes()) + ":" + fill2(tm.getSeconds()) )
         this.labDate.setText( (tm.getMonth()+1) + '月' + tm.getDate() + '日  周' + days[tm.getDay()] )
     }
-
-    restoreLocale() {
-        let locale = JSON.load(localeJsonPath)
-        if(!locale) {
-            return
-        }
-        this.cityName = locale.cityName
-        this.weatherCode = locale.weatherCode
-    }
-
-    setCity(cityName,weatherCode) {
-        this.labCity.setText(cityName)
-        this.cityName = cityName
-        this.weatherCode = weatherCode
-        
-        let locale = JSON.load(localeJsonPath) || {}
-        locale.cityName = cityName
-        locale.weatherCode = weatherCode
-        beapi.fs.writeFileSync(localeJsonPath, JSON.stringify(locale))
-    }
     
     async queryWeather() {
         for(let retry = 5 ; retry; retry--) {
-            console.log("queryWeather() start", this.weatherCode)
-            let url = `http://api.service.become.cool/weather`
-            console.log(url)
+            console.log(api)
             try{
-                let body = await beapi.mg.get(url)
+                let body = await beapi.mg.get(api)
                 console.log(body)
                 body = JSON.parse(body)
-                
-                this.labCity.setText( body.localText )
-                this.txtTemp.setText( body.payload.text + ' ' + parseInt(body.payload.temp)+'°C' )
-                this.txtHumidity.setText(`湿度 ${body.payload.humidity}%`)
-                this.txtDetail.setText(`${body.payload.windDir} ${body.payload.windScale}级 ${body.payload.windSpeed}km/h`)
-
-                this.imgWeather.setSrc(`/lib/icon/weather/${body.payload.icon}.png`)
-
+                if(body){
+                    this.update(body)
+                    beapi.fs.mkdirSync("/home/become/.data/")
+                    beapi.fs.writeFileSync("/home/become/.data/weather.json", JSON.stringify(body))
+                }
                 return
 
             }catch(e) {
@@ -203,6 +182,16 @@ class HoloClock extends lv.Obj {
                 await sleep(1000)
             }
         }
+    }
+
+    update(body) {
+
+        this.labCity.setText( body.localText )
+        this.txtTemp.setText( body.payload.text + ' ' + parseInt(body.payload.temp)+'°C' )
+        this.txtHumidity.setText(`湿度 ${body.payload.humidity}%`)
+        this.txtDetail.setText(`${body.payload.windDir} ${body.payload.windScale}级 ${body.payload.windSpeed}km/h`)
+
+        this.imgWeather.setSrc(`/lib/icon/weather/${body.payload.icon}.png`)
     }
 
     setWeatherImg(imgName) {

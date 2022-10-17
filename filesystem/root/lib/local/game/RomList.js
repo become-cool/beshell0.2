@@ -38,7 +38,6 @@ module.exports = class RomList extends beapi.lvgl.Column {
                             text: "正在加载ROM清单 ..." ,
                             align: "center" ,
                             ref: "txtMsg" ,
-        
                         }
                     ]
                 }
@@ -60,7 +59,7 @@ module.exports = class RomList extends beapi.lvgl.Column {
         this.lstRom.clean()
 
         this.txtMsg.setText("正在加载ROM清单 ...")
-        this.txtMsg.show()
+        this.txtMsg.parent().show()
 
         setTimeout(()=>{
 
@@ -81,13 +80,13 @@ module.exports = class RomList extends beapi.lvgl.Column {
 
             if(romcnt) {
                 this.lstRom.show()
-                this.txtMsg.hide()
+                this.txtMsg.parent().hide()
             }
             else {
                 this.lstRom.hide()
 
                 this.txtMsg.setText("请将游戏 ROM 存入主机 FLASH 或 SD存储卡")
-                this.txtMsg.show()
+                this.txtMsg.parent().show()
             }
 
         }, 0)
@@ -108,7 +107,7 @@ module.exports = class RomList extends beapi.lvgl.Column {
 
         this.barTop.hide()
         this.lstRom.hide()
-        this.txtMsg.show()
+        this.txtMsg.parent().show()
         this.txtMsg.setText("正在加载ROM: "+romPath)
         
         setTimeout(()=>{

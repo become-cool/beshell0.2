@@ -5,7 +5,7 @@
 
 
 static uint8_t _spi_bus_setup = 0 ;
-static spi_device_handle_t _spi_handle_pool1[8] = {0,0,0,0,0,0,0,0} ;
+spi_device_handle_t _spi_handle_pool1[8] = {0,0,0,0,0,0,0,0} ;
 
 static int8_t find_free_spi_handle(spi_device_handle_t ** pool) {
     int8_t h = 0 ;
@@ -18,7 +18,7 @@ static int8_t find_free_spi_handle(spi_device_handle_t ** pool) {
     return -1 ;
 }
 
-static spi_device_handle_t _spi_handle(uint8_t idx) {
+spi_device_handle_t spi_handle_with_id(uint8_t idx) {
     if(idx<8) {
         return _spi_handle_pool1[idx] ;
     }
@@ -128,6 +128,13 @@ static JSValue js_spi_device_remove(JSContext *ctx, JSValueConst this_val, int a
     return JS_UNDEFINED ;
 }
 
+#define ARGV_TO_SPI_HANDLE(i, handle)                   \
+    ARGV_TO_UINT8(i, spiidx)                            \
+    spi_device_handle_t handle = spi_handle_with_id(spiidx) ;  \
+    if(handle==NULL) {                                  \
+        THROW_EXCEPTION("know spi handle")              \
+    }
+
 /**
  * 
  * bus (1-3)
@@ -137,11 +144,7 @@ static JSValue js_spi_device_remove(JSContext *ctx, JSValueConst this_val, int a
  */
 static JSValue js_spi_send(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(2)
-    ARGV_TO_UINT8(0, spiidx)
-    spi_device_handle_t handle = _spi_handle(spiidx) ;
-    if(handle==NULL) {
-        THROW_EXCEPTION("know spi handle")
-    }
+    ARGV_TO_SPI_HANDLE(0, handle)
 
     int offset = 0 ;
     if(argc>=3) {
@@ -189,6 +192,88 @@ end:
     return JS_NewInt32(ctx, ret) ;
 }
 
+
+#define ARGV_TO_SPI_OUT_NUMBER(i, type, var)            \
+    type var = 0 ;                                      \
+    if( !JS_IsUndefined(var) && !JS_IsUndefined(var) ) {\
+        if(JS_ToUint32(ctx, &out, argv[i])!=0) {        \
+            THROW_EXCEPTION("arg must be a number")     \
+        }                                               \
+    }
+
+inline esp_err_t spi_trans_int(spi_device_handle_t handle, uint8_t * rx_buff, uint8_t * tx_buff, size_t bit_length) {
+    spi_transaction_t t;
+    memset(&t, 0, sizeof(t));
+
+    // t.flags = SPI_TRANS_USE_RXDATA | SPI_TRANS_USE_TXDATA ;
+    t.tx_buffer = tx_buff ;
+    t.rx_buffer = rx_buff ;
+    t.length = bit_length ;
+    t.rxlength = 0 ; // same to length
+    
+    return spi_device_transmit(handle, &t) ;
+}
+/**
+ * 
+ * dev id
+ * u8
+ */
+static JSValue js_spi_send_u8(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    CHECK_ARGC(2)
+    ARGV_TO_SPI_HANDLE(0, handle)
+
+    uint8_t in = 0 ;
+    ARGV_TO_SPI_OUT_NUMBER(1, uint8_t, out)
+
+    esp_err_t ret = spi_trans_int(handle, (uint8_t*)&in, (uint8_t*)&out, 8) ;
+    if(ret!=ESP_OK) {
+        THROW_EXCEPTION("spi bus transmit failed:%d", ret)
+    }
+
+    return JS_NewInt32(ctx, in) ;
+}
+
+/**
+ * 
+ * dev id
+ * u16
+ */
+static JSValue js_spi_send_u16(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    CHECK_ARGC(2)
+    ARGV_TO_SPI_HANDLE(0, handle)
+
+    uint16_t in = 0 ;
+    ARGV_TO_SPI_OUT_NUMBER(1, uint16_t, out)
+
+    esp_err_t ret = spi_trans_int(handle, (uint8_t*)&in, (uint8_t*)&out, 16) ;
+    if(ret!=ESP_OK) {
+        THROW_EXCEPTION("spi bus transmit failed:%d", ret)
+    } 
+
+    return JS_NewInt32(ctx, in) ;
+}
+
+/**
+ * 
+ * dev id
+ * u32
+ */
+static JSValue js_spi_send_u32(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    CHECK_ARGC(2)
+    ARGV_TO_SPI_HANDLE(0, handle)
+    ARGV_TO_UINT32(1, val)
+
+    spi_transaction_t t;
+    memset(&t, 0, sizeof(t));
+
+    t.tx_buffer = (uint8_t *) & val ;
+    t.length = 32 ;
+
+    esp_err_t ret = spi_device_transmit(handle, &t) ;
+    return JS_NewInt32(ctx, ret) ;
+}
+
+
 static JSValue js_spi_recv(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
 
     return JS_UNDEFINED ;
@@ -196,11 +281,7 @@ static JSValue js_spi_recv(JSContext *ctx, JSValueConst this_val, int argc, JSVa
 
 
 
-// void be_module_serial_spi_init() {
-// }
-
 void be_module_serial_spi_require(JSContext *ctx, JSValue pkg) {
-
     JSValue spi = JS_NewObject(ctx);
     JS_SetPropertyStr(ctx, pkg, "spi", spi);
     JS_SetPropertyStr(ctx, spi, "setup", JS_NewCFunction(ctx, js_spi_bus_setup, "setup", 1));
@@ -208,12 +289,12 @@ void be_module_serial_spi_require(JSContext *ctx, JSValue pkg) {
     JS_SetPropertyStr(ctx, spi, "addDevice", JS_NewCFunction(ctx, js_spi_device_add, "addDevice", 1));
     JS_SetPropertyStr(ctx, spi, "removeDevice", JS_NewCFunction(ctx, js_spi_device_remove, "removeDevice", 1));
     JS_SetPropertyStr(ctx, spi, "send", JS_NewCFunction(ctx, js_spi_send, "send", 1));
+    JS_SetPropertyStr(ctx, spi, "sendU8", JS_NewCFunction(ctx, js_spi_send_u8, "sendU8", 1));
+    JS_SetPropertyStr(ctx, spi, "sendU16", JS_NewCFunction(ctx, js_spi_send_u16, "sendU16", 1));
+    JS_SetPropertyStr(ctx, spi, "sendU32", JS_NewCFunction(ctx, js_spi_send_u32, "sendU32", 1));
     JS_SetPropertyStr(ctx, spi, "recv", JS_NewCFunction(ctx, js_spi_recv, "recv", 1));
 
 }
-
-// void be_module_serial_spi_loop(JSContext *ctx) {
-// }
 
 void be_module_serial_spi_reset(JSContext *ctx) {
     

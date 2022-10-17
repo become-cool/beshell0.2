@@ -38,11 +38,11 @@
             "path": "beshell.bin"
         },
         {
-            "address": "0x340000",
+            "address": "0x348000",
             "path": "fs-root.img"
         },
         {
-            "address": "0x380000",
+            "address": "0x390000",
             "path": "fs-home.img"
         }
     ]

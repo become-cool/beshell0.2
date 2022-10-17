@@ -5,12 +5,21 @@
 #include <string.h>
 #include <stdbool.h>
 
+#ifndef SIMULATION
+#include "esp_heap_caps.h"
+#endif
+
 uint64_t gettime() {
 	struct timespec tm = {0, 0};
 	clock_gettime(CLOCK_REALTIME, &tm);
 	return tm.tv_nsec/1000/1000 + tm.tv_sec*1000 ;
 }
 
+uint64_t gettime_us() {
+	struct timespec tm = {0, 0};
+	clock_gettime(CLOCK_REALTIME, &tm);
+	return tm.tv_nsec/1000 + tm.tv_sec*1000*1000 ;
+}
 
 char * mallocf(char * fmt, ...) {
 	char *result;
@@ -21,6 +30,18 @@ char * mallocf(char * fmt, ...) {
 	va_end( args );
 
 	return result;
+}
+
+inline void * mallocDMA(size_t size) {
+#ifndef SIMULATION
+    void * data = heap_caps_malloc(size, MALLOC_CAP_DMA) ;
+	// if(!data) {
+	// 	return heap_caps_malloc(size, MALLOC_CAP_SPIRAM) ;
+	// }
+	return data ;
+#else
+    return malloc(size) ;
+#endif
 }
 
 void freeArrayBuffer(JSRuntime *rt, void *opaque, void *ptr) {

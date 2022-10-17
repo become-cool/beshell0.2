@@ -23,13 +23,38 @@
 
 #define dref(var) printf(#var" ref count:%d @%d\n", ((JSRefCountHeader *)JS_VALUE_GET_PTR(var))->ref_count, __LINE__) ;
 
-#define echo_time(msg, codes)                   \
-    {                                           \
-        int64_t t = gettime() ;                 \
-        codes                                   \
-        printf(msg": %lldms\n", gettime()-t) ;  \
+#define record_time(var, codes)                                 \
+    int64_t var = 0 ;                                           \
+    {                                                           \
+        var = gettime() ;                                       \
+        codes                                                   \
+        var = gettime()-var ;                                   \
+    }
+
+#define echo_time(msg, codes)                                   \
+    {                                                           \
+        int64_t __tt = gettime() ;                              \
+        codes                                                   \
+        printf(msg": %lldms\n", gettime()-__tt) ;               \
+    }
+#define echof_time(msg, codes, ...)                             \
+    {                                                           \
+        int64_t __tt = gettime() ;                              \
+        codes                                                   \
+        printf(msg": %lldms\n", __VA_ARGS__, gettime()-__tt) ;  \
     }
 #define necho_time(msg, codes)  codes
+#define nechof_time(msg, codes, ...)  codes
+
+
+#define echo_alloc(msg, codes)                                  \
+    {                                                           \
+        size_t __m = heap_caps_get_free_size(MALLOC_CAP_DMA) ;  \
+        codes                                                   \
+        printf(msg" alloc: %d\n", __m - heap_caps_get_free_size(MALLOC_CAP_DMA)) ; \
+    }
+#define necho_alloc(msg, codes, ...)  codes
+
 
 
 #endif

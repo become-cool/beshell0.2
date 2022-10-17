@@ -134,10 +134,10 @@ static JSContext * init_custom_context(JSRuntime *rt) {
     be_module_socks_require(ctx) ;
     be_module_driver_require(ctx) ;
     be_module_gameplayer_require(ctx) ;
-    be_module_media_require(ctx) ;
 #else
     be_simulate_require(ctx) ;
 #endif
+    be_module_media_require(ctx) ;
     be_module_mg_require(ctx) ;
     be_telnet_require(ctx) ;
     be_module_lvgl_require(ctx) ;

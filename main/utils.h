@@ -44,7 +44,7 @@ void echo_error(JSContext *) ;
 	if( api(ctx, &var, argv[i])!=0 ) {                      \
         THROW_EXCEPTION("Invalid param type")               \
 	}
-
+    
 #define  ARGV_TO_UINT8(i,var)   ARGV_TO_INT(i, var, uint8_t,  JS_ToUint32)
 #define   ARGV_TO_INT8(i,var)   ARGV_TO_INT(i, var, int8_t,   JS_ToInt32)
 #define ARGV_TO_UINT16(i,var)   ARGV_TO_INT(i, var, uint16_t, JS_ToUint32)
@@ -53,6 +53,23 @@ void echo_error(JSContext *) ;
 #define ARGV_TO_INT32(i,var)    ARGV_TO_INT(i, var, int32_t,  JS_ToInt32)
 #define ARGV_TO_INT64(i,var)    ARGV_TO_INT(i, var, int64_t,  JS_ToInt64)
 #define ARGV_TO_DOUBLE(i,var)   ARGV_TO_INT(i, var, double, JS_ToFloat64)
+
+
+#define ARGV_TO_INT_OPT(i, var, ctype, api, dft)            \
+	ctype var = dft ;                                       \
+	if( api(ctx, &var, argv[i])!=0 ) {                      \
+        THROW_EXCEPTION("Invalid param type")               \
+	}
+    
+#define  ARGV_TO_UINT8_OPT(i,var,dft)   ARGV_TO_INT_OPT(i, var, uint8_t,  JS_ToUint32, dft)
+#define   ARGV_TO_INT8_OPT(i,var,dft)   ARGV_TO_INT_OPT(i, var, int8_t,   JS_ToInt32, dft)
+#define ARGV_TO_UINT16_OPT(i,var,dft)   ARGV_TO_INT_OPT(i, var, uint16_t, JS_ToUint32, dft)
+#define ARGV_TO_INT16_OPT(i,var,dft)    ARGV_TO_INT_OPT(i, var, int16_t,  JS_ToInt32, dft)
+#define ARGV_TO_UINT32_OPT(i,var,dft)   ARGV_TO_INT_OPT(i, var, uint32_t, JS_ToUint32, dft)
+#define ARGV_TO_INT32_OPT(i,var,dft)    ARGV_TO_INT_OPT(i, var, int32_t,  JS_ToInt32, dft)
+#define ARGV_TO_INT64_OPT(i,var,dft)    ARGV_TO_INT_OPT(i, var, int64_t,  JS_ToInt64, dft)
+#define ARGV_TO_DOUBLE_OPT(i,var,dft)   ARGV_TO_INT_OPT(i, var, double, JS_ToFloat64, dft)
+
 
 #define ARGV_TO_STRING_LEN(i, var, len)                     \
     size_t len = 0 ;                                        \
@@ -156,8 +173,11 @@ void eval_code_len(JSContext *ctx, const char * str,size_t len,const char * file
 #define dref(var) printf( #var " ref:%d @%d\n", VAR_REFCNT(var), __LINE__) ;
 
 uint64_t gettime() ;
+uint64_t gettime_us() ;
 
 char * mallocf(char * format, ...) ;
+
+void * mallocDMA(size) ;
 
 void freeArrayBuffer(JSRuntime *rt, void *opaque, void *ptr) ;
 

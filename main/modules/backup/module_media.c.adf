@@ -71,9 +71,9 @@ typedef struct {
     JSContext * ctx ;
     // QueueHandle_t queue ;
 
-} adf_player_t ;
+} adf_audio_pipe_t ;
 
-adf_player_t mp3_player = {
+adf_audio_pipe_t mp3_player = {
     .inited = false ,
 } ;
 
@@ -174,7 +174,7 @@ static void mp3_player_stop() {
     audio_pipeline_terminate(mp3_player.pipe);
 }
 
-static void emit_event(const char * event) {
+static void audio_stream_emit_js(const char * event) {
     JSValue audio = js_get_glob_prop(mp3_player.ctx, 2, "beapi", "audio") ;
     JSValue emit = js_get_glob_prop(mp3_player.ctx, 4, "beapi", "EventEmitter", "prototype", "emit") ;
 
@@ -206,7 +206,7 @@ static void task_pipe_handler(void * data) {
             printf("Event interface error : %d\n", ret);
             vTaskDelay(100) ;
 
-            emit_event("stop") ;
+            audio_stream_emit_js("stop") ;
             mp3_player.playing = false ;
 
             continue ;
@@ -224,7 +224,7 @@ static void task_pipe_handler(void * data) {
                 audio_element_setinfo(mp3_player.i2s, &music_info);
                 i2s_stream_set_clk(mp3_player.i2s, music_info.sample_rates, music_info.bits, music_info.channels);
 
-                emit_event("start") ;
+                audio_stream_emit_js("start") ;
 
                 continue ;
             }
@@ -240,18 +240,18 @@ static void task_pipe_handler(void * data) {
             else if (msg.source == (void *) mp3_player.i2s && msg.cmd == AEL_MSG_CMD_REPORT_STATUS) {
                 switch((int)msg.data) {
                     case AEL_STATUS_STATE_STOPPED:
-                        emit_event("stop") ;
+                        audio_stream_emit_js("stop") ;
                         mp3_player.playing = false ;
                         break;
                     case AEL_STATUS_STATE_FINISHED:
-                        emit_event("finish") ;
+                        audio_stream_emit_js("finish") ;
                         mp3_player.playing = false ;
                         break;
                     case AEL_STATUS_STATE_RUNNING:
-                        emit_event("running") ;
+                        audio_stream_emit_js("running") ;
                         break;
                     case AEL_STATUS_STATE_PAUSED:
-                        emit_event("pause") ;
+                        audio_stream_emit_js("pause") ;
                         break;
                 }
             }
@@ -366,7 +366,7 @@ static JSValue js_audio_stop(JSContext *ctx, JSValueConst this_val, int argc, JS
         return JS_FALSE ;
     }
     mp3_player_stop() ;
-    // emit_event("stop") ;
+    // audio_stream_emit_js("stop") ;
     return JS_TRUE ;
 }
 

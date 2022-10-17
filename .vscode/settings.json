@@ -24,7 +24,8 @@
         "ES8156.C": "cpp",
         "windows.h": "c",
         "*.helix": "c",
-        "*.next": "c"
+        "*.next": "c",
+        "el_src": "c"
     },
     "cmake.configureOnOpen": false
 }

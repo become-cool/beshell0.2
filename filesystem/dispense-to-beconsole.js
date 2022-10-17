@@ -66,7 +66,7 @@ function mkdir(path) {
     try{ 
         fs.mkdirSync(path)
     }catch(e){
-        console.log(e)
+        // console.log(e)
     }
 }
 function cp(from, to) {

@@ -187,11 +187,11 @@ typedef struct {
     JSContext * ctx ;
     JSValue jsobj ;
     
-} player_t ;
+} audio_pipe_t ;
 
 
 
-void player_set_playing(player_t * player, bool playing) {
+void player_set_playing(audio_pipe_t * player, bool playing) {
     if(player->playing == playing) {
         return ;
     }
@@ -205,7 +205,7 @@ void player_set_playing(player_t * player, bool playing) {
 }
 
 // 放音线程
-static void task_pcm_player(player_t * player) {
+static void task_pcm_player(audio_pipe_t * player) {
 
     printf("task_pcm_player()\n") ;
 
@@ -254,7 +254,7 @@ static void task_pcm_player(player_t * player) {
 }
 
                 
-// static inline bool mp3_decode_start(player_t * player) {
+// static inline bool mp3_decode_start(audio_pipe_t * player) {
 
 //     printf("mp3_decode_start()\n") ;
 
@@ -296,7 +296,7 @@ static void task_pcm_player(player_t * player) {
 
 // // 读文件并解码一帧
 // // 返回：错误代码 <0; 文件结束 0; 成功 1
-// static inline int mp3_decode_frame(player_t * player) {
+// static inline int mp3_decode_frame(audio_pipe_t * player) {
 
 //     if(player->file==NULL){
 //         printf("file not open\n");
@@ -360,7 +360,7 @@ static void task_pcm_player(player_t * player) {
 
 
 // 解码任务线程
-static void task_mp3_decoder(player_t * player) {
+static void task_mp3_decoder(audio_pipe_t * player) {
 
     printf("task_mp3_decoder()\n") ;
 
@@ -378,7 +378,7 @@ static void task_mp3_decoder(player_t * player) {
 }
 
 #define THIS_PLAYER(thisobj)                                                \
-    player_t * thisobj = JS_GetOpaque(this_val, js_audio_player_class_id) ; \
+    audio_pipe_t * thisobj = JS_GetOpaque(this_val, js_audio_player_class_id) ; \
     if(!thisobj) {                                                          \
         THROW_EXCEPTION("must be called as a Player method")           \
     }
@@ -388,12 +388,12 @@ static JSClassID js_audio_player_class_id ;
 static JSValue js_audio_player_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
     JSValue jsobj = JS_NewObjectClass(ctx, js_audio_player_class_id) ;
 
-    dn(sizeof(player_t))
-    player_t * player = heap_caps_malloc(sizeof(player_t), MALLOC_CAP_DMA) ;
+    dn(sizeof(audio_pipe_t))
+    audio_pipe_t * player = heap_caps_malloc(sizeof(audio_pipe_t), MALLOC_CAP_DMA) ;
     if(!player) {
         THROW_EXCEPTION("out of memory?")
     }
-    memset(player, 0, sizeof(player_t)) ;
+    memset(player, 0, sizeof(audio_pipe_t)) ;
     JS_SetOpaque(jsobj, player) ;
 
     // 初始化
@@ -431,7 +431,7 @@ static JSValue js_audio_player_constructor(JSContext *ctx, JSValueConst new_targ
 static void js_audio_player_finalizer(JSRuntime *rt, JSValue this_val){
     printf("deinit all player resource") ;
     
-    player_t * player = JS_GetOpaque(this_val, js_audio_player_class_id) ;
+    audio_pipe_t * player = JS_GetOpaque(this_val, js_audio_player_class_id) ;
     if(!player) {
         printf("?! js_audio_player_finalizer()") ;
         return ;

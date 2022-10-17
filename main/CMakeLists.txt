@@ -1,6 +1,55 @@
+# c 头文件目录
+set(include_dirs .)
+list(APPEND include_dirs telnet)
+list(APPEND include_dirs libb64)
+list(APPEND include_dirs gameplayer)
+list(APPEND include_dirs gameplayer/nofrendo)
+list(APPEND include_dirs gameplayer/nofrendo/cpu)
+list(APPEND include_dirs gameplayer/nofrendo/libsnss)
+list(APPEND include_dirs gameplayer/nofrendo/nes)
+list(APPEND include_dirs gameplayer/nofrendo/sndhrdw)
+list(APPEND include_dirs media)
+list(APPEND include_dirs media/TinySoundFont)
+list(APPEND include_dirs media/audio_stream)
+list(APPEND include_dirs encoding)
+list(APPEND include_dirs modules)
+list(APPEND include_dirs modules/http)
+list(APPEND include_dirs modules/serial)
+list(APPEND include_dirs modules/mg)
+list(APPEND include_dirs modules/driver)
+list(APPEND include_dirs modules/media)
+list(APPEND include_dirs modules/lvgl)
+list(APPEND include_dirs modules/lvgl/driver)
+list(APPEND include_dirs modules/lvgl/font)
+
+# c 源码目录
+set(src_dirs .)
+list(APPEND src_dirs telnet)
+list(APPEND src_dirs libb64)
+list(APPEND src_dirs gameplayer)
+list(APPEND src_dirs gameplayer/nofrendo)
+list(APPEND src_dirs gameplayer/nofrendo/cpu)
+list(APPEND src_dirs gameplayer/nofrendo/libsnss)
+list(APPEND src_dirs gameplayer/nofrendo/nes)
+list(APPEND src_dirs gameplayer/nofrendo/sndhrdw)
+list(APPEND src_dirs gameplayer/nofrendo/mappers)
+list(APPEND src_dirs media)
+list(APPEND src_dirs media/TinySoundFont)
+list(APPEND src_dirs media/audio_stream)
+list(APPEND src_dirs encoding)
+list(APPEND src_dirs modules)
+list(APPEND src_dirs modules/http)
+list(APPEND src_dirs modules/mg)
+list(APPEND src_dirs modules/driver)
+list(APPEND src_dirs modules/media)
+list(APPEND src_dirs modules/serial)
+list(APPEND src_dirs modules/lvgl)
+list(APPEND src_dirs modules/lvgl/driver)
+list(APPEND src_dirs modules/lvgl/font)
+
 idf_component_register(
-    SRC_DIRS . telnet modules modules/http modules/mg modules/driver modules/serial modules/lvgl modules/lvgl/driver modules/lvgl/font libb64 gameplayer/nofrendo/cpu gameplayer/nofrendo/libsnss gameplayer/nofrendo/nes gameplayer/nofrendo/sndhrdw gameplayer/nofrendo/mappers gameplayer/nofrendo gameplayer media lv_demo_music lv_demo_music/assets encoding
-    INCLUDE_DIRS . telnet gameplayer modules modules/http modules/serial modules/mg modules/driver modules/lvgl modules/lvgl/driver modules/lvgl/font libb64 gameplayer/nofrendo/cpu gameplayer/nofrendo/libsnss gameplayer/nofrendo/nes gameplayer/nofrendo/sndhrdw gameplayer/nofrendo gameplayer media lv_demo_music encoding
+    SRC_DIRS ${src_dirs}
+    INCLUDE_DIRS ${include_dirs}
     # EMBED_FILES root.raw
 )
 

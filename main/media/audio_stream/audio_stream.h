@@ -55,19 +55,6 @@ typedef struct _audio_el_t{
 
 
 
-void audio_el_set_stat(audio_el_t * el, EventBits_t stat) ;
-
-void audio_el_init(
-        audio_el_t * el
-        , TaskFunction_t pvTaskCode
-        , const char *const pcName
-        , const uint32_t usStackDepth
-        , UBaseType_t uxPriority
-        , const BaseType_t xCoreID
-        , size_t ringSz
-    ) ;
-
-
 // 文件读取 element
 typedef struct {
 
@@ -127,8 +114,9 @@ typedef struct {
     
     tml_message * msg_header ;  // 事件列表的头部
     tml_message * msg ;         // 当前事件
+    int played_notes ;          // 已播放音符位置, 用于表示进度
 
-    uint64_t start_ms ; // 开始播放的时间
+    uint64_t start_ms ;         // 开始播放的系统时间
 
     uint8_t speed ;         // 速率分子
     uint8_t speed_d ;       // 速率分母
@@ -171,7 +159,7 @@ typedef struct _audio_pipe {
     
 } audio_pipe_t ;
 
-
+// 用于设置midi player
 typedef struct {
     char * sf2_path ;
     spi_device_handle_t handle ;
@@ -197,7 +185,19 @@ typedef struct _audio_player_midi {
 
 
 // base audio element
+void audio_el_set_stat(audio_el_t * el, EventBits_t stat) ;
+void audio_el_init(
+        audio_el_t * el
+        , TaskFunction_t pvTaskCode
+        , const char *const pcName
+        , const uint32_t usStackDepth
+        , UBaseType_t uxPriority
+        , const BaseType_t xCoreID
+        , size_t ringSz
+    ) ;
 void audio_el_delete(audio_el_t * el) ;
+bool audio_el_is_running(audio_el_t * el) ;
+bool audio_el_stop(audio_el_t * el) ;
 bool audio_el_is_drain(audio_el_t * el) ;
 void audio_el_print_stats(audio_el_t * el) ;
 void audio_el_clear_ring(audio_el_t * el) ;
@@ -221,7 +221,11 @@ void audio_el_i2s_delete(audio_el_i2s_t * el) ;
 
 // midi message
 audio_el_midi_msg_t * audio_el_midi_msg_create(audio_pipe_t * pipe, tsf* sf, audio_player_midi_conf_t * config) ;
-bool audio_el_midi_msg_start(audio_el_midi_msg_t * el, const char * midPath) ;
+bool audio_el_midi_msg_load(audio_el_midi_msg_t * el, const char * midPath) ;
+int audio_el_midi_msg_note_cnt(audio_el_midi_msg_t * el) ;
+bool audio_el_midi_msg_play(audio_el_midi_msg_t * el) ;
+bool audio_el_midi_msg_seek(audio_el_midi_msg_t * el, unsigned int pos) ;
+void audio_el_midi_msg_pause(audio_el_midi_msg_t * el) ;
 void audio_el_midi_msg_delete(audio_el_midi_msg_t * el) ;
 
 // spi midi keyboard

@@ -42,7 +42,9 @@ void audio_el_delete(audio_el_t * el) {
     free(el) ;
 }
 
-
+bool audio_el_is_running(audio_el_t * el) {
+    return (xEventGroupGetBits(el->stats)&STAT_RUNNING) == STAT_RUNNING ;
+}
 
 bool audio_el_is_drain(audio_el_t * el) {
     if(!el->ring) {
@@ -103,6 +105,22 @@ inline void audio_stream_emit_js(JSContext * ctx, JSValue thisobj, const char * 
 
     JS_FreeValue(ctx, eventName) ;
     JS_FreeValue(ctx, emit) ;
+
+}
+
+// 设置为 STAT_STOPING ,等待任务线程停止
+bool audio_el_stop(audio_el_t * el) {
+    EventBits_t stats = xEventGroupGetBits(el->stats) ;
+
+    if( (stats&STAT_STOPPED) == STAT_STOPPED ) {
+        return true ;
+    }
+    if( (stats&STAT_RUNNING) == STAT_RUNNING ) {
+        xEventGroupSetBits(el->stats, STAT_STOPPING) ;
+    }
+
+    stats = xEventGroupWaitBits(el->stats, STAT_STOPPED, false, false, 100) ;
+    return (stats&STAT_STOPPED) == STAT_STOPPED ;
 
 }
 

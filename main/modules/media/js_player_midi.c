@@ -124,26 +124,55 @@ static JSValue js_midi_player_note_release(JSContext *ctx, JSValueConst this_val
     return JS_UNDEFINED ;
 }
 
-static JSValue js_midi_player_play_midi(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+static JSValue js_midi_player_load(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(1)
     THIS_PLAYER(player)
 
     char * midpath = js_arg_to_vfspath(ctx, argv[0]) ;
-    bool res = audio_el_midi_msg_start(player->midi_msg, midpath) ;
+    bool res = audio_el_midi_msg_load(player->midi_msg, midpath) ;
 
     free(midpath) ;
 
     return res? JS_TRUE : JS_FALSE ;
 }
 
+static JSValue js_midi_player_play(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    THIS_PLAYER(player)
+    return audio_el_midi_msg_play(player->midi_msg)? JS_TRUE : JS_FALSE ;
+}
+
+static JSValue js_midi_player_pause(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    THIS_PLAYER(player)
+    audio_el_midi_msg_pause(player->midi_msg) ;
+    return JS_UNDEFINED ;
+}
+
+
+static JSValue js_midi_player_current_pos(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    THIS_PLAYER(player)
+    return JS_NewInt32(ctx, player->midi_msg->played_notes) ;
+}
+
+static JSValue js_midi_player_seek(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+    THIS_PLAYER(player)
+
+    ARGV_TO_UINT32(0,pos)
+    
+    return audio_el_midi_msg_seek(player->midi_msg, pos)? JS_TRUE : JS_FALSE ;
+}
+
+static JSValue js_midi_player_note_count(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    THIS_PLAYER(player)
+    return JS_NewInt32(ctx, audio_el_midi_msg_note_cnt(player->midi_msg)) ;
+}
+
+
 static JSValue js_midi_player_set_playback(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(1)
     THIS_PLAYER(player)
     
     player->midi_msg->playback = JS_ToBool(ctx, argv[0])? true: false ;
-
-    dn(player->midi_msg->playback)
-    dp(player->midi_msg->sf)
 
     return JS_UNDEFINED ;
 }
@@ -199,11 +228,40 @@ static JSValue js_midi_player_hint_with_bytes(JSContext *ctx, JSValueConst this_
     return JS_UNDEFINED ;
 }
 
+static JSValue js_midi_note_count(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+    char * midpath = js_arg_to_vfspath(ctx, argv[0]) ;
+
+    tml_message* msg = tml_load_filename(midpath);
+    if(!msg) {
+        JS_ThrowReferenceError(ctx, "can not load midi file %s", midpath) ;
+        free(midpath) ;
+        return JS_EXCEPTION ;
+    }
+    free(midpath) ;
+
+    int cnt = 0 ;
+    for(;msg!=NULL;msg=msg->next) {
+        if(msg->type!=TML_NOTE_OFF && msg->velocity!=0) {
+            cnt ++ ;
+        }
+    }
+
+    tml_free(msg) ;
+
+    return JS_NewInt32(ctx, cnt) ;
+}
+
 static const JSCFunctionListEntry js_midi_player_proto_funcs[] = {
     JS_CFUNC_DEF("detach", 0, js_midi_player_detach),
     JS_CFUNC_DEF("notePress", 0, js_midi_player_note_press),
     JS_CFUNC_DEF("noteRelease", 0, js_midi_player_note_release),
-    JS_CFUNC_DEF("playMIDI", 0, js_midi_player_play_midi),
+    JS_CFUNC_DEF("load", 0, js_midi_player_load),
+    JS_CFUNC_DEF("play", 0, js_midi_player_play),
+    JS_CFUNC_DEF("pause", 0, js_midi_player_pause),
+    JS_CFUNC_DEF("seek", 0, js_midi_player_seek),
+    JS_CFUNC_DEF("currentPos", 0, js_midi_player_current_pos),
+    JS_CFUNC_DEF("noteCount", 0, js_midi_player_note_count),
     JS_CFUNC_DEF("setSpeed", 0, js_midi_player_set_speed),
     JS_CFUNC_DEF("setPlayback", 0, js_midi_player_set_playback),
     JS_CFUNC_DEF("hint", 0, js_midi_player_hint),
@@ -220,6 +278,8 @@ void be_module_midi_require(JSContext *ctx, JSValue pkg) {
 
     JSValue EventEmitterProto = js_get_glob_prop(ctx, 3, "beapi", "EventEmitter", "prototype") ;
     QJS_DEF_CLASS(midi_player, "MIDIPlayer", "lv.MIDIPlayer", EventEmitterProto, pkg)
+
+    JS_SetPropertyStr(ctx, pkg, "midiNoteCount", JS_NewCFunction(ctx, js_midi_note_count, "midiNoteCount", 1));
 
     JS_FreeValue(ctx, EventEmitterProto);
 

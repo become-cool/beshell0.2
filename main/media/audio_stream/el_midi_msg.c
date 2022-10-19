@@ -1,4 +1,7 @@
 #include "audio_stream.h"
+#include "esp_timer.h"
+
+#define IsPress(msg) (msg->type==TML_NOTE_ON && msg->velocity!=0)
 
 
 // midi 事件任务线程
@@ -11,13 +14,19 @@ static void task_func_midi_msg(audio_el_midi_msg_t * el) {
 
     while(1) {
 
-        stat = xEventGroupWaitBits(el->base.stats, STAT_RUNNING, false, true, portMAX_DELAY);
+        stat = xEventGroupWaitBits(el->base.stats, STAT_RUNNING|STAT_STOPPING, false, false, portMAX_DELAY);
+        // 请求停止线程
+        if( (stat&STAT_STOPPING) == STAT_STOPPING ) {
+            audio_el_set_stat(el, STAT_STOPPED) ;
+            vTaskDelay(10) ;
+            continue;
+        }
         if( (stat&STAT_RUNNING)!=STAT_RUNNING || !el->msg ) {
             vTaskDelay(10) ;
             continue;
         }
 
-        time_ms = ( gettime() - el->start_ms )  ;
+        time_ms = ( esp_timer_get_time()/1000 - el->start_ms )  ;
 
         if(el->msg->time > time_ms) {
             // printf("%lld, delay:%lld\n", time_ms, el->msg->time-time_ms) ;
@@ -27,14 +36,14 @@ static void task_func_midi_msg(audio_el_midi_msg_t * el) {
         switch (el->msg->type) {
             case TML_PROGRAM_CHANGE: //channel program (preset) change (special handling for 10th MIDI channel with drums)
                 tsf_channel_set_presetnumber(el->sf, el->msg->channel, el->msg->program, (el->msg->channel == 9));
-                printf("TML_PROGRAM_CHANGE\n") ;
+                // printf("TML_PROGRAM_CHANGE\n") ;
                 break;
 
             case TML_NOTE_ON: //play a note
             case TML_NOTE_OFF: //stop a note
 
                 // 琴键按下或释放
-                press = el->msg->type!=TML_NOTE_OFF && el->msg->velocity!=0 ;
+                press = IsPress(el->msg) ;
 
                 // 键盘提示
                 if(el->prompter) {
@@ -42,14 +51,14 @@ static void task_func_midi_msg(audio_el_midi_msg_t * el) {
                 }
 
                 if(press) {
-                    printf("[%d ON] key:%d \n",el->msg->channel, el->msg->key) ;
+                    // printf("[%d ON] key:%d \n",el->msg->channel, el->msg->key) ;
                     if(el->playback && el->sf) {
                         tsf_channel_note_on(el->sf, el->msg->channel, el->msg->key, el->msg->velocity / 127.0f);
                         // tsf_note_on(el->sf, el->sf_preset, el->msg->key, 1.0f);
                     }
                 }
                 else {
-                    printf("[%d OFF] key:%d\n",el->msg->channel,el->msg->key) ;
+                    // printf("[%d OFF] key:%d\n",el->msg->channel,el->msg->key) ;
                     if(el->playback && el->sf) {
 					    tsf_channel_note_off(el->sf, el->msg->channel, el->msg->key);
                         // tsf_note_off(el->sf, el->sf_preset, el->msg->key);
@@ -63,19 +72,20 @@ static void task_func_midi_msg(audio_el_midi_msg_t * el) {
                 break;
             case TML_CONTROL_CHANGE: //MIDI controller messages
                 tsf_channel_midi_control(el->sf, el->msg->channel, el->msg->control, el->msg->control_value);
-                printf("TML_CONTROL_CHANGE\n") ;
+                // printf("TML_CONTROL_CHANGE\n") ;
                 break;
             default: 
                 printf("unknow type:%d\n",el->msg->type) ;
         }
 
         el->msg = el->msg->next ;
+        el->played_notes ++ ;
 
         // midi 文件结束
         if(!el->msg) {
             audio_el_set_stat(el, STAT_STOPPED) ;
 
-            printf("time: %lld = %lld = %lld sec\n", (gettime()-el->start_ms)/1000, gettime()/1000, el->start_ms/1000) ;
+            printf("time: %lld = %lld - %lld sec\n", (esp_timer_get_time()/1000-el->start_ms)/1000, esp_timer_get_time()/1000/1000, el->start_ms/1000) ;
         }
     }
 }
@@ -117,7 +127,9 @@ void audio_el_midi_msg_delete(audio_el_midi_msg_t * el) {
 }
 
 // 开始播放 midi 文件里的事件
-bool audio_el_midi_msg_start(audio_el_midi_msg_t * el, const char * midPath) {
+bool audio_el_midi_msg_load(audio_el_midi_msg_t * el, const char * midPath) {
+
+    audio_el_stop(el) ;
 
     if(el->msg_header) {
         tml_free(el->msg_header) ;
@@ -130,16 +142,109 @@ bool audio_el_midi_msg_start(audio_el_midi_msg_t * el, const char * midPath) {
         return false ;
     }
 
-    el->msg = el->msg_header ;
+    el->msg = NULL ;
+    el->played_notes = -1 ;
 
-    audio_el_set_stat(el, STAT_RUNNING) ;
+    return true ;
+}
 
-    // 键盘提示
+
+// 开始播放 midi 文件里的事件
+bool audio_el_midi_msg_play(audio_el_midi_msg_t * el) {
+
+    if(!el->msg_header) {
+        return false ;
+    }
+
+    if(!el->msg) {
+        el->msg = el->msg_header ;
+        el->played_notes = 0 ;
+    }
+
+    // 已经结束
+    if(!el->msg) {
+        return audio_el_stop(el) ;
+    }
+    
+    if( audio_el_is_running(el) ) {
+        return true ;
+    }
+    
+    // 释放所有按下的琴键
+    tsf_note_off_all(el->sf) ;
+    
+    // 清空键盘提示
     if(el->prompter) {
         audio_el_spi_keyboard_hint_clear(el->prompter) ;
     }
+    
+    el->start_ms = esp_timer_get_time()/1000 - el->msg->time ;
 
-    el->start_ms = gettime() ;
+    audio_el_set_stat(el, STAT_RUNNING) ;
 
     return true ;
+}
+
+
+int audio_el_midi_msg_note_cnt(audio_el_midi_msg_t * el) {
+
+    int cnt = 0 ;
+    
+    if(!el->msg_header) {
+        return 0 ;
+    }
+    
+    for(tml_message * msg = el->msg_header;msg!=NULL;msg=msg->next) {
+        if(IsPress(msg)) {
+            cnt ++ ;
+        }
+    }
+
+    return cnt ;
+}
+
+// 开始播放 midi 文件里的事件
+bool audio_el_midi_msg_seek(audio_el_midi_msg_t * el, unsigned int pos) {
+    if(!el->msg_header) {
+        return false ;
+    }
+
+    int notes = 0 ;
+
+    for( tml_message * msg = el->msg_header; msg!=NULL; msg=msg->next ) {
+        if(IsPress(msg)) {
+            if(notes==pos) {
+
+                bool running = audio_el_is_running(el) ;
+                if(running) {
+                    if(!audio_el_stop(el)) {
+                        printf("can not stop midi msg\n") ;
+                        return false ;
+                    }
+                }
+
+                // 释放所有按下的琴键
+                tsf_note_off_all(el->sf) ;
+
+                el->msg = msg ;
+                el->played_notes = notes ;
+                
+                el->start_ms = esp_timer_get_time()/1000 - el->msg->time ;
+
+                if(running) {
+                    audio_el_set_stat(el, STAT_RUNNING) ;
+                }
+
+                return true ;
+            }
+
+            notes ++ ;
+        }
+    }
+
+    return false ;
+}
+
+void audio_el_midi_msg_pause(audio_el_midi_msg_t * el) {
+    audio_el_stop(el) ;
 }

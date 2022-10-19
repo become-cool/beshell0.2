@@ -122,3 +122,10 @@ beconsoled.resetModel = function(){
     beapi.fs.unlinkSync("/home/become/config/setup.json")
     beapi.fs.unlinkSync("/home/become/config/boot.json")
 }
+beconsoled.setupedPresetName = function() {
+    let setup = JSON.load("/home/become/config/setup.json")
+    if(!setup) {
+        return null
+    }
+    return setup.preset || null
+}

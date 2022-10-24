@@ -30,7 +30,6 @@ static JSValue js_midi_player_constructor(JSContext *ctx, JSValueConst new_targe
     ARGV_TO_UINT8(1, pl)
     ARGV_TO_UINT8(2, i2s)
 
-
     JSValue jsarr = argv[3] ;
     if(!JS_IsArray(ctx, jsarr)) {
         THROW_EXCEPTION("arg keys must be a array")
@@ -71,6 +70,8 @@ static JSValue js_midi_player_constructor(JSContext *ctx, JSValueConst new_targe
     }
 
     JSValue jsobj = JS_NewObjectClass(ctx, js_midi_player_class_id) ;
+
+    JS_SetPropertyStr(ctx, jsobj, "_handlers", JS_NewObject(ctx));
 
     JS_SetOpaque(jsobj, player) ;
     player->base.ctx = ctx ;

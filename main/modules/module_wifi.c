@@ -129,6 +129,7 @@ static void esp32_wifi_eventHandler(void* arg, esp_event_base_t event_base, int3
             printf("WIFI_EVENT_WIFI_READY\n") ;
         }
         else if(event_id == WIFI_EVENT_SCAN_DONE) {
+            // printf("WIFI_EVENT_SCAN_DONE\n") ;
             _scanning = false ;
         }
         else if(event_id == WIFI_EVENT_STA_START) {

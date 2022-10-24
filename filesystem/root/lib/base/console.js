@@ -23,6 +23,10 @@ console.stringify = function(value,format) {
     return str
 }
 
+console.emit = function() {
+    console.message(JSON.stringify(Object.values(arguments)))
+}
+
 console.log = function() {
     let vals = []
     for(let v of arguments){

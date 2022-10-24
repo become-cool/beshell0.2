@@ -141,6 +141,10 @@ function cat(path) {
 function pwd() {
     console.log(process.env.PWD)
 }
+function mkdir(path) {
+    path = resolvepath(path)
+    beapi.fs.mkdirSync(path)
+}
 function compile(path) {
     if(!path) {
         console.log("compile <script>|<dir>")
@@ -198,7 +202,7 @@ function reboot() {
 }
 
 const ShellCmds = {
-    cd, pwd, ls, cp, rm, mv, touch, cat, stat
+    cd, pwd, ls, cp, rm, mv, touch, cat, stat, mkdir
     , require:cmd_require
     , free, reset, reboot
     , compile

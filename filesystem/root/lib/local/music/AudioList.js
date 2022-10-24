@@ -112,6 +112,7 @@ module.exports = class AudioList extends lv.Column {
         this.lst.length = 0
 
         try{
+            this.loadDir("/home/become/music", this.lst, 3)
             this.loadDir("/mnt/sd", this.lst, 3)
         }catch(e){
             console.error(e)

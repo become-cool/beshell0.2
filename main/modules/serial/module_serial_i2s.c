@@ -7,6 +7,7 @@
 static uint8_t _i2s_bus_setup = 0 ;
 
 static JSValue js_i2s_setup(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    // return JS_UNDEFINED ;
     CHECK_ARGC(1)
 
     ARGV_TO_UINT8(0, i2s)
@@ -14,21 +15,13 @@ static JSValue js_i2s_setup(JSContext *ctx, JSValueConst this_val, int argc, JSV
         THROW_EXCEPTION("arg %s must be 0 or 1", "i2s")
     }
 
-    // int bit = I2S_BITS_PER_SAMPLE_32BIT ;
-    // int sample_rate = 8000 ;
-    // if(){
-
-    // }
-    // ARGV_TO_UINT8(1, sample_rate)
-
 
     i2s_config_t i2s_config = {
         .mode = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_TX | I2S_MODE_RX),
-        .sample_rate = 44200,
+        .sample_rate = 44100,
         .bits_per_sample = I2S_BITS_PER_SAMPLE_16BIT,
         .channel_format = I2S_CHANNEL_FMT_RIGHT_LEFT,
         .communication_format = I2S_COMM_FORMAT_STAND_I2S,
-        // .communication_format = I2S_COMM_FORMAT_I2S,
         .intr_alloc_flags = ESP_INTR_FLAG_LEVEL2 | ESP_INTR_FLAG_IRAM,
         .dma_buf_count = 2,
         .dma_buf_len = 512,
@@ -59,12 +52,18 @@ static JSValue js_i2s_setup(JSContext *ctx, JSValueConst this_val, int argc, JSV
         ASSIGN_INT_PROP_DEFAULT(argv[1], "intr_alloc_flags", i2s_config.intr_alloc_flags, ESP_INTR_FLAG_LEVEL2 | ESP_INTR_FLAG_IRAM)
         ASSIGN_INT_PROP_DEFAULT(argv[1], "dma_buf_count", i2s_config.dma_buf_count, 2)
         ASSIGN_INT_PROP_DEFAULT(argv[1], "dma_buf_len", i2s_config.dma_buf_len, 256)
+        ASSIGN_INT_PROP_DEFAULT(argv[1], "use_apll", i2s_config.use_apll, 1)
         
         ASSIGN_UINT_PROP(argv[1], "lrclk", pin_config.ws_io_num)
         ASSIGN_UINT_PROP(argv[1], "sclk", pin_config.bck_io_num)
         ASSIGN_INT_PROP_DEFAULT(argv[1], "sout", pin_config.data_out_num, -1)
         ASSIGN_INT_PROP_DEFAULT(argv[1], "sin", pin_config.data_in_num, -1)
     }
+
+    i2s_config.channel_format = I2S_CHANNEL_FMT_ONLY_LEFT ;
+    dn(i2s_config.channel_format)
+    dn(i2s_config.sample_rate)
+    dn(i2s_config.bits_per_sample)
 
     if(i2s_driver_install(i2s, &i2s_config, 0, NULL)==ESP_OK){
         _i2s_bus_setup|= 1<<i2s ;

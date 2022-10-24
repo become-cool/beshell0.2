@@ -12,7 +12,7 @@ static void mp3dec_output(audio_el_mp3_t * el, uint8_t * data, size_t size) {
         // 等这一帧以前的数据播放完成
         // xEventGroupWaitBits(el->base.stats, STAT_DRAIN, false, true, 100);
 
-        printf("i2snum:%d, samprate:%d, bps:%d, chans:%d \n",
+        printf("i2s bus:%d, samprate:%d, bps:%d, chans:%d \n",
             el->i2s
             , el->decoder->samprate
             , 32
@@ -135,7 +135,7 @@ static void task_mp3_decoder(audio_el_mp3_t * el) {
                 printf("MP3Decode failed ,code is %d, receive: %d, left data: %d, sync: %d \n",errs, data_size, decode_left, offset);
 
                 // 遇到错误，停止解码
-                // audio_stream_emit_js(((audio_pipe_t *)el->base.pipe)->ctx, ((audio_pipe_t *)el->base.pipe)->jsobj, "error") ;
+                // audio_pipe_emit_js(el->base.pipe, "error") ;
 
                 ((audio_pipe_t *)el->base.pipe)->error = errs ;
                 ((audio_pipe_t *)el->base.pipe)->finished = false ;

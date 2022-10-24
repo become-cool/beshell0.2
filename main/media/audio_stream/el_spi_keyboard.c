@@ -69,9 +69,14 @@ static void task_func_spi_keyboard(audio_el_spi_keyboard_t * el) {
                     if(key) {
                         if(press) {
                             tsf_note_on(el->sf, el->sf_preset, key, 1.0f);
+                            
+                            audio_pipe_emit_js(el->base.pipe, "press", JS_NewInt32(((audio_pipe_t*)el->base.pipe)->ctx,  key)) ;
+
                         }
                         else {
                             tsf_note_off(el->sf, el->sf_preset, key);
+                            
+                            audio_pipe_emit_js(el->base.pipe, "release", JS_NewInt32(((audio_pipe_t*)el->base.pipe)->ctx,  key)) ;
                         }
                     }
 

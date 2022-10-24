@@ -29,23 +29,23 @@ module.exports = class ScrApps extends lv.Obj {
                     "pad-left": 9 ,
                 } ,
                 children: [
-                    {
-                        class:AppIcon ,
-                        "text": "设置" ,
-                        "src": "/lib/icon/32/setting.png" ,
-                        group: this.group ,
-                        ref: 'settings' ,
-                        clicked: ()=>{
-                            this.emit("setting-popup()")
-                        }
-                    } ,
-                    {
-                        class:AppIcon ,
-                        "text": "模型" ,
-                        "src": "/lib/icon/32/arm.png",
-                        group: this.group ,
-                        ref: 'files'
-                    } ,
+                    // {
+                    //     class:AppIcon ,
+                    //     "text": "设置" ,
+                    //     "src": "/lib/icon/32/setting.png" ,
+                    //     group: this.group ,
+                    //     ref: 'settings' ,
+                    //     clicked: ()=>{
+                    //         this.emit("setting-popup()")
+                    //     }
+                    // } ,
+                    // {
+                    //     class:AppIcon ,
+                    //     "text": "模型" ,
+                    //     "src": "/lib/icon/32/arm.png",
+                    //     group: this.group ,
+                    //     ref: 'files'
+                    // } ,
                     {
                         class:AppIcon ,
                         "text": "文件" ,
@@ -117,7 +117,8 @@ module.exports = class ScrApps extends lv.Obj {
             child.addStyle(this.styleFocused, 2) // LV_STATE_FOCUSED: 2
         }
 
-        lv.Group.focusObj(this.settings)
+
+        lv.Group.focusObj(this.grid.child(0))
     }
 
     dlgNewApp() {

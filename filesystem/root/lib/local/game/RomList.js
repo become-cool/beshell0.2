@@ -14,7 +14,9 @@ module.exports = class RomList extends beapi.lvgl.Column {
                             text:"退出" , font:"msyh",
                             ref: 'btnExit' ,
                             clicked:()=>{
-                                beapi.lvgl.loadScreen(be.desktop)
+                                process.reboot()
+                                // grp.releaseKeys(this.screen())
+                                // beapi.lvgl.loadScreen(be.desktop)
                             }
                         }
                     ]

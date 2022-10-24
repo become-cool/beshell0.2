@@ -157,6 +157,10 @@ static JSValue js_audio_play_pcm(JSContext *ctx, JSValueConst this_val, int argc
         THROW_EXCEPTION("player is running")
     }
     CHECK_ARGC(1)
+    
+    build_el_src(player) ;
+    build_el_i2s(player) ;
+
     ARGV_TO_STRING(0, path) ;
 
     if(strlen(path) + strlen(vfs_path_prefix) + 1 > sizeof(player->src->src_path)) {
@@ -166,9 +170,6 @@ static JSValue js_audio_play_pcm(JSContext *ctx, JSValueConst this_val, int argc
 
     sprintf(player->src->src_path, "%s%s", vfs_path_prefix, path) ;
     JS_FreeCString(ctx, path) ;
-
-    build_el_src(player) ;
-    build_el_i2s(player) ;
 
     i2s_set_clk(0,44100,32,2);
 
@@ -188,7 +189,7 @@ static JSValue js_audio_play_pcm(JSContext *ctx, JSValueConst this_val, int argc
     player->base.running = true ;
     player->base.finished = false ;
     player->base.error = 0 ;
-    audio_stream_emit_js(ctx, player->base.jsobj, "play", JS_UNDEFINED) ;
+    audio_pipe_emit_js(player, "play", JS_UNDEFINED) ;
 
     return JS_UNDEFINED ;
 }
@@ -200,6 +201,11 @@ static JSValue js_audio_play_mp3(JSContext *ctx, JSValueConst this_val, int argc
         THROW_EXCEPTION("player is running")
     }
     CHECK_ARGC(1)
+    
+    build_el_src(player) ;
+    build_el_mp3(player) ;
+    build_el_i2s(player) ;
+
     ARGV_TO_STRING(0, path) ;
 
     if(strlen(path) + strlen(vfs_path_prefix) + 1 > sizeof(player->src->src_path)) {
@@ -209,9 +215,6 @@ static JSValue js_audio_play_mp3(JSContext *ctx, JSValueConst this_val, int argc
     sprintf(player->src->src_path, "%s%s", vfs_path_prefix, path) ;
     JS_FreeCString(ctx, path) ;
 
-    build_el_src(player) ;
-    build_el_mp3(player) ;
-    build_el_i2s(player) ;
 
 #ifndef SIMULATION
     if(!audio_el_src_strip_mp3(player->src)) {
@@ -233,7 +236,7 @@ static JSValue js_audio_play_mp3(JSContext *ctx, JSValueConst this_val, int argc
     player->base.running = true ;
     player->base.finished = false ;
     player->base.error = 0 ;
-    audio_stream_emit_js(ctx, player->base.jsobj, "play", JS_UNDEFINED) ;
+    audio_pipe_emit_js(player, "play", JS_UNDEFINED) ;
 
     audio_pipe_set_stats(player, STAT_RUNNING) ;
 
@@ -270,14 +273,14 @@ static JSValue js_audio_pause(JSContext *ctx, JSValueConst this_val, int argc, J
     THIS_PLAYER(player)
     audio_pipe_clear_stats(player, STAT_RUNNING) ;
     player->base.paused = true ;
-    audio_stream_emit_js(ctx, player->base.jsobj, "pause", JS_UNDEFINED) ;
+    audio_pipe_emit_js(player, "pause", JS_UNDEFINED) ;
     return JS_UNDEFINED ;
 }
 static JSValue js_audio_resume(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     THIS_PLAYER(player)
     audio_pipe_set_stats(player, STAT_RUNNING) ;
     player->base.paused = false ;
-    audio_stream_emit_js(ctx, player->base.jsobj, "resume", JS_UNDEFINED) ;
+    audio_pipe_emit_js(player, "resume", JS_UNDEFINED) ;
     return JS_UNDEFINED ;
 }
 static JSValue js_audio_track_info(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {

@@ -28,6 +28,7 @@
 #define CMD_CALLBACK                6		// 执行本地js代码(远程发起)
 #define CMD_OUTPUT	                7		// 远程输出
 #define CMD_DATA	                8		// 数据包(用于 CMD_FILE_PULL_REQ 的回应)
+#define CMD_MSG	                    9		// 主动向客户端推送的事件
 
 #define CMD_FILE_PUSH_REQ			10		// 发送文件. DATA区格式：路径(0结尾字符串) + 文件内容
 #define CMD_FILE_APPEND_REQ			11		// 发送文件后续内容. DATA区格式和 CMD_FILE_APPEND 相同

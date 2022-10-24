@@ -279,6 +279,14 @@ wifi.autostart = async function() {
     }
 }
 
+beapi.wifi.scan = function() {
+    return new Promise(function(resolve) {
+        if(!beapi.wifi.isScanning()) {
+            beapi.wifi.scanStart()
+        }
+        beapi.wifi.once("scan.done",resolve)
+    })
+}
 
 beapi.wifi.registerEventHandle(function(eventType, eventId, data){
     let eventName = null

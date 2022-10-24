@@ -56,6 +56,10 @@ static void task_func_midi_msg(audio_el_midi_msg_t * el) {
                         tsf_channel_note_on(el->sf, el->msg->channel, el->msg->key, el->msg->velocity / 127.0f);
                         // tsf_note_on(el->sf, el->sf_preset, el->msg->key, 1.0f);
                     }
+
+                    el->played_notes ++ ;
+                    audio_pipe_emit_js(el->base.pipe, "press", JS_NewInt32(((audio_pipe_t*)el->base.pipe)->ctx,  el->msg->key)) ;
+
                 }
                 else {
                     // printf("[%d OFF] key:%d\n",el->msg->channel,el->msg->key) ;
@@ -63,6 +67,8 @@ static void task_func_midi_msg(audio_el_midi_msg_t * el) {
 					    tsf_channel_note_off(el->sf, el->msg->channel, el->msg->key);
                         // tsf_note_off(el->sf, el->sf_preset, el->msg->key);
                     }
+                    
+                    audio_pipe_emit_js(el->base.pipe, "release", JS_NewInt32(((audio_pipe_t*)el->base.pipe)->ctx,  el->msg->key)) ;
                 }
                 break;
 
@@ -79,11 +85,12 @@ static void task_func_midi_msg(audio_el_midi_msg_t * el) {
         }
 
         el->msg = el->msg->next ;
-        el->played_notes ++ ;
 
         // midi 文件结束
         if(!el->msg) {
             audio_el_set_stat(el, STAT_STOPPED) ;
+
+            audio_pipe_emit_js(el->base.pipe, "finish", JS_UNDEFINED) ;
 
             printf("time: %lld = %lld - %lld sec\n", (esp_timer_get_time()/1000-el->start_ms)/1000, esp_timer_get_time()/1000/1000, el->start_ms/1000) ;
         }

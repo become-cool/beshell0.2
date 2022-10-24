@@ -57,10 +57,13 @@ static QueueHandle_t queAudio;
 // static QueueHandle_t queCmd;
 
 
-#define  EMULATOR_SAMPLERATE   44200
+#define  EMULATOR_SAMPLERATE   22100
 // #define  EMULATOR_FRAGSIZE     400
-#define  EMULATOR_FRAGSIZE     1024
+#define  EMULATOR_FRAGSIZE     400
 
+
+// FILE * hsound = NULL ;
+// size_t sound_smps = 0 ;
 
 
 void player_nofrendo_set_video(st77xx_dev_t * dev, uint16_t * buff, uint16_t width, uint16_t lines, uint16_t xr, uint16_t xw) {
@@ -125,12 +128,55 @@ static void osd_init_sound_i2s(void) {
     else {
         i2s = -1 ;
     }
+    
+	// printf("init audio i2s dev\n") ;
 
-    if(i2s>=0) {
-        printf("audio i2c bus:%d\n",i2s) ;
-        printf("i2s_set_clk(%d,%d,%d,%d)\n",i2s, EMULATOR_SAMPLERATE, 16, I2S_CHANNEL_FMT_RIGHT_LEFT) ;
-        i2s_set_clk(i2s, EMULATOR_SAMPLERATE, 16, I2S_CHANNEL_FMT_RIGHT_LEFT);
-    }
+
+    i2s = 0 ;
+    // if(i2s>=0) {
+
+    //     // if( i2s_set_sample_rates(i2s, EMULATOR_SAMPLERATE)){
+    //     //     printf("Failed: %s()\n", "i2s_set_sample_rates") ;
+    //     // }
+
+
+    //     // printf("audio i2c bus:%d\n",i2s) ;
+    //     // printf("i2s_set_clk(%d,%d,%d,%d)\n",i2s, EMULATOR_SAMPLERATE, 16, I2S_CHANNEL_FMT_ALL_LEFT) ;
+    //     // i2s_set_clk(i2s, EMULATOR_SAMPLERATE, 16, I2S_CHANNEL_FMT_ALL_LEFT);
+    // }
+
+    
+    // i2s_driver_uninstall(i2s) ;
+        
+    // i2s_config_t i2s_config = {
+    //     .mode = I2S_MODE_MASTER | I2S_MODE_TX,
+    //     .sample_rate=EMULATOR_SAMPLERATE,
+    //     .bits_per_sample= 16 ,
+    //     .channel_format=I2S_CHANNEL_FMT_RIGHT_LEFT,
+    //     .communication_format=I2S_COMM_FORMAT_I2S_MSB,
+    //     .intr_alloc_flags = 0, // default interrupt priority
+    //     .dma_buf_count=4,
+    //     .dma_buf_len=512,
+    //     .use_apll = false
+    // };
+
+    // i2s_pin_config_t pin_config = {
+    //     .bck_io_num = 33,       // BCK
+    //     .ws_io_num = 32,        // LR
+    //     .data_out_num = 22,     // sdata
+    //     .data_in_num = I2S_PIN_NO_CHANGE
+    // };
+    // printf("i2s data:%d, bclk:%d, lrc:%d\n",AUDIO_PIN_DATA,AUDIO_PIN_BCLK,AUDIO_PIN_LRC) ;
+
+    // if( i2s_driver_install(i2s, &i2s_config, 0, NULL) != ESP_OK ){
+    //     printf("Failed: %s()\n", "i2s_driver_install") ;
+    // }
+    // if( i2s_set_pin(i2s, &pin_config) ){
+    //     printf("Failed: %s()\n", "i2s_set_pin") ;
+    // }
+
+    // hsound = fopen("/fs/home/become/xxx.pcm","w") ;
+    // sound_smps = 0 ;
 }
 
 void osd_getsoundinfo(sndinfo_t *info) {
@@ -292,48 +338,98 @@ void framerate() {
 	last_time = _now ;
 }
 
+static bool printed = false ;
+
+static void audio_play_frame() {
+
+        uint8_t frms = dynamic_frames ;
+
+        // if(dynamic_frames) {
+
+        // }
+        int left = EMULATOR_SAMPLERATE / ((dynamic_frames>10)? dynamic_frames: NES_REFRESH_RATE) ;
+        // int left = EMULATOR_SAMPLERATE / dynamic_frames ;
+        // dn(left)
+        size_t written ;
+
+        while(left) {
+            int n=EMULATOR_FRAGSIZE;
+            if (n>left)
+                n=left;
+            audio_callback(audio_frame, n); //get more data
+
+            // printf("audio %d/%d\n", n, left) ;
+            
+            // if(hsound) {
+            //     dn2(left,n)
+
+            //     if(audio_frame[0] && audio_frame[1] && audio_frame[2] && audio_frame[3] ) {
+
+            //         fwrite(audio_frame, 1, n*2, hsound) ;
+            //         sound_smps+= n ;
+
+            //         if(sound_smps > EMULATOR_SAMPLERATE*3) {
+            //             printf("pcm save over, samples: %d\n", sound_smps) ;
+            //             fclose(hsound) ;
+            //             hsound = NULL ;
+            //         }
+            //     }
+
+            // }
+
+            //16 bit mono -> 32-bit (16 bit right+left)
+            for (int i=n-1; i>=0; i--) {
+                audio_frame[i*2+1]=audio_frame[i];
+                audio_frame[i*2]=audio_frame[i];
+            }
+            
+            // int64_t t0 = gettime() ;
+            i2s_write(i2s, audio_frame, 4*n, &written, portMAX_DELAY);
+            // i2s_write_expand(i2s, audio_frame, 4*n, 16,32, &written, portMAX_DELAY);
+            // printf("i2s_write_expand() t:%lld, bytes: %d\n", gettime()-t0, written) ;
+
+            // dn4(frms, left, n, written)
+
+            left-=n;
+
+
+            if( !printed && (audio_frame[0] || audio_frame[1] || audio_frame[2] || audio_frame[3]) ) {
+                printf("sound: %d,%d,%d,%d,%d,%d,%d,%d\n"
+                    , audio_frame[0]
+                    , audio_frame[1]
+                    , audio_frame[2]
+                    , audio_frame[3]
+                    , audio_frame[4]
+                    , audio_frame[5]
+                    , audio_frame[6]
+                    , audio_frame[7]
+                    ) ;
+                printed = true ;
+            }
+
+        }
+}
+
+
+static uint8_t print_framerate_counter = 0 ;
 
 static void custom_blit(bitmap_t *bmp, int num_dirties, rect_t *dirty_rects) {
 
     vTaskDelay(0) ;
 
-    framerate() ;
+    // framerate() ;
+    // if(print_framerate_counter++%60==0) {
+    //     dn2(dynamic_frames, NES_REFRESH_RATE)
+    // }
 
 	xQueueSend(queVideo, &bmp, 0);
 
     audio_started = true ;
+    return ;
 
-    // return ;
-
-    // if(i2s>=0) {
-    
-    //     // dn2(dynamic_frames, NES_REFRESH_RATE)
-    //     int left = EMULATOR_SAMPLERATE / ((dynamic_frames>10)? dynamic_frames: NES_REFRESH_RATE) ;
-
-    //     while(left) {
-    //         int n=EMULATOR_FRAGSIZE;
-    //         if (n>left)
-    //             n=left;
-    //         audio_callback(audio_frame, n); //get more data
-
-    //         // printf("audio %d/%d\n", n, left) ;
-
-    //         //16 bit mono -> 32-bit (16 bit right+left)
-    //         for (int i=n-1; i>=0; i--) {
-    //             audio_frame[i*2+1]=audio_frame[i];
-    //             audio_frame[i*2]=audio_frame[i];
-    //         }
-    //         size_t bytes_written ;
-            
-    //         int64_t t0 = gettime() ;
-    //         i2s_write_expand(i2s, audio_frame, 4*n, 16,32, &bytes_written, portMAX_DELAY);
-    //         // i2s_write(i2s, audio_frame, 4*n, &bytes_written, 10);
-    //         printf("i2s_write_expand() t:%lld, bytes: %d\n", gettime()-t0, bytes_written) ;
-    //         // dn(bytes_written)
-
-    //         left-=n;
-    //     }
-    // }
+    if(i2s>=0) {
+        audio_play_frame() ;
+    }
 }
 
 void task_audio(void * data) {
@@ -345,22 +441,30 @@ void task_audio(void * data) {
     printf("audio start\n") ;
 
     while(1){
-        audio_callback(audio_frame, EMULATOR_FRAGSIZE) ;
 
-        //16 bit mono -> 32-bit (16 bit right+left)
-        for (int i=EMULATOR_FRAGSIZE-1; i>=0; i--) {
-            audio_frame[i*2+1]=audio_frame[i];
-            audio_frame[i*2]=audio_frame[i];
+        framerate() ;
+        if(print_framerate_counter++%60==0) {
+            dn2(dynamic_frames, NES_REFRESH_RATE)
         }
 
-        size_t bytes_written ;
-        // int64_t t0 = gettime() ;
-        // i2s_write_expand(i2s, audio_frame, 4*EMULATOR_FRAGSIZE, 16,32, &bytes_written, portMAX_DELAY);
-        i2s_write(i2s, audio_frame, 4*EMULATOR_FRAGSIZE, &bytes_written, 10);
-        // printf("i2s_write() t:%lld, bytes: %d\n", gettime()-t0, bytes_written) ;
-        // dn(bytes_written)
+        audio_play_frame() ;
 
-        vTaskDelay(0) ;
+        // audio_callback(audio_frame, EMULATOR_FRAGSIZE) ;
+
+        // //16 bit mono -> 32-bit (16 bit right+left)
+        // for (int i=EMULATOR_FRAGSIZE-1; i>=0; i--) {
+        //     audio_frame[i*2+1]=audio_frame[i];
+        //     audio_frame[i*2]=audio_frame[i];
+        // }
+
+        // size_t bytes_written ;
+        // // int64_t t0 = gettime() ;
+        // // i2s_write_expand(i2s, audio_frame, 4*EMULATOR_FRAGSIZE, 16,32, &bytes_written, portMAX_DELAY);
+        // i2s_write(i2s, audio_frame, 4*EMULATOR_FRAGSIZE, &bytes_written, portMAX_DELAY);
+        // // printf("i2s_write() t:%lld, bytes: %d\n", gettime()-t0, bytes_written) ;
+        // // dn(bytes_written)
+
+        vTaskDelay(1) ;
     }
     
         // // dn2(dynamic_frames, NES_REFRESH_RATE)
@@ -530,7 +634,7 @@ int osd_init() {
     xTaskCreatePinnedToCore(&task_video, "task_video", 1024*4, NULL, 5, NULL, 1);
 
     if(i2s>=0) {
-	    // xTaskCreatePinnedToCore(&task_audio, "task_audio", 2048, NULL, 2, NULL, 1);
+	    xTaskCreatePinnedToCore(&task_audio, "task_audio", 2048, NULL, 5, NULL, 1);
     }
 
     echo_DMA("end osd_init") ;

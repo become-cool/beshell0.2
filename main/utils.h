@@ -213,6 +213,18 @@ void freeArrayBuffer(JSRuntime *rt, void *opaque, void *ptr) ;
         }                                                                               \
     }
 
+#define GET_INT_PROP_NODEF(obj, propName, cvar, default)                                \
+    {                                                                                   \
+        JSValue jsvar = JS_GetPropertyStr(ctx, obj, propName) ;                         \
+        if( jsvar!=JS_UNDEFINED ) {                                                     \
+            if( !JS_IsNumber(jsvar) ) {                                                 \
+                JS_FreeValue(ctx, jsvar) ;                                              \
+                THROW_EXCEPTION(ctx, "property %s is not a number", propName) ;         \
+            }                                                                           \
+            JS_ToInt32(ctx, &cvar, jsvar) ;                                             \
+        }                                                                               \
+    }
+
 #define _ASSIGN_INT_PROP_DEFAULT(obj, propName, cvar, getter, default)                  \
     if(obj==JS_UNDEFINED||obj==JS_NULL) {                                               \
         cvar = default ;                                                                \

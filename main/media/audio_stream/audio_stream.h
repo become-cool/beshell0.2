@@ -244,13 +244,12 @@ void audio_pipe_link(audio_pipe_t * pipe, int audio_el_cnt, ...) ;
 void audio_pipe_set_stats(audio_pipe_t * pipe, int stats) ;
 void audio_pipe_clear_stats(audio_pipe_t * pipe, int stats) ;
 void audio_pipe_clear(audio_pipe_t * pipe) ;
+void audio_pipe_emit_js(audio_pipe_t * pipe, const char * event, JSValue param) ;
 
 // midi player 
 audio_player_midi_t * audio_player_midi_create(audio_player_midi_conf_t * config) ;
 void audio_player_midi_delete(audio_player_midi_t * player) ;
 
-
-void audio_stream_emit_js(JSContext * ctx, JSValue thisobj, const char * event, JSValue param) ;
 
 
 #endif

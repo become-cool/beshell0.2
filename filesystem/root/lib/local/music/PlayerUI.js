@@ -290,16 +290,18 @@ class PlayerUI extends lv.CleanObj {
     }
 
     exit() {
-        this.currentPath = null
-        this.currentIndex = -1
-        this.waveAnim.stop()
+        process.reboot()
 
-        this.player.stop()
-        this.player.detach()
-        // delete this.player
-        // delete this.ctrl.player
+        // this.currentPath = null
+        // this.currentIndex = -1
+        // this.waveAnim.stop()
 
-        lv.loadScreen(be.desktop)
+        // this.player.stop()
+        // this.player.detach()
+        // // delete this.player
+        // // delete this.ctrl.player
+
+        // lv.loadScreen(be.desktop)
     }
 }
 

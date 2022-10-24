@@ -175,7 +175,7 @@ JSValue js_process_memory_usage(JSContext *ctx, JSValueConst this_val, int argc,
 }
 
 
-JSValue js_console_print(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+inline JSValue _print(uint8_t type, JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(1)
     size_t len = 0 ;
     const char * str = JS_ToCStringLen(ctx, &len, argv[0]) ;
@@ -183,10 +183,20 @@ JSValue js_console_print(JSContext *ctx, JSValueConst this_val, int argc, JSValu
         THROW_EXCEPTION("not a avalid string.") 
     }
     if(len) {
-        telnet_output(CMD_OUTPUT, mk_echo_pkgid() , str, len) ;
+        telnet_output(type, mk_echo_pkgid() , str, len) ;
     }
     JS_FreeCString(ctx, str) ;
     return JS_UNDEFINED ;
+}
+
+JSValue js_console_print(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    return _print(CMD_OUTPUT, ctx, this_val, argc, argv) ;
+}
+JSValue js_console_run(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    return _print(CMD_CALLBACK, ctx, this_val, argc, argv) ;
+}
+JSValue js_console_message(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    return _print(CMD_MSG, ctx, this_val, argc, argv) ;
 }
 
 // JSValue js_console_log(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
@@ -284,6 +294,8 @@ void be_module_process_require(JSContext *ctx) {
     // console
     JSValue console = JS_NewObject(ctx) ;
     JS_SetPropertyStr(ctx, console, "print", JS_NewCFunction(ctx, js_console_print, "print", 1));
+    JS_SetPropertyStr(ctx, console, "run", JS_NewCFunction(ctx, js_console_run, "run", 1));
+    JS_SetPropertyStr(ctx, console, "message", JS_NewCFunction(ctx, js_console_message, "message", 1));
     // JS_SetPropertyStr(ctx, console, "log", JS_NewCFunction(ctx, js_console_log, "log", 1));
     // JS_SetPropertyStr(ctx, console, "error", JS_NewCFunction(ctx, js_console_log, "error", 1));
     JS_SetPropertyStr(ctx, global, "console", console);

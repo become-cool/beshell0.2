@@ -88,25 +88,6 @@ void audio_el_clear_ring(audio_el_t * el) {
     }
 }
 
-inline void audio_stream_emit_js(JSContext * ctx, JSValue thisobj, const char * event, JSValue param) {
-
-    JSValue emit = js_get_glob_prop(ctx, 4, "beapi", "EventEmitter", "prototype", "emit") ;
-
-    JSValue eventName = JS_NewString(ctx, event) ;
-
-    if(JS_IsUndefined(param) ) {
-        MAKE_ARGV1(argv, eventName)
-        eventloop_push_with_argv(ctx, emit, thisobj, 1, argv) ;
-    }
-    else {
-        MAKE_ARGV2(argv, eventName, param)
-        eventloop_push_with_argv(ctx, emit, thisobj, 2, argv) ;
-    }
-
-    JS_FreeValue(ctx, eventName) ;
-    JS_FreeValue(ctx, emit) ;
-
-}
 
 // 设置为 STAT_STOPING ,等待任务线程停止
 bool audio_el_stop(audio_el_t * el) {
@@ -153,9 +134,9 @@ inline void audio_el_stop_when_req(audio_el_t * el) {
         PLAYER(el)->paused = false ;
         if( PLAYER(el)->ctx && JS_IsObject(PLAYER(el)->jsobj) ){
             if(PLAYER(el)->error) {
-                audio_stream_emit_js(PLAYER(el)->ctx, PLAYER(el)->jsobj, "error", JS_NewInt32(NULL, PLAYER(el)->error)) ;
+                audio_pipe_emit_js(PLAYER(el), "error", JS_NewInt32(NULL, PLAYER(el)->error)) ;
             }
-            audio_stream_emit_js(PLAYER(el)->ctx, PLAYER(el)->jsobj, PLAYER(el)->finished? "finish": "stop", JS_UNDEFINED) ;
+            audio_pipe_emit_js(PLAYER(el), PLAYER(el)->finished? "finish": "stop", JS_UNDEFINED) ;
         }
 
     }

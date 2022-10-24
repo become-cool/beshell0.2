@@ -102,6 +102,10 @@ beapi.lvgl.msg = {
             if(!visible)
                 this.del()
         })
+        box.holdKeys(key=>{
+            box.releaseKeys()
+            box.hide()
+        })
         return box
     }
 }

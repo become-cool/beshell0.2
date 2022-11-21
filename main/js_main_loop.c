@@ -41,9 +41,9 @@
 
 JSRuntime *rt;
 JSContext *ctx;
-uint8_t boot_level = 5 ;
-bool requst_reset = false ;
-
+static uint8_t boot_level = 5 ;
+static bool requst_reset = false ;
+static bool nowifi = false ;
 
 uint8_t task_boot_level() {
     return boot_level ;
@@ -240,7 +240,6 @@ void js_main_loop(const char * script){
     boot_level = 5 ;
     nvs_read_onetime("rst-lv", &boot_level) ;
 
-    bool nowifi = false ;
     nvs_read_onetime("rst-nowifi", (uint8_t*)&nowifi) ;
 
 // nowifi = true ;
@@ -249,16 +248,18 @@ void js_main_loop(const char * script){
 
     // 在初始化前，先占用整块的 DMA 内存，在初始化完成后释放
     // 迫使各个模块使用 PSRAM
-    void * retain_mem1 = NULL ;
-    void * retain_mem2 = NULL ;
-    if(getPsramTotal()>1024) {
-        echo_DMA("hold mem") ;
-        HOLD_MEM(retain_mem1, 60*1024)
-        HOLD_MEM(retain_mem2, 50*1024)
-    }
+    // void * retain_mem1 = NULL ;
+    // void * retain_mem2 = NULL ;
+    // if(getPsramTotal()>1024) {
+    //     echo_DMA("hold mem") ;
+    //     HOLD_MEM(retain_mem1, 60*1024)
+    //     // HOLD_MEM(retain_mem2, 50*1024)
+    // }
     
     
-    if(!nowifi) {
+    if(nowifi) {
+        printf("disabled wifi by nvs setting: rst-nowifi\n") ;
+    } else {
         be_module_wifi_init() ;
     }
     be_rawfs_mount("/fs") ;
@@ -284,8 +285,8 @@ void js_main_loop(const char * script){
     quickjs_init() ;
 
 #ifndef SIMULATION
-    FREE_MEM(retain_mem1)
-    FREE_MEM(retain_mem2)
+    // FREE_MEM(retain_mem1)
+    // FREE_MEM(retain_mem2)
 #endif
 
     rc_init() ;

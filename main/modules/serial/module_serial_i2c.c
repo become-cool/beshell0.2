@@ -336,6 +336,7 @@ static JSValue js_i2c_bus_setup(JSContext *ctx, JSValueConst this_val, int argc,
     
     _i2c_bus_setup|= 1<<(busnum) ;
 
+    dn(timeout)
 	i2c_set_timeout(busnum, timeout) ;
 
     int setup_time=0;

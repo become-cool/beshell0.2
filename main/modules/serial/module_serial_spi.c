@@ -66,7 +66,7 @@ static JSValue js_spi_bus_setup(JSContext *ctx, JSValueConst this_val, int argc,
         .max_transfer_sz=20480
     } ;
 
-    esp_err_t ret = spi_bus_initialize(busnum, &buscfg, SPI_DMA_CH2);
+    esp_err_t ret = spi_bus_initialize(busnum, &buscfg, SPI_DMA_CH_AUTO);
     if(ret==0) {
         _spi_bus_setup|= 1<<busnum ;
     }
@@ -213,6 +213,9 @@ inline esp_err_t spi_trans_int(spi_device_handle_t handle, uint8_t * rx_buff, ui
     
     return spi_device_transmit(handle, &t) ;
 }
+
+
+
 /**
  * 
  * dev id
@@ -273,13 +276,56 @@ static JSValue js_spi_send_u32(JSContext *ctx, JSValueConst this_val, int argc, 
     return JS_NewInt32(ctx, ret) ;
 }
 
+// 双工收发, 或 接受
+#define SPI_TRANS(h, in, out, bit_length)                       \
+        esp_err_t ret = spi_trans_int(h, in, out, bit_length) ; \
+        if(ret!=ESP_OK) {                                       \
+            THROW_EXCEPTION("spi bus transmit failed:%d", ret)  \
+        }                                                       \
+        return JS_NewInt32(ctx, in) ;
 
-static JSValue js_spi_recv(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+#define SPI_TRANS_FUNC(type, bit_length) \
+    CHECK_ARGC(1) \
+    ARGV_TO_SPI_HANDLE(0, handle) \
+    type in_var = 0 ; \
+    if( argc>1 && !JS_IsUndefined(argv[1]) && !JS_IsUndefined(argv[1]) ) { \
+        type out_var ; \
+        if(JS_ToUint32(ctx, &out_var, argv[1])!=0) { \
+            THROW_EXCEPTION("arg must be a number") \
+        } \
+        SPI_TRANS(handle, in_var, (uint8_t*)&out_var, bit_length) \
+    } \ 
+    else { \
+        SPI_TRANS(handle, in_var, NULL, bit_length) \
+    }
 
-    return JS_UNDEFINED ;
+
+static JSValue js_spi_trans_u8(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    SPI_TRANS_FUNC(uint8_t, 8)
+}
+static JSValue js_spi_trans_u16(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    SPI_TRANS_FUNC(uint16_t, 16)
+}
+static JSValue js_spi_trans_u32(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    SPI_TRANS_FUNC(uint32_t, 32)
 }
 
 
+#define SPI_RECV_FUNC(type, bit_length)         \
+    CHECK_ARGC(1)                               \
+    ARGV_TO_SPI_HANDLE(0, handle)               \
+    type in_var = 0 ;                           \
+    SPI_TRANS(handle, in_var, NULL, bit_length)
+
+static JSValue js_spi_recv_u8(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    SPI_RECV_FUNC(uint8_t, 8)
+}
+static JSValue js_spi_recv_u16(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    SPI_RECV_FUNC(uint16_t, 16)
+}
+static JSValue js_spi_recv_u32(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    SPI_RECV_FUNC(uint32_t, 32)
+}
 
 void be_module_serial_spi_require(JSContext *ctx, JSValue pkg) {
     JSValue spi = JS_NewObject(ctx);
@@ -292,7 +338,12 @@ void be_module_serial_spi_require(JSContext *ctx, JSValue pkg) {
     JS_SetPropertyStr(ctx, spi, "sendU8", JS_NewCFunction(ctx, js_spi_send_u8, "sendU8", 1));
     JS_SetPropertyStr(ctx, spi, "sendU16", JS_NewCFunction(ctx, js_spi_send_u16, "sendU16", 1));
     JS_SetPropertyStr(ctx, spi, "sendU32", JS_NewCFunction(ctx, js_spi_send_u32, "sendU32", 1));
-    JS_SetPropertyStr(ctx, spi, "recv", JS_NewCFunction(ctx, js_spi_recv, "recv", 1));
+    JS_SetPropertyStr(ctx, spi, "recvU8", JS_NewCFunction(ctx, js_spi_recv_u8, "recvU8", 1));
+    JS_SetPropertyStr(ctx, spi, "recvU16", JS_NewCFunction(ctx, js_spi_recv_u16, "recvU16", 1));
+    JS_SetPropertyStr(ctx, spi, "recvU32", JS_NewCFunction(ctx, js_spi_recv_u32, "recvU32", 1));
+    JS_SetPropertyStr(ctx, spi, "transU8", JS_NewCFunction(ctx, js_spi_trans_u8, "transU8", 1));
+    JS_SetPropertyStr(ctx, spi, "transU16", JS_NewCFunction(ctx, js_spi_trans_u16, "transU16", 1));
+    JS_SetPropertyStr(ctx, spi, "transU32", JS_NewCFunction(ctx, js_spi_trans_u32, "transU32", 1));
 
 }
 

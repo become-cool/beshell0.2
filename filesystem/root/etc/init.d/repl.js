@@ -10,6 +10,71 @@ const CMD_EXCEPTION = 5 ;
 let _pending_pkg_id = -1
 let _pending_code = ''
 
+
+
+function thousands(num) {
+    num=num.toString().split(".");  // 分隔小数点
+    var arr=num[0].split("").reverse();  // 转换成字符数组并且倒序排列
+    var res=[];
+    for(var i=0,len=arr.length;i<len;i++){
+      if(i%3===0&&i!==0){
+         res.push(",");   // 添加分隔符
+      }
+      res.push(arr[i]);
+    }
+    res.reverse(); // 再次倒序成为正确的顺序
+    if(num[1]){  // 如果有小数的话添加小数部分
+      res=res.join("").concat("."+num[1]);
+    }else{
+      res=res.join("");
+    }
+    return res;
+}
+function formatByteNum(num, useUnit) {
+    if(useUnit) {
+        if(num>1073741824){
+            return thousands(Math.round(num*10/1073741824)/10) + 'G'
+        }else if(num>1048576){
+            return thousands(Math.round(num*10/1048576)/10) + 'M'
+        }else if(num>1024){
+            return thousands(Math.round(num*10/1024)/10) + 'K'
+        }else {
+            return thousands(num)
+        }
+    }
+    else {
+        return thousands(num)
+    }
+}
+function widthByChar(str) {
+    return str.length
+}
+function printTable(table) {
+    let clmsW = []
+    let c, r
+    let sep = '    '
+    for(r=0;r<table.length;r++) {
+        for(c=0;c<table[r].length;c++) {
+            if(clmsW[c]==undefined) {
+                clmsW[c] = 0
+            }
+            let width = widthByChar(table[r][c])
+            if(width>clmsW[c]) {
+                clmsW[c] = width
+            }
+        }
+    }
+    for(r=0;r<table.length;r++) {
+        for(c=0;c<table[r].length;c++) {
+            let w = widthByChar(table[r][c])
+            table[r][c]+= " ".repeat(clmsW[c] - w)
+        }
+        console.log(table[r].join(sep))
+    }
+}
+
+
+
 beapi.telnet.registerHandler(function(pkgid, remain, pkgcmd, code){
 
     if(_pending_pkg_id>0 && _pending_pkg_id!=pkgid) {
@@ -51,17 +116,26 @@ beapi.telnet.registerHandler(function(pkgid, remain, pkgcmd, code){
     }
 })
 
-function resolvepath(path) {
+function resolvepath(path,onlyFile) {
+    let _path
     if(path=='~' ) {
-        return process.env.HOME
+        _path = process.env.HOME
     } 
     else if(path[0]=='~' && path[1]=='/') {
-        return process.env.HOME + path.substr(1)
+        _path = process.env.HOME + path.substr(1)
     }
     else if(path[0]!='/') {
-        return process.env.PWD + '/' + path
+        _path = process.env.PWD + '/' + path
     }
-    return path
+    else {
+        _path = path ;
+    }
+    if(!!onlyFile) {
+        if(!beapi.fs.isFileSync(_path)) {
+            throw new Error ("path not a exists file")
+        }
+    }
+    return _path
 }
 
 function cd(path) {
@@ -88,7 +162,7 @@ function ls(path) {
     let stat = beapi.fs.statSync(resolvepath(path))
     if(!stat) {
         console.log("path not exists:", path)
-        return ;
+        return
     }
     if(!stat.isDir) {
         console.log(stat)
@@ -185,9 +259,29 @@ function compile(path) {
     }
 }
 
-function free() {
-    console.log(process.memoryUsage())
+
+function free(...args) {
+    let info = process.memoryUsage()
+    if(args.includes('-j')) {
+        console.log(info)
+        return
+    }
+    let h = args.includes('-h')
+    let used, free, total
+    let table = [['', '[used]', '[%]', '[free]', '[total]']]
+    for(let key in info) {
+        ;({used, free, total} = info[key])
+        table.push([
+            key.toUpperCase()
+            , formatByteNum(used,h)
+            , Math.floor(used*1000/total)/10+'%'
+            , formatByteNum(free,h)
+            , formatByteNum(total,h)
+        ])
+    }
+    printTable(table)
 }
+
 function reset(level) {
     level = parseInt((level||'5').trim())
     if(isNaN(level)) {
@@ -200,11 +294,19 @@ function reset(level) {
 function reboot() {
     process.reboot()
 }
+function onboot(path) {
+    if(!path) {
+        console.log("onboot <script path>")
+        return false
+    }
+    path = resolvepath(path,true)
+    require(__dirname+"/boot.js").setAutoScript(path)
+}
 
 const ShellCmds = {
     cd, pwd, ls, cp, rm, mv, touch, cat, stat, mkdir
     , require:cmd_require
-    , free, reset, reboot
+    , free, reset, reboot, onboot
     , compile
 }
 

@@ -67,18 +67,14 @@ module.exports = class RomList extends beapi.lvgl.Column {
 
             let romcnt = 0
 
-            beapi.fs.walkFileWithExt("/home/become/game", ".nes", (path, detail)=>{
-                let title = detail.name.slice(0, -4)
-    
-                let btn = this.lstRom.addBtn(null, '')
-                btn.setText(title)
-                btn.setFont("msyh")
-                btn.on('clicked', ()=>{
-                    this.play(path)
-                })
-
+            walkRomDir("/home/become/game", (path, detail, emulator)=>{
+                this.addRom(detail.name.slice(0, -4), path, emulator)
                 romcnt ++
-            })
+            },3)
+            walkRomDir("/mnt/sd", (path, detail, emulator)=>{
+                this.addRom(detail.name.slice(0, -4), path, emulator)
+                romcnt ++
+            },4)
 
             if(romcnt) {
                 this.lstRom.show()
@@ -94,10 +90,22 @@ module.exports = class RomList extends beapi.lvgl.Column {
         }, 0)
     }
 
-    play(romPath) {
+    addRom(name, path, emulator) {
+
+        let btn = this.lstRom.addBtn(null, '')
+        btn.setText(name)
+        btn.setFont("msyh")
+        btn.on('clicked', ()=>{
+            this.play(path, emulator)
+        })
+        btn.emulator = emulator
+        return btn
+    }
+
+    play(romPath, emulator) {
         console.log(romPath)
 
-        let data = JSON.stringify({rom: romPath})
+        let data = JSON.stringify({rom: romPath, emulator})
         if(!beapi.fs.mkdirSync("/home/become/.data", true)){
             console.log("mkdirSync() failed:", "/home/become/.data")
             return
@@ -117,4 +125,15 @@ module.exports = class RomList extends beapi.lvgl.Column {
         }, 0)
         
     }
+}
+
+function walkRomDir(dir,callback) {
+    beapi.fs.walkFile(dir, (path, detail)=>{
+        if(path.slice(-4).toLowerCase()==".gbc" || path.slice(-3).toLowerCase()==".gb"){
+            callback(path, detail, 2)
+        }
+        else if(path.slice(-4).toLowerCase()==".nes"){
+            callback(path, detail, 1)
+        }
+    }, 3)
 }

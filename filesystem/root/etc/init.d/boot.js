@@ -1,4 +1,5 @@
-const confPath = "/home/become/config/boot.json"
+const confDir = "/home/become/config"
+const confPath = confDir + "/boot.json"
 
 module.exports = JSON.load(confPath) || {}
 
@@ -6,11 +7,6 @@ module.exports.__proto__ = {
     desktop: "desktop/Desktop" ,
 
     async autorun () {
-        if(this["script"]) {
-            try{
-                eval(this["script"])
-            }catch(e){ console.log(e) }
-        }
 
         let app = beapi.nvs.readString("rst-app",true)
         if(app) {
@@ -23,6 +19,13 @@ module.exports.__proto__ = {
                 process.reboot()
             }
         }
+        
+        if(this["script"]) {
+            try{
+                console.log("auto run script", this["script"])
+                require(this["script"])
+            }catch(e){ console.log(e) }
+        }
 
         if(this["app"]) {
             try{
@@ -33,6 +36,7 @@ module.exports.__proto__ = {
         }
         
         if( be.disp?.length && this.desktop && !beapi.nvs.readUint8("rst-nodesktop",true) ){
+            console.log("rst-nodesktop:", this.desktop)
             const Desktop = require(this.desktop)
             be.desktop = new Desktop()
         }
@@ -43,6 +47,7 @@ module.exports.__proto__ = {
             throw new Error("path not exists")
         }
         this.script = path
+        beapi.fs.mkdirSync(confDir)
         beapi.fs.writeFileSync(confPath, JSON.stringify(this,null,4))
     } ,
 

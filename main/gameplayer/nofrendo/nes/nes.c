@@ -468,8 +468,10 @@ int nes_insertcart(const char *filename, nes_t *machine)
 
    /* rom file */
    machine->rominfo = rom_load(filename);
-   if (NULL == machine->rominfo)
+   if (NULL == machine->rominfo){
+      printf("NULL == machine->rominfo\n") ;
       goto _fail;
+   }
 
    /* map cart's SRAM to CPU $6000-$7FFF */
    if (machine->rominfo->sram)
@@ -480,12 +482,16 @@ int nes_insertcart(const char *filename, nes_t *machine)
 
    /* mapper */
    machine->mmc = mmc_create(machine->rominfo);
-   if (NULL == machine->mmc)
+   if (NULL == machine->mmc) {
+      printf("NULL == machine->mmc\n") ;
       goto _fail;
+   }
 
    /* if there's VRAM, let the PPU know */
-   if (NULL != machine->rominfo->vram)
+   if (NULL != machine->rominfo->vram) {
+      printf("NULL == machine->rominfo->vram\n") ;
       machine->ppu->vram_present = true;
+   }
    
    apu_setext(machine->apu, machine->mmc->intf->sound_ext);
    

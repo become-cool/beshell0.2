@@ -1,5 +1,5 @@
 
-beapi.fs.walkFile = function(dir, callback, depth) {
+beapi.fs.walkFile = function walkFile(dir, callback, depth) {
     if(depth==undefined) 
         depth = 3
     try{
@@ -14,7 +14,7 @@ beapi.fs.walkFile = function(dir, callback, depth) {
         let path = dir+'/'+item.name
         if (item.type=='dir') {
             if(depth) {
-                this.loadDir(path, callback, depth-1)
+                walkFile(path, callback, depth-1)
             }
             continue
         }

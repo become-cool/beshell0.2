@@ -21,7 +21,13 @@
     "bin": [
         {
             "address": "0x1000",
-            "path": "bootloader.bin"
+            "path": "bootloader.bin",
+            "chiptype": "esp32"
+        },
+        {
+            "address": "0x0",
+            "path": "bootloader-s3.bin",
+            "chiptype": "esp32s3"
         },
         {
             "address": "0x8000",
@@ -35,7 +41,13 @@
         },
         {
             "address": "0x10000",
-            "path": "beshell.bin"
+            "path": "beshell.bin",
+            "chiptype": "esp32"
+        },
+        {
+            "address": "0x10000",
+            "path": "beshell-s3.bin",
+            "chiptype": "esp32s3"
         },
         {
             "address": "0x348000",

@@ -168,12 +168,12 @@ static int internal_insert(const char *filename, system_t type)
       }
 
       if (nes_insertcart(console.filename, console.machine.nes))
-         return -1;
+         return -2;
 
       vid_setmode(NES_SCREEN_WIDTH, NES_VISIBLE_HEIGHT);
 
       if (install_timer(NES_REFRESH_RATE_TIMER))
-         return -1;
+         return -3;
 
       nes_emulate();
       break;
@@ -230,23 +230,26 @@ int main_loop(const char *filename, system_t type)
       return -1;
 
    if (osd_init())
-      return -1;
+      return -2;
 
    if (gui_init())
-      return -1;
+      return -3;
 
    osd_getvideoinfo(&video);
    if (vid_init(video.default_width, video.default_height, video.driver))
-      return -1;
+      return -4;
 	printf("vid_init done\n");
 
    console.nextfilename = strdup(filename);
    console.nexttype = type;
 
+   int retcode ;
    while (false == console.quit)
    {
-      if (internal_insert(console.nextfilename, console.nexttype))
-         return 1;
+      retcode = internal_insert(console.nextfilename, console.nexttype) ;
+      if (retcode) {
+         return retcode - 100 ;
+      }
    }
 
    return 0;

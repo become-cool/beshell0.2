@@ -1,6 +1,5 @@
 
-all:
-	./build.sh
+all: mkonly dist-beshell
 
 mkonly:
 	idf.py build
@@ -25,7 +24,9 @@ mkfs-home:
 	bin/mklittlefs -c filesystem/tmp/home -s 204800 filesystem/img/fs-home.img -d 5
 
 dist:
-	node filesystem/dispense-to-beconsole.js
+	node filesystem/dispense-to-beconsole.js all
+dist-beshell:
+	node filesystem/dispense-to-beconsole.js beshell
 dist-fs:
 	node filesystem/dispense-to-beconsole.js fs
 dist-root:
@@ -43,7 +44,7 @@ partition:
 
 pack-fs: tree-shaking mkfs-root mkfs-home partition dist-fs
 	ls -lh filesystem/img/
-pack-all: tree-shaking mkfs-root mkfs-home partition dist
+pack-all: tree-shaking mkfs-root mkfs-home partition dist-js
 	ls -lh filesystem/img/
 
 # 编译js, 打包 / 和 /home 分区，并制作 img 文件
@@ -77,6 +78,12 @@ telweb: telweb-build fs-root
 help:
 	@echo "make"
 	@echo "make mkonly		# idf.py build"
+	@echo "make dist		# dispense full firmware package to BeConsole dir"
+	@echo "make dist-beshell	# dispense beshell firmware img file to BeConsole dir"
+	@echo "make dist-fs		# dispense fs img files('/root' and '/home') to BeConsole dir"
+	@echo "make dist-root		# dispense fs /root img file to BeConsole dir"
+	@echo "make dist-home		# dispense fs /home img file to BeConsole dir"
+
 	@echo "make compile		# compile all .js file to .bin"
 	@echo "make tree-shaking"
 	@echo "make mkfs-root"
@@ -84,9 +91,6 @@ help:
 	@echo "make partition"
 	@echo "make pack-fs		# tree-shaking + mkfs-root + mkfs-home + partition + dist-fs"
 	@echo "make pack-all		# tree-shaking + mkfs-root + mkfs-home + partition + dist"
-	@echo "make dist		# dispense to BeConsole"
-	@echo "make dist-root		# dispense fs root img file to BeConsole"
-	@echo "make dist-home		# dispense fs home img file to BeConsole"
 	@echo "make fs			# compile + pack-all"
 	@echo "make fs-src		# clear-jsbin + pack-all"
 	@echo "make fs-root		# compile tree-shaking mkfs-root dist-root"

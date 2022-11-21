@@ -7,7 +7,9 @@
 #include "math.h"
 #include "driver/gpio.h"
 #include "driver/ledc.h"
-#include <driver/dac.h>
+#include "hal/ledc_types.h"
+
+// #include "driver/dac.h"
 #include <esp_adc_cal.h>
 
 
@@ -206,21 +208,21 @@ JSValue js_gpio_analog_read(JSContext *ctx, JSValueConst this_val, int argc, JSV
     }
     return JS_NewInt32(ctx, val) ;
 }
-JSValue js_gpio_analog_write(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-    CHECK_ARGC(2)
-    ARGV_TO_UINT8(0, pin)
-    ARGV_TO_UINT8(1, value)
+// JSValue js_gpio_analog_write(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+//     CHECK_ARGC(2)
+//     ARGV_TO_UINT8(0, pin)
+//     ARGV_TO_UINT8(1, value)
 
-    if(pin<25 || pin>26) {
-        THROW_EXCEPTION("analogWrite() arg pin must be 25 or 26")  
-    }
-    pin-= 25 ; // DAC_CHANNEL_1 or DAC_CHANNEL_2
+//     if(pin<25 || pin>26) {
+//         THROW_EXCEPTION("analogWrite() arg pin must be 25 or 26")  
+//     }
+//     pin-= 25 ; // DAC_CHANNEL_1 or DAC_CHANNEL_2
     
-    dac_output_enable(pin);
-    dac_output_voltage(pin, value);
+//     dac_output_enable(pin);
+//     dac_output_voltage(pin, value);
 
-    return JS_UNDEFINED ;
-}
+//     return JS_UNDEFINED ;
+// }
 
 JSValue _gpio_isr_js_callback = NULL ;
 
@@ -367,7 +369,11 @@ JSValue js_pwm_config_channel(JSContext *ctx, JSValueConst this_val, int argc, J
         .channel    = channel,
         .duty       = duty,
         .gpio_num   = gpio,
+#ifdef SOC_LEDC_SUPPORT_HS_MODE
         .speed_mode = LEDC_HIGH_SPEED_MODE,
+#else
+        .speed_mode = LEDC_LOW_SPEED_MODE,
+#endif
         .intr_type  = LEDC_INTR_DISABLE,
         .hpoint     = 0,
         .timer_sel  = timer
@@ -627,7 +633,7 @@ void be_module_gpio_require(JSContext *ctx) {
     JS_SetPropertyStr(ctx, gpio, "adcConfigBits", JS_NewCFunction(ctx, js_adc_set_bits, "adcConfigBits", 1));
     JS_SetPropertyStr(ctx, gpio, "adcConfigAtten", JS_NewCFunction(ctx, js_adc_set_channel_atten, "adcConfigAtten", 1));
     JS_SetPropertyStr(ctx, gpio, "analogRead", JS_NewCFunction(ctx, js_gpio_analog_read, "analogRead", 1));
-    JS_SetPropertyStr(ctx, gpio, "analogWrite", JS_NewCFunction(ctx, js_gpio_analog_write, "analogWrite", 1));
+    // JS_SetPropertyStr(ctx, gpio, "analogWrite", JS_NewCFunction(ctx, js_gpio_analog_write, "analogWrite", 1));
     JS_SetPropertyStr(ctx, gpio, "pwmConfigTimer", JS_NewCFunction(ctx, js_pwm_config_timer, "pwmConfigTimer", 1));
     JS_SetPropertyStr(ctx, gpio, "pwmConfigChannel", JS_NewCFunction(ctx, js_pwm_config_channel, "pwmConfigChannel", 1));
     JS_SetPropertyStr(ctx, gpio, "pwmConfig", JS_NewCFunction(ctx, js_pwm_config, "pwmConfig", 1));

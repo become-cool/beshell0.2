@@ -1252,8 +1252,10 @@ void be_lv_structs_init() {
 // AUTO GENERATE CODE END [CLASS ID INIT] --------
 }
 
+#include "psram.h"
 
 void be_lv_structs_require(JSContext *ctx, JSValue lvgl) {
+
 // AUTO GENERATE CODE START [CLASS REQUIRE] --------
     qjs_def_class(ctx, "DrawRectDsc", js_lv_draw_rect_dsc_class_id, &js_lv_draw_rect_dsc_class
                 , "lvgl.DrawRectDsc", js_lv_draw_rect_dsc_constructor, js_lv_draw_rect_dsc_proto_funcs, countof(js_lv_draw_rect_dsc_proto_funcs), JS_UNDEFINED, lvgl) ;

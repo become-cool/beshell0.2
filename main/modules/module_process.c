@@ -77,6 +77,25 @@ static JSValue js_process_cpu_usage(JSContext *ctx, JSValueConst this_val, int a
 
 }
 
+static JSValue js_process_cpu_idle_ticks(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+    ARGV_TO_UINT8(0,cpu)
+
+#ifndef SIMULATION
+    if(cpu==0) {
+        return JS_NewInt64(ctx, cpu0_idle_ticks()) ;
+    }
+    else if(cpu==1) {
+        return JS_NewInt64(ctx, cpu1_idle_ticks()) ;
+    }
+    else {
+        THROW_EXCEPTION("arv cpu core must be 0 or 1")
+    }
+#else
+    return JS_NewUint32(ctx, 50) ;
+#endif
+
+}
 
 JSValue js_process_reset(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     int level = -1 ;
@@ -260,6 +279,7 @@ void be_module_process_require(JSContext *ctx) {
 
     JS_SetPropertyStr(ctx, process, "reset", JS_NewCFunction(ctx, js_process_reset, "reset", 1));
     JS_SetPropertyStr(ctx, process, "reboot", JS_NewCFunction(ctx, js_process_reboot, "reboot", 1));
+    JS_SetPropertyStr(ctx, process, "cpuIdle", JS_NewCFunction(ctx, js_process_cpu_idle_ticks, "cpuIdle", 1));
     JS_SetPropertyStr(ctx, process, "cpuUsage", JS_NewCFunction(ctx, js_process_cpu_usage, "cpuUsage", 1));
     JS_SetPropertyStr(ctx, process, "memoryUsage", JS_NewCFunction(ctx, js_process_memory_usage, "memoryUsage", 1));
     // JS_SetPropertyStr(ctx, process, "global", global);

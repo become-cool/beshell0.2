@@ -499,7 +499,7 @@ static esp_err_t esp_littlefs_init(const esp_vfs_littlefs_conf_t* conf)
     }
 
 	{
-        uint32_t flash_page_size = g_rom_flashchip.page_size;
+        uint32_t flash_page_size = CONFIG_SPIFFS_PAGE_SIZE;
         uint32_t log_page_size = CONFIG_LITTLEFS_PAGE_SIZE;
         if (log_page_size % flash_page_size != 0) {
             ESP_LOGE(TAG, "LITTLEFS_PAGE_SIZE is not multiple of flash chip page size (%d)",

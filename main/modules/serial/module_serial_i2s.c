@@ -45,7 +45,7 @@ static JSValue js_i2s_setup(JSContext *ctx, JSValueConst this_val, int argc, JSV
         }
 
         ASSIGN_INT_PROP_DEFAULT(argv[1], "mode", i2s_config.mode, (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_TX | I2S_MODE_RX))
-        ASSIGN_INT_PROP_DEFAULT(argv[1], "sample_rate", i2s_config.sample_rate, 8000)
+        ASSIGN_UINT_PROP_DEFAULT(argv[1], "sample_rate", i2s_config.sample_rate, 8000)
         ASSIGN_INT_PROP_DEFAULT(argv[1], "bits_per_sample", i2s_config.bits_per_sample, I2S_BITS_PER_SAMPLE_16BIT)
         ASSIGN_INT_PROP_DEFAULT(argv[1], "channel_format", i2s_config.channel_format, I2S_CHANNEL_FMT_RIGHT_LEFT)
         ASSIGN_INT_PROP_DEFAULT(argv[1], "communication_format", i2s_config.communication_format, I2S_COMM_FORMAT_STAND_I2S)
@@ -77,6 +77,13 @@ static JSValue js_i2s_setup(JSContext *ctx, JSValueConst this_val, int argc, JSV
 bool i2s_has_setup(uint8_t busnum) {
     return (1<<busnum) & _i2s_bus_setup ;
 }
+
+void i2s_stop_play(uint8_t busnum) {
+    i2s_zero_dma_buffer(busnum);
+    i2s_stop(busnum);
+    i2s_start(busnum);
+}
+
 
 static JSValue js_i2s_has_setup(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(1)

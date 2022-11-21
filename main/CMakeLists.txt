@@ -8,12 +8,14 @@ list(APPEND include_dirs gameplayer/nofrendo/cpu)
 list(APPEND include_dirs gameplayer/nofrendo/libsnss)
 list(APPEND include_dirs gameplayer/nofrendo/nes)
 list(APPEND include_dirs gameplayer/nofrendo/sndhrdw)
+list(APPEND include_dirs gameplayer/player_gnuboy)
+list(APPEND include_dirs gameplayer/player_gnuboy/gnuboy)
 list(APPEND include_dirs media)
 list(APPEND include_dirs media/TinySoundFont)
 list(APPEND include_dirs media/audio_stream)
 list(APPEND include_dirs encoding)
 list(APPEND include_dirs modules)
-list(APPEND include_dirs modules/http)
+# list(APPEND include_dirs modules/http)
 list(APPEND include_dirs modules/serial)
 list(APPEND include_dirs modules/mg)
 list(APPEND include_dirs modules/driver)
@@ -33,12 +35,14 @@ list(APPEND src_dirs gameplayer/nofrendo/libsnss)
 list(APPEND src_dirs gameplayer/nofrendo/nes)
 list(APPEND src_dirs gameplayer/nofrendo/sndhrdw)
 list(APPEND src_dirs gameplayer/nofrendo/mappers)
-list(APPEND src_dirs media)
+list(APPEND src_dirs gameplayer/player_gnuboy)
+list(APPEND src_dirs gameplayer/player_gnuboy/gnuboy)
+# list(APPEND src_dirs media)
 list(APPEND src_dirs media/TinySoundFont)
 list(APPEND src_dirs media/audio_stream)
 list(APPEND src_dirs encoding)
 list(APPEND src_dirs modules)
-list(APPEND src_dirs modules/http)
+# list(APPEND src_dirs modules/http)
 list(APPEND src_dirs modules/mg)
 list(APPEND src_dirs modules/driver)
 list(APPEND src_dirs modules/media)
@@ -53,10 +57,19 @@ idf_component_register(
     # EMBED_FILES root.raw
 )
 
-# for mongoose tls/ssl
-add_definitions(-DMG_ENABLE_OPENSSL)
+# # for mongoose tls/ssl
+add_definitions(-DMG_ENABLE_MBEDTLS)
+# add_definitions(-DMG_ENABLE_OPENSSL)
 
-# for nofrendo
+# # for nofrendo
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wno-error=char-subscripts -Wno-error=attributes")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-error=char-subscripts -Wno-error=attributes")
 
+
+# for gunboy
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS} -Wno-error=array-bounds")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-error=array-bounds")
+
+add_definitions(-DGNUBOY_NO_MINIZIP)
+add_definitions(-DGNUBOY_NO_SCREENSHOT)
+add_definitions(-DIS_LITTLE_ENDIAN)

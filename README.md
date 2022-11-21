@@ -123,6 +123,18 @@ CONFIG_FATFS_LFN_STACK=y
 CONFIG_FATFS_API_ENCODING_UTF_8=y
 ```
 
+## SD 访问错误
+
+如果在访问 SD内存卡 中的数据时，出现错误：
+
+```
+[0;31mE (590913) diskio_sdmmc: sdmmc_read_blocks failed (257)[0m
+```
+
+错误代码 257
+
+可能时 SRAM 内存不足，考虑到内存碎片，访问 SD 前确保可用 SRAM 大于 `10k`
+
 ## S2 摄像头驱动问题
 
 配置摄像头的时候 `camera_config_t.clk_freq_hz` 必须设置为 16MHz , 否则驱动在分配 DMA 内存时，不会使用 PSRAM ，导致内存紧张。如果再启用 WiFi ，则 SRAM 不够用

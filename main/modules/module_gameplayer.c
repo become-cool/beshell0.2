@@ -12,6 +12,13 @@
 #include "indev_i2c.h"
 
 #include "player_nofrendo.h"
+#include "player_gnuboy.h"
+
+
+
+#define EMULATOR_NOFRENDO 1
+#define EMULATOR_GUNBOY 2
+
 
 static JSValue js_gameplayer_set_display(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
 
@@ -85,52 +92,41 @@ static JSValue js_gameplayer_set_buttons(JSContext *ctx, JSValueConst this_val, 
     return JS_UNDEFINED;
 }
 
+/**
+ * 
+ * @param rom path 
+ * @param emulator: 1: nofrendo; 2: gunboy
+ */
+
 static JSValue js_gameplayer_play(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(1)
     char * rompath = js_arg_to_vfspath(ctx, argv[0]) ;
 
-    struct stat statbuf;
-    if(stat(rompath,&statbuf)<0) {
-        JS_ThrowReferenceError(ctx, "Failed to open rom file: %s", rompath);
-        free(rompath) ;
-        return JS_EXCEPTION ;
+    int emulator = EMULATOR_NOFRENDO ;
+    if(argc>1) {
+        if(JS_ToInt32(ctx, &emulator, argv[1])!=0 || (emulator!=EMULATOR_NOFRENDO && emulator!=EMULATOR_GUNBOY) ) {
+            THROW_EXCEPTION("invalid emulator")
+        }
     }
 
-    if(!S_ISREG(statbuf.st_mode)) {
-        JS_ThrowReferenceError(ctx, "arg path is a file: %s", rompath);
-        free(rompath) ;
-        return JS_EXCEPTION ;
-    }
-    if(statbuf.st_size<1){
-        JS_ThrowReferenceError(ctx, "rom file is empty: %s", rompath);
-        free(rompath) ;
-        return JS_EXCEPTION ;
-    }
 
-    printf("rom size: %d\n", (int)statbuf.st_size) ;
-
-	FILE * fd = fopen(rompath, "r");
-    free(rompath) ;
-
-    if(NULL==fd) {
-        THROW_EXCEPTION("Failed to open rome file (%d).", errno);
-    }
+    echo_DMA("start game ...") ;
     
-    void * romdata = malloc(statbuf.st_size) ;
-    if(!romdata) {
-        free(rompath) ;
-        THROW_EXCEPTION("out of memory?");
+    switch(emulator) {
+        case EMULATOR_NOFRENDO :
+            if(!player_nofrendo_load_rom(rompath)) {
+                free(rompath) ;
+                THROW_EXCEPTION("load rom failed") ;
+            }
+            int retcode = player_nofrendo_main();
+            break ;
+
+        case EMULATOR_GUNBOY :
+            player_gnuboy_main(rompath);
+            break ;
     }
 
-    player_nofrendo_set_rom(romdata) ;
-
-    fread(romdata, 1, statbuf.st_size, fd) ;
-    fclose(fd) ;
-
-    echo_DMA("start nofrendo ...") ;
-    nofrendo_main(0, NULL);
-    echo_DMA("nofrendo stop") ;
-    free(romdata) ;
+    free(rompath) ;
 
     return JS_UNDEFINED ;
 }

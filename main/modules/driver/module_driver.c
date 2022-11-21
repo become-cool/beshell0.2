@@ -54,8 +54,8 @@ static JSValue js_driver_mount_sd(JSContext *ctx, JSValueConst this_val, int arg
     if(argc>3 && !JS_IsUndefined(argv[3])){
         ARGV_TO_UINT32(3, khz)
         host.max_freq_khz = khz ;
-        dn(host.max_freq_khz)
     }
+    dn(host.max_freq_khz)
 
     ret = esp_vfs_fat_sdspi_mount(mntPath, &host, &slot_config, &mount_config, &card);
 

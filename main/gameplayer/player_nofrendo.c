@@ -7,6 +7,7 @@
 #include <errno.h>
 #include "psram.h"
 #include "esp_system.h"
+#include "esp_timer.h"
 #include "indev.h"
 #include "indev_i2c.h"
 
@@ -75,8 +76,62 @@ void player_nofrendo_set_video(st77xx_dev_t * dev, uint16_t * buff, uint16_t wid
     buff_xw = xw ;
 }
 
-void player_nofrendo_set_rom(void * rom) {
-    romdata = rom ;
+int player_nofrendo_load_rom(char * rompath) {
+    
+    struct stat statbuf;
+    if(stat(rompath,&statbuf)<0) {
+        printf("Failed to open rom file: %s\n", rompath);
+        return false ;
+    }
+
+    if(!S_ISREG(statbuf.st_mode)) {
+        printf("arg path is a file: %s\n", rompath);
+        return false ;
+    }
+    if(statbuf.st_size<1){
+        printf("rom file is empty: %s\n", rompath);
+        return false ;
+    }
+
+    printf("rom size: %d\n", (int)statbuf.st_size) ;
+
+	FILE * fd = fopen(rompath, "r");
+
+    if(NULL==fd) {
+        printf("Failed to open rome file (%d)\n", errno);
+        return false ;
+    }
+    
+    if(romdata) {
+        free(romdata) ;
+        romdata = NULL ;
+    }
+    romdata = malloc(statbuf.st_size) ;
+    
+    if(!romdata) {
+        printf("out of memory?\n");
+        fclose(fd) ;
+        return false ;
+    }
+
+    size_t read_bytes = 1024 * 10 ;
+    void * read_ptr = romdata ;
+    size_t left_bytes = statbuf.st_size ;
+    while( left_bytes>0) {
+
+        if(read_bytes>left_bytes) {
+            read_bytes = left_bytes ;
+        }
+        
+        fread(read_ptr, 1, read_bytes, fd) ;
+
+        read_ptr +=read_bytes ;
+        left_bytes-=read_bytes ;
+    }
+
+    fclose(fd) ;
+
+    return true ;
 }
 
 //Seemingly, this will be called only once. Should call func with a freq of frequency,
@@ -119,15 +174,15 @@ static void osd_stopsound(void) {
 static void osd_init_sound_i2s(void) {
     audio_frame = heap_caps_malloc(4*EMULATOR_FRAGSIZE, MALLOC_CAP_DMA);
 
-    if(i2s_has_setup(0)) {
-        i2s = 0 ;
-    }
-    else if(i2s_has_setup(1)) {
-        i2s = 1 ;
-    }
-    else {
-        i2s = -1 ;
-    }
+    // if(i2s_has_setup(0)) {
+    //     i2s = 0 ;
+    // }
+    // else if(i2s_has_setup(1)) {
+    //     i2s = 1 ;
+    // }
+    // else {
+    //     i2s = -1 ;
+    // }
     
 	// printf("init audio i2s dev\n") ;
 
@@ -444,7 +499,7 @@ void task_audio(void * data) {
 
         framerate() ;
         if(print_framerate_counter++%60==0) {
-            dn2(dynamic_frames, NES_REFRESH_RATE)
+            dn2(NES_REFRESH_RATE, dynamic_frames)
         }
 
         audio_play_frame() ;
@@ -639,4 +694,8 @@ int osd_init() {
 
     echo_DMA("end osd_init") ;
 	return 0;
+}
+
+int player_nofrendo_main() {
+    return nofrendo_main(0, NULL);
 }

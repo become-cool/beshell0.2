@@ -12,7 +12,7 @@ if(!json || !json.rom) {
     process.reboot()
 }
 
-console.log("load rom", json.rom)
+console.log("load rom", json)
 
 beapi.gameplayer.setDisplay(be.disp[0])
 
@@ -32,5 +32,9 @@ for(let dev of Object.values(be.dev)) {
     }
 }
 
-beapi.gameplayer.play(json.rom)
+try{
+    beapi.gameplayer.play(json.rom, json.emulator||1)
+}catch(e) {
+    console.log(e)
+}
 

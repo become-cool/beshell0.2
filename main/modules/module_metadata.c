@@ -4,6 +4,7 @@
 
 #ifndef SIMULATION
 #include "soc/soc.h"
+#include "esp_efuse.h"
 #endif
 
 const char * field_names[] = {
@@ -18,7 +19,8 @@ int readPartId() {
 #ifdef SIMULATION
     return 255 ;
 #else
-    return REG_READ(0x3FF5A078) ;
+    int value = esp_efuse_read_reg(3, 7) ; // blk3
+    return (value >> 24) & 0xFF ;
 #endif
 }
 
@@ -26,7 +28,8 @@ int readPartVersion() {
 #ifdef SIMULATION
     return 255 ;
 #else
-    return REG_READ(0x3FF5A079) ;
+    int value = esp_efuse_read_reg(3, 7) ;
+    return (value >> 16) & 0xFF ;
 #endif
 }
 
@@ -46,11 +49,11 @@ static JSValue js_metadata_read_field(JSContext *ctx, JSValueConst this_val, int
     if(field>7) {
         THROW_EXCEPTION("metadata field must 0-7")
     }
-    int value = REG_READ(field*4+0x3FF5A078) ;
+    int value = esp_efuse_read_reg(3, field) ;
+
     return JS_NewInt32(ctx, value) ;
 }
 #endif
-
 
 static int read_fields(JSContext *ctx, JSValue meta, const char * buf, int offset) {
     if(offset>29){ // 包最小长度 3

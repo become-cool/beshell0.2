@@ -26,7 +26,7 @@
 */
 
 #include <noftypes.h>
-#include <memguard.h>
+// #include <memguard.h>
 
 /* undefine macro definitions, so we get real calls */
 #undef malloc

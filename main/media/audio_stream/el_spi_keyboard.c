@@ -1,6 +1,7 @@
 #include "audio_stream.h"
 #include "midi_keys.h"
 #include "driver/i2s.h"
+#include "driver/gpio.h"
 #include "module_serial_spi.h"
 
 
@@ -28,9 +29,11 @@ inline static void trans_keyboard(audio_el_spi_keyboard_t * el, uint8_t * keys, 
 // 键盘读取任务线程
 static void task_func_spi_keyboard(audio_el_spi_keyboard_t * el) {
 
+    // 琴键状态(按位存储)
     uint8_t bit_keys[MAX_MIDI_KEY_CNT/8] ;
     memset(bit_keys, 0, sizeof(bit_keys));
 
+    // 上一次的琴键状态(按位存储)
     uint8_t bit_keys_last[MAX_MIDI_KEY_CNT/8] ;
     memset(bit_keys_last, 0, sizeof(bit_keys_last));
 
@@ -42,6 +45,7 @@ static void task_func_spi_keyboard(audio_el_spi_keyboard_t * el) {
     int64_t t = gettime() ;
 
     trans_keyboard(el, bit_keys, el->hint_bytes) ;
+    memcpy(bit_keys_last, bit_keys, byte<el->byte_num) ;
     // dn(bit_keys)
 
     while(1) {
@@ -53,6 +57,8 @@ static void task_func_spi_keyboard(audio_el_spi_keyboard_t * el) {
         // 逐字节对比
         for(byte=0; byte<el->byte_num; byte++) {
             if( bit_keys_last[byte] != bit_keys[byte] ) {
+
+                printf("%d/%d: %d->%d\n", byte, el->byte_num, bit_keys_last[byte], bit_keys[byte]) ;
 
                 bit_diff = bit_keys_last[byte] ^ bit_keys[byte] ;
 

@@ -36,7 +36,7 @@ module.exports.__proto__ = {
         }
         
         if( be.disp?.length && this.desktop && !beapi.nvs.readUint8("rst-nodesktop",true) ){
-            console.log("rst-nodesktop:", this.desktop)
+            console.log("desktop:", this.desktop)
             const Desktop = require(this.desktop)
             be.desktop = new Desktop()
         }

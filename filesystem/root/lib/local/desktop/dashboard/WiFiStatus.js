@@ -10,16 +10,6 @@ class WiFiStatus extends lv.Column {
             {
                 class: "Label" ,
                 font: "m12" ,
-                text: lv.symbol.battery_3 + "  " ,
-                width: "100%",
-                style: {
-                    "text-align": "right"
-                }
-
-            } ,
-            {
-                class: "Label" ,
-                font: "m12" ,
                 text: lv.symbol.wifi + " STA" ,
                 style: {
                     "pad-top": 20
@@ -57,6 +47,15 @@ class WiFiStatus extends lv.Column {
                 font: "m10" ,
                 text: "0.0.0.0" ,
                 ref: "apIP"
+            } ,
+            { clear: true, grow: true } ,
+            {
+                class: "Label" ,
+                font: "m10" ,
+                text: "BeShell: "+process.versions.beshell ,
+                style: {
+                    "pad-bottom": 20
+                }
             } ,
         ], this)
 

@@ -635,7 +635,7 @@ bool be_module_fs_init() {
         .block_size = 4096
     };
     if(esp_vfs_littlefs_register(&conf_home)!=ESP_OK){
-        printf("Failed to mount fs.\n") ;
+        printf("Failed to mount %s.\n", conf_home.base_path) ;
         return false ;
     }
 

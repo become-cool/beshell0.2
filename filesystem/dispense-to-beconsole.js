@@ -3,6 +3,7 @@ const exec = require("child_process").execSync
 const beconsolePath = __dirname + "/../../beconsole.next/platform/nw.js"
 
 const version = require("./version")
+const getEsp32Target = require("./target").getEsp32Target
 
 function mkdir(path) {
     try{ 
@@ -70,11 +71,11 @@ function mkMetaJson() {
             },
     
             {
-                "address": "0x348000",
+                "address": (0x10000 + appsize).toString(16),
                 "path": "fs-root.img"
             },
             {
-                "address": "0x390000",
+                "address": (0x10000 + appsize + rootsize).toString(16) ,
                 "path": "fs-home.img"
             }
         ]
@@ -125,7 +126,9 @@ function dist(firmware, targetDir) {
     }
 
     if(dispenseJson) {
-        fs.writeFileSync(path+'/firmware.json', mkMetaJson())
+        let jsonstr = mkMetaJson()
+        fs.writeFileSync(__dirname+'/img/firmware.json', jsonstr)
+        fs.writeFileSync(path+'/firmware.json', jsonstr)
     }
 
     if(dispenseBootloader) {
@@ -149,19 +152,6 @@ function dist(firmware, targetDir) {
         cp("img/fs-home.img", path+"/")
     }
 }
-
-// 返回 esp32 或者 esp32s3
-function getEsp32Target() {
-    let file = (fs.readFileSync( __dirname+'/../dependencies.lock' ) || '').toString()
-
-    let targetChip = (file.match(/target: ([^\r\n\s$]+)/)||[]) [1]
-    if(!targetChip) {
-        throw new Error("unknow idf build target (missing dependencies.lock file?)")
-    }
-
-    return targetChip
-}
-
 
 let firmware = "all"
 for(let t of ['beshell', 'fs', 'fs-home', 'fs-root']) {

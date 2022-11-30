@@ -67,16 +67,20 @@ function write_node(node, fd){
 
     // name + \0
     buf.write(node.name,offset)
-    offset+= node.name.length + 1
+    offset+= node.name.length
 
-    if(node.type == TYPE_FILE) {
-        buf.writeUInt32LE(node.offset,offset)
-        offset+= 4
-    }
+    buf.write(String.fromCharCode(0),offset)
+    offset+=1
 
     // size
     buf.writeUInt32LE(node.size,offset)
     offset+= 4
+
+    // offset
+    if(node.type == TYPE_FILE) {
+        buf.writeUInt32LE(node.offset,offset)
+        offset+= 4
+    }
 
     // console.log(node, buf)
 
@@ -93,6 +97,8 @@ console.log(root)
 
 let tar = packdir(__dirname+'/tmp/root', Buffer.from([]), root)
 console.log("tar size:", tar.length)
+
+console.log("write to",__dirname+"/img/fs-root.img")
 
 let fd = fs.openSync(__dirname+"/img/fs-root.img", 'w')
 

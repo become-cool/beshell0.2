@@ -35,21 +35,21 @@ include_directories(../components/lvgl/src)
 file(GLOB_RECURSE SRC_LIST "../components/lvgl/src/*.c")
 
 # quickjs
-AUX_SOURCE_DIRECTORY(../components/quickjs SRC_LIST)
+aux_source_directory(../components/quickjs SRC_LIST)
 include_directories(../components/quickjs)
 
 # mongoose
-AUX_SOURCE_DIRECTORY(../components/mongoose SRC_LIST)
+aux_source_directory(../components/mongoose SRC_LIST)
 include_directories(../components/mongoose)
 
 
 
 # hexli
 include_directories(../components/helix/include)
-AUX_SOURCE_DIRECTORY(../components/helix/src SRC_LIST)
+aux_source_directory(../components/helix/src SRC_LIST)
 
 
-AUX_SOURCE_DIRECTORY(./src SRC_LIST)
+aux_source_directory(./src SRC_LIST)
 
 include_directories(./src)
 include_directories(../main)
@@ -74,6 +74,8 @@ list(APPEND SRC_LIST ../main/stack.c)
 list(APPEND SRC_LIST ../main/list.c)
 list(APPEND SRC_LIST ../main/uuid.c)
 list(APPEND SRC_LIST ../main/font/s16.c)
+list(APPEND SRC_LIST ../main/rawfs.c)
+list(APPEND SRC_LIST ../main/debug.c)
 list(APPEND SRC_LIST ../main/anchor9/anchor9.c)
 list(APPEND SRC_LIST ../main/anchor9/anchor9_lvgl.c)
 list(APPEND SRC_LIST ../main/media/TinySoundFont/tml.c)
@@ -106,7 +108,24 @@ list(APPEND SRC_LIST ../main/modules/lvgl/lv_obj_init.js.c)
 list(APPEND SRC_LIST beapi.simulate.c)
 
 
-ADD_EXECUTABLE(beshell ${SRC_LIST})
+# game emulator
+include_directories(../main/gameplayer)
+include_directories(../main/gameplayer/nofrendo)
+include_directories(../main/gameplayer/nofrendo/cpu)
+include_directories(../main/gameplayer/nofrendo/libsnss)
+include_directories(../main/gameplayer/nofrendo/nes)
+include_directories(../main/gameplayer/nofrendo/sndhrdw)
+
+file(GLOB_RECURSE src_gameplayer "../main/gameplayer/nofrendo/*.c")
+SET (SRC_LIST 
+    ${SRC_LIST}
+    ${src_gameplayer}
+)
+
+add_definitions(-DNOFRENDO_DEBUG)
+
+
+add_executable(beshell ${SRC_LIST})
 target_link_libraries(beshell libssl.a libcrypto.a dl)
 target_link_libraries(beshell dl pthread)
 

@@ -21,7 +21,6 @@
 #include "module_media.h"
 #include "module_driver.h"
 #include "driver_camera.h"
-#include "rawfs.h"
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -31,8 +30,10 @@
 #else
 
 #include "simulate.h"
+#include "_module_gameplayer.h"
 #endif
 
+#include "rawfs.h"
 #include "module_mg.h"
 #include "module_lvgl.h"
 #include "module_process.h"
@@ -133,10 +134,10 @@ static JSContext * init_custom_context(JSRuntime *rt) {
     be_module_serial_require(ctx) ;
     be_module_socks_require(ctx) ;
     be_module_driver_require(ctx) ;
-    be_module_gameplayer_require(ctx) ;
 #else
     be_simulate_require(ctx) ;
 #endif
+    be_module_gameplayer_require(ctx) ;
     be_module_media_require(ctx) ;
     be_module_mg_require(ctx) ;
     be_telnet_require(ctx) ;
@@ -265,7 +266,8 @@ void js_main_loop(const char * script){
     be_rawfs_mount("/fs") ;
     be_module_fs_init() ;
     vTaskDelay(1) ;
-    
+#else
+    be_rawfs_mount(NULL) ;
 #endif
 
     be_module_process_init() ;

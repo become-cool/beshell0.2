@@ -194,7 +194,7 @@ JSValue js_process_memory_usage(JSContext *ctx, JSValueConst this_val, int argc,
 }
 
 
-inline JSValue _print(uint8_t type, JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+static inline JSValue _print(uint8_t type, JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(1)
     size_t len = 0 ;
     const char * str = JS_ToCStringLen(ctx, &len, argv[0]) ;

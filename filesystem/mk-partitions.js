@@ -76,6 +76,7 @@ let parttables16MB = [
     } ,
 ]
 
+
 function generatePartitionsTable(parts, flashSize) {
 
     let output = ''
@@ -115,3 +116,5 @@ console.log(csv16MB)
 
 fs.writeFileSync(__dirname+'/partitions-4MB.csv',csv4MB)
 fs.writeFileSync(__dirname+'/partitions-16MB.csv',csv16MB)
+
+

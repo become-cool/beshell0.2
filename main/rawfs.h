@@ -1,7 +1,12 @@
 #ifndef ONCE_H_RAWFS
 #define ONCE_H_RAWFS
 
+#ifndef SIMULATION
 #include "esp_system.h"
+#else
+#include <stdint.h>
+#endif
+
 #include <dirent.h>
 
 #define MAX_OPEN_FD 16
@@ -21,6 +26,8 @@ typedef struct _vfs_node {
 
 } vfs_node_t ;
 
+
+#ifndef SIMULATION
 
 typedef struct {
     DIR dir;            /*!< VFS DIR struct */
@@ -50,6 +57,9 @@ typedef struct _vfs_rawfs {
 } vfs_rawfs_t ;
 
 vfs_rawfs_t * be_rawfs_root() ;
+
+#endif
+
 
 void be_rawfs_mount(const char * mntPoint) ;
 

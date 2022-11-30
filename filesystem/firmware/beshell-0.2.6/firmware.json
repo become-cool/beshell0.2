@@ -1,0 +1,61 @@
+{
+    "name": "BeShell",
+    "version": "0.2.6",
+    "home": "https://become.cool",
+    "description": "",
+    "chips": [
+        "esp32"
+    ],
+    "author": "BECOME",
+    "priority": 5,
+    "write-options": {
+        "argvs": [
+            "-z"
+        ],
+        "baud": [
+            921600
+        ],
+        "flash_mode": "dio",
+        "flash_freq": "80m"
+    },
+    "bin": [
+        {
+            "address": "0x1000",
+            "path": "bootloader.bin",
+            "chiptype": "esp32"
+        },
+        {
+            "address": "0x0",
+            "path": "bootloader-s3.bin",
+            "chiptype": "esp32s3"
+        },
+        {
+            "address": "0x8000",
+            "path": "partitions-4MB.bin",
+            "flashsize": "4"
+        },
+        {
+            "address": "0x8000",
+            "path": "partitions-16MB.bin",
+            "flashsize": "16"
+        },
+        {
+            "address": "0x10000",
+            "path": "beshell.bin",
+            "chiptype": "esp32"
+        },
+        {
+            "address": "0x10000",
+            "path": "beshell-s3.bin",
+            "chiptype": "esp32s3"
+        },
+        {
+            "address": "328000",
+            "path": "fs-root.img"
+        },
+        {
+            "address": "370000",
+            "path": "fs-home.img"
+        }
+    ]
+}

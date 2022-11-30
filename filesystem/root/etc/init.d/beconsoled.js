@@ -129,3 +129,14 @@ beconsoled.setupedPresetName = function() {
     }
     return setup.preset || null
 }
+beconsoled.sdMountPoints = function () {
+    let points = []
+    let SDSPI = require("/lib/local/besdk/driver/sdspi.js")
+    for(let id in be.dev){
+        let dev = be.dev[id]
+        if(dev instanceof SDSPI && dev.mounted) {
+            points.push(dev.opts.mount)
+        }
+    }
+    return points
+}

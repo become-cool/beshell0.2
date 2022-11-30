@@ -1,15 +1,19 @@
 #include "rawfs.h"
 
-#include <unistd.h>
+#ifndef SIMULATION
 #include <sys/errno.h>
 #include <sys/fcntl.h>
 #include <sys/lock.h>
 #include <sys/param.h>
 #include "esp_vfs.h"
 #include "esp_partition.h"
-#include "debug.h"
-#include "untar.h"
+#else
+#include "module_fs.h"
+#endif
 
+#include <sys/stat.h>
+#include <unistd.h>
+#include "debug.h"
 
 
 
@@ -106,10 +110,61 @@ static vfs_node_t * vfs_node_walk_path(vfs_node_t * parent, const char * path, s
     return vfs_node_walk_path(node, p, len) ;
 }
 
+static void vfs_node_printf(vfs_node_t * node, const char * path) {
+
+}
+
+vfs_node_t * parse_tree(char * raw, vfs_node_t * parent, char ** out_raw, size_t * out_total) {
+    
+    vfs_node_t * node = vfs_node_malloc(parent) ;
+    if(!node) {
+        return NULL ;
+    }
+
+    node->type = *raw ;
+    raw ++ ;
+
+    node->filename = raw ;
+    raw+= strlen(node->filename) + 1 ;
+
+#ifdef SIMULATION
+    printf("%s\n",node->filename) ;
+#endif
+
+    node->filesize = * ((uint32_t *)raw) ;
+    raw+= sizeof(uint32_t) ;
+
+    if(node->type==VFS_NODE_DIR) {
+        for(int i=0;i<node->filesize;i++) {
+            parse_tree(raw, node, &raw, out_total) ;
+        }
+    }
+    else if(node->type==VFS_NODE_FILE) {
+        node->offset = * ((uint32_t *)raw) ;
+        raw+= sizeof(uint32_t) ;
+    }
+    else {
+        printf("unknown node type: %d\n", node->type) ;
+        return ;
+    }
+    // printf("%s\n, size:%d, offset:%d\n",node->filename,node->filesize,node->offset) ;
+
+    if(out_total) {
+        (*out_total)+= node->filesize ;
+    }
+    if(out_raw) {
+        *out_raw = raw ;
+    }
+
+    return node ;
+}
 
 #define WARNING_READONLY(op) \
     printf("read only FS operation not supported: %s.\n",op) ;
 #define RAWFS ((vfs_rawfs_t *)ctx)
+
+
+#ifndef SIMULATION
 
 static int vfs_rawfs_open(void* ctx, const char * path, int flags, int mode) {
     vfs_node_t * node = vfs_node_walk_path(RAWFS->root, path, strlen(path));
@@ -294,45 +349,16 @@ static int vfs_rawfs_fsync(void* ctx, int fd) {
     return 0 ;
 }
 
-vfs_node_t * parse_tree(char * raw, vfs_node_t * parent, char ** out_raw, size_t * out_total) {
-    
-    vfs_node_t * node = vfs_node_malloc(parent) ;
-    if(!node) {
-        return NULL ;
-    }
-
-    node->type = *raw ;
-    raw ++ ;
-
-    node->filename = raw ;
-    raw+= strlen(node->filename) + 1 ;
-
-    if(node->type==VFS_NODE_FILE) {
-        node->offset = * ((uint32_t *)raw) ;
-        raw+= sizeof(uint32_t) ;
-    }
-
-    node->filesize = * ((uint32_t *)raw) ;
-    raw+= sizeof(uint32_t) ;
-
-    (*out_total)+= node->filesize ;
-
-    if(node->type==VFS_NODE_DIR) {
-        for(int i=0;i<node->filesize;i++) {
-            parse_tree(raw, node, &raw, out_total) ;
-        }
-    }
-
-    if(out_raw) {
-        *out_raw = raw ;
-    }
-
-    return node ;
-}
-
 static vfs_rawfs_t * fs_root = NULL ;
 
+#endif
+
+
 void be_rawfs_mount(const char * mntPoint) {
+
+	char * romdata = NULL ;
+
+#ifndef SIMULATION
 
 	const esp_partition_t * part = esp_partition_find_first(0x01, 0x81, "fsroot");
     if(!part) {
@@ -340,14 +366,30 @@ void be_rawfs_mount(const char * mntPoint) {
         return ;
     }
 
-	char* romdata = NULL ;
+    printf("root addr: 0x%x\n",part->address) ;
+    dn(part->size)
+    ds(part->label)
+
+
+    // spi_flash_mmap_handle_t hhh ;
+    // void * fsroot_ptr ;
+    // if(spi_flash_mmap(0x328000, 0x48000, SPI_FLASH_MMAP_DATA, (const void **)&fsroot_ptr, &hhh) == ESP_OK) {
+    //     print_block(fsroot_ptr, 16, 8) ;
+    // }
+    // else {
+    //     printf("spi_flash_mmap(0x328000, 0x48000) failed\n") ;
+    // }
+
+    romdata = NULL ;
 	spi_flash_mmap_handle_t hrom ;
     esp_err_t ret = esp_partition_mmap(part, 0, part->size, SPI_FLASH_MMAP_DATA, (const void**)&romdata, &hrom) ;
-	if(ret!= ESP_OK) {
+	if(ret!= ESP_OK || !romdata) {
         printf("mmap failed: %d\n", ret) ;
         return ;
     }
 
+    // print_block(romdata, 16, 8) ;
+    
     fs_root = malloc(sizeof(vfs_rawfs_t)) ;
     fs_root->partition_size = part->size ;
     fs_root->size = 0 ;
@@ -391,15 +433,51 @@ void be_rawfs_mount(const char * mntPoint) {
         return ;
     }
 
-    // untar
-    // read_tar_from_flash(fs_root) ;
+#else
+
+    char * tarpath = vfspath_to_fs("../img/fs-root.img") ;
+
+    struct stat statbuf;
+    if(stat(tarpath,&statbuf)<0) {
+        printf("Failed to stat file: %s", tarpath);
+        free(tarpath) ;
+        return ;
+    }
+
+    dn(statbuf.st_size)
+
+    romdata = malloc(statbuf.st_size) ;
+    if(!romdata) {
+        printf("malloc failed: %d\n",statbuf.st_size) ;
+        return ;
+    }
+
+    FILE * file = fopen(tarpath, "r") ;
+    if(!file) {
+        printf("open file failed: %s", tarpath);
+        return ;
+    }
+
+    fread(romdata, 1, statbuf.st_size, file) ;
+
+    fclose(file) ;
+    free(tarpath) ;
+
+    vfs_node_t * root = parse_tree(romdata, NULL, NULL, NULL) ;
+
+    vfs_node_printf(root, "") ;
+
+    print_block(romdata, 8, 8) ;
+#endif
 
     return ;
 }
 
 
+#ifndef SIMULATION
 vfs_rawfs_t * be_rawfs_root() {
     return fs_root ;
 }
+#endif
 
 // esp_partition_read

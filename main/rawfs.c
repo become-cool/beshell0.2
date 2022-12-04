@@ -128,7 +128,7 @@ vfs_node_t * parse_tree(char * raw, vfs_node_t * parent, char ** out_raw, size_t
     raw+= strlen(node->filename) + 1 ;
 
 #ifdef SIMULATION
-    printf("%s\n",node->filename) ;
+    // printf("%s\n",node->filename) ;
 #endif
 
     node->filesize = * ((uint32_t *)raw) ;
@@ -467,10 +467,9 @@ void be_rawfs_mount(const char * mntPoint) {
 
     vfs_node_printf(root, "") ;
 
-    print_block(romdata, 8, 8) ;
+    // print_block(romdata, 8, 8) ;
 #endif
 
-    return ;
 }
 
 

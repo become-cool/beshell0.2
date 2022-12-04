@@ -134,8 +134,6 @@ static JSContext * init_custom_context(JSRuntime *rt) {
     be_module_serial_require(ctx) ;
     be_module_socks_require(ctx) ;
     be_module_driver_require(ctx) ;
-#else
-    be_simulate_require(ctx) ;
 #endif
     be_module_gameplayer_require(ctx) ;
     be_module_media_require(ctx) ;
@@ -144,6 +142,10 @@ static JSContext * init_custom_context(JSRuntime *rt) {
     be_module_lvgl_require(ctx) ;
     module_metadata_require(ctx) ;
     be_module_nvs_require(ctx) ;
+
+#ifdef SIMULATION
+    be_simulate_require(ctx) ;
+#endif
 
     return ctx;
 }

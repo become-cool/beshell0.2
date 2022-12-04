@@ -263,7 +263,7 @@ static JSValue js_lv_disp_height(JSContext *ctx, JSValueConst this_val, int argc
     if(!thisdisp->driver) {
         THROW_EXCEPTION("invalid lv.Display object")
     }
-    return JS_NewInt32(ctx, thisdisp->driver->hor_res) ;
+    return JS_NewInt32(ctx, thisdisp->driver->ver_res) ;
 }
 static JSValue js_lv_disp_id(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     THIS_DISP

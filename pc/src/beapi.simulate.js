@@ -1,5 +1,10 @@
 ;(function(){
 
+
+beapi.nvs.readString = function() { return null }
+
+
+
 // wifi mode
 // const MODE_NONE = 0
 const MODE_STA = 1
@@ -106,6 +111,9 @@ beapi.wifi = {
     staStarted() { return true } ,
     staConnected() { return isStaConnected } ,
     apStarted() { return true } ,
+
+    hasInited() { return false } ,
 }
 
-})() ;
+
+})()

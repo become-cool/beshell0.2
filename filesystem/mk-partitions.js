@@ -118,3 +118,4 @@ fs.writeFileSync(__dirname+'/partitions-4MB.csv',csv4MB)
 fs.writeFileSync(__dirname+'/partitions-16MB.csv',csv16MB)
 
 
+require(__dirname+"/mk-firmware-json.js")

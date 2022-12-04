@@ -1,8 +1,7 @@
 
-if(beapi.wifi.hasInited()) {
+if(beapi.wifi.hasInited() || process.simulate) {
 
     const telweb = require("telweb")
-
 
     let addr8022 = "http://0.0.0.0:8022"
     let addr80 = "http://0.0.0.0:"+(process.simulate?'8088':'80')

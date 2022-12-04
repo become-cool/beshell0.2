@@ -4,7 +4,8 @@
     "home": "https://become.cool",
     "description": "",
     "chips": [
-        "esp32"
+        "esp32",
+        "esp32s3"
     ],
     "author": "BECOME",
     "priority": 5,
@@ -50,11 +51,11 @@
             "chiptype": "esp32s3"
         },
         {
-            "address": "328000",
+            "address": "0x328000",
             "path": "fs-root.img"
         },
         {
-            "address": "370000",
+            "address": "0x370000",
             "path": "fs-home.img"
         }
     ]

@@ -1,2 +1,2 @@
-beapi.midi.loadSF2("")
+// beapi.midi.loadSF2("")
 console.log("xxxxxxxxx")

@@ -15,6 +15,7 @@
 #endif
 
 static uint8_t _disp_id = 0 ;
+disp_drv_spec_t * _default_disp_drv_spec = NULL ;
 
 JSValue js_lv_disp_wrapper(JSContext *ctx, lv_disp_t * disp) {
     if(!disp || !disp->driver) {
@@ -52,48 +53,6 @@ typedef struct {
     // bool flushed ;   
 } disp_spi_param_t ;
 
-// static disp_spi_param_t disp_spi_param ;
-// static QueueHandle_t    disp_spi_queue ;
-
-// static void flush_disp_if_other_ready() {
-//     if(disp_spi_param.flushed) {
-//         lv_disp_flush_ready(disp_spi_param.disp) ;
-//     }
-//     else {
-//         disp_spi_param.flushed = true ;
-//     }
-// }
-
-// static void disp_spi_task() {
-
-// 	disp_spi_param_t * param = NULL;
-    
-//     while(1) {
-//         param = NULL ;
-// 		if( disp_spi_queue && (xQueueReceive(disp_spi_queue, &param, portMAX_DELAY)==pdFALSE || !param)) {
-//             vTaskDelay(1) ;
-//             continue ;
-//         }
-//         st77xx_draw_rect(((disp_drv_spec_t*)param->disp->user_data)->spi_dev, param->x1,param->y1, param->x2, param->y2, param->buff) ;
-
-//         flush_disp_if_other_ready() ;
-// 	}
-// }
-
-// TaskHandle_t disp_spi_task_handle = NULL;
-// bool disp_spi_task_started = false ;
-// static void disp_spi_start(){
-//     if(!disp_spi_task_started) {
-// 	    disp_spi_queue = xQueueCreate(5, sizeof(disp_spi_param_t));
-//         if(!disp_spi_queue) {
-//             printf("xQueueCreate() falided.\n") ;
-//             return ;
-//         }
-//         xTaskCreatePinnedToCore(&disp_spi_task, "disp_spi_task", 1024*10, NULL, 5, NULL, 1);
-
-//         disp_spi_task_started = true ;
-//     }
-// }
 
 static void disp_st77XX_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color_p) {
     if(!disp->user_data) {
@@ -101,24 +60,9 @@ static void disp_st77XX_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_c
         return ;
     }
 
-    // disp_spi_param.disp = disp ;
-    // disp_spi_param.x1 = area->x1 ;
-    // disp_spi_param.y1 = area->y1 ;
-    // disp_spi_param.x2 = area->x2 ;
-    // disp_spi_param.y2 = area->y2 ;
-    // disp_spi_param.buff = color_p ;
-    // disp_spi_param.flushed = false ;
-
-    // disp_spi_param_t * param = &disp_spi_param ;
-
-    // printf("send()\n") ;
-	// xQueueSend(disp_spi_queue, &param, 0);
-
-    
     st77xx_draw_rect(((disp_drv_spec_t*)disp->user_data)->spi_dev, area->x1,area->y1, area->x2, area->y2, color_p) ;
     // flush_disp_if_other_ready() ;
     
-
     ws_disp_flush(disp, area, color_p) ;
 
     // flush_disp_if_other_ready() ;
@@ -355,7 +299,9 @@ static const JSCFunctionListEntry js_lv_disp_proto_funcs[] = {
 #endif
 };
 
-
+disp_drv_spec_t * default_disp_drv_spec() {
+    return _default_disp_drv_spec ;
+}
 
 // static JSValue js_lvgl_get_default_display(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
 //     lv_disp_t * disp = lv_disp_get_default() ;
@@ -511,6 +457,10 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
     if( strncmp(typestr, "ST7789", 6)==0 ) {
 
 #ifndef SIMULATION
+
+        if(!_default_disp_drv_spec) {
+            _default_disp_drv_spec = dvrdata ;
+        }
 
         GET_INT_PROP(argv[1], "cs", cs, { goto excp ;})
         GET_INT_PROP(argv[1], "dc", dc, { goto excp ;})

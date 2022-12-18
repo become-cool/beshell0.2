@@ -207,7 +207,7 @@ function rm(path) {
     beapi.fs.unlinkSync(path)
 }
 function touch() {
-    console.log("this repl cmd not implemented")
+    beapi.fs.writeFileSync(resolvepath(path), '')
 }
 function cat(path) {
     console.log(beapi.fs.readFileSync(resolvepath(path)).asString())
@@ -302,12 +302,15 @@ function onboot(path) {
     path = resolvepath(path,true)
     require(__dirname+"/boot.js").setAutoScript(path)
 }
+function help() {
+    console.log("command:", Object.keys(ShellCmds).join(", "))
+}
 
 const ShellCmds = {
     cd, pwd, ls, cp, rm, mv, touch, cat, stat, mkdir
     , require:cmd_require
     , free, reset, reboot, onboot
-    , compile
+    , compile, help, "?": help
 }
 
 

@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include "psram.h"
+#include "module_telnet.h"
 
 #define pf(...) printf(__VA_ARGS__) ;printf("\n") ;
 #define dd printf("@%d\n", __LINE__) ;

@@ -5,9 +5,21 @@
 #include "lvgl.h"
 #include "lv_conf.h"
 #include "mongoose.h"
+#include "disp_st77xx.h"
+#include <freertos/task.h>
+#include <freertos/queue.h>
+#include <freertos/semphr.h>
+#include "tjpg.h"
 
 
 bool telnet_ws_response(struct mg_connection *c, int ev, void *ev_data, void *fn_data) ;
+
+
+// 投屏
+bool telnet_ws_projection_sessn_alloc(struct mg_connection *conn)  ;
+void telnet_ws_projection_sess_free() ;
+void telnet_ws_response_projection(struct mg_connection *conn, struct mg_ws_message * wm) ;
+
 
 void telnet_ws_set_repl_client(struct mg_connection * conn) ;
 void telnet_ws_output(uint8_t cmd, int pkgid, const char * data, size_t datalen) ;

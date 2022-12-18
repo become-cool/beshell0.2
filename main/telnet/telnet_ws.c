@@ -53,45 +53,32 @@ uint8_t jpeg_quality = 20 ;
 typedef enum {
     WS_REPL = 1 ,
     WS_DISP ,
+    WS_PROJ ,
 } WS_TYPE ;
 
 typedef struct {
     stack_base_t stack_item;
     struct mg_connection *conn;
-    WS_TYPE type ;   // 1: repl, 2: display
+    WS_TYPE type ;
     bool active ;
-    lv_disp_t * disp ;
-
+    void * data ;   // lv_disp_t*
 } ws_client_t;
 
-ws_client_t *lst_clients = NULL;
+ws_client_t * client_repl = NULL;           // repl客户端
+ws_client_t * client_disp = NULL;           // 虚拟桌面客户端
+ws_client_t * client_proj = NULL;           // 投屏客户端
 
-ws_client_t *lst_clients_search_by_conn(ws_client_t *lst, struct mg_connection *conn) {
-    for (ws_client_t *item = lst; item != NULL; item = (ws_client_t *)((stack_base_t *)item)->_next) {
-        if (item->conn == conn)
-            return item;
-    }
-    return NULL;
-}
+#define SET_CLIENT(type, client)                \
+    if( client_##type!=NULL && client_##type->conn!=NULL) { \
+        client_##type->conn->is_closing = 1 ;   \
+    }                                           \
+    client_##type = client ;
 
-
-struct mg_connection * repl_client = NULL ;
-
-void telnet_ws_set_repl_client(struct mg_connection * conn) {
-    if(repl_client) {
-        if(repl_client==conn) {
-            return ;
-        }
-        // @todo tell them
-        repl_client->is_closing = 1 ;
-    }
-    repl_client = conn ;
-}
 
 
 void ws_disp_flush(lv_disp_drv_t *dispdrv, const lv_area_t *area, lv_color_t *color_p) {
 
-    if(stack_count(lst_clients)==0) {
+    if(!client_disp) {
         lv_disp_flush_ready(dispdrv) ;
         return ;
     }
@@ -126,15 +113,11 @@ void ws_disp_flush(lv_disp_drv_t *dispdrv, const lv_area_t *area, lv_color_t *co
 
     fmt2jpg((uint8_t *)color_p, size, area->x2-area->x1+1, area->y2-area->y1+1, PIXFORMAT_RGB565, jpeg_quality, jpgbuff, &jpglen);
 
-    STACK_FOREACH(lst_clients, client, ws_client_t) {
-        if(client->type==WS_DISP && client->active && client->disp->driver==dispdrv) {
-            mg_ws_send(client->conn, (char *)buff, jpglen+10, WEBSOCKET_OP_BINARY);
-        }
-    }
-
-    free(buff) ;
+    mg_ws_send(client_disp->conn, (char *)buff, jpglen+10, WEBSOCKET_OP_BINARY);
 
     lv_disp_flush_ready(dispdrv) ;
+    
+    free(buff) ;
 }
 
 static void listdir(struct mg_connection *c, const char * path) {
@@ -221,49 +204,67 @@ static void listdir(struct mg_connection *c, const char * path) {
 static void upgrade_ws(struct mg_connection *c, struct mg_http_message *hm, WS_TYPE type) {
 
     mg_ws_upgrade(c, hm, NULL);
+    
+    ws_client_t * client = NULL ;
+    client = malloc(sizeof(ws_client_t));
+    memset(client, 0, sizeof(ws_client_t));
+    client->conn = c;
+    client->type = type;
+    c->userdata = client;
 
     if( type==WS_REPL ) {
-        telnet_ws_set_repl_client(c) ;
+        client_repl = client ;
+        SET_CLIENT(repl, client) ;
     }
-    else if ( type==WS_DISP && lst_clients_search_by_conn(lst_clients, c)==NULL ) {
+
+    else if ( type==WS_DISP ) {
 
         char strid[4] ;
         int idlen = mg_http_get_var(&hm->query,"id",strid,sizeof(strid)) ;
         if(idlen<=0) {
 
             // @TODO : 返回错误给客户端
-
             printf("missing display id\n") ;
-            c->is_closing = 1 ;
-            return;
+            goto fail ;
         }
         strid[idlen] = 0 ;
         int id = atoi(strid) ;
         if(id<0 || id>255) {
             // @TODO : 返回错误给客户端
             printf("invalid display id: %d\n", id) ;
-            c->is_closing = 1 ;
-            return;
+            goto fail ;
         }
 
         lv_disp_t * disp = find_disp_by_id(id) ;
         if(!disp) {
             // @TODO : 返回错误给客户端
             printf("display id not exists: %d\n", id) ;
-            c->is_closing = 1 ;
-            return;
+            goto fail ;
         }
 
-        ws_client_t *client = malloc(sizeof(ws_client_t));
-        memset(client, 0, sizeof(ws_client_t));
-        client->conn = c;
-        client->type = WS_DISP;
-        client->disp = disp ;
         client->active = true ;
-        stack_unshift(&lst_clients, client);
-
-        printf("new ws connect, lst_clients count: %d\n", stack_count(lst_clients));
+        client->data = disp ;
+        
+        SET_CLIENT(disp, client) ;
     }
+
+    else if( type==WS_PROJ ) {
+        if(!telnet_ws_projection_sessn_alloc(c)) {
+            goto fail ;
+        }
+
+        if( client_proj!=NULL && client_proj->conn!=NULL) {
+            printf("client_proj->conn->is_closing = 1\n") ;
+            client_proj->conn->is_closing = 1 ;
+        }
+        client_proj = client ;
+    }
+
+    return ;
+
+fail:
+    c->is_closing = 1 ;
+    free(client) ;
 }
 
 static void response_fs(struct mg_connection *c, struct mg_http_message *hm, const char * path) {
@@ -276,6 +277,7 @@ static void response_fs(struct mg_connection *c, struct mg_http_message *hm, con
     }
 
     if(mg_vcmp(&hm->method, "GET")==0) {
+        ds(path)
         // 文件
         if(S_ISREG(statbuf.st_mode)) {
             struct mg_http_serve_opts opts = {.mime_types = "application/octet-stream"};
@@ -294,11 +296,10 @@ static void response_fs(struct mg_connection *c, struct mg_http_message *hm, con
     // 上传文件 CROS 浏览器跨域时的预检请求
     else if(mg_vcmp(&hm->method, "OPTIONS")==0){
         printf("CROS\n") ;
-        mg_http_reply(c, 204,  CROS_RSPN_HEADERS
-        , "", "");
+        mg_http_reply(c, 204,  CROS_RSPN_HEADERS, "", "");
     }
     else if(mg_vcmp(&hm->method, "POST")==0) {
-        // printf("post path=%s, body len:%d\n", path, hm->body.len); ;
+        printf("post path=%s, body len:%d\n", path, hm->body.len); ;
 
         // 检查目录是否存在
         if(!S_ISDIR(statbuf.st_mode)) {
@@ -325,11 +326,14 @@ static void response_fs(struct mg_connection *c, struct mg_http_message *hm, con
 	            size_t wroteBytes = fwrite(part.body.ptr, 1, part.body.len, fd);
                 fclose(fd) ;
 
+                printf("wroten:%d\n", wroteBytes) ;
                 if(wroteBytes==part.body.len) {
                     mg_http_reply(c, 200, CROS_RSPN_HEADERS, "%s", "ok") ;
+                    printf("200\n") ;
                 }
                 else {
                     mg_http_reply(c, 200, CROS_RSPN_HEADERS, "{error: \"%s\"}", "some error occur") ;
+                    printf("some error occur\n") ;
                 }
                 return ;
             }
@@ -428,9 +432,7 @@ bool telnet_ws_response_http(struct mg_connection *c, struct mg_http_message *hm
         return true ;
     }
     // /fs
-    else if( hm->uri.len>=3 && hm->uri.ptr[0]=='/' && hm->uri.ptr[1]=='f' && hm->uri.ptr[2]=='s'
-        && (hm->uri.len==3 || hm->uri.ptr[3]=='/')
-    ) {
+    else if( hm->uri.len>=3 && strncmp(hm->uri.ptr,"/fs",3) && (hm->uri.len==3 || hm->uri.ptr[3]=='/')) {
 #ifndef SIMULATION
         char * path = malloc(hm->uri.len+1) ;
         memcpy(path,hm->uri.ptr,hm->uri.len) ;
@@ -462,109 +464,118 @@ bool telnet_ws_response_http(struct mg_connection *c, struct mg_http_message *hm
         return true ;
     }
 
+    else if (mg_http_match_uri(hm, "/projection")) {
+        upgrade_ws(c, hm, WS_PROJ) ;
+        return true ;
+    }
+
     return false ;
 }
 
 bool telnet_ws_response_ws(struct mg_connection *c, struct mg_ws_message * wm) {
 
-    ws_client_t *client = lst_clients_search_by_conn(lst_clients, c);
-
-    // for /display
-    if( client && client->type == WS_DISP) {
-        // printf("%d(%d)\n", wm->data.ptr[0], wm->data.len) ;
-
-        if (wm->data.ptr[0] == WS_DISP_CMD_REFRESH && wm->data.len == 1) {
-            if (client->disp) {
-                lv_area_t area;
-                memset(&area, 0, sizeof(lv_area_t));
-                area.x2 = client->disp->driver->hor_res - 1;
-                area.y2 = client->disp->driver->ver_res - 1;
-
-                // printf("_lv_inv_area() (%d,%d)->(%d,%d)", area.x1,area.y1,area.x2,area.y2) ;
-                bool active = client->active ;
-                client->active = true ;
-                _lv_inv_area(client->disp, &area);
-                lv_task_handler();
-                client->active = active ;
-            }
-            else {
-                printf("there is no default display\n");
-            }
-        }
-
-        else if (wm->data.ptr[0] == WS_DISP_CMD_RELEASE) {
-            if(wm->data.len == 2) {
-                indev_driver_spec_t * indev_spec = find_indev_spec_by_id( ((uint8_t *)wm->data.ptr)[1] ) ;
-                if(indev_spec) {
-                    indev_spec->data.pointer.state = LV_INDEV_STATE_RELEASED ;
-                    indev_spec->fake = true ;
-                }
-                else {
-                    printf("invalid indev id: %d\n", ((uint8_t *)wm->data.ptr)[1] ) ;
-                }
-            }
-            else {
-                printf("invalid indev frame data len: %d\n", wm->data.len ) ;
-            }
-        }
-        else if (wm->data.ptr[0] == WS_DISP_CMD_PRESS) {
-            if(wm->data.len == 6) {
-                indev_driver_spec_t * indev_spec = find_indev_spec_by_id( ((uint8_t *)wm->data.ptr)[1] ) ;
-                if(indev_spec) {
-                    uint16_t *data = (uint16_t *)(wm->data.ptr + 2);
-                    indev_spec->data.pointer.x = *data ;
-                    indev_spec->data.pointer.y = *(data + 1);
-                    indev_spec->data.pointer.state = LV_INDEV_STATE_PRESSED ;
-                    indev_spec->fake = true ;
-                }
-                else {
-                    printf("invalid indev id: %d\n", ((uint8_t *)wm->data.ptr)[1] ) ;
-                }
-            }
-            else {
-                printf("invalid indev frame data len: %d\n", wm->data.len ) ;
-            }
-        }
-        else if (wm->data.ptr[0] == WS_DISP_CMD_QUALITY) {
-            jpeg_quality = wm->data.ptr[1] ;
-            
-            lv_area_t area;
-            memset(&area, 0, sizeof(lv_area_t));
-            area.x2 = client->disp->driver->hor_res - 1;
-            area.y2 = client->disp->driver->ver_res - 1;
-            _lv_inv_area(client->disp, &area);
-        }
-
-        else {
-            printf("invalid cmd type: %d\n", wm->data.ptr[0]) ;
-            return false ;
-        }
+    ws_client_t * client = (ws_client_t *)c->userdata ;
+    if(!client) {
+        printf("invalid client\n") ;
+        return false ;
     }
 
     // for /repl
-    else if(c==repl_client) {
-        JSContext * ctx = (JSContext *)be_module_mg_mgr()->userdata ;
-        if(ctx) {
-            uint8_t cmd = wm->data.ptr[0] ;
-            uint8_t pkgid = wm->data.ptr[1] ;
-            char * code = wm->data.ptr + 2 ;
-            size_t codelen = wm->data.len - 2 ;
-
-            telnet_run(ctx, pkgid, 0, cmd, (uint8_t *) code, codelen) ;
+    switch(client->type) {
+        case WS_REPL: {
+            JSContext * ctx = (JSContext *)be_module_mg_mgr()->userdata ;
+            if(ctx) {
+                uint8_t cmd = wm->data.ptr[0] ;
+                uint8_t pkgid = wm->data.ptr[1] ;
+                char * code = wm->data.ptr + 2 ;
+                size_t codelen = wm->data.len - 2 ;
+                telnet_run(ctx, pkgid, 0, cmd, (uint8_t *) code, codelen) ;
+            }
+            break ;
         }
-    }
+        case WS_DISP: {
+            // printf("%d(%d)\n", wm->data.ptr[0], wm->data.len) ;
 
-    else {
-        
-        printf("invalid client\n") ;
+            if (wm->data.ptr[0] == WS_DISP_CMD_REFRESH && wm->data.len == 1) {
+                if (client->data) {
+                    lv_area_t area;
+                    memset(&area, 0, sizeof(lv_area_t));
+                    area.x2 = ((lv_disp_t*)client->data)->driver->hor_res - 1;
+                    area.y2 = ((lv_disp_t*)client->data)->driver->ver_res - 1;
 
-        return false ;
+                    // printf("_lv_inv_area() (%d,%d)->(%d,%d)", area.x1,area.y1,area.x2,area.y2) ;
+                    bool active = client->active ;
+                    client->active = true ;
+                    _lv_inv_area(((lv_disp_t*)client->data), &area);
+                    lv_task_handler();
+                    client->active = active ;
+                }
+                else {
+                    printf("there is no default display\n");
+                }
+            }
+
+            else if (wm->data.ptr[0] == WS_DISP_CMD_RELEASE) {
+                if(wm->data.len == 2) {
+                    indev_driver_spec_t * indev_spec = find_indev_spec_by_id( ((uint8_t *)wm->data.ptr)[1] ) ;
+                    if(indev_spec) {
+                        indev_spec->data.pointer.state = LV_INDEV_STATE_RELEASED ;
+                        indev_spec->fake = true ;
+                    }
+                    else {
+                        printf("invalid indev id: %d\n", ((uint8_t *)wm->data.ptr)[1] ) ;
+                    }
+                }
+                else {
+                    printf("invalid indev frame data len: %d\n", wm->data.len ) ;
+                }
+            }
+            else if (wm->data.ptr[0] == WS_DISP_CMD_PRESS) {
+                if(wm->data.len == 6) {
+                    indev_driver_spec_t * indev_spec = find_indev_spec_by_id( ((uint8_t *)wm->data.ptr)[1] ) ;
+                    if(indev_spec) {
+                        uint16_t *data = (uint16_t *)(wm->data.ptr + 2);
+                        indev_spec->data.pointer.x = *data ;
+                        indev_spec->data.pointer.y = *(data + 1);
+                        indev_spec->data.pointer.state = LV_INDEV_STATE_PRESSED ;
+                        indev_spec->fake = true ;
+                    }
+                    else {
+                        printf("invalid indev id: %d\n", ((uint8_t *)wm->data.ptr)[1] ) ;
+                    }
+                }
+                else {
+                    printf("invalid indev frame data len: %d\n", wm->data.len ) ;
+                }
+            }
+            else if (wm->data.ptr[0] == WS_DISP_CMD_QUALITY) {
+                jpeg_quality = wm->data.ptr[1] ;
+                be_lv_disp_inv((lv_disp_t*)client->data) ;
+            }
+
+            else {
+                printf("invalid cmd type: %d\n", wm->data.ptr[0]) ;
+                return false ;
+            }
+
+            break ;
+        }
+
+        case WS_PROJ:
+            telnet_ws_response_projection(c, wm) ;
+            break ;
     }
 
     return true ;
 }
 
-// 返回 true 表示已经处理完必，否则返回 false
+
+#define FREE_RTC_Client(conn, client) \
+        free(conn->userdata) ;      \
+        conn->userdata = NULL ;     \
+        client = NULL ;             \
+
+// 返回 true 表示已经处理完毕，否则返回 false
 bool telnet_ws_response(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
     (void)fn_data;
     
@@ -582,20 +593,19 @@ bool telnet_ws_response(struct mg_connection *c, int ev, void *ev_data, void *fn
         return telnet_ws_response_ws(c,ev_data) ;
     }
     else if (ev == MG_EV_CLOSE) {
-        ws_client_t *client = lst_clients_search_by_conn(lst_clients, c);
-        if (!client) {
-            // printf("unknow client close ?\n");
-        }
-        else {
-            stack_remove(&lst_clients, client);
-        }
 
-        if(repl_client == c) {
-            repl_client = NULL ;
+        if(c->userdata==client_repl) {
+            FREE_RTC_Client(c, client_repl)
+        }
+        else if(c->userdata==client_disp) {
+            FREE_RTC_Client(c, client_disp)
+        }
+        else if(c->userdata==client_proj) {
+            telnet_ws_projection_sess_free() ;
+            FREE_RTC_Client(c, client_proj)
         }
 
         return false ;
-        // printf("lst_clients count: %d\n", stack_count(lst_clients));
     }
     
     else {
@@ -607,20 +617,14 @@ bool telnet_ws_response(struct mg_connection *c, int ev, void *ev_data, void *fn
 
 void telnet_ws_output(uint8_t cmd, int pkgid, const char * data, size_t datalen) {
 
-
     size_t pkglen = datalen+2 ;
     char * pkg = malloc(pkglen) ;
     pkg[0] = cmd ;
     pkg[1] = pkgid ;
     memcpy(pkg+2, data, datalen) ;
     
-    // printf("lst_clients count: %d\n", stack_count(lst_clients));
-    // STACK_FOREACH(lst_clients, client, ws_client_t) {
-    //     mg_ws_send(client->conn, pkg, pkglen, WEBSOCKET_OP_BINARY);
-    // }
-
-    if(repl_client) {
-        mg_ws_send(repl_client, pkg, pkglen, WEBSOCKET_OP_BINARY);
+    if(client_repl && client_repl->conn) {
+        mg_ws_send(client_repl->conn, pkg, pkglen, WEBSOCKET_OP_BINARY);
     }
 
 	free(pkg) ;
@@ -681,7 +685,7 @@ void be_telnet_ws_init() {
     // Captive Portal
     mg_listen(be_module_mg_mgr(), "udp://0.0.0.0:53", captive_dns, NULL);
 
-    repl_client = NULL ;
+    client_repl = NULL ;
 }
 void be_telnet_ws_require(JSContext * ctx, JSValue telnet) {
     // JSValue server = be_http_server_new(ctx, conn, JS_UNDEFINED) ;

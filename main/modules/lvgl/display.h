@@ -31,6 +31,9 @@ JSClassID lv_disp_js_class_id() ;
 lv_disp_t * find_disp_by_id(uint8_t id) ;
 disp_drv_spec_t * find_disp_spec_by_id(uint8_t id) ;
 
+disp_drv_spec_t * default_disp_drv_spec() ;
+
+
 void be_lv_display_init() ;
 
 void be_lv_display_require(JSContext *ctx, JSValue lvgl) ;

@@ -312,7 +312,7 @@ static uint16_t rgb565_conv_inv(uint16_t r,uint16_t g,uint16_t b) {
 
 /* copy nes palette over to hardware */
 static void set_palette(rgb_t *pal) {
-    printf("nes.set_palette()\n") ;
+    // printf("nes.set_palette()\n") ;
     uint16 c;
     int i;
     for (i = 0; i < PALETTE_SIZE; i++) {

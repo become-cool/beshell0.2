@@ -4,8 +4,11 @@
 #include "quickjs-libc.h"
 #include <stdbool.h>
 #include "mongoose.h"
+#include "esp_http_server.h"
 
 bool driver_camera_has_inited() ;
+
+esp_err_t ws_rtc_camera_stream(httpd_req_t *req) ;
 
 bool be_module_driver_camera_response(struct mg_connection *c, int ev, void *ev_data) ;
 

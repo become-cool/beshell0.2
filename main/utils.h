@@ -181,6 +181,9 @@ void * mallocDMA(size) ;
 
 void freeArrayBuffer(JSRuntime *rt, void *opaque, void *ptr) ;
 
+#define HMALLOC(var, size) var = heap_caps_malloc(size, MALLOC_CAP_DMA); \
+    if(!var) { var = heap_caps_malloc(size, MALLOC_CAP_SPIRAM); }
+
 #define GET_INT_PROP(obj, propName, cvar, excp)                                     \
     int32_t cvar = 0 ;                                                              \
     {                                                                               \

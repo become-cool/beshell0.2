@@ -3,7 +3,6 @@
 #include "module_wifi.h"
 #include "utils.h"
 #include "esp_camera.h"
-#include "esp_http_server.h"
 #include <string.h>
 #include "img_converters.h"
 
@@ -20,8 +19,8 @@ bool driver_camera_has_inited() {
 }
 
 
-httpd_handle_t stream_httpd = NULL;
-static esp_err_t web_camera_stream(httpd_req_t *req) {
+// httpd_handle_t stream_httpd = NULL;
+esp_err_t ws_rtc_camera_stream(httpd_req_t *req) {
 
     httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
     httpd_resp_set_hdr(req, "X-Framerate", "60");
@@ -72,31 +71,31 @@ static esp_err_t web_camera_stream(httpd_req_t *req) {
     return ESP_OK;
 }
 
-static void web_camera_init() {
+// static void web_camera_init() {
 
-    if(!wifi_has_inited()) {
-        return ;
-    }
+//     if(!wifi_has_inited()) {
+//         return ;
+//     }
     
-    httpd_config_t config = HTTPD_DEFAULT_CONFIG();
-    config.max_uri_handlers = 8;
-    config.server_port = 8019 ;
-    config.ctrl_port += 8019 ;
-    config.core_id = 1 ;
+//     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
+//     config.max_uri_handlers = 8;
+//     config.server_port = 8019 ;
+//     config.ctrl_port += 8019 ;
+//     config.core_id = 1 ;
 
-    httpd_uri_t stream_uri = {
-        .uri = "/",
-        .method = HTTP_GET,
-        .handler = web_camera_stream,
-        .user_ctx = NULL};
+//     httpd_uri_t stream_uri = {
+//         .uri = "/",
+//         .method = HTTP_GET,
+//         .handler = web_camera_stream,
+//         .user_ctx = NULL};
 
-    if (httpd_start(&stream_httpd, &config) != ESP_OK) {
-        printf("start camera stream server faild\n") ;
-        return ;
-    }
+//     if (httpd_start(&stream_httpd, &config) != ESP_OK) {
+//         printf("start camera stream server faild\n") ;
+//         return ;
+//     }
     
-    httpd_register_uri_handler(stream_httpd, &stream_uri);
-}
+//     httpd_register_uri_handler(stream_httpd, &stream_uri);
+// }
 
 
 
@@ -353,7 +352,7 @@ bool be_module_driver_camera_response(struct mg_connection *c, int ev, void *ev_
 
 void be_module_driver_camera_init() {
     inited = false ;
-    web_camera_init() ;
+    // web_camera_init() ;
 }
 
 void be_module_driver_camera_require(JSContext *ctx, JSValue driver) {

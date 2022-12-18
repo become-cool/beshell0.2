@@ -87,8 +87,8 @@ const LibDefaultConf = {
                 , "use_apll": 0
             }} ,
             dev: [
-                {driver:'sdspi',setup:{cs:48,spi:1,mount:'/mnt/sd',khz:5000}} ,
-                {"driver":"ST7789V", "setup":{"dc":38, "cs":45, "spi":1, "width":320, "height":240, "freq":60000000, "MADCTL": 96}} ,
+                {driver:'sdspi',setup:{cs:48,spi:1,mount:'/mnt/sd',khz:15000}} ,
+                {"driver":"ST7789V", "setup":{"dc":38, "cs":45, "spi":1, "width":320, "height":240, "freq":80000000, "MADCTL": 96}} ,
                 {"driver":"joypad", "setup":{"i2c":0, "addr":51}} ,
                 {"driver":"joypad", "setup":{"i2c":0, "addr":52}} ,
             ]

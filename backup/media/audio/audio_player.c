@@ -60,8 +60,7 @@ static int start_decoder_task(player_t *player)
             return -1;
     }
 
-    if (xTaskCreatePinnedToCore(task_func, task_name, stack_depth, player,
-    PRIO_MAD, NULL, 1) != pdPASS) {
+    if (xTaskCreatePinnedToCore(task_func, task_name, stack_depth, player,PRIO_MAD, NULL, 1) != pdPASS) {
         ESP_LOGE(TAG, "ERROR creating decoder task! Out of memory?");
         return -1;
     } else {

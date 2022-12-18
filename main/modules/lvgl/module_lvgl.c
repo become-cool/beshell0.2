@@ -5,7 +5,6 @@
 #include "style.h"
 #include "be_lv_struct_wrapper.h"
 #include "be_lv_draggable.h"
-#include "lvgl.h"
 #include "lv_conf.h"
 #include "utils.h"
 #include "cutils.h"
@@ -28,7 +27,8 @@ int16_t indev_input_x = 0 ;
 int16_t indev_input_y = 0 ;
 bool indev_input_pressed = false ;
 
-bool lv_has_inited = false ;
+static bool lv_tick_active = false ;
+static bool lv_tick_status_save = false ;
 #define LV_TICK_PERIOD_MS 1
 
 
@@ -177,7 +177,7 @@ static JSValue js_lvgl_refresh(JSContext *ctx, JSValueConst this_val, int argc, 
 #ifndef SIMULATION
 void lv_tick_task(void *arg) {
     (void) arg;
-    if(lv_has_inited) {
+    if(lv_tick_active) {
         lv_tick_inc(LV_TICK_PERIOD_MS);
     }
 }
@@ -185,11 +185,28 @@ void lv_tick_task(void *arg) {
 struct sigaction tact;
 struct itimerval value;
 void sig_alm_handler(int sig_num) {
-    if(lv_has_inited) {
+    if(lv_tick_active) {
         lv_tick_inc(LV_TICK_PERIOD_MS);
     }
 }
 #endif
+
+void be_lv_disp_inv(lv_disp_t* disp) {
+    lv_area_t area;
+    memset(&area, 0, sizeof(lv_area_t));
+    area.x2 = disp->driver->hor_res - 1;
+    area.y2 = disp->driver->ver_res - 1;
+    _lv_inv_area(disp, &area);
+}
+
+void be_lv_pause() {
+    lv_tick_status_save = lv_tick_active ;
+    lv_tick_active = false ;
+}
+void be_lv_resume() {
+    lv_tick_active = lv_tick_status_save ;
+    be_lv_disp_inv(lv_disp_get_default()) ;
+}
 
 
 void be_lv_font_symbol_require(JSContext *ctx, JSValue lvgl) {
@@ -295,11 +312,11 @@ void be_module_lvgl_init() {
 }
 
 void be_module_lvgl_require(JSContext *ctx) {
-    if(!lv_has_inited) {
+    if(!lv_tick_active) {
         lv_init();
         lv_png_init() ;
         
-        lv_has_inited = true ;
+        lv_tick_active = true ;
     }
 
     JSValue global = JS_GetGlobalObject(ctx);
@@ -351,7 +368,7 @@ void be_module_lvgl_reset(JSContext *ctx) {
 }
 
 void be_module_lvgl_loop(JSContext *ctx)  {
-    if(lv_has_inited) {
+    if(lv_tick_active) {
         lv_task_handler() ;
     }
 }

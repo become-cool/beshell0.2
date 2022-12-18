@@ -38,7 +38,7 @@ bool st77xx_spi_init(st77xx_dev_t * dev, uint8_t spi, uint8_t cs, uint8_t dc, ui
 
 	spi_device_interface_config_t devcfg={
 		.clock_speed_hz = frequency,
-		.queue_size = 7,
+		.queue_size = 8,
 		.mode = SCREEN_SPI_MODE,
 		.flags = SPI_DEVICE_NO_DUMMY,
 	};
@@ -70,6 +70,22 @@ void spi_write_bytes(spi_device_handle_t dev, const uint8_t* data, size_t len) {
 		trans.length = len * 8;
 		trans.tx_buffer = data;
 		trans.flags = trans.flags & (~SPI_TRANS_USE_RXDATA) ;
+
+		// // 加入到发送任务队列
+		// if(spi_device_queue_trans( dev, &trans, portMAX_DELAY )!=ESP_OK) {
+		// 	return ;
+		// }
+		// // 检查任务完成
+		// spi_transaction_t * rtrans = NULL ;
+		// while(1) {
+		// 	if(spi_device_get_trans_result(dev, &rtrans, portMAX_DELAY)!=ESP_OK) {
+		// 		break ;
+		// 	}
+		// 	if(rtrans==&trans) {
+		// 		break ;
+		// 	}
+		// }
+
 		// ret = spi_device_transmit( dev, &trans );
 		ret = spi_device_polling_transmit( dev, &trans );
 	}
@@ -302,7 +318,9 @@ void st77xx_draw_rect(st77xx_dev_t * dev, uint16_t x1, uint16_t y1, uint16_t x2,
 
 	// printf("draw rect (%d,%d) -> (%d,%d); dc:%d\n", _x1,_y1, _x2, _y2, dev->_dc) ;
 
-	spi_device_acquire_bus(dev->spi_dev, portMAX_DELAY) ;
+	if( spi_device_acquire_bus(dev->spi_dev, portMAX_DELAY) != ESP_OK ){
+		return ;
+	}
 	// g_spi_bus1_busy ++ ;
 	// xSemaphoreTake(g_spi_bus1_mutex, portMAX_DELAY) ;
     // printf("draw start(P15=%d)\n", gpio_get_level(15));

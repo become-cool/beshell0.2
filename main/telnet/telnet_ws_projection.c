@@ -182,7 +182,7 @@ bool telnet_ws_projection_sessn_alloc(struct mg_connection *conn) {
 
         // int coreId = xPortGetCoreID()==1? 0: 1 ;
         // core 0
-        if (xTaskCreatePinnedToCore(task_jpeg_decode, "task_jpeg_decode", 2*1024, sess, 5, sess->jdec_task, 0) != pdPASS) {
+        if (xTaskCreatePinnedToCore(task_jpeg_decode, "task_jpeg_decode", 1*1024, sess, 5, sess->jdec_task, 0) != pdPASS) {
             printf("create task for tjpeg failed\n") ;
             goto fail ;
         }
@@ -196,7 +196,7 @@ bool telnet_ws_projection_sessn_alloc(struct mg_connection *conn) {
         sess->jdec_working = xSemaphoreCreateMutex() ;
 
         // core 1
-        if (xTaskCreatePinnedToCore(task_disp, "task_disp", 2*1024, sess, 5, sess->disp_task, 1) != pdPASS) {
+        if (xTaskCreatePinnedToCore(task_disp, "task_disp", 1.5*1024, sess, 5, sess->disp_task, 1) != pdPASS) {
             printf("create task for display failed\n") ;
             goto fail ;
         }

@@ -22,10 +22,8 @@ function handler(event,req,rspn) {
     }
 }
 
-function start(addr) {
-    let server = beapi.mg.httpListen(addr, handler)
-    server.startTelweb()
-    return server
+function start(addr, ssl) {
+    return beapi.mg.httpListen({addr, callback: handler, telweb:true, ssl:!!ssl})
 }
 
 exports.start = start

@@ -11,6 +11,9 @@ typedef struct _be_http_server {
     JSContext * ctx ;
     JSValue callback ;
     bool telweb ;
+    bool ssl;
+    void * ssl_cert_path;
+    void * ssl_key_path;
 } be_http_server_t ;
 
 
@@ -23,7 +26,7 @@ typedef struct _response {
 JSClassID js_mg_http_message_class_id ;
 JSClassID js_mg_http_rspn_class_id ;
 
-JSValue be_http_server_new(JSContext *ctx, struct mg_connection * conn, JSValue callback) ;
+// JSValue be_http_server_new(JSContext *ctx, struct mg_connection * conn, JSValue callback) ;
 
 bool mg_url_is_listening(const char * url) ;
 

@@ -1,5 +1,6 @@
 #include "mg_server.h"
 #include "module_mg.h"
+#include "module_fs.h"
 #include "telnet_ws.h"
 #include "utils.h"
 #include "cutils.h"
@@ -105,16 +106,30 @@ static response_t * response_new(JSContext *ctx, struct mg_connection * conn) {
 //   MG_EV_SNTP_TIME,   // SNTP time received           struct timeval *
 //   MG_EV_USER,        // Starting ID for user events
 // };
+
 static void http_server_event_handler(struct mg_connection * conn, int ev, void *ev_data, void *fn_data) {
+
     if(ev== MG_EV_POLL || !fn_data) {
         return ;
     }
-
-    be_http_server_t * server = (be_http_server_t *)fn_data ;
+        
+    #define SERVER ((be_http_server_t *)fn_data)
+    // be_http_server_t * server = (be_http_server_t *)fn_data ;
     // printf("\nevent:%s, conn:%p, server:%p, server->conn:%p, \n", mg_event_const_to_name(ev), conn, server, server->conn) ;
     // printf("%s %s \n", ((server->conn==NULL || server->conn==conn)?"server":"client"), mg_event_const_to_name(ev)) ;
 
-    if(server->telweb) {
+    if(ev==MG_EV_ACCEPT && SERVER->ssl) {
+        struct mg_tls_opts opts = {
+            .cert = vfspath_to_fs("/var/cert.pem"),    // Certificate file
+            .certkey = vfspath_to_fs("/var/key.pem"),  // Private key file
+        };
+        mg_tls_init(conn, &opts);
+        printf("mg_tls_init()\n") ;
+        return ;
+    }
+
+
+    if(SERVER->telweb) {
         if( telnet_ws_response(conn, ev, ev_data, fn_data) ) {
             return ;
         }
@@ -122,20 +137,21 @@ static void http_server_event_handler(struct mg_connection * conn, int ev, void 
         // 这种情况下 open 事件是在 c 函数内处理的，
         // 需要在此创建 response_t 
         if(!conn->userdata){
-            conn->userdata = response_new(server->ctx, conn) ;
+            conn->userdata = response_new(SERVER->ctx, conn) ;
         }
     }
-    if(!JS_IsFunction(server->ctx, server->callback)) {
-        printf("callback is not a function， event:%s\n", mg_event_const_to_name(ev)) ;
+    if(!JS_IsFunction(SERVER->ctx, SERVER->callback)) {
+        printf("callback is not a function, event:%s\n", mg_event_const_to_name(ev)) ;
         return ;
     }
 
     // server connection
-    if(server->conn==NULL || server->conn==conn) {
-        if(ev==MG_EV_CLOSE) {
-            JS_FreeValue(server->ctx, server->callback) ;
-            server->callback = JS_NULL ;
-            return ;
+    if(SERVER->conn==NULL || SERVER->conn==conn) {
+        switch(ev) {
+            case MG_EV_CLOSE: 
+                JS_FreeValue(SERVER->ctx, SERVER->callback) ;
+                SERVER->callback = JS_NULL ;
+                return ;
         }
     }
 
@@ -143,22 +159,22 @@ static void http_server_event_handler(struct mg_connection * conn, int ev, void 
     else {
         switch(ev) {
             case MG_EV_OPEN: {
-                conn->userdata = response_new(server->ctx, conn) ; 
+                conn->userdata = response_new(SERVER->ctx, conn) ; 
                 return ;
             }
             case MG_EV_CLOSE:
                 if(conn->userdata) {
                     response_t * rspn = (response_t *)conn->userdata ;
 
-                    MAKE_ARGV3(cbargv, JS_NewString(server->ctx, "close"), JS_NULL, rspn->jsrspn)
-                    JSValue ret = JS_Call(server->ctx, server->callback, JS_UNDEFINED, 3, cbargv) ;
+                    MAKE_ARGV3(cbargv, JS_NewString(SERVER->ctx, "close"), JS_NULL, rspn->jsrspn)
+                    JSValue ret = JS_Call(SERVER->ctx, SERVER->callback, JS_UNDEFINED, 3, cbargv) ;
                     free(cbargv) ;
                     if(JS_IsException(ret)) {
-                        js_std_dump_error(server->ctx) ;
+                        js_std_dump_error(SERVER->ctx) ;
                     }
 
                     JS_SetOpaque(rspn->jsrspn, NULL) ;
-                    JS_FreeValue(server->ctx, rspn->jsrspn) ;
+                    JS_FreeValue(SERVER->ctx, rspn->jsrspn) ;
                     free(rspn) ;
                     conn->userdata = NULL ;
                 }
@@ -172,18 +188,18 @@ static void http_server_event_handler(struct mg_connection * conn, int ev, void 
                 }
                 response_t * rspn = (response_t *)conn->userdata ;
 
-                JSValue jsreq = JS_NewObjectClass(server->ctx, js_mg_http_message_class_id) ;
+                JSValue jsreq = JS_NewObjectClass(SERVER->ctx, js_mg_http_message_class_id) ;
                 JS_SetOpaque(jsreq, ev_data) ;
 
-                MAKE_ARGV3(cbargv, JS_NewString(server->ctx, mg_event_const_to_name(ev)), jsreq, rspn->jsrspn)
-                JSValue ret = JS_Call(server->ctx, server->callback, JS_UNDEFINED, 3, cbargv) ;
+                MAKE_ARGV3(cbargv, JS_NewString(SERVER->ctx, mg_event_const_to_name(ev)), jsreq, rspn->jsrspn)
+                JSValue ret = JS_Call(SERVER->ctx, SERVER->callback, JS_UNDEFINED, 3, cbargv) ;
 
                 JS_SetOpaque(jsreq, NULL) ;  // mg 事件函数结束后 mg_http_message 对象销毁
-                JS_FreeValue(server->ctx, jsreq) ;
+                JS_FreeValue(SERVER->ctx, jsreq) ;
                 free(cbargv) ;
 
                 if(JS_IsException(ret)) {
-                    js_std_dump_error(server->ctx) ;
+                    js_std_dump_error(SERVER->ctx) ;
                 }
 
                 return ;
@@ -202,24 +218,24 @@ static void http_server_event_handler(struct mg_connection * conn, int ev, void 
 
                 struct mg_ws_message * msg = (struct mg_ws_message *)ev_data ;
 
-                JSValue jsmsg = JS_NewObject(server->ctx) ;
+                JSValue jsmsg = JS_NewObject(SERVER->ctx) ;
                 uint8_t op = msg->flags&15 ;
-                JS_SetPropertyStr(server->ctx, jsmsg, "type", JS_NewUint32(server->ctx, op)) ;
+                JS_SetPropertyStr(SERVER->ctx, jsmsg, "type", JS_NewUint32(SERVER->ctx, op)) ;
 
                 if(op == WEBSOCKET_OP_TEXT) {
-                    JS_SetPropertyStr(server->ctx, jsmsg, "data", JS_NewStringLen(server->ctx, msg->data.ptr, msg->data.len)) ;
+                    JS_SetPropertyStr(SERVER->ctx, jsmsg, "data", JS_NewStringLen(SERVER->ctx, msg->data.ptr, msg->data.len)) ;
                 }
                 else if(op == WEBSOCKET_OP_BINARY) {
-                    JS_SetPropertyStr(server->ctx, jsmsg, "data", JS_NewArrayBuffer(server->ctx,msg->data.ptr, msg->data.len,NULL,NULL,false)) ;
+                    JS_SetPropertyStr(SERVER->ctx, jsmsg, "data", JS_NewArrayBuffer(SERVER->ctx,msg->data.ptr, msg->data.len,NULL,NULL,false)) ;
                 }
 
-                MAKE_ARGV3(cbargv, JS_NewString(server->ctx, mg_event_const_to_name(ev)), jsmsg, rspn->jsrspn)
-                JSValue ret = JS_Call(server->ctx, server->callback, JS_UNDEFINED, 3, cbargv) ;
+                MAKE_ARGV3(cbargv, JS_NewString(SERVER->ctx, mg_event_const_to_name(ev)), jsmsg, rspn->jsrspn)
+                JSValue ret = JS_Call(SERVER->ctx, SERVER->callback, JS_UNDEFINED, 3, cbargv) ;
 
                 if( JS_IsException(ret) ){
-                    js_std_dump_error(server->ctx) ;
+                    js_std_dump_error(SERVER->ctx) ;
                 }
-                JS_FreeValue(server->ctx, jsmsg) ;
+                JS_FreeValue(SERVER->ctx, jsmsg) ;
                 free(cbargv) ;
 
                 return ;
@@ -232,7 +248,10 @@ static void http_server_event_handler(struct mg_connection * conn, int ev, void 
 JSValue be_http_server_new(JSContext *ctx, struct mg_connection * conn, JSValue callback) {
 
     be_http_server_t * server = malloc(sizeof(be_http_server_t)) ;
+    memset(server, 0, sizeof(be_http_server_t));
     server->ctx  = ctx ;
+
+
     server->callback = JS_DupValue(ctx,callback) ;
 
     server->telweb = false ;
@@ -245,29 +264,87 @@ JSValue be_http_server_new(JSContext *ctx, struct mg_connection * conn, JSValue 
     return jsobj ;
 }
 
+/*
+参数：
+options: {
+    addr: string ,
+    ssl: boolean ,
+    callback: (ev:string, req, rspn)=>void
+}
+
+参数：
+addr: string
+callback: (ev:string, req, rspn)=>void
+*/
 static JSValue js_mg_mgr_http_listen(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_WIFI_INITED
-    CHECK_ARGC(2)
-    if( !JS_IsFunction(ctx, argv[1]) ) {
-        THROW_EXCEPTION("arg callback must be a function")
+    CHECK_ARGC(1)
+
+    char * addr = NULL ;
+
+    be_http_server_t * server = malloc(sizeof(be_http_server_t)) ;
+    memset(server, 0, sizeof(be_http_server_t));
+    server->ctx  = ctx ;
+
+    // options
+    if( JS_IsObject(argv[0]) ){
+        ASSIGN_STR_PROP_C(argv[0], "addr", addr, {
+            THROW_GOTO(failed,"missing option addr")
+        })
+
+        ASSIGN_PROP(argv[0], "callback", server->callback)
+        if( !JS_IsFunction(ctx, server->callback) ) {
+            THROW_GOTO(failed,"arg callback must be a function")
+        }
+        JS_DupValue(ctx, server->callback) ;
+
+        ASSIGN_BOOL_PROP(argv[0], "ssl", server->ssl)
+        ASSIGN_BOOL_PROP(argv[0], "telweb", server->telweb)
     }
-    ARGV_TO_STRING_E(0, addr, "arg addr must be a string") ;
+
+    // addr + callback
+    else {
+        CHECK_ARGC(2)
+
+        ARGV_AS_STRING_C(0, addr, {
+            THROW_GOTO(failed,"arg addr must be a string")
+        }) ;
+
+        if( !JS_IsFunction(ctx, argv[1]) ) {
+            THROW_GOTO(failed, "arg callback must be a function")
+        }
+        server->callback = JS_DupValue(ctx,argv[1]) ;
+    }
 
     if(!mg_url_is_listening(addr)) {
-        JS_ThrowReferenceError(ctx, "addr %s has listened", addr) ;
-        JS_FreeCString(ctx, addr) ;
-        return JS_EXCEPTION ;
+        THROW_GOTO(failed, "addr %s has listened", addr) ;
     }
 
     struct mg_connection * conn = mg_http_listen(be_module_mg_mgr(), addr, http_server_event_handler, NULL) ;
     if(conn==NULL) {
-        THROW_EXCEPTION_FREE({
-            JS_FreeCString(ctx, addr) ;
-        }, "could not listen addr: %s", addr)
+        THROW_GOTO(failed, "could not listen addr: %s", addr)
     }
-    
     JS_FreeCString(ctx, addr) ;
-    return be_http_server_new(ctx, conn, argv[1]) ;
+    server->conn = conn ;
+    conn->fn_data = server ;
+
+    JSValue jsobj = JS_NewObjectClass(ctx, js_mg_server_class_id) ;
+    JS_SetOpaque(jsobj, server) ;
+    
+    return jsobj ;
+
+failed:
+    if(addr) {
+        JS_FreeCString(ctx, addr) ;
+        addr = NULL ;
+    }
+    if(server) {
+        JS_FreeValue(ctx, server->callback) ;
+        free(server) ;
+        server = NULL ;
+    }
+    return JS_EXCEPTION ;
+
 }
 
 

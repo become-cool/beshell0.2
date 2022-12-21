@@ -23,6 +23,11 @@ void echo_error(JSContext *) ;
     JS_ThrowReferenceError(ctx, __VA_ARGS__);               \
     return JS_EXCEPTION ;
 
+
+#define THROW_GOTO(label, ...)                              \
+    JS_ThrowReferenceError(ctx, __VA_ARGS__);               \
+    goto label ;
+
 #define THROW_EXCEPTION_FREE(exec, ...)                     \
     JS_ThrowReferenceError(ctx, __VA_ARGS__);               \
     exec                                                    \
@@ -80,13 +85,28 @@ void echo_error(JSContext *) ;
     }                                                       \
     ARGV_TO_STRING_LEN(i, var, len)
 
+
 #define ARGV_TO_STRING(i, var)                              \
     char * var = JS_ToCString(ctx, argv[i]) ;
-#define ARGV_TO_STRING_E(i, var, msg)                       \
+
+#define ARGV_AS_STRING_E(i, var, msg)                       \
+    var = NULL ;                                            \
     if(!JS_IsString(argv[i])) {                             \
         THROW_EXCEPTION(msg)                                \
     }                                                       \
-    ARGV_TO_STRING(i, var)
+    var = JS_ToCString(ctx, argv[i]) ;
+#define ARGV_TO_STRING_E(i, var, msg)  char * ARGV_AS_STRING_E(i, var, msg)
+
+#define ARGV_AS_STRING_C(i, var, err_code)                  \
+    var = NULL ;                                            \
+    if(!JS_IsString(argv[i])) {                             \
+        err_code                                            \
+    }                                                       \
+    var = JS_ToCString(ctx, argv[i]) ;
+#define ARGV_TO_STRING_C(i, var, err_code)  char * ARGV_AS_STRING_C(i, var, err_code)
+    
+
+
 
 #define ARGV_TO_ARRAYBUFFER(i, var, varlen)                                         \
     size_t varlen = 0;                                                              \
@@ -216,7 +236,7 @@ void freeArrayBuffer(JSRuntime *rt, void *opaque, void *ptr) ;
         }                                                                               \
     }
 
-#define GET_INT_PROP_NODEF(obj, propName, cvar, default)                                \
+#define GET_INT_PROP_NODEF(obj, propName, cvar)                                         \
     {                                                                                   \
         JSValue jsvar = JS_GetPropertyStr(ctx, obj, propName) ;                         \
         if( jsvar!=JS_UNDEFINED ) {                                                     \
@@ -265,6 +285,52 @@ void freeArrayBuffer(JSRuntime *rt, void *opaque, void *ptr) ;
 
 #define ASSIGN_UINT_PROP(obj, propName, cvar) \
         _ASSIGN_INT_PROP(obj, propName, uint, cvar, JS_ToUint32)
+
+
+#define ASSIGN_PROP(obj, propName, jsvar)                                               \
+    jsvar = JS_UNDEFINED ;                                                              \
+    if(obj!=JS_UNDEFINED&&obj!=JS_NULL) {                                               \
+        jsvar = JS_GetPropertyStr(ctx, obj, propName) ;                         \
+    }                                                                                   \
+
+#define ASSIGN_PROP_P(obj, propName, jsvar, not_exist_code)                             \
+    ASSIGN_PROP(obj, propName, jsvar)                                                   \
+    if(jsvar==JS_UNDEFINED||jsvar==JS_NULL) {                                           \
+        not_exist_code                                                                  \
+    }
+
+// 对象属性值 -> cvar
+// 需要要手动 JS_FreeString(ctx, cvar)
+#define ASSIGN_STR_PROP(obj, propName, cvar)                                            \
+    cvar = NULL ;                                                                       \
+    if(obj!=JS_UNDEFINED&&obj!=JS_NULL) {                                               \
+        JSValue jsvar = JS_GetPropertyStr(ctx, obj, propName) ;                         \
+        if( jsvar!=JS_UNDEFINED && jsvar!=JS_NULL) {                                    \
+            cvar = JS_ToCString(ctx, jsvar) ;                                           \
+        }                                                                               \
+    }
+#define ASSIGN_STR_PROP_C(obj, propName, cvar, err_code)                                \
+    cvar = NULL ;                                                                       \
+    if(obj!=JS_UNDEFINED&&obj!=JS_NULL) {                                               \
+        JSValue jsvar = JS_GetPropertyStr(ctx, obj, propName) ;                         \
+        if( jsvar!=JS_UNDEFINED && jsvar!=JS_NULL) {                                    \
+            cvar = JS_ToCString(ctx, jsvar) ;                                           \
+        }                                                                               \
+    }                                                                                   \
+    if(!cvar) {                                                                         \
+        err_code                                                                        \
+    }
+
+#define ASSIGN_STR_PROP_E(obj, propName, cvar, err_msg)                                 \
+    ASSIGN_STR_PROP_C( obj, propName, cvar, THROW_EXCEPTION(err_msg))
+
+
+#define ASSIGN_BOOL_PROP(obj, propName, cvar)                                           \
+    cvar = false ;                                                                      \
+    if(obj!=JS_UNDEFINED&&obj!=JS_NULL) {                                               \
+        JSValue jsvar = JS_GetPropertyStr(ctx, obj, propName) ;                         \
+        cvar = JS_ToBool(ctx, jsvar) ;                                                  \
+    }
 
 
 JSValue js_get_prop(JSContext *ctx, JSValue obj, int depth, ...)  ;

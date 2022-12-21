@@ -213,7 +213,7 @@ static void upgrade_ws(struct mg_connection *c, struct mg_http_message *hm, WS_T
     c->userdata = client;
 
     if( type==WS_REPL ) {
-        client_repl = client ;
+        dd
         SET_CLIENT(repl, client) ;
     }
 
@@ -361,6 +361,7 @@ static void response_fs(struct mg_connection *c, struct mg_http_message *hm, con
 static bool telnet_ws_is_captive_portal_request(struct mg_connection *c, struct mg_http_message *hm) {
 
     struct mg_str * host = mg_http_get_header(hm, "Host") ;
+printf("%.*s\n",host->len,host->ptr) ;
     if(mg_strcmp(*host, mg_str("captive.apple.com"))==0) {
         return true ;
     }
@@ -388,6 +389,7 @@ bool telnet_ws_response_http(struct mg_connection *c, struct mg_http_message *hm
     }
 
     if (mg_http_match_uri(hm, "/repl")) {
+        dd
         upgrade_ws(c, hm, WS_REPL) ;
         return true ;
     }
@@ -483,12 +485,14 @@ bool telnet_ws_response_ws(struct mg_connection *c, struct mg_ws_message * wm) {
     // for /repl
     switch(client->type) {
         case WS_REPL: {
+            dd
             JSContext * ctx = (JSContext *)be_module_mg_mgr()->userdata ;
             if(ctx) {
                 uint8_t cmd = wm->data.ptr[0] ;
                 uint8_t pkgid = wm->data.ptr[1] ;
                 char * code = wm->data.ptr + 2 ;
                 size_t codelen = wm->data.len - 2 ;
+                ds(code)
                 telnet_run(ctx, pkgid, 0, cmd, (uint8_t *) code, codelen) ;
             }
             break ;
@@ -587,6 +591,7 @@ bool telnet_ws_response(struct mg_connection *c, int ev, void *ev_data, void *fn
 #endif
 
     if (ev == MG_EV_HTTP_MSG) {
+        dd
         return telnet_ws_response_http(c,ev_data) ;
     }
     else if (ev == MG_EV_WS_MSG) {
@@ -678,7 +683,7 @@ void be_telnet_ws_init() {
     }
 #endif
 
-    fs_root = mallocf("/fs/=%s", vfs_path_prefix) ;
+    // fs_root = mallocf("/fs/=%s", vfs_path_prefix) ;
     // conn = mg_http_listen(be_module_mg_mgr(), TELNET_WS_ADDR, telnet_ws_response, NULL);
     // printf("telnet websocket addr: %s\n", TELNET_WS_ADDR) ;
 

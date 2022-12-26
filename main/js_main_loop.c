@@ -13,6 +13,7 @@
 #include "malloc_funcs.h"
 #include "psram.h"
 #include "sniffer.h"
+#include "module_bt.h"
 #include "module_wifi.h"
 #include "module_gpio.h"
 #include "module_serial.h"
@@ -128,6 +129,7 @@ static JSContext * init_custom_context(JSRuntime *rt) {
     eval_rc_script(ctx, "/lib/base/require.js") ;
 
 #ifndef SIMULATION
+    be_module_bt_require(ctx) ;
     be_module_wifi_require(ctx) ;
     be_module_gpio_require(ctx) ;  
     // be_module_telnet_require(ctx) ;

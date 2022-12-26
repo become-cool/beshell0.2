@@ -274,7 +274,7 @@ s.setDTR(1); s.setRTS(0)
 
 在函数前加上 `IRAM_ATTR` 宏，可将该函数加载到 `iram0` 。
 
-一般用于中断函数。 BeShell 里目前只有 module_gpio.c 用到 IRAM_ATTR 终端。
+一般用于中断函数。 BeShell 里目前只有 module_gpio.c 用到 IRAM_ATTR 中断。
 
 如果 iram0 不够，可以减少 IRAM_ATTR 声明。
 

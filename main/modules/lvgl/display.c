@@ -15,7 +15,6 @@
 #endif
 
 static uint8_t _disp_id = 0 ;
-disp_drv_spec_t * _default_disp_drv_spec = NULL ;
 
 JSValue js_lv_disp_wrapper(JSContext *ctx, lv_disp_t * disp) {
     if(!disp || !disp->driver) {
@@ -300,7 +299,13 @@ static const JSCFunctionListEntry js_lv_disp_proto_funcs[] = {
 };
 
 disp_drv_spec_t * default_disp_drv_spec() {
-    return _default_disp_drv_spec ;
+
+    lv_disp_t * disp = lv_disp_get_default() ;
+    if(!disp || !disp->driver || !disp->driver->user_data ) {
+        return ;
+    }
+
+    return disp->driver->user_data ;
 }
 
 // static JSValue js_lvgl_get_default_display(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
@@ -405,6 +410,7 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
     GET_INT_PROP(argv[1], "height", height, { goto excp ;})
     
     disp_drv_spec_t * dvrdata = malloc(sizeof(disp_drv_spec_t)) ;
+    memset(dvrdata, 0, sizeof(disp_drv_spec_t)) ;
     dvrdata->id = _disp_id ++ ;
 
     // 创建缓冲区
@@ -458,10 +464,6 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
 
 #ifndef SIMULATION
 
-        if(!_default_disp_drv_spec) {
-            _default_disp_drv_spec = dvrdata ;
-        }
-
         GET_INT_PROP(argv[1], "cs", cs, { goto excp ;})
         GET_INT_PROP(argv[1], "dc", dc, { goto excp ;})
         GET_INT_PROP_DEFAULT(argv[1], "spi", spi, 1)
@@ -500,6 +502,7 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
 
         // 注册设备驱动对象
         dispdrv->flush_cb = ws_disp_flush ;
+        dvrdata->is_virtual = true ;
     }
     else {
         JS_ThrowReferenceError(ctx, "unknow disp driver: %s", typestr);

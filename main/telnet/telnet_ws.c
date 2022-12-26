@@ -249,7 +249,7 @@ static void upgrade_ws(struct mg_connection *c, struct mg_http_message *hm, WS_T
     }
 
     else if( type==WS_PROJ ) {
-        if(!telnet_ws_projection_sessn_alloc(c)) {
+        if(!telnet_ws_projection_sessn_init(c)) {
             goto fail ;
         }
 
@@ -591,7 +591,6 @@ bool telnet_ws_response(struct mg_connection *c, int ev, void *ev_data, void *fn
 #endif
 
     if (ev == MG_EV_HTTP_MSG) {
-        dd
         return telnet_ws_response_http(c,ev_data) ;
     }
     else if (ev == MG_EV_WS_MSG) {
@@ -606,7 +605,7 @@ bool telnet_ws_response(struct mg_connection *c, int ev, void *ev_data, void *fn
             FREE_RTC_Client(c, client_disp)
         }
         else if(c->userdata==client_proj) {
-            telnet_ws_projection_sess_free() ;
+            telnet_ws_projection_sess_release() ;
             FREE_RTC_Client(c, client_proj)
         }
 

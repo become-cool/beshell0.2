@@ -18,6 +18,7 @@ typedef struct {
     void * buff1 ;
     void * buff2 ;
     lv_coord_t buff_lines ;
+    bool is_virtual ;
 
     bool enable_input_event ;
     JSContext * ctx ;

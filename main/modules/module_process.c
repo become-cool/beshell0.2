@@ -17,6 +17,7 @@
 #include <sys/types.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
+#include "freertos/task.h"
 
 static int cpu0_idle_cnt = 0;
 static int cpu1_idle_cnt = 0;
@@ -56,11 +57,7 @@ static JSValue js_process_cpu_usage(JSContext *ctx, JSValueConst this_val, int a
 
 #ifndef SIMULATION
 
-    // float new_cnt =  (float)idle_cnt;    // Save the count for printing it ...
-    // // Compensate for the 100 ms delay artifact: 900 ms = 100%
-    // float cpu_percent = ((99.9 / 90.) * new_cnt) / 10;
-    // printf("%.0f%%\n", 100 - cpu_percent); fflush(stdout);
-
+    int max = max_calls_per_second() ;
 
     if(cpu==0) {
         return JS_NewUint32(ctx, cpu0_usage()) ;
@@ -77,16 +74,17 @@ static JSValue js_process_cpu_usage(JSContext *ctx, JSValueConst this_val, int a
 
 }
 
-static JSValue js_process_cpu_idle_ticks(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+
+static JSValue js_process_cpu_idle_calls(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(1)
     ARGV_TO_UINT8(0,cpu)
 
 #ifndef SIMULATION
     if(cpu==0) {
-        return JS_NewInt64(ctx, cpu0_idle_ticks()) ;
+        return JS_NewInt64(ctx, cpu0_idle_last_calls()) ;
     }
     else if(cpu==1) {
-        return JS_NewInt64(ctx, cpu1_idle_ticks()) ;
+        return JS_NewInt64(ctx, cpu1_idle_last_calls()) ;
     }
     else {
         THROW_EXCEPTION("arv cpu core must be 0 or 1")
@@ -95,6 +93,87 @@ static JSValue js_process_cpu_idle_ticks(JSContext *ctx, JSValueConst this_val, 
     return JS_NewUint32(ctx, 50) ;
 #endif
 
+}
+
+#define NOP10   \
+    __asm__ __volatile__ ("nop");   \
+    __asm__ __volatile__ ("nop");   \
+    __asm__ __volatile__ ("nop");   \
+    __asm__ __volatile__ ("nop");   \
+    __asm__ __volatile__ ("nop");   \
+    __asm__ __volatile__ ("nop");   \
+    __asm__ __volatile__ ("nop");   \
+    __asm__ __volatile__ ("nop");   \
+    __asm__ __volatile__ ("nop");   \
+    __asm__ __volatile__ ("nop");
+#define NOP100 \
+    NOP10 NOP10 NOP10 NOP10 NOP10 NOP10 NOP10 NOP10 NOP10 NOP10
+
+inline static void nop1000() {
+    NOP100 NOP100 NOP100 NOP100 NOP100 NOP100 NOP100 NOP100 NOP100 NOP100
+}
+
+
+static JSValue js_process_stat_max_calls(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+
+    int64_t t = gettime() ;
+    int calls_cpu0 = 0 ;
+    int calls_cpu1 = 0 ;
+    
+    vTaskSuspendAll() ;
+
+    reset_cpu0_idle_calls() ;
+    reset_cpu1_idle_calls() ;
+
+    // 延迟大约2秒多
+    for(int i=0;i<500000;i++) {
+        nop1000() ;
+    }
+
+    calls_cpu0 = cpu0_idle_calls() ;
+    calls_cpu1 = cpu1_idle_calls() ;
+
+    xTaskResumeAll() ;
+
+    t = gettime() - t ;
+
+    printf("dur: %lld ms\n", t) ;
+    dn(calls_cpu0)
+    dn(calls_cpu1)
+
+    int calls_per_sec = calls_cpu1 * 1000 / t ;
+    dn(calls_per_sec)
+
+    return JS_UNDEFINED ;
+}
+
+    
+
+static JSValue js_process_stat_nop(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+
+    uint32_t i = 0 ;
+    int64_t tn = gettime_ns() ;
+    nop1000() ;
+    printf("1000 nop time: %lld ns\n", gettime_ns()-tn);
+
+    return JS_UNDEFINED ;
+}
+
+
+static JSValue js_process_print_tasks(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+
+    size_t taskCnt = uxTaskGetNumberOfTasks() ;
+    char * buff = malloc(taskCnt*40) ;
+
+    if(!buff) {
+        THROW_EXCEPTION("out of memory?")
+    }
+
+    vTaskList(buff) ;
+    printf(buff) ;
+
+    free(buff) ;
+    return JS_UNDEFINED ;
 }
 
 JSValue js_process_reset(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
@@ -279,9 +358,13 @@ void be_module_process_require(JSContext *ctx) {
 
     JS_SetPropertyStr(ctx, process, "reset", JS_NewCFunction(ctx, js_process_reset, "reset", 1));
     JS_SetPropertyStr(ctx, process, "reboot", JS_NewCFunction(ctx, js_process_reboot, "reboot", 1));
-    JS_SetPropertyStr(ctx, process, "cpuIdle", JS_NewCFunction(ctx, js_process_cpu_idle_ticks, "cpuIdle", 1));
+    JS_SetPropertyStr(ctx, process, "cpuIdle", JS_NewCFunction(ctx, js_process_cpu_idle_calls, "cpuIdle", 1));
     JS_SetPropertyStr(ctx, process, "cpuUsage", JS_NewCFunction(ctx, js_process_cpu_usage, "cpuUsage", 1));
     JS_SetPropertyStr(ctx, process, "memoryUsage", JS_NewCFunction(ctx, js_process_memory_usage, "memoryUsage", 1));
+    JS_SetPropertyStr(ctx, process, "printTasks", JS_NewCFunction(ctx, js_process_print_tasks, "printTasks", 1));
+    JS_SetPropertyStr(ctx, process, "nop1000", JS_NewCFunction(ctx, js_process_stat_nop, "nop1000", 1));
+    JS_SetPropertyStr(ctx, process, "statMaxCalls", JS_NewCFunction(ctx, js_process_stat_max_calls, "statMaxCalls", 1));
+    
     // JS_SetPropertyStr(ctx, process, "global", global);
 
     JSValue env = JS_NewObject(ctx) ;
@@ -316,6 +399,7 @@ void be_module_process_require(JSContext *ctx) {
     JS_SetPropertyStr(ctx, console, "print", JS_NewCFunction(ctx, js_console_print, "print", 1));
     JS_SetPropertyStr(ctx, console, "run", JS_NewCFunction(ctx, js_console_run, "run", 1));
     JS_SetPropertyStr(ctx, console, "message", JS_NewCFunction(ctx, js_console_message, "message", 1));
+    
     // JS_SetPropertyStr(ctx, console, "log", JS_NewCFunction(ctx, js_console_log, "log", 1));
     // JS_SetPropertyStr(ctx, console, "error", JS_NewCFunction(ctx, js_console_log, "error", 1));
     JS_SetPropertyStr(ctx, global, "console", console);

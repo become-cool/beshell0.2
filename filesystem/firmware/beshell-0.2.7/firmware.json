@@ -51,11 +51,11 @@
             "chiptype": "esp32s3"
         },
         {
-            "address": "0x328000",
+            "address": "0x380000",
             "path": "fs-root.img"
         },
         {
-            "address": "0x370000",
+            "address": "0x3c8000",
             "path": "fs-home.img"
         }
     ]

@@ -20,6 +20,11 @@ uint64_t gettime_us() {
 	clock_gettime(CLOCK_REALTIME, &tm);
 	return tm.tv_nsec/1000 + tm.tv_sec*1000*1000 ;
 }
+uint64_t gettime_ns() {
+	struct timespec tm = {0, 0};
+	clock_gettime(CLOCK_REALTIME, &tm);
+	return tm.tv_nsec + tm.tv_sec*1000*1000*1000 ;
+}
 
 char * mallocf(char * fmt, ...) {
 	char *result;

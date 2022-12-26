@@ -55,7 +55,7 @@
 			"    JSValue ${TM_FILENAME_BASE/^module_(.+)$/${1}/} = JS_NewObject(ctx);",
 			"    JS_SetPropertyStr(ctx, beapi, \"${TM_FILENAME_BASE/^module_(.+)$/${1}/}\", ${TM_FILENAME_BASE/^module_(.+)$/${1}/});",
 			"",
-			"    // JS_SetPropertyStr(ctx, beapi, \"xxxOoo\", JS_NewCFunction(ctx, js_xxx_ooo, \"xxxOoo\", 1));",
+			"    // JS_SetPropertyStr(ctx, ${TM_FILENAME_BASE/^module_(.+)$/${1}/}, \"xxxOoo\", JS_NewCFunction(ctx, js_xxx_ooo, \"xxxOoo\", 1));",
 			"",
 			"",
 			"    JS_FreeValue(ctx, beapi);",

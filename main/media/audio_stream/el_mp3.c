@@ -60,7 +60,6 @@ static void task_mp3_decoder(audio_el_mp3_t * el) {
     int offset = 0 ;
     int errs = 0 ;
 
-    // hexli_set_ringbuf(el->base.ring, xRingbufferSend) ;
     mp3dec_set_output_func(mp3dec_output) ;
 
     for(int i=0;i<10;) {

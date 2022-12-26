@@ -194,6 +194,7 @@ void eval_code_len(JSContext *ctx, const char * str,size_t len,const char * file
 
 uint64_t gettime() ;
 uint64_t gettime_us() ;
+uint64_t gettime_ns() ;
 
 char * mallocf(char * format, ...) ;
 

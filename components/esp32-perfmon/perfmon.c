@@ -14,52 +14,55 @@ static uint64_t idle1Calls = 0;
 static uint64_t lastIdle0Calls = 0;
 static uint64_t lastIdle1Calls = 0;
 
-uint8_t cpu0 = 0 ;
-uint8_t cpu1 = 0 ;
+static uint64_t _ticks_per_sec = 0 ;
 
-// ESP32
-#if defined(CONFIG_ESP32_DEFAULT_CPU_FREQ_240)
-static const uint64_t MaxIdleCalls = 1855000;
-#elif defined(CONFIG_ESP32_DEFAULT_CPU_FREQ_160)
-static const uint64_t MaxIdleCalls = 1233100;
+// 实际统计值，见 js_process_stat_max_calls() 函数
+static const uint64_t MaxIdleCalls = 400100;
 
-// ESP32S3
-#elif defined(CONFIG_ESP32S3_DEFAULT_CPU_FREQ_240)
-static const uint64_t MaxIdleCalls = 1855000;
-#elif defined(CONFIG_ESP32S3_DEFAULT_CPU_FREQ_160)
-static const uint64_t MaxIdleCalls = 1233100;
-#else
-
-#error "Unsupported CPU frequency"
-#endif
 
 uint8_t cpu0_usage() {
-	return cpu0 ;
+	return ((MaxIdleCalls-lastIdle0Calls) * 1000 / MaxIdleCalls + 5)/10 ;
 }
 uint8_t cpu1_usage() {
-	return cpu1 ;
+	return ((MaxIdleCalls-lastIdle1Calls) * 1000 / MaxIdleCalls + 5)/10 ;
 }
-uint64_t cpu0_idle_ticks() {
+uint64_t cpu0_idle_last_calls() {
 	return lastIdle0Calls ;
 }
-uint64_t cpu1_idle_ticks() {
+uint64_t cpu1_idle_last_calls() {
 	return lastIdle1Calls ;
 }
 
-static bool idle_task_0()
-{
-	idle0Calls += 1;
+uint64_t cpu0_idle_calls() {
+	return idle0Calls ;
+}
+uint64_t cpu1_idle_calls() {
+	return idle1Calls ;
+}
+
+void reset_cpu0_idle_calls() {
+	idle0Calls = 0;
+}
+void reset_cpu1_idle_calls() {
+	idle1Calls = 0;
+}
+
+uint32_t max_calls_per_second() {
+	return MaxIdleCalls ;
+}
+
+IRAM_ATTR static bool idle_task_0() {
+	idle0Calls ++ ;
 	return false;
 }
 
-static bool idle_task_1()
-{
-	idle1Calls += 1;
+IRAM_ATTR static bool idle_task_1() {
+	idle1Calls ++ ;
 	return false;
 }
 
-static void perfmon_task(void *args)
-{
+
+static void perfmon_task(void *args) {
 	while (1)
 	{
 		lastIdle0Calls = idle0Calls;
@@ -67,13 +70,7 @@ static void perfmon_task(void *args)
 
 		idle0Calls = 0;
 		idle1Calls = 0;
-
-		cpu0 = 100 -  100 * lastIdle0Calls / MaxIdleCalls;
-		cpu1 = 100 - 100 * lastIdle1Calls / MaxIdleCalls;
-
-		// ESP_LOGI(TAG, "Core 0 at %d%%", cpu0);
-		// ESP_LOGI(TAG, "Core 1 at %d%%", cpu1);
-		// TODO configurable delay
+		
 		vTaskDelay(1000 / portTICK_PERIOD_MS);
 	}
 	vTaskDelete(NULL);

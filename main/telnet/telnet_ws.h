@@ -16,8 +16,8 @@ bool telnet_ws_response(struct mg_connection *c, int ev, void *ev_data, void *fn
 
 
 // 投屏
-bool telnet_ws_projection_sessn_alloc(struct mg_connection *conn)  ;
-void telnet_ws_projection_sess_free() ;
+bool telnet_ws_projection_sessn_init(struct mg_connection *conn)  ;
+void telnet_ws_projection_sess_release() ;
 void telnet_ws_response_projection(struct mg_connection *conn, struct mg_ws_message * wm) ;
 
 

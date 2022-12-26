@@ -22,13 +22,19 @@ static void task_pcm_playback(audio_el_i2s_t * el) {
         
         vTaskDelay(0) ;
 
-        // 等待开始状态
-        bits = xEventGroupWaitBits(el->base.stats, STAT_RUNNING|STAT_STOPPING, false, false, portMAX_DELAY);
+        // 等待状态
+        bits = xEventGroupWaitBits(el->base.stats, STAT_RUNNING|STAT_STOPPING|STAT_PAUSING, false, false, portMAX_DELAY);
+
+        // 停止信号
         if( bits&STAT_STOPPING ) {
             audio_el_stop_when_req(el) ;
-
-            // i2s_zero_dma_buffer(el->i2s) ;
-
+            vTaskDelay(1) ;
+            continue ;
+        }
+        // 暂停信号
+        else if( bits&STAT_PAUSING ) {
+            i2s_zero_dma_buffer(el->i2s) ;
+            audio_el_set_stat(el, STAT_PAUSED) ;
             vTaskDelay(1) ;
             continue ;
         }
@@ -48,6 +54,7 @@ static void task_pcm_playback(audio_el_i2s_t * el) {
             // 确定前级已流干（ring buffer 里的可读数据可能分在头尾两端，需要两次才能读空）
             if(audio_el_is_drain(el->base.upstream)) {
                 // printf("i2s's input drain\n") ;
+                i2s_zero_dma_buffer(el->i2s) ;
                 xEventGroupSetBits(el->base.upstream->stats, STAT_DRAIN) ;  
                 vTaskDelay(1) ;
             }

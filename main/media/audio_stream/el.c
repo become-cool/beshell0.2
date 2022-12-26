@@ -105,7 +105,8 @@ bool audio_el_stop(audio_el_t * el) {
 
 }
 
-
+// 该函数用于响应 STAT_STOPPING
+// 等待数据流干后设置 STAT_STOPPED
 #define PLAYER(el) ((audio_pipe_t*)el->pipe)
 inline void audio_el_stop_when_req(audio_el_t * el) {
     if( ! (xEventGroupGetBits(el->stats) & STAT_STOPPING) ) {
@@ -128,7 +129,7 @@ inline void audio_el_stop_when_req(audio_el_t * el) {
         audio_el_set_stat(el->downstream, STAT_STOPPING) ;
     }
 
-    // 最后一个节点：触发 finish 事件
+    // 最后一个节点：触发 js finish 事件
     else {
         PLAYER(el)->running = false ;
         PLAYER(el)->paused = false ;
@@ -138,7 +139,6 @@ inline void audio_el_stop_when_req(audio_el_t * el) {
             }
             audio_pipe_emit_js(PLAYER(el), PLAYER(el)->finished? "finish": "stop", JS_UNDEFINED) ;
         }
-
     }
 
     vTaskDelay(0) ;

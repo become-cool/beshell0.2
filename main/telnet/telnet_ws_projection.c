@@ -247,17 +247,20 @@ static void task_audio(telws_proj_sess_t * sess) {
     esp_err_t err ;
 
     while(1) {
+        if(i2s_num==255) {
+            vTaskDelay(1) ;
+            continue;
+        }
+
         vTaskDelay(0) ;
         data = xRingbufferReceiveUpTo(sess->audio_ring, &data_size, 10, I2S_BUFF_SIZE);
         if(data_size==0 || !data) {
+            i2s_zero_dma_buffer(i2s_num) ;
             continue ;
         }
         memcpy(buff, data, data_size) ;
         vRingbufferReturnItem(sess->audio_ring, data) ;
 
-        if(i2s_num==255) {
-            continue;
-        }
         data = buff ;
         
         while(data_size) {
@@ -396,6 +399,10 @@ void telnet_ws_projection_sess_release() {
     DELETE_TASK(sess->task_jdec)
     DELETE_TASK(sess->task_disp)
     DELETE_TASK(sess->task_audio)
+
+    if(i2s_num!=255) {
+        i2s_zero_dma_buffer(i2s_num) ;
+    }
 
     sess->enable = false ;
 

@@ -272,12 +272,15 @@ static JSValue js_audio_is_paused(JSContext *ctx, JSValueConst this_val, int arg
 static JSValue js_audio_pause(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     THIS_PLAYER(player)
     audio_pipe_clear_stats(player, STAT_RUNNING) ;
+    audio_pipe_set_stats(player, STAT_PAUSING) ;
     player->base.paused = true ;
     audio_pipe_emit_js(player, "pause", JS_UNDEFINED) ;
     return JS_UNDEFINED ;
 }
 static JSValue js_audio_resume(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     THIS_PLAYER(player)
+    audio_pipe_clear_stats(player, STAT_PAUSED) ;
+    audio_pipe_clear_stats(player, STAT_PAUSING) ;
     audio_pipe_set_stats(player, STAT_RUNNING) ;
     player->base.paused = false ;
     audio_pipe_emit_js(player, "resume", JS_UNDEFINED) ;

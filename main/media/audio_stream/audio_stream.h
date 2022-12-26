@@ -26,10 +26,12 @@
 #define STAT_RUNNING        1
 #define STAT_STOPPING       2
 #define STAT_STOPPED        4
-#define STAT_ALL_PHASE      (STAT_RUNNING | STAT_STOPPING | STAT_STOPPED)
+#define STAT_PAUSING        8
+#define STAT_PAUSED         16
+#define STAT_ALL_PHASE      (STAT_RUNNING | STAT_STOPPING | STAT_STOPPED | STAT_PAUSING | STAT_PAUSED)
 // 以上 bit 是互斥的
 
-#define STAT_DRAIN          8
+#define STAT_DRAIN          32
 
 typedef struct _audio_el_t{
 

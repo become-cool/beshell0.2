@@ -70,6 +70,7 @@ bool frame2jpg_cb(camera_fb_t * fb, uint8_t quality, jpg_out_cb cb, void * arg);
  * @return true on success
  */
 bool fmt2jpg(uint8_t *src, size_t src_len, uint16_t width, uint16_t height, pixformat_t format, uint8_t quality, uint8_t ** out, size_t * out_len);
+bool fmt2jpg_2(uint8_t *src, size_t src_len, uint16_t width, uint16_t height, pixformat_t format, uint8_t quality, uint8_t *buff, size_t bufflen, size_t * out_len) ;
 
 /**
  * @brief Convert camera frame buffer to JPEG buffer

@@ -90,6 +90,8 @@ static void task_mp3_decoder(audio_el_mp3_t * el) {
         }
         if ( data_size==0 || !psrc ) {
 
+            printf("mp3 upstream drain\n") ;
+
             // 确定前级已流干（ring buffer 里的可读数据可能分在头尾两端，需要两次才能读空）
             if(audio_el_is_drain(el->base.upstream)) {
                 // printf("decode's input drain\n") ;
@@ -156,10 +158,10 @@ static void task_mp3_decoder(audio_el_mp3_t * el) {
 }
 
 
-audio_el_t * audio_el_mp3_create(audio_pipe_t * pipe) {    
+audio_el_t * audio_el_mp3_create(audio_pipe_t * pipe, uint8_t core) {    
     audio_el_mp3_t * el ;
     echo_alloc("audio_el_mp3_t",{
-        ELEMENT_CREATE(pipe, audio_el_mp3_t, el, task_mp3_decoder, 1024*3, 5, 1, 512)
+        ELEMENT_CREATE(pipe, audio_el_mp3_t, el, task_mp3_decoder, 1024*3, 5, core, 512)
     })
 
     echo_alloc("hexli", {

@@ -79,20 +79,20 @@ typedef struct {
     }
 
 
-static inline void build_el_src(player_t * player) {
+static inline void build_el_src(player_t * player, int core) {
     if(!player->src) {
-        ELEMENT_CREATE(player, audio_el_src_t, player->src, task_src, 1024*3, 5, 0, 512)  // task_src 需要访问 sd spi bus, 和 screen spi 任务在同一cpu核可以避免 spi bus 抢占错误
+        ELEMENT_CREATE(player, audio_el_src_t, player->src, task_src, 1024*3, 5, core, 512)
     }
 }
-static inline void build_el_mp3(player_t * player) {
+static inline void build_el_mp3(player_t * player, uint8_t core) {
     if(!player->mp3) {
-        player->mp3 = audio_el_mp3_create(player) ;
+        player->mp3 = audio_el_mp3_create(player,core) ;
         player->mp3->i2s = 0 ;
     }
 }
-static inline void build_el_i2s(player_t * player) {
+static inline void build_el_i2s(player_t * player, uint8_t core) {
     if(!player->playback) {
-        player->playback = audio_el_i2s_create(player, 0) ;
+        player->playback = audio_el_i2s_create(player, 0, core) ;
     }
 }
 // static inline void build_el_keyboard(player_t * player, uint8_t bit_num) {
@@ -158,8 +158,8 @@ static JSValue js_audio_play_pcm(JSContext *ctx, JSValueConst this_val, int argc
     }
     CHECK_ARGC(1)
     
-    build_el_src(player) ;
-    build_el_i2s(player) ;
+    build_el_src(player,0) ;
+    build_el_i2s(player,0) ;
 
     ARGV_TO_STRING(0, path) ;
 
@@ -202,9 +202,9 @@ static JSValue js_audio_play_mp3(JSContext *ctx, JSValueConst this_val, int argc
     }
     CHECK_ARGC(1)
     
-    build_el_src(player) ;
-    build_el_mp3(player) ;
-    build_el_i2s(player) ;
+    build_el_src(player,1) ;
+    build_el_mp3(player,1) ;
+    build_el_i2s(player,0) ;
 
     ARGV_TO_STRING(0, path) ;
 

@@ -213,12 +213,12 @@ bool audio_el_src_strip_pcm(audio_el_src_t * el) ;
 bool audio_el_src_strip_mp3(audio_el_src_t * el) ;
 
 // mp3 decoder
-audio_el_t * audio_el_mp3_create(audio_pipe_t * pipe) ;
+audio_el_t * audio_el_mp3_create(audio_pipe_t * pipe, uint8_t core) ;
 void audio_el_mp3_delete(audio_el_mp3_t * el) ;
 void audio_el_mp3_reset(audio_el_mp3_t * el) ;
 
 // i2s playback
-audio_el_i2s_t * audio_el_i2s_create(audio_pipe_t * pipe, uint8_t i2s_num) ;
+audio_el_i2s_t * audio_el_i2s_create(audio_pipe_t * pipe, uint8_t i2s_num, uint8_t core) ;
 void audio_el_i2s_delete(audio_el_i2s_t * el) ;
 
 // midi message

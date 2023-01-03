@@ -43,7 +43,7 @@ audio_player_midi_t * audio_player_midi_create(audio_player_midi_conf_t * config
     }
     
     // element: i2s 播放
-    player->playback = audio_el_i2s_create(player, config->i2s_num) ;
+    player->playback = audio_el_i2s_create(player, config->i2s_num, 0) ;
     if(!player->playback) {
         audio_player_midi_delete(player) ;
         return NULL ;

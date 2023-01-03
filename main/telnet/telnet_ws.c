@@ -75,7 +75,6 @@ ws_client_t * client_proj = NULL;           // 投屏客户端
     client_##type = client ;
 
 
-
 void ws_disp_flush(lv_disp_drv_t *dispdrv, const lv_area_t *area, lv_color_t *color_p) {
 
     if(!client_disp) {
@@ -90,7 +89,7 @@ void ws_disp_flush(lv_disp_drv_t *dispdrv, const lv_area_t *area, lv_color_t *co
     //todo: allocate proper buffer for holding JPEG data
     //this should be enough for CIF frame size
     size_t jpglen = size*2;
-    uint8_t * buff = (uint8_t *)malloc(jpglen+10);
+    uint8_t * HMALLOC(buff, jpglen+10);
     if(buff == NULL) {
         printf("JPG buffer malloc failed");
         return ;
@@ -111,7 +110,7 @@ void ws_disp_flush(lv_disp_drv_t *dispdrv, const lv_area_t *area, lv_color_t *co
 
     uint8_t * jpgbuff = buff + 10 ;
 
-    fmt2jpg((uint8_t *)color_p, size, area->x2-area->x1+1, area->y2-area->y1+1, PIXFORMAT_RGB565, jpeg_quality, jpgbuff, &jpglen);
+    fmt2jpg_2((uint8_t *)color_p, size, area->x2-area->x1+1, area->y2-area->y1+1, PIXFORMAT_RGB565, jpeg_quality, jpgbuff, jpglen, &jpglen);
 
     mg_ws_send(client_disp->conn, (char *)buff, jpglen+10, WEBSOCKET_OP_BINARY);
 
@@ -213,7 +212,6 @@ static void upgrade_ws(struct mg_connection *c, struct mg_http_message *hm, WS_T
     c->userdata = client;
 
     if( type==WS_REPL ) {
-        dd
         SET_CLIENT(repl, client) ;
     }
 
@@ -485,14 +483,12 @@ bool telnet_ws_response_ws(struct mg_connection *c, struct mg_ws_message * wm) {
     // for /repl
     switch(client->type) {
         case WS_REPL: {
-            dd
             JSContext * ctx = (JSContext *)be_module_mg_mgr()->userdata ;
             if(ctx) {
                 uint8_t cmd = wm->data.ptr[0] ;
                 uint8_t pkgid = wm->data.ptr[1] ;
                 char * code = wm->data.ptr + 2 ;
                 size_t codelen = wm->data.len - 2 ;
-                ds(code)
                 telnet_run(ctx, pkgid, 0, cmd, (uint8_t *) code, codelen) ;
             }
             break ;

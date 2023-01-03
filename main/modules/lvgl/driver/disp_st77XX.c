@@ -300,12 +300,12 @@ void st77xx_draw_rect(st77xx_dev_t * dev, uint16_t x1, uint16_t y1, uint16_t x2,
 	// printf("st77xx_draw_rect() dev->_width=%d, dev->_width=%d, dc=%d\n",dev->_width,dev->_height,dev->_dc) ;
 
 	if (x1 >= dev->_width) {
-		printf("out of dev->_width (%d) \n", dev->_width) ;
+		printf("x1(%d) out of dev->_width (%d) \n", x1, dev->_width) ;
 		return;
 	}
 	if (x2 >= dev->_width) x2=dev->_width-1;
 	if (y1 >= dev->_height) {
-		printf("out of dev->_height (%d) \n", dev->_height) ;
+		printf("y1(%d) out of dev->_height (%d) \n", y1, dev->_height) ;
 		return;
 	}
 	if (y2 >= dev->_height) y2=dev->_height-1;

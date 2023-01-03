@@ -412,12 +412,16 @@ void telnet_ws_projection_sess_release() {
     xSemaphoreGive( sess->jdec_working ) ;
 }
 
-#define RSPN_STRING(conn, msg)   mg_ws_send(conn, msg, sizeof(msg)-1, WEBSOCKET_OP_TEXT);
+#define WRAP_QUOTE(string) "\"" string "\""
+#define PAIR(key,value)  WRAP_QUOTE(key) ":" WRAP_QUOTE(value)
+#define RSPN_JSON(media, act, msg) "{" PAIR("media",media) "," PAIR("act",act) "," PAIR("msg",msg) "}"
+#define RSPN_STRING(conn, media, act, msg) \
+    mg_ws_send(conn, RSPN_JSON(media, act, msg), sizeof(RSPN_JSON(media, act, msg))-1, WEBSOCKET_OP_TEXT);
 
 inline static void rspn_video_frame(struct mg_connection *conn, struct mg_ws_message * wm) {
 
     if( wm->data.len<8 ) {
-        RSPN_STRING(conn, "video.frame:invalid length")
+        RSPN_STRING(conn, "video", "frame", "invalid length")
         return ;
     }
 
@@ -429,7 +433,7 @@ inline static void rspn_video_frame(struct mg_connection *conn, struct mg_ws_mes
     rect.rawlen =  (wm->data.ptr[5] << 16) | (wm->data.ptr[6] << 8) | wm->data.ptr[7] ;
 
     if(rect.rawlen+8 < rect.rawlen) {
-        RSPN_STRING(conn, "video.frame:invalid length")
+        RSPN_STRING(conn, "video", "frame", "invalid length")
         return ;
     }
 
@@ -441,13 +445,13 @@ inline static void rspn_video_frame(struct mg_connection *conn, struct mg_ws_mes
 
     xQueueSend(sess->jdec_que, &rect, portMAX_DELAY);
 
-    RSPN_STRING(conn, "video.frame:ok")
+    RSPN_STRING(conn, "video", "frame", "ok")
 
 }
 
 inline static void rspn_audio_init(struct mg_connection *conn, struct mg_ws_message * wm) {
     if( wm->data.len<5 ) {
-        RSPN_STRING(conn, "audio.init:invalid length")
+        RSPN_STRING(conn, "audio", "init", "invalid length")
         return ;
     }
 
@@ -457,7 +461,7 @@ inline static void rspn_audio_init(struct mg_connection *conn, struct mg_ws_mess
         i2s_num = 1 ;
     } else {
         i2s_num = 255 ;
-        RSPN_STRING(conn, "audio.init:i2s not setup")
+        RSPN_STRING(conn, "audio", "init", "i2s not setup")
         return ;
     }
 
@@ -468,30 +472,30 @@ inline static void rspn_audio_init(struct mg_connection *conn, struct mg_ws_mess
     dn4(i2s_num, sample_rate,bit,channels)
 
     if(i2s_set_clk(i2s_num, sample_rate, bit, channels)!=ESP_OK) {
-        RSPN_STRING(conn, "audio.init:failed")
+        RSPN_STRING(conn, "audio", "init", "failed")
         return ;
     }
 
-    RSPN_STRING(conn, "audio.init:ok")
+    RSPN_STRING(conn, "audio", "init", "ok")
 }
 
 inline static void rspn_audio_frame(struct mg_connection *conn, struct mg_ws_message * wm) {
 
     if(i2s_num==255) {
-        RSPN_STRING(conn, "audio.frame:i2s invalid")
+        RSPN_STRING(conn, "audio", "frame", "i2s invalid")
         return ;
     }
 
     if(!sess->audio_ring) {
-        RSPN_STRING(conn, "audio.frame:unknow error")
+        RSPN_STRING(conn, "audio", "frame", "unknow error")
         return ;
     }
 
     if(pdTRUE != xRingbufferSend(sess->audio_ring, wm->data.ptr+1, wm->data.len-1, portMAX_DELAY)) {
-        RSPN_STRING(conn, "audio.frame:timeout")
+        RSPN_STRING(conn, "audio", "frame", "timeout")
         return ;
     }
-    RSPN_STRING(conn, "audio.frame:ok")
+    RSPN_STRING(conn, "audio", "frame", "ok")
 
 }
 
@@ -514,7 +518,7 @@ void telnet_ws_response_projection(struct mg_connection *conn, struct mg_ws_mess
         rspn_audio_frame(conn,wm) ;
     }
     else {
-        RSPN_STRING(conn, "invalid command")
+        RSPN_STRING(conn, "unknow","unknow","invalid command")
     }
         
     vTaskDelay(0) ;

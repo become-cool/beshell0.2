@@ -169,14 +169,14 @@ wifi.connect = async function(ssid,password,retry,retryDur) {
     return 0==res
 }
 
-wifi.disconnect = function() {
+wifi.disconnect = async function() {
     return new Promise(function(resolve) {
         if(!beapi.wifi.staConnected()) {
-            resolve(true)
+            resolve()
             return
         }
         beapi.wifi.disconnect()
-        waitConnecting().then(()=>resolve())
+        wifi.once("sta.disconnected", resolve)
     })
 }
 

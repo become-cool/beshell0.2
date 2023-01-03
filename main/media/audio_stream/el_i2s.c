@@ -89,9 +89,9 @@ static void task_pcm_playback(audio_el_i2s_t * el) {
     while(1){}
 }
 
-audio_el_i2s_t * audio_el_i2s_create(audio_pipe_t * pipe, uint8_t i2s_num) {
+audio_el_i2s_t * audio_el_i2s_create(audio_pipe_t * pipe, uint8_t i2s_num, uint8_t core) {
     audio_el_i2s_t * el = NULL ;
-    ELEMENT_CREATE(pipe, audio_el_i2s_t, el, task_pcm_playback, 1024*3, 5, 0, 0)
+    ELEMENT_CREATE(pipe, audio_el_i2s_t, el, task_pcm_playback, 1024*3, 5, core, 0)
     if(el) {
         el->i2s = i2s_num ;
     }

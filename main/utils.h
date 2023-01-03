@@ -202,6 +202,7 @@ void * mallocDMA(size) ;
 
 void freeArrayBuffer(JSRuntime *rt, void *opaque, void *ptr) ;
 
+// SRAM优先于PSRAM
 #define HMALLOC(var, size) var = heap_caps_malloc(size, MALLOC_CAP_DMA); \
     if(!var) { var = heap_caps_malloc(size, MALLOC_CAP_SPIRAM); }
 

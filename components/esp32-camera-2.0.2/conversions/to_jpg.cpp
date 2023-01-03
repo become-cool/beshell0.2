@@ -214,7 +214,8 @@ bool fmt2jpg(uint8_t *src, size_t src_len, uint16_t width, uint16_t height, pixf
 
     uint8_t * jpg_buf = (uint8_t *)_malloc(jpg_buf_len);
     if(jpg_buf == NULL) {
-        ESP_LOGE(TAG, "JPG buffer malloc failed");
+        // ESP_LOGE(TAG, "JPG buffer malloc failed");
+        printf("JPG buffer malloc failed:%d\n",jpg_buf_len) ;
         return false;
     }
     memory_stream dst_stream(jpg_buf, jpg_buf_len);
@@ -225,6 +226,16 @@ bool fmt2jpg(uint8_t *src, size_t src_len, uint16_t width, uint16_t height, pixf
     }
 
     *out = jpg_buf;
+    *out_len = dst_stream.get_size();
+    return true;
+}
+
+
+bool fmt2jpg_2(uint8_t *src, size_t src_len, uint16_t width, uint16_t height, pixformat_t format, uint8_t quality, uint8_t *buff, size_t bufflen, size_t * out_len) {
+    memory_stream dst_stream(buff, bufflen);
+    if(!convert_image(src, width, height, format, quality, &dst_stream)) {
+        return false;
+    }
     *out_len = dst_stream.get_size();
     return true;
 }

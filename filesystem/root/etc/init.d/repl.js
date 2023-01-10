@@ -206,7 +206,7 @@ function rm(path) {
     path = resolvepath(path)
     beapi.fs.unlinkSync(path)
 }
-function touch() {
+function touch(path) {
     beapi.fs.writeFileSync(resolvepath(path), '')
 }
 function cat(path) {

@@ -533,20 +533,30 @@ static JSValue js_fs_info(JSContext *ctx, JSValueConst this_val, int argc, JSVal
 #ifndef SIMULATION
     if(strcmp(jslabel,"/home")==0){
         if( esp_littlefs_info(PARTITION_LABEL_HOME, &total, &used) != ESP_OK ) {
+            JS_FreeCString(ctx, jslabel) ;
             THROW_EXCEPTION("esp_littlefs_info() bad")
         }
+        // free_ = total - used ;
     }
     else if(strcmp(jslabel,"/")==0) {
         vfs_rawfs_t * fs = be_rawfs_root() ;
         if(fs) {
             used = fs->size ;
             total = fs->partition_size ;
+            // free_ = total - used ;
         }
     }
     else {
-        JS_ThrowReferenceError(ctx, "unknow mount point: %s", jslabel) ;
-        JS_FreeCString(ctx, jslabel) ;
-        return JS_EXCEPTION ;
+
+        // size_t free_ = 0 ;
+        // if( esp_vfs_fat_info(jslabel, &total, &free_) != ESP_OK ) {
+            
+            JS_ThrowReferenceError(ctx, "unknow mount point: %s", jslabel) ;
+            JS_FreeCString(ctx, jslabel) ;
+            return JS_EXCEPTION ;
+
+        // }
+        // used = total - free_ ;
     }
 #endif
     JS_FreeCString(ctx, jslabel) ;
@@ -554,6 +564,7 @@ static JSValue js_fs_info(JSContext *ctx, JSValueConst this_val, int argc, JSVal
     JSValue obj = JS_NewObject(ctx) ;
     JS_SetPropertyStr(ctx, obj, "total", JS_NewUint32(ctx, total));
     JS_SetPropertyStr(ctx, obj, "used", JS_NewUint32(ctx, used));
+    // JS_SetPropertyStr(ctx, obj, "free", JS_NewUint32(ctx, free_));
 
     return obj ;
 }

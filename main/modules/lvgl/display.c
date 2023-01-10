@@ -251,16 +251,22 @@ JSValue be_lv_display_st77xx_init(JSContext *ctx, JSValueConst this_val, int arg
     ARGV_TO_UINT32(2, height)
     ARGV_TO_UINT32(3, MADCTL)
 
-    ds(typestr)
-    dn3(width,height,MADCTL)
+    st77xx_conf_t conf ;
+    memset(&conf, 0, sizeof(st77xx_conf_t)) ;
+    conf.width = width ;
+    conf.height = height ;
+    conf.MADCTL = MADCTL ;
+
+    // ds(typestr)
+    // dn3(width,height,MADCTL)
 
     disp_drv_spec_t * spec = (disp_drv_spec_t *)thisdisp->driver->user_data ;
     
     if( strcmp(typestr, "ST7789V")==0 ) {
-        st7789v_init(spec->spi_dev, width, height, 0, 0, (uint8_t)MADCTL);
+        st7789v_init(spec->spi_dev, conf);
     }
     else if(strcmp(typestr, "ST7789")==0) {
-        st7789_init(spec->spi_dev, width, height, 0, 0, (uint8_t)MADCTL);
+        st7789_init(spec->spi_dev, conf);
     }
 
     JS_FreeCString(ctx,typestr) ;
@@ -468,20 +474,28 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
         GET_INT_PROP(argv[1], "dc", dc, { goto excp ;})
         GET_INT_PROP_DEFAULT(argv[1], "spi", spi, 1)
         GET_INT_PROP_DEFAULT(argv[1], "freq", freq, 26000000)
+        GET_INT_PROP_DEFAULT(argv[1], "MADCTL", MADCTL, 0)
+        bool invColor = JS_ToBool(ctx, JS_GetPropertyStr(ctx, argv[1], "invColor")) ;
 
-        printf("spi=%d, cs=%d, dc=%d, freq=%d, width=%d, height=%d\n",spi,cs,dc,freq,width,height) ;
+        printf("spi=%d, cs=%d, dc=%d, freq=%d, width=%d, height=%d, MADCTL=%d, invColor=%d\n",spi,cs,dc,freq,width,height, MADCTL, invColor) ;
 
         // 初始化 spi
         st77xx_dev_t * spidev = malloc(sizeof(st77xx_dev_t));
         st77xx_spi_init(spidev, spi, cs, dc, freq);
 
+        st77xx_conf_t conf ;
+        memset(&conf, 0, sizeof(st77xx_conf_t)) ;
+        conf.width = width ;
+        conf.height = height ;
+        conf.MADCTL = MADCTL ;
+        conf.invColor = invColor ;
+    
+
         if( strcmp(typestr, "ST7789V")==0 ) {
-            GET_INT_PROP_DEFAULT(argv[1], "MADCTL", MADCTL, 0)
-            st7789v_init(spidev, width, height, 0, 0, (uint8_t)MADCTL);
+            st7789v_init(spidev, conf);
         }
         else if(strcmp(typestr, "ST7789")==0) {
-            GET_INT_PROP_DEFAULT(argv[1], "MADCTL", MADCTL, 0)
-            st7789_init(spidev, width, height, 0, 0, (uint8_t)MADCTL);
+            st7789_init(spidev, conf);
         }
         else {
             JS_ThrowReferenceError(ctx, "unknow disp driver: %s", typestr);

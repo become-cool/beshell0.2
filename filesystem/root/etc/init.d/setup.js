@@ -102,6 +102,8 @@ const LibDefaultConf = {
         ]
     }}
 }
+LibDefaultConf[3][254] = JSON.parse(JSON.stringify(LibDefaultConf[3][255]))
+LibDefaultConf[3][254].dev[1].setup.invColor = true
 
 function defaultSetupConf() {
     let partId = beapi.utils.partId()

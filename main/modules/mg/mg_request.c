@@ -19,7 +19,7 @@ static JSValue js_mg_http_message_constructor(JSContext *ctx, JSValueConst new_t
     return JS_NewObjectClass(ctx, js_mg_http_message_class_id) ;
 }
 static void js_mg_http_message_finalizer(JSRuntime *rt, JSValue this_val){
-    printf("js_mg_http_message_finalizer()\n") ;
+    // printf("js_mg_http_message_finalizer()\n") ;
 }
 static JSClassDef js_mg_http_message_class = {
     "mg.HttpMessage",

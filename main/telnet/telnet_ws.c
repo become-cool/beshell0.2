@@ -275,7 +275,6 @@ static void response_fs(struct mg_connection *c, struct mg_http_message *hm, con
     }
 
     if(mg_vcmp(&hm->method, "GET")==0) {
-        ds(path)
         // 文件
         if(S_ISREG(statbuf.st_mode)) {
             struct mg_http_serve_opts opts = {.mime_types = "application/octet-stream"};
@@ -288,6 +287,7 @@ static void response_fs(struct mg_connection *c, struct mg_http_message *hm, con
         }
         // unknow
         else {
+            dd
             mg_http_reply(c, 500,  "Content-Type: application/json\r\n", "{error: \"%s\"}", "Unknow File Type");
         }
     }
@@ -297,7 +297,7 @@ static void response_fs(struct mg_connection *c, struct mg_http_message *hm, con
         mg_http_reply(c, 204,  CROS_RSPN_HEADERS, "", "");
     }
     else if(mg_vcmp(&hm->method, "POST")==0) {
-        printf("post path=%s, body len:%d\n", path, hm->body.len); ;
+        // printf("post path=%s, body len:%d\n", path, hm->body.len);
 
         // 检查目录是否存在
         if(!S_ISDIR(statbuf.st_mode)) {
@@ -324,7 +324,7 @@ static void response_fs(struct mg_connection *c, struct mg_http_message *hm, con
 	            size_t wroteBytes = fwrite(part.body.ptr, 1, part.body.len, fd);
                 fclose(fd) ;
 
-                printf("wroten:%d\n", wroteBytes) ;
+                // printf("wroten:%d\n", wroteBytes) ;
                 if(wroteBytes==part.body.len) {
                     mg_http_reply(c, 200, CROS_RSPN_HEADERS, "%s", "ok") ;
                     printf("200\n") ;
@@ -359,7 +359,8 @@ static void response_fs(struct mg_connection *c, struct mg_http_message *hm, con
 static bool telnet_ws_is_captive_portal_request(struct mg_connection *c, struct mg_http_message *hm) {
 
     struct mg_str * host = mg_http_get_header(hm, "Host") ;
-printf("%.*s\n",host->len,host->ptr) ;
+    // printf("%.*s\n",host->len,host->ptr) ;
+
     if(mg_strcmp(*host, mg_str("captive.apple.com"))==0) {
         return true ;
     }
@@ -375,7 +376,7 @@ printf("%.*s\n",host->len,host->ptr) ;
         return true ;
     }
 
-    printf("%.*s/%.*s\n", host->len, host->ptr, hm->uri.len, hm->uri.ptr) ;
+    // printf("%.*s/%.*s\n", host->len, host->ptr, hm->uri.len, hm->uri.ptr) ;
 
     return false ;
 }
@@ -386,8 +387,9 @@ bool telnet_ws_response_http(struct mg_connection *c, struct mg_http_message *hm
         return true ;
     }
 
+    // printf("%.*s\n", hm->uri.len, hm->uri.ptr);
+
     if (mg_http_match_uri(hm, "/repl")) {
-        dd
         upgrade_ws(c, hm, WS_REPL) ;
         return true ;
     }
@@ -432,11 +434,19 @@ bool telnet_ws_response_http(struct mg_connection *c, struct mg_http_message *hm
         return true ;
     }
     // /fs
-    else if( hm->uri.len>=3 && strncmp(hm->uri.ptr,"/fs",3) && (hm->uri.len==3 || hm->uri.ptr[3]=='/')) {
+    else if( hm->uri.len>=3 && strncmp(hm->uri.ptr,"/fs",3)==0 && (hm->uri.len==3 || hm->uri.ptr[3]=='/')) {
 #ifndef SIMULATION
-        char * path = malloc(hm->uri.len+1) ;
+
+        size_t path_len = hm->uri.len+1 ;
+
+        char * path = malloc(path_len) ;
         memcpy(path,hm->uri.ptr,hm->uri.len) ;
         path[hm->uri.len] = '\0' ;
+
+        char * path_dec = malloc(path_len) ;
+        path_dec[0] = 0 ;
+
+        int res = mg_url_decode(path, path_len, path_dec, path_len, 1) ;
 #else
         char * path ;
         if(hm->uri.len==3) {
@@ -453,9 +463,13 @@ bool telnet_ws_response_http(struct mg_connection *c, struct mg_http_message *hm
         }
 
 #endif
-        response_fs(c, hm, path) ;
+
+        
+
+        response_fs(c, hm, path_dec) ;
 
         free(path) ;
+        free(path_dec) ;
         return true ;
     }
 
@@ -468,7 +482,6 @@ bool telnet_ws_response_http(struct mg_connection *c, struct mg_http_message *hm
         upgrade_ws(c, hm, WS_PROJ) ;
         return true ;
     }
-
     return false ;
 }
 

@@ -33,7 +33,7 @@ static JSValue js_mg_http_rspn_constructor(JSContext *ctx, JSValueConst new_targ
     return JS_NewObjectClass(ctx, js_mg_http_rspn_class_id) ;
 }
 static void js_mg_http_rspn_finalizer(JSRuntime *rt, JSValue this_val){
-    printf("js_mg_http_rspn_finalizer()\n") ;
+    // printf("js_mg_http_rspn_finalizer()\n") ;
 }
 static JSClassDef js_mg_http_rspn_class = {
     "mg.HttpResponse",

@@ -55,9 +55,11 @@ static JSValue js_driver_mount_sd(JSContext *ctx, JSValueConst this_val, int arg
         ARGV_TO_UINT32(3, khz)
         host.max_freq_khz = khz ;
     }
-    dn(host.max_freq_khz)
 
     ret = esp_vfs_fat_sdspi_mount(mntPath, &host, &slot_config, &mount_config, &card);
+
+    dn(card->max_freq_khz)
+    sdmmc_card_print_info(stdout, card);
 
     free(mntPath) ;
 
@@ -70,7 +72,6 @@ static JSValue js_driver_mount_sd(JSContext *ctx, JSValueConst this_val, int arg
         }
     }
 
-    // sdmmc_card_print_info(stdout, card);
 
     return JS_TRUE ;
 }

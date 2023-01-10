@@ -32,9 +32,20 @@ typedef struct {
 	spi_device_handle_t spi_dev;
 } st77xx_dev_t;
 
+
+typedef struct {
+	int width ;
+	int height ;
+	int offsetx ;
+	int offsety ;
+	uint8_t MADCTL ;
+	bool invColor ;
+} st77xx_conf_t ;
+
+
 bool st77xx_spi_init(st77xx_dev_t * dev, uint8_t spi, uint8_t cs, uint8_t dc, uint32_t frequency) ;
-void st7789v_init(st77xx_dev_t * dev, int width, int height, int offsetx, int offsety, uint8_t MADCTL);
-void st7789_init(st77xx_dev_t * dev, int width, int height, int offsetx, int offsety, uint8_t MADCTL);
+void st7789v_init(st77xx_dev_t * dev, st77xx_conf_t conf);
+void st7789_init(st77xx_dev_t * dev, st77xx_conf_t conf);
 // void st77xx_pixel(st77xx_dev_t * dev, uint16_t x, uint16_t y, uint16_t color);
 void st77xx_draw_rect(st77xx_dev_t * dev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t * colors) ;
 void st77xx_fill_rect(st77xx_dev_t * dev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color) ;

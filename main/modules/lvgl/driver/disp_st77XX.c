@@ -133,12 +133,12 @@ static void delay(int ms) {
 }
 
 
-void st7789_init(st77xx_dev_t * dev, int width, int height, int offsetx, int offsety, uint8_t MADCTL) {
+void st7789_init(st77xx_dev_t * dev,  st77xx_conf_t conf) {
 
-	dev->_width = width;
-	dev->_height = height;
-	dev->_offsetx = offsetx;
-	dev->_offsety = offsety;
+	dev->_width = conf.width;
+	dev->_height = conf.height;
+	dev->_offsetx = conf.offsetx;
+	dev->_offsety = conf.offsety;
 
 	st77xx_command(dev, 0x01);	//Power Control 1
 	delay(150);
@@ -160,7 +160,7 @@ void st7789_init(st77xx_dev_t * dev, int width, int height, int offsetx, int off
 	// }
 	// else {
 		st77xx_command(dev, 0x36);	
-		st77xx_data_byte(dev, MADCTL);	
+		st77xx_data_byte(dev, conf.MADCTL);	
 	// }
 	
 	st77xx_command(dev, 0x3A);	// 颜色模式： RGB565 (16Bit)
@@ -173,7 +173,10 @@ void st7789_init(st77xx_dev_t * dev, int width, int height, int offsetx, int off
 	st77xx_data_byte(dev, 0xA4);
 	st77xx_data_byte(dev, 0xA1);
 
-	st77xx_command(dev, 0x21);	// 反色
+	if(conf.invColor) {
+		st77xx_command(dev, 0x21);	// 反色
+	}
+
 	st77xx_command(dev, 0x29);	// 打开屏幕
 
 	// 屏幕尺寸
@@ -190,12 +193,13 @@ void st7789_init(st77xx_dev_t * dev, int width, int height, int offsetx, int off
 	st77xx_data_byte(dev, 240);	
 }
 
-void st7789v_init(st77xx_dev_t * dev, int width, int height, int offsetx, int offsety, uint8_t MADCTL) {
+// int width, int height, int offsetx, int offsety, uint8_t MADCTL
+void st7789v_init(st77xx_dev_t * dev,  st77xx_conf_t conf) {
 
-	dev->_width = width;
-	dev->_height = height;
-	dev->_offsetx = offsetx;
-	dev->_offsety = offsety;
+	dev->_width = conf.width;
+	dev->_height = conf.height;
+	dev->_offsetx = conf.offsetx;
+	dev->_offsety = conf.offsety;
 
 	st77xx_command(dev, 0x01);	//Power Control 1
 	delay(150);
@@ -203,13 +207,17 @@ void st7789v_init(st77xx_dev_t * dev, int width, int height, int offsetx, int of
 	st77xx_command(dev, 0x11);	// 唤醒
 	delay(120);
 
+	if(conf.invColor) {
+		st77xx_command(dev, 0x21);	// 反色
+	}
+
 	//--------------------------------------Display Setting------------------------------------------//
 	// 关于 0x36, 0x37 旋转屏幕，参考 st7789 文档，以及：
 	// https://github.com/notro/fbtft/issues/523
 	// 方向: 0x20, 0x40, 0x80 组合确定
 	// if(rotation==90) {
 		st77xx_command(dev, 0x36);
-		st77xx_data_byte(dev, MADCTL);	
+		st77xx_data_byte(dev, conf.MADCTL);	
 	// }
 	// else {
 	// 	st77xx_command(dev, 0x36);	
@@ -236,10 +244,10 @@ void st7789v_init(st77xx_dev_t * dev, int width, int height, int offsetx, int of
 	st77xx_data_byte(dev, 0x33);
 	st77xx_data_byte(dev, 0x33);
 	st77xx_command(dev, 0xb7);
-	st77xx_data_byte(dev, 0x35);
+	st77xx_data_byte(dev, 0x74);   //VGH=14.97V,VGL=-7.67V
 //---------------------------------ST7789V Power setting--------------------------------------//
 	st77xx_command(dev, 0xbb);
-	st77xx_data_byte(dev, 0x28);
+	st77xx_data_byte(dev, 0x1F);
 	st77xx_command(dev, 0xc0);
 	st77xx_data_byte(dev, 0x2c);
 	st77xx_command(dev, 0xc2);
@@ -254,37 +262,43 @@ void st7789v_init(st77xx_dev_t * dev, int width, int height, int offsetx, int of
 	st77xx_data_byte(dev, 0xa4);
 	st77xx_data_byte(dev, 0xa1);
 //--------------------------------ST7789V gamma setting---------------------------------------//
-	st77xx_command(dev, 0xe0); 
-	st77xx_data_byte(dev, 0xd0); 
-	st77xx_data_byte(dev, 0x00); 
-	st77xx_data_byte(dev, 0x02); 
-	st77xx_data_byte(dev, 0x07); 
-	st77xx_data_byte(dev, 0x0a); 
-	st77xx_data_byte(dev, 0x28); 
-	st77xx_data_byte(dev, 0x32); 
-	st77xx_data_byte(dev, 0x44); 
-	st77xx_data_byte(dev, 0x42); 
-	st77xx_data_byte(dev, 0x06); 
-	st77xx_data_byte(dev, 0x0e); 
-	st77xx_data_byte(dev, 0x12); 
-	st77xx_data_byte(dev, 0x14); 
-	st77xx_data_byte(dev, 0x17); 
-	st77xx_command(dev, 0xe1); 
-	st77xx_data_byte(dev, 0xd0);
-	st77xx_data_byte(dev, 0x00);
-	st77xx_data_byte(dev, 0x02);
+	st77xx_command(dev, 0xE0);
+	st77xx_data_byte(dev, 0xD0);
 	st77xx_data_byte(dev, 0x07);
-	st77xx_data_byte(dev, 0x0a);
-	st77xx_data_byte(dev, 0x28);
-	st77xx_data_byte(dev, 0x31);
+	st77xx_data_byte(dev, 0x0E);
+	st77xx_data_byte(dev, 0x0B);
+	st77xx_data_byte(dev, 0x0A);
+	st77xx_data_byte(dev, 0x14);
+	st77xx_data_byte(dev, 0x38);
+	st77xx_data_byte(dev, 0x33);
+	st77xx_data_byte(dev, 0x4F);
+	st77xx_data_byte(dev, 0x37);
+	st77xx_data_byte(dev, 0x16);
+	st77xx_data_byte(dev, 0x16);
+	st77xx_data_byte(dev, 0x2A);
+	st77xx_data_byte(dev, 0x2E);
+
+	st77xx_command(dev, 0xE1);
+	st77xx_data_byte(dev, 0xD0);
+	st77xx_data_byte(dev, 0x0B);
+	st77xx_data_byte(dev, 0x10);
+	st77xx_data_byte(dev, 0x08);
+	st77xx_data_byte(dev, 0x08);
+	st77xx_data_byte(dev, 0x06);
+	st77xx_data_byte(dev, 0x35);
 	st77xx_data_byte(dev, 0x54);
-	st77xx_data_byte(dev, 0x47);
-	st77xx_data_byte(dev, 0x0e); 
-	st77xx_data_byte(dev, 0x1c);
-	st77xx_data_byte(dev, 0x17);
-	st77xx_data_byte(dev, 0x1b);
-	st77xx_data_byte(dev, 0x1e);
+	st77xx_data_byte(dev, 0x4D);
+	st77xx_data_byte(dev, 0x0A);
+	st77xx_data_byte(dev, 0x14);
+	st77xx_data_byte(dev, 0x14);
+	st77xx_data_byte(dev, 0x2C);
+	st77xx_data_byte(dev, 0x2F);
+
+
+
+	// 开机
 	st77xx_command(dev, 0x29); 
+	delay(20);
 }
 
 

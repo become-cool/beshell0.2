@@ -20,24 +20,25 @@ class Controller extends lv.Column {
         this.fromJson({
             height: 80 ,
             crossAlign: "center" ,
-            children: [{
-                class: "CleanObj" ,
-                height:30 ,
-                width: "100%" ,
-                children:[{
-                    class: "Slider" ,
-                    align: "center" ,
-                    width: "80%" ,
-                    height: 5 ,
-                    value: 10 ,
-                    style: {
-                        "pad-top": 20 ,
-                        "pad-bottom": 20 ,
-                    } ,
-                    ref: "progress" ,
-                }]
-            }
-            , {
+            children: [
+            // {
+            //     class: "CleanObj" ,
+            //     height:30 ,
+            //     width: "100%" ,
+            //     children:[{
+            //         class: "Slider" ,
+            //         align: "center" ,
+            //         width: "80%" ,
+            //         height: 5 ,
+            //         value: 10 ,
+            //         style: {
+            //             "pad-top": 20 ,
+            //             "pad-bottom": 20 ,
+            //         } ,
+            //         ref: "progress" ,
+            //     }]
+            // } ,
+            {
                 class: "CleanObj" ,
                 width: "100%",
                 grow: true ,

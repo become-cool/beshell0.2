@@ -10,6 +10,7 @@
 #include "esp_timer.h"
 #include "indev.h"
 #include "indev_i2c.h"
+#include "esp32_perfmon.h"
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/timers.h>
@@ -57,14 +58,16 @@ static QueueHandle_t queVideo;
 static QueueHandle_t queAudio;
 // static QueueHandle_t queCmd;
 
+#define AUDIO_RECORD 0
 
-#define  EMULATOR_SAMPLERATE   22100
+#define  EMULATOR_SAMPLERATE   22050
 // #define  EMULATOR_FRAGSIZE     400
 #define  EMULATOR_FRAGSIZE     400
 
 
 // FILE * hsound = NULL ;
 // size_t sound_smps = 0 ;
+
 
 
 void player_nofrendo_set_video(st77xx_dev_t * dev, uint16_t * buff, uint16_t width, uint16_t lines, uint16_t xr, uint16_t xw) {
@@ -158,7 +161,7 @@ int osd_installtimer(int frequency, void *func, int funcsize, void *counter, int
  * Audio
  */
 static void (*audio_callback)(void *buffer, int length) = NULL;
-static uint16_t *audio_frame;
+static int16_t *audio_frame;
 static bool audio_started = false ;
 
 
@@ -365,6 +368,66 @@ uint64_t nowms(){
     return (clock() * 1000 / CLOCKS_PER_SEC);
 }
 
+#if AUDIO_RECORD
+
+bool record_audio = false ;
+FILE * record_audio_fd = NULL ;
+static char * record_audio_buff = NULL ;
+static char * record_audio_writer = NULL ;
+#define RECORD_LEN 1024*1024
+
+
+static void record_on(){
+
+    printf("record_on()\n") ;
+
+    record_audio = true ;
+    // record_audio_buff = heap_caps_malloc(RECORD_LEN, MALLOC_CAP_SPIRAM);
+    record_audio_writer = record_audio_buff ;
+}
+
+
+
+static void record_off(){
+    
+    printf("record_off()\n") ;
+
+    record_audio_fd = fopen("/fs/mnt/sd/record.pcm", "w") ;
+    if(!record_audio_fd) {
+        printf("fopen() record.pcm failed\n") ;
+    } else {
+        size_t pcmlen = record_audio_writer - record_audio_buff ;
+        dn(pcmlen)
+        fwrite(record_audio_buff, 1, pcmlen, record_audio_fd) ;
+        fclose(record_audio_fd) ;
+        record_audio_fd = NULL ;
+    }
+
+    record_audio = false ;
+}
+
+static void record_proc(void * data, size_t datalen){
+
+    size_t wroten = record_audio_writer - record_audio_buff ;
+    size_t left = RECORD_LEN - wroten ;
+    if(datalen>left) {
+        datalen = left ;
+    }
+
+    memcpy(record_audio_writer, data, datalen) ;
+    record_audio_writer+= datalen ;
+
+    if(record_audio_writer-record_audio_buff>=RECORD_LEN) {
+        record_off() ;
+    }
+
+    // if(record_audio_fd) {
+    //     fwrite(data, 1, datalen, record_audio_fd) ;
+    // }
+}
+
+#endif
+
 static uint64_t next_time = 0 ;
 static uint64_t last_time = 0 ;
 static uint8_t frames = 0 ;
@@ -397,72 +460,6 @@ static bool printed = false ;
 
 static void audio_play_frame() {
 
-        uint8_t frms = dynamic_frames ;
-
-        // if(dynamic_frames) {
-
-        // }
-        int left = EMULATOR_SAMPLERATE / ((dynamic_frames>10)? dynamic_frames: NES_REFRESH_RATE) ;
-        // int left = EMULATOR_SAMPLERATE / dynamic_frames ;
-        // dn(left)
-        size_t written ;
-
-        while(left) {
-            int n=EMULATOR_FRAGSIZE;
-            if (n>left)
-                n=left;
-            audio_callback(audio_frame, n); //get more data
-
-            // printf("audio %d/%d\n", n, left) ;
-            
-            // if(hsound) {
-            //     dn2(left,n)
-
-            //     if(audio_frame[0] && audio_frame[1] && audio_frame[2] && audio_frame[3] ) {
-
-            //         fwrite(audio_frame, 1, n*2, hsound) ;
-            //         sound_smps+= n ;
-
-            //         if(sound_smps > EMULATOR_SAMPLERATE*3) {
-            //             printf("pcm save over, samples: %d\n", sound_smps) ;
-            //             fclose(hsound) ;
-            //             hsound = NULL ;
-            //         }
-            //     }
-
-            // }
-
-            //16 bit mono -> 32-bit (16 bit right+left)
-            for (int i=n-1; i>=0; i--) {
-                audio_frame[i*2+1]=audio_frame[i];
-                audio_frame[i*2]=audio_frame[i];
-            }
-            
-            // int64_t t0 = gettime() ;
-            i2s_write(i2s, audio_frame, 4*n, &written, portMAX_DELAY);
-            // i2s_write_expand(i2s, audio_frame, 4*n, 16,32, &written, portMAX_DELAY);
-            // printf("i2s_write_expand() t:%lld, bytes: %d\n", gettime()-t0, written) ;
-
-            // dn4(frms, left, n, written)
-
-            left-=n;
-
-
-            if( !printed && (audio_frame[0] || audio_frame[1] || audio_frame[2] || audio_frame[3]) ) {
-                printf("sound: %d,%d,%d,%d,%d,%d,%d,%d\n"
-                    , audio_frame[0]
-                    , audio_frame[1]
-                    , audio_frame[2]
-                    , audio_frame[3]
-                    , audio_frame[4]
-                    , audio_frame[5]
-                    , audio_frame[6]
-                    , audio_frame[7]
-                    ) ;
-                printed = true ;
-            }
-
-        }
 }
 
 
@@ -480,11 +477,6 @@ static void custom_blit(bitmap_t *bmp, int num_dirties, rect_t *dirty_rects) {
 	xQueueSend(queVideo, &bmp, 0);
 
     audio_started = true ;
-    return ;
-
-    if(i2s>=0) {
-        audio_play_frame() ;
-    }
 }
 
 void task_audio(void * data) {
@@ -499,55 +491,37 @@ void task_audio(void * data) {
 
         framerate() ;
         if(print_framerate_counter++%60==0) {
-            dn2(NES_REFRESH_RATE, dynamic_frames)
+            printf("fps:%d, cpu0:%d%%, cpu1:%d%%\n", dynamic_frames, cpu0_usage(), cpu1_usage()) ;
         }
 
-        audio_play_frame() ;
+        int left = EMULATOR_SAMPLERATE / NES_REFRESH_RATE ;
+        size_t written ;
 
-        // audio_callback(audio_frame, EMULATOR_FRAGSIZE) ;
+        while(left) {
+            int n=EMULATOR_FRAGSIZE;
+            if (n>left)
+                n=left;
+            audio_callback(audio_frame, n); //get more data
 
-        // //16 bit mono -> 32-bit (16 bit right+left)
-        // for (int i=EMULATOR_FRAGSIZE-1; i>=0; i--) {
-        //     audio_frame[i*2+1]=audio_frame[i];
-        //     audio_frame[i*2]=audio_frame[i];
-        // }
+            //16 bit mono -> 32-bit (16 bit right+left)
+            for (int i=n-1; i>=0; i--) {
+                audio_frame[i] = audio_frame[i]/4 ;
+                audio_frame[i*2+1]=audio_frame[i];
+                audio_frame[i*2]=audio_frame[i];
+            }
+            
+            i2s_write(i2s, audio_frame, 4*n, &written, portMAX_DELAY);
+            left-=n;
 
-        // size_t bytes_written ;
-        // // int64_t t0 = gettime() ;
-        // // i2s_write_expand(i2s, audio_frame, 4*EMULATOR_FRAGSIZE, 16,32, &bytes_written, portMAX_DELAY);
-        // i2s_write(i2s, audio_frame, 4*EMULATOR_FRAGSIZE, &bytes_written, portMAX_DELAY);
-        // // printf("i2s_write() t:%lld, bytes: %d\n", gettime()-t0, bytes_written) ;
-        // // dn(bytes_written)
+#if AUDIO_RECORD
+            if(record_audio) {
+                record_proc(audio_frame, written) ;
+            }
+#endif
+        }
 
         vTaskDelay(1) ;
     }
-    
-        // // dn2(dynamic_frames, NES_REFRESH_RATE)
-        // int left = EMULATOR_SAMPLERATE / ((dynamic_frames>10)? dynamic_frames: NES_REFRESH_RATE) ;
-
-        // while(left) {
-        //     int n=EMULATOR_FRAGSIZE;
-        //     if (n>left)
-        //         n=left;
-        //     audio_callback(audio_frame, n); //get more data
-
-        //     // printf("audio %d/%d\n", n, left) ;
-
-        //     //16 bit mono -> 32-bit (16 bit right+left)
-        //     for (int i=n-1; i>=0; i--) {
-        //         audio_frame[i*2+1]=audio_frame[i];
-        //         audio_frame[i*2]=audio_frame[i];
-        //     }
-        //     size_t bytes_written ;
-            
-        //     // int64_t t0 = gettime() ;
-        //     i2s_write_expand(i2s, audio_frame, 4*n, 16,32, &bytes_written, portMAX_DELAY);
-        //     // i2s_write(i2s, audio_frame, 4*n, &bytes_written, 10);
-        //     // printf("i2s_write() t:%lld, bytes: %d\n", gettime()-t0, bytes_written) ;
-        //     // dn(bytes_written)
-
-        //     left-=n;
-        // }
 }
 
 void st7789_write_frame(const uint8_t ** data) {
@@ -581,7 +555,12 @@ static void task_video(void *arg) {
 		// printf("F:%dx%d\n",bmp->width, bmp->height) ;
 
         // dp(bmp->line)
-		st7789_write_frame(bmp->line);
+#if AUDIO_RECORD
+        // if(!record_audio)
+#endif
+        // {
+		    st7789_write_frame(bmp->line);
+        // }
 
         vTaskDelay(1) ;
 	}
@@ -617,14 +596,24 @@ void osd_getinput(void) {
         // 192 == select + start
         if( (btns_1&192)==192 || (btns_2&192)==192 ) {
 #ifndef SIMULATION
-            dn(btns_1)
-            dn(btns_2)
             printf("pressed select + start\n") ;
             esp_restart() ;
 #else
             exit(99) ;
 #endif
         }
+
+#if AUDIO_RECORD
+        // 按 select 停止画面，记录声音
+        if(btns_1==0x80 && !record_audio) {
+            record_on() ;
+        }
+        // 按 start 恢复
+        else if(btns_1==0x40 && record_audio) {
+            record_off() ;
+        }
+#endif
+
     }
 
     // dn2(btns_1,btns_2)
@@ -672,6 +661,8 @@ int osd_init() {
 
     printf("osd_init()\n") ;
 
+    dn(AUDIO_RECORD)
+
     if(!palette) {
         palette = heap_caps_malloc( sizeof(uint16)*PALETTE_SIZE, MALLOC_CAP_DMA ) ;
         if(!palette) {
@@ -689,7 +680,12 @@ int osd_init() {
     xTaskCreatePinnedToCore(&task_video, "task_video", 1024*4, NULL, 5, NULL, 1);
 
     if(i2s>=0) {
-	    xTaskCreatePinnedToCore(&task_audio, "task_audio", 2048, NULL, 5, NULL, 1);
+#if AUDIO_RECORD
+        record_audio_buff = malloc(RECORD_LEN) ;
+	    xTaskCreatePinnedToCore(&task_audio, "task_audio", 1024*4, NULL, 5, NULL, 1);
+#else
+	    xTaskCreatePinnedToCore(&task_audio, "task_audio", 1024*2, NULL, 5, NULL, 1);
+#endif
     }
 
     echo_DMA("end osd_init") ;

@@ -37,8 +37,8 @@ mkfs-root:
 mkfs-home:
 	bin/mklittlefs -c filesystem/tmp/home -s 204800 filesystem/img/fs-home.img -d 5
 
-mkfs-home-with-roms:
-	bin/mklittlefs -c filesystem/home-with-roms -s 3145728 filesystem/img/fs-home.img -d 5
+mkfs-home-more:
+	bin/mklittlefs -c filesystem/tmp/home -s 6291456 filesystem/img/fs-home.img -d 5
 
 dist:
 	node filesystem/dispense-to-beconsole.js all
@@ -64,6 +64,12 @@ pack-fs: tree-shaking mkfs-root mkfs-home partition dist-fs
 pack-all: tree-shaking mkfs-root mkfs-home partition dist
 	ls -lh filesystem/img/
 
+pack-home-data:
+	mkdir -p filesystem/tmp/home/become/game
+	cp -rf filesystem/home/become/game/* filesystem/tmp/home/become/game
+	mkdir -p filesystem/tmp/home/become/game
+	cp -rf filesystem/home/become/music/* filesystem/tmp/home/become/music
+
 # 编译js, 打包 / 和 /home 分区，并制作 img 文件
 fs: compile pack-fs
 
@@ -78,6 +84,11 @@ fs-root-src: clear-jsbin tree-shaking mkfs-root dist-root
 
 # 编译js, 打包 /home 分区，并制作 img 文件
 fs-home: compile tree-shaking mkfs-home partition dist-home
+
+fs-home-with-data: compile tree-shaking pack-home-data mkfs-home-more partition dist-home
+
+
+
 
 # 编译 telweb (vue3) ，并打包制作 / 分区 img文件
 telweb-build:

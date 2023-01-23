@@ -11,7 +11,7 @@ class PlayerUI extends lv.CleanObj {
         // console.log("holdDMA",beapi.driver.holdDMA("audio",20*1024))
         
         this.group = new lv.Group()
-        this.loopMethod = "循环"
+        this.loopMethod = "不循环"
         this.player = new beapi.audio.Player
 
         this.fromJson({
@@ -246,7 +246,7 @@ class PlayerUI extends lv.CleanObj {
         beapi.driver.releaseDMA("audio")
 
         await this.stop()
-        this.player.playMP3(this.currentPath)
+        this.player.playMP3(this.currentPath, true)
         
         console.log(process.memoryUsage())
     }

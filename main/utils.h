@@ -203,8 +203,12 @@ void * mallocDMA(size) ;
 void freeArrayBuffer(JSRuntime *rt, void *opaque, void *ptr) ;
 
 // SRAM优先于PSRAM
+#ifndef SIMULATION
 #define HMALLOC(var, size) var = heap_caps_malloc(size, MALLOC_CAP_DMA); \
     if(!var) { var = heap_caps_malloc(size, MALLOC_CAP_SPIRAM); }
+#else
+#define HMALLOC(var, size) var = malloc(size);
+#endif
 
 #define GET_INT_PROP(obj, propName, cvar, excp)                                     \
     int32_t cvar = 0 ;                                                              \
@@ -241,7 +245,7 @@ void freeArrayBuffer(JSRuntime *rt, void *opaque, void *ptr) ;
 #define GET_INT_PROP_NODEF(obj, propName, cvar)                                         \
     {                                                                                   \
         JSValue jsvar = JS_GetPropertyStr(ctx, obj, propName) ;                         \
-        if( jsvar!=JS_UNDEFINED ) {                                                     \
+        if( !JS_IsUndefined(jsvar) ) {                                                     \
             if( !JS_IsNumber(jsvar) ) {                                                 \
                 JS_FreeValue(ctx, jsvar) ;                                              \
                 THROW_EXCEPTION(ctx, "property %s is not a number", propName) ;         \
@@ -291,7 +295,7 @@ void freeArrayBuffer(JSRuntime *rt, void *opaque, void *ptr) ;
 
 #define ASSIGN_PROP(obj, propName, jsvar)                                               \
     jsvar = JS_UNDEFINED ;                                                              \
-    if(obj!=JS_UNDEFINED&&obj!=JS_NULL) {                                               \
+    if(!JS_IsUndefined(obj)&&!JS_IsNull(obj)) {                                               \
         jsvar = JS_GetPropertyStr(ctx, obj, propName) ;                         \
     }                                                                                   \
 
@@ -305,17 +309,17 @@ void freeArrayBuffer(JSRuntime *rt, void *opaque, void *ptr) ;
 // 需要要手动 JS_FreeString(ctx, cvar)
 #define ASSIGN_STR_PROP(obj, propName, cvar)                                            \
     cvar = NULL ;                                                                       \
-    if(obj!=JS_UNDEFINED&&obj!=JS_NULL) {                                               \
+    if(!JS_IsUndefined(obj)&&!JS_IsNull(obj)) {                                               \
         JSValue jsvar = JS_GetPropertyStr(ctx, obj, propName) ;                         \
-        if( jsvar!=JS_UNDEFINED && jsvar!=JS_NULL) {                                    \
+        if( !JS_IsUndefined(jsvar) && !JS_IsNull(jsvar)) {                                    \
             cvar = JS_ToCString(ctx, jsvar) ;                                           \
         }                                                                               \
     }
 #define ASSIGN_STR_PROP_C(obj, propName, cvar, err_code)                                \
     cvar = NULL ;                                                                       \
-    if(obj!=JS_UNDEFINED&&obj!=JS_NULL) {                                               \
+    if((!JS_IsUndefined(obj))&&(!JS_IsNull(obj))) {                                           \
         JSValue jsvar = JS_GetPropertyStr(ctx, obj, propName) ;                         \
-        if( jsvar!=JS_UNDEFINED && jsvar!=JS_NULL) {                                    \
+        if( !JS_IsUndefined(jsvar) && !JS_IsNull(jsvar)) {                                    \
             cvar = JS_ToCString(ctx, jsvar) ;                                           \
         }                                                                               \
     }                                                                                   \
@@ -329,7 +333,7 @@ void freeArrayBuffer(JSRuntime *rt, void *opaque, void *ptr) ;
 
 #define ASSIGN_BOOL_PROP(obj, propName, cvar)                                           \
     cvar = false ;                                                                      \
-    if(obj!=JS_UNDEFINED&&obj!=JS_NULL) {                                               \
+    if(!JS_IsUndefined(obj)&&!JS_IsNull(obj)) {                                               \
         JSValue jsvar = JS_GetPropertyStr(ctx, obj, propName) ;                         \
         cvar = JS_ToBool(ctx, jsvar) ;                                                  \
     }

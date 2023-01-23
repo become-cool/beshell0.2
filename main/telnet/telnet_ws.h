@@ -5,12 +5,14 @@
 #include "lvgl.h"
 #include "lv_conf.h"
 #include "mongoose.h"
+
+#ifndef SIMULATION
 #include "disp_st77xx.h"
 #include <freertos/task.h>
 #include <freertos/queue.h>
 #include <freertos/semphr.h>
 #include "tjpg.h"
-
+#endif
 
 bool telnet_ws_response(struct mg_connection *c, int ev, void *ev_data, void *fn_data) ;
 

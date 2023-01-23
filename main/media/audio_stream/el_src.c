@@ -2,6 +2,12 @@
 #include "module_fs.h"
 
 
+audio_el_t *  audio_el_src_create(audio_pipe_t * pipe, uint8_t core) {
+    audio_el_src_t * el ;
+    ELEMENT_CREATE(pipe, audio_el_src_t, el, task_src, 1024*3, 5, core, 1024*2)
+    return el ;
+}
+
 bool audio_el_src_strip_mp3(audio_el_src_t * el) {
     if(!audio_el_src_strip_pcm(el)){
         return false ;
@@ -107,10 +113,3 @@ finish:
 
     }
 }
-
-// audio_el_t * audio_el_mp3_create(audio_pipe_t * pipe) {
-//     audio_el_t * el ;
-//     // task_src 需要访问 sd spi bus, 和 screen spi 任务在同一cpu核避免 spi bus 抢占错误
-//     ELEMENT_CREATE(pipe, audio_el_src_t, el, task_src, 1024*3, 5, 0, 512)  
-//     return el ;
-// }

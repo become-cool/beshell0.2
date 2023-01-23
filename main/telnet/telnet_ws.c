@@ -83,20 +83,24 @@ void ws_disp_flush(lv_disp_drv_t *dispdrv, const lv_area_t *area, lv_color_t *co
     }
 
     size_t size = (area->x2-area->x1+1) * (area->y2-area->y1+1) * sizeof(lv_color_t) ;
-
-    // uint64_t t0 = gettime() ;
-
+    
     //todo: allocate proper buffer for holding JPEG data
     //this should be enough for CIF frame size
+#ifndef SIMULATION
+    size_t bufflen = size*2+10;
     size_t jpglen = size*2;
-    uint8_t * HMALLOC(buff, jpglen+10);
+#else
+    size_t bufflen = size+10;
+#endif
+
+    uint8_t * HMALLOC(buff, bufflen);
     if(buff == NULL) {
         printf("JPG buffer malloc failed");
         return ;
     }
+    // dn2(area->x1,area->y1)
 
     buff[0] = WS_DISP_CMD_DRAW ;
-    buff[1] = WS_DISP_BUFF_JPEG ;
     uint16_t * coord = (uint16_t *)(buff + 2);
     (*coord) = area->x1 ;
     coord++ ;
@@ -106,13 +110,18 @@ void ws_disp_flush(lv_disp_drv_t *dispdrv, const lv_area_t *area, lv_color_t *co
     coord++ ;
     (*coord) = area->y2 ;
 
-    // dn2(area->x1,area->y1)
+    // esp32 上 jpg 编码后发送，pc 上直接发送
+#ifndef SIMULATION
 
+    buff[1] = WS_DISP_BUFF_JPEG ;
     uint8_t * jpgbuff = buff + 10 ;
-
     fmt2jpg_2((uint8_t *)color_p, size, area->x2-area->x1+1, area->y2-area->y1+1, PIXFORMAT_RGB565, jpeg_quality, jpgbuff, jpglen, &jpglen);
 
-    mg_ws_send(client_disp->conn, (char *)buff, jpglen+10, WEBSOCKET_OP_BINARY);
+#else
+    buff[1] = WS_DISP_BUFF_RAW ;
+#endif
+
+    mg_ws_send(client_disp->conn, (char *)buff, bufflen, WEBSOCKET_OP_BINARY);
 
     lv_disp_flush_ready(dispdrv) ;
     
@@ -245,7 +254,7 @@ static void upgrade_ws(struct mg_connection *c, struct mg_http_message *hm, WS_T
         
         SET_CLIENT(disp, client) ;
     }
-
+#ifndef SIMULATION
     else if( type==WS_PROJ ) {
         if(!telnet_ws_projection_sessn_init(c)) {
             goto fail ;
@@ -257,6 +266,7 @@ static void upgrade_ws(struct mg_connection *c, struct mg_http_message *hm, WS_T
         }
         client_proj = client ;
     }
+#endif
 
     return ;
 
@@ -435,18 +445,14 @@ bool telnet_ws_response_http(struct mg_connection *c, struct mg_http_message *hm
     }
     // /fs
     else if( hm->uri.len>=3 && strncmp(hm->uri.ptr,"/fs",3)==0 && (hm->uri.len==3 || hm->uri.ptr[3]=='/')) {
-#ifndef SIMULATION
+
 
         size_t path_len = hm->uri.len+1 ;
 
+#ifndef SIMULATION
         char * path = malloc(path_len) ;
         memcpy(path,hm->uri.ptr,hm->uri.len) ;
         path[hm->uri.len] = '\0' ;
-
-        char * path_dec = malloc(path_len) ;
-        path_dec[0] = 0 ;
-
-        int res = mg_url_decode(path, path_len, path_dec, path_len, 1) ;
 #else
         char * path ;
         if(hm->uri.len==3) {
@@ -461,10 +467,11 @@ bool telnet_ws_response_http(struct mg_connection *c, struct mg_http_message *hm
 
             uri[hm->uri.len] = end ;
         }
-
 #endif
-
         
+        char * path_dec = malloc(path_len) ;
+        path_dec[0] = 0 ;
+        int res = mg_url_decode(path, path_len, path_dec, path_len, 1) ;
 
         response_fs(c, hm, path_dec) ;
 
@@ -574,9 +581,11 @@ bool telnet_ws_response_ws(struct mg_connection *c, struct mg_ws_message * wm) {
             break ;
         }
 
+#ifndef SIMULATION
         case WS_PROJ:
             telnet_ws_response_projection(c, wm) ;
             break ;
+#endif
     }
 
     return true ;
@@ -613,10 +622,12 @@ bool telnet_ws_response(struct mg_connection *c, int ev, void *ev_data, void *fn
         else if(c->userdata==client_disp) {
             FREE_RTC_Client(c, client_disp)
         }
+#ifndef SIMULATION
         else if(c->userdata==client_proj) {
             telnet_ws_projection_sess_release() ;
             FREE_RTC_Client(c, client_proj)
         }
+#endif
 
         return false ;
     }

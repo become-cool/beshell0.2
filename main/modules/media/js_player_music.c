@@ -81,7 +81,7 @@ typedef struct {
 
 static inline void build_el_src(player_t * player, int core) {
     if(!player->src) {
-        ELEMENT_CREATE(player, audio_el_src_t, player->src, task_src, 1024*3, 5, core, 512)
+        player->src = audio_el_src_create(player, core) ;
     }
 }
 static inline void build_el_mp3(player_t * player, uint8_t core) {
@@ -207,6 +207,10 @@ static JSValue js_audio_play_mp3(JSContext *ctx, JSValueConst this_val, int argc
     build_el_i2s(player,0) ;
 
     ARGV_TO_STRING(0, path) ;
+    bool sync = false ;
+    if(argc>1) {
+        sync = JS_ToBool(ctx, argv[1]);
+    }
 
     if(strlen(path) + strlen(vfs_path_prefix) + 1 > sizeof(player->src->src_path)) {
         free(path) ;
@@ -239,6 +243,11 @@ static JSValue js_audio_play_mp3(JSContext *ctx, JSValueConst this_val, int argc
     audio_pipe_emit_js(player, "play", JS_UNDEFINED) ;
 
     audio_pipe_set_stats(player, STAT_RUNNING) ;
+    
+    if(sync) {
+        xEventGroupWaitBits(player->playback->base.stats, STAT_STOPPED, false, false, portMAX_DELAY);
+        printf("stopped") ;
+    }
 
 #else
     player->mp3->fin = fopen("../filesystem/root/mnt/sd/music-16b-2c-44100hz.mp3", "rb") ;

@@ -208,6 +208,7 @@ void audio_el_stop_when_req(audio_el_t * el) ;
 
 // source file reader
 void audio_el_src_delete(audio_el_src_t * el) ;
+audio_el_t *  audio_el_src_create(audio_pipe_t * pipe, uint8_t core) ;
 void task_src(audio_el_src_t * el) ;
 bool audio_el_src_strip_pcm(audio_el_src_t * el) ;
 bool audio_el_src_strip_mp3(audio_el_src_t * el) ;

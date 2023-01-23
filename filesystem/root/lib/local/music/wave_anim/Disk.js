@@ -25,7 +25,7 @@ module.exports = class Disk extends lv.CleanObj {
             angle+=120
             if(angle>=3600) angle = 0
             this.photo.setAngle(angle)
-        },100)
+        },200)
     }
 
     stop(){

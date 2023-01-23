@@ -113,7 +113,7 @@ inline static void nop1000() {
     NOP100 NOP100 NOP100 NOP100 NOP100 NOP100 NOP100 NOP100 NOP100 NOP100
 }
 
-
+#ifndef SIMULATION
 static JSValue js_process_stat_max_calls(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
 
     int64_t t = gettime() ;
@@ -146,7 +146,7 @@ static JSValue js_process_stat_max_calls(JSContext *ctx, JSValueConst this_val, 
 
     return JS_UNDEFINED ;
 }
-
+#endif
     
 
 static JSValue js_process_stat_nop(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
@@ -160,6 +160,7 @@ static JSValue js_process_stat_nop(JSContext *ctx, JSValueConst this_val, int ar
 }
 
 
+#ifndef SIMULATION
 static JSValue js_process_print_tasks(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
 
     size_t taskCnt = uxTaskGetNumberOfTasks() ;
@@ -175,6 +176,7 @@ static JSValue js_process_print_tasks(JSContext *ctx, JSValueConst this_val, int
     free(buff) ;
     return JS_UNDEFINED ;
 }
+#endif
 
 JSValue js_process_reset(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     int level = -1 ;
@@ -361,9 +363,11 @@ void be_module_process_require(JSContext *ctx) {
     JS_SetPropertyStr(ctx, process, "cpuIdle", JS_NewCFunction(ctx, js_process_cpu_idle_calls, "cpuIdle", 1));
     JS_SetPropertyStr(ctx, process, "cpuUsage", JS_NewCFunction(ctx, js_process_cpu_usage, "cpuUsage", 1));
     JS_SetPropertyStr(ctx, process, "memoryUsage", JS_NewCFunction(ctx, js_process_memory_usage, "memoryUsage", 1));
-    JS_SetPropertyStr(ctx, process, "printTasks", JS_NewCFunction(ctx, js_process_print_tasks, "printTasks", 1));
     JS_SetPropertyStr(ctx, process, "nop1000", JS_NewCFunction(ctx, js_process_stat_nop, "nop1000", 1));
+#ifndef SIMULATION
+    JS_SetPropertyStr(ctx, process, "printTasks", JS_NewCFunction(ctx, js_process_print_tasks, "printTasks", 1));
     JS_SetPropertyStr(ctx, process, "statMaxCalls", JS_NewCFunction(ctx, js_process_stat_max_calls, "statMaxCalls", 1));
+#endif
     
     // JS_SetPropertyStr(ctx, process, "global", global);
 

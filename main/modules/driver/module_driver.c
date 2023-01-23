@@ -58,12 +58,13 @@ static JSValue js_driver_mount_sd(JSContext *ctx, JSValueConst this_val, int arg
 
     ret = esp_vfs_fat_sdspi_mount(mntPath, &host, &slot_config, &mount_config, &card);
 
-    dn(card->max_freq_khz)
-    sdmmc_card_print_info(stdout, card);
-
     free(mntPath) ;
 
-    if (ret != ESP_OK) {
+    if (ret == ESP_OK) {
+        dn(card->max_freq_khz)
+        sdmmc_card_print_info(stdout, card);
+    }
+    else {
         dn(ret)
         if (ret == ESP_FAIL) {
             THROW_EXCEPTION("Failed to mount the card .\n")

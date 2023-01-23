@@ -161,7 +161,7 @@ static void task_mp3_decoder(audio_el_mp3_t * el) {
 audio_el_t * audio_el_mp3_create(audio_pipe_t * pipe, uint8_t core) {    
     audio_el_mp3_t * el ;
     echo_alloc("audio_el_mp3_t",{
-        ELEMENT_CREATE(pipe, audio_el_mp3_t, el, task_mp3_decoder, 1024*3, 5, core, 512)
+        ELEMENT_CREATE(pipe, audio_el_mp3_t, el, task_mp3_decoder, 1024*3, 5, core, 1024*2)
     })
 
     echo_alloc("hexli", {

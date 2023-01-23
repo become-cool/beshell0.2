@@ -291,14 +291,16 @@ static JSValue js_wifi_set_ps(JSContext *ctx, JSValueConst this_val, int argc, J
         }                                                           \
     }
 
-#define SET_MEMBER_INT(mode, name)                               \
+#define SET_MEMBER_INT_(mode, name, jspropname)                               \
     {                                                               \
-        JSValue val = JS_GetPropertyStr(ctx, argv[0], #name) ;      \
+        JSValue val = JS_GetPropertyStr(ctx, argv[0], #jspropname) ;      \
         if( !JS_IsUndefined(val) ) {                                \
             JS_ToInt32(ctx, &wifi_config.mode.name, val) ;           \
         }                                                           \
         JS_FreeValue(ctx,val) ;                                     \
     }
+#define SET_MEMBER_INT(mode, name)                               \
+    SET_MEMBER_INT_(mode, name, name)
 #define SET_MEMBER_BOOL(mode, name)                               \
     {                                                               \
         JSValue val = JS_GetPropertyStr(ctx, argv[0], #name) ;      \
@@ -326,6 +328,19 @@ static JSValue js_wifi_set_ps(JSContext *ctx, JSValueConst this_val, int argc, J
 //     uint32_t btm_enabled:1;       /**< Whether BSS Transition Management is enabled for the connection */
 //     uint32_t reserved:30;         /**< Reserved for future feature set */
 // } wifi_sta_config_t;
+// typedef enum {
+//     WIFI_AUTH_OPEN = 0,         /**< authenticate mode : open */
+//     WIFI_AUTH_WEP = 1,              /**< authenticate mode : WEP */
+//     WIFI_AUTH_WPA_PSK = 2,          /**< authenticate mode : WPA_PSK */
+//     WIFI_AUTH_WPA2_PSK = 3,         /**< authenticate mode : WPA2_PSK */
+//     WIFI_AUTH_WPA_WPA2_PSK = 4,     /**< authenticate mode : WPA_WPA2_PSK */
+//     WIFI_AUTH_WPA2_ENTERPRISE = 5,  /**< authenticate mode : WPA2_ENTERPRISE */
+//     WIFI_AUTH_WPA3_PSK = 6,         /**< authenticate mode : WPA3_PSK */
+//     WIFI_AUTH_WPA2_WPA3_PSK = 7,    /**< authenticate mode : WPA2_WPA3_PSK */
+//     WIFI_AUTH_WAPI_PSK = 8,         /**< authenticate mode : WAPI_PSK */
+//     WIFI_AUTH_MAX
+// } wifi_auth_mode_t;
+
 static JSValue js_wifi_set_sta_config(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_WIFI_INITED
     CHECK_ARGC(1)
@@ -348,6 +363,7 @@ static JSValue js_wifi_set_sta_config(JSContext *ctx, JSValueConst this_val, int
 
     SET_MEMBER_STRING(sta, ssid, MAX_PASSWORD_CHARLEN)
     SET_MEMBER_STRING(sta, password, MAX_PASSWORD_CHARLEN)
+    SET_MEMBER_INT_(sta, threshold.authmode, authmode)
     if(password_len==0) {
         wifi_config.sta.threshold.authmode = WIFI_AUTH_OPEN ;
     }
@@ -358,6 +374,10 @@ static JSValue js_wifi_set_sta_config(JSContext *ctx, JSValueConst this_val, int
     SET_MEMBER_INT(sta, sort_method)
     // SET_MEMBER_INT(sta, rm_enabled)
     // SET_MEMBER_INT(sta, btm_enabled)
+
+    // dn(wifi_config.sta.threshold.authmode)
+    // ds(wifi_config.sta.ssid)
+    // ds(wifi_config.sta.password)
 
     return JS_NewInt32(ctx, esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config) );
 }
@@ -424,6 +444,7 @@ static JSValue js_wifi_get_config(JSContext *ctx, JSValueConst this_val, int arg
         }
         JS_SetPropertyStr(ctx, jsconf, "ssid", JS_NewString(ctx, (const char *)conf.sta.ssid)) ;
         JS_SetPropertyStr(ctx, jsconf, "password", JS_NewString(ctx, (const char *)conf.sta.password)) ;
+        JS_SetPropertyStr(ctx, jsconf, "authmode", JS_NewInt32(ctx, conf.sta.threshold.authmode)) ;
         JS_SetPropertyStr(ctx, jsconf, "channel", JS_NewInt32(ctx, conf.sta.channel)) ;
         JS_SetPropertyStr(ctx, jsconf, "scan_method", JS_NewInt32(ctx, conf.sta.scan_method)) ;
         JS_SetPropertyStr(ctx, jsconf, "listen_interval", JS_NewInt32(ctx, conf.sta.listen_interval)) ;
@@ -592,7 +613,7 @@ static JSValue js_wifi_scan_records(JSContext *ctx, JSValueConst this_val, int a
         JS_SetPropertyStr(ctx, apobj, "ssid", JS_NewString(ctx, (char*)list[i].ssid)) ;
         JS_SetPropertyStr(ctx, apobj, "channel", JS_NewInt32(ctx, list[i].primary)) ;
         JS_SetPropertyStr(ctx, apobj, "rssi", JS_NewInt32(ctx, list[i].rssi)) ;
-        JS_SetPropertyStr(ctx, apobj, "authmode", JS_NewInt32(ctx, authmode_names(list[i].authmode))) ;
+        JS_SetPropertyStr(ctx, apobj, "authmode", JS_NewInt32(ctx, list[i].authmode)) ;
         JS_SetPropertyUint32(ctx, array, i, apobj) ;
     }
 

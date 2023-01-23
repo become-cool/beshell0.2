@@ -232,7 +232,7 @@ static void telnet_ws_projection_clear() {
         y1 = y2+1 ;
     }
 
-    printf("clear:%lld\n", gettime()-t) ;
+    // printf("clear screen:%lld ms\n", gettime()-t) ;
 
     free(buff) ;
 }
@@ -247,13 +247,16 @@ static void task_audio(telws_proj_sess_t * sess) {
     esp_err_t err ;
 
     while(1) {
-        if(i2s_num==255) {
+        if(i2s_num==255 || !sess->enable) {
             vTaskDelay(1) ;
             continue;
         }
 
         vTaskDelay(0) ;
         data = xRingbufferReceiveUpTo(sess->audio_ring, &data_size, 10, I2S_BUFF_SIZE);
+        // if(data_size!=I2S_BUFF_SIZE) {
+        //     dn(data_size)
+        // }
         if(data_size==0 || !data) {
             i2s_zero_dma_buffer(i2s_num) ;
             continue ;
@@ -279,6 +282,8 @@ static void task_audio(telws_proj_sess_t * sess) {
 }
 
 bool telnet_ws_projection_sessn_init(struct mg_connection *conn) {
+
+    // printf("telnet_ws_projection_sessn_init\n") ;
 
     telnet_ws_projection_clear() ;
 
@@ -383,6 +388,8 @@ fail:
         ring = NULL ;               \
     }
 void telnet_ws_projection_sess_release() {
+
+    printf("telnet_ws_projection_sess_release()\n") ;
 
     xSemaphoreTake( sess->jdec_working, portMAX_DELAY ) ;
 

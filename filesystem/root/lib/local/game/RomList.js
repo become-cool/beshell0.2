@@ -115,10 +115,12 @@ module.exports = class RomList extends beapi.lvgl.Column {
             return
         }
 
+        let filename = romPath.replace(/.+\/([^\/]+)\.[^\.]+/, "$1")
+
         this.barTop.hide()
         this.lstRom.hide()
         this.txtMsg.parent().show()
-        this.txtMsg.setText("正在加载ROM: "+romPath)
+        this.txtMsg.setText("正在加载ROM: "+filename)
         
         setTimeout(()=>{
             require("/etc/init.d/boot.js").rebootToApp(__dirname + "/playrom.js", true)

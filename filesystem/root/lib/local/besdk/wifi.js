@@ -124,6 +124,11 @@ function waitConnecting() {
         })
     })
 }
+/*
+function(ssid,password,retry,retryDur)
+or
+function(options)
+*/
 wifi.connect = async function(ssid,password,retry,retryDur) {
 
     if(_connecting) {
@@ -140,11 +145,18 @@ wifi.connect = async function(ssid,password,retry,retryDur) {
     await wifi.start()
     await wifi.disconnect()
     
-    beapi.wifi.setStaConfig({ssid, password})
+    if(typeof ssid=='object') {
+        retry = ssid.retry
+        retryDur = ssid.retryDur
+        beapi.wifi.setStaConfig(ssid)
+    }
+    else {
+        beapi.wifi.setStaConfig({ssid, password})
+    }
 
     retry = (parseInt(retry) || 0) 
     if(retry<=0)
-        retry = 1
+        retry = 2
     retryDur = (parseInt(retryDur) || 2000)
     if(retryDur<=0) {
         retryDur = 2000
@@ -170,6 +182,10 @@ wifi.connect = async function(ssid,password,retry,retryDur) {
 }
 
 wifi.disconnect = async function() {
+    if(timerDeamon>=0) {
+        clearTimeout(timerDeamon)
+        timerDeamon = -1
+    }
     return new Promise(function(resolve) {
         if(!beapi.wifi.staConnected()) {
             resolve()
@@ -220,6 +236,7 @@ wifi.status = function(netif) {
         let config = beapi.wifi.getConfig(MODE_STA)
         sta.ssid = config.ssid
         sta.password = config.password
+        sta.authmode = config.authmode
         
         return sta
     }
@@ -254,9 +271,10 @@ function autoAP() {
     let ssid = 'BECOME-'+res[1].slice(-4)
     beapi.wifi.setAPConfig({ssid, password: config.password})
 }
+let timerDeamon = -1
 function deamon() {
     console.log("start wifi sta deamon")
-    setInterval(()=>{
+    timerDeamon = setInterval(()=>{
         if( beapi.wifi.staConnected() || !(wifi.mode()&MODE_STA) || _connecting || !beapi.wifi.staStarted()){
             return
         }
@@ -274,27 +292,32 @@ wifi.autostart = async function() {
     
     let staconf = beapi.wifi.getConfig(1)
     if(wifi.mode()&MODE_STA && staconf.ssid) {
-        await wifi.connect(staconf.ssid, staconf.password, 5, 2000)
+        await wifi.connect({
+            ssid:staconf.ssid,
+            password:staconf.password,
+            authmode:staconf.authmode,
+        }, 5, 2000)
         deamon()
     }
 }
 
-beapi.wifi.scan = function() {
+wifi.scan = function() {
     return new Promise(function(resolve) {
         if(!beapi.wifi.isScanning()) {
             beapi.wifi.scanStart()
         }
-        beapi.wifi.once("scan.done",resolve)
+        wifi.once("scan.done",resolve)
     })
 }
 
 beapi.wifi.registerEventHandle(function(eventType, eventId, data){
+
     let eventName = null
     let eventArgv = []
 
     if(eventType==EVENT_WIFI) {
         eventName = evtNames[eventId]
-        switch(eventName) {
+        switch(eventId) {
             case WIFI_STA_DISCONNECTED :
                 eventArgv.push( data )  // disconnect reason
             case WIFI_STA_CONNECTED :

@@ -48,8 +48,12 @@ static void task_pcm_playback(audio_el_i2s_t * el) {
             continue ;
         }
         data_size = 0 ;
-        pwrite = xRingbufferReceiveUpTo(el->base.upstream->ring, &data_size, 10, sizeof(buff));
+        nechof_time("i2s received %d", {
+            pwrite = xRingbufferReceiveUpTo(el->base.upstream->ring, &data_size, 10, sizeof(buff));
+        },data_size) ;
         if(data_size==0 || !pwrite) {
+
+            printf("el_i2s receive empty\n") ;
             
             // 确定前级已流干（ring buffer 里的可读数据可能分在头尾两端，需要两次才能读空）
             if(audio_el_is_drain(el->base.upstream)) {

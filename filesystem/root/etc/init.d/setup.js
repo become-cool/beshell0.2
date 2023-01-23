@@ -77,14 +77,14 @@ const LibDefaultConf = {
             "i2s": {"0": {
                 "lrclk": 16 ,"sclk": 17 ,"sout": 18
                 , "mode": 5
-                , "sample_rate":22100
+                , "sample_rate":22050
                 , "bits_per_sample": 16
                 , "channel_format": 0
                 , "communication_format": 2
                 , "intr_alloc_flags" :0
-                , "dma_buf_count": 4
-                , "dma_buf_len": 512
-                , "use_apll": 0
+                , "dma_buf_count": 7
+                , "dma_buf_len": 256
+                , "use_apll": 1
             }} ,
             dev: [
                 {driver:'sdspi',setup:{cs:48,spi:1,mount:'/mnt/sd',khz:15000}} ,

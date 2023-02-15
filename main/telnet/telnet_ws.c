@@ -261,7 +261,7 @@ static void upgrade_ws(struct mg_connection *c, struct mg_http_message *hm, WS_T
         }
 
         if( client_proj!=NULL && client_proj->conn!=NULL) {
-            printf("client_proj->conn->is_closing = 1\n") ;
+            printf("projection conn exists\n") ;
             client_proj->conn->is_closing = 1 ;
         }
         client_proj = client ;
@@ -624,10 +624,14 @@ bool telnet_ws_response(struct mg_connection *c, int ev, void *ev_data, void *fn
         }
 #ifndef SIMULATION
         else if(c->userdata==client_proj) {
+            printf("close client_proj\n") ;
             telnet_ws_projection_sess_release() ;
             FREE_RTC_Client(c, client_proj)
         }
 #endif
+        else {
+            printf("unknow ws client close\n") ;
+        }
 
         return false ;
     }

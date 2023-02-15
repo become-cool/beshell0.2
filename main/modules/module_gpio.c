@@ -492,6 +492,10 @@ JSValue pwm_config(JSContext *ctx, uint8_t gpio, uint32_t freq, uint8_t resoluti
             .speed_mode = speedMode,            // timer mode
             .timer_num = timer,                 // timer index
         } ;
+        dn(timerConf.duty_resolution)
+        dn(timerConf.freq_hz)
+        dn(timerConf.speed_mode)
+        dn(timerConf.timer_num)
         esp_err_t ret = ledc_timer_config(&timerConf) ;
         if(ret<0) {
             return JS_NewInt32(ctx, ret) ;
@@ -510,6 +514,13 @@ JSValue pwm_config(JSContext *ctx, uint8_t gpio, uint32_t freq, uint8_t resoluti
         .hpoint     = 0,
         .timer_sel  = timer
     } ;
+        dn(channelConf.channel)
+        dn(channelConf.duty)
+        dn(channelConf.gpio_num)
+        dn(channelConf.speed_mode)
+        dn(channelConf.intr_type)
+        dn(channelConf.hpoint)
+        dn(channelConf.timer_sel)
     esp_err_t ret = ledc_channel_config(&channelConf) ;
     if(ret<0) {
         return JS_NewInt32(ctx, ret-1000) ;

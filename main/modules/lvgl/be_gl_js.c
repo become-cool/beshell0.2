@@ -23,6 +23,12 @@
     cvar.y = tmp ;                                  \
     JS_FreeValue(ctx, jsvar) ;
 
+#define ARGV_TO_INT_VAR_TMP(i, var, tmp, api)               \
+	if( api(ctx, &tmp, argv[i])!=0 ) {                      \
+        THROW_EXCEPTION("Invalid param type")               \
+	}                                                       \
+    var = tmp ;
+
 
 static JSValue js_lv_draw_line(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(4)
@@ -238,8 +244,8 @@ static JSValue js_gl_path_add_arc(JSContext *ctx, JSValueConst this_val, int arg
     ARGV_TO_INT32(3, y2)
 
     int32_t val ;
-    ARGV_TO_INT_VAR(4, arc->cx, val, JS_ToInt32)
-    ARGV_TO_INT_VAR(5, arc->cy, val, JS_ToInt32)
+    ARGV_TO_INT_VAR_TMP(4, arc->cx, val, JS_ToInt32)
+    ARGV_TO_INT_VAR_TMP(5, arc->cy, val, JS_ToInt32)
 
     lv_coord_t _x = x1 - arc->cx ;
     lv_coord_t _y = y1 - arc->cy ;
@@ -292,13 +298,13 @@ static JSValue js_gl_path_draw(JSContext *ctx, JSValueConst this_val, int argc, 
     CHECK_ARGC(5)
     lv_coord_t x, y ;
     int32_t tmp ;
-    ARGV_TO_INT_VAR(0, x, tmp, JS_ToInt32)
-    ARGV_TO_INT_VAR(1, y, tmp, JS_ToInt32)
+    ARGV_TO_INT_VAR_TMP(0, x, tmp, JS_ToInt32)
+    ARGV_TO_INT_VAR_TMP(1, y, tmp, JS_ToInt32)
     ARGV_TO_DOUBLE(2, zoom)
 
     lv_color_t color ;
     uint32_t tmp2 ;
-    ARGV_TO_INT_VAR(3, color.full, tmp2, JS_ToUint32)
+    ARGV_TO_INT_VAR_TMP(3, color.full, tmp2, JS_ToUint32)
 
     lv_area_t * clip = JS_GetOpaque(argv[4],js_lv_area_class_id) ;
     if(!clip) {
@@ -342,7 +348,7 @@ static JSValue js_gl_path_test(JSContext *ctx, JSValueConst this_val, int argc, 
 
     // lv_coord_t y = 2 ;
     // int32_t tmp ;
-    // ARGV_TO_INT_VAR(0, y, tmp, JS_ToInt32)
+    // ARGV_TO_INT_VAR_TMP(0, y, tmp, JS_ToInt32)
     
     // size_t interaction_cnt = 0 ;
     // lv_coord_t interactions[path->segment_cnt*2] ; // 每段路径最多两个交点

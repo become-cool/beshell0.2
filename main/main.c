@@ -110,7 +110,7 @@ void tinyusb_cdc_line_state_changed_callback(int itf, cdcacm_event_t *event)
 }
 
 void init_usb_cdc() {
-
+    
     // ESP_LOGI(TAG, "USB initialization");
     // 
     // // Setting of descriptor. You can use descriptor_tinyusb and

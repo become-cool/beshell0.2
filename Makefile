@@ -67,7 +67,7 @@ pack-all: tree-shaking mkfs-root mkfs-home partition dist
 pack-home-data:
 	mkdir -p filesystem/tmp/home/become/game
 	cp -rf filesystem/home/become/game/* filesystem/tmp/home/become/game
-	mkdir -p filesystem/tmp/home/become/game
+	mkdir -p filesystem/tmp/home/become/music
 	cp -rf filesystem/home/become/music/* filesystem/tmp/home/become/music
 
 # 编译js, 打包 / 和 /home 分区，并制作 img 文件

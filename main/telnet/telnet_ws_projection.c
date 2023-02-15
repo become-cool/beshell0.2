@@ -35,6 +35,12 @@ typedef struct {
     uint8_t * raw ;
 } frame_video_block_t ;
 
+
+typedef struct {
+    uint32_t len ;
+    uint8_t * ptr ;
+} frame_audio_t ;
+
 typedef struct {
 
     bool enable ;
@@ -61,6 +67,9 @@ typedef struct {
     // 放音任务
     TaskHandle_t task_audio ;
     RingbufHandle_t audio_ring ;
+    QueueHandle_t audio_que ;
+    SemaphoreHandle_t audio_data_semaphore ;
+
 
 } telws_proj_sess_t ;
 
@@ -246,21 +255,24 @@ static void task_audio(telws_proj_sess_t * sess) {
     char buff[I2S_BUFF_SIZE] ;
     esp_err_t err ;
 
+    // frame_audio_t frame ;
+    // frame.ptr = NULL ;
+    // frame.len = 0 ;
+    
     while(1) {
         if(i2s_num==255 || !sess->enable) {
-            vTaskDelay(1) ;
+            vTaskDelay(1) ;            
             continue;
         }
 
-        vTaskDelay(0) ;
-        data = xRingbufferReceiveUpTo(sess->audio_ring, &data_size, 10, I2S_BUFF_SIZE);
-        // if(data_size!=I2S_BUFF_SIZE) {
-        //     dn(data_size)
-        // }
+        vTaskDelay(1) ;
+
+        data = xRingbufferReceiveUpTo(sess->audio_ring, &data_size, 20, I2S_BUFF_SIZE);
         if(data_size==0 || !data) {
             i2s_zero_dma_buffer(i2s_num) ;
             continue ;
         }
+
         memcpy(buff, data, data_size) ;
         vRingbufferReturnItem(sess->audio_ring, data) ;
 
@@ -278,12 +290,38 @@ static void task_audio(telws_proj_sess_t * sess) {
             data_size-= data_wroten ;
             data+= data_wroten ;
         }
+
+
+        // xQueueReceive(sess->audio_que, &frame, portMAX_DELAY);
+        // if(i2s_num==255) {
+        //     vTaskDelay(1) ;
+        //     continue ;
+        // }
+        // if(frame.len==0 || !frame.ptr) {
+        //     i2s_zero_dma_buffer(i2s_num) ;
+        //     continue ;
+        // }
+
+        // if(frame.len) {
+        //     err = i2s_write(i2s_num, frame.ptr, frame.len, &data_wroten, portMAX_DELAY);
+        //     // 扩展到 32 sample (标准I2S)
+        //     // err = i2s_write_expand(i2s_num, data, data_size, 16, 32, &data_wroten, portMAX_DELAY ) ;
+        //     if(err!=ESP_OK) {
+        //         printf("i2s_write_expand() failed: %s(%d)\n", esp_err_to_name(err), err);
+        //     }
+
+        //     if(frame.ptr) {
+        //         free(frame.ptr) ;
+        //         frame.ptr = NULL ;
+        //         frame.len = 0 ;
+        //     }
+        // }
     }
 }
 
 bool telnet_ws_projection_sessn_init(struct mg_connection *conn) {
 
-    // printf("telnet_ws_projection_sessn_init\n") ;
+    printf("telnet_ws_projection_sessn_init\n") ;
 
     telnet_ws_projection_clear() ;
 
@@ -298,19 +336,23 @@ bool telnet_ws_projection_sessn_init(struct mg_connection *conn) {
     }
 
     if(!sess) {
+        // printf("malloc proj sess\n") ;
         HMALLOC(sess, sizeof(telws_proj_sess_t)) ;
         memset(sess, 0, sizeof(telws_proj_sess_t)) ;
         sess->jdec.device = sess ;
     }
-    
-    if(!sess->task_jdec) {
-        if (xTaskCreatePinnedToCore(task_jpeg_decode, "task_jpeg_decode", 3*1024, sess, 5, &sess->task_jdec, 1) != pdPASS) {
-            printf("create task for tjpeg failed\n") ;
+
+    if(!sess->jdeca_pool) {
+        // printf("create jdeca_pool\n") ;
+        HMALLOC(sess->jdeca_pool, TJPG_WORK_SIZE)
+        if(!sess->jdeca_pool) {
+            printf("out of memory?\n") ;
             goto fail ;
         }
     }
 
     if(!sess->jdec_que) {
+        // printf("create jdec_que\n") ;
         sess->jdec_que = xQueueCreate(5, sizeof(frame_video_rect_t));
         if(!sess->jdec_que) {
             printf("create queue for tjpeg failed\n") ;
@@ -319,18 +361,12 @@ bool telnet_ws_projection_sessn_init(struct mg_connection *conn) {
     }
     
     if(!sess->jdec_working) {
+        // printf("create jdec_working\n") ;
         sess->jdec_working = xSemaphoreCreateMutex() ;
-        printf("create jdec_working\n") ;
-    }
-    
-    if(!sess->task_disp) {
-        if (xTaskCreatePinnedToCore(task_disp, "task_disp", 2*1024, sess, 5, &sess->task_disp, 0) != pdPASS) {
-            printf("create task for display failed\n") ;
-            goto fail ;
-        }
     }
     
     if(!sess->disp_que) {
+        // printf("create disp_que\n") ;
         sess->disp_que = xQueueCreate(5, sizeof(frame_video_block_t));
         if(!sess->disp_que) {
             printf("create queue for display failed\n") ;
@@ -338,24 +374,45 @@ bool telnet_ws_projection_sessn_init(struct mg_connection *conn) {
         }
     }
     
-    if(!sess->task_audio) {
-        if (xTaskCreatePinnedToCore(task_audio, "task_audio", 3*1024, sess, 5, &sess->task_audio, 0) != pdPASS) {
-            printf("create task for display failed\n") ;
-            goto fail ;
-        }
-    }
-    
     if(!sess->audio_ring) {
+        // printf("create audio_ring\n") ;
         sess->audio_ring = xRingbufferCreate(1024*10, RINGBUF_TYPE_BYTEBUF);
         if(!sess->audio_ring) {
             goto fail ;
         }
     }
+    if(!sess->audio_que) {
+        // printf("create audio_que\n") ;
+        sess->audio_que = xQueueCreate(5, sizeof(frame_audio_t));
+        if(!sess->audio_que) {
+            printf("create queue for audio failed\n") ;
+            goto fail ;
+        }
+    }
 
-    if(!sess->jdeca_pool) {
-        HMALLOC(sess->jdeca_pool, TJPG_WORK_SIZE)
-        if(!sess->jdeca_pool) {
-            printf("out of memory?\n") ;
+    if(!sess->audio_data_semaphore) {
+        // printf("create audio_data_semaphore\n") ;
+        sess->audio_data_semaphore = xSemaphoreCreateBinary() ;
+    }
+    
+    if(!sess->task_jdec) {
+        // printf("create task_jpeg_decode\n") ;
+        if (xTaskCreatePinnedToCore(task_jpeg_decode, "task_jpeg_decode", 3*1024, sess, 5, &sess->task_jdec, 1) != pdPASS) {
+            printf("create task for tjpeg failed\n") ;
+            goto fail ;
+        }
+    }
+    if(!sess->task_disp) {
+        // printf("create task_disp\n") ;
+        if (xTaskCreatePinnedToCore(task_disp, "task_disp", 2*1024, sess, 5, &sess->task_disp, 0) != pdPASS) {
+            printf("create task for display failed\n") ;
+            goto fail ;
+        }
+    }
+    if(!sess->task_audio) {
+        // printf("create task_audio\n") ;
+        if (xTaskCreatePinnedToCore(task_audio, "task_audio", 3*1024, sess, 5, &sess->task_audio, 0) != pdPASS) {
+            printf("create task for display failed\n") ;
             goto fail ;
         }
     }
@@ -387,25 +444,40 @@ fail:
         vRingbufferDelete(ring) ;   \
         ring = NULL ;               \
     }
+
+#define DELETE_SEMAPHORE(semaphore)     \
+    if(semaphore) {                     \
+        vSemaphoreDelete(semaphore) ;   \
+        semaphore = NULL ;              \
+    }
+
 void telnet_ws_projection_sess_release() {
+    if(!sess) {
+        return ;
+    }
 
     printf("telnet_ws_projection_sess_release()\n") ;
 
-    xSemaphoreTake( sess->jdec_working, portMAX_DELAY ) ;
+    if(sess->jdec_working) {
+        xSemaphoreTake( sess->jdec_working, portMAX_DELAY ) ;
+    }
 
     if(sess->jdeca_pool) {
         free(sess->jdeca_pool) ;
         sess->jdeca_pool = NULL ;
     }
 
+    DELETE_TASK(sess->task_jdec)
+    DELETE_TASK(sess->task_disp)
+    DELETE_TASK(sess->task_audio)
+
     DELETE_QUEUE(sess->jdec_que)
     DELETE_QUEUE(sess->disp_que)
 
     DELETE_RING(sess->audio_ring)
+    DELETE_QUEUE(sess->audio_que)
+    DELETE_SEMAPHORE(sess->audio_data_semaphore) 
 
-    DELETE_TASK(sess->task_jdec)
-    DELETE_TASK(sess->task_disp)
-    DELETE_TASK(sess->task_audio)
 
     if(i2s_num!=255) {
         i2s_zero_dma_buffer(i2s_num) ;
@@ -416,7 +488,9 @@ void telnet_ws_projection_sess_release() {
     // 恢复 ui
     be_lv_resume() ;
 
-    xSemaphoreGive( sess->jdec_working ) ;
+    if(sess->jdec_working) {
+        xSemaphoreGive( sess->jdec_working ) ;
+    }
 }
 
 #define WRAP_QUOTE(string) "\"" string "\""
@@ -493,15 +567,27 @@ inline static void rspn_audio_frame(struct mg_connection *conn, struct mg_ws_mes
         return ;
     }
 
-    if(!sess->audio_ring) {
+    if(!sess->audio_que) {
         RSPN_STRING(conn, "audio", "frame", "unknow error")
         return ;
     }
 
-    if(pdTRUE != xRingbufferSend(sess->audio_ring, wm->data.ptr+1, wm->data.len-1, portMAX_DELAY)) {
+    // frame_audio_t frame ;
+    // frame.len = wm->data.len-1 ;
+    // HMALLOC(frame.ptr, frame.len) ;
+    // memcpy(frame.ptr, wm->data.ptr+1, frame.len) ;
+    // dn(frame.len)
+    // xQueueSend(sess->audio_que, &frame, portMAX_DELAY);
+
+
+    if(pdTRUE != xRingbufferSend(sess->audio_ring, wm->data.ptr+1, wm->data.len-1, 100)) {
         RSPN_STRING(conn, "audio", "frame", "timeout")
         return ;
     }
+
+    // 通知数据装入
+    // xSemaphoreGive( sess->audio_data_semaphore);
+
     RSPN_STRING(conn, "audio", "frame", "ok")
 
 }

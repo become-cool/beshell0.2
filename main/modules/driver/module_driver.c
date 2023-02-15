@@ -1,5 +1,6 @@
 #include "module_driver.h"
 #include "driver_camera.h"
+#include "driver_stepper.h"
 
 #include "module_fs.h"
 #include "utils.h"
@@ -246,6 +247,8 @@ void be_module_driver_require(JSContext *ctx) {
 
     be_module_driver_camera_require(ctx, driver) ;    
 
+    be_module_driver_stepper_require(ctx, driver) ;
+
     JS_FreeValue(ctx, beapi);
 }
 
@@ -254,5 +257,6 @@ void be_module_driver_loop(JSContext *ctx) {
 
 void be_module_driver_reset(JSContext *ctx) {
     be_module_driver_camera_reset(ctx) ;   
+    be_module_driver_stepper_reset(ctx) ;   
 }
 

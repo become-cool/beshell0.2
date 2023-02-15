@@ -38,15 +38,43 @@ void echo_error(JSContext *) ;
         THROW_EXCEPTION("Missing param")                    \
     }
 
-#define ARGV_TO_INT_VAR(i, var, tmp, api)                   \
-	if( api(ctx, &tmp, argv[i])!=0 ) {                      \
+#define ARGV_TO_INT_VAR(i, var, api)                        \
+	if( api(ctx, &var, argv[i])!=0 ) {                      \
         THROW_EXCEPTION("Invalid param type")               \
-	}                                                       \
-    var = tmp ;
+	}
+#define  ARGV_TO_UINT8_VAR(i,var)   ARGV_TO_INT_VAR(i, var, JS_ToUint32)
+#define   ARGV_TO_INT8_VAR(i,var)   ARGV_TO_INT_VAR(i, var, JS_ToInt32)
+#define ARGV_TO_UINT16_VAR(i,var)   ARGV_TO_INT_VAR(i, var, JS_ToUint32)
+#define ARGV_TO_INT16_VAR(i,var)    ARGV_TO_INT_VAR(i, var, JS_ToInt32)
+#define ARGV_TO_UINT32_VAR(i,var)   ARGV_TO_INT_VAR(i, var, JS_ToUint32)
+#define ARGV_TO_INT32_VAR(i,var)    ARGV_TO_INT_VAR(i, var, JS_ToInt32)
+#define ARGV_TO_INT64_VAR(i,var)    ARGV_TO_INT_VAR(i, var, JS_ToInt64)
+#define ARGV_TO_DOUBLE_VAR(i,var)   ARGV_TO_INT_VAR(i, var, JS_ToFloat64)
+
+
+#define ARGV_TO_INT_VAR_OPT(i, var, api, dft)       \
+    if( i>=argc ) {                                 \
+        var = dft ;                                 \
+    }                                               \
+    else {                                          \
+        if( api(ctx, &var, argv[i])!=0 ) {          \
+            THROW_EXCEPTION("Invalid param type")   \
+        }                                           \
+    }
+	      
+#define  ARGV_TO_UINT8_VAR_OPT(i,var, dft)   ARGV_TO_INT_VAR_OPT(i, var, JS_ToUint32, dft)
+#define   ARGV_TO_INT8_VAR_OPT(i,var, dft)   ARGV_TO_INT_VAR_OPT(i, var, JS_ToInt32, dft)
+#define ARGV_TO_UINT16_VAR_OPT(i,var, dft)   ARGV_TO_INT_VAR_OPT(i, var, JS_ToUint32, dft)
+#define ARGV_TO_INT16_VAR_OPT(i,var, dft)    ARGV_TO_INT_VAR_OPT(i, var, JS_ToInt32, dft)
+#define ARGV_TO_UINT32_VAR_OPT(i,var, dft)   ARGV_TO_INT_VAR_OPT(i, var, JS_ToUint32, dft)
+#define ARGV_TO_INT32_VAR_OPT(i,var, dft)    ARGV_TO_INT_VAR_OPT(i, var, JS_ToInt32, dft)
+#define ARGV_TO_INT64_VAR_OPT(i,var, dft)    ARGV_TO_INT_VAR_OPT(i, var, JS_ToInt64, dft)
+#define ARGV_TO_DOUBLE_VAR_OPT(i,var, dft)   ARGV_TO_INT_VAR_OPT(i, var, JS_ToFloat64, dft)
+
 
 #define ARGV_TO_INT(i, var, ctype, api)                     \
 	ctype var ;                                             \
-	if( api(ctx, &var, argv[i])!=0 ) {                      \
+	if( api(ctx, &(var), argv[i])!=0 ) {                    \
         THROW_EXCEPTION("Invalid param type")               \
 	}
     
@@ -60,12 +88,14 @@ void echo_error(JSContext *) ;
 #define ARGV_TO_DOUBLE(i,var)   ARGV_TO_INT(i, var, double, JS_ToFloat64)
 
 
-#define ARGV_TO_INT_OPT(i, var, ctype, api, dft)            \
-	ctype var = dft ;                                       \
-	if( api(ctx, &var, argv[i])!=0 ) {                      \
-        THROW_EXCEPTION("Invalid param type")               \
-	}
-    
+#define ARGV_TO_INT_OPT(i, var, ctype, api, dft)    \
+	ctype var = dft ;                               \
+    if( i<argc ) {                                  \
+        if( api(ctx, &var, argv[i])!=0 ) {          \
+            THROW_EXCEPTION("Invalid param type")   \
+        }                                           \
+    }
+
 #define  ARGV_TO_UINT8_OPT(i,var,dft)   ARGV_TO_INT_OPT(i, var, uint8_t,  JS_ToUint32, dft)
 #define   ARGV_TO_INT8_OPT(i,var,dft)   ARGV_TO_INT_OPT(i, var, int8_t,   JS_ToInt32, dft)
 #define ARGV_TO_UINT16_OPT(i,var,dft)   ARGV_TO_INT_OPT(i, var, uint16_t, JS_ToUint32, dft)
@@ -105,9 +135,6 @@ void echo_error(JSContext *) ;
     var = JS_ToCString(ctx, argv[i]) ;
 #define ARGV_TO_STRING_C(i, var, err_code)  char * ARGV_AS_STRING_C(i, var, err_code)
     
-
-
-
 #define ARGV_TO_ARRAYBUFFER(i, var, varlen)                                         \
     size_t varlen = 0;                                                              \
     uint8_t * var = (uint8_t *)JS_GetArrayBuffer(ctx, &varlen, argv[i]) ;           \
@@ -127,6 +154,14 @@ void echo_error(JSContext *) ;
 void eval_code_len(JSContext *ctx, const char * str,size_t len,const char * filename) ;
 
 #define EVAL_CODE(str, filename) eval_code_len(ctx, str, strlen(str), filename) ;
+
+#define CALL_IDF_API(func_invoke)           \
+    {                                       \
+        esp_err_t res = func_invoke ;       \
+        if( res != ESP_OK ) {               \
+            THROW_EXCEPTION(#func_invoke " failed, err: %d", res)   \
+        }                                   \
+    }
 
 #define CALLBACK(func, thisobj, argc, argv)                                         \
     {                                                                               \

@@ -8,7 +8,7 @@
 
 #define ARGV_I2C_BUSNUM(i, var)                     \
     ARGV_TO_UINT8(i, var)                           \
-    if(var<0 || var>1) {                            \
+    if(var<0 || var>=I2C_NUM_MAX) {                 \
         THROW_EXCEPTION("Bus num must be 0-1")      \
     }
 
@@ -31,7 +31,9 @@
 
 #define I2C_COMMIT(bus)                                                     \
 	i2c_master_stop(cmd);                                                   \
+    i2c_take_semph(bus, portMAX_DELAY ) ;                                   \
 	esp_err_t res=i2c_master_cmd_begin(bus, cmd, 10/portTICK_PERIOD_MS) ;   \
+    i2c_give_semph(bus) ;                                                   \
 	i2c_cmd_link_delete(cmd);
 
 #define I2C_READ_INT(var, type, size)                                       \
@@ -60,6 +62,8 @@ esp_err_t i2c_read(uint8_t bus, uint8_t addr, uint8_t reg, uint8_t * data, uint8
 
 bool i2c_ping(uint8_t bus, uint8_t addr) ;
 
+bool i2c_take_semph(i2c_port_t busnum, TickType_t wait) ;
+bool i2c_give_semph(i2c_port_t busnum) ;
 
 void be_module_serial_i2c_init() ;
 void be_module_serial_i2c_require(JSContext *ctx, JSValue pkg) ;

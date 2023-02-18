@@ -8,6 +8,7 @@
 
 #ifndef SIMULATION
 #include "driver/spi_master.h"
+#include "driver/i2c.h"
 #endif
 
 typedef enum {
@@ -65,8 +66,13 @@ typedef struct {
             uint32_t state ;
             uint32_t press ;
             uint32_t release ;
+            uint8_t value ;
+            SemaphoreHandle_t semaphore ;
         } buttons ;
     } data ;
+
+    lv_indev_t * lv_indev ;
+
 } indev_driver_spec_t ;
 
 typedef struct {

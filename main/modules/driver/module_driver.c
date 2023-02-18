@@ -1,6 +1,7 @@
 #include "module_driver.h"
 #include "driver_camera.h"
-#include "driver_stepper.h"
+#include "driver_stepper_mcpwm.h"
+#include "driver_stepper_timer.h"
 
 #include "module_fs.h"
 #include "utils.h"
@@ -232,6 +233,8 @@ static JSValue js_driver_release_dma(JSContext *ctx, JSValueConst this_val, int 
 
 void be_module_driver_init() {
     be_module_driver_camera_init() ;
+    be_module_driver_stepper_mcpwm_init() ;
+    be_module_driver_stepper_timer_init() ;
 }
 
 void be_module_driver_require(JSContext *ctx) {
@@ -247,16 +250,17 @@ void be_module_driver_require(JSContext *ctx) {
 
     be_module_driver_camera_require(ctx, driver) ;    
 
-    be_module_driver_stepper_require(ctx, driver) ;
+    be_module_driver_stepper_mcpwm_require(ctx, driver) ;
+    be_module_driver_stepper_timer_require(ctx, driver) ;
 
     JS_FreeValue(ctx, beapi);
 }
 
-void be_module_driver_loop(JSContext *ctx) {
-}
+void be_module_driver_loop(JSContext *ctx) {}
 
 void be_module_driver_reset(JSContext *ctx) {
     be_module_driver_camera_reset(ctx) ;   
-    be_module_driver_stepper_reset(ctx) ;   
+    be_module_driver_stepper_mcpwm_reset(ctx) ;
+    be_module_driver_stepper_timer_reset(ctx) ;
 }
 

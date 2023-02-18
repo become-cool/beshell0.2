@@ -18,17 +18,6 @@ static inline void _indev_nav_set_value(indev_driver_spec_t * driver_spec, uint3
     driver_spec->data.buttons.state = v ;
 }
 
-#define PROC_EVENT(mem, KEY, INDEV_KEY, STATE, keyName, keyStat)        \
-    if(driver_spec->data.buttons.mem&NAVKEY_##KEY) {                    \
-        data->key = INDEV_KEY ;                                         \
-        data->state = LV_INDEV_STATE_##STATE ;                          \
-        driver_spec->data.buttons.mem&= ~NAVKEY_##KEY ;                 \
-        indev_emit_js_event(drv, driver_spec, "ipt.btn."keyStat, keyName ) ; \
-        return ;                                                        \
-    }
-#define PROC_PRESS(key, NAV_KEY, INDEV_KEY)      PROC_EVENT(press,NAV_KEY, INDEV_KEY,PRESSED, key, "press")
-#define PROC_RELEASE(key, NAV_KEY, INDEV_KEY)    PROC_EVENT(release,NAV_KEY, INDEV_KEY,RELEASED, key, "release")                        
-
 
 /*
 #define INDEV_I2C_READ(spec, value)         \
@@ -45,6 +34,18 @@ inline bool indev_nav_read_i2c(indev_driver_spec_t* spec, uint8_t * byte) {
     return ESP_OK==res ;
 }
 
+
+#define PROC_EVENT(mem, KEY, INDEV_KEY, STATE, keyName, keyStat)        \
+    if(driver_spec->data.buttons.mem&NAVKEY_##KEY) {                    \
+        data->key = INDEV_KEY ;                                         \
+        data->state = LV_INDEV_STATE_##STATE ;                          \
+        driver_spec->data.buttons.mem&= ~NAVKEY_##KEY ;                 \
+        indev_emit_js_event(drv, driver_spec, "ipt.btn."keyStat, keyName ) ; \
+        return ;                                                        \
+    }
+#define PROC_PRESS(key, NAV_KEY, INDEV_KEY)      PROC_EVENT(press,NAV_KEY, INDEV_KEY,PRESSED, key, "press")
+#define PROC_RELEASE(key, NAV_KEY, INDEV_KEY)    PROC_EVENT(release,NAV_KEY, INDEV_KEY,RELEASED, key, "release")                        
+
 static void indev_nav_read_cb(struct _lv_indev_drv_t * drv, lv_indev_data_t * data) {
     if(!drv->user_data) {
         return ;
@@ -54,10 +55,14 @@ static void indev_nav_read_cb(struct _lv_indev_drv_t * drv, lv_indev_data_t * da
         return ;
     }
     
-    uint8_t value = 0;
-    if(indev_nav_read_i2c(driver_spec, &value)) {
-        _indev_nav_set_value(driver_spec, value) ;
+    if( xSemaphoreTake(driver_spec->data.buttons.semaphore, 5) != pdTRUE ){
+        return ;
     }
+
+    uint8_t value = driver_spec->data.buttons.value ;
+    _indev_nav_set_value(driver_spec, value) ;
+    
+    xSemaphoreGive(driver_spec->data.buttons.semaphore) ;
 
     if(driver_spec->data.buttons.press) {
         PROC_PRESS("up", UP, LV_KEY_UP)
@@ -83,39 +88,28 @@ static void indev_nav_read_cb(struct _lv_indev_drv_t * drv, lv_indev_data_t * da
 }
 
 static void task_nav_read(indev_driver_spec_t * spec) {
-
-    const TickType_t xDelay = 5/portTICK_PERIOD_MS ;
-    uint8_t value = 0 ;
-    uint8_t last = 0 ;
-
     while(1) {
-
-        
-        if(indev_nav_read_i2c(spec, &value)) {
-            if(value!=last) {
-                printf("i2c indev:%d\n",value) ;
-                last = value ;
-            }
-            _indev_nav_set_value(spec, value) ;
+        if( xSemaphoreTake(spec->data.buttons.semaphore, 5) == pdTRUE ){
+            indev_nav_read_i2c(spec, &spec->data.buttons.value) ;
+            xSemaphoreGive(spec->data.buttons.semaphore) ;
         }
-
-        vTaskDelay(xDelay) ;
+        vTaskDelay(10/portTICK_PERIOD_MS) ;
     }
 }
 
 static JSValue js_lv_indev_nav_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
 
-    if(lv_disp_get_default()==NULL) {
-        THROW_EXCEPTION("There is no default display.")
-    }
+    // if(lv_disp_get_default()==NULL) {
+    //     THROW_EXCEPTION("There is no default display.")
+    // }
     if(_indev_id>=255){
         THROW_EXCEPTION("max indev count 255") ;
     }
 
-    indev_driver_spec_t driver_spec ;
-    memset(&driver_spec, 0, sizeof(indev_driver_spec_t)) ;
+    indev_driver_spec_t * HMALLOC(driver_spec, sizeof(indev_driver_spec_t));
+    memset(driver_spec, 0, sizeof(indev_driver_spec_t)) ;
 
-    driver_spec.id = _indev_id ++ ;
+    driver_spec->id = _indev_id ++ ;
 
     if(argc>0) {
 
@@ -123,7 +117,7 @@ static JSValue js_lv_indev_nav_constructor(JSContext *ctx, JSValueConst new_targ
 
         ARGV_TO_STRING_E(0, driverName, "arg driver must be a string")
         if(strcmp(driverName, "joypad")==0) {
-            driver_spec.driver = INDEV_DRIVER_JOYPAD ;
+            driver_spec->driver = INDEV_DRIVER_JOYPAD ;
         }
         else {
             THROW_EXCEPTION("unknow nav input device driver")
@@ -132,59 +126,73 @@ static JSValue js_lv_indev_nav_constructor(JSContext *ctx, JSValueConst new_targ
         ARGV_TO_UINT8(1, bus)
         ARGV_TO_UINT8(2, addr)
 
-        driver_spec.conf.i2c.bus = bus ;
-        driver_spec.conf.i2c.addr = addr ;
+        driver_spec->conf.i2c.bus = bus ;
+        driver_spec->conf.i2c.addr = addr ;
 
-        if(i2c_ping(bus,addr)) {
-            dd
-        }
-        driver_spec.found = i2c_ping(bus,addr) ;
+        driver_spec->found = i2c_ping(bus,addr) ;
 
-
-        if(!driver_spec.found) {
+        if(!driver_spec->found) {
             printf("not found i2c device, bus: %d, addr: %d \n", bus,addr) ;
         }
-
-
     }
-
-    lv_indev_drv_t * indev_drv = malloc(sizeof(lv_indev_drv_t));
-    lv_indev_drv_init(indev_drv);
-    indev_drv->type = LV_INDEV_TYPE_KEYPAD;
-    indev_drv->read_cb = indev_nav_read_cb ;
     
-    indev_drv->user_data = malloc(sizeof(indev_driver_spec_t)) ;
-    memcpy(indev_drv->user_data, &driver_spec, sizeof(indev_driver_spec_t)) ;
-
-    lv_indev_t * indev = lv_indev_drv_register(indev_drv);
-    if(!indev) {
-        THROW_EXCEPTION("register indev drv failded")
-    }
-
-    // xTaskCreatePinnedToCore(&task_nav_read, "task_nav_read", 1024*2, (void *)indev_drv->user_data, 5, NULL, 1) ;
+    driver_spec->data.buttons.semaphore = xSemaphoreCreateMutex();
+    xTaskCreatePinnedToCore(&task_nav_read, "task_nav_read", 1024*1.5, (void *)driver_spec, 5, NULL, 1) ;
     
     lv_task_handler() ;
 
     JSValue jsobj = JS_NewObjectClass(ctx, js_lv_indev_nav_class_id) ;
-    JS_SetOpaque(jsobj, indev) ;
+    JS_SetOpaque(jsobj, driver_spec) ;
     return jsobj ;
 }
 static void js_lv_indev_nav_finalizer(JSRuntime *rt, JSValue this_val){
     // printf("js_lv_indev_nav_finalizer()\n") ;
-    lv_indev_t * thisobj = (lv_indev_t *)JS_GetOpaque(this_val, js_lv_indev_nav_class_id) ;
-    if(thisobj) {
-        lv_indev_remove(thisobj) ;
-        if(thisobj->driver) {
-            if(thisobj->driver->user_data) {
-                free(thisobj->driver->user_data) ;
-                thisobj->driver->user_data = NULL ;
-                return ;
+
+    indev_driver_spec_t * spec = (indev_driver_spec_t *)JS_GetOpaque(this_val, js_lv_indev_nav_class_id) ;
+    if(spec) {
+        // 从 lvgl 中注销
+        if(spec->lv_indev) {
+            
+            lv_indev_remove(spec->lv_indev) ;
+
+            if(spec->lv_indev->driver) {
+                free(spec->lv_indev->driver) ;
+                spec->lv_indev->driver = NULL ;
             }
-            free(thisobj->driver) ;
-            thisobj->driver = NULL ;
+
+            free(spec->lv_indev) ;
+            spec->lv_indev = NULL ;
         }
-        free(thisobj) ;
+
+        vSemaphoreDelete(spec->data.buttons.semaphore) ;
+        spec->data.buttons.semaphore = NULL ;
+
+        free(spec) ;
+        spec = NULL ;
     }
+    
+    // lv_indev_t * indev = (indev_driver_spec_t *)JS_GetOpaque(this_val, js_lv_indev_nav_class_id) ;
+    // if(indev) {
+    //     lv_indev_remove(indev) ;
+    //     if(indev->driver) {
+    //         if(indev->driver->user_data) {
+
+    //             indev_driver_spec_t * spec = (indev_driver_spec_t*)indev->driver->user_data ;
+
+    //             vSemaphoreDelete(spec->data.buttons.semaphore) ;
+
+    //             free(indev->driver->user_data) ;
+    //             indev->driver->user_data = NULL ;
+
+    //             return ;
+    //         }
+    //         free(indev->driver) ;
+    //         indev->driver = NULL ;
+    //     }
+    //     free(indev) ;
+    // }
+
+    
 }
 static JSClassDef js_lv_indev_nav_class = {
     "lv.InDevNav",
@@ -194,15 +202,45 @@ static JSValue js_lv_indev_nav_set(JSContext *ctx, JSValueConst this_val, int ar
     CHECK_ARGC(1)
     ARGV_TO_UINT8(0, v)
 
-    THIS_OBJ("lv.InDevNav", "set", thisobj, lv_indev_t)
-    if(!thisobj->driver->user_data) {
+    THIS_OBJ("lv.InDevNav", "set", spec, indev_driver_spec_t)
+    if(!spec) {
         THROW_EXCEPTION("invalid indev")
     }
 
-    _indev_nav_set_value((indev_driver_spec_t *) thisobj->driver->user_data, v) ;
+    _indev_nav_set_value(spec, v) ;
 
     return JS_UNDEFINED ;
 }
+
+static JSValue js_lv_indev_nav_register_to_lvgl(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+
+    THIS_OBJ("lv.InDevNav", "registerToLvgl", spec, indev_driver_spec_t)
+    if(!spec) {
+        THROW_EXCEPTION("invalid indev")
+    }
+    
+    lv_indev_drv_t * indev_drv = malloc(sizeof(lv_indev_drv_t));
+    lv_indev_drv_init(indev_drv);
+    indev_drv->type = LV_INDEV_TYPE_KEYPAD;
+    indev_drv->read_cb = indev_nav_read_cb ;
+    indev_drv->user_data = spec ;
+
+    lv_indev_t * indev = lv_indev_drv_register(indev_drv);
+    if(!indev) {
+        THROW_EXCEPTION("register indev drv failded")
+    }
+
+    spec->lv_indev = indev ;
+
+    return JS_UNDEFINED ;
+}
+
+static JSValue js_lv_indev_nav_serve(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(0)
+
+    return JS_UNDEFINED ;
+}
+
 
 #define BYTE_TO_BINARY_PATTERN "%c%c%c%c%c%c%c%c"
 #define BYTE_TO_BINARY(byte)  \
@@ -216,15 +254,14 @@ static JSValue js_lv_indev_nav_set(JSContext *ctx, JSValueConst this_val, int ar
   (byte & 0x01 ? '1' : '0') 
 static JSValue js_lv_indev_nav_state(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(0)
-    THIS_OBJ("lv.InDevNav", "set", thisobj, lv_indev_t)
-    indev_driver_spec_t * driver_spec = (indev_driver_spec_t *) thisobj->driver->user_data ;
-    if(!driver_spec) {
+    THIS_OBJ("lv.InDevNav", "set", spec, indev_driver_spec_t)
+    if(!spec) {
         return JS_NULL ;
     }
 
     printf(
         "state=" BYTE_TO_BINARY_PATTERN ", press=" BYTE_TO_BINARY_PATTERN ", release=" BYTE_TO_BINARY_PATTERN "\n" ,
-        BYTE_TO_BINARY(driver_spec->data.buttons.state), BYTE_TO_BINARY(driver_spec->data.buttons.press), BYTE_TO_BINARY(driver_spec->data.buttons.release)
+        BYTE_TO_BINARY(spec->data.buttons.state), BYTE_TO_BINARY(spec->data.buttons.press), BYTE_TO_BINARY(spec->data.buttons.release)
     ) ;
 
     return JS_UNDEFINED ;
@@ -232,6 +269,8 @@ static JSValue js_lv_indev_nav_state(JSContext *ctx, JSValueConst this_val, int 
 
 static const JSCFunctionListEntry js_lv_indev_nav_proto_funcs[] = {
     JS_CFUNC_DEF("set", 0, js_lv_indev_nav_set),
+    JS_CFUNC_DEF("serve", 0, js_lv_indev_nav_serve),
+    JS_CFUNC_DEF("registerToLvgl", 0, js_lv_indev_nav_register_to_lvgl),
     // JS_CFUNC_DEF("tick", 0, js_lv_indev_tick),
     // JS_CFUNC_DEF("setGroup", 0, js_lv_indev_set_group),
     // JS_CFUNC_DEF("id", 0, js_lv_indev_id),

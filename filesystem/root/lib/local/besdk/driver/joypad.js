@@ -3,7 +3,6 @@ const I2CDevice = require("./I2CDevice")
 class Joypad extends I2CDevice {
     constructor() {
         super("joypad")
-        // this._timer=-1
         this.raw = 0
     }
     scan(addr) {
@@ -12,16 +11,16 @@ class Joypad extends I2CDevice {
     setup(opts){
         this.bus = opts?.i2c || 0
         this.addr = opts?.addr
-    }
-    register(insName) {
-        // beapi.i2c.ping(this.bus,this.addr)
-        // if(this.bus==undefined || this.addr==undefined || !beapi.i2c.ping(this.bus,this.addr)) {
-        //     console.log("joypad not found, bus:", this.bus ,", addr:", this.addr)
-        //     return
-        // }
-        super.register(insName)
+
         this.indev = new lv.InDevNav("joypad", this.bus||0, this.addr||51)
         be.indev.push(this.indev)
+        
+        try{
+            this.indev.registerToLvgl()
+        }catch(e) {}
+        if(opts.serve){
+            this.indev.serve()
+        }
     }
     read() {
         if( this.addr!=51 && this.addr!=52 ) {

@@ -6,6 +6,8 @@
 static uint8_t _i2c_bus_setup = 0 ;
 
 
+static SemaphoreHandle_t i2c_bus_semaphores[I2C_NUM_MAX] = {NULL} ;
+
 static esp_err_t i2c_send(uint8_t bus, uint8_t addr, uint8_t * data, size_t len) {
     if(!I2C_IS_SETUP(bus))
         return ESP_ERR_INVALID_STATE ;
@@ -350,6 +352,11 @@ static JSValue js_i2c_bus_setup(JSContext *ctx, JSValueConst this_val, int argc,
     i2c_get_data_timing(busnum, &sample_time, &data_hold_time) ;
     // dn2(sample_time, data_hold_time)
 
+    if(i2c_bus_semaphores[busnum]) {
+        vSemaphoreDelete(i2c_bus_semaphores[busnum]) ;
+    }
+    i2c_bus_semaphores[busnum] = xSemaphoreCreateMutex();
+
     return JS_TRUE ;
 }
 
@@ -657,14 +664,33 @@ static JSValue js_i2c_bus_free(JSContext *ctx, JSValueConst this_val, int argc, 
         }
         _i2c_bus_setup&= ~(1<<busnum) ;
     }
+
+    vSemaphoreDelete(i2c_bus_semaphores[busnum]) ;
+    i2c_bus_semaphores[busnum] = NULL ;
     
     return JS_TRUE ;
 }
 
+inline bool i2c_take_semph(i2c_port_t busnum, TickType_t wait) {
+    if(busnum>=I2C_NUM_MAX) {
+        return false ;
+    }
+    if(!i2c_bus_semaphores[busnum]) {
+        return false ;
+    }
+    return pdTRUE == xSemaphoreTake(i2c_bus_semaphores[busnum], wait) ;
+}
+inline bool i2c_give_semph(i2c_port_t busnum) {
+    if(busnum>=I2C_NUM_MAX) {
+        return false ;
+    }
+    if(!i2c_bus_semaphores[busnum]) {
+        return false ;
+    }
+    return pdTRUE == xSemaphoreGive(i2c_bus_semaphores[busnum]) ;
 
+}
 
-// void be_module_serial_i2c_init() {
-// }
 
 void be_module_serial_i2c_require(JSContext *ctx, JSValue pkg) {
 

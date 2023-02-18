@@ -1,4 +1,4 @@
-#include "driver_stepper.h"
+#include "driver_stepper_mcpwm.h"
 #include "utils.h"
 #include "rom/gpio.h"
 #include "driver/ledc.h"
@@ -32,6 +32,7 @@ typedef struct {
 
     mcpwm_unit_t mcpwm_unit ;
     mcpwm_timer_t mcpwm_timer ;
+    int mcpwm_freq ;
 
     pcnt_unit_t pcnt_unit ;
     // pcnt_channel_t pcnt_channel ;
@@ -44,10 +45,10 @@ typedef struct {
     uint8_t run_dir ;
     uint32_t steps_over_counter ;
 
-} driver_stepper_t ;
+} driver_stepper_mcpwm_t ;
 
 #define THIS_STEPPER(var)                                                   \
-    driver_stepper_t * var = JS_GetOpaque(this_val, js_stepper_class_id);   \
+    driver_stepper_mcpwm_t * var = JS_GetOpaque(this_val, js_stepper_mcpwm_class_id);   \
     if(!var) {                                                              \
         THROW_EXCEPTION("must be called as a driver.Stepper method")        \
     }
@@ -58,10 +59,10 @@ typedef struct {
 #define STEPPER_CNT_H  10000
 #define STEPPER_CNT_L  -10000
 
-static JSClassID js_stepper_class_id ;
+static JSClassID js_stepper_mcpwm_class_id ;
 
 
-inline static void emit_stop_event(driver_stepper_t * stepper, bool sync) {
+inline static void emit_stop_event(driver_stepper_mcpwm_t * stepper, bool sync) {
     
     int count = 0 ;
     pcnt_get_counter_value(stepper->pcnt_unit, &count) ;
@@ -72,7 +73,6 @@ inline static void emit_stop_event(driver_stepper_t * stepper, bool sync) {
     JSValue emit = js_get_glob_prop(stepper->ctx, 4, "beapi", "EventEmitter", "prototype", "emit") ;
 
     if(sync) {
-        dd
         // dn( JS_IsUndefined(stepper->jsobj) )
         JS_Call(stepper->ctx, emit, JS_MKPTR(JS_TAG_OBJECT,stepper->jsobj), 3, argv) ;
         JS_FreeValue(stepper->ctx, eventName) ;
@@ -88,7 +88,7 @@ static void IRAM_ATTR stepper_pcnt_intr_handler(void *arg) {
     if(!arg) {
         return ;
     }
-    driver_stepper_t * stepper = (driver_stepper_t *) arg ;
+    driver_stepper_mcpwm_t * stepper = (driver_stepper_mcpwm_t *) arg ;
 
     uint32_t status ;
     pcnt_get_event_status(stepper->pcnt_unit, &status);
@@ -121,7 +121,7 @@ static void IRAM_ATTR stepper_pcnt_intr_handler(void *arg) {
  * pcnt_unit = PCNT_UNIT_0
  * 
  */
-static JSValue js_stepper_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
+static JSValue js_stepper_mcpwm_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv){
 
     CHECK_ARGC(2)
 
@@ -138,11 +138,11 @@ static JSValue js_stepper_constructor(JSContext *ctx, JSValueConst new_target, i
     ARGV_TO_INT32_OPT(5, pcnt_unit, PCNT_UNIT_0)
 
     // malloc
-    driver_stepper_t * HMALLOC(stepper, sizeof(driver_stepper_t))
+    driver_stepper_mcpwm_t * HMALLOC(stepper, sizeof(driver_stepper_mcpwm_t))
     if(!stepper) {
         THROW_EXCEPTION("out of memory?")
     }
-    memset(stepper, 0, sizeof(driver_stepper_t)) ;
+    memset(stepper, 0, sizeof(driver_stepper_mcpwm_t)) ;
     stepper->io_step = io_step ;
     stepper->io_dir = io_dir ;
     stepper->io_en = io_en ;
@@ -150,7 +150,7 @@ static JSValue js_stepper_constructor(JSContext *ctx, JSValueConst new_target, i
     stepper->mcpwm_timer = mcpwm_timer ;
     stepper->pcnt_unit = pcnt_unit ;
     
-    JSValue jsobj = JS_NewObjectClass(ctx, js_stepper_class_id) ;
+    JSValue jsobj = JS_NewObjectClass(ctx, js_stepper_mcpwm_class_id) ;
 
     // setup pcnt
     pcnt_config_t cfg_pcnt = {
@@ -205,7 +205,7 @@ static JSValue js_stepper_constructor(JSContext *ctx, JSValueConst new_target, i
         .cmpr_b = 0,
         .counter_mode = MCPWM_UP_COUNTER,
         .duty_mode = MCPWM_DUTY_MODE_0,
-        .frequency = 1000,
+        .frequency = 100,
     };
     CALL_IDF_API( mcpwm_init(stepper->mcpwm_unit, stepper->mcpwm_timer, &cfg_mcpwm) )
     CALL_IDF_API( mcpwm_stop(stepper->mcpwm_unit,stepper->mcpwm_timer) )
@@ -226,14 +226,15 @@ static JSValue js_stepper_constructor(JSContext *ctx, JSValueConst new_target, i
     JS_SetOpaque(jsobj, stepper) ;
     JS_SetPropertyStr(ctx, jsobj, "_handlers", JS_NewObject(ctx));
 
+    stepper->mcpwm_freq = cfg_mcpwm.frequency ;
     stepper->ctx = ctx ;
     stepper->jsobj = JS_VALUE_GET_PTR(jsobj) ;
 
     return jsobj ;
 }
 
-static void js_stepper_finalizer(JSRuntime *rt, JSValue this_val){
-    driver_stepper_t * thisstepper = JS_GetOpaque(this_val, js_stepper_class_id);
+static void js_stepper_mcpwm_finalizer(JSRuntime *rt, JSValue this_val){
+    driver_stepper_mcpwm_t * thisstepper = JS_GetOpaque(this_val, js_stepper_mcpwm_class_id);
     if(!thisstepper) {
         printf("must be called as a driver.Stepper method\n") ;
     }
@@ -243,12 +244,12 @@ static void js_stepper_finalizer(JSRuntime *rt, JSValue this_val){
         JS_SetOpaque(this_val, NULL) ;
     }
 }
-static JSClassDef js_stepper_class = {
+static JSClassDef js_stepper_mcpwm_class = {
     "driver.Stepper",
-    .finalizer = js_stepper_finalizer,
+    .finalizer = js_stepper_mcpwm_finalizer,
 } ;
 
-static JSValue js_stepper_set_freq(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+static JSValue js_stepper_mcpwm_set_freq(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(1)
 
     THIS_STEPPER(stepper)
@@ -256,11 +257,17 @@ static JSValue js_stepper_set_freq(JSContext *ctx, JSValueConst this_val, int ar
 
     CALL_IDF_API( mcpwm_set_frequency(stepper->mcpwm_unit,stepper->mcpwm_timer,freq) )
 
+    stepper->mcpwm_freq = freq ;
+
     return JS_UNDEFINED ;
 }
 
+static JSValue js_stepper_mcpwm_get_freq(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    THIS_STEPPER(stepper)
+    return JS_NewUint32(ctx, stepper->mcpwm_freq) ;
+}
 
-static JSValue run_steps(JSContext *ctx, driver_stepper_t * stepper, int16_t steps, uint8_t dir) {
+static JSValue run_steps(JSContext *ctx, driver_stepper_mcpwm_t * stepper, int16_t steps, uint8_t dir) {
 
     if(stepper->running) {
         THROW_EXCEPTION("this stepper is running alread")
@@ -294,17 +301,13 @@ static JSValue run_steps(JSContext *ctx, driver_stepper_t * stepper, int16_t ste
 
     stepper->running = true ;
 
-    // dn(stepper->running)
-    // dn(stepper->steps_over_counter)
-    // dn(stepper->run_steps)
-
     return JS_UNDEFINED ;
 }
 
 /**
  * @param dir=1
  */
-static JSValue js_stepper_run(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+static JSValue js_stepper_mcpwm_run(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
 
     uint8_t dir = 1 ;
     if(argc>0) {
@@ -315,7 +318,7 @@ static JSValue js_stepper_run(JSContext *ctx, JSValueConst this_val, int argc, J
 
     return run_steps(ctx, stepper, -1, dir) ;
 }
-static JSValue js_stepper_stop(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+static JSValue js_stepper_mcpwm_stop(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
 
     THIS_STEPPER(stepper)
     CALL_IDF_API( mcpwm_stop(stepper->mcpwm_unit,stepper->mcpwm_timer) )
@@ -331,7 +334,7 @@ static JSValue js_stepper_stop(JSContext *ctx, JSValueConst this_val, int argc, 
  * @param steps 
  * @param dir=1
  */
-static JSValue js_stepper_run_steps(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+static JSValue js_stepper_mcpwm_run_steps(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(1)
     ARGV_TO_UINT16(0, steps)
 
@@ -356,9 +359,6 @@ static JSValue js_stepper_get_steps(JSContext *ctx, JSValueConst this_val, int a
     uint32_t count = 0 ;
     pcnt_get_counter_value(stepper->pcnt_unit, &count);
 
-    dn(count)
-    dn(stepper->steps_over_counter)
-
     if(!only_pcnt_val) {
         count = stepper->steps_over_counter * MAX_PCNT_VALUE + count ;
     }
@@ -366,33 +366,40 @@ static JSValue js_stepper_get_steps(JSContext *ctx, JSValueConst this_val, int a
     return JS_NewInt32(ctx,count) ;
 }
 
-static const JSCFunctionListEntry js_stepper_proto_funcs[] = {
-    JS_CFUNC_DEF("run", 0, js_stepper_run),
-    JS_CFUNC_DEF("stop", 0, js_stepper_stop),
-    JS_CFUNC_DEF("runSteps", 0, js_stepper_run_steps),
+static JSValue js_driver_stepper_mcpwm_is_running(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    THIS_STEPPER(stepper)
+    return JS_NewBool(ctx, stepper->running) ;
+}
+
+static const JSCFunctionListEntry js_stepper_mcpwm_proto_funcs[] = {
+    JS_CFUNC_DEF("run", 0, js_stepper_mcpwm_run),
+    JS_CFUNC_DEF("stop", 0, js_stepper_mcpwm_stop),
+    JS_CFUNC_DEF("runSteps", 0, js_stepper_mcpwm_run_steps),
     JS_CFUNC_DEF("getSteps", 0, js_stepper_get_steps),
-    JS_CFUNC_DEF("setFreq", 0, js_stepper_set_freq),
+    JS_CFUNC_DEF("setFreq", 0, js_stepper_mcpwm_set_freq),
+    JS_CFUNC_DEF("freq", 0, js_stepper_mcpwm_get_freq),
+    JS_CFUNC_DEF("isRunning", 0, js_driver_stepper_mcpwm_is_running),
 } ;
 
 
-void be_module_driver_stepper_init() {
-    JS_NewClassID(&js_stepper_class_id);
+void be_module_driver_stepper_mcpwm_init() {
+    JS_NewClassID(&js_stepper_mcpwm_class_id);
 }
 
-void be_module_driver_stepper_require(JSContext *ctx, JSValue driver) {
+void be_module_driver_stepper_mcpwm_require(JSContext *ctx, JSValue driver) {
 
     JSValue EventEmitterProto = js_get_glob_prop(ctx, 3, "beapi", "EventEmitter", "prototype") ;
 
-    QJS_DEF_CLASS(stepper, "Stepper", "driver.Stepper", EventEmitterProto, driver)
+    QJS_DEF_CLASS(stepper_mcpwm, "MCPWMStepper", "driver.MCPWMStepper", EventEmitterProto, driver)
     // 
     // JS_SetPropertyStr(ctx, driver, "pcntCount", JS_NewCFunction(ctx, js_driver_pcnt_count, "pcntCount", 1));
     
     JS_FreeValue(ctx, EventEmitterProto) ;
 }
 
-void be_module_driver_stepper_loop(JSContext *ctx) {
+void be_module_driver_stepper_mcpwm_loop(JSContext *ctx) {
 }
 
-void be_module_driver_stepper_reset(JSContext *ctx) {
+void be_module_driver_stepper_mcpwm_reset(JSContext *ctx) {
 }
 

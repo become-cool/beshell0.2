@@ -87,7 +87,7 @@ const LibDefaultConf = {
                 , "use_apll": 1
             }} ,
             dev: [
-                {driver:'sdspi',setup:{cs:48,spi:1,mount:'/mnt/sd',khz:15000}} ,
+                {"driver":'sdspi',setup:{cs:48,spi:1,mount:'/mnt/sd',khz:15000}} ,
                 {"driver":"ST7789V", "setup":{"dc":38, "cs":45, "spi":1, "width":320, "height":240, "freq":80000000, "MADCTL": 96}} ,
                 {"driver":"joypad", "setup":{"i2c":0, "addr":51}} ,
                 {"driver":"joypad", "setup":{"i2c":0, "addr":52}} ,
@@ -120,7 +120,7 @@ function createDevFromDriver(devConf) {
         console.error("unknow driver", devConf.driver)
     }
     try {
-    let dev = new driver
+        let dev = new driver
         if(dev.setup(devConf.setup)==false) {
             console.error(devConf.driver,'device setup failed.')
             return

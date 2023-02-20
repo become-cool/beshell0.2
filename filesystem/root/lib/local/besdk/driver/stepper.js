@@ -14,6 +14,10 @@ class Stepper extends DeviceDriver {
         this.proxy('isRunning')
         this.proxy('pos')
         this.proxy('setPos')
+        this.proxy('setPassingBy')
+        this.proxy('clearPassingBy')
+        this.proxy('on')
+        this.proxy('race')
     }
     setup(opts) {
         this.optsSetup = opts

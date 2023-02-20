@@ -73,7 +73,7 @@ void echo_error(JSContext *) ;
 
 
 #define ARGV_TO_INT(i, var, ctype, api)                     \
-	ctype var ;                                             \
+	ctype var = 0 ;                                         \
 	if( api(ctx, &(var), argv[i])!=0 ) {                    \
         THROW_EXCEPTION("Invalid param type")               \
 	}

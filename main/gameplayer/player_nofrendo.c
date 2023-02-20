@@ -8,6 +8,7 @@
 #include "psram.h"
 #include "esp_system.h"
 #include "esp_timer.h"
+#include "esp_task_wdt.h"
 #include "indev.h"
 #include "indev_i2c.h"
 #include "esp32_perfmon.h"
@@ -467,12 +468,7 @@ static uint8_t print_framerate_counter = 0 ;
 
 static void custom_blit(bitmap_t *bmp, int num_dirties, rect_t *dirty_rects) {
 
-    vTaskDelay(0) ;
-
-    // framerate() ;
-    // if(print_framerate_counter++%60==0) {
-    //     dn2(dynamic_frames, NES_REFRESH_RATE)
-    // }
+    esp_task_wdt_reset() ;
 
 	xQueueSend(queVideo, &bmp, 0);
 
@@ -584,12 +580,12 @@ void osd_getinput(void) {
         if(spec->driver==INDEV_DRIVER_JOYPAD && spec->found) {
             // dn(spec->conf.i2c.addr)
             if(spec->conf.i2c.addr==51) {
-                // btns_1 = spec->data.buttons.state ;
-                indev_nav_read_i2c(spec, & btns_1) ;
+                btns_1 = spec->data.buttons.value ;
+                // indev_nav_read_i2c(spec, & btns_1) ;
             }
             else if(spec->conf.i2c.addr==52) {
-                // btns_2 = spec->data.buttons.state ;
-                indev_nav_read_i2c(spec, & btns_2) ;
+                btns_2 = spec->data.buttons.value ;
+                // indev_nav_read_i2c(spec, & btns_2) ;
             }
         }
 
@@ -660,8 +656,6 @@ static int logprint(const char *string) {
 int osd_init() {
 
     printf("osd_init()\n") ;
-
-    dn(AUDIO_RECORD)
 
     if(!palette) {
         palette = heap_caps_malloc( sizeof(uint16)*PALETTE_SIZE, MALLOC_CAP_DMA ) ;

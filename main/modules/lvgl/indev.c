@@ -240,9 +240,10 @@ void be_lv_indev_require(JSContext *ctx, JSValue lvgl) {
 
     JS_SetPropertyStr(ctx, lvgl, "setIndevCallback", JS_NewCFunction(ctx, js_set_indev_global_cb, "setIndevCallback", 1));
     JS_SetPropertyStr(ctx, lvgl, "clearIndevCallback", JS_NewCFunction(ctx, js_clear_indev_global_cb, "clearIndevCallback", 1));
-
     
-    JSValue baseProto = QJS_DEF_CLASS(indev_base, "IndevBase", "lv.IndevBase", JS_UNDEFINED, lvgl) ;
+    JSValue EventEmitterProto = js_get_glob_prop(ctx, 3, "beapi", "EventEmitter", "prototype") ;
+    JSValue baseProto = QJS_DEF_CLASS(indev_base, "IndevBase", "lv.IndevBase", EventEmitterProto, lvgl) ;
+    JS_FreeValue(ctx, EventEmitterProto);
 
     be_indev_pointer_require(ctx, lvgl, baseProto) ;
 #ifndef SIMULATION

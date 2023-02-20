@@ -240,8 +240,8 @@ void app_main(void)
     printf("DMA   (free/total): %d/%d\n", getDMAUsed(),getDMATotal());
     printf("PSRAM (free/total): %d/%d\n", getPsramUsed(),getPsramTotal());
 
-    xTaskCreatePinnedToCore(&js_main_loop, "js_main_loop", 20*1024, NULL, 5, NULL, 0);
-    // js_main_loop(NULL) ;
+    // 优先级 tskIDLE_PRIORITY 可以避免触发看门狗
+    xTaskCreatePinnedToCore(&js_main_loop, "js_main_loop", 20*1024, NULL, tskIDLE_PRIORITY, NULL, 0);
 #endif
 
 }

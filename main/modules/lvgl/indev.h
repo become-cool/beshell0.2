@@ -55,6 +55,7 @@ typedef struct {
 
     bool fake:1 ;
     bool found:1 ;
+    bool enable_jsobj_event:1 ;  // 在 js 对象上触发事件
     
     union{
         struct {
@@ -70,6 +71,9 @@ typedef struct {
             SemaphoreHandle_t semaphore ;
         } buttons ;
     } data ;
+
+    JSContext * ctx ;
+    JSValue jsobj ;
 
     lv_indev_t * lv_indev ;
 

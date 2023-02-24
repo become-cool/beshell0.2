@@ -123,6 +123,8 @@ help:
 	@echo "make fs-src		# clear-jsbin + pack-all"
 	@echo "make fs-root		# compile tree-shaking mkfs-root dist-root"
 	@echo "make fs-root-src	# clear-jsbin tree-shaking mkfs-root dist-root"
+	@echo "make fs-home		# compile tree-shaking mkfs-home partition dist-home"
+	@echo "make fs-home-with-data	# compile tree-shaking pack-home-data mkfs-home-more partition dist-home"
 	@echo "make telweb-build"
 	@echo "make telweb-pack"
 	@echo "make telweb		# telweb-build + telweb-pack"

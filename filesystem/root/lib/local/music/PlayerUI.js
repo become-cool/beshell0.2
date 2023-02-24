@@ -246,7 +246,7 @@ class PlayerUI extends lv.CleanObj {
         beapi.driver.releaseDMA("audio")
 
         await this.stop()
-        this.player.playMP3(this.currentPath, true)
+        this.player.playMP3(this.currentPath, false)
         
         console.log(process.memoryUsage())
     }

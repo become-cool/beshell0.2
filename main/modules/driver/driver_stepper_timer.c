@@ -26,7 +26,9 @@ typedef struct {
     bool use_dest:1 ;
     bool use_passing_by:1 ; // "passing-by" 事件
 
-    uint16_t freq ;
+    uint16_t freq ;             // 当前频率 (电机当前速度)
+    uint16_t freq_target ;      // 目标频率 (电机目标速度)
+    uint16_t freq_v ;           // 频率速度 (电机加速度)
     
     int64_t pos ;       // 当前位置
     int64_t dest ;      // 目标位置 
@@ -199,11 +201,12 @@ static JSClassDef js_stepper_timer_class = {
 } ;
 
 
-static inline JSValue set_freq(JSContext *ctx, driver_stepper_timer_t * stepper, uint16_t freq) {
+static inline JSValue set_freq(JSContext *ctx, driver_stepper_timer_t * stepper, int freq) {
     if(freq<=0 || freq>MAX_FREQ) {
         THROW_EXCEPTION("arg freq must >0 && <%d", MAX_FREQ)
     }
     stepper->freq = freq ;
+    stepper->freq_target = freq ;
     
     if(stepper->is_running) {
         CALL_IDF_API( esp_timer_stop(stepper->timer) )
@@ -242,7 +245,7 @@ static JSValue js_stepper_timer_run(JSContext *ctx, JSValueConst this_val, int a
         stepper->run_dir = JS_ToBool(ctx, argv[0]) ;
     }
     if(argc>1) {
-        ARGV_TO_UINT16(1, freq)
+        ARGV_TO_INT32(1, freq)
         if( JS_IsException(set_freq(ctx, stepper, freq)) ) {
             return JS_EXCEPTION ;
         }
@@ -269,7 +272,7 @@ static JSValue js_stepper_timer_run_steps(JSContext *ctx, JSValueConst this_val,
     stepper->dest = stepper->pos + steps ;
 
     if(argc>1) {
-        ARGV_TO_UINT16(1, freq)
+        ARGV_TO_INT32(1, freq)
         if( JS_IsException(set_freq(ctx, stepper, freq)) ) {
             return JS_EXCEPTION ;
         }
@@ -297,7 +300,7 @@ static JSValue js_stepper_timer_run_to(JSContext *ctx, JSValueConst this_val, in
     stepper->run_dir = dest>stepper->pos? 1: 0 ;    
 
     if(argc>1) {
-        ARGV_TO_UINT16(1, freq)
+        ARGV_TO_INT32(1, freq)
         if( JS_IsException(set_freq(ctx, stepper, freq)) ) {
             return JS_EXCEPTION ;
         }
@@ -324,7 +327,7 @@ static JSValue js_stepper_timer_set_freq(JSContext *ctx, JSValueConst this_val, 
     CHECK_ARGC(1)
     THIS_STEPPER(stepper)
     
-    ARGV_TO_UINT16(0, freq) ;
+    ARGV_TO_INT32(0, freq) ;
     return set_freq(ctx, stepper, freq) ;
 }
 

@@ -30,10 +30,10 @@ let keyStat = {
 
 
 let travalXFreq = 100
-let travalXMax = 500
+let travalXMax = 3500
 
 let travalZFreq = 50
-let travalZMax = 500
+let travalZMax = 1500
 
 
 be.dev.stepperX.setFreq(travalXFreq)
@@ -58,6 +58,22 @@ be.dev.joypad1.indev.on("*",(act, key)=>{
                 break
 
             case 'a' :
+
+                // z 轴加速
+                if( keyStat.up || keyStat.down ) {
+                    travalZFreq = Math.min(travalZFreq+50, travalZMax)
+                    be.dev.stepperZ.setFreq(travalZFreq)
+                    console.log("z+", travalZFreq)
+                    break
+                }
+                // x 轴加速
+                else if( keyStat.left || keyStat.right ) {
+                    travalXFreq = Math.min(travalXFreq+50, travalXMax)
+                    be.dev.stepperX.setFreq(travalXFreq)
+                    console.log("x+", travalXFreq)
+                    break
+                }
+
                 if( !keyStat.select ) {
                     target.a.x = be.dev.stepperX.pos()
                 }
@@ -68,6 +84,22 @@ be.dev.joypad1.indev.on("*",(act, key)=>{
                 console.log(target.a)
                 break
             case 'b' :
+
+            // z 轴减速
+            if( keyStat.up || keyStat.down ) {
+                travalZFreq = Math.max(travalZFreq-50, 0)
+                be.dev.stepperZ.setFreq(travalZFreq)
+                console.log("z-", travalZFreq)
+                break
+            }
+            // x 轴减速
+            else if( keyStat.left || keyStat.right ) {
+                travalXFreq = Math.max(travalXFreq-50, 0)
+                be.dev.stepperX.setFreq(travalXFreq)
+                console.log("x-", travalXFreq)
+                break
+            }
+
                 if( !keyStat.select ) {
                     target.b.x = be.dev.stepperX.pos()
                 }
@@ -104,29 +136,6 @@ be.dev.joypad1.indev.on("*",(act, key)=>{
                 break
 
             case 'select':
-                
-                // z轴加速
-                if(keyStat.up) {
-                    travalZFreq = Math.min(travalZFreq+50, travalZMax)
-                    be.dev.stepperZ.setFreq(travalZFreq)
-                }
-                // z轴减速
-                else if(keyStat.down) {
-                    travalZFreq = Math.max(travalZFreq-50, 0)
-                    be.dev.stepperZ.setFreq(travalZFreq)
-                }
-
-                // x轴加速
-                else if(keyStat.right) {
-                    travalXFreq = Math.min(travalXFreq+50, travalZMax)
-                    be.dev.stepperX.setFreq(travalXFreq)
-                }
-                // x轴减速
-                else if(keyStat.left) {
-                    travalXFreq = Math.max(travalXFreq-50, 0)
-                    be.dev.stepperX.setFreq(travalXFreq)
-                }
-
                 break
         }
 
@@ -184,13 +193,14 @@ function audoTravel(to,_from) {
             // 计算 z 轴速度
             let distX_with_z = to.x_with_z - _from.x_with_z
             let freqZ = Math.floor( distZ/distX_with_z * travalXFreq )
+            freqZ = Math.abs(freqZ)
     
             console.log("z freq =", freqZ)
             console.log("[x with z]", _from.x_with_z, '->', to.x_with_z, ' = ', distX_with_z)
 
             // z轴 和 x轴同步开始，不需要 x轴的 passing-by 事件
             if( from.x == _from.x_with_z ) {
-                be.dev.stepperZ.runTo(to.z, travalXFreq)
+                be.dev.stepperZ.runTo(to.z, freqZ)
             }
 
             // 到达 from.x_with_z 后开始 z 轴
@@ -201,7 +211,7 @@ function audoTravel(to,_from) {
                     console.log(evt,pos)
                     if(evt=='passing-by') {
                         console.log("stepperZ.runTo()",to.z, ", from", be.dev.stepperZ.pos())
-                        be.dev.stepperZ.runTo(to.z, travalXFreq)
+                        be.dev.stepperZ.runTo(to.z, freqZ)
                     }
                 })
             }
@@ -212,3 +222,6 @@ function audoTravel(to,_from) {
 }
 
 global.target = target
+global.sx = be.dev.stepperX
+global.sz = be.dev.stepperZ
+global.joy = be.dev.joypad1

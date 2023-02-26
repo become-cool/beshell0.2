@@ -3,7 +3,20 @@ console.log("Camera Slideway")
 console.log("==========================")
 
 
+let travalXFreq = 1000
+let travalXMax = 3500
+
+let travalZFreq = 100
+let travalZMax = 1000
+
 be.dev.joypad1.indev.enableEvent()
+
+be.dev.stepperX.setFreq(travalXFreq)
+be.dev.stepperX.setAccel(1500)
+
+be.dev.stepperZ.setFreq(travalZFreq)
+be.dev.stepperZ.setAccel(100)
+
 
 let target = {
     a : {
@@ -28,12 +41,6 @@ let keyStat = {
     'down' : false ,
 }
 
-
-let travalXFreq = 100
-let travalXMax = 3500
-
-let travalZFreq = 50
-let travalZMax = 1500
 
 
 be.dev.stepperX.setFreq(travalXFreq)
@@ -188,30 +195,34 @@ function audoTravel(to,_from) {
 
         // z轴 和 x轴 联动
         else {
-            console.log("z async")
+            console.log("z sync")
 
             // 计算 z 轴速度
-            let distX_with_z = to.x_with_z - _from.x_with_z
-            let freqZ = Math.floor( distZ/distX_with_z * travalXFreq )
+            let distX_with_z = Math.abs(to.x_with_z - _from.x_with_z)
+            let timeX_with_z = be.dev.stepperX.dvr.calculateTravelTime(distX_with_z)
+
+            console.log("x travel time (with z):", timeX_with_z)
+
+            let freqZ = Math.round( distZ/timeX_with_z )
             freqZ = Math.abs(freqZ)
     
             console.log("z freq =", freqZ)
             console.log("[x with z]", _from.x_with_z, '->', to.x_with_z, ' = ', distX_with_z)
 
-            // z轴 和 x轴同步开始，不需要 x轴的 passing-by 事件
+            // z轴 和 x轴同步开始，不需要 x轴的 passing 事件
             if( from.x == _from.x_with_z ) {
-                be.dev.stepperZ.runTo(to.z, freqZ)
+                be.dev.stepperZ.runTo(to.z, freqZ, false)
             }
 
             // 到达 from.x_with_z 后开始 z 轴
             else {
                 console.log("z later")
-                be.dev.stepperX.setPassingBy(_from.x_with_z)
-                be.dev.stepperX.race(['stop','passing-by'],(evt,pos)=>{
+                be.dev.stepperX.setPassing(_from.x_with_z)
+                be.dev.stepperX.race(['stop','passing'],(evt,pos)=>{
                     console.log(evt,pos)
-                    if(evt=='passing-by') {
+                    if(evt=='passing') {
                         console.log("stepperZ.runTo()",to.z, ", from", be.dev.stepperZ.pos())
-                        be.dev.stepperZ.runTo(to.z, freqZ)
+                        be.dev.stepperZ.runTo(to.z, freqZ, false)
                     }
                 })
             }
@@ -220,6 +231,35 @@ function audoTravel(to,_from) {
         }
     }
 }
+
+// 计算加速阶段，返回从0加速到目标速度所需要的时间和步数
+function calculateAccelPhase(v, a) {
+    let accelTime = v / a ;
+    let accelSteps = Math.round(a * accelTime*accelTime/2) ;
+    return [v / a, accelSteps]
+}
+
+// 解二元一次方程
+function solveUnaryQuadratic(a,b,c) {
+
+    let delat = b*b-4*a*c
+        
+    if(delat>0) {
+
+        let x1= ( -b+Math.sqrt(delat) )/(2*a)
+        let x2= ( -b-Math.sqrt(delat) )/(2*a)
+        return [x1, x2]
+    }
+    else if(delat==0) {
+        let x1=( -b+Math.sqrt(delat) )/(2*a)
+        return [x1, x1]
+    }
+
+    else {
+        return [null, null]
+    }
+}
+
 
 global.target = target
 global.sx = be.dev.stepperX

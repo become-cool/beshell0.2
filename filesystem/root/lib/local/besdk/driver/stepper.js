@@ -8,14 +8,16 @@ class Stepper extends DeviceDriver {
         this.proxy('runSteps')
         this.proxy('runTo')
         this.proxy('stop')
-        this.proxy('getSteps')
-        this.proxy('setFreq')
         this.proxy('freq')
+        this.proxy('setFreq')
+        this.proxy('accel')
+        this.proxy('setAccel')
         this.proxy('isRunning')
+        this.proxy('isStopping')
         this.proxy('pos')
         this.proxy('setPos')
-        this.proxy('setPassingBy')
-        this.proxy('clearPassingBy')
+        this.proxy('setPassing')
+        this.proxy('clearPassing')
         this.proxy('on')
         this.proxy('race')
     }
@@ -31,6 +33,16 @@ class Stepper extends DeviceDriver {
                 throw new Error("invork setup() first")
             }
             return this.dvr[methodName] (...argv)
+        }
+    }
+    info() {
+        return {
+            pos: this.dvr.pos() ,
+            freq: this.dvr.freq() ,
+            freqRuntime: this.dvr.freq(true) ,
+            accel: this.dvr.accel() ,
+            running: this.dvr.isRunning() ,
+            stopping: this.dvr.isStopping() ,
         }
     }
 }

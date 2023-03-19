@@ -8,3 +8,4 @@ exports.singleton = function() {
     lv.loadScreen(_singleton)
     global.game = _singleton
 }
+

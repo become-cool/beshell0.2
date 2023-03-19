@@ -68,7 +68,9 @@ typedef struct {
             uint32_t press ;
             uint32_t release ;
             uint8_t value ;
+#ifndef SIMULATION
             SemaphoreHandle_t semaphore ;
+#endif
         } buttons ;
     } data ;
 

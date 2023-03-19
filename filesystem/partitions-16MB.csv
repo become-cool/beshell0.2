@@ -4,8 +4,8 @@
 nvs, data, nvs, 0x9000, 0x6000 
 phy_init, data, phy, 0xF000, 0x1000 
 factory, app, factory, 0x10000, 0x378000 
-fsroot, data, fat, 0x388000, 0x50000 
-fshome, data, fat, 0x3D8000, 0xC28000 
+fsroot, data, fat, 0x388000, 0x58000 
+fshome, data, fat, 0x3E0000, 0xC20000 
 
 
 

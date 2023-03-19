@@ -49,6 +49,8 @@ typedef struct {
     uint64_t start_time ;
     uint64_t stop_time ;
 
+    uint32_t run_delay_us ;  // 延迟开始(微秒)
+
 } driver_stepper_timer_t ;
 
 
@@ -401,7 +403,8 @@ static JSValue run(JSContext *ctx, driver_stepper_timer_t * stepper) {
         CALL_IDF_API( gpio_set_level(stepper->io_dir, stepper->run_dir) )
     }
 
-    uint32_t half_period = 0 ;
+    stepper->freq = 0 ;
+    uint32_t period = stepper->run_delay_us ;
 
     // 使用加速度
     if(stepper->accel>0 && stepper->use_accel) {
@@ -421,18 +424,21 @@ static JSValue run(JSContext *ctx, driver_stepper_timer_t * stepper) {
             stepper->pos_stopping = 0 ;
         }
 
+        if(!period) {
 
-        float first_steps_time = 0 ;
+            float first_steps_time = 0 ;
 
-        if( !calculate_step_time_freq(0, stepper->accel, &first_steps_time)) {
-            THROW_EXCEPTION("can not solve step time")
+            if( !calculate_step_time_freq(0, stepper->accel, &first_steps_time)) {
+                THROW_EXCEPTION("can not solve step time")
+            }
+
+            stepper->freq = (uint16_t)(first_steps_time * stepper->accel + 0.5) ;
+
+            // printf("first step at %d ms, stepper->freq=%d\n", (int)(first_steps_time*1000+0.5), stepper->freq) ;
+
+            period = 500000*first_steps_time+0.5 ;
+
         }
-
-        stepper->freq = (uint16_t)(first_steps_time * stepper->accel + 0.5) ;
-
-        // printf("first step at %d ms, stepper->freq=%d\n", (int)(first_steps_time*1000+0.5), stepper->freq) ;
-
-        half_period = 500000*first_steps_time+0.5 ;
     }
 
     // 不使用加速度
@@ -442,15 +448,18 @@ static JSValue run(JSContext *ctx, driver_stepper_timer_t * stepper) {
             stepper->pos_stopping = stepper->dest ;
         }
 
-        stepper->freq = stepper->freq_target ;
+        if(!period) {
 
-        half_period = 500000/stepper->freq ;
+            stepper->freq = stepper->freq_target ;
+
+            period = 500000/stepper->freq ;
+        }
     }
 
-    dn(stepper->use_accel)
+    // dn(stepper->use_accel)
 
     stepper->level = 0 ;
-    CALL_IDF_API( esp_timer_start_periodic(stepper->timer, half_period) )
+    CALL_IDF_API( esp_timer_start_periodic(stepper->timer, period) )
 
     stepper->is_running = true ;
 
@@ -537,7 +546,6 @@ static JSValue js_stepper_timer_run_to(JSContext *ctx, JSValueConst this_val, in
     }
     ARGV_TO_INT64(0, dest) ;
 
-
     if(argc>1) {
         ARGV_TO_INT32(1, freq)
         if( JS_IsException(set_freq(ctx, stepper, freq)) ) {
@@ -590,16 +598,14 @@ static JSValue js_stepper_timer_stop(JSContext *ctx, JSValueConst this_val, int 
     THIS_STEPPER(stepper)
 
     bool force = false ;
-    if(argc>1) {
+    if(argc>0) {
         force = JS_ToBool(ctx, argv[0]) ;
     }
-    dn(force)
 
     if(stepper->is_running) {
 
         // force==true 或 无加速度，直接停止
-        if( force || stepper->accel == 0 ) {
-            dd
+        if( force || !stepper->use_accel || stepper->accel == 0 ) {
             stepper->is_running = false;
             stepper->is_stopping = false;
             stepper->freq = 0;
@@ -633,8 +639,7 @@ static JSValue js_stepper_timer_set_freq(JSContext *ctx, JSValueConst this_val, 
 static JSValue js_stepper_timer_get_freq(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     THIS_STEPPER(stepper)
 
-    if(argc>1) {
-        dn(JS_ToBool(ctx, argv[0]))
+    if(argc>0) {
         if(JS_ToBool(ctx, argv[0])) {
             return JS_NewUint32(ctx, stepper->freq) ;
         }
@@ -696,6 +701,18 @@ static JSValue js_stepper_timer_get_limit_pin(JSContext *ctx, JSValueConst this_
     return JS_NewInt32(ctx, stepper->io_limit) ;
 }
 
+static JSValue js_stepper_timer_set_delay_us(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+    THIS_STEPPER(stepper)
+    ARGV_TO_UINT32(0, delay) ;
+    stepper->run_delay_us = delay ;
+    return JS_UNDEFINED ;
+}
+
+static JSValue js_stepper_timer_get_delay_us(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    THIS_STEPPER(stepper)
+    return JS_NewInt32(ctx, stepper->run_delay_us) ;
+}
 
 
 static JSValue js_stepper_timer_get_passing(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
@@ -726,7 +743,7 @@ static JSValue js_stepper_timer_get_start_time(JSContext *ctx, JSValueConst this
 }
 static JSValue js_stepper_timer_get_stop_time(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     THIS_STEPPER(stepper)
-    return JS_NewInt64(ctx, stepper->start_time) ;
+    return JS_NewInt64(ctx, stepper->stop_time) ;
 }
 
 static const JSCFunctionListEntry js_stepper_timer_proto_funcs[] = {
@@ -751,6 +768,8 @@ static const JSCFunctionListEntry js_stepper_timer_proto_funcs[] = {
     JS_CFUNC_DEF("calculateTravelTime", 0, js_stepper_timer_calculate_travel_time),
     JS_CFUNC_DEF("startTime", 0, js_stepper_timer_get_start_time),
     JS_CFUNC_DEF("stopTime", 0, js_stepper_timer_get_stop_time),
+    JS_CFUNC_DEF("setDelay", 0, js_stepper_timer_set_delay_us),
+    JS_CFUNC_DEF("getDelay", 0, js_stepper_timer_get_delay_us),
 } ;
 
 

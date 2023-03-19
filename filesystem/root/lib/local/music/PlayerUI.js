@@ -3,6 +3,16 @@ const Disk = require('./wave_anim/Disk.js')
 const Controller = require("./Controller.js")
 const AudioList = require("./AudioList.js")
 
+class FakePlayer {
+    on(){}
+    once(){}
+    isRunning(){ return true }
+    isPaused(){ return true }
+    resume(){}
+    stop(){}
+    playMP3(){}
+}
+
 class PlayerUI extends lv.CleanObj {
     constructor(parent) {
         super(parent)
@@ -12,7 +22,7 @@ class PlayerUI extends lv.CleanObj {
         
         this.group = new lv.Group()
         this.loopMethod = "不循环"
-        this.player = new beapi.audio.Player
+        this.player = new (beapi.audio.Player || FakePlayer)
 
         this.fromJson({
             children:[{

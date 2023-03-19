@@ -532,6 +532,9 @@ static JSValue js_wifi_ap_all_sta(JSContext *ctx, JSValueConst this_val, int arg
     return arr ;
 }
 
+/**
+ * wifi mode 必须包含 sta
+ */
 static JSValue js_wifi_scan_start(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_WIFI_INITED
     wifi_scan_config_t scanConf = {
@@ -541,11 +544,13 @@ static JSValue js_wifi_scan_start(JSContext *ctx, JSValueConst this_val, int arg
         .show_hidden = true
     };
 
-    if(esp_wifi_scan_start(&scanConf, false) == ESP_OK) {
+    esp_err_t ret = esp_wifi_scan_start(&scanConf, false) ;
+    if( ret == ESP_OK) {
         _scanning = true ;
         return JS_TRUE ;
     }
     else{
+        printf("esp_wifi_scan_start() failed:(%d) %s\n",ret, esp_err_to_name(ret)) ;
         _scanning = false ;
         return JS_FALSE ;
     }

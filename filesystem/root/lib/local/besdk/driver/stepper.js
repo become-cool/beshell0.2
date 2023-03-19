@@ -39,11 +39,12 @@ class Stepper extends DeviceDriver {
         return {
             pos: this.dvr.pos() ,
             freq: this.dvr.freq() ,
-            freqRuntime: this.dvr.freq(true) ,
+            freqRT: this.dvr.freq(true) ,
             accel: this.dvr.accel() ,
             running: this.dvr.isRunning() ,
             stopping: this.dvr.isStopping() ,
         }
     }
+    runTime() { return this.dvr.stopTime() - this.dvr.startTime() }
 }
 module.exports = Stepper

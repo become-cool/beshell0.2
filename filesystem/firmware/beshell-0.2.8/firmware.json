@@ -55,7 +55,7 @@
             "path": "fs-root.img"
         },
         {
-            "address": "0x3d0000",
+            "address": "0x3e0000",
             "path": "fs-home.img"
         }
     ]

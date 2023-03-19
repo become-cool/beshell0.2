@@ -58,6 +58,6 @@
 #define necho_alloc(msg, codes, ...)  codes
 
 
-void print_block(char * block, int columns, int rows) ;
+void print_block(uint8_t * block, int columns, int rows) ;
 
 #endif

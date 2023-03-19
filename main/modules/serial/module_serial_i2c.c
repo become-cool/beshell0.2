@@ -313,6 +313,7 @@ static JSValue js_i2c_bus_setup(JSContext *ctx, JSValueConst this_val, int argc,
         }
     }
 
+    printf("i2c freq:%d\n", freq) ;
     // dn4(busnum,sdapin,sclpin,freq)
 
     // 先 delete driver

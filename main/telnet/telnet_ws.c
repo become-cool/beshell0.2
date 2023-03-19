@@ -119,6 +119,7 @@ void ws_disp_flush(lv_disp_drv_t *dispdrv, const lv_area_t *area, lv_color_t *co
 
 #else
     buff[1] = WS_DISP_BUFF_RAW ;
+    memcpy(buff + 10, color_p, size) ;
 #endif
 
     mg_ws_send(client_disp->conn, (char *)buff, bufflen, WEBSOCKET_OP_BINARY);

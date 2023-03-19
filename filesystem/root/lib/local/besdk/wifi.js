@@ -302,9 +302,15 @@ wifi.autostart = async function() {
 }
 
 wifi.scan = function() {
-    return new Promise(function(resolve) {
+    return new Promise(function(resolve, reject) {
+        if( !(wifi.mode() & MODE_STA) ) {
+            beapi.wifi.setMode(wifi.mode()|MODE_STA)
+        }
         if(!beapi.wifi.isScanning()) {
-            beapi.wifi.scanStart()
+            if(!beapi.wifi.scanStart()) {
+                reject()
+                return
+            }
         }
         wifi.once("scan.done",resolve)
     })

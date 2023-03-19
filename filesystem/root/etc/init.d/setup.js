@@ -31,7 +31,7 @@ module.exports = function() {
         }
         for(let num in setupConf.i2c||{}){
             let i2c = setupConf.i2c[num]
-            beapi.i2c.setup(parseInt(num), i2c.sda, i2c.scl)
+            beapi.i2c.setup(parseInt(num), i2c.sda, i2c.scl, i2c.freq||100000)
             console.log(`setup I2C ${num}, sda:${i2c.sda}, scl:${i2c.scl}`)
         }
         for(let num in setupConf.i2s||{}){
@@ -72,7 +72,7 @@ const LibDefaultConf = {
             ]
         } ,
         255:{
-            "i2c": {"0": {"sda": 11, "scl": 12 }} ,
+            "i2c": {"0": {"sda": 11, "scl": 12, "freq": 10000 }} ,
             spi: { 1: {miso:14,mosi:13,sck:21} } ,
             "i2s": {"0": {
                 "lrclk": 16 ,"sclk": 17 ,"sout": 18

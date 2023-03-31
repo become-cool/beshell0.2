@@ -6,7 +6,7 @@ void list_init(list_t * lst) {
     lst->tail = NULL ;
 }
 
-void _list_append(list_t * lst, list_item_t * item) {
+void list_append(list_t * lst, list_item_t * item) {
     
     item->prev = lst->tail;
     item->next = NULL;
@@ -21,17 +21,8 @@ void _list_append(list_t * lst, list_item_t * item) {
     }
 }
 
-void list_append(list_t * lst, void * data) {
-    list_item_t * item = malloc(sizeof(list_item_t)) ;
-    if(!item) {
-        return NULL ;
-    }
-    item->data = data ;
-    _list_append(lst, item) ;
-}
 
-
-void _list_remove(list_t * lst, list_item_t * item) {
+void list_remove(list_t * lst, list_item_t * item) {
 
     if(item->prev) {
         item->prev->next = item->next ;
@@ -49,30 +40,10 @@ void _list_remove(list_t * lst, list_item_t * item) {
 
     item->next = NULL ;
     item->prev = NULL ;
-    
-    free(item) ;
+
 }
 
-char list_remove(list_t * lst, void * data) {
-    list_item_t * item = list_find(lst, data) ;
-    if(item==NULL){
-        return 0 ;
-    }
-    _list_remove(lst, item) ;
-    return 1 ;
-}
-
-
-list_item_t * list_find(list_t * lst, void * data) {
-    FOREACH_LIST(lst, item) {
-        if(item->data == data) {
-            return item ;
-        }
-    }
-    return NULL ;
-}
-
-char list_is_empty(list_t * lst) {
+bool list_is_empty(list_t * lst) {
     if( lst->head!=NULL && lst->tail!=NULL ){
         return 0 ;
     }

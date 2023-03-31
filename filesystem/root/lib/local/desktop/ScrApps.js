@@ -83,7 +83,16 @@ module.exports = class ScrApps extends lv.Obj {
                         "text": "相机" ,
                         "src": "/lib/icon/32/camera.png" ,
                         group: this.group ,
-                    } ,
+                    }
+                    , {
+                        class:AppIcon ,
+                        "text": "天气" ,
+                        "src": "/lib/icon/32/weather.png" ,
+                        group: this.group ,
+                        create() {
+                            require("/lib/local/holoclock/index.js")
+                        }
+                    }
                 ]
             }],
         },this)

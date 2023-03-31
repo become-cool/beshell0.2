@@ -40,18 +40,19 @@ mkfs-home:
 mkfs-home-more:
 	bin/mklittlefs -c filesystem/tmp/home -s 6291456 filesystem/img/fs-home.img -d 5
 
-dist:
+mk-firmwarejson:
+	node filesystem/mk-firmware-json.js
+
+dist: mk-firmwarejson
 	node filesystem/dispense-to-beconsole.js all
-dist-beshell:
+dist-beshell: mk-firmwarejson
 	node filesystem/dispense-to-beconsole.js beshell
-dist-fs:
+dist-fs: mk-firmwarejson
 	node filesystem/dispense-to-beconsole.js fs
-dist-root:
+dist-root: mk-firmwarejson
 	node filesystem/dispense-to-beconsole.js fs-root
-dist-home:
+dist-home: mk-firmwarejson
 	node filesystem/dispense-to-beconsole.js fs-home
-new-version:
-	mkdir 
 
 partition:
 	node filesystem/mk-partitions.js

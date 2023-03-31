@@ -1,6 +1,6 @@
 {
     "name": "BeShell",
-    "version": "0.2.11",
+    "version": "0.2.10",
     "home": "https://become.cool",
     "description": "",
     "chips": [
@@ -55,7 +55,7 @@
             "path": "fs-root.img"
         },
         {
-            "address": "0x3e0000",
+            "address": "0x3e8000",
             "path": "fs-home.img"
         }
     ]

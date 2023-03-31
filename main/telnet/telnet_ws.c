@@ -370,6 +370,10 @@ static void response_fs(struct mg_connection *c, struct mg_http_message *hm, con
 static bool telnet_ws_is_captive_portal_request(struct mg_connection *c, struct mg_http_message *hm) {
 
     struct mg_str * host = mg_http_get_header(hm, "Host") ;
+    if(!host) {
+        printf("unknow host for captive_portal\n") ;
+        return false ;
+    }
     // printf("%.*s\n",host->len,host->ptr) ;
 
     if(mg_strcmp(*host, mg_str("captive.apple.com"))==0) {

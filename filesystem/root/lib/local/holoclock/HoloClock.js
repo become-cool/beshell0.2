@@ -155,6 +155,9 @@ class HoloClock extends lv.Obj {
         if(json) {
             this.update(json)
         }
+
+        // 居中显示
+        this.setStyle('pad-left', (this.width() - 240)/2)
     }
 
     freshTime() {

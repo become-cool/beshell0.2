@@ -34,25 +34,21 @@ module.exports = class ScrSysApps extends lv.Obj {
                 , {
                     class:AppIcon ,
                     "text": "音乐" ,
-                    ref: "btn1" ,
                     "src": "/lib/icon/32/music.png"
                 }
                 , {
                     class:AppIcon ,
                     "text": "游戏" ,
-                    ref: "btn1" ,
                     "src": "/lib/icon/32/game.png"
                 }
                 , {
                     class:AppIcon ,
                     "text": "设置" ,
-                    ref: "btn1" ,
                     "src": "/lib/icon/32/setting.png"
                 }
                 , {
                     class:AppIcon ,
                     "text": "相机" ,
-                    ref: "btn1" ,
                     "src": "/lib/icon/32/camera.png"
                 }
             ]

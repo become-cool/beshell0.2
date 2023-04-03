@@ -43,15 +43,15 @@ mkfs-home-more:
 mk-firmwarejson:
 	node filesystem/mk-firmware-json.js
 
-dist: mk-firmwarejson
+dist: mk-firmwarejson partition
 	node filesystem/dispense-to-beconsole.js all
-dist-beshell: mk-firmwarejson
+dist-beshell: 
 	node filesystem/dispense-to-beconsole.js beshell
-dist-fs: mk-firmwarejson
+dist-fs: 
 	node filesystem/dispense-to-beconsole.js fs
-dist-root: mk-firmwarejson
+dist-root: 
 	node filesystem/dispense-to-beconsole.js fs-root
-dist-home: mk-firmwarejson
+dist-home: 
 	node filesystem/dispense-to-beconsole.js fs-home
 
 partition:

@@ -158,6 +158,29 @@ class HoloClock extends lv.Obj {
 
         // 居中显示
         this.setStyle('pad-left', (this.width() - 240)/2)
+
+
+        this.holdKeys()
+        let enterPressed = false, tabPressed = false
+        this.on("ipt.btn.press", (key)=>{
+            if(key=='enter') {
+                enterPressed = true
+            }
+            else if(key=='tab') {
+                tabPressed = true
+            }
+            if(tabPressed && enterPressed) {
+                process.reboot()
+            }
+        })
+        this.on("ipt.btn.release", (key)=>{
+            if(key=='enter') {
+                enterPressed = false
+            }
+            else if(key=='tab') {
+                tabPressed = false
+            }
+        })
     }
 
     freshTime() {

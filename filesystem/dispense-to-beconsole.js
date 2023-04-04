@@ -64,7 +64,9 @@ function dist(firmware, targetDir) {
     }
 
     if(dispenseBootloader) {
-        cp("../build/bootloader/bootloader.bin", path+"/bootloader"+postfix+".bin")
+        cp("img/bootloader-4MB.bin", path+"/bootloader-4MB.bin")
+        cp("img/bootloader-16MB.bin", path+"/bootloader-16MB.bin")
+        cp("img/bootloader-s3-16MB.bin", path+"/bootloader-s3-16MB.bin")
     }
     
     if(dispensePartition) {

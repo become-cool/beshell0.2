@@ -129,7 +129,10 @@ static JSContext * init_custom_context(JSRuntime *rt) {
     eval_rc_script(ctx, "/lib/base/require.js") ;
 
 #ifndef SIMULATION
+
+#ifdef BT_ENABLED
     be_module_bt_require(ctx) ;
+#endif
     be_module_wifi_require(ctx) ;
     be_module_gpio_require(ctx) ;  
     // be_module_telnet_require(ctx) ;

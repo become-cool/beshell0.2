@@ -131,7 +131,7 @@ static JSValue js_camera_setup(JSContext *ctx, JSValueConst this_val, int argc, 
 
     CHECK_ARGC(1)
     if( !JS_IsObject(argv[0]) ) {
-        THROW_EXCEPTION("param pins must be a object")
+        THROW_EXCEPTION("setup param must be a object")
     }
     
     camera_config_t config ;

@@ -2,6 +2,8 @@
 #include "utils.h"
 #include <string.h>
 
+#ifdef BT_ENABLED
+
 #include "esp_bt.h"
 #include "esp_bt_main.h"
 #include "esp_gap_bt_api.h"
@@ -31,7 +33,11 @@ static JSValue js_bt_controller_init_as_default(JSContext *ctx, JSValueConst thi
     CHECK_ARGC(1)
     ARGV_BT_MODE(0, mode)
     esp_bt_controller_config_t bt_cfg = BT_CONTROLLER_INIT_CONFIG_DEFAULT();
+#ifdef CONFIG_IDF_TARGET_ESP32S3
     bt_cfg.bluetooth_mode = mode ;
+#else
+    bt_cfg.mode = mode ;
+#endif
     CALL_IDF_API(esp_bt_controller_init, "bt controller init failed: %s", &bt_cfg)
     return JS_TRUE ;
 }
@@ -117,3 +123,4 @@ void be_module_bt_loop(JSContext *ctx) {
 void be_module_bt_reset(JSContext *ctx) {
 }
 
+#endif

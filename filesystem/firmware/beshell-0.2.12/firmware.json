@@ -22,12 +22,19 @@
     "bin": [
         {
             "address": "0x1000",
-            "path": "bootloader.bin",
-            "chiptype": "esp32"
+            "path": "bootloader-4MB.bin",
+            "chiptype": "esp32",
+            "flashsize": "4"
+        },
+        {
+            "address": "0x1000",
+            "path": "bootloader-16MB.bin",
+            "chiptype": "esp32",
+            "flashsize": "16"
         },
         {
             "address": "0x0",
-            "path": "bootloader-s3.bin",
+            "path": "bootloader-s3-16MB.bin",
             "chiptype": "esp32s3"
         },
         {
@@ -51,11 +58,11 @@
             "chiptype": "esp32s3"
         },
         {
-            "address": "0x388000",
+            "address": "0x2f8000",
             "path": "fs-root.img"
         },
         {
-            "address": "0x3e0000",
+            "address": "0x350000",
             "path": "fs-home.img"
         }
     ]

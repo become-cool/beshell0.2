@@ -29,6 +29,7 @@ list(APPEND include_dirs modules/lvgl/font)
 set(src_dirs .)
 list(APPEND src_dirs telnet)
 list(APPEND src_dirs libb64)
+
 list(APPEND src_dirs gameplayer)
 list(APPEND src_dirs gameplayer/nofrendo)
 list(APPEND src_dirs gameplayer/nofrendo/cpu)
@@ -36,8 +37,12 @@ list(APPEND src_dirs gameplayer/nofrendo/libsnss)
 list(APPEND src_dirs gameplayer/nofrendo/nes)
 list(APPEND src_dirs gameplayer/nofrendo/sndhrdw)
 list(APPEND src_dirs gameplayer/nofrendo/mappers)
-list(APPEND src_dirs gameplayer/player_gnuboy)
-list(APPEND src_dirs gameplayer/player_gnuboy/gnuboy)
+
+if(CONFIG_IDF_TARGET_ESP32S3) ## 仅在 esp32s3 下编译 gnuboy，esp32 IRAM 不够
+    list(APPEND src_dirs gameplayer/player_gnuboy)
+    list(APPEND src_dirs gameplayer/player_gnuboy/gnuboy)
+endif()
+
 # list(APPEND src_dirs media)
 list(APPEND src_dirs media/TinySoundFont)
 list(APPEND src_dirs media/audio_stream)

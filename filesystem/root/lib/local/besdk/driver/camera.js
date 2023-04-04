@@ -3,7 +3,7 @@ class Camera extends DeviceDriver {
     constructor(){
         super("camera")
     }
-    begin(opts) {
+    setup(opts) {
         return beapi.driver.camera.setup(opts)
     }
 }

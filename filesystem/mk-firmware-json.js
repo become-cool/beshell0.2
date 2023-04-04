@@ -23,13 +23,21 @@ function mkMetaJson() {
         "bin": [
             {
                 "address": "0x1000",
-                "path": "bootloader.bin",
-                "chiptype": "esp32"
+                "path": "bootloader-4MB.bin",
+                "chiptype": "esp32" ,
+                "flashsize": "4"
+            },
+            {
+                "address": "0x1000",
+                "path": "bootloader-16MB.bin",
+                "chiptype": "esp32" ,
+                "flashsize": "16"
             },
             {
                 "address": "0x0",
-                "path": "bootloader-s3.bin",
-                "chiptype": "esp32s3"
+                "path": "bootloader-s3-16MB.bin",
+                "chiptype": "esp32s3" ,
+                "flashsize": "16"
             },
     
             {

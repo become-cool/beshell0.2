@@ -109,7 +109,6 @@ static JSValue js_gameplayer_play(JSContext *ctx, JSValueConst this_val, int arg
         }
     }
 
-
     echo_DMA("start game ...") ;
     
     switch(emulator) {
@@ -120,14 +119,18 @@ static JSValue js_gameplayer_play(JSContext *ctx, JSValueConst this_val, int arg
             }
             int retcode = player_nofrendo_main();
             break ;
-
+#if CONFIG_IDF_TARGET_ESP32S3
         case EMULATOR_GUNBOY :
             player_gnuboy_main(rompath);
+            break ;
+#endif
+        default :
+            free(rompath) ;
+            THROW_EXCEPTION("unknown emulator")
             break ;
     }
 
     free(rompath) ;
-
     return JS_UNDEFINED ;
 }
 

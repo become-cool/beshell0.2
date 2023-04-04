@@ -123,8 +123,19 @@ void telnet_send_ready() {
 
 JSValue js_repl_rspn(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
 	CHECK_ARGC(3)
-	ARGV_TO_UINT8(0, pkgid)
-	ARGV_TO_UINT8(1, cmd)
+
+	uint8_t pkgid = 0 ;
+	if(JS_ToUint32(ctx, &pkgid, argv[0])!=0) {
+		THROW_EXCEPTION("Invalid param type")
+	}
+
+	uint8_t cmd = 0 ;
+	if(JS_ToUint32(ctx, &cmd, argv[1])!=0) {
+		THROW_EXCEPTION("Invalid param type")
+	}
+
+	// ARGV_TO_UINT8(0, pkgid)
+	// ARGV_TO_UINT8(1, cmd)
 	ARGV_TO_STRING_LEN(2, data, datalen)
 
     telnet_output(cmd, pkgid, data, datalen) ;

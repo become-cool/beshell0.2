@@ -19,7 +19,6 @@ bool driver_camera_has_inited() {
 }
 
 
-// httpd_handle_t stream_httpd = NULL;
 esp_err_t ws_rtc_camera_stream(httpd_req_t *req) {
 
     httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
@@ -71,31 +70,32 @@ esp_err_t ws_rtc_camera_stream(httpd_req_t *req) {
     return ESP_OK;
 }
 
-// static void web_camera_init() {
+httpd_handle_t stream_httpd = NULL;
+static void web_camera_init(int port, int core_id) {
 
-//     if(!wifi_has_inited()) {
-//         return ;
-//     }
+    if(!wifi_has_inited() || stream_httpd) {
+        return ;
+    }
     
-//     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
-//     config.max_uri_handlers = 8;
-//     config.server_port = 8019 ;
-//     config.ctrl_port += 8019 ;
-//     config.core_id = 1 ;
+    httpd_config_t config = HTTPD_DEFAULT_CONFIG();
+    config.max_uri_handlers = 8;
+    config.server_port = port ;
+    config.ctrl_port += port ;
+    config.core_id = core_id ;
 
-//     httpd_uri_t stream_uri = {
-//         .uri = "/",
-//         .method = HTTP_GET,
-//         .handler = web_camera_stream,
-//         .user_ctx = NULL};
+    httpd_uri_t stream_uri = {
+        .uri = "/",
+        .method = HTTP_GET,
+        .handler = ws_rtc_camera_stream,
+        .user_ctx = NULL};
 
-//     if (httpd_start(&stream_httpd, &config) != ESP_OK) {
-//         printf("start camera stream server faild\n") ;
-//         return ;
-//     }
+    if (httpd_start(&stream_httpd, &config) != ESP_OK) {
+        printf("start camera stream server faild\n") ;
+        return ;
+    }
     
-//     httpd_register_uri_handler(stream_httpd, &stream_uri);
-// }
+    httpd_register_uri_handler(stream_httpd, &stream_uri);
+}
 
 
 
@@ -240,6 +240,13 @@ static JSValue js_camera_setup(JSContext *ctx, JSValueConst this_val, int argc, 
     return JS_TRUE ;
 }
 
+static JSValue js_camera_start_stream(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+    ARGV_TO_INT32(0, port)
+    web_camera_init(port, 1) ;
+    return JS_TRUE ;
+}
+
 static JSValue js_camera_unsetup(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     if(!inited) {
         THROW_EXCEPTION("camera device not setup yet.")
@@ -364,6 +371,7 @@ void be_module_driver_camera_require(JSContext *ctx, JSValue driver) {
     JS_SetPropertyStr(ctx, camera, "unsetup", JS_NewCFunction(ctx, js_camera_unsetup, "unsetup", 1));
     JS_SetPropertyStr(ctx, camera, "hasSetup", JS_NewCFunction(ctx, js_camera_has_setup, "hasSetup", 1));
     JS_SetPropertyStr(ctx, camera, "capture", JS_NewCFunction(ctx, js_camera_capture, "capture", 1));
+    JS_SetPropertyStr(ctx, camera, "startStream", JS_NewCFunction(ctx, js_camera_start_stream, "startStream", 1));
 }
 
 

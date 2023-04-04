@@ -35,7 +35,8 @@
         {
             "address": "0x0",
             "path": "bootloader-s3-16MB.bin",
-            "chiptype": "esp32s3"
+            "chiptype": "esp32s3",
+            "flashsize": "16"
         },
         {
             "address": "0x8000",
@@ -58,11 +59,11 @@
             "chiptype": "esp32s3"
         },
         {
-            "address": "0x2f8000",
+            "address": "0x300000",
             "path": "fs-root.img"
         },
         {
-            "address": "0x350000",
+            "address": "0x358000",
             "path": "fs-home.img"
         }
     ]

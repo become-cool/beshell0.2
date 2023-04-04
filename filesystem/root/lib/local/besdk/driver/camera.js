@@ -4,7 +4,12 @@ class Camera extends DeviceDriver {
         super("camera")
     }
     setup(opts) {
-        return beapi.driver.camera.setup(opts)
+        if(!beapi.driver.camera.setup(opts)){
+            return false
+        }
+        if( opts.streamPort ) {
+            beapi.driver.camera.startStream(opts.streamPort)
+        }
     }
 }
 module.exports = Camera

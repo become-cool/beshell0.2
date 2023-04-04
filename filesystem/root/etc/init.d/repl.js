@@ -104,7 +104,6 @@ beapi.telnet.registerHandler(function(pkgid, remain, pkgcmd, code){
         else {
             let res = evalAsFile(code, "REPL")
             if(pkgcmd == CMD_CALL) {
-                console.log("rspn pkgid",pkgid)
                 beapi.telnet.rspn(pkgid, CMD_RSPN, console.stringify(res))
             }
         }

@@ -1,2 +1,5 @@
-fs-4MB.img
-fs-16MB.img
+fs-home.img
+fs-root.img
+firmware.json
+bootloader*
+beshell*

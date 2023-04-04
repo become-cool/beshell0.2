@@ -104,6 +104,15 @@ telweb-pack: tree-shaking mkfs-root
 telweb: telweb-build fs-root
 
 
+target-esp32: 
+	cp sdkconfig sdkconfig-esp32s3
+	cp sdkconfig-esp32 sdkconfig
+
+target-esp32s3: 
+	cp sdkconfig sdkconfig-esp32
+	cp sdkconfig-esp32s3 sdkconfig
+
+
 help:
 	@echo "make"
 	@echo "make mkonly		# idf.py build"

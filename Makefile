@@ -103,15 +103,20 @@ telweb-pack: tree-shaking mkfs-root
 
 telweb: telweb-build fs-root
 
+TARGET=`cat build/config/sdkconfig.h | grep -E 'CONFIG_IDF_TARGET "esp32(s3)?' | grep -oE "esp32(s3)?"`
+
+target:
+	@echo ${TARGET}
 
 target-esp32: 
-	cp sdkconfig sdkconfig-esp32s3
+	cp sdkconfig sdkconfig-${TARGET}
 	cp sdkconfig-esp32 sdkconfig
+	idf.py set-target esp32
 
 target-esp32s3: 
-	cp sdkconfig sdkconfig-esp32
+	cp sdkconfig sdkconfig-${TARGET}
 	cp sdkconfig-esp32s3 sdkconfig
-
+	idf.py set-target esp32s3
 
 help:
 	@echo "make"

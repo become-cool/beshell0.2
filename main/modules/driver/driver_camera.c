@@ -243,11 +243,7 @@ static JSValue js_camera_start_http_stream(JSContext *ctx, JSValueConst this_val
     return JS_TRUE ;
 }
 
-static struct mg_connection * cam_tcp_client = NULL ;
 TaskHandle_t task_cam_tcp_handle = NULL ;
-
-#define byte100 "0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789"
-char * testmsg = "hello2\n" byte100 "\n"  byte100 "\n\n" ;
 
 static void task_camera_tcp_stream(void * data) {
 
@@ -258,8 +254,6 @@ static void task_camera_tcp_stream(void * data) {
     pkg.header[PKG0519_POS_CMD] = CMD_DATA ;
     
     uint8_t * lenbuff = pkg.header + PKG0519_HEADERLEN_WITHOUT_DATALEN ;
-
-
 
     int listen_sock =  socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
     if(listen_sock < 0)  {
@@ -293,7 +287,9 @@ static void task_camera_tcp_stream(void * data) {
             close(listen_sock);
         }
         
-        printf("client come in\n") ;
+        printf("camera tcp client come in\n") ;
+        uint8_t lenbytes = 1 ;
+        int sent = 0 ;
 
         while(1) {
             fb = esp_camera_fb_get();
@@ -303,18 +299,20 @@ static void task_camera_tcp_stream(void * data) {
             }
 
             pkg.header[PKG0519_POS_ID] = pkgid ++ ;
+            pkg.header[PKG0519_POS_VERIFY] = telnet_prot0519_checksum(fb->buf, fb->len) ;
 
-            uint8_t lenbytes = telnet_prot0519_pack_data_len(fb->len, lenbuff) ;
+            lenbytes = telnet_prot0519_pack_data_len(fb->len, lenbuff) ;
 
             if( send(sock, pkg.header, PKG0519_HEADERLEN_WITHOUT_DATALEN + lenbytes, 0)<0 ){
                 break ;
             }
 
             necho_time("send", {
-                if( send(sock, fb->buf, fb->len, 0)<0 ){
-                    break ;
-                }
+                sent = send(sock, fb->buf, fb->len, 0) ;
             })
+            if( sent<0 ){
+                break ;
+            }
 
             esp_camera_fb_return(fb);
             fb = NULL ;
@@ -322,7 +320,7 @@ static void task_camera_tcp_stream(void * data) {
             vTaskDelay(1) ;
         }
 
-        printf("client close\n") ;
+        printf("camera tcp client close\n") ;
 
         if(fb) {
             esp_camera_fb_return(fb);
@@ -334,7 +332,6 @@ static void task_camera_tcp_stream(void * data) {
 
     }
 }
-
 
 static JSValue js_camera_start_tcp_stream(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(1)
@@ -462,21 +459,6 @@ bool be_module_driver_camera_response(struct mg_connection *c, int ev, void *ev_
     return false ;
 }
 
-be_rv_strem_t * be_create_rv_stream(RemoteVideoCallback callback) {
-    be_rv_strem_t * rv = malloc(sizeof(be_rv_strem_t)) ;
-    memset(rv, 0, sizeof(be_rv_strem_t)) ;
-
-    INIT_PKG(&(rv->pkg)) ;
-
-    rv->callback = callback ;
-
-    return rv ;
-}
-
-static JSValue js_camera_create_remote_video_stream(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-    return JS_TRUE ;
-}
-
 void be_module_driver_camera_init() {
     inited = false ;
     // web_camera_init() ;
@@ -493,7 +475,6 @@ void be_module_driver_camera_require(JSContext *ctx, JSValue driver) {
     JS_SetPropertyStr(ctx, camera, "capture", JS_NewCFunction(ctx, js_camera_capture, "capture", 1));
     JS_SetPropertyStr(ctx, camera, "startHTTPStream", JS_NewCFunction(ctx, js_camera_start_http_stream, "startHTTPStream", 1));
     JS_SetPropertyStr(ctx, camera, "startTCPStream", JS_NewCFunction(ctx, js_camera_start_tcp_stream, "startTCPStream", 1));
-    JS_SetPropertyStr(ctx, camera, "createRemoteVideoStream", JS_NewCFunction(ctx, js_camera_create_remote_video_stream, "createRemoteVideoStream", 1));
 }
 
 

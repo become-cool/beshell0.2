@@ -5,7 +5,7 @@
 PkgCmdProcess telnet_prot_on_package = 0 ;
 
 
-uint8_t checksum(struct telnet_prot_buffer * buff) {
+static uint8_t checksum(struct telnet_prot_buffer * buff) {
     uint8_t sum = 0 ;
     for(uint16_t i=0; i<PKG_HEADER_LEN + buff->bytes[PKGPOS_DATALEN]; i++) {
         sum^= buff->bytes[i] ;

@@ -20,12 +20,6 @@
 
 static uint8_t i2s_num = 255 ;      // 255 表示无效
 
-typedef struct {
-    uint16_t x ;
-    uint16_t y ;
-    uint8_t * raw ;
-    uint32_t rawlen ;
-} frame_video_rect_t ;
 
 typedef struct {
     uint16_t x1 ;
@@ -174,6 +168,7 @@ static void task_jpeg_decode(telws_proj_sess_t * sess) {
         }
 
         if(jdec_frame.raw) {
+            // printf("free() jpgraw:%p\n",jdec_frame.raw) ;
             free(jdec_frame.raw) ;
             jdec_frame.raw = NULL ;
             jdec_frame.rawlen = 0 ;
@@ -319,7 +314,7 @@ static void task_audio(telws_proj_sess_t * sess) {
     }
 }
 
-bool telnet_ws_projection_sessn_init(struct mg_connection *conn) {
+bool telnet_ws_projection_sessn_init() {
 
     printf("telnet_ws_projection_sessn_init\n") ;
 
@@ -491,6 +486,18 @@ void telnet_ws_projection_sess_release() {
     if(sess->jdec_working) {
         xSemaphoreGive( sess->jdec_working ) ;
     }
+}
+
+inline void post_jpg_rect(uint16_t x, uint16_t y, void * jpgraw, uint32_t jpgraw_len) {
+    frame_video_rect_t rect ;
+    memset(&rect, 0, sizeof(frame_video_rect_t));
+
+    rect.x = x ;
+    rect.y = y ;
+    rect.raw = jpgraw ;
+    rect.rawlen = jpgraw_len ;
+
+    xQueueSend(sess->jdec_que, &rect, portMAX_DELAY);
 }
 
 #define WRAP_QUOTE(string) "\"" string "\""

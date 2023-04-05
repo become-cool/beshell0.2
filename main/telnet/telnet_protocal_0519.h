@@ -25,7 +25,7 @@ BeProtocal 协议的设计目标是最大减轻单片机的负担：
 */
 
 
-#define PKG0519_HEADERLEN_WITHOUT_DATALEN   4
+#define PKG0519_HEADERLEN_WITHOUT_DATALEN   5
 #define PKG0519_HEADERLEN_MIN               PKG0519_HEADERLEN_WITHOUT_DATALEN + 1
 #define PKG0519_HEADERLEN_MAX               PKG0519_HEADERLEN_WITHOUT_DATALEN + 4
 #define PKG0519_SIZE_1                      (0xFF>>1)            // 由1个字节表示包长
@@ -43,7 +43,8 @@ BeProtocal 协议的设计目标是最大减轻单片机的负担：
 #define PKG0519_POS_MARK2           1
 #define PKG0519_POS_ID              2
 #define PKG0519_POS_CMD             3
-#define PKG0519_POS_DATA_LEN        4
+#define PKG0519_POS_VERIFY          4
+#define PKG0519_POS_DATA_LEN        5
 
 #define CMD_RUN	                	1		// 执行js代码，无返回值
 #define CMD_CALL	                2		// 执行js代码，有返回值
@@ -92,6 +93,7 @@ typedef struct {
 // uint8_t telnet_prot0519_pack_header(uint8_t * header, uint8_t pkgId, uint8_t cmd, size_t datalen) ;
 
 uint8_t telnet_prot0519_pack_data_len(uint32_t len, uint8_t * len_bytes) ;
+uint8_t telnet_prot0519_checksum(uint8_t * data, uint32_t len) ;
 
 
 #endif

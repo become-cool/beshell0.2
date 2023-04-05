@@ -26,9 +26,8 @@ typedef struct {
     TaskHandle_t task ;
 
     RemoteVideoCallback callback ;
-    
+
 } be_rv_strem_t ;
 
-be_rv_strem_t * be_create_rv_stream(RemoteVideoCallback callback) ;
 
 #endif

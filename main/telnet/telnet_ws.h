@@ -16,12 +16,17 @@
 
 bool telnet_ws_response(struct mg_connection *c, int ev, void *ev_data, void *fn_data) ;
 
-
 // 投屏
-bool telnet_ws_projection_sessn_init(struct mg_connection *conn)  ;
+typedef struct {
+    uint16_t x ;
+    uint16_t y ;
+    uint8_t * raw ;
+    uint32_t rawlen ;
+} frame_video_rect_t ;
+bool telnet_ws_projection_sessn_init()  ;
 void telnet_ws_projection_sess_release() ;
 void telnet_ws_response_projection(struct mg_connection *conn, struct mg_ws_message * wm) ;
-
+void post_jpg_rect(uint16_t x, uint16_t y, void * jpgraw, uint32_t jpgraw_len) ;
 
 void telnet_ws_set_repl_client(struct mg_connection * conn) ;
 void telnet_ws_output(uint8_t cmd, int pkgid, const char * data, size_t datalen) ;

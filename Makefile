@@ -119,6 +119,8 @@ target-esp32s3:
 
 help:
 	@echo "make"
+	@echo "make target-esp32	# 切换到 ESP32 芯片编译选项"
+	@echo "make target-esp32s3	# 切换到 ESP32 S3 芯片编译选项"
 	@echo "make mkonly		# idf.py build"
 	@echo "make dist		# dispense full firmware package to BeConsole dir"
 	@echo "make dist-beshell	# dispense beshell firmware img file to BeConsole dir"

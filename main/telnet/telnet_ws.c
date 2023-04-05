@@ -257,7 +257,7 @@ static void upgrade_ws(struct mg_connection *c, struct mg_http_message *hm, WS_T
     }
 #ifndef SIMULATION
     else if( type==WS_PROJ ) {
-        if(!telnet_ws_projection_sessn_init(c)) {
+        if(!telnet_ws_projection_sessn_init()) {
             goto fail ;
         }
 

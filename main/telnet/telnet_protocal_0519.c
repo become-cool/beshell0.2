@@ -1,4 +1,4 @@
-#include "telnet_protocal.h"
+#include "telnet_protocal_0519.h"
 #include "utils.h"
 #include <string.h>
 
@@ -6,6 +6,13 @@ PkgCmdProcess telnet_prot0519_on_package = 0 ;
 
 
 
+uint8_t telnet_prot0519_checksum(uint8_t * data, uint32_t len) {
+    uint8_t sum = 0 ;
+    for(uint16_t i=0; i<len; i++) {
+        sum^= data[i] ;
+    }
+    return sum ;
+}
 
 inline static void telnet_prot0519_push_char(struct telnet_prot_buffer * buff, uint8_t byte, const void * ctx) {
     // 包头

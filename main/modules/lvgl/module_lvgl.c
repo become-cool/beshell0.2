@@ -11,6 +11,7 @@
 #include "be_gl.h"
 #include "be_gl_js.h"
 #include "indev.h"
+#include "remote_video_stream.h"
 
 
 #ifndef SIMULATION
@@ -356,6 +357,7 @@ void be_module_lvgl_require(JSContext *ctx) {
     be_lv_draggable_require(ctx, lvgl) ;
     be_gl_require(ctx, lvgl) ;
     be_lv_indev_require(ctx, lvgl) ;
+    be_remote_video_stream_require(ctx, lvgl) ;
 
     JS_FreeValue(ctx, global);
     JS_FreeValue(ctx, beapi);

@@ -78,10 +78,10 @@ void echo_error(JSContext *) ;
         THROW_EXCEPTION("Invalid param type")               \
 	}
     
-#define  ARGV_TO_UINT8(i,var)   ARGV_TO_INT(i, var, uint8_t,  JS_ToUint32)
-#define   ARGV_TO_INT8(i,var)   ARGV_TO_INT(i, var, int8_t,   JS_ToInt32)
-#define ARGV_TO_UINT16(i,var)   ARGV_TO_INT(i, var, uint16_t, JS_ToUint32)
-#define ARGV_TO_INT16(i,var)    ARGV_TO_INT(i, var, int16_t,  JS_ToInt32)
+#define  ARGV_TO_UINT8(i,var)   ARGV_TO_INT(i, var, uint32_t,  JS_ToUint32)
+#define   ARGV_TO_INT8(i,var)   ARGV_TO_INT(i, var, int32_t,   JS_ToInt32)
+#define ARGV_TO_UINT16(i,var)   ARGV_TO_INT(i, var, uint32_t, JS_ToUint32)
+#define ARGV_TO_INT16(i,var)    ARGV_TO_INT(i, var, int32_t,  JS_ToInt32)
 #define ARGV_TO_UINT32(i,var)   ARGV_TO_INT(i, var, uint32_t, JS_ToUint32)
 #define ARGV_TO_INT32(i,var)    ARGV_TO_INT(i, var, int32_t,  JS_ToInt32)
 #define ARGV_TO_INT64(i,var)    ARGV_TO_INT(i, var, int64_t,  JS_ToInt64)
@@ -96,10 +96,10 @@ void echo_error(JSContext *) ;
         }                                           \
     }
 
-#define  ARGV_TO_UINT8_OPT(i,var,dft)   ARGV_TO_INT_OPT(i, var, uint8_t,  JS_ToUint32, dft)
-#define   ARGV_TO_INT8_OPT(i,var,dft)   ARGV_TO_INT_OPT(i, var, int8_t,   JS_ToInt32, dft)
-#define ARGV_TO_UINT16_OPT(i,var,dft)   ARGV_TO_INT_OPT(i, var, uint16_t, JS_ToUint32, dft)
-#define ARGV_TO_INT16_OPT(i,var,dft)    ARGV_TO_INT_OPT(i, var, int16_t,  JS_ToInt32, dft)
+#define  ARGV_TO_UINT8_OPT(i,var,dft)   ARGV_TO_INT_OPT(i, var, uint32_t,  JS_ToUint32, dft)
+#define   ARGV_TO_INT8_OPT(i,var,dft)   ARGV_TO_INT_OPT(i, var, int32_t,   JS_ToInt32, dft)
+#define ARGV_TO_UINT16_OPT(i,var,dft)   ARGV_TO_INT_OPT(i, var, uint32_t, JS_ToUint32, dft)
+#define ARGV_TO_INT16_OPT(i,var,dft)    ARGV_TO_INT_OPT(i, var, int32_t,  JS_ToInt32, dft)
 #define ARGV_TO_UINT32_OPT(i,var,dft)   ARGV_TO_INT_OPT(i, var, uint32_t, JS_ToUint32, dft)
 #define ARGV_TO_INT32_OPT(i,var,dft)    ARGV_TO_INT_OPT(i, var, int32_t,  JS_ToInt32, dft)
 #define ARGV_TO_INT64_OPT(i,var,dft)    ARGV_TO_INT_OPT(i, var, int64_t,  JS_ToInt64, dft)

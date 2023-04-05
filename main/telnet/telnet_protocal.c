@@ -94,7 +94,11 @@ uint8_t telnet_prot_pack(uint8_t * pkg, uint8_t pkgId, uint8_t remain, uint8_t c
     pkg[2] = pkgId ;
     pkg[3] = remain ;
     pkg[4] = cmd ;
+
+
     pkg[5] = datalen ;
+
+    
     uint8_t i ;
     for(i=0;i<datalen;i++) {
         pkg[6+i] = *(dat+i) ;

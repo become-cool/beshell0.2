@@ -16,7 +16,9 @@ class Joypad extends I2CDevice {
         be.indev.push(this.indev)
         try{
             this.indev.registerToLvgl()
-        }catch(e) {}
+        }catch(e) {
+            console.log(e)
+        }
     }
     read() {
         if( this.addr!=51 && this.addr!=52 ) {

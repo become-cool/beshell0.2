@@ -115,15 +115,15 @@ class Dashboard extends lv.Column {
             }]
         },this)
 
-        this.updateWeather( weather.loadCache() )
-        wifi.on("ip.got", async ()=>{
-            console.log("ip.got")
-            this.updateWeather( await weather.query() )
-        })
-        // 每 3 小时更新一次
-        setInterval(async ()=>{
-            this.updateWeather( await weather.query() )
-        }, 3*60*60*1000) 
+        // this.updateWeather( weather.loadCache() )
+        // wifi.on("ip.got", async ()=>{
+        //     console.log("ip.got")
+        //     this.updateWeather( await weather.query() )
+        // })
+        // // 每 3 小时更新一次
+        // setInterval(async ()=>{
+        //     this.updateWeather( await weather.query() )
+        // }, 3*60*60*1000) 
     }
     wakeup() {
         this.active = true
@@ -132,13 +132,13 @@ class Dashboard extends lv.Column {
         this.active = false
     }
 
-    updateWeather(info) {
-        if(!info) {
-            return
-        }
-        this.weather1.setText(`${info.localText} ${info.payload.temp}°C ${info.payload.text}`)
-        this.weather2.setText(`湿度:${info.payload.humidity}%`)
-        this.weather3.setText(`${info.payload.windDir} / 风力${info.payload.windScale} / 风速${info.payload.windSpeed}`)
-    }
+    // updateWeather(info) {
+    //     if(!info) {
+    //         return
+    //     }
+    //     this.weather1.setText(`${info.localText} ${info.payload.temp}°C ${info.payload.text}`)
+    //     this.weather2.setText(`湿度:${info.payload.humidity}%`)
+    //     this.weather3.setText(`${info.payload.windDir} / 风力${info.payload.windScale} / 风速${info.payload.windSpeed}`)
+    // }
 }
 module.exports = Dashboard

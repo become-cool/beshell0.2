@@ -32,7 +32,9 @@ inline bool indev_nav_read_i2c(indev_driver_spec_t* spec, uint8_t * byte) {
     I2C_RECV(byte,1) ;
     I2C_COMMIT(spec->conf.i2c.bus) ;
 
-    return ESP_OK==res ;
+    spec->found = ESP_OK==res ;
+
+    return spec->found ;
 }
 
 
@@ -123,7 +125,7 @@ static void task_nav_read(indev_driver_spec_t * spec) {
             indev_nav_read_i2c(spec, &spec->data.buttons.value) ;
             xSemaphoreGive(spec->data.buttons.semaphore) ;
 
-            // 如果已经注册到 lvgl ，则有 lvgl 处理读到的数据
+            // 如果已经注册到 lvgl ，则由 lvgl 处理读到的数据
             if( ! spec->lv_indev ) {
                 indev_nav_process_value(spec, NULL, NULL) ;
             }
@@ -299,9 +301,7 @@ void be_indev_i2c_init() {
 }
 
 void be_indev_i2c_require(JSContext *ctx, JSValue lvgl, JSValue baseProto) {
-
     QJS_DEF_CLASS(lv_indev_nav, "InDevNav", "lv.InDevNav", baseProto, lvgl)
-    
 }
 
 void be_indev_i2c_loop(JSContext *ctx) {

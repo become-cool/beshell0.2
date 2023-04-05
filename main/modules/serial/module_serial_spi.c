@@ -35,26 +35,40 @@ static JSValue js_spi_bus_setup(JSContext *ctx, JSValueConst this_val, int argc,
 
     CHECK_ARGC(4)
 
-    int8_t misopin = -1 ;
-    int8_t mosipin = -1 ;
-    if(!JS_IsUndefined(argv[1]) && !JS_IsNull(argv[1])) {
-        if( JS_ToUint32(ctx, &misopin, argv[1])!=0 ){
-            THROW_EXCEPTION("MISO pin invalid.")
-        }
-    }
-    if(!JS_IsUndefined(argv[2]) && !JS_IsNull(argv[2])) {
-        if( JS_ToUint32(ctx, &mosipin, argv[2])!=0 ){
-            THROW_EXCEPTION("MOSI pin invalid.")
-        }
-    }
+    ARGV_TO_UINT8(3, clkpin)
+    
+    // int8_t misopin = -1 ;
+    // int8_t mosipin = -1 ;
+    // if(!JS_IsUndefined(argv[2]) && !JS_IsNull(argv[2])) {
+    //     if( JS_ToUint32(ctx, &mosipin, argv[2])!=0 ){
+    //         THROW_EXCEPTION("MOSI pin invalid.")
+    //     }
+    // }
+    // if(!JS_IsUndefined(argv[1]) && !JS_IsNull(argv[1])) {
+    //     if( JS_ToUint32(ctx, &misopin, argv[1])!=0 ){
+    //         THROW_EXCEPTION("MISO pin invalid.")
+    //     }
+    // }
+    
+    ARGV_TO_UINT8(2, mosipin)
+    ARGV_TO_UINT8(1, misopin)
 
     ARGV_TO_UINT8(0, busnum)
-    if(busnum<0 || busnum>3) {
-        THROW_EXCEPTION("Bus num must be 1-3")
+    if(busnum<0 || busnum>4) {
+        THROW_EXCEPTION("Bus num must be 0-3")
     }
-    ARGV_TO_UINT8(3, clkpin)
+// #ifdef CONFIG_IDF_TARGET_ESP32S3
+//     if(busnum<0 || busnum>4) {
+//         THROW_EXCEPTION("Bus num must be 0-3")
+//     }
+// #elif CONFIG_IDF_TARGET_ESP32
+//     if(busnum<0 || busnum>3) {
+//         THROW_EXCEPTION("Bus num must be 0-2")
+//     }
+// #endif
 
-    // pf("miso=%d, mosi=%d, clk=%d", misopin, mosipin, clkpin)
+
+    printf("spi[%d] miso=%d, mosi=%d, clk=%d\n", busnum, misopin, mosipin, clkpin);
     // dn(busnum)
 
     spi_bus_config_t buscfg = {
@@ -69,6 +83,9 @@ static JSValue js_spi_bus_setup(JSContext *ctx, JSValueConst this_val, int argc,
     esp_err_t ret = spi_bus_initialize(busnum, &buscfg, SPI_DMA_CH_AUTO);
     if(ret==0) {
         _spi_bus_setup|= 1<<busnum ;
+    }
+    else {
+        printf("spi_bus_initialize() failed with err: %d\n", ret) ;
     }
 
     return JS_NewInt32(ctx, ret) ;

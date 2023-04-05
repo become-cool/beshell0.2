@@ -1,7 +1,7 @@
 #include "driver_camera.h"
 #include "module_metadata.h"
 #include "module_wifi.h"
-#include "utils.h"
+#include "module_mg.h"
 #include "esp_camera.h"
 #include <string.h>
 #include "img_converters.h"
@@ -17,87 +17,6 @@ bool inited = false ;
 bool driver_camera_has_inited() {
     return inited ;
 }
-
-
-esp_err_t ws_rtc_camera_stream(httpd_req_t *req) {
-
-    httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
-    httpd_resp_set_hdr(req, "X-Framerate", "60");
-
-    if(!inited) {
-        httpd_resp_set_status(req, "404") ;
-        return httpd_resp_send(req, "Camera device not setuped", 5);
-    }
-
-    esp_err_t res = httpd_resp_set_type(req, _STREAM_CONTENT_TYPE);
-
-    char *part_buf[128];
-    camera_fb_t * fb = NULL ;
-    size_t hlen = 0 ;
-
-    while (true) {
-
-        fb = esp_camera_fb_get();
-        if (!fb) {
-            httpd_resp_send(req, "Camera device not setuped", 5);
-            break ;
-        }
-
-        res = httpd_resp_send_chunk(req, _STREAM_BOUNDARY, strlen(_STREAM_BOUNDARY));
-        if(res!=ESP_OK) {
-            break ;
-        }
-        
-        hlen = snprintf((char *)part_buf, 128, _STREAM_PART, fb->len, fb->timestamp.tv_sec, fb->timestamp.tv_usec);
-        res = httpd_resp_send_chunk(req, (const char *)part_buf, hlen);
-        if(res!=ESP_OK) {
-            break ;
-        }
-
-        res = httpd_resp_send_chunk(req, (const char *)fb->buf, fb->len);
-        if(res!=ESP_OK) {
-            break ;
-        }
-        
-        esp_camera_fb_return(fb);
-        fb = NULL ;
-    }
-
-    if(fb) {
-        esp_camera_fb_return(fb);
-    }
-
-    return ESP_OK;
-}
-
-httpd_handle_t stream_httpd = NULL;
-static void web_camera_init(int port, int core_id) {
-
-    if(!wifi_has_inited() || stream_httpd) {
-        return ;
-    }
-    
-    httpd_config_t config = HTTPD_DEFAULT_CONFIG();
-    config.max_uri_handlers = 8;
-    config.server_port = port ;
-    config.ctrl_port += port ;
-    config.core_id = core_id ;
-
-    httpd_uri_t stream_uri = {
-        .uri = "/",
-        .method = HTTP_GET,
-        .handler = ws_rtc_camera_stream,
-        .user_ctx = NULL};
-
-    if (httpd_start(&stream_httpd, &config) != ESP_OK) {
-        printf("start camera stream server faild\n") ;
-        return ;
-    }
-    
-    httpd_register_uri_handler(stream_httpd, &stream_uri);
-}
-
-
 
 static JSValue js_camera_has_setup(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     return inited? JS_TRUE: JS_FALSE ;
@@ -240,12 +159,199 @@ static JSValue js_camera_setup(JSContext *ctx, JSValueConst this_val, int argc, 
     return JS_TRUE ;
 }
 
-static JSValue js_camera_start_stream(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+
+esp_err_t ws_rtc_camera_stream(httpd_req_t *req) {
+
+    httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
+    httpd_resp_set_hdr(req, "X-Framerate", "60");
+
+    if(!inited) {
+        httpd_resp_set_status(req, "404") ;
+        return httpd_resp_send(req, "Camera device not setuped", 5);
+    }
+
+    esp_err_t res = httpd_resp_set_type(req, _STREAM_CONTENT_TYPE);
+
+    char *part_buf[128];
+    camera_fb_t * fb = NULL ;
+    size_t hlen = 0 ;
+
+    while (true) {
+
+        fb = esp_camera_fb_get();
+        if (!fb) {
+            httpd_resp_send(req, "Camera device not setuped", 5);
+            break ;
+        }
+
+        res = httpd_resp_send_chunk(req, _STREAM_BOUNDARY, strlen(_STREAM_BOUNDARY));
+        if(res!=ESP_OK) {
+            break ;
+        }
+        
+        hlen = snprintf((char *)part_buf, 128, _STREAM_PART, fb->len, fb->timestamp.tv_sec, fb->timestamp.tv_usec);
+        res = httpd_resp_send_chunk(req, (const char *)part_buf, hlen);
+        if(res!=ESP_OK) {
+            break ;
+        }
+
+        res = httpd_resp_send_chunk(req, (const char *)fb->buf, fb->len);
+        if(res!=ESP_OK) {
+            break ;
+        }
+        
+        esp_camera_fb_return(fb);
+        fb = NULL ;
+    }
+
+    if(fb) {
+        esp_camera_fb_return(fb);
+    }
+
+    return ESP_OK;
+}
+
+static httpd_handle_t stream_httpd = NULL;
+
+static JSValue js_camera_start_http_stream(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(1)
     ARGV_TO_INT32(0, port)
-    web_camera_init(port, 1) ;
+    
+    if(!wifi_has_inited() || stream_httpd) {
+        return ;
+    }
+    
+    httpd_config_t config = HTTPD_DEFAULT_CONFIG();
+    config.max_uri_handlers = 8;
+    config.server_port = port ;
+    config.ctrl_port += port ;
+    config.core_id = 1 ;
+
+    httpd_uri_t stream_uri = {
+        .uri = "/",
+        .method = HTTP_GET,
+        .handler = ws_rtc_camera_stream,
+        .user_ctx = NULL};
+
+    if (httpd_start(&stream_httpd, &config) != ESP_OK) {
+        printf("start camera stream server faild\n") ;
+        return ;
+    }
+    
+    httpd_register_uri_handler(stream_httpd, &stream_uri);
+
     return JS_TRUE ;
 }
+
+static struct mg_connection * cam_tcp_client = NULL ;
+TaskHandle_t task_cam_tcp_handle = NULL ;
+
+#define byte100 "0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789"
+char * testmsg = "hello2\n" byte100 "\n"  byte100 "\n\n" ;
+
+static void task_camera_tcp_stream(void * data) {
+
+    camera_fb_t * fb = NULL ;
+    uint8_t pkgid = 0 ;
+    
+    DEF_PKG(pkg)
+    pkg.header[PKG0519_POS_CMD] = CMD_DATA ;
+    
+    uint8_t * lenbuff = pkg.header + PKG0519_HEADERLEN_WITHOUT_DATALEN ;
+
+
+
+    int listen_sock =  socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
+    if(listen_sock < 0)  {
+        printf("Unable to create socket: errno %d\n", errno);
+    }
+
+    struct sockaddr_in dest_addr;
+    dest_addr.sin_family = AF_INET;
+    dest_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    dest_addr.sin_port = htons(8018);
+
+    int err = bind(listen_sock, (struct sockaddr *)&dest_addr, sizeof(dest_addr));
+    if(err != 0)  {
+        printf("Socket unable to bind: errno %d\n", errno);
+        close(listen_sock);
+    }
+    printf("Socket bound, port 8019\n");
+
+    err = listen(listen_sock, 1);    // 这里为啥是1，网上大多数是5
+    if(err != 0)  {
+        printf("Error occurred during listen: errno %d\n", errno);
+        close(listen_sock);
+    }
+
+    while(1) {
+        struct sockaddr_in6 source_addr; // Large enough for both IPv4 or IPv6
+        uint addr_len = sizeof(source_addr);
+        int sock = accept(listen_sock, (struct sockaddr *)&source_addr, &addr_len);
+        if(sock < 0)  {
+            printf("Unable to accept connection: errno %d\n", errno);
+            close(listen_sock);
+        }
+        
+        printf("client come in\n") ;
+
+        while(1) {
+            fb = esp_camera_fb_get();
+            if(!fb) {
+                vTaskDelay(10) ;
+                continue;
+            }
+
+            pkg.header[PKG0519_POS_ID] = pkgid ++ ;
+
+            uint8_t lenbytes = telnet_prot0519_pack_data_len(fb->len, lenbuff) ;
+
+            if( send(sock, pkg.header, PKG0519_HEADERLEN_WITHOUT_DATALEN + lenbytes, 0)<0 ){
+                break ;
+            }
+
+            necho_time("send", {
+                if( send(sock, fb->buf, fb->len, 0)<0 ){
+                    break ;
+                }
+            })
+
+            esp_camera_fb_return(fb);
+            fb = NULL ;
+            // dd
+            vTaskDelay(1) ;
+        }
+
+        printf("client close\n") ;
+
+        if(fb) {
+            esp_camera_fb_return(fb);
+            fb = NULL ;
+        }
+
+        shutdown(sock, 0) ;
+        close(sock) ;
+
+    }
+}
+
+
+static JSValue js_camera_start_tcp_stream(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+    ARGV_TO_STRING_E(0, url, "invalid url")
+    
+    if(task_cam_tcp_handle) {
+        THROW_EXCEPTION("camera tcp stream has started.\n")
+    }
+
+    // mg_listen(be_module_mg_mgr(), url, camera_tcp_stream, NULL);
+    xTaskCreatePinnedToCore(&task_camera_tcp_stream, "task_camera_tcp_stream", 1024*2, NULL, 5, &task_cam_tcp_handle, 1) ;
+
+    JS_FreeCString(ctx, url) ;
+
+    return JS_UNDEFINED ;
+}
+
 
 static JSValue js_camera_unsetup(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     if(!inited) {
@@ -356,6 +462,20 @@ bool be_module_driver_camera_response(struct mg_connection *c, int ev, void *ev_
     return false ;
 }
 
+be_rv_strem_t * be_create_rv_stream(RemoteVideoCallback callback) {
+    be_rv_strem_t * rv = malloc(sizeof(be_rv_strem_t)) ;
+    memset(rv, 0, sizeof(be_rv_strem_t)) ;
+
+    INIT_PKG(&(rv->pkg)) ;
+
+    rv->callback = callback ;
+
+    return rv ;
+}
+
+static JSValue js_camera_create_remote_video_stream(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    return JS_TRUE ;
+}
 
 void be_module_driver_camera_init() {
     inited = false ;
@@ -371,7 +491,9 @@ void be_module_driver_camera_require(JSContext *ctx, JSValue driver) {
     JS_SetPropertyStr(ctx, camera, "unsetup", JS_NewCFunction(ctx, js_camera_unsetup, "unsetup", 1));
     JS_SetPropertyStr(ctx, camera, "hasSetup", JS_NewCFunction(ctx, js_camera_has_setup, "hasSetup", 1));
     JS_SetPropertyStr(ctx, camera, "capture", JS_NewCFunction(ctx, js_camera_capture, "capture", 1));
-    JS_SetPropertyStr(ctx, camera, "startStream", JS_NewCFunction(ctx, js_camera_start_stream, "startStream", 1));
+    JS_SetPropertyStr(ctx, camera, "startHTTPStream", JS_NewCFunction(ctx, js_camera_start_http_stream, "startHTTPStream", 1));
+    JS_SetPropertyStr(ctx, camera, "startTCPStream", JS_NewCFunction(ctx, js_camera_start_tcp_stream, "startTCPStream", 1));
+    JS_SetPropertyStr(ctx, camera, "createRemoteVideoStream", JS_NewCFunction(ctx, js_camera_create_remote_video_stream, "createRemoteVideoStream", 1));
 }
 
 

@@ -4,6 +4,11 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+
+// 0518 协议数据包长度限制在255以内
+// 这是为了接收时，通过包的 数据校验和 来分包
+// 以便允许包和包之间“夹杂”自由数据
+
 #define PKGLEN_WITHOUT_DATA         7
 #define PKG_HEADER_LEN              6
 #define PKGLEN_MAX_DATA             248

@@ -11,6 +11,7 @@ module.exports = function() {
         }
     }catch(e) {}
 
+    console.log("part id:", beapi.utils.partId(), "part version:",beapi.utils.partVersion())
 
     if(!process.simulate) {
         
@@ -26,8 +27,8 @@ module.exports = function() {
         // serial bus
         for(let num in setupConf.spi||{}){
             let spi = setupConf.spi[num]
-            beapi.spi.setup(num, spi.miso, spi.mosi, spi.sck)
             console.log(`setup SPI ${num}, miso:${spi.miso}, mosi:${spi.mosi}, sck:${spi.sck}`)
+            beapi.spi.setup(num, spi.miso, spi.mosi, spi.sck)
         }
         for(let num in setupConf.i2c||{}){
             let i2c = setupConf.i2c[num]
@@ -64,16 +65,16 @@ const LibDefaultConf = {
     }} ,
     3: {
         0:{
-            spi: { 1: {miso:12,mosi:13,sck:14} } ,
+            spi: { 2: {miso:12,mosi:13,sck:14} } ,
             dev: [
                 // MADCTL: 0x40|0x20
-                {"driver":"ST7789V", "setup":{"dc":18, "cs":19, "spi":1, "width":320, "height":240, "freq":60000000, "MADCTL": 96}}
-                , {"driver":"XPT2046", "setup":{"spi":1, "cs":21, "invX":true, "invY":true, "maxX":320, "maxY":240, "offsetX":11}}
+                {"driver":"ST7789V", "setup":{"dc":18, "cs":19, "spi":2, "width":320, "height":240, "freq":50000000, "MADCTL": 96}}
+                , {"driver":"XPT2046", "setup":{"spi":2, "cs":21, "invX":true, "invY":true, "maxX":320, "maxY":240, "offsetX":11}}
             ]
         } ,
         255:{
             "i2c": {"0": {"sda": 11, "scl": 12, "freq": 10000 }} ,
-            spi: { 1: {miso:14,mosi:13,sck:21} } ,
+            spi: { 2: {miso:14,mosi:13,sck:21} } ,
             "i2s": {"0": {
                 "lrclk": 16 ,"sclk": 17 ,"sout": 18
                 , "mode": 5
@@ -87,8 +88,8 @@ const LibDefaultConf = {
                 , "use_apll": 1
             }} ,
             dev: [
-                {"driver":'sdspi',setup:{cs:48,spi:1,mount:'/mnt/sd',khz:15000}} ,
-                {"driver":"ST7789V", "setup":{"dc":38, "cs":45, "spi":1, "width":320, "height":240, "freq":80000000, "MADCTL": 96}} ,
+                {"driver":'sdspi',setup:{cs:48,spi:2,mount:'/mnt/sd',khz:15000}} ,
+                {"driver":"ST7789V", "setup":{"dc":38, "cs":45, "spi":2, "width":320, "height":240, "freq":80000000, "MADCTL": 96}} ,
                 {"driver":"joypad", "setup":{"i2c":0, "addr":51}} ,
                 {"driver":"joypad", "setup":{"i2c":0, "addr":52}} ,
             ]
@@ -98,7 +99,7 @@ const LibDefaultConf = {
         spi: { 1: {miso:12,mosi:13,sck:14} } ,
         dev: [
             {driver:'sdspi',setup:{cs:25,spi:1,mount:'/mnt/sd'}} ,
-            {driver:'camera',setup:{d0:39,d1:37,d2:36,d3:38,d4:34,d5:19,d6:9,d7:22,xclk:5,pclk:35,vsync:23,href:27,sda:21,scl:18,pwdn:-1,reset:-1,ledc_channel:1,ledc_timer:1,jpeg_quality:10,fb_count:2,xclk_freq:20000000,size:"QVGA",format:"jpeg",streamPort:8019}}
+            {driver:'camera',setup:{d0:39,d1:37,d2:36,d3:38,d4:34,d5:19,d6:9,d7:22,xclk:5,pclk:35,vsync:23,href:27,sda:21,scl:18,pwdn:-1,reset:-1,ledc_channel:1,ledc_timer:1,jpeg_quality:10,fb_count:2,xclk_freq:20000000,size:"QVGA",format:"jpeg",stream:{http:8019,tcp:"tcp://0.0.0.0:8018"}}}
         ]
     }}
 }

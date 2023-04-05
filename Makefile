@@ -110,13 +110,12 @@ target:
 
 target-esp32: 
 	cp sdkconfig sdkconfig-${TARGET}
-	cp sdkconfig-esp32 sdkconfig
-	idf.py set-target esp32
+	idf.py set-target esp32 && cp sdkconfig-esp32 sdkconfig && idf.py reconfigure
+	
 
 target-esp32s3: 
 	cp sdkconfig sdkconfig-${TARGET}
-	cp sdkconfig-esp32s3 sdkconfig
-	idf.py set-target esp32s3
+	idf.py set-target esp32s3 && cp sdkconfig-esp32s3 sdkconfig && idf.py reconfigure
 
 help:
 	@echo "make"

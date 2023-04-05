@@ -22,7 +22,7 @@
 
 bool st77xx_spi_init(st77xx_dev_t * dev, uint8_t spi, uint8_t cs, uint8_t dc, uint32_t frequency) {
 	
-	// printf("st77xx_spi_init() spi=%d, cs=%d, dc=%d, freq=%d\n",spi,cs,dc,frequency) ;
+	printf("st77xx_spi_init() spi=%d, cs=%d, dc=%d, freq=%d\n",spi,cs,dc,frequency) ;
 
 	esp_err_t ret;
 

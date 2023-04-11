@@ -21,7 +21,7 @@ class Joypad extends I2CDevice {
         }
     }
     read() {
-        if( this.addr!=51 && this.addr!=52 ) {
+        if( this.addr!=51 && this.addr!=52 && this.addr!=67 ) {
             throw new Error("not set i2c device addr")
         }
         this.raw = beapi.i2c.readU8(this.bus, this.addr)

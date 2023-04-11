@@ -94,7 +94,7 @@ static JSValue js_lvgl_input_point(JSContext *ctx, JSValueConst this_val, int ar
 static JSValue js_lv_rgb(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(1)
     lv_color_t color ;
-    uint8_t r, g, b ;
+    uint32_t r, g, b ;
     if(JS_ToUint32(ctx, &r, argv[0] ) ){
         THROW_EXCEPTION("arg red must be a int")
     }

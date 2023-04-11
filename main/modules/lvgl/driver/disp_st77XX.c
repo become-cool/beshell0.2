@@ -98,6 +98,11 @@ void st77xx_command(st77xx_dev_t * dev, uint8_t cmd) {
 	spi_write_bytes( dev->spi_dev, &__Byte, 1 );
 }
 
+void st77xx_data(st77xx_dev_t * dev, uint8_t * data, int len) {
+	gpio_set_level( dev->_dc, SPI_Data_Mode );
+	spi_write_bytes( dev->spi_dev, data, len );
+}
+
 void st77xx_data_byte(st77xx_dev_t * dev, uint8_t data) {
 	static uint8_t __Byte = 0;
 	__Byte = data;
@@ -132,6 +137,11 @@ static void delay(int ms) {
 	vTaskDelay(xTicksToDelay);
 }
 
+typedef struct {
+    uint8_t cmd;
+    uint8_t data[16];
+    uint8_t databytes; //No of data in data; bit 7 = delay after set; 0xFF = end of cmds.
+} lcd_init_cmd_t;
 
 void st7789_init(st77xx_dev_t * dev,  st77xx_conf_t conf) {
 
@@ -172,6 +182,67 @@ void st7789_init(st77xx_dev_t * dev,  st77xx_conf_t conf) {
 	st77xx_command(dev, 0xD0);	// power control
 	st77xx_data_byte(dev, 0xA4);
 	st77xx_data_byte(dev, 0xA1);
+
+	st77xx_command(dev, 0x21);	// 反色
+	st77xx_command(dev, 0x29);	// 打开屏幕
+
+	// 屏幕尺寸
+	st77xx_command(dev, 0x2A);
+	st77xx_data_byte(dev, 0);
+	st77xx_data_byte(dev, 0);
+	st77xx_data_byte(dev, 0);
+	st77xx_data_byte(dev, 240);
+	
+	st77xx_command(dev, 0x2B);
+	st77xx_data_byte(dev, 0);
+	st77xx_data_byte(dev, 0);
+	st77xx_data_byte(dev, 0);
+	st77xx_data_byte(dev, 240);	
+
+	return ;
+
+	dev->_width = conf.width;
+	dev->_height = conf.height;
+	dev->_offsetx = conf.offsetx;
+	dev->_offsety = conf.offsety;
+
+	st77xx_command(dev, 0x01);	//Power Control 1
+	delay(150);
+
+	st77xx_command(dev, 0x11);	// 唤醒
+	delay(120);
+
+	// 关于 0x36, 0x37 旋转屏幕，参考 st7789 文档，以及：
+	// https://github.com/notro/fbtft/issues/523
+
+	// 方向: 0x20, 0x40, 0x80 组合确定
+	// if(rotation==90) {
+	// 	st77xx_command(dev, 0x36);
+	// 	st77xx_data_byte(dev, 0x20|0x80);	
+	// }
+	// else {
+		// st77xx_command(dev, 0x36);	
+		// st77xx_data_byte(dev, conf.MADCTL);	
+	// }
+	
+	// 屏幕开始位置偏移80像素
+	// st77xx_command(dev, 0x37);
+	// st77xx_data_byte(dev, 0);	
+	// st77xx_data_byte(dev, 0x50);	
+	
+	st77xx_command(dev, 0x3A);	// 颜色模式： RGB565 (16Bit)
+	st77xx_data_byte(dev, 0x05);
+
+	st77xx_command(dev, 0xC6);	// 帧率: 60hz
+	st77xx_data_byte(dev, 0x0F);
+	
+	st77xx_command(dev, 0xD0);	// power control
+	st77xx_data_byte(dev, 0xA4);
+	st77xx_data_byte(dev, 0xA1);
+
+	st77xx_command(dev, 0x36);
+	st77xx_data_byte(dev, conf.MADCTL);	
+	printf("ST7798 REG [0x36] -> %d\n", conf.MADCTL) ;
 
 	if(conf.invColor) {
 		st77xx_command(dev, 0x21);	// 反色

@@ -489,12 +489,12 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
         conf.height = height ;
         conf.MADCTL = MADCTL ;
         conf.invColor = invColor ;
-    
 
         if( strcmp(typestr, "ST7789V")==0 ) {
             st7789v_init(spidev, conf);
         }
         else if(strcmp(typestr, "ST7789")==0) {
+            dd
             st7789_init(spidev, conf);
         }
         else {

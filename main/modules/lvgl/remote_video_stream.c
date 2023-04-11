@@ -164,16 +164,14 @@ void task_poll_rvs(void * data) {
                 break ;
             }
 
-            vsum2 = telnet_prot0519_checksum(body, pkglen) ;
-
-            // dn4(body[0],body[1], vsum, vsum2)
-
-            if(vsum!=vsum2) {
-                free(body) ;
-                vTaskDelay(1);
-                printf("verify sum incorrect\n") ;
-                continue;
-            }
+            // vsum2 = telnet_prot0519_checksum(body, pkglen) ;
+            // // dn4(body[0],body[1], vsum, vsum2)
+            // if(vsum!=vsum2) {
+            //     free(body) ;
+            //     vTaskDelay(1);
+            //     printf("verify sum incorrect\n") ;
+            //     continue;
+            // }
 
             post_jpg_rect(0,0,body,pkglen) ;
 

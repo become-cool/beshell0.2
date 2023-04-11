@@ -16,6 +16,7 @@ typedef enum {
     INDEV_DRIVER_XPT2046 ,
     INDEV_DRIVER_JOYPAD ,
     INDEV_DRIVER_BTN ,
+    INDEV_DRIVER_BTN3D ,
 } indev_driver_t ;
 
 

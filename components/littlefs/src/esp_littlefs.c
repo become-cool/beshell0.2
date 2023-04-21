@@ -138,7 +138,12 @@ esp_err_t esp_littlefs_info(const char* partition_label, size_t *total_bytes, si
     efs = _efs[index];
 
     if(total_bytes) *total_bytes = efs->cfg.block_size * efs->cfg.block_count; 
-    if(used_bytes) *used_bytes = efs->cfg.block_size * lfs_fs_size(efs->fs);
+    if(used_bytes) {
+        if(efs->used_bytes==0){
+            efs->used_bytes = lfs_fs_size(efs->fs) ;
+        }
+        *used_bytes = efs->cfg.block_size * efs->used_bytes ;
+    }
 
     return ESP_OK;
 }
@@ -930,6 +935,8 @@ static ssize_t vfs_littlefs_write(void* ctx, int fd, const void * data, size_t s
         return res;
     }
 
+    efs->used_bytes = 0 ;
+
     return res;
 }
 
@@ -1018,6 +1025,7 @@ exit:
         return -1;
     }
 
+    efs->used_bytes = 0 ;
     return res;
 }
 
@@ -1288,6 +1296,7 @@ static int vfs_littlefs_unlink(void* ctx, const char *path) {
 
     sem_give(efs);
 
+    efs->used_bytes = 0 ;
     return 0;
 #undef fail_str_1
 }
@@ -1493,6 +1502,7 @@ static int vfs_littlefs_mkdir(void* ctx, const char* name, mode_t mode) {
                 name, esp_littlefs_errno(res), res);
         return res;
     }
+    efs->used_bytes = 0 ;
     return 0;
 }
 
@@ -1527,6 +1537,7 @@ static int vfs_littlefs_rmdir(void* ctx, const char* name) {
         return -1;
     }
 
+    efs->used_bytes = 0 ;
     return 0;
 }
 

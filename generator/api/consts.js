@@ -150,6 +150,7 @@ module.exports = [
         type: 'lv_border_side_t' ,
         name: 'lv_border_side' ,
         end: 'LV_BORDER_SIDE_INTERNAL+1' ,
+        bits: true ,
         def: parseCSource(`
             LV_BORDER_SIDE_NONE     = 0x00,
             LV_BORDER_SIDE_BOTTOM   = 0x01,
@@ -167,6 +168,7 @@ module.exports = [
         type: 'lv_base_dir_t' ,
         name: 'lv_base_dir' ,
         end: 'LV_BASE_DIR_WEAK+1' ,
+        bits: true ,
         def: parseCSource(`
         enum {
             LV_BASE_DIR_LTR      = 0x00,
@@ -333,6 +335,7 @@ module.exports = [
         prefix: 'LV_STATE_' ,
         type: 'lv_state_t' ,
         name: 'lv_state' ,
+        bits: true ,
         def: parseCSource(`
         enum {
             LV_STATE_DEFAULT     =  0x0000,
@@ -360,6 +363,7 @@ module.exports = [
         prefix: 'LV_OBJ_FLAG_' ,
         type: 'lv_obj_flag_t' ,
         name: 'lv_obj_flag' ,
+        bits: true ,
         def: parseCSource(`
             LV_OBJ_FLAG_HIDDEN          = (1L << 0),  /**< Make the object hidden. (Like it wasn't there at all)*/
             LV_OBJ_FLAG_CLICKABLE       = (1L << 1),  /**< Make the object clickable by the input devices*/
@@ -553,6 +557,7 @@ module.exports = [
         prefix: 'LV_PART_' ,
         type: 'lv_part_t' ,
         name: 'lv_part' ,
+        bits: true ,
         def: parseCSource(`
         enum {
             LV_PART_MAIN         = 0x000000,   /**< A background like rectangle*/
@@ -578,6 +583,11 @@ function constC2JS(src, prefix) {
         let name = res[1].substr(prefix.length).toLowerCase()
         console.log("'"+name+"':",res[2], ",")
     }
+}
+
+module.exports.byName = {}
+for(let def of module.exports) {
+    module.exports.byName[def.type] = def
 }
 
 // console.log(module.exports)

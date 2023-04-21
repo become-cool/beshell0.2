@@ -1142,7 +1142,7 @@ static JSValue js_lv_area_set_x1(JSContext *ctx, JSValueConst this_val, int argc
             THROW_EXCEPTION("arg %s of %s() is invalid", "x1", "setX1") 
         } 
         cvar->x1 = (lv_coord_t)num ; 
-    } 
+    }
 
     return JS_UNDEFINED ;
 }

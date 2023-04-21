@@ -16,7 +16,6 @@ typedef enum {
     INDEV_DRIVER_XPT2046 ,
     INDEV_DRIVER_JOYPAD ,
     INDEV_DRIVER_BTN ,
-    INDEV_DRIVER_BTN3D ,
 } indev_driver_t ;
 
 
@@ -73,6 +72,10 @@ typedef struct {
             SemaphoreHandle_t semaphore ;
 #endif
         } buttons ;
+        struct {
+            uint32_t code ;
+            lv_indev_state_t state ;
+        } key ;
     } data ;
 
     JSContext * ctx ;
@@ -100,6 +103,9 @@ void indev_emit_js_event(lv_indev_drv_t * drv, indev_driver_spec_t * drv_spec, c
 void indev_global_cb_proc(lv_indev_data_t *data) ;
 
 extern uint8_t _indev_id ;
+
+extern JSClassID js_lv_indev_pointer_class_id ;
+extern JSClassID js_lv_indev_nav_class_id ;
 
 #ifndef SIMULATION
 #define THIS_INDEV(thisobj)     \

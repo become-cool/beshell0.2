@@ -50,9 +50,11 @@ char * js_arg_to_vfspath(JSContext *ctx, JSValueConst argv) {
 
 /**
  * 同步返回文件状态
+ * 如果文件不存在,返回 null; 否则返回包含详细信息的对象
  * 
- * @param {string} path 文件路径
- * @return {object} {dev, ino, mode, size, isDir, atime, mtime, ctime}
+ * @beapi beapi.fs.statSync
+ * @param path:string 文件路径
+ * @return null|{dev:number,ino:number,mode:number,size:number,isDir:bool,atime:number,mtime:number,ctime:number}
  */
 JSValue js_fs_stat_sync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(1)
@@ -85,8 +87,9 @@ JSValue js_fs_stat_sync(JSContext *ctx, JSValueConst this_val, int argc, JSValue
 /**
  * 同步返回路径是否是一个存在的目录
  * 
- * @param {string} path
- * @return {bool}
+ * @beapi beapi.fs.isDirSync
+ * @param path:string 路径
+ * @return bool
  */
 JSValue js_fs_is_dir_sync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(1)
@@ -104,9 +107,12 @@ JSValue js_fs_is_dir_sync(JSContext *ctx, JSValueConst this_val, int argc, JSVal
 /**
  * 同步返回路径是否是一个存在的文件
  * 
- * @param {string} path
- * @return {bool}
+ * @beapi beapi.fs.fileSync
+ * @param path:string 路径
+ * @return bool
  */
+
+
 JSValue js_fs_is_file_sync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(1)
     JS2VSFPath(path, argv[0]) 
@@ -122,8 +128,9 @@ JSValue js_fs_is_file_sync(JSContext *ctx, JSValueConst this_val, int argc, JSVa
 /**
  * 同步返回路径是否存在
  * 
- * @param {string} path
- * @return {bool}
+ * @beapi beapi.fs.existsSync
+ * @param path:string 路径
+ * @return bool
  */
 JSValue js_fs_exists_sync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(1)
@@ -187,9 +194,12 @@ int mkdir_p(char* file_path, mode_t mode) {
 }
 
 /**
- * argv:
- *   path string
- *   recursive=false bool
+ * 同步创建目录
+ * 
+ * @beapi beapi.fs.mkdirSync
+ * @param path:string 路径
+ * @param recursive:bool=false 路径
+ * @return bool
  */
 JSValue js_fs_mkdir_sync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     if(argc<1) {
@@ -228,6 +238,13 @@ JSValue js_fs_mkdir_sync(JSContext *ctx, JSValueConst this_val, int argc, JSValu
     return ret? JS_TRUE: JS_FALSE ;
 }
 
+/**
+ * 同步删除目录。如果目录非空返回 false。
+ * 
+ * @beapi beapi.fs.rmdirSync
+ * @param path:string 路径
+ * @return bool
+ */
 JSValue js_fs_rmdir_sync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     if(argc<1) {
         JS_ThrowReferenceError(ctx, "Missing param path");
@@ -239,6 +256,13 @@ JSValue js_fs_rmdir_sync(JSContext *ctx, JSValueConst this_val, int argc, JSValu
     return ret? JS_TRUE: JS_FALSE ;
 }
 
+/**
+ * 同步删除文件
+ * 
+ * @beapi beapi.fs.unlinkSync
+ * @param path:string 路径
+ * @return bool
+ */
 JSValue js_fs_unlink_sync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     if(argc<1) {
         JS_ThrowReferenceError(ctx, "Missing param path");
@@ -251,10 +275,13 @@ JSValue js_fs_unlink_sync(JSContext *ctx, JSValueConst this_val, int argc, JSVal
 }
 
 /**
- * argv:
- *  path string
- *  readlen=-1 int
- *  offset=0 int
+ * 同步读取文件
+ * 
+ * @beapi beapi.fs.readFileSync
+ * @param path:string 路径
+ * @param readlen:number=-1 读取长度，-1表示全文
+ * @param offset:number=0 开始位置
+ * @return ArrayBuffer
  */
 JSValue js_fs_read_file_sync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     JS2VSFPath(path, argv[0])
@@ -301,11 +328,15 @@ JSValue js_fs_read_file_sync(JSContext *ctx, JSValueConst this_val, int argc, JS
     return JS_NewArrayBuffer(ctx, (uint8_t *)buff, readedBytes, freeArrayBuffer, NULL, false) ;
 }
 
+
 /**
- * argv:
- *  path string
- *  data string
- *  append=false int
+ * 同步写入文件，返回写入字节数量
+ * 
+ * @beapi beapi.fs.writeFileSync
+ * @param path:string 路径
+ * @param data:string|ArrayBuffer 数据内容
+ * @param append:bool=false 是否追加写入
+ * @return number
  */
 JSValue js_fs_write_file_sync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
 
@@ -370,9 +401,13 @@ JSValue js_fs_write_file_sync(JSContext *ctx, JSValueConst this_val, int argc, J
 }
 
 /**
- * argv:
- *  path string
- *  detail=false
+ * 同步读取目录下的所有成员。
+ * 如果 detail 参数为 false，仅返回文件名数字。
+ * 
+ * @beapi beapi.fs.readdirSync
+ * @param path:string 路径
+ * @param detail:bool=false 是否范围详细信息
+ * @return string[]|{name:string, type:"file"|"dir"|"unknown", size:number}[]
  */
 JSValue js_fs_readdir_sync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(1)
@@ -495,6 +530,12 @@ bool rm(const char * path, bool recursive) {
     return false ;
 }
 
+/**
+ * 同步删除文件
+ * 
+ * @param path {string} 路径
+ * @return bool
+ */
 JSValue js_fs_rm_sync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(1)
     JS2VSFPath(path, argv[0]) ;
@@ -509,6 +550,16 @@ JSValue js_fs_rm_sync(JSContext *ctx, JSValueConst this_val, int argc, JSValueCo
 
     return ret? JS_TRUE: JS_FALSE ;
 }
+
+/**
+ * 同步重命名文件
+ * 操作成功，返回 0
+ * 如果错误，返回错误代码
+ * 
+ * @param path {string} 路径
+ * @param name {string} 名称
+ * @return number
+ */
 static JSValue js_fs_rename_sync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(2)
     JS2VSFPath(oldpath, argv[0]) ;
@@ -522,6 +573,13 @@ static JSValue js_fs_rename_sync(JSContext *ctx, JSValueConst this_val, int argc
     return JS_NewInt32(ctx, ret) ;
 }
 
+/**
+ * 文件分区的信息
+ * 返回的对象包括了分区的总大小，和已用大小
+ * 
+ * @param path {string} 分区路径
+ * @return {total:number, used:number}
+ */
 static JSValue js_fs_info(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
 
     CHECK_ARGC(1)

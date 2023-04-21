@@ -72,20 +72,24 @@ void echo_error(JSContext *) ;
 #define ARGV_TO_DOUBLE_VAR_OPT(i,var, dft)   ARGV_TO_INT_VAR_OPT(i, var, JS_ToFloat64, dft)
 
 
-#define ARGV_TO_INT(i, var, ctype, api)                     \
+#define ARGV_TO_INT(i, var, ctype, tmp_type, api)           \
 	ctype var = 0 ;                                         \
-	if( api(ctx, &(var), argv[i])!=0 ) {                    \
-        THROW_EXCEPTION("Invalid param type")               \
-	}
+    {                                                       \
+        tmp_type tmp ;                                      \
+        if( api(ctx, &tmp, argv[i])!=0 ) {                  \
+            THROW_EXCEPTION("Invalid param type")           \
+        }                                                   \
+        var = (ctype)tmp ;                                  \
+    }
     
-#define  ARGV_TO_UINT8(i,var)   ARGV_TO_INT(i, var, uint32_t,  JS_ToUint32)
-#define   ARGV_TO_INT8(i,var)   ARGV_TO_INT(i, var, int32_t,   JS_ToInt32)
-#define ARGV_TO_UINT16(i,var)   ARGV_TO_INT(i, var, uint32_t, JS_ToUint32)
-#define ARGV_TO_INT16(i,var)    ARGV_TO_INT(i, var, int32_t,  JS_ToInt32)
-#define ARGV_TO_UINT32(i,var)   ARGV_TO_INT(i, var, uint32_t, JS_ToUint32)
-#define ARGV_TO_INT32(i,var)    ARGV_TO_INT(i, var, int32_t,  JS_ToInt32)
-#define ARGV_TO_INT64(i,var)    ARGV_TO_INT(i, var, int64_t,  JS_ToInt64)
-#define ARGV_TO_DOUBLE(i,var)   ARGV_TO_INT(i, var, double, JS_ToFloat64)
+#define  ARGV_TO_UINT8(i,var)   ARGV_TO_INT(i, var, uint8_t,  uint32_t,  JS_ToUint32)
+#define   ARGV_TO_INT8(i,var)   ARGV_TO_INT(i, var, int8_t,   int32_t,   JS_ToInt32)
+#define ARGV_TO_UINT16(i,var)   ARGV_TO_INT(i, var, uint16_t, uint32_t,  JS_ToUint32)
+#define ARGV_TO_INT16(i,var)    ARGV_TO_INT(i, var, int16_t,  int32_t,   JS_ToInt32)
+#define ARGV_TO_UINT32(i,var)   ARGV_TO_INT(i, var, uint32_t, uint32_t,  JS_ToUint32)
+#define ARGV_TO_INT32(i,var)    ARGV_TO_INT(i, var, int32_t,  int32_t,   JS_ToInt32)
+#define ARGV_TO_INT64(i,var)    ARGV_TO_INT(i, var, int64_t,  int64_t,   JS_ToInt64)
+#define ARGV_TO_DOUBLE(i,var)   ARGV_TO_INT(i, var, double,    double,   JS_ToFloat64)
 
 
 #define ARGV_TO_INT_OPT(i, var, ctype, api, dft)    \

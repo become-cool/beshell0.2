@@ -33,12 +33,32 @@ static bool lv_tick_status_save = false ;
 #define LV_TICK_PERIOD_MS 1
 
 
+/**
+ * 放回一个百分比类型的尺寸值, 用于 `Obj.setWidth()` 等API
+ * 
+ * > `lv_coord_t` 格式实际是一个整数类型, 有一段取值范围代表了百分比
+ * 
+ * 返回一个 lv_coord_t 格式的整数值
+ * 
+ * @beapi beapi.lvgl.pct
+ * @param pct:number 0-100
+ * @return number
+ */
 static JSValue js_lv_coord_pct(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(1)
     ARGV_TO_UINT16(0,val)
     return JS_NewUint32(ctx,LV_PCT(val)) ;
 }
 
+/**
+ * 判断输入的整数是否是一个有效的尺寸百分比数值
+ * 
+ * > `lv_coord_t` 格式实际是一个整数类型, 有一段取值范围代表了百分比
+ * 
+ * @beapi beapi.lvgl.isPct
+ * @param pct:number lv_coord_t
+ * @return number
+ */
 static JSValue js_lv_coord_is_pct(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(1)
     ARGV_TO_UINT16(0,val)
@@ -46,6 +66,13 @@ static JSValue js_lv_coord_is_pct(JSContext *ctx, JSValueConst this_val, int arg
 }
 
 
+
+/**
+ * 当前默认显示器加载顶层 widget
+ * 
+ * @beapi beapi.lvgl.loadScreen
+ * @param widget:beapi.lvgl.Obj
+ */
 static JSValue js_lvgl_load_screen(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(1)
     
@@ -83,6 +110,12 @@ static JSValue js_lvgl_load_screen(JSContext *ctx, JSValueConst this_val, int ar
 }
 
 
+/**
+ * 返回触摸/指针类型的输入参数
+ * 
+ * @beapi beapi.lvgl.inputPoint
+ * @return {x:number,y;number,press:bool}
+ */
 static JSValue js_lvgl_input_point(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     JSValue obj = JS_NewObject(ctx) ;
     JS_SetPropertyStr(ctx, obj, "x", JS_NewInt32(ctx, indev_input_x)) ;
@@ -91,6 +124,19 @@ static JSValue js_lvgl_input_point(JSContext *ctx, JSValueConst this_val, int ar
     return obj ;
 }
 
+/**
+ * 
+ * 
+ * rgb 用于将 `RGB888` 格式转换位 `lv_color_t` 格式
+ * 
+ * > `lv_color_t` 类型在 LVGL 种实际上是一个整数
+ * 
+ * @beapi beapi.lvgl.rgb
+ * @param r:number 红色分量值
+ * @param g:number 绿色分量值
+ * @param b:number 蓝色分量值
+ * @return number
+ */
 static JSValue js_lv_rgb(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(1)
     lv_color_t color ;
@@ -127,6 +173,13 @@ static JSValue js_lv_rgb(JSContext *ctx, JSValueConst this_val, int argc, JSValu
     return JS_NewUint32(ctx, color.full) ;
 }
 
+
+/**
+ * 为输入设备设置一个接收 widget
+ * 
+ * @beapi beapi.lvgl.setIndevActiveObj
+ * @param widget:beapi.lvgl.Obj 接收输入事件的 widget
+ */
 static JSValue js_lv_set_indev_active_obj(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(1)
 
@@ -159,16 +212,35 @@ static JSValue js_lv_set_indev_active_obj(JSContext *ctx, JSValueConst this_val,
     return JS_UNDEFINED ;
 }
 
+/**
+ * 执行一次 lvgl 循环
+ * 
+ * > lvgl 的循环会由 JS主循环调用,一般情况下不需要主动调用此函数
+ * 
+ * @beapi beapi.lvgl.loop
+ */
 static JSValue js_lvgl_loop(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     lv_task_handler() ;
     return JS_UNDEFINED ;
 }
 
+/**
+ * 通知 LVGL tick
+ * 
+ * @beapi beapi.lvgl.tick
+ */
 static JSValue js_lvgl_tick(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     lv_tick_inc(LV_TICK_PERIOD_MS);
     return JS_UNDEFINED ;
 }
 
+/**
+ * 刷新 LVGL , 将变动的区域更新到显示器
+ * 
+ * > lvgl 的循环会函数会调用此函数,一般情况下不需要主动调用此函数
+ * 
+ * @beapi beapi.lvgl.refresh
+ */
 static JSValue js_lvgl_refresh(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(0)
     lv_refr_now(lv_disp_get_default()) ;
@@ -200,15 +272,35 @@ void be_lv_disp_inv(lv_disp_t* disp) {
     _lv_inv_area(disp, &area);
 }
 
+
+/**
+ * 暂停 lvgl 循环
+ * 
+ * @beapi beapi.lvgl.pause
+ */
 void be_lv_pause() {
     lv_tick_status_save = lv_tick_active ;
     lv_tick_active = false ;
 }
+/**
+ * 恢复 lvgl 循环
+ * 
+ * @beapi beapi.lvgl.resume
+ */
 void be_lv_resume() {
     lv_tick_active = lv_tick_status_save ;
     be_lv_disp_inv(lv_disp_get_default()) ;
 }
 
+/**
+ * 设置是否使用伪静态内存
+ * 
+ * > 静态内存(`SRAM`)速度较快,但是非常有限,BeShell 默认允许 lvgl 使用较慢但较大的伪静态内存(`PSRAM`)
+ * > 如果设备上没有伪静态内存,依然使用静态内存
+ * 
+ * @beapi beapi.lvgl.setAllocSPIRAM
+ * @param allow: bool
+ */
 
 void be_lv_font_symbol_require(JSContext *ctx, JSValue lvgl) {
     JSValue symbol = JS_NewObject(ctx) ;

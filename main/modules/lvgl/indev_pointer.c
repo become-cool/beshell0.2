@@ -28,7 +28,7 @@ static void indev_pointer_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
         return ;
     }
     indev_driver_spec_touch_t * driver_spec = (indev_driver_spec_t *) drv->user_data ;
-    if(driver_spec->spec.fake) {        
+    if(driver_spec->spec.fake) {
         driver_spec->spec.fake = false ;
         data->point.x = driver_spec->spec.data.pointer.x ;
         data->point.y = driver_spec->spec.data.pointer.y ;
@@ -138,6 +138,9 @@ static JSValue js_lv_indev_pointer_constructor(JSContext *ctx, JSValueConst new_
     JS_SetOpaque(jsobj, indev) ;
     JS_SetPropertyStr(ctx, jsobj, "driver", JS_NewString(ctx, driver)) ;
 
+    // 调用 lv_indev_remove() 后解除这个引用
+    JS_DupValue(ctx, jsobj) ;
+    
     JS_FreeCString(ctx, driver) ;
     return jsobj ;
 }

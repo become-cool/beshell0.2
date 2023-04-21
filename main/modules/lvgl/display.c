@@ -373,6 +373,15 @@ static JSValue js_lvgl_all_displays(JSContext *ctx, JSValueConst this_val, int a
     return array ;
 }
 
+static JSValue js_lv_active_display(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    lv_disp_t * disp = lv_disp_get_default() ;
+    if(!disp || !disp->driver || !disp->driver->user_data) {
+        return JS_NULL;
+    }
+
+    JSValue jsdisp = JS_MKPTR(JS_TAG_OBJECT, ((disp_drv_spec_t*)disp->driver->user_data)->jsobj) ;
+    return JS_DupValue(ctx, jsdisp) ;
+}
 
 static void * malloc_buffer(size_t size) {
 #ifndef SIMULATION
@@ -494,7 +503,6 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
             st7789v_init(spidev, conf);
         }
         else if(strcmp(typestr, "ST7789")==0) {
-            dd
             st7789_init(spidev, conf);
         }
         else {
@@ -585,6 +593,7 @@ void be_lv_display_require(JSContext *ctx, JSValue lvgl) {
 
     JS_SetPropertyStr(ctx, lvgl, "createDisplay", JS_NewCFunction(ctx, js_lvgl_create_display, "createDisplay", 1));
     JS_SetPropertyStr(ctx, lvgl, "allDisplays", JS_NewCFunction(ctx, js_lvgl_all_displays, "allDisplays", 1));
+    JS_SetPropertyStr(ctx, lvgl, "activeDisplay", JS_NewCFunction(ctx, js_lv_active_display, "activeDisplay", 1));
     JS_SetPropertyStr(ctx, lvgl, "getDisplayById", JS_NewCFunction(ctx, js_lvgl_get_display_by_id, "getDisplayById", 1));
 }
 

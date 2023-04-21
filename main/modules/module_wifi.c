@@ -170,18 +170,36 @@ static void esp32_wifi_eventHandler(void* arg, esp_event_base_t event_base, int3
     }
 }
 
+/**
+ * 返回 WiFi STA 模式是否启动
+ * 
+ * @beapi beapi.wifi.staStarted
+ * @return bool
+ */
 static JSValue js_wifi_sta_started(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     if(!wifi_inited)
         return JS_FALSE;
     return JS_NewBool(ctx, _sta_started) ;
 }
 
+/**
+ * 返回 WiFi STA 是否已经连接
+ * 
+ * @beapi beapi.wifi.staConnected
+ * @return bool
+ */
 static JSValue js_wifi_sta_connected(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     if(!wifi_inited)
         return JS_FALSE;
     return JS_NewBool(ctx, _sta_connected) ;
 }
 
+/**
+ * 返回 WiFi AP 模式是否启用
+ * 
+ * @beapi beapi.wifi.apStarted
+ * @return bool
+ */
 static JSValue js_wifi_ap_started(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     if(!wifi_inited)
         return JS_FALSE;
@@ -189,11 +207,31 @@ static JSValue js_wifi_ap_started(JSContext *ctx, JSValueConst this_val, int arg
 }
 
 
+/**
+ * WiFi STA 断开连接
+ * 
+ * 返回 0 表示成功; 非 0 代表对应的错误
+ * 
+ * @beapi beapi.wifi.disconnect
+ * @return number
+ */
 static JSValue js_wifi_disconnect(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_WIFI_INITED
     return JS_NewInt32(ctx, esp_wifi_disconnect()) ;
 }
 
+/**
+ * WiFi STA 连接到热点
+ * 
+ * ssid, password 等参数需要通过 beapi.wifi.setStaConfig() 设置
+ * 
+ * 返回 0 仅表示api函数调用成功; 非 0 代表对应的错误
+ * 
+ * 连接成功或失败回触发回调函数, 回调函数由 beapi.wifi.registerEventHandle() 设置
+ * 
+ * @beapi beapi.wifi.connect
+ * @return number
+ */
 static JSValue js_wifi_connect(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_WIFI_INITED
     if( JS_IsFunction(ctx, __event_handle) ) {
@@ -204,6 +242,13 @@ static JSValue js_wifi_connect(JSContext *ctx, JSValueConst this_val, int argc, 
     return JS_NewInt32(ctx, esp_wifi_connect()) ;
 }
 
+/**
+ * 返回 AP/STA 的 IP 
+ * 
+ * @beapi beapi.wifi.getIpInfo
+ * @param type:number 1代表 sta, 2代表 ap
+ * @return {ip:string,netmask:string,gw:string} 
+ */
 static JSValue js_wifi_get_ip_info(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_WIFI_INITED
     CHECK_ARGC(1)
@@ -237,6 +282,12 @@ static JSValue js_wifi_get_ip_info(JSContext *ctx, JSValueConst this_val, int ar
     return status ;
 }
 
+/**
+ * 返回设置 wifi 的在局域网中可被显示的主机名
+ * 
+ * @beapi beapi.wifi.setHostname
+ * @param nane:string
+ */
 static JSValue js_wifi_set_hostname(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_WIFI_INITED
     CHECK_ARGC(1)
@@ -251,12 +302,39 @@ static JSValue js_wifi_set_hostname(JSContext *ctx, JSValueConst this_val, int a
 }
 
 
+/**
+ * 返回设置 wifi 的工作模式
+ * 
+ * * 0 未启动
+ * * 1 STA
+ * * 2 AP
+ * * 3 STA + AP
+ * 
+ * @beapi beapi.wifi.getMode
+ * @return number
+ */
 static JSValue js_wifi_get_mode(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_WIFI_INITED
     wifi_mode_t mode_ori;
     esp_wifi_get_mode(&mode_ori) ;
     return JS_NewInt32(ctx, mode_ori);
 }
+
+/**
+ * 设置 wifi 的工作模式
+ * 
+ * 参数 mode :
+ * * 0 未启动
+ * * 1 STA
+ * * 2 AP
+ * * 3 STA + AP
+ * 
+ * 返回 0 表示 api 调用成功, 返回非 0 表示错误代码
+ * 
+ * @beapi beapi.wifi.setMode
+ * @param mode:0|1|2|3
+ * @return number
+ */
 static JSValue js_wifi_set_mode(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_WIFI_INITED
     ARGV_TO_INT8(0, mode)
@@ -264,6 +342,18 @@ static JSValue js_wifi_set_mode(JSContext *ctx, JSValueConst this_val, int argc,
 }
 
 
+/**
+ * 设置 wifi 的节能模式 (PowerSafe)
+ * 
+ * 参数 mode :
+ * * 0 关闭节能模式
+ * * 1 最小
+ * * 2 最大
+ * 
+ * @beapi beapi.wifi.setPS
+ * @param mode:0|1|2
+ * @return number
+ */
 static JSValue js_wifi_set_ps(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_WIFI_INITED
     CHECK_ARGC(1)
@@ -341,6 +431,31 @@ static JSValue js_wifi_set_ps(JSContext *ctx, JSValueConst this_val, int argc, J
 //     WIFI_AUTH_MAX
 // } wifi_auth_mode_t;
 
+
+/**
+ * 设置 wifi STA 模式的参数
+ * 
+ * 参数 mode :
+ * ```
+ * {
+ *     ssid: string ,
+ *     password?: string ,
+ *     "threshold.authmode"?: 0-8 ,
+ *     scan_method?: 0|1 ,
+ *     channel?: 1-13 ,
+ *     listen_interval?:number = 3 ,
+ *     sort_method?: 0|1 = 0 ,       // sort the connect AP in the list by rssi or security mode
+ * }
+ * ```
+ * 
+ * 如果 `password` 为空, 则 `threshold.authmode` 自动设置为 `WIFI_AUTH_OPEN`
+ * 
+ * 返回 0 表示 api 调用成功, 返回非 0 表示错误代码
+ * 
+ * @beapi beapi.wifi.setStaConfig
+ * @param config:object
+ * @return number
+ */
 static JSValue js_wifi_set_sta_config(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_WIFI_INITED
     CHECK_ARGC(1)
@@ -394,6 +509,34 @@ static JSValue js_wifi_set_sta_config(JSContext *ctx, JSValueConst this_val, int
 //     wifi_cipher_type_t pairwise_cipher;   /**< pairwise cipher of SoftAP, group cipher will be derived using this. cipher values are valid starting from WIFI_CIPHER_TYPE_TKIP, enum values before that will be considered as invalid and default cipher suites(TKIP+CCMP) will be used. Valid cipher suites in softAP mode are WIFI_CIPHER_TYPE_TKIP, WIFI_CIPHER_TYPE_CCMP and WIFI_CIPHER_TYPE_TKIP_CCMP. */
 //     bool ftm_responder;         /**< Enable FTM Responder mode */
 // } wifi_ap_config_t;
+
+
+/**
+ * 设置 wifi AP 模式的参数
+ * 
+ * 参数 mode :
+ * ```
+ * {
+ *     ssid: string ,
+ *     password?: string ,
+ *     "threshold.authmode"?: 0-8 ,
+ *     channel?: 1-13 ,
+ *     max_connection?: number = 4 , // 最大客户连接数
+ *     ssid_hidden:bool = false ,    // 热点不会被扫描到
+ *     beacon_interval?: number ,
+ *     pairwise_cipher?: number ,
+ *     ftm_responder?: bool ,        // Enable FTM Responder mode
+ * }
+ * ```
+ * 
+ * 如果 `password` 为空, 则 `threshold.authmode` 自动设置为 `WIFI_AUTH_OPEN`
+ * 
+ * 返回 0 表示 api 调用成功, 返回非 0 表示错误代码
+ * 
+ * @beapi beapi.wifi.setAPConfig
+ * @param config:object
+ * @return number
+ */
 static JSValue js_wifi_set_ap_config(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_WIFI_INITED
     CHECK_ARGC(1)
@@ -428,7 +571,15 @@ static JSValue js_wifi_set_ap_config(JSContext *ctx, JSValueConst this_val, int 
 }
 
 
-
+/**
+ * 返回 wifi 的工作参数
+ * 
+ * 返回的对象可参考 `setStaConfig()` 和 `setAPConfig()` 的 `mode` 参数
+ * 
+ * @beapi beapi.wifi.getConfig
+ * @param mode:1|2  1代表 sta , 2代表 ap
+ * @return object
+ */
 static JSValue js_wifi_get_config(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_WIFI_INITED
     CHECK_ARGC(1)
@@ -474,6 +625,14 @@ static JSValue js_wifi_get_config(JSContext *ctx, JSValueConst this_val, int arg
 }
 
 
+/**
+ * 设置一个用于接收 wifi 事件的回调函数
+ * 
+ * > 只能设置一个回调函数, 如果已经存在, 则会替换掉原来的
+ * 
+ * @beapi beapi.wifi.registerEventHandle
+ * @param callback:(eventType:number,eventId:number,data:any)=>void
+ */
 static JSValue js_wifi_register_event_handle(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(1)
     if( !JS_IsFunction(ctx, argv[0]) ){
@@ -485,12 +644,29 @@ static JSValue js_wifi_register_event_handle(JSContext *ctx, JSValueConst this_v
     return JS_UNDEFINED ;
 }
 
+/**
+ * 启动 wifi
+ * 
+ * 返回 0 表示 api 调用成功, 返回非 0 表示错误代码
+ * 
+ * @beapi beapi.wifi.start
+ * @return number
+ */
 static JSValue js_wifi_start(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_WIFI_INITED
     esp_err_t err = esp_wifi_start() ;
     _started = err == ESP_OK ;
     return JS_NewInt32(ctx, err);
 }
+
+/**
+ * 停止 wifi
+ * 
+ * 返回 0 表示 api 调用成功, 返回非 0 表示错误代码
+ * 
+ * @beapi beapi.wifi.stop
+ * @return number
+ */
 static JSValue js_wifi_stop(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_WIFI_INITED
     esp_err_t err = esp_wifi_stop() ;
@@ -515,6 +691,13 @@ static JSValue js_wifi_stop(JSContext *ctx, JSValueConst this_val, int argc, JSV
 //     wifi_sta_info_t sta[ESP_WIFI_MAX_CONN_NUM]; /**< station list */
 //     int       num; /**< number of stations in the list (other entries are invalid) */
 // } wifi_sta_list_t;
+
+/**
+ * 返回所有连接到本机AP的客户机
+ * 
+ * @beapi beapi.wifi.allSta
+ * @return {mac:string,rssi:string}[]
+ */
 static JSValue js_wifi_ap_all_sta(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_WIFI_INITED
     wifi_sta_list_t clients;
@@ -525,6 +708,7 @@ static JSValue js_wifi_ap_all_sta(JSContext *ctx, JSValueConst this_val, int arg
     JSValue arr = JS_NewArray(ctx) ;
     for(int i=0; i<clients.num; i++) {
         JSValue obj = JS_NewObject(ctx) ;
+        JS_SetPropertyStr(ctx, obj, "mac", JS_NewString(ctx, "unimplemented")) ;
         JS_SetPropertyStr(ctx, obj, "rssi", JS_NewInt32(ctx, clients.sta[i].rssi)) ;
         JS_SetPropertyUint32(ctx, arr, i, obj) ;
     }
@@ -533,7 +717,12 @@ static JSValue js_wifi_ap_all_sta(JSContext *ctx, JSValueConst this_val, int arg
 }
 
 /**
- * wifi mode 必须包含 sta
+ * 开始扫描附近的AP
+ * 
+ * > wifi STA 模式必须启动
+ * 
+ * @beapi beapi.wifi.scanStart
+ * @return bool
  */
 static JSValue js_wifi_scan_start(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_WIFI_INITED
@@ -555,10 +744,23 @@ static JSValue js_wifi_scan_start(JSContext *ctx, JSValueConst this_val, int arg
         return JS_FALSE ;
     }
 }
+
+/**
+ * 停止AP扫描
+ * 
+ * @beapi beapi.wifi.scanStop
+ * @return bool
+ */
 static JSValue js_wifi_scan_stop(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_WIFI_INITED
     return esp_wifi_scan_stop() == ESP_OK? JS_TRUE : JS_FALSE;
 }
+/**
+ * 返回 AP 扫描是否正在进行
+ * 
+ * @beapi beapi.wifi.isScanning
+ * @return bool
+ */
 static JSValue js_wifi_is_scanning(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_WIFI_INITED
     return _scanning? JS_TRUE : JS_FALSE;
@@ -593,6 +795,24 @@ static char * authmode_names(wifi_auth_mode_t auto_mode) {
             return "unknow" ;
     }
 }
+
+/**
+ * 取回 AP 扫描的结果
+ * 
+ * AP对象的格式:
+ * ```
+ * {
+ *     bssid:string ,
+ *     ssid:string ,
+ *     channel:number ,
+ *     rssi:number ,
+ *     authmode:number ,
+ * }
+ * ```
+ * 
+ * @beapi beapi.wifi.scanRecords
+ * @return object[]
+ */
 static JSValue js_wifi_scan_records(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_WIFI_INITED
     JSValue array = JS_NewArray(ctx) ;
@@ -627,9 +847,18 @@ static JSValue js_wifi_scan_records(JSContext *ctx, JSValueConst this_val, int a
     return array ;
 }
 
+
 bool inline wifi_has_inited() {
     return wifi_inited ;
 }
+/**
+ * 返回 wifi 是否已经初始化
+ * 
+ * beshell 启动时回自动初始化 wifi (除非在 nvs 中禁用 wifi)
+ * 
+ * @beapi beapi.wifi.hasInited
+ * @return bool
+ */
 static JSValue js_wifi_has_inited(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     return wifi_inited? JS_TRUE: JS_FALSE ;
 }

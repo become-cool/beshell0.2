@@ -29,7 +29,15 @@
 	}                                                       \
     var = tmp ;
 
-
+/**
+ * 绘制一条线段
+ * 
+ * @beapi beapi.lvgl.drawLine
+ * @param start:[number,number] 起点坐标
+ * @param end:[number,number] 终点坐标
+ * @param clip:lv_area_t 可绘制范围,超出范围会被忽略
+ * @param dsc:lv_draw_line_dsc_t 样式
+ */
 static JSValue js_lv_draw_line(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(4)
     if(!JS_IsArray(ctx, argv[0])) {
@@ -57,6 +65,15 @@ static JSValue js_lv_draw_line(JSContext *ctx, JSValueConst this_val, int argc, 
     lv_draw_line(&start, &end, clip, dsc) ;
     return JS_UNDEFINED ;
 }
+
+/**
+ * 绘制一个矩形
+ * 
+ * @beapi beapi.lvgl.drawRect
+ * @param rect:lv_area_t 矩形
+ * @param clip:lv_area_t 可绘制范围,超出范围会被忽略
+ * @param dsc:lv_draw_rect_dsc_t 样式
+ */
 static JSValue js_lv_draw_rect(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(3)
     lv_area_t * rect = JS_GetOpaque(argv[0],js_lv_area_class_id) ;
@@ -74,6 +91,19 @@ static JSValue js_lv_draw_rect(JSContext *ctx, JSValueConst this_val, int argc, 
     lv_draw_rect(rect, clip, dsc) ;
     return JS_UNDEFINED ;
 }
+
+/**
+ * 绘制一个圆
+ * 
+ * @beapi beapi.lvgl.drawArc
+ * @param x:number 圆心坐标 x
+ * @param y:number 圆心坐标 y
+ * @param radius:number 圆半径
+ * @param startAngle:number 起始角度
+ * @param endAngle:number 终止角度
+ * @param clip:lv_area_t 可绘制范围,超出范围会被忽略
+ * @param dsc:lv_draw_rect_dsc_t 样式
+ */
 static JSValue js_lv_draw_arc(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(7)
     ARGV_TO_INT16(0, x)
@@ -92,6 +122,22 @@ static JSValue js_lv_draw_arc(JSContext *ctx, JSValueConst this_val, int argc, J
     lv_draw_arc(x, y, radius, startAngle, endAngle, clip, dsc) ;
     return JS_UNDEFINED ;
 }
+
+
+/**
+ * 绘制一个凸多边形
+ * 
+ * > 该函数仅支持凸多边形,凹多边形需要先分割成多个凸多边形,分别绘制; 或者使用 Path 类
+ * 
+ * @beapi beapi.lvgl.drawArc
+ * @param x:number 圆心坐标 x
+ * @param y:number 圆心坐标 y
+ * @param radius:number 圆半径
+ * @param startAngle:number 起始角度
+ * @param endAngle:number 终止角度
+ * @param clip:lv_area_t 可绘制范围,超出范围会被忽略
+ * @param dsc:lv_draw_rect_dsc_t 样式
+ */
 static JSValue js_lv_draw_polygon(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(3)
 
@@ -294,6 +340,16 @@ static JSValue js_gl_path_add_arc(JSContext *ctx, JSValueConst this_val, int arg
     return JS_UNDEFINED ;
 }
 
+/**
+ * @brief 
+ * 
+ * @param ctx 
+ * @param this_val 
+ * @param argc 
+ * @param argv 
+ * @param draw_method 
+ * @return JSValue 
+ */
 static JSValue js_gl_path_draw(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv, int draw_method) {
     CHECK_ARGC(5)
     lv_coord_t x, y ;

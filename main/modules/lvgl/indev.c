@@ -27,6 +27,40 @@ indev_driver_spec_t * find_indev_spec_by_id(uint8_t id) {
     return NULL ;
 }
 
+static JSValue js_find_indev_by_id(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(1)
+
+    ARGV_TO_UINT8(0,id)
+
+    indev_driver_spec_t * spec = find_indev_spec_by_id(id) ;
+
+    if(!spec || !spec->jsobj || JS_IsUndefined(spec->jsobj) || JS_IsNull(spec->jsobj)) {
+        return JS_NULL ;
+    }
+
+    return JS_DupValue(ctx,JS_MKPTR(JS_TAG_OBJECT,spec->jsobj)) ;
+}
+
+static JSValue js_all_indev(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+
+    JSValue ret = JS_NewArray(ctx) ;
+    int idx = 0 ;
+
+    lv_indev_t * indev=NULL ;
+    while((indev=lv_indev_get_next(indev))) {
+        if( !indev->driver || !indev->driver->user_data ) {
+            continue;
+        }
+        JSValue jsobj = ((indev_driver_spec_t *)indev->driver->user_data)->jsobj ;
+        if(!jsobj || JS_IsUndefined(jsobj) || JS_IsNull(jsobj)) {
+            continue;
+        }
+        JS_SetPropertyUint32(ctx, ret, idx++, JS_DupValue(ctx,JS_MKPTR(JS_TAG_OBJECT,jsobj))) ;
+    }
+
+    return ret ;
+}
+
 inline void indev_emit_js_event(lv_indev_drv_t * drv, indev_driver_spec_t * drv_spec, const char * event_name, const char * key) {
     if( !drv->disp || !drv->disp->driver || !drv->disp->driver->user_data ) {
         return ;
@@ -195,11 +229,17 @@ static JSValue js_lv_indev_set_group(JSContext *ctx, JSValueConst this_val, int 
     return JS_UNDEFINED ;
 }
 
+static JSValue js_lv_indev_unregister(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    THROW_EXCEPTION("not implements yet") ;
+}
+
+
 
 
 static const JSCFunctionListEntry js_indev_base_proto_funcs[] = {
     JS_CFUNC_DEF("tick", 0, js_lv_indev_tick),
     JS_CFUNC_DEF("setGroup", 0, js_lv_indev_set_group),
+    JS_CFUNC_DEF("unregister", 0, js_lv_indev_unregister),
     JS_CFUNC_DEF("id", 0, js_lv_indev_id),
 } ;
 
@@ -224,6 +264,7 @@ void be_lv_indev_reset(JSContext * ctx) {
 
 void be_lv_indev_init() {
     JS_NewClassID(&js_indev_base_class_id);
+    // JS_NewClassID(&js_indev_fake_key_class_id);
 
     be_indev_pointer_init() ;
 #ifndef SIMULATION
@@ -240,10 +281,14 @@ void be_lv_indev_require(JSContext *ctx, JSValue lvgl) {
 
     JS_SetPropertyStr(ctx, lvgl, "setIndevCallback", JS_NewCFunction(ctx, js_set_indev_global_cb, "setIndevCallback", 1));
     JS_SetPropertyStr(ctx, lvgl, "clearIndevCallback", JS_NewCFunction(ctx, js_clear_indev_global_cb, "clearIndevCallback", 1));
+    JS_SetPropertyStr(ctx, lvgl, "allIndev", JS_NewCFunction(ctx, js_all_indev, "allIndev", 1));
+    JS_SetPropertyStr(ctx, lvgl, "findIndevById", JS_NewCFunction(ctx, js_find_indev_by_id, "findIndevById", 1));
     
     JSValue EventEmitterProto = js_get_glob_prop(ctx, 3, "beapi", "EventEmitter", "prototype") ;
     JSValue baseProto = QJS_DEF_CLASS(indev_base, "IndevBase", "lv.IndevBase", EventEmitterProto, lvgl) ;
     JS_FreeValue(ctx, EventEmitterProto);
+
+    // QJS_DEF_CLASS(indev_fake_key, "IndevFakeKey", "lv.IndevFakeKey", baseProto, lvgl)
 
     be_indev_pointer_require(ctx, lvgl, baseProto) ;
 #ifndef SIMULATION

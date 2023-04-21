@@ -127,6 +127,7 @@ const lstClasses = [
 }
 */
 const WidgetsMeta = []
+WidgetsMeta.byName = {}
 
 for(let clzconf of lstClasses) {
     if(typeof clzconf=='string') {
@@ -156,6 +157,7 @@ for(let clzconf of lstClasses) {
         clzconf.cusMethods = []
     }
     
+    WidgetsMeta.byName[clzconf.className] = clzconf
     WidgetsMeta.push(clzconf)
 }
 

@@ -31,6 +31,21 @@ static uint32_t gpio_state[PIN_CNT] = {
 } ;
 
 
+/**
+ * 设置 gpio 的工作模式
+ *  
+ * 参数 `mode` 的可选值为:
+ * * input 输入
+ * * output 输出
+ * * output-od 开漏输出
+ * * input-output 输入/输出 (分时复用)
+ * * input-output-od 输入/开漏输出 (分时复用)
+ * 
+ * @beapi beapi.gpio.pinMode
+ * @param pin:number mcu可用的gpio编号
+ * @param mode:string
+ * @return undefined
+ */
 JSValue js_gpio_pin_mode(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     
     CHECK_ARGC(2)
@@ -66,6 +81,20 @@ JSValue js_gpio_pin_mode(JSContext *ctx, JSValueConst this_val, int argc, JSValu
 }
 
 
+/**
+ * 设置 gpio pull 模式
+ *  
+ * 参数 `pullMode` 的可选值为:
+ * * up 上拉
+ * * down 下拉
+ * * updown 同时上下拉
+ * * floating 悬空
+ * 
+ * @beapi beapi.gpio.pinPull
+ * @param pin:number mcu可用的gpio编号
+ * @param pullMode:string
+ * @return undefined
+ */
 JSValue js_gpio_pin_pull(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     
     CHECK_ARGC(2)
@@ -98,12 +127,27 @@ JSValue js_gpio_pin_pull(JSContext *ctx, JSValueConst this_val, int argc, JSValu
     return JS_UNDEFINED ;
 }
 
+/**
+ * 以数字方式读取 gpio
+ * 
+ * @beapi beapi.gpio.digitalRead
+ * @param pin:number mcu可用的gpio编号
+ * @return 0|1
+ */
 JSValue js_gpio_digital_read(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(1)
     ARGV_TO_UINT8(0, pin)
     uint8_t value = gpio_get_level(pin) ;
     return JS_NewInt32(ctx, value) ;
 }
+/**
+ * 在 gpio 上以数字方式输出 
+ * 
+ * @beapi beapi.gpio.digitalWrite
+ * @param pin:number mcu可用的gpio编号
+ * @param value:0|1
+ * @return write
+ */
 JSValue js_gpio_digital_write(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(2)
     ARGV_TO_UINT8(0, pin)
@@ -117,6 +161,14 @@ JSValue js_gpio_digital_write(JSContext *ctx, JSValueConst this_val, int argc, J
 
 
 
+/**
+ * 设置 gpoi 的 adc 采样位宽
+ * 
+ * @beapi beapi.gpio.adcConfigBits
+ * @param pin:number mcu可用于 adc 的gpio编号
+ * @param bits:9-12
+ * @return bool
+ */
 JSValue js_adc_set_bits(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(2)
     ARGV_TO_UINT8(0, adc)
@@ -161,13 +213,21 @@ JSValue js_adc_set_bits(JSContext *ctx, JSValueConst this_val, int argc, JSValue
         THROW_EXCEPTION("pin is not a valid adc pin, must be 0, 2, 4, 12-15, 25-27, 32-39.")   \
     }
 
+/**
+ * 设置 gpoi 所使用的 adc 通道
+ * 
+ * @beapi beapi.gpio.setChannelAtten
+ * @param pin:number mcu可用于 adc 的gpio编号
+ * @param atten:0-3
+ * @return bool
+ */
 JSValue js_adc_set_channel_atten(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(2)
     ARGV_TO_UINT8(0, pin)
     ARGV_TO_UINT8(1, atten)
 
     if( atten<0 || atten>3 ) {
-        THROW_EXCEPTION("adcConfigBits() arg atten must be 0-3")
+        THROW_EXCEPTION("setChannelAtten() arg atten must be 0-3")
     }
 
     GPIO2ADCCHANNEL(pin, channel, adc)
@@ -185,6 +245,13 @@ JSValue js_adc_set_channel_atten(JSContext *ctx, JSValueConst this_val, int argc
 
 
 
+/**
+ * 读取 adc 采样结果
+ * 
+ * @beapi beapi.gpio.analogRead
+ * @param pin:number mcu可用于 adc 的gpio编号
+ * @return number
+ */
 JSValue js_gpio_analog_read(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(1)
     ARGV_TO_UINT8(0, pin)
@@ -251,6 +318,18 @@ static void IRAM_ATTR _gpio_isr_handler(void* arg) {
 }
 
 
+/**
+ * 为 gpio 设置输入中断
+ * 
+ * 参数模式:
+ * * 1 上升沿
+ * * 2 下降沿
+ * * 3 上升沿/下降沿
+ * 
+ * @beapi beapi.gpio.setPinISR
+ * @param pin:number mcu可用于输入的gpio编号
+ * @param mode:1|2|3
+ */
 JSValue js_gpio_set_pin_isr(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(2)
     ARGV_TO_UINT8(0, pin)
@@ -278,6 +357,14 @@ JSValue js_gpio_set_pin_isr(JSContext *ctx, JSValueConst this_val, int argc, JSV
 
     return JS_UNDEFINED;
 }
+
+/**
+ * 取消 gpio 输入中断
+ * 
+ * 
+ * @beapi beapi.gpio.unsetPinISR
+ * @param pin:number mcu可用于输入的gpio编号
+ */
 JSValue js_gpio_unset_pin_isr(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(1)
     ARGV_TO_UINT8(0, pin)
@@ -289,6 +376,17 @@ JSValue js_gpio_unset_pin_isr(JSContext *ctx, JSValueConst this_val, int argc, J
 
     return JS_UNDEFINED;
 }
+
+/**
+ * 设置 gpio 输入中断的回调函数
+ * 
+ * > callback 只是一个回调函数, 在 js 事件循环中被调用, BeShell JS 代码没有机会在中断中执行
+ * 
+ * > 只能设置一个回调函数, 如果已经存在, 则会替换掉原来的
+ * 
+ * @beapi beapi.gpio.setPinISRCallback
+ * @param pin:number mcu可用于输入的gpio编号
+ */
 JSValue js_gpio_set_pin_isr_callback(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(1)
     if(!JS_IsFunction(ctx, argv[0])) {
@@ -303,10 +401,16 @@ JSValue js_gpio_set_pin_isr_callback(JSContext *ctx, JSValueConst this_val, int 
 }
 
 /**
- * timer 0-3
- * freq
- * resolution  1-20
- * speedMode 0:high, 1:low
+ * 设置 PWM 定时器
+ * 
+ * 返回 0 表示 api 调用成功, 返回非 0 表示错误代码
+ * 
+ * @beapi beapi.gpio.pwmConfigTimer
+ * @param timer:0-3 定时器编号
+ * @param freq:number 频率(hz)
+ * @param resolution:1-20 PWM分辨率
+ * @param speedMode:0|1 速度模式, 0: high, 1: low
+ * @return number
  */
 JSValue js_pwm_config_timer(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
 
@@ -337,12 +441,19 @@ JSValue js_pwm_config_timer(JSContext *ctx, JSValueConst this_val, int argc, JSV
     return JS_NewInt32(ctx, ledc_timer_config(&timerConf)) ;
 }
 
+
 /**
- * gpio 0-39
- * duty
- * channel 0-7
- * timer 0-3
- * speedMode 0:high, 1:low
+ * 设置 PWM 通道
+ * 
+ * 返回 0 表示 api 调用成功, 返回非 0 表示错误代码
+ * 
+ * @beapi beapi.gpio.pwmConfigChannel
+ * @param pin:number mcu可用于输出的gpio编号
+ * @param duty:number 占空比
+ * @param channel:0-7
+ * @param timer:0-3 定时器编号
+ * @param speedMode:0|1 速度模式, 0: high, 1: low
+ * @return number
  */
 JSValue js_pwm_config_channel(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     
@@ -528,11 +639,18 @@ JSValue pwm_config(JSContext *ctx, uint8_t gpio, uint32_t freq, uint8_t resoluti
     return JS_NewInt32(ctx, 0) ;
 }
 
+
 /**
- * gpio
- * freq
- * resolution  1-20
- * duty
+ * 设置 PWM
+ * 
+ * 返回 0 表示 api 调用成功, 返回非 0 表示错误代码
+ * 
+ * @beapi beapi.gpio.pwmConfig
+ * @param pin:number mcu可用于输出的gpio编号
+ * @param freq:number 频率(hz)
+ * @param resolution:1-20 PWM分辨率
+ * @param duty:number 占空比
+ * @return number
  */
 JSValue js_pwm_config(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(4)
@@ -547,9 +665,16 @@ JSValue js_pwm_config(JSContext *ctx, JSValueConst this_val, int argc, JSValueCo
     return pwm_config(ctx, gpio, freq, resolution, duty, NULL, NULL) ;
 }
 
+
 /**
- * gpio
- * duty
+ * PWM 输出
+ * 
+ * 返回 0 表示 api 调用成功, 返回非 0 表示错误代码
+ * 
+ * @beapi beapi.gpio.pwmWrite
+ * @param pin:number mcu可用于输出的gpio编号
+ * @param duty:number 占空比
+ * @return number
  */
 JSValue js_pwm_write(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
 
@@ -590,6 +715,12 @@ endloop:
     return JS_NewInt32(ctx, 0) ;
 }
 
+/**
+ * 停止 PWM 输出
+ * 
+ * @beapi beapi.gpio.pwmStop
+ * @param pin:number mcu可用于输出的gpio编号
+ */
 JSValue js_pwm_stop(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(1)
     ARGV_TO_UINT8(0, gpio)

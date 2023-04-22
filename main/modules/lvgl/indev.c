@@ -61,31 +61,51 @@ static JSValue js_all_indev(JSContext *ctx, JSValueConst this_val, int argc, JSV
     return ret ;
 }
 
-inline void indev_emit_js_event(lv_indev_drv_t * drv, indev_driver_spec_t * drv_spec, const char * event_name, const char * key) {
-    if( !drv->disp || !drv->disp->driver || !drv->disp->driver->user_data ) {
-        return ;
-    }
-    disp_drv_spec_t * disp_spec = (disp_drv_spec_t*)drv->disp->driver->user_data ;
-    if(!disp_spec->enable_input_event || !disp_spec->jsobj) {
-        return ;
-    }
-    JSValue jsobj = JS_MKPTR(JS_TAG_OBJECT, disp_spec->jsobj) ;
-    JSValue emit = JS_GetPropertyStr(disp_spec->ctx,jsobj,"emit") ;
-    if( JS_IsFunction(disp_spec->ctx, emit) ) {
-        
-        MAKE_ARGV2(argv
-            , JS_NewString(disp_spec->ctx, event_name)
-            , JS_NewString(disp_spec->ctx, key)
-        )
-        JSValue ret = JS_Call(disp_spec->ctx, emit, jsobj, 2, argv ) ;
-        if (JS_IsException(ret)) {
-            js_std_dump_error(disp_spec->ctx);
-        }
-
-        free(argv) ;
-    }
+inline void indev_emit_js_event(indev_driver_spec_t * indev_spec, const char * event_name, const char * key) {
     
-    JS_FreeValue(disp_spec->ctx, emit);
+    MAKE_ARGV2(argv
+        , JS_NewString(indev_spec->ctx, event_name)
+        , JS_NewString(indev_spec->ctx, key)
+    )
+
+    // 在 lvgl 屏幕对象上触发事件
+    if ( indev_spec->lv_indev
+            && indev_spec->lv_indev->driver
+            && indev_spec->lv_indev->driver->disp
+            && indev_spec->lv_indev->driver->disp->driver
+            && indev_spec->lv_indev->driver->disp->driver->user_data
+    ){
+        disp_drv_spec_t * disp_spec = (disp_drv_spec_t *)indev_spec->lv_indev->driver->disp->driver->user_data ;
+
+        if(disp_spec->enable_input_event) {
+            JSValue jsobj = JS_MKPTR(JS_TAG_OBJECT, disp_spec->jsobj) ;
+            JSValue emit = JS_GetPropertyStr(disp_spec->ctx,jsobj,"emit") ;
+            if( JS_IsFunction(indev_spec->ctx, emit) ) {
+                JSValue ret = JS_Call(indev_spec->ctx, emit, jsobj, 2, argv ) ;
+                if (JS_IsException(ret)) {
+                    js_std_dump_error(indev_spec->ctx);
+                }
+            }
+            JS_FreeValue(indev_spec->ctx, emit);
+        }
+        
+    }
+
+    // 在 indev 对象上触发事件
+    if( indev_spec->enable_jsobj_event && indev_spec->jsobj ){
+
+        JSValue jsobj = JS_MKPTR(JS_TAG_OBJECT, indev_spec->jsobj) ;
+        JSValue emit = JS_GetPropertyStr(indev_spec->ctx,jsobj,"emit") ;
+        if( JS_IsFunction(indev_spec->ctx, emit) ) {
+            JSValue ret = JS_Call(indev_spec->ctx, emit, jsobj, 2, argv ) ;
+            if (JS_IsException(ret)) {
+                js_std_dump_error(indev_spec->ctx);
+            }
+        }
+        JS_FreeValue(indev_spec->ctx, emit);
+    }
+
+    free(argv) ;
 }
 
 JSContext * js_indev_global_cb_ctx = NULL ;

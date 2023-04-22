@@ -14,13 +14,14 @@ typedef struct list_item {
 typedef struct {
     list_item_t * head ;
     list_item_t * tail ;
+    size_t count ;
 } list_t;
 
 void list_init(list_t * lst) ;
 void list_append(list_t * lst, list_item_t * item) ;
 void list_remove(list_t * lst, list_item_t * item) ;
 bool list_is_empty(list_t * lst) ;
-unsigned int list_count(list_t * lst) ;
+unsigned int list_recount(list_t * lst) ;
 
 
 #define FOREACH_LIST(lst, item) for(list_item_t * item=(lst)->head; item!=NULL; item=item->next)

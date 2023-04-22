@@ -22,6 +22,7 @@
 #include "module_media.h"
 #include "module_driver.h"
 #include "driver_camera.h"
+#include "indev_i2c.h"
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -243,6 +244,10 @@ static void quickjs_deinit() {
 }
 
 
+
+
+
+
 void js_main_loop(const char * script){
 
     boot_level = 5 ;
@@ -304,6 +309,28 @@ void js_main_loop(const char * script){
         evalScript(ctx, script, false) ;
     }
 
+    
+#define ENABLE_MONITOR_LOOP 0
+
+#if ENABLE_MONITOR_LOOP
+	struct timespec __tm = {0, 0} ;
+    int64_t __tt1,__tt2 ;
+#define monitor(label, code)                                        \
+    {                                                               \
+	    clock_gettime(CLOCK_REALTIME, &__tm);                       \
+	    __tt1 = __tm.tv_nsec/1000/1000 + __tm.tv_sec*1000 ;         \
+        code                                                        \
+	    clock_gettime(CLOCK_REALTIME, &__tm);                       \
+	    __tt2 = __tm.tv_nsec/1000/1000 + __tm.tv_sec*1000 ;         \
+        if(__tt2-__tt1>100) {                                       \
+            printf(label " block loop: %lldms\n", __tt2-__tt1) ;    \
+        }                                                           \
+    }
+    
+#else 
+#define monitor(label, code) code
+#endif
+    
 #ifndef SIMULATION
     echo_DMA("loop start") ;
 #endif
@@ -332,19 +359,39 @@ void js_main_loop(const char * script){
             requst_reset = false ;
         }
 
-        js_std_loop(ctx) ;
+        monitor("std loop1", {
+            js_std_loop(ctx) ;
+        })
 #ifndef SIMULATION
-        // be_module_telnet_loop(ctx) ;
-        be_module_sniffer_loop() ;
-        be_module_socks_udp_loop(ctx) ;
+        monitor("sniffer", {
+            be_module_sniffer_loop() ;
+        })
+        monitor("socks udp", {
+            be_module_socks_udp_loop(ctx) ;
+        })
+        monitor("gpio", {
         be_module_gpio_loop(ctx) ;
+        })
 #endif
-        be_telnet_loop(ctx) ;
-        be_module_mg_loop(ctx) ;
-        be_module_lvgl_loop(ctx) ;
-        be_module_eventloop_loop(ctx) ;
+        monitor("telnet", {
+            be_telnet_loop(ctx) ;
+        })
+        monitor("mg", {
+            be_module_mg_loop(ctx) ;
+        })
+        monitor("mg", {
+            be_indev_i2c_loop(ctx) ;
+        })
+        monitor("lvgl", {
+            be_module_lvgl_loop(ctx) ;
+        })
+        monitor("eventloop", {
+            be_module_eventloop_loop(ctx) ;
+        })
 
-        js_std_loop(ctx) ;
+        monitor("std loop2", {
+            js_std_loop(ctx) ;
+        })
 #ifndef SIMULATION
         vTaskDelay(0) ;
 #endif

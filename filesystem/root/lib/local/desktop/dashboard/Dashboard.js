@@ -111,7 +111,7 @@ class Dashboard extends lv.Column {
             } ,
             {
                 class: SysStatus ,
-                ref: "row2" ,
+                ref: "status" ,
             }]
         },this)
 

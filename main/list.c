@@ -4,6 +4,7 @@
 void list_init(list_t * lst) {
     lst->head = NULL ;
     lst->tail = NULL ;
+    lst->count = 0 ;
 }
 
 void list_append(list_t * lst, list_item_t * item) {
@@ -19,6 +20,8 @@ void list_append(list_t * lst, list_item_t * item) {
     if(!lst->head) {
         lst->head = item ;
     }
+
+    lst->count ++ ;
 }
 
 
@@ -41,6 +44,7 @@ void list_remove(list_t * lst, list_item_t * item) {
     item->next = NULL ;
     item->prev = NULL ;
 
+    lst->count -- ;
 }
 
 bool list_is_empty(list_t * lst) {
@@ -54,10 +58,11 @@ bool list_is_empty(list_t * lst) {
 }
 
 
-unsigned int list_count(list_t * lst) {
+unsigned int list_recount(list_t * lst) {
     unsigned int cnt = 0 ;
     FOREACH_LIST(lst, item) {
         cnt ++ ;
     }
+    lst->count = cnt ;
     return cnt ;
 }

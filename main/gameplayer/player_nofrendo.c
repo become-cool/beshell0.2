@@ -577,14 +577,15 @@ void osd_getinput(void) {
             continue;
         }
         spec = (indev_driver_spec_t *) indev->driver->user_data ;
-        if(spec->driver==INDEV_DRIVER_JOYPAD && spec->found) {
+        if(spec->driver==INDEV_DRIVER_JOYPAD) {
+
             // dn(spec->conf.i2c.addr)
             if(spec->conf.i2c.addr==51) {
-                btns_1 = spec->data.buttons.value ;
+                btns_1 = indev_nav_take_value(spec) ;
                 // indev_nav_read_i2c(spec, & btns_1) ;
             }
             else if(spec->conf.i2c.addr==52) {
-                btns_2 = spec->data.buttons.value ;
+                btns_2 = indev_nav_take_value(spec) ;
                 // indev_nav_read_i2c(spec, & btns_2) ;
             }
         }

@@ -5,10 +5,13 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "lvgl.h"
+#include "list.h"
 
 #ifndef SIMULATION
 #include "driver/spi_master.h"
 #include "driver/i2c.h"
+#include <freertos/FreeRTOS.h>
+#include <freertos/queue.h>
 #endif
 
 typedef enum {
@@ -30,6 +33,8 @@ typedef enum {
     NAVKEY_SELECT = 0x80 ,
 } nav_key_t ;
 
+
+// #define INPUT_QUEUE_SIZE 10
 
 typedef struct {
 
@@ -65,9 +70,23 @@ typedef struct {
         } pointer ;
         struct {
             uint32_t state ;
-            uint32_t press ;
-            uint32_t release ;
-            uint8_t value ;
+            uint32_t unread_pressed ;
+            uint32_t unread_released ;
+            // uint32_t press ;
+            // uint32_t release ;
+
+            // uint8_t value ;
+#ifndef SIMULATION
+            QueueHandle_t queue ;
+#endif
+
+            // bool unread ;
+
+            // list_t queue ;
+            // uint8_t queue_length ;
+            // uint8_t queue[INPUT_QUEUE_SIZE] ;
+            // uint8_t queue_length ;  // 如果超出 INPUT_QUEUE_SIZE, 则等于 0xFF
+
 #ifndef SIMULATION
             SemaphoreHandle_t semaphore ;
 #endif
@@ -99,7 +118,7 @@ typedef struct {
 } indev_driver_spec_touch_t ;
 
 indev_driver_spec_t * find_indev_spec_by_id(uint8_t id) ;
-void indev_emit_js_event(lv_indev_drv_t * drv, indev_driver_spec_t * drv_spec, const char * event_name, const char * key) ;
+void indev_emit_js_event(indev_driver_spec_t * drv_spec, const char * event_name, const char * key) ;
 void indev_global_cb_proc(lv_indev_data_t *data) ;
 
 extern uint8_t _indev_id ;

@@ -20,7 +20,8 @@ function cp(from, to) {
 
 function dist(firmware, targetDir) {
 
-    let path = targetDir + "/beshell-"+version
+    let path = targetDir + "/last"
+    // let path = targetDir + "/beshell-"+version
     console.log("\r\ndispense to", path, firmware)
     mkdir(path)
 

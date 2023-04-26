@@ -46,10 +46,10 @@ btn_key_conf_t btn_key_conf[8] = {
 // ------------
 // InDevNav List
 
-static list_t * lst_devs = NULL ;
+static be_list_t * lst_devs = NULL ;
 
 typedef struct {
-    list_item_t base ;
+    be_list_item_t base ;
     indev_driver_spec_t * spec ;
     uint8_t last_value ;
 } indev_item_t ;
@@ -100,7 +100,7 @@ static void i2c_indev_init(indev_driver_spec_t * spec) {
     memset(item, 0, sizeof(indev_item_t)) ;
 
     item->spec = spec ;
-    list_append(lst_devs, &item->base) ;
+    be_list_append(lst_devs, &item->base) ;
 
     spec->data.buttons.queue = xQueueCreate(1, sizeof(uint8_t));
 
@@ -116,7 +116,7 @@ static void i2c_indev_deinit(indev_driver_spec_t * spec) {
 
     FOREACH_TYPE_LIST(lst_devs, indev_item_t, item) {
         if(item->spec==spec) {
-            list_remove(lst_devs, item) ;
+            be_list_remove(lst_devs, item) ;
             return ;
         }
     }
@@ -393,9 +393,9 @@ void be_indev_i2c_init() {
     JS_NewClassID(&js_lv_indev_nav_class_id);
 
     if(!lst_devs) {
-        lst_devs = malloc(sizeof(list_t)) ;
-        memset(lst_devs,0,sizeof(list_t)) ;
-        list_init(lst_devs) ;
+        lst_devs = malloc(sizeof(be_list_t)) ;
+        memset(lst_devs,0,sizeof(be_list_t)) ;
+        be_list_init(lst_devs) ;
     }
 
 }
@@ -408,8 +408,13 @@ void be_indev_i2c_require(JSContext *ctx, JSValue lvgl, JSValue baseProto) {
 
 inline uint8_t indev_nav_take_value(indev_driver_spec_t * spec) {
     uint8_t value = 0 ;
-    xQueueReceive(spec->data.buttons.queue, &value, 0) ;
-    return value ;
+    if( xQueueReceive(spec->data.buttons.queue, &value, 0) == pdTRUE ) {
+        spec->data.buttons.state = value ;
+        return value ;
+    }
+    else {
+        return spec->data.buttons.state ;
+    }
 }
 
 inline void be_indev_i2c_loop(JSContext *ctx) {

@@ -1,13 +1,13 @@
 #include "list.h"
 #include <stdio.h>
 
-void list_init(list_t * lst) {
+void be_list_init(be_list_t * lst) {
     lst->head = NULL ;
     lst->tail = NULL ;
     lst->count = 0 ;
 }
 
-void list_append(list_t * lst, list_item_t * item) {
+void be_list_append(be_list_t * lst, be_list_item_t * item) {
     
     item->prev = lst->tail;
     item->next = NULL;
@@ -25,7 +25,7 @@ void list_append(list_t * lst, list_item_t * item) {
 }
 
 
-void list_remove(list_t * lst, list_item_t * item) {
+void be_list_remove(be_list_t * lst, be_list_item_t * item) {
 
     if(item->prev) {
         item->prev->next = item->next ;
@@ -47,7 +47,7 @@ void list_remove(list_t * lst, list_item_t * item) {
     lst->count -- ;
 }
 
-bool list_is_empty(list_t * lst) {
+bool be_list_is_empty(be_list_t * lst) {
     if( lst->head!=NULL && lst->tail!=NULL ){
         return 0 ;
     }
@@ -58,7 +58,7 @@ bool list_is_empty(list_t * lst) {
 }
 
 
-unsigned int list_recount(list_t * lst) {
+unsigned int be_list_recount(be_list_t * lst) {
     unsigned int cnt = 0 ;
     FOREACH_LIST(lst, item) {
         cnt ++ ;

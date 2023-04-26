@@ -82,7 +82,7 @@ typedef struct {
 
             // bool unread ;
 
-            // list_t queue ;
+            // be_list_t queue ;
             // uint8_t queue_length ;
             // uint8_t queue[INPUT_QUEUE_SIZE] ;
             // uint8_t queue_length ;  // 如果超出 INPUT_QUEUE_SIZE, 则等于 0xFF

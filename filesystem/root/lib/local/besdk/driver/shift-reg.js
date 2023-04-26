@@ -1,5 +1,8 @@
 const DeviceDriver = require("./DeviceDriver")
 class ShiftReg extends DeviceDriver {
+    constructor(){
+        super("shift")
+    }
     setup(opt) {
         if(isNaN(opt.clk)) {
             throw new Error("missing clk pin")
@@ -18,7 +21,7 @@ class ShiftReg extends DeviceDriver {
         }
     }
     read(bits) {
-        return beapi.driver.common.shift_read(this.opt.data,this.opt.clk,this.opt.pl,this.opt.ce,bits)
+        return beapi.driver.common.shift_read(this.opt.data,this.opt.clk,this.opt.pl,this.opt.ce,bits||8)
     }
 }
 module.exports = ShiftReg

@@ -60,7 +60,7 @@ static JSValue js_lv_draw_line(JSContext *ctx, JSValueConst this_val, int argc, 
     }
     lv_draw_line_dsc_t * dsc = JS_GetOpaque(argv[3],js_lv_draw_line_dsc_class_id) ;
     if(!dsc) {
-        THROW_EXCEPTION("arg dsc must a lv.DrawRectDsc object")
+        THROW_EXCEPTION("arg dsc must a lv.DrawLineDsc object")
     }
     lv_draw_line(&start, &end, clip, dsc) ;
     return JS_UNDEFINED ;

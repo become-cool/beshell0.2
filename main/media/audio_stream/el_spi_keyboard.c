@@ -14,16 +14,16 @@
 inline static void trans_keyboard(audio_el_spi_keyboard_t * el, uint8_t * keys, uint8_t * leds) {
 
     // 触发 74HC165 PL引脚，将 key 读入到移位寄存器
-    record_time(xx, {
+    // record_time(xx, {
         gpio_set_level(el->pl_pin, 0) ;
         vTaskDelay(0) ;
         gpio_set_level(el->pl_pin, 1) ;
         vTaskDelay(0) ;
-    })
+    // })
 
-    record_time(yy, {
+    // record_time(yy, {
         spi_trans_int(el->handle, keys, leds, el->byte_num*8) ;
-    })
+    // })
 }
 
 // 键盘读取任务线程

@@ -131,7 +131,7 @@ static JSContext * init_custom_context(JSRuntime *rt) {
 
 #ifndef SIMULATION
 
-#ifdef BT_ENABLED
+#ifdef CONFIG_BT_ENABLED
     be_module_bt_require(ctx) ;
 #endif
     be_module_wifi_require(ctx) ;

@@ -281,6 +281,10 @@ s.setDTR(1); s.setRTS(0)
 编译器优化选项 -Os 也可以大幅减少 iram0 占用。
 
 
+官方建议 :
+
+https://docs.espressif.com/projects/esp-idf/en/latest/esp32c3/api-guides/performance/ram-usage.html#optimizing-iram-usage
+
 ### 读写空指针、野指针、悬空指针
 
 ```

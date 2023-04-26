@@ -1,5 +1,6 @@
 #include "module_telnet.h"
 #include "telnet_stdio.h"
+#include "telnet_ble.h"
 #include "telnet_ws.h"
 #include "telnet_serial.h"
 #include "module_utils.h"
@@ -143,6 +144,8 @@ void be_telnet_init() {
 
 	be_telnet_ws_init() ;
 
+	// be_telnet_ble_init() ;
+
 #ifdef SIMULATION
 	be_telnet_stdio_init() ;
 #else
@@ -164,6 +167,8 @@ void be_telnet_require(JSContext *ctx) {
 	JS_FreeValue(ctx, global);
 	
 	be_telnet_ws_require(ctx, telnet) ;
+
+	be_telnet_ble_require(ctx) ;
 
 #ifdef SIMULATION
 	be_telnet_stdio_require(ctx) ;
@@ -187,5 +192,6 @@ void be_telnet_reset(JSContext *ctx) {
 	be_telnet_stdio_reset(ctx) ;
 #else
 	be_telnet_serial_reset(ctx) ;
+	be_telnet_ble_reset(ctx) ;
 #endif
 }

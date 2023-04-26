@@ -11,3 +11,4 @@ filesystem/root/home/become
 sdkconfig
 sdkconfig.old
 dependencies.lock
+node_modules

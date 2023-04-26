@@ -52,28 +52,43 @@ JSValue js_gpio_pin_mode(JSContext *ctx, JSValueConst this_val, int argc, JSValu
     ARGV_TO_UINT8(0, pin)
     char * mode = JS_ToCString(ctx, argv[1]) ;
 
-    esp_err_t err ;
+	gpio_config_t conf = {
+		    .pin_bit_mask = (1ULL<<pin),			/*!< GPIO pin: set with bit mask, each bit maps to a GPIO */
+		    .mode = GPIO_MODE_DISABLE,              /*!< GPIO mode: set input/output mode                     */
+		    .pull_up_en = GPIO_PULLUP_DISABLE,      /*!< GPIO pull-up                                         */
+		    .pull_down_en = GPIO_PULLDOWN_DISABLE,  /*!< GPIO pull-down                                       */
+		    .intr_type = GPIO_INTR_DISABLE      	/*!< GPIO interrupt type                                  */
+	};
+
+    // esp_err_t err ;
     if(strcmp(mode,"input")==0) {
-        err = gpio_set_direction(pin, GPIO_MODE_INPUT) ;
+        // err = gpio_set_direction(pin, GPIO_MODE_INPUT) ;
+        conf.mode = GPIO_MODE_INPUT ;
     }
     else if(strcmp(mode,"output")==0) {
-        err = gpio_set_direction(pin, GPIO_MODE_OUTPUT) ;
+        // err = gpio_set_direction(pin, GPIO_MODE_OUTPUT) ;
+        conf.mode = GPIO_MODE_OUTPUT ;
     }
     else if(strcmp(mode,"output-od")==0) {
-        err = gpio_set_direction(pin, GPIO_MODE_OUTPUT_OD) ;
+        // err = gpio_set_direction(pin, GPIO_MODE_OUTPUT_OD) ;
+        conf.mode = GPIO_MODE_OUTPUT_OD ;
     }
     else if(strcmp(mode,"input-output")==0) {
-        err = gpio_set_direction(pin, GPIO_MODE_INPUT_OUTPUT) ;
+        // err = gpio_set_direction(pin, GPIO_MODE_INPUT_OUTPUT) ;
+        conf.mode = GPIO_MODE_INPUT_OUTPUT ;
     }
     else if(strcmp(mode,"input-output-od")==0) {
-        err = gpio_set_direction(pin, GPIO_MODE_INPUT_OUTPUT_OD) ;
+        // err = gpio_set_direction(pin, GPIO_MODE_INPUT_OUTPUT_OD) ;
+        conf.mode = GPIO_MODE_INPUT_OUTPUT_OD ;
     }
     else {
         THROW_EXCEPTION("unknow pin mode(input, output, output-od, input-output, input-output-od)")
     }
-
-    if(err!=ESP_OK) {
+    
+	if(gpio_config(&conf) != ESP_OK)
+    {
         THROW_EXCEPTION("set pin mode failed, arg invalid?")
+        return;
     }
 
     JS_FreeCString(ctx, mode) ;
@@ -153,7 +168,10 @@ JSValue js_gpio_digital_write(JSContext *ctx, JSValueConst this_val, int argc, J
     ARGV_TO_UINT8(0, pin)
     ARGV_TO_UINT8(1, value)
     
-    gpio_set_level(pin, value==0? 0: 1) ;
+    esp_err_t res = gpio_set_level(pin, value==0? 0: 1) ;
+    if(res != ESP_OK) {
+        THROW_EXCEPTION("gpio_set_level() failed with code: %d", res)
+    }
     // digitalWrite(pin, value) ;
 
     return JS_UNDEFINED ;
@@ -790,7 +808,7 @@ void be_module_gpio_require(JSContext *ctx) {
 }
 
 void be_module_gpio_init() {
-    gpio_install_isr_service(0);
+    // gpio_install_isr_service(0);
     
     for(uint8_t p=0; p<PIN_CNT; p++) {
         gpio_state[p] = 0 ;

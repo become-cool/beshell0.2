@@ -114,7 +114,7 @@ static JSValue js_spi_bus_free(JSContext *ctx, JSValueConst this_val, int argc, 
  * freq
  * mode
  */
-static JSValue js_spi_device_add(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+static JSValue js_spi_add_device(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
 
     spi_device_handle_t handle = NULL ;
     uint8_t spi_handle_index ;
@@ -147,9 +147,9 @@ static JSValue js_spi_device_remove(JSContext *ctx, JSValueConst this_val, int a
 
 #define ARGV_TO_SPI_HANDLE(i, handle)                   \
     ARGV_TO_UINT8(i, spiidx)                            \
-    spi_device_handle_t handle = spi_handle_with_id(spiidx) ;  \
+    spi_device_handle_t handle = spi_handle_with_id(spiidx) ; \
     if(handle==NULL) {                                  \
-        THROW_EXCEPTION("know spi handle")              \
+        THROW_EXCEPTION("unknow spi device id:%d",spiidx) \
     }
 
 /**
@@ -349,7 +349,7 @@ void be_module_serial_spi_require(JSContext *ctx, JSValue pkg) {
     JS_SetPropertyStr(ctx, pkg, "spi", spi);
     JS_SetPropertyStr(ctx, spi, "setup", JS_NewCFunction(ctx, js_spi_bus_setup, "setup", 1));
     JS_SetPropertyStr(ctx, spi, "free", JS_NewCFunction(ctx, js_spi_bus_free, "free", 1));
-    JS_SetPropertyStr(ctx, spi, "addDevice", JS_NewCFunction(ctx, js_spi_device_add, "addDevice", 1));
+    JS_SetPropertyStr(ctx, spi, "addDevice", JS_NewCFunction(ctx, js_spi_add_device, "addDevice", 1));
     JS_SetPropertyStr(ctx, spi, "removeDevice", JS_NewCFunction(ctx, js_spi_device_remove, "removeDevice", 1));
     JS_SetPropertyStr(ctx, spi, "send", JS_NewCFunction(ctx, js_spi_send, "send", 1));
     JS_SetPropertyStr(ctx, spi, "sendU8", JS_NewCFunction(ctx, js_spi_send_u8, "sendU8", 1));

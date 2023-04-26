@@ -1,0 +1,8 @@
+{
+    "spi": {
+    },
+    "dev": [{
+        "driver":"shift-reg" ,
+        "setup": {"data":12,"clk":14,"ce":15,"pl":13}
+    }]
+}

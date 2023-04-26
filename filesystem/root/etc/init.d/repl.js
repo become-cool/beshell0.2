@@ -308,7 +308,7 @@ function help() {
 
 const ShellCmds = {
     cd, pwd, ls, cp, rm, mv, touch, cat, stat, mkdir
-    , require:cmd_require
+    , require:cmd_require, '.':cmd_require
     , free, reset, reboot, onboot
     , compile, help, "?": help
 }

@@ -1,5 +1,6 @@
 
 TARGET:=$(shell node filesystem/target.js)
+ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
 
 all: mkonly dist-beshell
 
@@ -35,10 +36,7 @@ mkfs-root:
 	node filesystem/rawfs-pack-dir.js
 
 mkfs-home:
-	bin/mklittlefs -c filesystem/tmp/home -s 204800 filesystem/img/fs-home.img -d 5
-
-mkfs-home-more:
-	bin/mklittlefs -c filesystem/tmp/home -s 6291456 filesystem/img/fs-home.img -d 5
+	node filesystem/mk-fs-home.js ${ARGS}
 
 mk-firmwarejson:
 	node filesystem/mk-firmware-json.js

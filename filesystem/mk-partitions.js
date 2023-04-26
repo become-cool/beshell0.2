@@ -27,6 +27,7 @@ let parttables4MB = [
     {
         name: "factory",
         type: "app",
+        addr: 0x10000 ,
         subtype: "factory",
         size: appsize,
     } ,
@@ -60,6 +61,7 @@ let parttables16MB = [
     {
         name: "factory",
         type: "app",
+        addr: 0x10000 ,
         subtype: "factory",
         size: appsize,
     } ,
@@ -97,6 +99,8 @@ function generatePartitionsTable(parts, flashSize) {
         }
         
         output+= `${partinfo.name}, ${partinfo.type}, ${partinfo.subtype}, 0x${offset.toString(16).toUpperCase()}, 0x${size.toString(16).toUpperCase()} \n`
+
+        console.log(partinfo.name, "0x"+(offset.toString(16)), "+", "0x"+(size.toString(16)), "=", "0x"+(offset+size).toString(16))
 
         offset+= size
     }

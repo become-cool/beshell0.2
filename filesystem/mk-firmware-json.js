@@ -6,6 +6,8 @@ function mkMetaJson() {
     // 计算 beshell.bin 文件的大小，按 8 取整做为分区的尺寸
     const [appsize, rootsize] = require('./app-partition-size.js')
 
+    console.log(appsize, rootsize)
+
     const meta = {
         "name": "BeShell" ,
         "version": version ,

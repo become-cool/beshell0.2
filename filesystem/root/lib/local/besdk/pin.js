@@ -165,6 +165,6 @@ global.pin = function(gpio) {
 let _pinMode = beapi.gpio.pinMode
 beapi.gpio.pinMode = function(gpio, mode) {
     _pinMode(gpio, mode)
-    pin(gpio).resetISR()
+    // pin(gpio).resetISR()
 }
 module.exports = Pin

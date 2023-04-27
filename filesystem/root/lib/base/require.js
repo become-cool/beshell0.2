@@ -38,7 +38,7 @@ function resolveExtName(path) {
                     path+= '/index.js'
                 }
             }catch(e){
-                console.log(e)
+                console.error(e)
             }
         }
         else {

@@ -1,3 +1,20 @@
+const booter = require("/etc/init.d/boot.js")
+
+let dataconf = JSON.load("/home/become/.data/game.json") || {rom:null, emulator:1, showcase:false}
+console.log(dataconf)
+function saveconf() {
+    if(!beapi.fs.mkdirSync("/home/become/.data", true)){
+        console.log("mkdirSync() failed:", "/home/become/.data")
+        return
+    }
+    let data = JSON.stringify(dataconf)
+    console.log("save load:", data)
+    if(!beapi.fs.writeFileSync("/home/become/.data/game.json", data)){
+        console.log("write json file failed:", "/home/become/.data/game.json")
+        return
+    }
+}
+
 module.exports = class RomList extends beapi.lvgl.Column {
     constructor(){
         super()
@@ -7,12 +24,44 @@ module.exports = class RomList extends beapi.lvgl.Column {
                 {
                     class: "Row" ,
                     mainAlign: "end" ,
+                    crossAlign: "center" ,
                     ref: "barTop" ,
+                    style: { "pad-row": 5 } ,
                     children: [
                         {
+                            class: 'Label' ,
+                            text:"演示模式: " ,font:"msyh",
+                            style: { "pad-left": 5 }
+                        } ,
+                        {
+                            class: "Switch" ,
+                            ref: 'swtShowcase' ,
+                            clicked:()=>{
+                                let showcase = ! this.swtShowcase.hasState("checked")
+                                if(showcase) {
+                                    this.swtShowcase.addState("checked")
+                                } else {
+                                    this.swtShowcase.clearState("checked")
+                                }
+                                setTimeout(()=>{
+                                    if(showcase) {
+                                        booter.setAutoScript("/lib/local/game/showcase-daemon.js")
+                                        dataconf.showcase = true
+                                    }
+                                    else {
+                                        booter.unsetAutoScript("/lib/local/game/showcase-daemon.js")
+                                        dataconf.showcase = false
+                                    }
+                                    saveconf()
+                                }, 200)
+                            }
+                        } ,
+                        { class:'CleanObj', grow:true, height:0 } ,
+                        {
                             class: "Btn" ,
-                            text:"退出" , font:"msyh",
                             ref: 'btnExit' ,
+                            text:"退出" ,font:"msyh",
+                            style: { "pad-right": 5 } ,
                             clicked:()=>{
                                 process.reboot()
                                 // grp.releaseKeys(this.screen())
@@ -28,7 +77,6 @@ module.exports = class RomList extends beapi.lvgl.Column {
                     ref: 'lstRom' ,
                     visible: false ,
                 } ,
-                
                 {
                     clear: true ,
                     width: "100%",
@@ -46,7 +94,14 @@ module.exports = class RomList extends beapi.lvgl.Column {
             ]
         },this)
 
+        if(dataconf.showcase) {
+            this.swtShowcase.addState("checked")
+        }
+
+        global.swtShowcase = this.swtShowcase
+
         let grp = this.lstRom.group()
+        grp.addObj( this.swtShowcase )
         grp.addObj( this.btnExit )
 
         setTimeout(()=>{
@@ -103,17 +158,11 @@ module.exports = class RomList extends beapi.lvgl.Column {
     }
 
     play(romPath, emulator) {
-        console.log(romPath)
 
-        let data = JSON.stringify({rom: romPath, emulator})
-        if(!beapi.fs.mkdirSync("/home/become/.data", true)){
-            console.log("mkdirSync() failed:", "/home/become/.data")
-            return
-        }
-        if(!beapi.fs.writeFileSync("/home/become/.data/game.json", data)){
-            console.log("write json file failed:", "/home/become/.data/game.json")
-            return
-        }
+        dataconf.rom = romPath
+        dataconf.emulator = emulator
+        dataconf.showcase = false
+        saveconf()
 
         let filename = romPath.replace(/.+\/([^\/]+)\.[^\.]+/, "$1")
 
@@ -125,7 +174,6 @@ module.exports = class RomList extends beapi.lvgl.Column {
         setTimeout(()=>{
             require("/etc/init.d/boot.js").rebootToApp(__dirname + "/playrom.js", true)
         }, 0)
-        
     }
 }
 

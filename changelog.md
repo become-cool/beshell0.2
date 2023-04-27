@@ -10,6 +10,11 @@
 
     * 不再被动等待 lvgl timer 读取i2c输入事件, 将事件主动投递给 lvgl
 
+* 重写了 beapi.gpio.pinMode() 的实现
+
+* 增加了位移寄存器(74HC165)的驱动 beapi.driver.common.shift_read()
+
+
 ## 0.2.13 2023-04-20
 
 增加:

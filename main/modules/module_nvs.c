@@ -10,7 +10,7 @@
 
 
 #define NVS_OPEN(h, failed)                                 \
-    nvs_handle_t handle;                                    \
+    nvs_handle_t h;                                         \
     esp_err_t err = nvs_open("beshell", NVS_READWRITE, &h); \
     if(err!=ESP_OK) {                                       \
         failed                                              \

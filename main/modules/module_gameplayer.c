@@ -96,6 +96,7 @@ static JSValue js_gameplayer_set_buttons(JSContext *ctx, JSValueConst this_val, 
  * 
  * @param rom path 
  * @param emulator: 1: nofrendo; 2: gunboy
+ * @param showcase: 演示模式
  */
 
 static JSValue js_gameplayer_play(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
@@ -108,6 +109,11 @@ static JSValue js_gameplayer_play(JSContext *ctx, JSValueConst this_val, int arg
             THROW_EXCEPTION("invalid emulator")
         }
     }
+    
+    bool showcase = false ;
+    if(argc>2) {
+        showcase = JS_ToBool(ctx, argv[2]) ;    
+    }
 
     echo_DMA("start game ...") ;
     
@@ -117,7 +123,7 @@ static JSValue js_gameplayer_play(JSContext *ctx, JSValueConst this_val, int arg
                 free(rompath) ;
                 THROW_EXCEPTION("load rom failed") ;
             }
-            int retcode = player_nofrendo_main();
+            int retcode = player_nofrendo_main(showcase);
             break ;
 #if CONFIG_IDF_TARGET_ESP32S3
         case EMULATOR_GUNBOY :

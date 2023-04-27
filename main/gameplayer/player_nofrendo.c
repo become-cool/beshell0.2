@@ -41,6 +41,8 @@
 #include "sdkconfig.h"
 
 
+#include "esp_system.h"
+#include "nvs_flash.h"
 
 
 static char * romdata = NULL ;
@@ -53,6 +55,12 @@ static uint16_t buff_xr = 0 ;
 static uint16_t buff_xw = 0 ;
 
 static int8_t i2s = -1 ;
+
+// 演示模式
+static bool showcase = false ;
+static int64_t last_input_time = 0 ;
+static int64_t showcase_max_ms = 300*1000 ;         // 默认5分钟更换一个游戏
+#define SHOWCASE_MAX_MS_PLAYED 600*1000             // 玩过以后，空闲10分钟更换游戏
 
 
 static QueueHandle_t queVideo;
@@ -69,6 +77,26 @@ static QueueHandle_t queAudio;
 // FILE * hsound = NULL ;
 // size_t sound_smps = 0 ;
 
+
+static void showcase_change_game() {
+
+    nvs_handle_t handle;
+    esp_err_t err = nvs_open("beshell", NVS_READWRITE, &handle);
+    if(err!=ESP_OK) {
+        printf("nvs_open() faild with code:%d\n", err) ;
+        return ;
+    }
+
+    nvs_set_str(handle, "rst-app", "/lib/local/game/playrom.js") ;
+    nvs_set_str(handle, "rst-app-argv", "showcase") ;
+    nvs_close(handle) ;
+
+#ifndef SIMULATION
+    esp_restart() ;
+#else
+    exit(99) ;
+#endif
+}
 
 
 void player_nofrendo_set_video(st77xx_dev_t * dev, uint16_t * buff, uint16_t width, uint16_t lines, uint16_t xr, uint16_t xw) {
@@ -487,7 +515,11 @@ void task_audio(void * data) {
 
         framerate() ;
         if(print_framerate_counter++%60==0) {
-            printf("fps:%d, cpu0:%d%%, cpu1:%d%%\n", dynamic_frames, cpu0_usage(), cpu1_usage()) ;
+            printf("fps:%d, cpu0:%d%%, cpu1:%d%%; ", dynamic_frames, cpu0_usage(), cpu1_usage()) ;
+            if(showcase) {
+                printf("idle: %lld / %lld", gettime()-last_input_time, showcase_max_ms) ;
+            }
+            printf("\n") ;
         }
 
         int left = EMULATOR_SAMPLERATE / NES_REFRESH_RATE ;
@@ -557,6 +589,15 @@ static void task_video(void *arg) {
         // {
 		    st7789_write_frame(bmp->line);
         // }
+
+        // 演示时间到，切换游戏
+        if(showcase) {
+            
+            if( gettime()-last_input_time > showcase_max_ms ) {
+                printf("[showcase] change game") ;
+                showcase_change_game() ;
+            }
+        }
 
         vTaskDelay(1) ;
 	}
@@ -632,6 +673,14 @@ void osd_getinput(void) {
     SET_INPUT(2, b, 0x20)
     SET_INPUT(2, start, 0x40)
     SET_INPUT(2, select, 0x80)
+
+    // 演示模式下，记录最后一次按键的时间
+    if( showcase ) {
+        if((btns_1|btns_2)) {
+            last_input_time = gettime() ;
+            showcase_max_ms = SHOWCASE_MAX_MS_PLAYED ;
+        }
+    }
 }
 
 
@@ -687,6 +736,11 @@ int osd_init() {
 	return 0;
 }
 
-int player_nofrendo_main() {
+int player_nofrendo_main(uint8_t _showcase) {
+
+    printf("showcase: %d\n", _showcase) ;
+
+    showcase = _showcase ;
+    last_input_time = gettime() ;
     return nofrendo_main(0, NULL);
 }

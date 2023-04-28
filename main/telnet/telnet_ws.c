@@ -37,7 +37,10 @@
 #define CROS_RSPN_HEADERS                                       \
         "Access-Control-Allow-Origin: *\r\n"                    \
         "Access-Control-Request-Method: GET, POST, OPTIONS\r\n" \
-        "Access-Control-Request-Headers: content-type\r\n"      \
+        "Access-Control-Request-Headers: content-type\r\n"
+
+#define CROS_RSPN_HEADERS_FULL      \
+        CROS_RSPN_HEADERS           \
         "Content-Type: application/octet-stream\r\n"
 
 
@@ -202,7 +205,7 @@ static void listdir(struct mg_connection *c, const char * path) {
 
     JSON_ARRAY_POP(json);
 
-    mg_http_reply(c, 200, "Content-Type: application/json\r\n", "%s", json.buf) ;
+    mg_http_reply(c, 200, CROS_RSPN_HEADERS "Content-Type: application/json\r\n", "%s", json.buf) ;
 
     closedir(dir);
 
@@ -277,20 +280,20 @@ fail:
 }
 
 static void response_fs(struct mg_connection *c, struct mg_http_message *hm, const char * path) {
-
     // 判断 路径不存在
     struct stat statbuf;
     if(stat(path,&statbuf)<0) {
         mg_http_reply(c, 404,  "Content-Type: application/json\r\n", "{error: \"%s\"}", "Not Found");
         return ;
     }
-
     if(mg_vcmp(&hm->method, "GET")==0) {
         // 文件
         if(S_ISREG(statbuf.st_mode)) {
-            struct mg_http_serve_opts opts = {.mime_types = "application/octet-stream"};
+            struct mg_http_serve_opts opts = {
+                .mime_types = "application/octet-stream" ,
+                .extra_headers = CROS_RSPN_HEADERS ,
+            };
             mg_http_serve_file(c, hm, path, &opts);  // Send file
-
         }
         // 目录
         else if(S_ISDIR(statbuf.st_mode)) {
@@ -298,14 +301,13 @@ static void response_fs(struct mg_connection *c, struct mg_http_message *hm, con
         }
         // unknow
         else {
-            dd
             mg_http_reply(c, 500,  "Content-Type: application/json\r\n", "{error: \"%s\"}", "Unknow File Type");
         }
     }
     // 上传文件 CROS 浏览器跨域时的预检请求
     else if(mg_vcmp(&hm->method, "OPTIONS")==0){
-        printf("CROS\n") ;
-        mg_http_reply(c, 204,  CROS_RSPN_HEADERS, "", "");
+        // printf("CROS\n") ;
+        mg_http_reply(c, 204,  CROS_RSPN_HEADERS_FULL, "", "");
     }
     else if(mg_vcmp(&hm->method, "POST")==0) {
         // printf("post path=%s, body len:%d\n", path, hm->body.len);
@@ -337,11 +339,11 @@ static void response_fs(struct mg_connection *c, struct mg_http_message *hm, con
 
                 // printf("wroten:%d\n", wroteBytes) ;
                 if(wroteBytes==part.body.len) {
-                    mg_http_reply(c, 200, CROS_RSPN_HEADERS, "%s", "ok") ;
-                    printf("200\n") ;
+                    mg_http_reply(c, 200, CROS_RSPN_HEADERS_FULL, "%s", "ok") ;
+                    // printf("200\n") ;
                 }
                 else {
-                    mg_http_reply(c, 200, CROS_RSPN_HEADERS, "{error: \"%s\"}", "some error occur") ;
+                    mg_http_reply(c, 200, CROS_RSPN_HEADERS_FULL, "{error: \"%s\"}", "some error occur") ;
                     printf("some error occur\n") ;
                 }
                 return ;

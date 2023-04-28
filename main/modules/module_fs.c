@@ -107,12 +107,10 @@ JSValue js_fs_is_dir_sync(JSContext *ctx, JSValueConst this_val, int argc, JSVal
 /**
  * 同步返回路径是否是一个存在的文件
  * 
- * @beapi beapi.fs.fileSync
+ * @beapi beapi.fs.isFileSync
  * @param path:string 路径
  * @return bool
  */
-
-
 JSValue js_fs_is_file_sync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(1)
     JS2VSFPath(path, argv[0]) 

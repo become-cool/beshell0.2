@@ -1298,6 +1298,8 @@ void mg_http_serve_file(struct mg_connection *c, struct mg_http_message *hm,
       }
     }
 
+    // printf("opts->extra_headers=%s\n",opts->extra_headers) ;
+
     mg_printf(c,
               "HTTP/1.1 %d %s\r\nContent-Type: %.*s\r\n"
               "Etag: %s\r\nContent-Length: " MG_INT64_FMT "\r\n%s%s\r\n",

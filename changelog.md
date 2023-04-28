@@ -14,6 +14,8 @@
 
 * 增加了位移寄存器(74HC165)的驱动 beapi.driver.common.shift_read()
 
+* http fs 接口支持跨域访问
+
 
 ## 0.2.13 2023-04-20
 

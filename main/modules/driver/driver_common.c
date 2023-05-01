@@ -1,6 +1,7 @@
 #include "driver_common.h"
 #include "utils.h"
 #include "driver/gpio.h"
+#include <rom/ets_sys.h>
 
 
 /**
@@ -15,6 +16,7 @@
  * @param pl_pin?:number|null=null 用于平行读取控制的 gpio
  * @param ce_pin?:number|null=null clk使能控制 gpio
  * @param bitnum:number=8 读入的位数
+ * @param clk_interval_us:number=5 时钟间隔。该参数用于所有 gpio 的电平反转等待，包括 clk_pin,pl_pin,ce_pin
  * @return number
  */
 static JSValue js_driver_shift_read(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
@@ -25,6 +27,7 @@ static JSValue js_driver_shift_read(JSContext *ctx, JSValueConst this_val, int a
     ARGV_TO_INT8_OPT(2, pl_pin, -1)
     ARGV_TO_INT8_OPT(3, ce_pin, -1)
     ARGV_TO_UINT8_OPT(4, bitnum, 8)
+    ARGV_TO_UINT8_OPT(5, clk_interval_us, 5)
 
     #define SET_LEVEL(pin,lv)                   \
         if(gpio_set_level(pin, lv)!=ESP_OK) {   \
@@ -33,11 +36,14 @@ static JSValue js_driver_shift_read(JSContext *ctx, JSValueConst this_val, int a
 
     if(ce_pin>-1) {
         SET_LEVEL(ce_pin, 0) ;
+        ets_delay_us(clk_interval_us);
     }
 
     if(pl_pin>-1) {
         SET_LEVEL(pl_pin, 0) ;
+        ets_delay_us(clk_interval_us);
         SET_LEVEL(pl_pin, 1) ;
+        ets_delay_us(clk_interval_us);
     }
 
     JSValue data = JS_NewArray(ctx) ;
@@ -47,8 +53,10 @@ static JSValue js_driver_shift_read(JSContext *ctx, JSValueConst this_val, int a
         byte = 0 ;                                      \
         for(int b=0;b<bit_cnt;b++) {                    \
             SET_LEVEL(clk_pin, 0) ;                     \
+            ets_delay_us(clk_interval_us);              \
             byte|= (gpio_get_level(data_pin)?1:0) << b ;\
             SET_LEVEL(clk_pin, 1) ;                     \
+            ets_delay_us(clk_interval_us);              \
         }                                               \
         JS_SetPropertyUint32(ctx, data, byteidx, JS_NewUint32(ctx, byte)) ;
 
@@ -64,6 +72,7 @@ static JSValue js_driver_shift_read(JSContext *ctx, JSValueConst this_val, int a
 
     if(ce_pin>-1) {
         SET_LEVEL(ce_pin, 1) ;
+        ets_delay_us(clk_interval_us);
     }
 
     return data ;

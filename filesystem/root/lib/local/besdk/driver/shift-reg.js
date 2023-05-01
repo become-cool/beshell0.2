@@ -7,21 +7,29 @@ class ShiftReg extends DeviceDriver {
         if(isNaN(opt.clk)) {
             throw new Error("missing clk pin")
         }
+        this.pin_clk = opt.clk
+        pin(this.pin_clk).setMode("output")
+
         if(isNaN(opt.data)) {
             throw new Error("missing data pin")
         }
-        this.opt=opt
-        pin(opt.data).setMode("input")
-        pin(opt.clk).setMode("output")
+        this.pin_data = opt.data
+        pin(this.pin_data).setMode("input")
+
         if(!isNaN(opt.pl)) {
-            pin(opt.pl).setMode("output")
+            this.pin_pl = opt.pl
+            pin(this.pin_pl).setMode("output")
         }
+
         if(!isNaN(opt.ce)) {
-            pin(opt.ce).setMode("output")
+            this.pin_ce = opt.ce
+            pin(this.pin_ce).setMode("output")
         }
+
+        this.us = isNaN(opt.us)?100: opt.us
     }
     read(bits) {
-        return beapi.driver.common.shift_read(this.opt.data,this.opt.clk,this.opt.pl,this.opt.ce,bits||8)
+        return beapi.driver.common.shift_read(this.pin_data,this.pin_clk,this.pin_pl,this.pin_ce,bits||8,this.us)
     }
 }
 module.exports = ShiftReg

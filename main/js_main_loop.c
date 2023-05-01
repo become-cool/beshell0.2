@@ -379,9 +379,12 @@ void js_main_loop(const char * script){
         monitor("mg", {
             be_module_mg_loop(ctx) ;
         })
+        
+#ifndef SIMULATION
         monitor("mg", {
             be_indev_i2c_loop(ctx) ;
         })
+#endif
         monitor("lvgl", {
             be_module_lvgl_loop(ctx) ;
         })

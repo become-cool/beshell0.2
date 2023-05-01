@@ -168,11 +168,11 @@ void be_telnet_require(JSContext *ctx) {
 	
 	be_telnet_ws_require(ctx, telnet) ;
 
-	be_telnet_ble_require(ctx) ;
 
 #ifdef SIMULATION
 	be_telnet_stdio_require(ctx) ;
 #else
+	be_telnet_ble_require(ctx) ;
 #endif
 
 }

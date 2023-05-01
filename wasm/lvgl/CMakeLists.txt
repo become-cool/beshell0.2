@@ -4,15 +4,15 @@ project (lvgl_api)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0 -D ASMJS -DLV_USE_FLEX -gsource-map")
 
 include_directories(${PROJECT_SOURCE_DIR})
-include_directories(../components/lvgl/src)
-include_directories(../main/modules/lvgl)
-include_directories(../main/modules/lvgl/font)
+include_directories(../../components/lvgl/src)
+include_directories(../../main/modules/lvgl)
+include_directories(../../main/modules/lvgl/font)
 include_directories(./src)
 
 file(GLOB_RECURSE INCLUDES "./src/*.h")
 
-file(GLOB_RECURSE LIB_SOURCES "../components/lvgl/*.c")
-file(GLOB MY_SOURCES "./src/*.c" "../main/modules/lvgl/font/font_msyh.c")
+file(GLOB_RECURSE LIB_SOURCES "../../components/lvgl/*.c")
+file(GLOB MY_SOURCES "./src/*.c" "../../main/modules/lvgl/font/font_msyh.c")
 
 set(SOURCES ${LIB_SOURCES} ${MY_SOURCES})
 

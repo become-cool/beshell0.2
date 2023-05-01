@@ -1,2 +1,4 @@
 emsdk
 build
+CMakeCache.txt
+CMakeFiles

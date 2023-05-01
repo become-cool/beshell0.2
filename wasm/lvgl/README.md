@@ -2,11 +2,11 @@
 
 初始化 emsdk 环境 (bash)：
 ```
-. emsdk/emsdk_env.sh
+. ../emsdk/emsdk_env.sh
 ```
 或 (fish)
 ```
-. emsdk/emsdk_env.fish
+. ../emsdk/emsdk_env.fish
 ```
 
 

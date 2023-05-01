@@ -275,6 +275,12 @@ JSValue js_fs_unlink_sync(JSContext *ctx, JSValueConst this_val, int argc, JSVal
 /**
  * 同步读取文件
  * 
+ * > 函数返回的是一个 ArrayBuffer 对象，可以使用 ArrayBuffer.prototype.asString() 方法转换为字符串，例如：
+ * > ```
+ * > let content = beapi.fs.readFileSync("~/foo.bar").asString()
+ * > console.log(content)
+ * > ```
+ * 
  * @beapi beapi.fs.readFileSync
  * @param path:string 路径
  * @param readlen:number=-1 读取长度，-1表示全文

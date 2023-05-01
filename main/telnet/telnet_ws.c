@@ -453,7 +453,6 @@ bool telnet_ws_response_http(struct mg_connection *c, struct mg_http_message *hm
     // /fs
     else if( hm->uri.len>=3 && strncmp(hm->uri.ptr,"/fs",3)==0 && (hm->uri.len==3 || hm->uri.ptr[3]=='/')) {
 
-
         size_t path_len = hm->uri.len+1 ;
 
 #ifndef SIMULATION

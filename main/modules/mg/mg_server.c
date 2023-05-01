@@ -30,6 +30,7 @@ static JSValue js_mg_server_constructor(JSContext *ctx, JSValueConst new_target,
     return jsobj ;
 }
 static void js_mg_server_finalizer(JSRuntime *rt, JSValue this_val){
+    // printf("js_mg_server_finalizer()") ;
 
     // @TODO: 改为在 MG_EV_CLOSE 事件里 free(server)
     THIS_SERVER(server)
@@ -46,6 +47,7 @@ static JSClassDef js_mg_server_class = {
 static JSValue js_mg_server_close(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     THIS_SERVER(server)
     server->conn->is_closing = true ;
+    JS_FreeValue(ctx,this_val) ;
     return JS_UNDEFINED ;
 }
 
@@ -314,6 +316,8 @@ static JSValue js_mg_mgr_http_listen(JSContext *ctx, JSValueConst this_val, int 
             THROW_GOTO(failed, "arg callback must be a function")
         }
         server->callback = JS_DupValue(ctx,argv[1]) ;
+        server->telweb = false ;
+        server->ssl = false ;
     }
 
     if(!mg_url_is_listening(addr)) {
@@ -330,6 +334,9 @@ static JSValue js_mg_mgr_http_listen(JSContext *ctx, JSValueConst this_val, int 
 
     JSValue jsobj = JS_NewObjectClass(ctx, js_mg_server_class_id) ;
     JS_SetOpaque(jsobj, server) ;
+
+    // 这个引用在监听结束后 free
+    JS_DupValue(ctx, jsobj) ;
     
     return jsobj ;
 

@@ -10,8 +10,8 @@ typedef struct _be_http_server {
     struct mg_connection * conn ;
     JSContext * ctx ;
     JSValue callback ;
-    bool telweb ;
-    bool ssl;
+    bool telweb: 1 ;
+    bool ssl: 1;
     void * ssl_cert_path;
     void * ssl_key_path;
 } be_http_server_t ;

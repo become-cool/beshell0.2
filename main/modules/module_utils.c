@@ -283,9 +283,7 @@ static JSValue js_utils_part_version(JSContext *ctx, JSValueConst this_val, int 
 }
 
 static JSValue js_utils_part_uuid(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
-#ifdef PLATFORM_LINUX
-    return JS_NewString(ctx, "123456789AEF") ;
-#else
+#ifdef PLATFORM_ESP32
     uint8_t mac_addr[6] = {0};
     char mac_addr_str[13] = {0};
     esp_efuse_mac_get_default(mac_addr);
@@ -294,6 +292,8 @@ static JSValue js_utils_part_uuid(JSContext *ctx, JSValueConst this_val, int arg
     mac_addr_str[12] = 0 ;
 
     return JS_NewStringLen(ctx, mac_addr_str, 12) ;
+#else
+    return JS_NewString(ctx, "123456789AEF") ;
 #endif
 }
 
@@ -634,7 +634,7 @@ static JSValue js_set_time(JSContext *ctx, JSValueConst this_val, int argc, JSVa
 
     printf("%lu.%lu\n",tv.tv_sec,tv.tv_usec);
 
-#ifndef __EMSCRIPTEN__
+#ifndef PLATFORM_WSAM
     settimeofday(&tv, NULL);
 #endif
 

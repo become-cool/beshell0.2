@@ -10,13 +10,11 @@
     <script>
     var Module = {
         onRuntimeInitialized() {
-            console.log("onRuntimeInitialized")
             setInterval(()=>{
                 Module.ccall("js_main_loop_tick","void",[],[])
             }, 0)
         } ,
         locateFile(name) {
-            console.log("fs filename",name)
             return 'build/'+name
         }
     }

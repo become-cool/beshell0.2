@@ -7,9 +7,9 @@
 
 #include "module_telnet.h"
 #include "module_utils.h"
-
-#ifndef __EMSCRIPTEN__
 #include "module_fs.h"
+
+#ifndef PLATFORM_WSAM
 #include "module_mg.h"
 #endif
 
@@ -69,10 +69,11 @@ JSContext * task_current_context() {
 
 static void eval_rc_script(JSContext *ctx, const char * path) {
 
-#ifndef __EMSCRIPTEN__
     char * fullpath = vfspath_to_fs(path) ;
 
-#ifdef PLATFORM_ESP32
+#ifdef PLATFORM_LINUX
+    evalScript(ctx, fullpath, false) ;
+#else
     char * binpath = mallocf("%s.bin", fullpath) ;
     struct stat statbuf;
     if(stat(binpath,&statbuf)<0) {
@@ -82,12 +83,9 @@ static void eval_rc_script(JSContext *ctx, const char * path) {
         evalScript(ctx, binpath, true) ;
     }
     free(binpath) ;
-#else
-    evalScript(ctx, fullpath, false) ;
 #endif
 
     free(fullpath) ;
-#endif
 
 }
 
@@ -126,7 +124,7 @@ static JSContext * init_custom_context(JSRuntime *rt) {
     JS_SetPropertyStr(ctx, global, "beapi", beapi);
     JS_FreeValue(ctx, global);
     
-#ifndef __EMSCRIPTEN__
+#ifndef PLATFORM_WSAM
     be_module_fs_require(ctx) ;
 #endif
     be_module_utils_require(ctx) ;
@@ -152,7 +150,7 @@ static JSContext * init_custom_context(JSRuntime *rt) {
 #endif
     be_module_gameplayer_require(ctx) ;
     be_module_media_require(ctx) ;
-#ifndef __EMSCRIPTEN__
+#ifndef PLATFORM_WSAM
     be_module_mg_require(ctx) ;
 #endif
     be_telnet_require(ctx) ;
@@ -281,10 +279,12 @@ inline
 #endif
 void js_main_loop_tick() {
 
+    // printf("js_main_loop_tick\n") ;
+
         if(requst_reset) {
 
             be_module_eventloop_reset(ctx) ;
-#ifndef __EMSCRIPTEN__
+#ifndef PLATFORM_WSAM
             be_module_mg_reset(ctx) ;
 #endif
             be_module_lvgl_reset(ctx) ;
@@ -323,7 +323,7 @@ void js_main_loop_tick() {
         monitor("telnet", {
             be_telnet_loop(ctx) ;
         })
-#ifndef __EMSCRIPTEN__
+#ifndef PLATFORM_WSAM
         monitor("mg", {
             be_module_mg_loop(ctx) ;
         })
@@ -352,16 +352,13 @@ void js_main_loop_tick() {
 #include <stdio.h>
 void js_main_loop(const char * script){
 
-    FILE * fp = fopen("/xxx","rw") ;
-    if(!fp) {
-        printf("xxxxxxxxxxx\n") ;
-    }
-    else {
-        printf("yyyyyyyyyy\n") ;
-
-    }
-
-    printf("js_main_loop()\n") ;
+    // FILE * fp = fopen("/etc/rc2.d.js","rw") ;
+    // if(!fp) {
+    //     printf("xxxxxxxxxxx\n") ;
+    // }
+    // else {
+    //     printf("yyyyyyyyyy\n") ;
+    // }
 
     boot_level = 5 ;
     nvs_read_onetime("rst-lv", &boot_level) ;
@@ -396,7 +393,7 @@ void js_main_loop(const char * script){
 #endif
 
     be_module_process_init() ;
-#ifndef __EMSCRIPTEN__
+#ifndef PLATFORM_WSAM
     be_module_mg_init() ;
 #endif
     be_module_lvgl_init() ;
@@ -433,7 +430,7 @@ void js_main_loop(const char * script){
     echo_DMA("loop start") ;
 #endif
 
-#ifndef __EMSCRIPTEN__
+#ifndef PLATFORM_WSAM
     while(1) {
         js_main_loop_tick() ;
     }

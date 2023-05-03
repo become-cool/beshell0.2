@@ -18,18 +18,20 @@ const char * field_names[] = {
 int readPartId() {
 #ifdef PLATFORM_LINUX
     return 255 ;
-#else
+#elif defined PLATFORM_ESP32
     int value = esp_efuse_read_reg(3, 7) ; // blk3
     return (value >> 24) & 0xFF ;
+#else defined PLATFORM_WSAM
 #endif
 }
 
 int readPartVersion() {
 #ifdef PLATFORM_LINUX
     return 255 ;
-#else
+#elif defined PLATFORM_ESP32
     int value = esp_efuse_read_reg(3, 7) ;
     return (value >> 16) & 0xFF ;
+#else defined PLATFORM_WSAM
 #endif
 }
 

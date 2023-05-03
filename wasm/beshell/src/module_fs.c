@@ -1,12 +1,19 @@
 #include "module_fs.h"
 #include <string.h>
 
+static char * vfs_path_prefix = "fs-root" ;
+
 void module_fs_set_vfs_path_prefix(char * path) {
 }
 char * vfspath_to_fs(const char * path) {
-    char * _path = malloc(strlen(path)+1) ;
-    strcpy(_path, path) ;
-    return _path ;
+    size_t pathlen = strlen(path) ;
+    size_t prefixlen = strlen(vfs_path_prefix) ;
+    char * fullpath = (void *)malloc(prefixlen+pathlen+1) ;
+    if(fullpath) {
+        strcpy(fullpath, vfs_path_prefix) ;
+        strcpy(fullpath+prefixlen, path) ;
+    }
+    return fullpath ;
 }
 
 

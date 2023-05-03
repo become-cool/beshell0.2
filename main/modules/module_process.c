@@ -383,9 +383,13 @@ void be_module_process_require(JSContext *ctx) {
     JS_SetPropertyStr(ctx, versions, "esp-idf", JS_NewString(ctx, ESPIDF_VERSION));
 #else
     JS_SetPropertyStr(ctx, versions, "esp-idf", JS_NewString(ctx, "none"));
+#endif
+
+#ifdef PLATFORM_LINUX
     JS_SetPropertyStr(ctx, process, "simulate", JS_NewBool(ctx, true));
     JS_SetPropertyStr(ctx, process, "exit", JS_NewCFunction(ctx, js_process_exit, "exit", 1));
 #endif
+
     JS_SetPropertyStr(ctx, versions, "quickjs", JS_NewString(ctx, QUICKJS_VERSION));
     
     char lvgl_ver[16] ;

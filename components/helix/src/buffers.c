@@ -50,7 +50,7 @@
 #include <string.h>
 #include "coder.h"
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 #include "esp_heap_caps.h"
 #define malloc(s)  heap_caps_malloc(s, MALLOC_CAP_INTERNAL);
 #endif

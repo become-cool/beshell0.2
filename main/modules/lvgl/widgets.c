@@ -713,7 +713,7 @@ JSValue js_lv_obj_from_ptr(JSContext *ctx, JSValueConst this_val, int argc, JSVa
     return JS_DupValue(ctx, jsobj) ;
 }
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 // JSValue js_lv_set_debug_log(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
 //     lv_set_debug_log( JS_ToBool(ctx, argv[0])) ;
 //     return JS_UNDEFINED ;
@@ -825,7 +825,7 @@ void be_lv_widgets_require(JSContext *ctx, JSValue lvgl) {
     JS_SetPropertyStr(ctx, lvgl, "isStyleName", JS_NewCFunction(ctx, js_lv_obj_is_style_name, "isStyleName", 1));
     JS_SetPropertyStr(ctx, lvgl, "fromPtr", JS_NewCFunction(ctx, js_lv_obj_from_ptr, "fromPtr", 1));
     JS_SetPropertyStr(ctx, lvgl, "weatherImg", JS_NewCFunction(ctx, js_lv_weather_img, "weatherImg", 1));
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
     // JS_SetPropertyStr(ctx, lvgl, "setDebugLog", JS_NewCFunction(ctx, js_lv_set_debug_log, "setDebugLog", 1));
 #endif
 }
@@ -885,7 +885,7 @@ JSValue js_lv_group_all_objs(JSContext *ctx, JSValueConst this_val, int argc, JS
     lv_group_t * thisgrp = lv_userdata ;
     
     JSValue array = JS_NewArray(ctx) ;
-    uint idx = 0 ;
+    uint32_t idx = 0 ;
     lv_obj_t ** ppobj;
     _LV_LL_READ(&thisgrp->obj_ll, ppobj) {
         JSValue jsobj = js_lv_obj_wrapper(ctx, *ppobj, JS_UNDEFINED, 0) ;

@@ -1,8 +1,9 @@
 #include "uuid.h"
 
 #include <string.h>
+#include <sys/time.h>
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 #include "esp_system.h"
 #else
 #include <stdio.h>

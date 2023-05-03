@@ -2,7 +2,7 @@
 #include "module_fs.h"
 #include "utils.h"
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 #include "driver/i2s.h"
 #include "module_serial_spi.h"
 #include "audio_stream.h"
@@ -284,7 +284,7 @@ void be_module_midi_require(JSContext *ctx, JSValue pkg) {
 
     JS_FreeValue(ctx, EventEmitterProto);
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 #else
 #endif
 }

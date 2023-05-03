@@ -203,7 +203,7 @@ static JSValue js_driver_hold_dma(JSContext *ctx, JSValueConst this_val, int arg
     JS_FreeCString(ctx,type) ;
 
     if((*p)==NULL) {
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
         (*p) = heap_caps_malloc(size, MALLOC_CAP_DMA) ;
 #else
         (*p) = 0xFF ;

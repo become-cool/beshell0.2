@@ -29,7 +29,7 @@ static void mp3dec_output(audio_el_mp3_t * el, uint8_t * data, size_t size) {
         el->channels = el->decoder->nChans ;
     }
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
     // if(pdTRUE != xRingbufferSend(el->base.ring, buff_pcm, el->info.outputSamps * 2, portMAX_DELAY)) {
     if(pdTRUE != xRingbufferSend(el->base.ring, data, size, portMAX_DELAY)) {
         printf("task mp3 decode xRingbufferSend() wrong ?????\n") ;
@@ -81,7 +81,7 @@ static void task_mp3_decoder(audio_el_mp3_t * el) {
             memmove(el->undecode_buff, psrc, decode_left);
         }
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
         data_size = 0 ;
         psrc = xRingbufferReceiveUpTo(el->base.upstream->ring, &data_size, 20, BUFF_SRC_SIZE-decode_left);
         if(psrc) {

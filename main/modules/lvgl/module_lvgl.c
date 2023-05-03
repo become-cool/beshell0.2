@@ -14,7 +14,7 @@
 #include "remote_video_stream.h"
 
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_system.h"
@@ -247,7 +247,7 @@ static JSValue js_lvgl_refresh(JSContext *ctx, JSValueConst this_val, int argc, 
     return JS_UNDEFINED ;
 }
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 void lv_tick_task(void *arg) {
     (void) arg;
     if(lv_tick_active) {
@@ -381,7 +381,7 @@ void be_module_lvgl_init() {
     be_gl_init() ;
     be_lv_indev_init() ;
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
     // lvgl 时钟
     const esp_timer_create_args_t periodic_timer_args = {
         .callback = &lv_tick_task,
@@ -449,7 +449,7 @@ void be_module_lvgl_require(JSContext *ctx) {
     be_lv_draggable_require(ctx, lvgl) ;
     be_gl_require(ctx, lvgl) ;
     be_lv_indev_require(ctx, lvgl) ;
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
     be_remote_video_stream_require(ctx, lvgl) ;
 #endif 
     JS_FreeValue(ctx, global);

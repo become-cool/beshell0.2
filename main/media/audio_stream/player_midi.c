@@ -2,7 +2,7 @@
 #include "audio_stream.h"
 #include "utils.h"
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 #include "driver/i2s.h"
 #include "module_serial_spi.h"
 #endif

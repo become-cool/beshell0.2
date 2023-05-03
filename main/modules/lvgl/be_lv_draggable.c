@@ -287,7 +287,7 @@ static JSValue js_lv_draggable_set_followers(JSContext *ctx, JSValueConst this_v
     clear_followers(draggable) ;
 
     if( JS_IsNull(argv[0]) ) {
-        return ;
+        return JS_UNDEFINED ;
     }
 
     if(!JS_IsArray(ctx, argv[0])) {

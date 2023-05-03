@@ -5,7 +5,7 @@
 #include <string.h>
 #include <stdbool.h>
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 #include "esp_heap_caps.h"
 #endif
 
@@ -38,7 +38,7 @@ char * mallocf(char * fmt, ...) {
 }
 
 inline void * mallocDMA(size_t size) {
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
     void * data = heap_caps_malloc(size, MALLOC_CAP_DMA) ;
 	// if(!data) {
 	// 	return heap_caps_malloc(size, MALLOC_CAP_SPIRAM) ;

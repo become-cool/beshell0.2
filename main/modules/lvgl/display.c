@@ -8,7 +8,7 @@
 #include "lv_conf.h"
 #include "telnet_ws.h"
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 #include "psram.h"
 #include "disp_st77xx.h"
 #include <freertos/queue.h>
@@ -37,7 +37,7 @@ JSValue js_lv_disp_wrapper(JSContext *ctx, lv_disp_t * disp) {
     }
 }
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 typedef struct {
     lv_coord_t x1 ;
     lv_coord_t x2 ;
@@ -62,7 +62,9 @@ static void disp_st77XX_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_c
     st77xx_draw_rect(((disp_drv_spec_t*)disp->user_data)->spi_dev, area->x1,area->y1, area->x2, area->y2, color_p) ;
     // flush_disp_if_other_ready() ;
     
+#ifndef __EMSCRIPTEN__
     ws_disp_flush(disp, area, color_p) ;
+#endif
 
     // flush_disp_if_other_ready() ;
     lv_disp_flush_ready(disp) ;
@@ -90,7 +92,7 @@ void free_disp_drv(JSContext * ctx, lv_disp_t * disp) {
                 free(drv_spec->buff2) ;
                 drv_spec->buff2 = NULL ;
             }
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
             st77xx_dev_t * dev = drv_spec->spi_dev ;
             if(dev) {
                 if(dev->spi_dev) {
@@ -211,7 +213,7 @@ static JSValue js_lv_disp_height(JSContext *ctx, JSValueConst this_val, int argc
 static JSValue js_lv_disp_id(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     THIS_DISP
     if(!thisdisp->driver || !thisdisp->driver->user_data) {
-        return ;
+        return JS_NULL ;
     }
     return JS_NewInt32(ctx, ((disp_drv_spec_t*)thisdisp->driver->user_data)->id) ;
 }
@@ -241,7 +243,7 @@ JSValue be_lv_display_inv_area(JSContext *ctx, JSValueConst this_val, int argc, 
     return JS_UNDEFINED;
 }
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 JSValue be_lv_display_st77xx_init(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     THIS_DISP
     CHECK_ARGC(4)
@@ -298,7 +300,7 @@ static const JSCFunctionListEntry js_lv_disp_proto_funcs[] = {
     JS_CFUNC_DEF("height", 0, js_lv_disp_height),
     JS_CFUNC_DEF("id", 0, js_lv_disp_id),
     JS_CFUNC_DEF("invArea", 0, be_lv_display_inv_area),
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
     JS_CFUNC_DEF("initST77xx", 0, be_lv_display_st77xx_init),
     JS_CFUNC_DEF("devRegWrite", 0, js_lv_disp_dev_reg_write),
 #endif
@@ -308,7 +310,7 @@ disp_drv_spec_t * default_disp_drv_spec() {
 
     lv_disp_t * disp = lv_disp_get_default() ;
     if(!disp || !disp->driver || !disp->driver->user_data ) {
-        return ;
+        return NULL ;
     }
 
     return disp->driver->user_data ;
@@ -384,7 +386,7 @@ static JSValue js_lv_active_display(JSContext *ctx, JSValueConst this_val, int a
 }
 
 static void * malloc_buffer(size_t size) {
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
     // echo_DMA("before malloc_buffer()") ;
     // void * buff = heap_caps_malloc( size + DISP_BUFF_AUX_SIZE, MALLOC_CAP_SPIRAM); 
     void * buff = heap_caps_malloc( size + DISP_BUFF_AUX_SIZE, MALLOC_CAP_DMA);
@@ -429,7 +431,7 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
     dvrdata->id = _disp_id ++ ;
 
     // 创建缓冲区
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
     dvrdata->buff_lines = DISP_BUFF_LINES ;
     size_t bufsize = width * dvrdata->buff_lines ;
     dvrdata->buff1 = malloc_buffer(bufsize*2) ;
@@ -477,7 +479,7 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
     // ST7789/ST7789V
     if( strncmp(typestr, "ST7789", 6)==0 ) {
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 
         GET_INT_PROP(argv[1], "cs", cs, { goto excp ;})
         GET_INT_PROP(argv[1], "dc", dc, { goto excp ;})
@@ -523,7 +525,9 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
     else if( strcmp(typestr, "virtual-display")==0 ) {
 
         // 注册设备驱动对象
+    #ifndef __EMSCRIPTEN__
         dispdrv->flush_cb = ws_disp_flush ;
+    #endif
         dvrdata->is_virtual = true ;
     }
     else {
@@ -557,7 +561,7 @@ void be_lv_display_init() {
     // class id 全局, 分配一次
     JS_NewClassID(&js_lv_disp_class_id);
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 	// disp_queue = xQueueCreate(1, sizeof(draw_param_t *));
 	// xTaskCreatePinnedToCore(task_disp, "task_disp", 2048, NULL, 5, NULL, 1);
 #endif
@@ -599,7 +603,7 @@ void be_lv_display_require(JSContext *ctx, JSValue lvgl) {
 
 void be_lv_display_reset(JSContext * ctx) {
     
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
     // multi_heap_info_t info;
     // heap_caps_get_info(&info, MALLOC_CAP_SPIRAM);
     // dn2(info.total_free_bytes, info.total_allocated_bytes)
@@ -613,7 +617,7 @@ void be_lv_display_reset(JSContext * ctx) {
     }
 
 
-// #ifndef SIMULATION
+// #ifdef PLATFORM_ESP32
 //     if(device_touch) {
 //         spi_bus_remove_device(device_touch) ;
 //         // device_touch = NULL ;
@@ -625,7 +629,7 @@ void be_lv_display_reset(JSContext * ctx) {
     // }
 
     
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
     // heap_caps_get_info(&info, MALLOC_CAP_SPIRAM);
     // dn2(info.total_free_bytes, info.total_allocated_bytes)
 #endif

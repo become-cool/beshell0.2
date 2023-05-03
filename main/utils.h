@@ -6,7 +6,7 @@
 #include "quickjs-libc.h"
 #include <stdbool.h>
 
-#ifdef SIMULATION
+#ifdef PLATFORM_LINUX
 
 void echo_error(JSContext *) ;
 
@@ -237,12 +237,12 @@ uint64_t gettime_ns() ;
 
 char * mallocf(char * format, ...) ;
 
-void * mallocDMA(size) ;
+void * mallocDMA(size_t size) ;
 
 void freeArrayBuffer(JSRuntime *rt, void *opaque, void *ptr) ;
 
 // SRAM优先于PSRAM
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 #define HMALLOC(var, size) var = heap_caps_malloc(size, MALLOC_CAP_DMA); \
     if(!var) { var = heap_caps_malloc(size, MALLOC_CAP_SPIRAM); }
 #else

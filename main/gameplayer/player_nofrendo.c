@@ -91,7 +91,7 @@ static void showcase_change_game() {
     nvs_set_str(handle, "rst-app-argv", "showcase") ;
     nvs_close(handle) ;
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
     esp_restart() ;
 #else
     exit(99) ;
@@ -633,7 +633,7 @@ void osd_getinput(void) {
 
         // 192 == select + start
         if( (btns_1&192)==192 || (btns_2&192)==192 ) {
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
             printf("pressed select + start\n") ;
             esp_restart() ;
 #else

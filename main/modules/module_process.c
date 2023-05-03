@@ -7,7 +7,7 @@
 
 #include "module_telnet.h"
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 #include "esp32_perfmon.h"
 #include "psram.h"
 
@@ -55,7 +55,7 @@ static JSValue js_process_cpu_usage(JSContext *ctx, JSValueConst this_val, int a
     CHECK_ARGC(1)
     ARGV_TO_UINT8(0,cpu)
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 
     int max = max_calls_per_second() ;
 
@@ -79,7 +79,7 @@ static JSValue js_process_cpu_idle_calls(JSContext *ctx, JSValueConst this_val, 
     CHECK_ARGC(1)
     ARGV_TO_UINT8(0,cpu)
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
     if(cpu==0) {
         return JS_NewInt64(ctx, cpu0_idle_last_calls()) ;
     }
@@ -113,7 +113,7 @@ inline static void nop1000() {
     NOP100 NOP100 NOP100 NOP100 NOP100 NOP100 NOP100 NOP100 NOP100 NOP100
 }
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 static JSValue js_process_stat_max_calls(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
 
     int64_t t = gettime() ;
@@ -160,7 +160,7 @@ static JSValue js_process_stat_nop(JSContext *ctx, JSValueConst this_val, int ar
 }
 
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 static JSValue js_process_print_tasks(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
 
     size_t taskCnt = uxTaskGetNumberOfTasks() ;
@@ -198,7 +198,7 @@ JSValue js_process_reset(JSContext *ctx, JSValueConst this_val, int argc, JSValu
     return JS_UNDEFINED ;
 }
 JSValue js_process_reboot(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
     esp_restart() ;
 #else
     exit(99) ;
@@ -207,7 +207,7 @@ JSValue js_process_reboot(JSContext *ctx, JSValueConst this_val, int argc, JSVal
 }
 
 
-#ifdef SIMULATION
+#ifdef PLATFORM_LINUX
 JSValue js_process_exit(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     int code = 0 ;
     if(argc>=1) {
@@ -232,7 +232,7 @@ JSValue js_process_memory_usage(JSContext *ctx, JSValueConst this_val, int argc,
     int dma_used = 0 ;
     int dma_free = 0 ;
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
     multi_heap_info_t info;
 
     heap_caps_get_info(&info, MALLOC_CAP_DMA);
@@ -343,7 +343,7 @@ JSValue js_console_message(JSContext *ctx, JSValueConst this_val, int argc, JSVa
 
 
 void be_module_process_init() {
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
     perfmon_start() ;
     // xTaskCreate(idle_task, "idle_task", 1024 * 2, &cpu0_idle_cnt,  0, NULL);
     // xTaskCreate(mon_task, "mon_task", 1024 * 2, &cpu0_idle_cnt, 10, NULL);
@@ -364,7 +364,7 @@ void be_module_process_require(JSContext *ctx) {
     JS_SetPropertyStr(ctx, process, "cpuUsage", JS_NewCFunction(ctx, js_process_cpu_usage, "cpuUsage", 1));
     JS_SetPropertyStr(ctx, process, "memoryUsage", JS_NewCFunction(ctx, js_process_memory_usage, "memoryUsage", 1));
     JS_SetPropertyStr(ctx, process, "nop1000", JS_NewCFunction(ctx, js_process_stat_nop, "nop1000", 1));
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
     JS_SetPropertyStr(ctx, process, "printTasks", JS_NewCFunction(ctx, js_process_print_tasks, "printTasks", 1));
     JS_SetPropertyStr(ctx, process, "statMaxCalls", JS_NewCFunction(ctx, js_process_stat_max_calls, "statMaxCalls", 1));
 #endif
@@ -379,7 +379,7 @@ void be_module_process_require(JSContext *ctx) {
     
     JSValue versions = JS_NewObject(ctx) ;
     JS_SetPropertyStr(ctx, versions, "beshell", JS_NewString(ctx, BESHELL_VERSION));
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
     JS_SetPropertyStr(ctx, versions, "esp-idf", JS_NewString(ctx, ESPIDF_VERSION));
 #else
     JS_SetPropertyStr(ctx, versions, "esp-idf", JS_NewString(ctx, "none"));

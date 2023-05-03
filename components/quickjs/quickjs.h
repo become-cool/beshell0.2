@@ -52,15 +52,15 @@ typedef struct JSClass JSClass;
 typedef uint32_t JSClassID;
 typedef uint32_t JSAtom;
 
-// #if INTPTR_MAX >= INT64_MAX
-// #define JS_PTR64
-// #define JS_PTR64_DEF(a) a
-// #else
-// #define JS_PTR64_DEF(a)
-// #endif
+#if INTPTR_MAX >= INT64_MAX
+#define JS_PTR64
+#define JS_PTR64_DEF(a) a
+#else
+#define JS_PTR64_DEF(a)
+#endif
 
 // 禁用 JS_PTR64 , 确保在所有平台上移一致
-#define JS_PTR64_DEF(a)
+// #define JS_PTR64_DEF(a)
 
 #ifndef JS_PTR64
 #define JS_NAN_BOXING

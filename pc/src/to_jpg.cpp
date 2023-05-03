@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #include <malloc.h>
+#include <stdio.h>
 #include <stdint.h>
 #include <stddef.h>
 #include <string.h>

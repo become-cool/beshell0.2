@@ -7,11 +7,13 @@
 #include "utils.h"
 #include <errno.h>
 #include <stdbool.h>
+#include <string.h>
+#include <sys/time.h>
 
 #define PARTITION_LABEL_ROOT "fsroot"
 #define PARTITION_LABEL_HOME "fshome"
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 #include "diskio_wl.h"
 #include "esp_littlefs.h"
 #include "vfs_fat_internal.h"
@@ -467,7 +469,7 @@ JSValue js_fs_readdir_sync(JSContext *ctx, JSValueConst this_val, int argc, JSVa
         }
     }
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
     // esp32 vfs 读取目录时，忽略了挂载点，将已知挂载点补充上
     if(strcmp(path,"/fs/")==0 || strcmp(path,"/fs")==0) {
         if(detail) {
@@ -592,7 +594,7 @@ static JSValue js_fs_info(JSContext *ctx, JSValueConst this_val, int argc, JSVal
     size_t total = 0 ;
     size_t used = 0 ;
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
     if(strcmp(jslabel,"/home")==0){
         if( esp_littlefs_info(PARTITION_LABEL_HOME, &total, &used) != ESP_OK ) {
             JS_FreeCString(ctx, jslabel) ;
@@ -643,7 +645,7 @@ static JSValue js_fs_opentest(JSContext *ctx, JSValueConst this_val, int argc, J
     return JS_UNDEFINED ;
 }
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 void extend_partition() {
     // 检查 unextend 文件
     struct stat statbuf;

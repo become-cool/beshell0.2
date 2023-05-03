@@ -6,7 +6,7 @@
 #include "lv_conf.h"
 #include "mongoose.h"
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 #include "disp_st77xx.h"
 #include <freertos/task.h>
 #include <freertos/queue.h>

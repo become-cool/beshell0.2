@@ -7,7 +7,7 @@
 #include "lvgl.h"
 #include "list.h"
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 #include "driver/spi_master.h"
 #include "driver/i2c.h"
 #include <freertos/FreeRTOS.h>
@@ -41,7 +41,7 @@ typedef struct {
     uint8_t id ;
     indev_driver_t driver ;
     
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
     union  {
         struct {
             spi_host_device_t handle ;
@@ -76,7 +76,7 @@ typedef struct {
             // uint32_t release ;
 
             // uint8_t value ;
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
             QueueHandle_t queue ;
 #endif
 
@@ -87,7 +87,7 @@ typedef struct {
             // uint8_t queue[INPUT_QUEUE_SIZE] ;
             // uint8_t queue_length ;  // 如果超出 INPUT_QUEUE_SIZE, 则等于 0xFF
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
             SemaphoreHandle_t semaphore ;
 #endif
         } buttons ;
@@ -126,7 +126,7 @@ extern uint8_t _indev_id ;
 extern JSClassID js_lv_indev_pointer_class_id ;
 extern JSClassID js_lv_indev_nav_class_id ;
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 #define THIS_INDEV(thisobj)     \
     lv_indev_t * thisobj = (lv_indev_t *)JS_GetOpaque(this_val, js_lv_indev_pointer_class_id) ; \
     if(!thisobj) {  \

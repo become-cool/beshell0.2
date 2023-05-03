@@ -1,6 +1,6 @@
 #include "rawfs.h"
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 #include <sys/errno.h>
 #include <sys/fcntl.h>
 #include <sys/lock.h>
@@ -13,6 +13,7 @@
 
 #include <sys/stat.h>
 #include <unistd.h>
+#include <string.h>
 #include "debug.h"
 
 
@@ -127,7 +128,7 @@ vfs_node_t * parse_tree(char * raw, vfs_node_t * parent, char ** out_raw, size_t
     node->filename = raw ;
     raw+= strlen(node->filename) + 1 ;
 
-#ifdef SIMULATION
+#ifdef PLATFORM_LINUX
     // printf("%s\n",node->filename) ;
 #endif
 
@@ -145,7 +146,7 @@ vfs_node_t * parse_tree(char * raw, vfs_node_t * parent, char ** out_raw, size_t
     }
     else {
         printf("unknown node type: %d\n", node->type) ;
-        return ;
+        return NULL ;
     }
     // printf("%s\n, size:%d, offset:%d\n",node->filename,node->filesize,node->offset) ;
 
@@ -164,7 +165,7 @@ vfs_node_t * parse_tree(char * raw, vfs_node_t * parent, char ** out_raw, size_t
 #define RAWFS ((vfs_rawfs_t *)ctx)
 
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 
 static int vfs_rawfs_open(void* ctx, const char * path, int flags, int mode) {
     vfs_node_t * node = vfs_node_walk_path(RAWFS->root, path, strlen(path));
@@ -358,7 +359,7 @@ void be_rawfs_mount(const char * mntPoint) {
 
 	char * romdata = NULL ;
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 
 	const esp_partition_t * part = esp_partition_find_first(0x01, 0x81, "fsroot");
     if(!part) {
@@ -444,7 +445,7 @@ void be_rawfs_mount(const char * mntPoint) {
         return ;
     }
 
-    dn(statbuf.st_size)
+    // dn(statbuf.st_size)
 
     romdata = malloc(statbuf.st_size) ;
     if(!romdata) {
@@ -473,7 +474,7 @@ void be_rawfs_mount(const char * mntPoint) {
 }
 
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 vfs_rawfs_t * be_rawfs_root() {
     return fs_root ;
 }

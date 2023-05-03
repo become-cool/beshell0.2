@@ -3,6 +3,7 @@
 
 #include "quickjs-libc.h"
 
+void js_main_loop_tick() ;
 void js_main_loop(const char * script) ;
 JSContext * task_current_context() ;
 

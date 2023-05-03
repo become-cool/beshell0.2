@@ -1,14 +1,17 @@
 #include "module_telnet.h"
 #include "telnet_stdio.h"
 #include "telnet_ble.h"
+#ifndef __EMSCRIPTEN__
 #include "telnet_ws.h"
+#include "module_fs.h"
+#endif
 #include "telnet_serial.h"
 #include "module_utils.h"
-#include "module_fs.h"
 #include "utils.h"
 #include "beshell.h"
 #include "js_main_loop.h"
 #include <math.h>
+#include <string.h>
 
 
 
@@ -39,10 +42,12 @@ uint8_t mk_echo_pkgid() {
 void telnet_output(uint8_t cmd, int pkgid, const char * data, size_t datalen) {
 
 	// for WebSocket(wifi)
+#ifndef __EMSCRIPTEN__
     telnet_ws_output(cmd, pkgid, data, datalen) ;
+#endif
 	
 	// for serial(usb) or stdio(simulators)
-#ifdef SIMULATION
+#ifdef PLATFORM_LINUX
 	printf(data) ;
 	printf("\n") ;
     fflush(stdout) ;
@@ -142,11 +147,13 @@ JSValue js_repl_rspn(JSContext *ctx, JSValueConst this_val, int argc, JSValueCon
 void be_telnet_init() {
     _func_repl_input = JS_NULL ;
 
+#ifndef __EMSCRIPTEN__
 	be_telnet_ws_init() ;
+#endif
 
 	// be_telnet_ble_init() ;
 
-#ifdef SIMULATION
+#ifdef PLATFORM_LINUX
 	be_telnet_stdio_init() ;
 #else
 	be_telnet_serial_init() ;
@@ -166,10 +173,12 @@ void be_telnet_require(JSContext *ctx) {
 	JS_FreeValue(ctx, beapi);
 	JS_FreeValue(ctx, global);
 	
+#ifndef __EMSCRIPTEN__
 	be_telnet_ws_require(ctx, telnet) ;
+#endif
 
 
-#ifdef SIMULATION
+#ifdef PLATFORM_LINUX
 	be_telnet_stdio_require(ctx) ;
 #else
 	be_telnet_ble_require(ctx) ;
@@ -177,10 +186,16 @@ void be_telnet_require(JSContext *ctx) {
 
 }
 void be_telnet_loop(JSContext *ctx) {
-#ifdef SIMULATION
+	// printf("be_telnet_loop()\n") ;
+	
+#ifdef __EMSCRIPTEN__
+
+#else
+#ifdef PLATFORM_LINUX
 	be_telnet_stdio_loop(ctx) ;
 #else
 	be_telnet_serial_loop(ctx) ;
+#endif
 #endif
 }
 
@@ -188,7 +203,7 @@ void be_telnet_reset(JSContext *ctx) {
     JS_FreeValue(ctx, _func_repl_input) ;
     _func_repl_input = JS_NULL ;
 
-#ifdef SIMULATION
+#ifdef PLATFORM_LINUX
 	be_telnet_stdio_reset(ctx) ;
 #else
 	be_telnet_serial_reset(ctx) ;

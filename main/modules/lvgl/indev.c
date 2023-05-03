@@ -5,7 +5,7 @@
 #include "cutils.h"
 #include "indev_pointer.h"
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 #include "indev_i2c.h"
 #endif
 
@@ -34,11 +34,14 @@ static JSValue js_find_indev_by_id(JSContext *ctx, JSValueConst this_val, int ar
 
     indev_driver_spec_t * spec = find_indev_spec_by_id(id) ;
 
-    if(!spec || !spec->jsobj || JS_IsUndefined(spec->jsobj) || JS_IsNull(spec->jsobj)) {
+    if(!spec || /*!spec->jsobj ||*/ JS_IsUndefined(spec->jsobj) || JS_IsNull(spec->jsobj)) {
         return JS_NULL ;
     }
-
+#ifdef PLATFORM_ESP32
     return JS_DupValue(ctx,JS_MKPTR(JS_TAG_OBJECT,spec->jsobj)) ;
+#else
+    return JS_DupValue(ctx,spec->jsobj) ;
+#endif
 }
 
 static JSValue js_all_indev(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
@@ -52,10 +55,14 @@ static JSValue js_all_indev(JSContext *ctx, JSValueConst this_val, int argc, JSV
             continue;
         }
         JSValue jsobj = ((indev_driver_spec_t *)indev->driver->user_data)->jsobj ;
-        if(!jsobj || JS_IsUndefined(jsobj) || JS_IsNull(jsobj)) {
+        if(/*!jsobj ||*/ JS_IsUndefined(jsobj) || JS_IsNull(jsobj)) {
             continue;
         }
+#ifdef PLATFORM_ESP32
         JS_SetPropertyUint32(ctx, ret, idx++, JS_DupValue(ctx,JS_MKPTR(JS_TAG_OBJECT,jsobj))) ;
+#else
+        JS_SetPropertyUint32(ctx, ret, idx++, JS_DupValue(ctx,jsobj)) ;
+#endif
     }
 
     return ret ;
@@ -92,9 +99,12 @@ inline void indev_emit_js_event(indev_driver_spec_t * indev_spec, const char * e
     }
 
     // 在 indev 对象上触发事件
-    if( indev_spec->enable_jsobj_event && indev_spec->jsobj ){
-
+    if( indev_spec->enable_jsobj_event && !JS_IsUndefined(indev_spec->jsobj) && !JS_IsNull(indev_spec->jsobj) ){
+#ifdef PLATFORM_ESP32
         JSValue jsobj = JS_MKPTR(JS_TAG_OBJECT, indev_spec->jsobj) ;
+#else
+        JSValue jsobj = indev_spec->jsobj ;
+#endif
         JSValue emit = JS_GetPropertyStr(indev_spec->ctx,jsobj,"emit") ;
         if( JS_IsFunction(indev_spec->ctx, emit) ) {
             JSValue ret = JS_Call(indev_spec->ctx, emit, jsobj, 2, argv ) ;
@@ -287,7 +297,7 @@ void be_lv_indev_init() {
     // JS_NewClassID(&js_indev_fake_key_class_id);
 
     be_indev_pointer_init() ;
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
     be_indev_i2c_init() ;
 #endif
 }
@@ -311,7 +321,7 @@ void be_lv_indev_require(JSContext *ctx, JSValue lvgl) {
     // QJS_DEF_CLASS(indev_fake_key, "IndevFakeKey", "lv.IndevFakeKey", baseProto, lvgl)
 
     be_indev_pointer_require(ctx, lvgl, baseProto) ;
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
     be_indev_i2c_require(ctx, lvgl, baseProto) ;
 #endif
 }

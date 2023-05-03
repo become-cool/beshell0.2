@@ -4,7 +4,7 @@
 
 #include "tml.h"
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 #include "js_player_midi.h"
 #include "js_player_music.h"
 #endif
@@ -52,7 +52,7 @@ static JSValue js_audio_test(JSContext *ctx, JSValueConst this_val, int argc, JS
 
 
 void be_module_media_init() {
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
     be_module_midi_init() ;
     be_module_music_init() ;
 #endif
@@ -66,7 +66,7 @@ void be_module_media_require(JSContext *ctx) {
 
     // JS_SetPropertyStr(ctx, audio, "test", JS_NewCFunction(ctx, js_audio_test, "test", 1));
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
     be_module_midi_require(ctx, audio) ;
     be_module_music_require(ctx, audio) ;
 #endif

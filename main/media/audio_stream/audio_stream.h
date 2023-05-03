@@ -50,7 +50,7 @@ typedef struct _audio_el_t{
 
 
 #define ELEMENT_CREATE(_pipe, type, var, func,stack,prio,core,ringsize) \
-    var = mallocDMA(sizeof(type), MALLOC_CAP_DMA) ;                     \
+    var = mallocDMA(sizeof(type)) ;                                     \
     memset(var, 0, sizeof(type)) ;                                      \
     var->base.pipe = _pipe ;                                            \
     audio_el_init(var, func, #func, stack, prio, core, ringsize ) ;

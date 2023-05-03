@@ -1,7 +1,7 @@
 #ifndef ONCE_H_RAWFS
 #define ONCE_H_RAWFS
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 #include "esp_system.h"
 #else
 #include <stdint.h>
@@ -27,7 +27,7 @@ typedef struct _vfs_node {
 } vfs_node_t ;
 
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 
 typedef struct {
     DIR dir;            /*!< VFS DIR struct */

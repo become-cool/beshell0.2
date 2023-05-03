@@ -5,7 +5,7 @@
 
 
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 
 #include "tp_spi.h"
 #include "xpt2046.h"
@@ -35,7 +35,7 @@ static void indev_pointer_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
         data->state = driver_spec->spec.data.pointer.state ;
         data->continue_reading = false ;
     }
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
     else if(INDEV_DRIVER_XPT2046 == driver_spec->spec.driver) {
         data->continue_reading = xpt2046_read(drv, data) ;
         // if( data->point.x > OFFSET_X ) {
@@ -88,7 +88,7 @@ static JSValue js_lv_indev_pointer_constructor(JSContext *ctx, JSValueConst new_
     if(strcmp(driver, "fake")==0) {
         driver_spec->spec.driver = INDEV_DRIVER_FAKE ;
     }
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
     else if(strcmp(driver, "XPT2046")==0) {
         printf("XPT2046\n")  ;
         if(argc<3) {
@@ -153,7 +153,7 @@ static void js_lv_indev_pointer_finalizer(JSRuntime *rt, JSValue this_val){
             if(thisobj->driver->user_data) {
 
                 indev_driver_spec_t * pointer = (indev_driver_spec_t *) thisobj->driver->user_data ;
-                #ifndef SIMULATION
+                #ifdef PLATFORM_ESP32
                 if(pointer->driver == INDEV_DRIVER_XPT2046) {
                     spi_bus_remove_device(& pointer->conf.spi.handle) ;
                 }

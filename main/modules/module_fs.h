@@ -2,8 +2,9 @@
 #define _MODULE_FS_H
 
 #include "quickjs-libc.h"
+#include <sys/stat.h>
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 #include "esp_vfs.h"
 
 bool be_module_fs_init() ;

@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <sys/time.h>
 #include <time.h>
 #include "logging.h"
 #include "utils.h"
@@ -13,7 +14,7 @@
 #include "module_telnet.h"
 #include "module_metadata.h"
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 #include "esp_system.h"
 #include "esp_task_wdt.h"
 #include "soc/soc.h"
@@ -116,7 +117,7 @@ static JSValue js_utils_sleep(JSContext *ctx, JSValueConst this_val, int argc, J
         if(now >= expire ) {
             break ;
         }
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
         esp_task_wdt_reset() ;
 #endif
     }
@@ -282,7 +283,7 @@ static JSValue js_utils_part_version(JSContext *ctx, JSValueConst this_val, int 
 }
 
 static JSValue js_utils_part_uuid(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
-#ifdef SIMULATION
+#ifdef PLATFORM_LINUX
     return JS_NewString(ctx, "123456789AEF") ;
 #else
     uint8_t mac_addr[6] = {0};
@@ -304,7 +305,7 @@ static JSValue js_utils_generate_uuid(JSContext *ctx, JSValueConst this_val, int
     return JS_NewStringLen(ctx, uu_str, UUID_STR_LEN-1) ;
 }
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 static JSValue js_utils_base64_encode(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(1)
     size_t srclen = 0 ;
@@ -379,7 +380,7 @@ JSValue js_utils_gamma8_correct(JSContext *ctx, JSValueConst this_val, int argc,
     return JS_NewUint32(ctx, gamma8_table[val]) ;
 }
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 int untar_dist_fd = NULL;
 static int untar_entry_header_cb(header_translated_t *proper, int entry_index, void *context_data) {
     if(proper->type == T_NORMAL) {
@@ -607,7 +608,7 @@ static JSValue js_arraybuffer_as_string(JSContext *ctx, JSValueConst this_val, i
 
 
 static JSValue js_feed_watchdog(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
     esp_task_wdt_reset() ;
 #endif
     return JS_UNDEFINED ;
@@ -633,13 +634,15 @@ static JSValue js_set_time(JSContext *ctx, JSValueConst this_val, int argc, JSVa
 
     printf("%lu.%lu\n",tv.tv_sec,tv.tv_usec);
 
+#ifndef __EMSCRIPTEN__
     settimeofday(&tv, NULL);
+#endif
 
     return JS_UNDEFINED ;
 }
 
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 static JSValue js_partition_read(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(2)
     ARGV_TO_STRING(0, name) ;
@@ -719,7 +722,7 @@ void be_module_utils_require(JSContext *ctx) {
 	// utils 
     JSValue utils = JS_NewObject(ctx);
     JS_SetPropertyStr(ctx, beapi, "utils", utils);
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
     JS_SetPropertyStr(ctx, utils, "setLogLevel", JS_NewCFunction(ctx, js_utils_set_log_level, "setLogLevel", 1));
     JS_SetPropertyStr(ctx, utils, "untar", JS_NewCFunction(ctx, js_utils_untar, "untar", 1));
     JS_SetPropertyStr(ctx, utils, "base64Encode", JS_NewCFunction(ctx, js_utils_base64_encode, "base64Encode", 1));

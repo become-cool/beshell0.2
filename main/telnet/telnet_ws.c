@@ -2,7 +2,7 @@
 #include "module_telnet.h"
 #include "module_metadata.h"
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 #include "module_wifi.h"
 #include "driver_camera.h"
 #include "esp_camera.h"
@@ -46,8 +46,6 @@
 
 static char * fs_root = NULL;
 struct mg_connection * conn ;
-
-
 struct mg_connection * client ;
 
 uint8_t jpeg_quality = 20 ;
@@ -89,7 +87,7 @@ void ws_disp_flush(lv_disp_drv_t *dispdrv, const lv_area_t *area, lv_color_t *co
     
     //todo: allocate proper buffer for holding JPEG data
     //this should be enough for CIF frame size
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
     size_t bufflen = size*2+10;
     size_t jpglen = size*2;
 #else
@@ -114,7 +112,7 @@ void ws_disp_flush(lv_disp_drv_t *dispdrv, const lv_area_t *area, lv_color_t *co
     (*coord) = area->y2 ;
 
     // esp32 上 jpg 编码后发送，pc 上直接发送
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 
     buff[1] = WS_DISP_BUFF_JPEG ;
     uint8_t * jpgbuff = buff + 10 ;
@@ -258,7 +256,7 @@ static void upgrade_ws(struct mg_connection *c, struct mg_http_message *hm, WS_T
         
         SET_CLIENT(disp, client) ;
     }
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
     else if( type==WS_PROJ ) {
         if(!telnet_ws_projection_sessn_init()) {
             goto fail ;
@@ -426,7 +424,7 @@ bool telnet_ws_response_http(struct mg_connection *c, struct mg_http_message *hm
                 .mime_types = "text/html",
                 .extra_headers = extra_headers
         };
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
         mg_http_serve_file(c, hm, "/fs/lib/local/telweb/index.html.gz", &opts);  // Send file
 #else
         mg_http_serve_file(c, hm, "../filesystem/root/lib/local/telweb/index.html.gz", &opts);  // Send file
@@ -443,7 +441,7 @@ bool telnet_ws_response_http(struct mg_connection *c, struct mg_http_message *hm
         };
 
         // content-type: image/vnd.microsoft.icon
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
         mg_http_serve_file(c, hm, "/fs/lib/local/telweb/favicon.ico", &opts);  // Send file
 #else
         mg_http_serve_file(c, hm, "../filesystem/root/lib/local/telweb/favicon.ico", &opts);  // Send file
@@ -455,7 +453,7 @@ bool telnet_ws_response_http(struct mg_connection *c, struct mg_http_message *hm
 
         size_t path_len = hm->uri.len+1 ;
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
         char * path = malloc(path_len) ;
         memcpy(path,hm->uri.ptr,hm->uri.len) ;
         path[hm->uri.len] = '\0' ;
@@ -587,7 +585,7 @@ bool telnet_ws_response_ws(struct mg_connection *c, struct mg_ws_message * wm) {
             break ;
         }
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
         case WS_PROJ:
             telnet_ws_response_projection(c, wm) ;
             break ;
@@ -607,7 +605,7 @@ bool telnet_ws_response_ws(struct mg_connection *c, struct mg_ws_message * wm) {
 bool telnet_ws_response(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
     (void)fn_data;
     
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
     // camera
     if(be_module_driver_camera_response(c,ev,ev_data)) {
         return true ;
@@ -628,7 +626,7 @@ bool telnet_ws_response(struct mg_connection *c, int ev, void *ev_data, void *fn
         else if(c->userdata==client_disp) {
             FREE_RTC_Client(c, client_disp)
         }
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
         else if(c->userdata==client_proj) {
             printf("close client_proj\n") ;
             telnet_ws_projection_sess_release() ;
@@ -706,18 +704,18 @@ static void captive_dns(struct mg_connection *c, int ev, void *ev_data, void *fn
 
 void be_telnet_ws_init() {
     
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
     if(!wifi_has_inited()) {
         return ;
     }
+
+    // Captive Portal
+    mg_listen(be_module_mg_mgr(), "udp://0.0.0.0:53", captive_dns, NULL);
 #endif
 
     // fs_root = mallocf("/fs/=%s", vfs_path_prefix) ;
     // conn = mg_http_listen(be_module_mg_mgr(), TELNET_WS_ADDR, telnet_ws_response, NULL);
     // printf("telnet websocket addr: %s\n", TELNET_WS_ADDR) ;
-
-    // Captive Portal
-    mg_listen(be_module_mg_mgr(), "udp://0.0.0.0:53", captive_dns, NULL);
 
     client_repl = NULL ;
 }

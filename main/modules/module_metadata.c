@@ -2,7 +2,7 @@
 #include "utils.h"
 #include <string.h>
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 #include "soc/soc.h"
 #include "esp_efuse.h"
 #endif
@@ -16,7 +16,7 @@ const char * field_names[] = {
 
 
 int readPartId() {
-#ifdef SIMULATION
+#ifdef PLATFORM_LINUX
     return 255 ;
 #else
     int value = esp_efuse_read_reg(3, 7) ; // blk3
@@ -25,7 +25,7 @@ int readPartId() {
 }
 
 int readPartVersion() {
-#ifdef SIMULATION
+#ifdef PLATFORM_LINUX
     return 255 ;
 #else
     int value = esp_efuse_read_reg(3, 7) ;
@@ -34,7 +34,7 @@ int readPartVersion() {
 }
 
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 
 
 /**
@@ -79,7 +79,7 @@ static int read_fields(JSContext *ctx, JSValue meta, const char * buf, int offse
     }
 
     if(checksum!=buf[offset+packlen-1]) {
-        return ;
+        return 0 ;
     }
 
     o=1 ;
@@ -98,7 +98,7 @@ static void load_meta_from_efuse(JSContext *ctx, JSValue meta) {
     char buffer[32] ;
     memset(buffer, 0, 32) ;
 
-#ifdef SIMULATION
+#ifdef PLATFORM_LINUX
     FILE * fd = fopen("../filesystem/meta-bins/BeCamera-019-v1.bin", "r") ;
     if(NULL==fd) {
         printf("can not open meta bin file\n") ;
@@ -106,7 +106,7 @@ static void load_meta_from_efuse(JSContext *ctx, JSValue meta) {
     }
     int readed = fread(buffer, 1, 32, fd) ;
     fclose(fd) ;
-#else
+#elif defined(PLATFORM_ESP32)
     for(int i=0; i<32; i+=4) {
         uint32_t value = REG_READ(i+0x3FF5A078) ;
         buffer[i] = value & 255 ;
@@ -134,7 +134,7 @@ void module_metadata_require(JSContext *ctx) {
 
     load_meta_from_efuse(ctx, metadata) ;
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
     JS_SetPropertyStr(ctx, metadata, "readField", JS_NewCFunction(ctx, js_metadata_read_field, "readField", 1));
 #endif
 

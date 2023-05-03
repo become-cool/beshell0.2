@@ -10,7 +10,7 @@
 
 #include "audio_stream.h"
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 
 #else
 
@@ -220,7 +220,7 @@ static JSValue js_audio_play_mp3(JSContext *ctx, JSValueConst this_val, int argc
     JS_FreeCString(ctx, path) ;
 
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
     if(!audio_el_src_strip_mp3(player->src)) {
         THROW_EXCEPTION("file not exists") ;
     }

@@ -5,7 +5,7 @@
 #include "utils.h"
 #include "cutils.h"
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 #include "module_wifi.h"
 #else
 #define CHECK_WIFI_INITED
@@ -31,10 +31,11 @@ static JSValue js_mg_server_constructor(JSContext *ctx, JSValueConst new_target,
 }
 static void js_mg_server_finalizer(JSRuntime *rt, JSValue this_val){
     // printf("js_mg_server_finalizer()") ;
-
-    // @TODO: 改为在 MG_EV_CLOSE 事件里 free(server)
-    THIS_SERVER(server)
-    free(server) ;
+    
+    be_http_server_t * server = JS_GetOpaque(this_val, js_mg_server_class_id) ;
+    if(server ) {
+        free(server) ;
+    }
 
     // @todo
     // 未断开的客户端连接 (chrome等现代浏览器会保持长连接)

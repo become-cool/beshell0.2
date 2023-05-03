@@ -3,7 +3,7 @@
 #include <sys/stat.h>
 
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 
 #include "esp_system.h"
 #include "nvs_flash.h"
@@ -95,7 +95,7 @@ ret:
 
 
 void nvs_read_onetime(const char * key, uint8_t*pvalue) {
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
     NVS_OPEN(handle, {
         return ;
     })
@@ -107,7 +107,7 @@ void nvs_read_onetime(const char * key, uint8_t*pvalue) {
 #endif
 }
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 static JSValue js_nvs_write_str(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(2)
     ARGV_TO_STRING(0,key)
@@ -174,7 +174,7 @@ ret:
 //     CHECK_ARGC(1)
 //     ARGV_TO_UINT8(0,level)
 //     JSValue result = JS_FALSE;
-// #ifndef SIMULATION
+// #ifdef PLATFORM_ESP32
 //     NVS_OPEN(handle, {
 //         goto ret ;
 //     })
@@ -207,7 +207,7 @@ void be_module_nvs_require(JSContext *ctx) {
     JS_SetPropertyStr(ctx, beapi, "nvs", nvs);
 
 
-#ifndef SIMULATION
+#ifdef PLATFORM_ESP32
 
     JS_SetPropertyStr(ctx, nvs, "erase", JS_NewCFunction(ctx, js_nvs_erase_key, "erase", 1));
     JS_SetPropertyStr(ctx, nvs, "readInt8", JS_NewCFunction(ctx, js_nvs_read_i8, "readInt8", 1));

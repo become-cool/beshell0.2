@@ -273,24 +273,38 @@ void be_lv_disp_inv(lv_disp_t* disp) {
 }
 
 
+void be_lv_pause() {
+    lv_tick_status_save = lv_tick_active ;
+    lv_tick_active = false ;
+}
+
 /**
  * 暂停 lvgl 循环
  * 
  * @beapi beapi.lvgl.pause
  */
-void be_lv_pause() {
-    lv_tick_status_save = lv_tick_active ;
-    lv_tick_active = false ;
+static JSValue js_be_lv_pause(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    be_lv_pause() ;
+    return JS_UNDEFINED ;
 }
+
+
+void be_lv_resume() {
+    lv_tick_active = lv_tick_status_save ;
+    be_lv_disp_inv(lv_disp_get_default()) ;
+}
+
+
 /**
  * 恢复 lvgl 循环
  * 
  * @beapi beapi.lvgl.resume
  */
-void be_lv_resume() {
-    lv_tick_active = lv_tick_status_save ;
-    be_lv_disp_inv(lv_disp_get_default()) ;
+static JSValue js_be_lv_resume(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    be_lv_resume() ;
+    return JS_UNDEFINED ;
 }
+
 
 /**
  * 设置是否使用伪静态内存
@@ -432,8 +446,8 @@ void be_module_lvgl_require(JSContext *ctx) {
     JS_SetPropertyStr(ctx, lvgl, "rgb", JS_NewCFunction(ctx, js_lv_rgb, "rgb", 1));
     JS_SetPropertyStr(ctx, lvgl, "setIndevActiveObj", JS_NewCFunction(ctx, js_lv_set_indev_active_obj, "setIndevActiveObj", 1));
     JS_SetPropertyStr(ctx, lvgl, "setAllocSPIRAM", JS_NewCFunction(ctx, js_lv_set_alloc_spiram, "setAllocSPIRAM", 1));
-    JS_SetPropertyStr(ctx, lvgl, "pause", JS_NewCFunction(ctx, be_lv_pause, "pause", 1));
-    JS_SetPropertyStr(ctx, lvgl, "resume", JS_NewCFunction(ctx, be_lv_resume, "resume", 1));
+    JS_SetPropertyStr(ctx, lvgl, "pause", JS_NewCFunction(ctx, js_be_lv_pause, "pause", 1));
+    JS_SetPropertyStr(ctx, lvgl, "resume", JS_NewCFunction(ctx, js_be_lv_resume, "resume", 1));
 
 
     JS_SetPropertyStr(ctx, lvgl, "SizeContent", JS_NewUint32(ctx, LV_SIZE_CONTENT));

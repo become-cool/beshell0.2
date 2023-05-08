@@ -48,7 +48,6 @@ void be_telnet_stdio_require(JSContext * ctx) {
     pid_t pid = getpid() ;    
     JS_SetPropertyStr(ctx, jsproc, "pid", JS_NewInt32(ctx, pid));
 
-
     JS_FreeValue(ctx, jsproc) ;
 }
 

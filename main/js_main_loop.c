@@ -7,11 +7,12 @@
 
 #include "module_telnet.h"
 #include "module_utils.h"
-#include "module_fs.h"
 
-#ifndef PLATFORM_WSAM
+
+#ifndef PLATFORM_WASM
 #include "module_mg.h"
 #endif
+#include "module_fs.h"
 
 #ifdef PLATFORM_ESP32
 #include "malloc_funcs.h"
@@ -65,15 +66,13 @@ JSContext * task_current_context() {
     return ctx ;
 }
 
-#define InitScriptTpl "require('/etc/rc%d.d.js')"
+#define InitScriptTpl "require('/etc/rc%d.d.js');\n"
 
 static void eval_rc_script(JSContext *ctx, const char * path) {
 
     char * fullpath = vfspath_to_fs(path) ;
 
-#ifdef PLATFORM_LINUX
-    evalScript(ctx, fullpath, false) ;
-#else
+#ifdef PLATFORM_ESP32
     char * binpath = mallocf("%s.bin", fullpath) ;
     struct stat statbuf;
     if(stat(binpath,&statbuf)<0) {
@@ -83,6 +82,8 @@ static void eval_rc_script(JSContext *ctx, const char * path) {
         evalScript(ctx, binpath, true) ;
     }
     free(binpath) ;
+#else
+    evalScript(ctx, fullpath, false) ;
 #endif
 
     free(fullpath) ;
@@ -124,9 +125,7 @@ static JSContext * init_custom_context(JSRuntime *rt) {
     JS_SetPropertyStr(ctx, global, "beapi", beapi);
     JS_FreeValue(ctx, global);
     
-#ifndef PLATFORM_WSAM
     be_module_fs_require(ctx) ;
-#endif
     be_module_utils_require(ctx) ;
     be_module_process_require(ctx) ;
 
@@ -143,14 +142,13 @@ static JSContext * init_custom_context(JSRuntime *rt) {
 #endif
     be_module_wifi_require(ctx) ;
     be_module_gpio_require(ctx) ;  
-    // be_module_telnet_require(ctx) ;
     be_module_serial_require(ctx) ;
     be_module_socks_require(ctx) ;
     be_module_driver_require(ctx) ;
 #endif
     be_module_gameplayer_require(ctx) ;
     be_module_media_require(ctx) ;
-#ifndef PLATFORM_WSAM
+#ifndef PLATFORM_WASM
     be_module_mg_require(ctx) ;
 #endif
     be_telnet_require(ctx) ;
@@ -216,6 +214,12 @@ static void quickjs_init() {
 
 static void rc_init() {
 
+#ifdef PLATFORM_WASM
+    EVAL_CODE("require('/lib/base/wasm-pad.js');\n", ":init.d")
+#endif
+
+
+
     // 0等级，不加载任何启动脚本，作为安全模式
     if(boot_level>0) { 
         echof("init level: %d\n", boot_level) ;
@@ -266,7 +270,7 @@ static int64_t __tt1,__tt2 ;
             printf(label " block loop: %lldms\n", __tt2-__tt1) ;    \
         }                                                           \
     }
-    
+
 #else 
 #define monitor(label, code) code
 #endif
@@ -279,71 +283,76 @@ inline
 #endif
 void js_main_loop_tick() {
 
-    // printf("js_main_loop_tick\n") ;
+    if(requst_reset) {
 
-        if(requst_reset) {
-
-            be_module_eventloop_reset(ctx) ;
-#ifndef PLATFORM_WSAM
-            be_module_mg_reset(ctx) ;
+        be_module_eventloop_reset(ctx) ;
+#ifndef PLATFORM_WASM
+        be_module_mg_reset(ctx) ;
 #endif
-            be_module_lvgl_reset(ctx) ;
-            be_telnet_reset(ctx) ;
+        be_module_lvgl_reset(ctx) ;
+        be_telnet_reset(ctx) ;
 #ifdef PLATFORM_ESP32
-            // be_module_telnet_reset(ctx) ;
-            be_module_gpio_reset(ctx) ;
-            be_module_serial_reset(ctx) ;
-            be_module_socks_reset(ctx) ;
-            // be_module_http_reset(ctx) ;
-            be_module_driver_reset(ctx) ;
-            be_module_wifi_reset(ctx) ;
-            be_module_media_reset(ctx) ;
+        // be_module_telnet_reset(ctx) ;
+        be_module_gpio_reset(ctx) ;
+        be_module_serial_reset(ctx) ;
+        be_module_socks_reset(ctx) ;
+        // be_module_http_reset(ctx) ;
+        be_module_driver_reset(ctx) ;
+        be_module_wifi_reset(ctx) ;
+        be_module_media_reset(ctx) ;
 #endif
-            quickjs_deinit() ;
-            quickjs_init() ;
-            rc_init() ;
+        quickjs_deinit() ;
+        quickjs_init() ;
+        rc_init() ;
 
-            requst_reset = false ;
-        }
+        requst_reset = false ;
+    }
 
-        monitor("std loop1", {
-            js_std_loop(ctx) ;
-        })
+    monitor("std loop1", {
+        js_std_loop(ctx) ;
+    })
 #ifdef PLATFORM_ESP32
-        monitor("sniffer", {
-            be_module_sniffer_loop() ;
-        })
-        monitor("socks udp", {
-            be_module_socks_udp_loop(ctx) ;
-        })
-        monitor("gpio", {
-        be_module_gpio_loop(ctx) ;
-        })
+    monitor("sniffer", {
+        be_module_sniffer_loop() ;
+    })
+    monitor("socks udp", {
+        be_module_socks_udp_loop(ctx) ;
+    })
+    monitor("gpio", {
+    be_module_gpio_loop(ctx) ;
+    })
 #endif
-        monitor("telnet", {
-            be_telnet_loop(ctx) ;
-        })
-#ifndef PLATFORM_WSAM
-        monitor("mg", {
-            be_module_mg_loop(ctx) ;
-        })
+    monitor("telnet", {
+        be_telnet_loop(ctx) ;
+    })
+#ifndef PLATFORM_WASM
+    monitor("mg", {
+        be_module_mg_loop(ctx) ;
+    })
 #endif
         
 #ifdef PLATFORM_ESP32
-        monitor("indev i2c", {
-            be_indev_i2c_loop(ctx) ;
-        })
+    monitor("indev i2c", {
+        be_indev_i2c_loop(ctx) ;
+    })
 #endif
-        monitor("lvgl", {
-            be_module_lvgl_loop(ctx) ;
-        })
-        monitor("eventloop", {
-            be_module_eventloop_loop(ctx) ;
-        })
+    monitor("lvgl", {
+        be_module_lvgl_loop(ctx) ;
+    })
+    monitor("eventloop", {
+        be_module_eventloop_loop(ctx) ;
+    })
 
-        monitor("std loop2", {
-            js_std_loop(ctx) ;
-        })
+    monitor("std loop2", {
+        js_std_loop(ctx) ;
+    })
+
+// #ifndef PLATFORM_WASM
+// 	EM_ASM({
+//         Module.onLoop()
+//     });
+// #endif
+
 #ifdef PLATFORM_ESP32
         vTaskDelay(0) ;
 #endif
@@ -352,20 +361,10 @@ void js_main_loop_tick() {
 #include <stdio.h>
 void js_main_loop(const char * script){
 
-    // FILE * fp = fopen("/etc/rc2.d.js","rw") ;
-    // if(!fp) {
-    //     printf("xxxxxxxxxxx\n") ;
-    // }
-    // else {
-    //     printf("yyyyyyyyyy\n") ;
-    // }
-
     boot_level = 5 ;
     nvs_read_onetime("rst-lv", &boot_level) ;
 
     nvs_read_onetime("rst-nowifi", (uint8_t*)&nowifi) ;
-
-// nowifi = true ;
     
 #ifdef PLATFORM_ESP32    
 
@@ -393,7 +392,7 @@ void js_main_loop(const char * script){
 #endif
 
     be_module_process_init() ;
-#ifndef PLATFORM_WSAM
+#ifndef PLATFORM_WASM
     be_module_mg_init() ;
 #endif
     be_module_lvgl_init() ;
@@ -430,7 +429,9 @@ void js_main_loop(const char * script){
     echo_DMA("loop start") ;
 #endif
 
-#ifndef PLATFORM_WSAM
+#ifdef PLATFORM_WASM
+    emscripten_set_main_loop(js_main_loop_tick, 0, 1);
+#else
     while(1) {
         js_main_loop_tick() ;
     }

@@ -13,7 +13,7 @@ module.exports = function() {
 
     console.log("part id:", beapi.utils.partId(), "part version:",beapi.utils.partVersion())
 
-    if(!process.simulate) {
+    if(process.platform=='esp32') {
         
         var setupConf = JSON.load("/home/become/config/setup.json")
         if(!setupConf) {

@@ -21,7 +21,7 @@ int readPartId() {
 #elif defined PLATFORM_ESP32
     int value = esp_efuse_read_reg(3, 7) ; // blk3
     return (value >> 24) & 0xFF ;
-#else defined PLATFORM_WSAM
+#else defined PLATFORM_WASM
 #endif
 }
 
@@ -31,7 +31,7 @@ int readPartVersion() {
 #elif defined PLATFORM_ESP32
     int value = esp_efuse_read_reg(3, 7) ;
     return (value >> 16) & 0xFF ;
-#else defined PLATFORM_WSAM
+#else defined PLATFORM_WASM
 #endif
 }
 

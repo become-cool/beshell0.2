@@ -309,7 +309,7 @@ static JSValue js_utils_generate_uuid(JSContext *ctx, JSValueConst this_val, int
 static JSValue js_utils_base64_encode(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(1)
     size_t srclen = 0 ;
-    char * src = JS_ToCStringLen(ctx, &srclen, argv[0]) ;
+    const char * src = JS_ToCStringLen(ctx, &srclen, argv[0]) ;
     size_t codelen = base64_encode_expected_len(srclen) ;
     char * code = (char *) malloc(codelen+1);
     if(!code) {
@@ -332,7 +332,7 @@ static JSValue js_utils_base64_encode(JSContext *ctx, JSValueConst this_val, int
 static JSValue js_utils_base64_decode(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(1)
     size_t codelen = 0 ;
-    char * code = JS_ToCStringLen(ctx, &codelen, argv[0]) ;
+    const char * code = JS_ToCStringLen(ctx, &codelen, argv[0]) ;
     size_t srclen = base64_decode_expected_len(codelen) + 1;
     char * src = (char *) malloc(srclen);
     if(!src) {
@@ -634,7 +634,7 @@ static JSValue js_set_time(JSContext *ctx, JSValueConst this_val, int argc, JSVa
 
     printf("%lu.%lu\n",tv.tv_sec,tv.tv_usec);
 
-#ifndef PLATFORM_WSAM
+#ifndef PLATFORM_WASM
     settimeofday(&tv, NULL);
 #endif
 

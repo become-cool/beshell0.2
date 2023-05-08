@@ -8,7 +8,7 @@ require("besdk")
 
         require("./init.d/banner.js")()
 
-        if(!process.simulate) {
+        if(process.platform=='esp32' && beapi.wifi.hasInited()) {
             require("besdk/wifi").autostart()
         }
 

@@ -365,37 +365,37 @@ static JSValue js_wifi_set_ps(JSContext *ctx, JSValueConst this_val, int argc, J
 
 
 
-#define SET_MEMBER_STRING(mode, name, max)                                \
+#define SET_MEMBER_STRING(mode, name, max)                          \
     size_t name##_len = 0 ;                                         \
     {                                                               \
         JSValue val = JS_GetPropertyStr(ctx, argv[0], #name) ;      \
         if( !JS_IsUndefined(val) ) {                                \
             char * str = JS_ToCStringLen(ctx, & name##_len, val) ;  \
-            if(name##_len>MAX_SSID_CHARLEN) {                              \
-                name##_len = MAX_SSID_CHARLEN ;                            \
+            if(name##_len>max) {                                    \
+                name##_len = max ;                                  \
                 str[name##_len] = 0 ;                               \
             }                                                       \
-            strcpy((char *)wifi_config.mode.name, str) ;                     \
+            strcpy((char *)wifi_config.mode.name, str) ;            \
             JS_FreeValue(ctx,val) ;                                 \
             JS_FreeCString(ctx,str) ;                               \
         }                                                           \
     }
 
-#define SET_MEMBER_INT_(mode, name, jspropname)                               \
+#define SET_MEMBER_INT_(mode, name, jspropname)                     \
     {                                                               \
-        JSValue val = JS_GetPropertyStr(ctx, argv[0], #jspropname) ;      \
+        JSValue val = JS_GetPropertyStr(ctx, argv[0], #jspropname) ;\
         if( !JS_IsUndefined(val) ) {                                \
-            JS_ToInt32(ctx, &wifi_config.mode.name, val) ;           \
+            JS_ToInt32(ctx, &wifi_config.mode.name, val) ;          \
         }                                                           \
         JS_FreeValue(ctx,val) ;                                     \
     }
-#define SET_MEMBER_INT(mode, name)                               \
+#define SET_MEMBER_INT(mode, name)                                  \
     SET_MEMBER_INT_(mode, name, name)
-#define SET_MEMBER_BOOL(mode, name)                               \
+#define SET_MEMBER_BOOL(mode, name)                                 \
     {                                                               \
         JSValue val = JS_GetPropertyStr(ctx, argv[0], #name) ;      \
         if( !JS_IsUndefined(val) ) {                                \
-            wifi_config.mode.name = JS_ToBool(ctx, val) ;            \
+            wifi_config.mode.name = JS_ToBool(ctx, val) ;           \
         }                                                           \
         JS_FreeValue(ctx,val) ;                                     \
     }
@@ -476,7 +476,7 @@ static JSValue js_wifi_set_sta_config(JSContext *ctx, JSValueConst this_val, int
         },
     };
 
-    SET_MEMBER_STRING(sta, ssid, MAX_PASSWORD_CHARLEN)
+    SET_MEMBER_STRING(sta, ssid, MAX_SSID_CHARLEN)
     SET_MEMBER_STRING(sta, password, MAX_PASSWORD_CHARLEN)
     SET_MEMBER_INT_(sta, threshold.authmode, authmode)
     if(password_len==0) {
@@ -554,7 +554,7 @@ static JSValue js_wifi_set_ap_config(JSContext *ctx, JSValueConst this_val, int 
         },
     };
 
-    SET_MEMBER_STRING(ap, ssid, MAX_PASSWORD_CHARLEN)
+    SET_MEMBER_STRING(ap, ssid, MAX_SSID_CHARLEN)
     SET_MEMBER_STRING(ap, password, MAX_PASSWORD_CHARLEN)
     if(password_len==0) {
         wifi_config.ap.authmode = WIFI_AUTH_OPEN ;

@@ -19,7 +19,7 @@ function sntp_request(retry) {
     })
 }
 
-if(!process.simulate) {
+if(process.platform=='esp32') {
     const wifi = require("besdk/wifi")
     wifi.on("ip.got", ()=>{
         sntp_request(10)

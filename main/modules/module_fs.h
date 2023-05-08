@@ -1,12 +1,12 @@
-#ifndef _MODULE_FS_H
-#define _MODULE_FS_H
+#pragma once
 
 #include "quickjs-libc.h"
 #include <sys/stat.h>
 
+#define PATH_PREFIX "/fs"
+
 #ifdef PLATFORM_ESP32
 #include "esp_vfs.h"
-
 bool be_module_fs_init() ;
 #endif
 
@@ -39,7 +39,6 @@ char * js_arg_to_vfspath(JSContext *ctx, JSValueConst argv) ;
         return JS_EXCEPTION ;                                                       \
     }
 
-#define PATH_PREFIX "/fs"
 
 // 递归创建目录
 #ifdef WIN32
@@ -50,4 +49,3 @@ int mkdir_p(char* file_path, mode_t mode) ;
 
 void be_module_fs_require(JSContext *ctx) ;
 
-#endif

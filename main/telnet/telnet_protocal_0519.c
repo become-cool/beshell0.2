@@ -2,7 +2,7 @@
 #include "utils.h"
 #include <string.h>
 
-PkgCmdProcess telnet_prot0519_on_package = 0 ;
+// PkgCmdProcess telnet_prot0519_on_package = 0 ;
 
 
 

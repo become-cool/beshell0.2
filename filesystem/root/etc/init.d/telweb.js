@@ -1,6 +1,6 @@
 
 
-if(beapi.wifi.hasInited() || process.simulate) {
+if(beapi.wifi.hasInited() || process.platform=='linux') {
 
     const telweb = require("telweb")
 

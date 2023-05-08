@@ -1,19 +1,23 @@
 require("besdk")
-require("besdk/http")
+if(process.platform!='wasm'){
+    require("besdk/http")
+}
 
 ; (async function(){
     try{
         require("./init.d/repl.js")
         sleep(0)
     
-        require("./init.d/telweb.js")
-        sleep(0)
+        if(process.platform!='wasm'){
+            require("./init.d/telweb.js")
+            sleep(0)
+        }
 
         require("./init.d/banner.js")()
         sleep(0)
 
 
-        if(!process.simulate && beapi.wifi.hasInited()) {
+        if(process.platform=='esp32' && beapi.wifi.hasInited()) {
             require("besdk/wifi").autostart()
         }
 

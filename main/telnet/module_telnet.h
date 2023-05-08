@@ -4,7 +4,6 @@
 #include "quickjs-libc.h"
 #include "telnet_protocal.h"
 
-
 void be_telnet_init() ;
 void be_telnet_require(JSContext *ctx) ;
 void be_telnet_loop(JSContext *ctx) ;

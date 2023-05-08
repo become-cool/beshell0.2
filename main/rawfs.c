@@ -434,13 +434,13 @@ void be_rawfs_mount(const char * mntPoint) {
         return ;
     }
 
-#else
+#elif defined(PLATFORM_LINUX)
 
     char * tarpath = vfspath_to_fs("../img/fs-root.img") ;
 
     struct stat statbuf;
     if(stat(tarpath,&statbuf)<0) {
-        printf("Failed to stat file: %s", tarpath);
+        printf("Failed to stat file: %s\n", tarpath);
         free(tarpath) ;
         return ;
     }

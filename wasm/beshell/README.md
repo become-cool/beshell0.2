@@ -20,14 +20,10 @@ https://www.cntofu.com/book/150/zh/ch3-runtime/ch3-03-fs.md
 
 编译：
 ```
+make cmake
 make
 ```
 
-调试 server：
-
-```
-make dev
-```
 
 修改过 `CMakeLists.txt` 需要 `make cmake`
 

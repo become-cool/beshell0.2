@@ -10,6 +10,10 @@
 #include <string.h>
 #include <sys/time.h>
 
+#ifndef ACCESSPERMS
+    #define ACCESSPERMS 0777
+#endif
+
 #define PARTITION_LABEL_ROOT "fsroot"
 #define PARTITION_LABEL_HOME "fshome"
 
@@ -26,6 +30,16 @@ char * vfs_path_prefix = PATH_PREFIX ;
 void module_fs_set_vfs_path_prefix(char * path) {
     vfs_path_prefix = path ;
 }
+
+#ifdef PLATFORM_WASM
+#include <emscripten.h>
+EMSCRIPTEN_KEEPALIVE
+void wasm_set_fs_prefix(const char * fs_path) {
+    size_t len = strlen(fs_path) ;
+    vfs_path_prefix = malloc(len+1) ;
+    strcpy(vfs_path_prefix, fs_path) ;
+}
+#endif
 
 // 返回值 由调用者 free
 char * vfspath_to_fs(const char * path) {
@@ -221,14 +235,14 @@ JSValue js_fs_mkdir_sync(JSContext *ctx, JSValueConst this_val, int argc, JSValu
 
     bool ret ;
     if(recursive) {
-#ifdef WIN32
+#if defined(WIN32)
         ret = mkdir_p(path)>=0 ;
 #else
         ret = mkdir_p(path, ACCESSPERMS)>=0 ;
 #endif
     }
     else {
-#ifdef WIN32
+#if defined(WIN32)
         ret = mkdir(path)>=0 ;
 #else
         ret = mkdir(path, ACCESSPERMS)>=0 ;

@@ -69,7 +69,7 @@ function __mkrequire(__dirname) {
         discahce = !!discahce
 
         if(Module.autoBin==-1) {
-            Module.autoBin = process.simulate? 1: 2
+            Module.autoBin = process.platform=='esp32'? 2: 1
         }
 
         let path
@@ -129,8 +129,8 @@ function __mkrequire(__dirname) {
         else {
             let isBinFile = path.substr(-4).toLowerCase()==".bin"
             if( isBinFile
-                || (Module.autoBin==2 && binExists) // 优先二进制文件
-                || (Module.autoBin==1 && !srcExists && binExists) // 备选二进制文件
+                || (Module.autoBin==2 && binExists) /*优先二进制文件*/
+                || (Module.autoBin==1 && !srcExists && binExists) /*备选二进制文件*/
             ) {
                 let bytecode = beapi.fs.readFileSync(isBinFile? path: (path+".bin"))
                 result = evalBin(bytecode)

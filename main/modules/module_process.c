@@ -276,6 +276,7 @@ JSValue js_process_memory_usage(JSContext *ctx, JSValueConst this_val, int argc,
 
 
 static inline JSValue _print(uint8_t type, JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+    
     CHECK_ARGC(1)
     size_t len = 0 ;
     const char * str = JS_ToCStringLen(ctx, &len, argv[0]) ;
@@ -381,13 +382,19 @@ void be_module_process_require(JSContext *ctx) {
     JS_SetPropertyStr(ctx, versions, "beshell", JS_NewString(ctx, BESHELL_VERSION));
 #ifdef PLATFORM_ESP32
     JS_SetPropertyStr(ctx, versions, "esp-idf", JS_NewString(ctx, ESPIDF_VERSION));
+    JS_SetPropertyStr(ctx, process, "platform", JS_NewString(ctx,"esp32"));
 #else
     JS_SetPropertyStr(ctx, versions, "esp-idf", JS_NewString(ctx, "none"));
 #endif
 
 #ifdef PLATFORM_LINUX
-    JS_SetPropertyStr(ctx, process, "simulate", JS_NewBool(ctx, true));
+    JS_SetPropertyStr(ctx, process, "platform", JS_NewString(ctx,"linux"));
     JS_SetPropertyStr(ctx, process, "exit", JS_NewCFunction(ctx, js_process_exit, "exit", 1));
+#endif
+
+
+#ifdef PLATFORM_WASM
+    JS_SetPropertyStr(ctx, process, "platform", JS_NewString(ctx,"wasm"));
 #endif
 
     JS_SetPropertyStr(ctx, versions, "quickjs", JS_NewString(ctx, QUICKJS_VERSION));

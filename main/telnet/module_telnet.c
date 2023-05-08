@@ -1,7 +1,9 @@
 #include "module_telnet.h"
 #include "telnet_stdio.h"
 #include "telnet_ble.h"
-#ifndef PLATFORM_WSAM
+#ifdef PLATFORM_WASM
+#include "telnet_wasm.h"
+#else
 #include "telnet_ws.h"
 #include "module_fs.h"
 #endif
@@ -42,22 +44,24 @@ uint8_t mk_echo_pkgid() {
 void telnet_output(uint8_t cmd, int pkgid, const char * data, size_t datalen) {
 
 	// for WebSocket(wifi)
-#ifndef PLATFORM_WSAM
-    telnet_ws_output(cmd, pkgid, data, datalen) ;
+#ifdef PLATFORM_WASM
+	telnet_proto_send_pkg(pkgid, cmd, data, datalen) ;
 #endif
 	
 	// for serial(usb) or stdio(simulators)
 #ifdef PLATFORM_LINUX
+    telnet_ws_output(cmd, pkgid, data, datalen) ;
+
 	printf(data) ;
 	printf("\n") ;
     fflush(stdout) ;
 #endif
 
 #ifdef PLATFORM_ESP32
-	telnet_serial_send_pkg(pkgid, cmd, data, datalen) ;
+    telnet_ws_output(cmd, pkgid, data, datalen) ;
+	telnet_proto_send_pkg(pkgid, cmd, data, datalen) ;
 #endif
 }
-
 
 void telnet_run(JSContext * ctx, uint8_t pkgid, uint8_t remain, uint8_t cmd, uint8_t * data, uint8_t datalen) {
 	if(!JS_IsNull(_func_repl_input) && JS_IsFunction(ctx, _func_repl_input)) {
@@ -149,8 +153,8 @@ JSValue js_repl_rspn(JSContext *ctx, JSValueConst this_val, int argc, JSValueCon
 void be_telnet_init() {
     _func_repl_input = JS_NULL ;
 
-#ifndef PLATFORM_WSAM
-	be_telnet_ws_init() ;
+#ifdef PLATFORM_WASM
+	be_telnet_wasm_init() ;
 #endif
 
 	// be_telnet_ble_init() ;
@@ -162,8 +166,8 @@ void be_telnet_init() {
 #ifdef PLATFORM_ESP32
 	be_telnet_serial_init() ;
 #endif
-
 }
+
 
 void be_telnet_require(JSContext *ctx) {
     JSValue global = JS_GetGlobalObject(ctx);
@@ -177,7 +181,7 @@ void be_telnet_require(JSContext *ctx) {
 	JS_FreeValue(ctx, beapi);
 	JS_FreeValue(ctx, global);
 	
-#ifndef PLATFORM_WSAM
+#ifndef PLATFORM_WASM
 	be_telnet_ws_require(ctx, telnet) ;
 #endif
 
@@ -200,6 +204,10 @@ void be_telnet_loop(JSContext *ctx) {
 
 #ifdef PLATFORM_ESP32
 	be_telnet_serial_loop(ctx) ;
+#endif
+
+#ifdef PLATFORM_WASM
+	be_telnet_wasm_loop(ctx) ;
 #endif
 }
 

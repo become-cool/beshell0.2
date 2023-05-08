@@ -72,7 +72,7 @@ class SysStatus extends lv.Row {
         }
         this.mem= new StatusBar(this, "MEM ")
 
-        if(!process.simulate) {
+        if(process.platform=='esp32') {
             this.refreshStatus()
             setInterval(()=>this.refreshStatus(), 1000)
         }

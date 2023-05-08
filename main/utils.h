@@ -1,5 +1,4 @@
-#ifndef _UTILS_H
-#define _UTILS_H
+#pragma once
 
 #include "cutils.h"
 #include "debug.h"
@@ -112,7 +111,7 @@ void echo_error(JSContext *) ;
 
 #define ARGV_TO_STRING_LEN(i, var, len)                     \
     size_t len = 0 ;                                        \
-    char * var = JS_ToCStringLen(ctx, &len, argv[i]) ;
+    const char * var = JS_ToCStringLen(ctx, &len, argv[i]) ;
 #define ARGV_TO_STRING_LEN_E(i, var, len, msg)              \
     if(!JS_IsString(argv[i])) {                             \
         THROW_EXCEPTION(msg)                                \
@@ -129,7 +128,7 @@ void echo_error(JSContext *) ;
         THROW_EXCEPTION(msg)                                \
     }                                                       \
     var = JS_ToCString(ctx, argv[i]) ;
-#define ARGV_TO_STRING_E(i, var, msg)  char * ARGV_AS_STRING_E(i, var, msg)
+#define ARGV_TO_STRING_E(i, var, msg)  const char * ARGV_AS_STRING_E(i, var, msg)
 
 #define ARGV_AS_STRING_C(i, var, err_code)                  \
     var = NULL ;                                            \
@@ -228,8 +227,6 @@ void eval_code_len(JSContext *ctx, const char * str,size_t len,const char * file
 #define STR1(R)  #R
 #define STR2(R)  STR1(R)
 
-
-#define dref(var) printf( #var " ref:%d @%d\n", VAR_REFCNT(var), __LINE__) ;
 
 uint64_t gettime() ;
 uint64_t gettime_us() ;
@@ -414,5 +411,3 @@ bool qjs_instanceof(JSContext *ctx, JSValue obj, JSClassID clz_id) ;
     qjs_def_class(ctx, clzName, js_##typeName##_class_id, &js_##typeName##_class     \
                 , fullClzName, js_##typeName##_constructor, js_##typeName##_proto_funcs, countof(js_##typeName##_proto_funcs), parentProto, pkgVar) ;
 
-
-#endif

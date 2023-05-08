@@ -25,7 +25,8 @@
         "windows.h": "c",
         "*.helix": "c",
         "*.next": "c",
-        "el_src": "c"
+        "el_src": "c",
+        "math.h": "c"
     },
     "cmake.configureOnOpen": false
 }

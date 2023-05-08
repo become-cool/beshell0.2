@@ -5,7 +5,7 @@ beapi.telnet.callback = function(funcName, ...arglst){
     beapi.telnet.rspn(0, 6, `${funcName}(${arglst.join(',')})`)
 }
 
-if(!process.simulate) {
+if(process.platform=='esp32') {
     require("besdk/pin.js")
     
     let __debounce_timers = {}

@@ -62,7 +62,7 @@ static void disp_st77XX_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_c
     st77xx_draw_rect(((disp_drv_spec_t*)disp->user_data)->spi_dev, area->x1,area->y1, area->x2, area->y2, color_p) ;
     // flush_disp_if_other_ready() ;
     
-#ifndef PLATFORM_WSAM
+#ifndef PLATFORM_WASM
     ws_disp_flush(disp, area, color_p) ;
 #endif
 
@@ -525,7 +525,7 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
     else if( strcmp(typestr, "virtual-display")==0 ) {
 
         // 注册设备驱动对象
-    #ifndef PLATFORM_WSAM
+    #ifndef PLATFORM_WASM
         dispdrv->flush_cb = ws_disp_flush ;
     #endif
         dvrdata->is_virtual = true ;

@@ -13,50 +13,47 @@ module.exports = function() {
 
     console.log("part id:", beapi.utils.partId(), "part version:",beapi.utils.partVersion())
 
-    if(process.platform=='esp32') {
-        
-        var setupConf = JSON.load("/home/become/config/setup.json")
-        if(!setupConf) {
-            console.log("~/config/setup.json not exists or invalid, use default setup config.") ;
-            var setupConf = defaultSetupConf()
-        }
-        if(!setupConf) {
-            console.error("setup failed: unknown part")
-            return
-        }
-        // serial bus
-        for(let num in setupConf.spi||{}){
-            let spi = setupConf.spi[num]
-            console.log(`setup SPI ${num}, miso:${spi.miso}, mosi:${spi.mosi}, sck:${spi.sck}`)
-            beapi.spi.setup(num, spi.miso, spi.mosi, spi.sck)
-        }
-        for(let num in setupConf.i2c||{}){
-            let i2c = setupConf.i2c[num]
-            beapi.i2c.setup(parseInt(num), i2c.sda, i2c.scl, i2c.freq||100000)
-            console.log(`setup I2C ${num}, sda:${i2c.sda}, scl:${i2c.scl}`)
-        }
-        for(let num in setupConf.i2s||{}){
-            let opts = setupConf.i2s[num]
-            beapi.i2s.setup(parseInt(num), opts)
-            console.log(`setup I2S ${num}, opts:${JSON.stringify(opts)}`)
-        }
-
-        // dev
-        for(let devConf of setupConf.dev||[]){
-            try {
-                if(devConf.disable) {
-                    continue
-                }
-                createDevFromDriver(devConf)
-            }catch(e){
-                console.log(e)
-            }
-        }
-
-        console.log("after setup.js DMA:", process.memoryUsage().dma)
-
-        return setupConf
+    var setupConf = JSON.load("/home/become/config/setup.json")
+    if(!setupConf) {
+        console.log("~/config/setup.json not exists or invalid, use default setup config.") ;
+        var setupConf = defaultSetupConf()
     }
+    if(!setupConf) {
+        console.error("setup failed: unknown part")
+        return
+    }
+    // serial bus
+    for(let num in setupConf.spi||{}){
+        let spi = setupConf.spi[num]
+        console.log(`setup SPI ${num}, miso:${spi.miso}, mosi:${spi.mosi}, sck:${spi.sck}`)
+        beapi.spi.setup(num, spi.miso, spi.mosi, spi.sck)
+    }
+    for(let num in setupConf.i2c||{}){
+        let i2c = setupConf.i2c[num]
+        beapi.i2c.setup(parseInt(num), i2c.sda, i2c.scl, i2c.freq||100000)
+        console.log(`setup I2C ${num}, sda:${i2c.sda}, scl:${i2c.scl}`)
+    }
+    for(let num in setupConf.i2s||{}){
+        let opts = setupConf.i2s[num]
+        beapi.i2s.setup(parseInt(num), opts)
+        console.log(`setup I2S ${num}, opts:${JSON.stringify(opts)}`)
+    }
+
+    // dev
+    for(let devConf of setupConf.dev||[]){
+        try {
+            if(devConf.disable) {
+                continue
+            }
+            createDevFromDriver(devConf)
+        }catch(e){
+            console.log(e)
+        }
+    }
+
+    console.log("after setup.js DMA:", process.memoryUsage().dma)
+
+    return setupConf
 }
 
 const LibDefaultConf = {
@@ -114,8 +111,8 @@ function defaultSetupConf() {
 
 function createDevFromDriver(devConf) {
     try{
-        console.log("/lib/local/besdk/driver/"+devConf.driver+'.js')
-        var driver = require("/lib/local/besdk/driver/"+devConf.driver+'.js')
+        console.log("besdk/driver/"+devConf.driver+'.js')
+        var driver = require("besdk/driver/"+devConf.driver+'.js')
     }catch(e){
         console.error(e)
         console.error("unknow driver", devConf.driver)

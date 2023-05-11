@@ -45,11 +45,11 @@ module.exports = class RomList extends beapi.lvgl.Column {
                                 }
                                 setTimeout(()=>{
                                     if(showcase) {
-                                        booter.setAutoScript("/lib/local/game/showcase-daemon.js")
+                                        booter.setAutoScript("/opt/nofrendo/showcase-daemon.js")
                                         dataconf.showcase = true
                                     }
                                     else {
-                                        booter.unsetAutoScript("/lib/local/game/showcase-daemon.js")
+                                        booter.unsetAutoScript("/opt/nofrendo/showcase-daemon.js")
                                         dataconf.showcase = false
                                     }
                                     saveconf()

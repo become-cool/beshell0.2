@@ -66,7 +66,7 @@ module.exports = class ScrApps extends lv.Obj {
                         "src": "/lib/icon/32/music.png",
                         group: this.group ,
                         create () {
-                            require("/lib/local/music/PlayerUI.js").singleton()
+                            require("/opt/music/PlayerUI.js").singleton()
                         }
                     }
                     , {
@@ -75,7 +75,7 @@ module.exports = class ScrApps extends lv.Obj {
                         "src": "/lib/icon/32/game.png" ,
                         group: this.group ,
                         create () {
-                            require("/lib/local/game/Player.js").singleton()
+                            require("nofrendo/Player.js").singleton()
                         }
                     }
                     , {
@@ -90,7 +90,7 @@ module.exports = class ScrApps extends lv.Obj {
                         "src": "/lib/icon/32/weather.png" ,
                         group: this.group ,
                         create() {
-                            require("/lib/local/holoclock/index.js")
+                            require("holoclock/index.js")
                         }
                     }
                 ]

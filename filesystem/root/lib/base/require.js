@@ -173,8 +173,8 @@ const Module = {
     autoBin: -1 , 
     caches: {} ,
     globalPaths: [
-        '/lib/local' ,
-        '/lib/node_modules' ,
+        '/opt' ,
+        '/lib/local'
     ] ,
     __mkrequire ,
     wrapExportMeta ,

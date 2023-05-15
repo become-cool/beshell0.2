@@ -4,10 +4,7 @@
 #include "utils.h"
 #include "cutils.h"
 #include "indev_pointer.h"
-
-#ifdef PLATFORM_ESP32
 #include "indev_i2c.h"
-#endif
 
 
 
@@ -37,11 +34,8 @@ static JSValue js_find_indev_by_id(JSContext *ctx, JSValueConst this_val, int ar
     if(!spec || /*!spec->jsobj ||*/ JS_IsUndefined(spec->jsobj) || JS_IsNull(spec->jsobj)) {
         return JS_NULL ;
     }
-#ifdef PLATFORM_ESP32
     return JS_DupValue(ctx,JS_MKPTR(JS_TAG_OBJECT,spec->jsobj)) ;
-#else
-    return JS_DupValue(ctx,spec->jsobj) ;
-#endif
+
 }
 
 static JSValue js_all_indev(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
@@ -297,9 +291,7 @@ void be_lv_indev_init() {
     // JS_NewClassID(&js_indev_fake_key_class_id);
 
     be_indev_pointer_init() ;
-#ifdef PLATFORM_ESP32
     be_indev_i2c_init() ;
-#endif
 }
 
 void be_lv_indev_require(JSContext *ctx, JSValue lvgl) {
@@ -321,7 +313,6 @@ void be_lv_indev_require(JSContext *ctx, JSValue lvgl) {
     // QJS_DEF_CLASS(indev_fake_key, "IndevFakeKey", "lv.IndevFakeKey", baseProto, lvgl)
 
     be_indev_pointer_require(ctx, lvgl, baseProto) ;
-#ifdef PLATFORM_ESP32
     be_indev_i2c_require(ctx, lvgl, baseProto) ;
-#endif
+
 }

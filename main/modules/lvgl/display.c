@@ -14,6 +14,10 @@
 #include <freertos/queue.h>
 #endif
 
+#ifdef PLATFORM_WASM
+#include <emscripten.h>
+#endif
+
 static uint8_t _disp_id = 0 ;
 
 JSValue js_lv_disp_wrapper(JSContext *ctx, lv_disp_t * disp) {
@@ -52,26 +56,52 @@ typedef struct {
     // bool flushed ;   
 } disp_spi_param_t ;
 
+#endif
+
+
+// void print_blockxx(uint8_t * data, int columns, int rows) {
+//     for(int r=0; r<rows; r++ ) {
+//         for(int c=0; c<columns; c++ ) {
+//             printf("0x%02x ", *data) ;
+//             data++ ;
+//         }
+//         printf("\n") ;
+//     }
+// }
 
 static void disp_st77XX_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color_p) {
+#ifdef PLATFORM_ESP32
     if(!disp->user_data) {
         printf("spidev is NULL\n") ;
         return ;
     }
-
     st77xx_draw_rect(((disp_drv_spec_t*)disp->user_data)->spi_dev, area->x1,area->y1, area->x2, area->y2, color_p) ;
-    // flush_disp_if_other_ready() ;
+#endif
     
-#ifndef PLATFORM_WASM
+#ifdef PLATFORM_WASM
+
+    // uint8_t * data = (void *)color_p ;
+    // print_blockxx(data,8,2) ;
+
+    size_t size = (area->x2-area->x1+1) * (area->y2-area->y1+1) * sizeof(lv_color_t) ;
+	EM_ASM_ARGS({
+        postMessage({
+            action: 'display-flush' ,
+            pixels: Module['HEAPU8'].buffer.slice($0, $0 + $1) ,
+            x1: $2 ,
+            y1: $3 ,
+            x2: $4 ,
+            y2: $5 ,
+            id: $6 ,
+        })
+	}, color_p, size, area->x1,area->y1, area->x2, area->y2, ((disp_drv_spec_t*)disp->user_data)->id);
+#else
     ws_disp_flush(disp, area, color_p) ;
 #endif
 
     // flush_disp_if_other_ready() ;
     lv_disp_flush_ready(disp) ;
 }
-
-
-#endif
 
 void free_disp_drv(JSContext * ctx, lv_disp_t * disp) {
     printf("free_disp_drv()") ;
@@ -238,7 +268,7 @@ JSValue be_lv_display_inv_area(JSContext *ctx, JSValueConst this_val, int argc, 
 
     uint64_t t0 = gettime() ;
     lv_task_handler();
-    printf("lv_task_handler() ms %llu\n",gettime() - t0) ;
+    // printf("lv_task_handler() ms %llu\n",gettime() - t0) ;
 
     return JS_UNDEFINED;
 }
@@ -425,8 +455,9 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
 
     GET_INT_PROP(argv[1], "width", width, { goto excp ;})
     GET_INT_PROP(argv[1], "height", height, { goto excp ;})
-    
+
     disp_drv_spec_t * dvrdata = malloc(sizeof(disp_drv_spec_t)) ;
+
     memset(dvrdata, 0, sizeof(disp_drv_spec_t)) ;
     dvrdata->id = _disp_id ++ ;
 
@@ -479,7 +510,6 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
     // ST7789/ST7789V
     if( strncmp(typestr, "ST7789", 6)==0 ) {
 
-#ifdef PLATFORM_ESP32
 
         GET_INT_PROP(argv[1], "cs", cs, { goto excp ;})
         GET_INT_PROP(argv[1], "dc", dc, { goto excp ;})
@@ -488,8 +518,9 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
         GET_INT_PROP_DEFAULT(argv[1], "MADCTL", MADCTL, 0)
         bool invColor = JS_ToBool(ctx, JS_GetPropertyStr(ctx, argv[1], "invColor")) ;
 
-        printf("spi=%d, cs=%d, dc=%d, freq=%d, width=%d, height=%d, MADCTL=%d, invColor=%d\n",spi,cs,dc,freq,width,height, MADCTL, invColor) ;
+        // printf("spi=%d, cs=%d, dc=%d, freq=%d, width=%d, height=%d, MADCTL=%d, invColor=%d\n",spi,cs,dc,freq,width,height, MADCTL, invColor) ;
 
+#ifdef PLATFORM_ESP32
         // 初始化 spi
         st77xx_dev_t * spidev = malloc(sizeof(st77xx_dev_t));
         st77xx_spi_init(spidev, spi, cs, dc, freq);
@@ -512,13 +543,32 @@ JSValue js_lvgl_create_display(JSContext *ctx, JSValueConst this_val, int argc, 
             goto excp ;
         }
 
+#elif defined(PLATFORM_WASM)
+	EM_ASM_ARGS({
+        postMessage({
+            action: 'device-setup' ,
+            setup: {
+                driver: UTF8ToString($0),
+                id: $1,
+                spi: $2,
+                cs: $3,
+                dc: $4 ,
+                width: $5 ,
+                height: $6 ,
+            }
+        })
+	}, typestr, dvrdata->id, spi, cs, dc, width, height);
+#endif
+
+
         // 注册设备驱动对象
         dispdrv->flush_cb = disp_st77XX_flush ;
+#ifdef PLATFORM_ESP32
         dvrdata->spi_dev = spidev ;
+#endif
 
         // 启动 spi 传输任务
         // disp_spi_start() ;
-#endif
     }
 
     // 虚拟屏幕

@@ -5,6 +5,10 @@
 
 * beapi.mg.httpListen 返回的对象只有1个引用，没有赋值给变量会立即释放
 
+* wsam 版本可用
+
+* fixed: repl 下 require 错误不显示 stack
+
 ## 0.2.14 2023-104-28
 
 * fixed: beapi.fs.info() 效率很低的问题

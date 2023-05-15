@@ -201,13 +201,12 @@ ret:
 void be_module_nvs_init() {}
 
 void be_module_nvs_require(JSContext *ctx) {
-
+#ifdef PLATFORM_ESP32
     JSValue beapi = js_get_glob_prop(ctx, 1, "beapi") ;
     JSValue nvs = JS_NewObject(ctx);
     JS_SetPropertyStr(ctx, beapi, "nvs", nvs);
 
 
-#ifdef PLATFORM_ESP32
 
     JS_SetPropertyStr(ctx, nvs, "erase", JS_NewCFunction(ctx, js_nvs_erase_key, "erase", 1));
     JS_SetPropertyStr(ctx, nvs, "readInt8", JS_NewCFunction(ctx, js_nvs_read_i8, "readInt8", 1));
@@ -231,10 +230,8 @@ void be_module_nvs_require(JSContext *ctx) {
     JS_SetPropertyStr(ctx, nvs, "readString", JS_NewCFunction(ctx, js_nvs_read_str, "readString", 1));
     JS_SetPropertyStr(ctx, nvs, "writeString", JS_NewCFunction(ctx, js_nvs_write_str, "writeString", 1));
 
-#endif
-
-
     JS_FreeValue(ctx, beapi);
+#endif
 }
 
 void be_module_nvs_loop(JSContext *ctx) {}

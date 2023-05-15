@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "lvgl.h"
-#include "list.h"
+#include "be_list.h"
 
 #ifdef PLATFORM_ESP32
 #include "driver/spi_master.h"
@@ -41,11 +41,12 @@ typedef struct {
     uint8_t id ;
     indev_driver_t driver ;
     
-#ifdef PLATFORM_ESP32
     union  {
+#ifdef PLATFORM_ESP32
         struct {
             spi_host_device_t handle ;
         } spi ;
+#endif
         struct {
             uint8_t bus ;
             uint8_t addr ;
@@ -56,7 +57,6 @@ typedef struct {
             uint8_t trigger ;
         } btn ;
     } conf ;
-#endif
 
     bool fake:1 ;
     bool found:1 ;
@@ -126,7 +126,6 @@ extern uint8_t _indev_id ;
 extern JSClassID js_lv_indev_pointer_class_id ;
 extern JSClassID js_lv_indev_nav_class_id ;
 
-#ifdef PLATFORM_ESP32
 #define THIS_INDEV(thisobj)     \
     lv_indev_t * thisobj = (lv_indev_t *)JS_GetOpaque(this_val, js_lv_indev_pointer_class_id) ; \
     if(!thisobj) {  \
@@ -135,13 +134,6 @@ extern JSClassID js_lv_indev_nav_class_id ;
     if(!thisobj) { \
         THROW_EXCEPTION("invalid indev obj") \
     }
-#else
-#define THIS_INDEV(thisobj)     \
-    lv_indev_t * thisobj = (lv_indev_t *)JS_GetOpaque(this_val, js_lv_indev_pointer_class_id) ; \
-    if(!thisobj) { \
-        THROW_EXCEPTION("invalid indev obj") \
-    }
-#endif
 
 #define THIS_SPEC(thisspec)                                 \
     THIS_INDEV(thisobj)                                     \

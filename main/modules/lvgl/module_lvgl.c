@@ -23,6 +23,9 @@
 #include <sys/time.h>
 #endif
 
+#ifdef PLATFORM_WASM
+#include <emscripten.h>
+#endif
 
 int16_t indev_input_x = 0 ;
 int16_t indev_input_y = 0 ;
@@ -71,7 +74,12 @@ static JSValue js_lv_coord_is_pct(JSContext *ctx, JSValueConst this_val, int arg
  * 当前默认显示器加载顶层 widget
  * 
  * @beapi beapi.lvgl.loadScreen
- * @param widget:beapi.lvgl.Obj
+ * @param widget:beapi.lvgl.Obj 新widget
+ * @param anim:lv_scr_load_anim_t="none" 动画方式
+ * @param dur:number=1000 持续时间(ms)
+ * @param delay:number=0 延迟开始(ms)
+ * @param autoDel:bool=false 自动删除原来的widget
+ * 
  */
 static JSValue js_lvgl_load_screen(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     CHECK_ARGC(1)
@@ -86,7 +94,7 @@ static JSValue js_lvgl_load_screen(JSContext *ctx, JSValueConst this_val, int ar
             THROW_EXCEPTION("invalid screen load animation type")
         }
 
-        ARGV_TO_UINT32(2, dur)
+        ARGV_TO_UINT32_OPT(2, dur, 1000)
 
         uint32_t delay = 0 ;    
         if(argc>3) {
@@ -254,10 +262,16 @@ void lv_tick_task(void *arg) {
         lv_tick_inc(LV_TICK_PERIOD_MS);
     }
 }
-#else
+#elif defined(PLATFORM_LINUX)
 struct sigaction tact;
 struct itimerval value;
 void sig_alm_handler(int sig_num) {
+    if(lv_tick_active) {
+        lv_tick_inc(LV_TICK_PERIOD_MS);
+    }
+}
+#elif defined(PLATFORM_WASM)
+EMSCRIPTEN_KEEPALIVE void be_lv_tick() {
     if(lv_tick_active) {
         lv_tick_inc(LV_TICK_PERIOD_MS);
     }
@@ -404,7 +418,7 @@ void be_module_lvgl_init() {
     esp_timer_handle_t periodic_timer;
     ESP_ERROR_CHECK(esp_timer_create(&periodic_timer_args, &periodic_timer));
     ESP_ERROR_CHECK(esp_timer_start_periodic(periodic_timer, LV_TICK_PERIOD_MS * 1000));
-#else 
+#elif defined(PLATFORM_LINUX)
     // lvgl 时钟
     tact.sa_handler = sig_alm_handler;
     tact.sa_flags = SA_RESTART ;  // SA_RESTART 在 select() 时遇到中断发生，在中断完成后自动恢复
@@ -415,6 +429,13 @@ void be_module_lvgl_init() {
     value.it_value.tv_usec = 1000 * LV_TICK_PERIOD_MS;
     value.it_interval = value.it_value;
     setitimer(ITIMER_REAL, &value, NULL);
+
+#elif defined(PLATFORM_WASM)
+    // emscripten_set_main_loop(be_lv_tick, 1000, 1);
+	EM_ASM({
+        setInterval(Module._be_lv_tick, 1)
+    }) ;
+    
 #endif
 }
 
@@ -432,6 +453,7 @@ void be_module_lvgl_require(JSContext *ctx) {
     JSValue EventEmitterProto = js_get_glob_prop(ctx, 3, "beapi", "EventEmitter", "prototype") ;
     JSValue lvgl = JS_NewObject(ctx);
     JS_SetPropertyStr(ctx, beapi, "lvgl", lvgl);
+    JS_SetPropertyStr(ctx, beapi, "lv", lvgl);
     JS_SetPropertyStr(ctx, lvgl, "__proto__", EventEmitterProto);
     JS_SetPropertyStr(ctx, lvgl, "_handlers", JS_NewObject(ctx));
     

@@ -2,7 +2,7 @@
 #define __H_INDEV_I2C__
 
 #include "quickjs-libc.h"
-#include "list.h"
+#include "be_list.h"
 #include "indev.h"
 
 

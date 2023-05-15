@@ -3,11 +3,11 @@
 #include "utils.h"
 #include "widgets_gen.h"
 #include "eventloop.h"
-#include "list.h"
+#include "be_list.h"
 
-
+#ifdef PLATFORM_ESP32
 #include "module_serial.h"
-
+#endif
 
 void indev_keypad_proc(lv_indev_t * i, lv_indev_data_t * data);
 void indev_proc_reset_query_handler(lv_indev_t * indev);
@@ -54,6 +54,8 @@ typedef struct {
     uint8_t last_value ;
 } indev_item_t ;
 
+#ifdef PLATFORM_ESP32
+
 TaskHandle_t task_nav_read_handle = NULL ;
 
 static void task_nav_read(void * argv) {
@@ -88,12 +90,13 @@ static void task_nav_read(void * argv) {
     }
 }
 
+
 static void i2c_indev_create_task() {
     if(!task_nav_read_handle) {
         xTaskCreatePinnedToCore(&task_nav_read, "task_nav_read", 1024*3, NULL, 5, &task_nav_read_handle, 1) ;
     }
 }
-
+#endif
 
 static void i2c_indev_init(indev_driver_spec_t * spec) {
     indev_item_t * item = malloc(sizeof(indev_item_t)) ;
@@ -102,17 +105,20 @@ static void i2c_indev_init(indev_driver_spec_t * spec) {
     item->spec = spec ;
     be_list_append(lst_devs, &item->base) ;
 
+#ifdef PLATFORM_ESP32
     spec->data.buttons.queue = xQueueCreate(1, sizeof(uint8_t));
-
     i2c_indev_create_task() ;
+#endif
 }
 
 static void i2c_indev_deinit(indev_driver_spec_t * spec) {
 
+#ifdef PLATFORM_ESP32
     if(spec->data.buttons.queue) {
         vQueueDelete( spec->data.buttons.queue );
         spec->data.buttons.queue = NULL ;
     }
+#endif
 
     FOREACH_TYPE_LIST(lst_devs, indev_item_t, item) {
         if(item->spec==spec) {
@@ -128,6 +134,7 @@ static void i2c_indev_deinit(indev_driver_spec_t * spec) {
 JSClassID js_lv_indev_nav_class_id = 0 ;
 
 
+#ifdef PLATFORM_ESP32
 
 /*
 #define INDEV_I2C_READ(spec, value)         \
@@ -145,6 +152,8 @@ inline bool indev_nav_read_i2c(indev_driver_spec_t* spec, uint8_t * byte) {
 
     return spec->found ;
 }
+
+#endif
 
 
 inline static void lvgl_proc_btn(indev_driver_spec_t * spec, uint32_t * unread, nav_key_t btn, lv_key_t key, lv_indev_state_t state, lv_indev_data_t *data) {
@@ -192,9 +201,12 @@ static JSValue js_lv_indev_nav_constructor(JSContext *ctx, JSValueConst new_targ
         driver_spec->conf.i2c.bus = bus ;
         driver_spec->conf.i2c.addr = addr ;
 
+
+#ifdef PLATFORM_ESP32
         // echo_time("i2c_ping",{
             driver_spec->found = i2c_ping(bus,addr) ;
         // })
+#endif
 
         if(!driver_spec->found) {
             printf("not found i2c device, bus: %d, addr: %d \n", bus,addr) ;
@@ -404,8 +416,7 @@ void be_indev_i2c_require(JSContext *ctx, JSValue lvgl, JSValue baseProto) {
     QJS_DEF_CLASS(lv_indev_nav, "InDevNav", "lv.InDevNav", baseProto, lvgl)
 }
 
-
-
+#ifdef PLATFORM_ESP32
 inline uint8_t indev_nav_take_value(indev_driver_spec_t * spec) {
     uint8_t value = 0 ;
     if( xQueueReceive(spec->data.buttons.queue, &value, 0) == pdTRUE ) {
@@ -425,6 +436,7 @@ inline void be_indev_i2c_loop(JSContext *ctx) {
         }
     }
 }
+#endif
 
 void be_indev_i2c_reset(JSContext *ctx) {
 

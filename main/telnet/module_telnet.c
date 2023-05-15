@@ -71,7 +71,7 @@ void telnet_run(JSContext * ctx, uint8_t pkgid, uint8_t remain, uint8_t cmd, uin
 		argv[2] = JS_NewInt32(ctx, cmd) ;
 		argv[3] = JS_NewStringLen(ctx, (char *)data, datalen) ;
 
-		// printf("%s\n", data) ;
+		// printf(">>> %.*s\n", datalen, data) ;
 
 		JSValue ret = JS_Call(ctx, _func_repl_input, JS_NULL, 4, argv) ;
 		if( JS_IsException(ret) ) {
@@ -140,6 +140,7 @@ JSValue js_repl_rspn(JSContext *ctx, JSValueConst this_val, int argc, JSValueCon
 	ARGV_TO_UINT8(0, pkgid)
 	ARGV_TO_STRING_LEN(2, data, datalen)
 
+	// printf("rspn(%d):%.*s\n",datalen,datalen,data) ;
     telnet_output(cmd, pkgid, data, datalen) ;
 
 	JS_FreeCString(ctx, data) ;

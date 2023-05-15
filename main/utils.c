@@ -104,9 +104,6 @@ void eval_code_len(JSContext *ctx,const char * str,size_t len,const char * filen
 	
     JSValue ret = JS_Eval(ctx, str, len, filename, JS_EVAL_TYPE_GLOBAL) ;   // JS_EVAL_FLAG_STRIP
 	if(JS_IsException(ret)) {
-		printf("errorrrrrrrrrr\n") ;
-		printf(">>>%.*s\n", len, str) ;
-
 		echo_error(ctx) ;
 	}
 	JS_FreeValue(ctx, ret) ;

@@ -4,6 +4,6 @@
 [submodule "components/websocke"]
 	path = components/websocke
 	url = https://github.com/Molorius/esp32-websocket.git
-[submodule "components/lvgl_esp32_drivers"]
-	path = components/lvgl_esp32_drivers
-	url = https://github.com.cnpmjs.org/lvgl/lvgl_esp32_drivers.git
+[submodule "filesystem/root"]
+	path = filesystem/root
+	url = http://git.become.cool:3110/beshell.fs.git

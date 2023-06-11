@@ -9,7 +9,7 @@
 
 
 EMSCRIPTEN_KEEPALIVE bool be_telnet_wasm_send(uint8_t * data, size_t datalen) {
-	telnet_prot0519_receive(data, &datalen) ;
+	telnet_prot_receive(data, &datalen) ;
 	return true ;
 }
 

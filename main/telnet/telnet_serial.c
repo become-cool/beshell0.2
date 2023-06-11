@@ -87,7 +87,7 @@ static void task_uart_receive(void * data) {
 				size_t remain =  telnet_received ;
 
 				xSemaphoreTake( sema, portMAX_DELAY ) ;
-				telnet_prot0519_receive(telnet_buffer, &remain) ;
+				telnet_prot_receive(telnet_buffer, &remain) ;
 				xSemaphoreGive( sema ) ;
 
 				// 处理剩余数据

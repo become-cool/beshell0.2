@@ -1,5 +1,4 @@
 #include "telnet_protocal.h"
-#include "telnet_protocal_0519.h"
 #include "module_fs.h"
 #include "utils.h"
 #include "be_list.h"
@@ -328,19 +327,35 @@ inline static int read_data_length(uint8_t * bytes, size_t length, size_t * data
 	return 4 ;
 }
 
-inline static bool receive_body(uint8_t * bytes, size_t * length, telnet_pkg_t * pkg) {
+inline static bool receive_body(uint8_t * body, size_t * length, telnet_pkg_t * pkg) {
 
 	size_t body_unread = pkg->data_len - pkg->data_received ;
 	size_t n = (*length) < body_unread? (*length): body_unread ;
 
-	memcpy( pkg->data+pkg->data_received, bytes, n) ;
+	memcpy( pkg->data+pkg->data_received, body, n) ;
 
 	(*length)-= n ;
 	pkg->data_received+= n ;
 
 	// printf("read body:%d,%d,->%d, @%p\n",(*length),body_unread,n,pkg) ;
 
-	return pkg->data_received == pkg->data_len ;
+	// 等待后续 body
+	if( pkg->data_received != pkg->data_len ){
+		return false ;
+	}
+	// body 完成
+	else {
+		if((*length)>0) {
+			// @todo 检查校验位
+
+			(*length) -= 1 ;
+			return true ;
+		}
+		// 等待校验字节
+		else {
+			return false ;
+		}
+	}
 }
 
 void telnet_proto_free_pkg(telnet_pkg_t * pkg) {
@@ -368,7 +383,7 @@ void be_telnet_proto_init(TelnetProtFuncSend sender) {
 }
 
 
-void telnet_prot0519_receive(uint8_t * bytes, size_t * length) {
+void telnet_prot_receive(uint8_t * bytes, size_t * length) {
 
 	if(pkg_uncompleted) {
 		if(receive_body(bytes,length,pkg_uncompleted)) {
@@ -396,7 +411,7 @@ void telnet_prot0519_receive(uint8_t * bytes, size_t * length) {
 	(*length) -= idx ;
 
 	// 后续长度不够，等待后文
-    if((*length)<5) {
+    if((*length)<PKG_MIN_SIZE) {
         return ;
     }
 

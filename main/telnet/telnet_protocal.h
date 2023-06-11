@@ -8,7 +8,7 @@
 
 /**
  * 0518
- * | H1 | H2 | PkgID | CMD | DATA LEN(1-4) | DATA ... |
+ * | H1 | H2 | PkgID | CMD | DATA LEN(1-4) | DATA ... | VerifyBit |
  * 
  * 0519
  * | H1 | H2 | PkgID | REMAIN | CMD | DATA LEN(1) | DATA ... | VerifyBit |
@@ -18,6 +18,7 @@
 // 05 18
 #define PKG_HEAD1                   5
 #define PKG_HEAD2                   18
+#define PKG_MIN_SIZE                6
 
 #define CMD_RUN	                	1		// 执行js代码，无返回值
 #define CMD_CALL	                2		// 执行js代码，有返回值
@@ -64,4 +65,4 @@ void telnet_proto_process_pkg (telnet_pkg_t * pkg, void * ctx) ;
 
 void be_telnet_proto_init() ;
 void be_telnet_proto_loop(void * ctx) ;
-void telnet_prot0519_receive(uint8_t * bytes, size_t * length) ;
+void telnet_prot_receive(uint8_t * bytes, size_t * length) ;

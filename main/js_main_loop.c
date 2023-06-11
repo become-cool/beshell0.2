@@ -26,6 +26,8 @@
 #include "module_gameplayer.h"
 #include "module_driver.h"
 #include "driver_camera.h"
+// #include "module_cron.h"
+
 #include "indev_i2c.h"
 
 #include "freertos/FreeRTOS.h"
@@ -145,6 +147,7 @@ static JSContext * init_custom_context(JSRuntime *rt) {
     be_module_serial_require(ctx) ;
     be_module_socks_require(ctx) ;
     be_module_driver_require(ctx) ;
+    // be_module_cron_require(ctx) ;
 #endif
     be_module_gameplayer_require(ctx) ;
     be_module_media_require(ctx) ;
@@ -256,6 +259,8 @@ static void quickjs_deinit() {
 #endif
 }
 
+    
+#define ENABLE_MONITOR_LOOP 0
 #if ENABLE_MONITOR_LOOP
 static struct timespec __tm = {0, 0} ;
 static int64_t __tt1,__tt2 ;
@@ -266,8 +271,8 @@ static int64_t __tt1,__tt2 ;
         code                                                        \
 	    clock_gettime(CLOCK_REALTIME, &__tm);                       \
 	    __tt2 = __tm.tv_nsec/1000/1000 + __tm.tv_sec*1000 ;         \
-        if(__tt2-__tt1>100) {                                       \
-            printf(label " block loop: %lldms\n", __tt2-__tt1) ;    \
+        if(__tt2-__tt1>0) {                                         \
+            printf(label ": %lldms\n", __tt2-__tt1) ;               \
         }                                                           \
     }
 
@@ -298,6 +303,7 @@ void js_main_loop_tick() {
         be_module_socks_reset(ctx) ;
         // be_module_http_reset(ctx) ;
         be_module_driver_reset(ctx) ;
+        // be_module_cron_init(ctx) ;
         be_module_wifi_reset(ctx) ;
         be_module_media_reset(ctx) ;
 #endif
@@ -308,18 +314,18 @@ void js_main_loop_tick() {
         requst_reset = false ;
     }
 
-    monitor("std loop1", {
-        js_std_loop(ctx) ;
-    })
+    // monitor("std loop1", {
+    //     js_std_loop(ctx) ;
+    // })
 #ifdef PLATFORM_ESP32
-    monitor("sniffer", {
-        be_module_sniffer_loop() ;
-    })
+    // monitor("sniffer", {
+    //     be_module_sniffer_loop() ;
+    // })
     monitor("socks udp", {
         be_module_socks_udp_loop(ctx) ;
     })
     monitor("gpio", {
-    be_module_gpio_loop(ctx) ;
+        be_module_gpio_loop(ctx) ;
     })
 #endif
     monitor("telnet", {
@@ -420,10 +426,6 @@ void js_main_loop(const char * script){
         evalScript(ctx, script, false) ;
     }
 
-    
-#define ENABLE_MONITOR_LOOP 0
-
-
 
 #ifdef PLATFORM_ESP32
     echo_DMA("loop start") ;
@@ -432,8 +434,12 @@ void js_main_loop(const char * script){
 #ifdef PLATFORM_WASM
     emscripten_set_main_loop(js_main_loop_tick, 0, 1);
 #else
+
+    // int64_t t ;
     while(1) {
+        // t = gettime() ;
         js_main_loop_tick() ;
+        // printf("lo:%lld\n",gettime() - t) ;
     }
 #endif
 }

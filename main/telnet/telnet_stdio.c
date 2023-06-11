@@ -75,7 +75,7 @@ void be_telnet_stdio_loop(JSContext * ctx) {
                 exit(1);
         }
 
-        telnet_run(ctx, 0, 0, CMD_CALL, (uint8_t *) buf, num_bytes) ;
+        telnet_run(ctx, 0, CMD_CALL, (uint8_t *) buf, num_bytes) ;
     }
 
 }

@@ -68,7 +68,7 @@ void be_module_sniffer_init() {
 }
 
 
-void be_module_sniffer_loop() {
+inline void be_module_sniffer_loop() {
     if(!wifi_has_inited()) {
         return ;
     }

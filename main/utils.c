@@ -49,11 +49,14 @@ inline void * mallocDMA(size_t size) {
 #endif
 }
 
+// 在 gc delete ArrayBuffer 时 free() 内存
 void freeArrayBuffer(JSRuntime *rt, void *opaque, void *ptr) {
-	// printf("freeArrayBuffer()\n") ;
 	if(ptr)
     	free(ptr) ;
 }
+// 在 gc delete ArrayBuffer 时不 free() 内存
+void nofreeArrayBuffer(JSRuntime *rt, void *opaque, void *ptr) {}
+
 
 JSValue js_get_prop(JSContext *ctx, JSValue obj, int depth, ...) {
     va_list argptr;

@@ -513,7 +513,7 @@ bool telnet_ws_response_ws(struct mg_connection *c, struct mg_ws_message * wm) {
                 uint8_t pkgid = wm->data.ptr[1] ;
                 char * code = wm->data.ptr + 2 ;
                 size_t codelen = wm->data.len - 2 ;
-                telnet_run(ctx, pkgid, 0, cmd, (uint8_t *) code, codelen) ;
+                telnet_run(ctx, pkgid, cmd, (uint8_t *) code, codelen) ;
             }
             break ;
         }

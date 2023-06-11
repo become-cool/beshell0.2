@@ -69,7 +69,7 @@ static void task_nav_read(void * argv) {
             continue;
         }
         
-        FOREACH_TYPE_LIST(lst_devs, indev_item_t, item) {
+        FOREACH_TYPE_LIST(lst_devs, indev_item_t, item, {
 
             value = 0 ;
             indev_nav_read_i2c(item->spec, &value) ;
@@ -84,7 +84,7 @@ static void task_nav_read(void * argv) {
 
                 item->last_value = value ;
             }
-        }
+        }) 
 
         vTaskDelay(1) ;
     }
@@ -120,12 +120,12 @@ static void i2c_indev_deinit(indev_driver_spec_t * spec) {
     }
 #endif
 
-    FOREACH_TYPE_LIST(lst_devs, indev_item_t, item) {
+    FOREACH_TYPE_LIST(lst_devs, indev_item_t, item, {
         if(item->spec==spec) {
             be_list_remove(lst_devs, item) ;
             return ;
         }
-    }
+    }) 
 }
 
 // ------------
@@ -430,11 +430,11 @@ inline uint8_t indev_nav_take_value(indev_driver_spec_t * spec) {
 
 inline void be_indev_i2c_loop(JSContext *ctx) {
     uint8_t value = 0 ;
-    FOREACH_TYPE_LIST(lst_devs, indev_item_t, item) {
+    FOREACH_TYPE_LIST(lst_devs, indev_item_t, item, {
         if( xQueueReceive(item->spec->data.buttons.queue, &value, 0) == pdTRUE ) {
             send_btns(item->spec,value) ;
         }
-    }
+    })
 }
 #endif
 

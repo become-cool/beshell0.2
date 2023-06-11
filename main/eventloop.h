@@ -9,7 +9,8 @@ typedef struct _eventloop_callback_t {
     JSValue thisobj ;
     uint64_t deadline ;
     uint32_t interval ;
-    bool repeat ;
+    bool repeat:1 ;
+    bool requestAnimationFrame:1 ;
     int argc ;
     JSValueConst * argv ;
     struct _eventloop_callback_t * next ;

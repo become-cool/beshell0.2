@@ -263,9 +263,9 @@ void be_module_mg_require(JSContext *ctx) {
     JS_FreeValue(ctx, beapi);
 }
 
-void be_module_mg_loop(JSContext *ctx) {
+inline void be_module_mg_loop(JSContext *ctx) {
     mgr.userdata = ctx ;
-    mg_mgr_poll(&mgr, 10);
+    mg_mgr_poll(&mgr, 0);
 }
 
 void be_module_mg_reset(JSContext *ctx) {

@@ -500,7 +500,7 @@ void be_module_lvgl_reset(JSContext *ctx) {
     be_lv_indev_reset(ctx) ;
 }
 
-void be_module_lvgl_loop(JSContext *ctx)  {
+inline void be_module_lvgl_loop(JSContext *ctx)  {
     if(lv_tick_active) {
         lv_task_handler() ;
     }

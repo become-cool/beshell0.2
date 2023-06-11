@@ -67667,5 +67667,8 @@ lv_font_t msyh = {
 
 
 lv_font_t * font_msyh_3500() {
+
+    printf("msyh font size: %d + %d\n", sizeof(glyph_bitmap), sizeof(glyph_dsc) ) ;
+
     return &msyh ;
 }

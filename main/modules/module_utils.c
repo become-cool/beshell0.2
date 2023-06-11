@@ -273,6 +273,69 @@ static JSValue js_eval_bin(JSContext *ctx, JSValueConst this_val, int argc, JSVa
 }
 
 
+void hsv2rgb(uint32_t h, uint32_t s, uint32_t v, uint32_t *r, uint32_t *g, uint32_t *b) {
+    h %= 360; // h -> [0,360]
+    uint32_t rgb_max = v * 2.55f;
+    uint32_t rgb_min = rgb_max * (100 - s) / 100.0f;
+
+    uint32_t i = h / 60;
+    uint32_t diff = h % 60;
+
+    // RGB adjustment amount by hue
+    uint32_t rgb_adj = (rgb_max - rgb_min) * diff / 60;
+
+    switch (i) {
+    case 0:
+        *r = rgb_max;
+        *g = rgb_min + rgb_adj;
+        *b = rgb_min;
+        break;
+    case 1:
+        *r = rgb_max - rgb_adj;
+        *g = rgb_max;
+        *b = rgb_min;
+        break;
+    case 2:
+        *r = rgb_min;
+        *g = rgb_max;
+        *b = rgb_min + rgb_adj;
+        break;
+    case 3:
+        *r = rgb_min;
+        *g = rgb_max - rgb_adj;
+        *b = rgb_max;
+        break;
+    case 4:
+        *r = rgb_min + rgb_adj;
+        *g = rgb_min;
+        *b = rgb_max;
+        break;
+    default:
+        *r = rgb_max;
+        *g = rgb_min;
+        *b = rgb_max - rgb_adj;
+        break;
+    }
+}
+
+static JSValue js_utils_hsv2rgb(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    CHECK_ARGC(3)
+    ARGV_TO_UINT32(0,h)
+    ARGV_TO_UINT32(1,s)
+    ARGV_TO_UINT32(2,v)
+
+dn3(h,s,v)
+
+    uint32_t r, g, b ;
+    hsv2rgb(h,s,v,&r,&g,&b) ;
+dn3(r,g,b)
+
+    JSValue rgb = JS_NewArray(ctx) ;
+    JS_SetPropertyUint32(ctx, rgb, 0, JS_NewUint32(ctx, r));
+    JS_SetPropertyUint32(ctx, rgb, 1, JS_NewUint32(ctx, g));
+    JS_SetPropertyUint32(ctx, rgb, 2, JS_NewUint32(ctx, b));
+    return rgb ;
+}
 
 
 static JSValue js_utils_part_id(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
@@ -354,7 +417,7 @@ static JSValue js_utils_base64_decode(JSContext *ctx, JSValueConst this_val, int
 }
 #endif
 
-const uint8_t gamma8_table[256] = {
+static const uint8_t gamma8_table[256] = {
           0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
           0,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  2,  2,  2,  2,
           2,  2,  2,  3,  3,  3,  3,  3,  4,  4,  4,  4,  4,  5,  5,  5,
@@ -373,6 +436,9 @@ const uint8_t gamma8_table[256] = {
         222,224,226,228,230,233,235,237,239,241,244,246,248,250,253,255,
 };
 
+uint8_t gamma8_correct(uint8_t val) {
+    return gamma8_table[val] ;
+}
 
 JSValue js_utils_gamma8_correct(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
     CHECK_ARGC(1)
@@ -722,6 +788,8 @@ void be_module_utils_require(JSContext *ctx) {
 	// utils 
     JSValue utils = JS_NewObject(ctx);
     JS_SetPropertyStr(ctx, beapi, "utils", utils);
+
+    JS_SetPropertyStr(ctx, utils, "hsv2rgb", JS_NewCFunction(ctx, js_utils_hsv2rgb, "hsv2rgb", 1));
 #ifdef PLATFORM_ESP32
     JS_SetPropertyStr(ctx, utils, "setLogLevel", JS_NewCFunction(ctx, js_utils_set_log_level, "setLogLevel", 1));
     JS_SetPropertyStr(ctx, utils, "untar", JS_NewCFunction(ctx, js_utils_untar, "untar", 1));
@@ -756,7 +824,6 @@ void be_module_utils_require(JSContext *ctx) {
     JS_SetPropertyStr(ctx, global, "setTimeout", JS_NewCFunction(ctx, js_utils_set_timeout, "setTimeout", 1));
     JS_SetPropertyStr(ctx, global, "setInterval", JS_NewCFunction(ctx, js_utils_set_interval, "setInterval", 1));
     JS_SetPropertyStr(ctx, global, "clearTimeout", JS_NewCFunction(ctx, js_utils_clear_timeout, "clearTimeout", 1));
-    JS_SetPropertyStr(ctx, global, "clearInterval", JS_NewCFunction(ctx, js_utils_clear_timeout, "clearInterval", 1));
     JS_SetPropertyStr(ctx, global, "evalScript", JS_NewCFunction(ctx, js_eval_script, "evalScript", 1));
     JS_SetPropertyStr(ctx, global, "evalAsFile", JS_NewCFunction(ctx, js_eval_as_file, "evalAsFile", 1));
     JS_SetPropertyStr(ctx, global, "compileScript", JS_NewCFunction(ctx, js_compile_script, "compileScript", 1));

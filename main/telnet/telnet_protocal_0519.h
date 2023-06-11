@@ -3,21 +3,13 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stddef.h>
 
 
 /**
 BeProtocal 协议的设计目标是最大减轻单片机的负担：
 1. 最小的包头
 2. 解析时使用的内存最小
-3. 尽可能可靠，自动适应错误
-
-数据内容第 n 个字节处插入一个字节，数值为前 n-1 个字节的校验和。 n = min(127, <data len>) 。
-
-对包的识别不止检查包头，也要查看前 n-1 个字节的校验和。只有包头 和 校验和都正确才识别为一个包。
-
-这是为了及早识别无效的数据包(链路中出现了包头字节组合，但校验和不对)，释放处理包的所用到的内存。
-
-允许在链路上出现 BeProtocal数据包 以外的数据，无效的数据包可以另做处理，以便跟其他数据内容共存。
 
 0518 协议数据包长度限制在255以内
 0519 协议采用不定长：当包长小于 127 时，使用1个字节表示包长；当包长大于 127时，使用多于1个字节表示包长，第一个长度字节高位为1; 小端，低位在前
@@ -25,7 +17,7 @@ BeProtocal 协议的设计目标是最大减轻单片机的负担：
 */
 
 
-#define PKG0519_HEADERLEN_WITHOUT_DATALEN   5
+#define PKG0519_HEADERLEN_WITHOUT_DATALEN   6
 #define PKG0519_HEADERLEN_MIN               PKG0519_HEADERLEN_WITHOUT_DATALEN + 1
 #define PKG0519_HEADERLEN_MAX               PKG0519_HEADERLEN_WITHOUT_DATALEN + 4
 #define PKG0519_SIZE_1                      (0xFF>>1)            // 由1个字节表示包长
@@ -89,7 +81,6 @@ typedef struct {
 
 
 // void telnet_prot0519_push_char(struct telnet_prot_buffer * buff, uint8_t byte, const void * ctx) ;
-// void telnet_prot0519_push_bytes(struct telnet_prot_buffer * buff, uint8_t * dat, uint8_t length, const void * ctx) ;
 // uint8_t telnet_prot0519_pack_header(uint8_t * header, uint8_t pkgId, uint8_t cmd, size_t datalen) ;
 
 uint8_t telnet_prot0519_pack_data_len(uint32_t len, uint8_t * len_bytes) ;

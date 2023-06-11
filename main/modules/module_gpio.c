@@ -848,7 +848,7 @@ void be_module_gpio_reset(JSContext *ctx) {
 }
 
 
-void be_module_gpio_loop(JSContext *ctx)  {
+inline void be_module_gpio_loop(JSContext *ctx)  {
     if(!_gpio_isr_js_callback)
         return ;
     

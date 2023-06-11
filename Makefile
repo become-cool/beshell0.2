@@ -41,6 +41,11 @@ mkfs-home:
 mk-firmwarejson:
 	node filesystem/mk-firmware-json.js
 
+partition:
+	node filesystem/mk-partitions.js
+	python3 /mnt/d/lib/esp-idf-v4.4/components/partition_table/gen_esp32part.py filesystem/partitions-4MB.csv filesystem/img/partitions-4MB.bin
+	python3 /mnt/d/lib/esp-idf-v4.4/components/partition_table/gen_esp32part.py filesystem/partitions-16MB.csv filesystem/img/partitions-16MB.bin
+	
 dist: mk-firmwarejson partition
 	node filesystem/dispense-to-beconsole.js all
 dist-beshell: 
@@ -52,10 +57,6 @@ dist-root:
 dist-home: 
 	node filesystem/dispense-to-beconsole.js fs-home
 
-partition:
-	node filesystem/mk-partitions.js
-	python3 /mnt/d/lib/esp-idf-v4.4/components/partition_table/gen_esp32part.py filesystem/partitions-4MB.csv filesystem/img/partitions-4MB.bin
-	python3 /mnt/d/lib/esp-idf-v4.4/components/partition_table/gen_esp32part.py filesystem/partitions-16MB.csv filesystem/img/partitions-16MB.bin
 
 
 pack-fs: tree-shaking mkfs-root mkfs-home partition dist-fs

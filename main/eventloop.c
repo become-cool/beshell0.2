@@ -1,5 +1,6 @@
 #include "eventloop.h"
 #include <time.h>
+#include <string.h>
 #include "utils.h"
 
 eventloop_callback_t * _callback_stack_top = NULL ;
@@ -8,13 +9,27 @@ eventloop_callback_t * _callback_stack_top = NULL ;
 //     return _callback_stack_top ;
 // }
 
+int eventloop_count() {
+    int cnt = 0 ;
+    for(
+        eventloop_callback_t * prev = NULL, * current = _callback_stack_top;
+        current!=NULL ;
+        prev=current, current=current->next
+    ) {
+        cnt ++ ;
+    }
+    return cnt ;
+}
+
 eventloop_callback_t * eventloop_push(JSContext *ctx, JSValue func, JSValue thisobj, int interval, bool repeat) {
 
     eventloop_callback_t * newcb = malloc(sizeof(eventloop_callback_t)) ;
+    memset(newcb,0,sizeof(eventloop_callback_t)) ;
     newcb->func = JS_DupValue(ctx, func) ;
     newcb->thisobj = thisobj ;
     newcb->interval = interval ;
     newcb->repeat = repeat ;
+    newcb->requestAnimationFrame = false ;
     newcb->next = _callback_stack_top ;
     newcb->deadline = gettime() + interval ;
     newcb->argc = 0 ;
@@ -22,12 +37,15 @@ eventloop_callback_t * eventloop_push(JSContext *ctx, JSValue func, JSValue this
 
     _callback_stack_top = newcb ;
     
+    
+    // printf("eventloop_push(%d)\n", eventloop_count()) ;
     return newcb ;
 }
 
 
 
 eventloop_callback_t * eventloop_push_with_argv(JSContext *ctx, JSValue func, JSValue thisobj, int argc, JSValueConst *argv) {
+
     eventloop_callback_t * newcb = malloc(sizeof(eventloop_callback_t)) ;
     newcb->func = JS_DupValue(ctx, func) ;
     newcb->thisobj = JS_DupValue(ctx, thisobj) ;
@@ -45,6 +63,8 @@ eventloop_callback_t * eventloop_push_with_argv(JSContext *ctx, JSValue func, JS
     }
 
     _callback_stack_top = newcb ;
+
+    // printf("eventloop_push_with_argv(%d)\n", eventloop_count()) ;
     return newcb ;
 }
 
@@ -69,16 +89,16 @@ void eventloop_out(JSContext *ctx, eventloop_callback_t * prev, eventloop_callba
         _callback_stack_top = current->next ;
     }
 
-
+    // printf("eventloop_out(%d)\n", eventloop_count()) ;
     free(current) ;
-
 }
 
 void eventloop_remove(JSContext *ctx, eventloop_callback_t * item) {
+    int i = 0 ;
     for(
         eventloop_callback_t * prev = NULL, * current = _callback_stack_top;
         current!=NULL ;
-        prev=current, current=current->next
+        prev=current, current=current->next, i++
     ) {
         if(current == item) {
             eventloop_out(ctx, prev, current) ;
@@ -87,7 +107,7 @@ void eventloop_remove(JSContext *ctx, eventloop_callback_t * item) {
     }
 }
 
-void be_module_eventloop_loop(JSContext *ctx) {
+inline void be_module_eventloop_loop(JSContext *ctx) {
     if(!_callback_stack_top) {
         return ;
     }

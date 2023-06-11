@@ -13,7 +13,7 @@
 
 struct timeval select_tv = {
     .tv_sec = 0,
-    .tv_usec = 1,
+    .tv_usec = 0,
 } ;
 
 
@@ -24,7 +24,8 @@ fd_set udp_recv_rfds;
 
 JSValue _js_udp_recv_callback = NULL ;
 
-void be_module_socks_udp_loop(JSContext *ctx) {
+
+inline void be_module_socks_udp_loop(JSContext *ctx) {
 
 	FD_ZERO(&udp_recv_rfds);
     int fds = -1 ;
@@ -41,6 +42,8 @@ void be_module_socks_udp_loop(JSContext *ctx) {
         return ;
     }
     
+	select_tv.tv_sec = 0 ;
+	select_tv.tv_usec = 0 ;
     int s = select( fds + 1, &udp_recv_rfds, NULL, NULL, &select_tv);
     // 超时
     if(s==0) {

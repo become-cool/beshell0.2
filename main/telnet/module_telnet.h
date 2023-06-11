@@ -13,7 +13,7 @@ void be_telnet_reset(JSContext *ctx) ;
 uint8_t mk_echo_pkgid() ;
 
 void telnet_send_ready() ;
-void telnet_run(JSContext * ctx, uint8_t pkgid, uint8_t remain, uint8_t cmd, uint8_t * data, uint8_t datalen) ;
+void telnet_run(JSContext * ctx, uint8_t pkgid, uint8_t cmd, uint8_t * data, size_t datalen) ;
 void telnet_output(uint8_t cmd, int pkgid, const char * data, size_t datalen) ;
 
 #define echo(sth) 		telnet_output(mk_echo_pkgid(), CMD_OUTPUT, sth, strlen(sth))

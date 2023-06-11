@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
+#include "be_list.h"
 
 
 // 0518 协议数据包长度限制在255以内
@@ -45,8 +46,18 @@
 typedef void (*TelnetProtFuncSend)(const uint8_t * data, size_t datalen);
 typedef void (*TelnetProtFuncReset)(uint8_t level);
 
+typedef struct{
+    be_list_item_t base ;
 
-extern TelnetProtFuncSend telnet_prot_func_pkg_send ;
+	uint8_t pkgid ;
+	uint8_t cmd ;
+
+	uint8_t * data ;
+	size_t data_len ;
+	size_t data_received ;
+    
+} telnet_pkg_t ;
+
 extern TelnetProtFuncReset telnet_prot_func_reset ;
 
 struct telnet_prot_buffer {
@@ -55,11 +66,17 @@ struct telnet_prot_buffer {
 } ;
 
 void telnet_prot_reset() ;
-void telnet_prot_push_char(struct telnet_prot_buffer * buff, uint8_t byte, const void * ctx) ;
-void telnet_prot_push_bytes(struct telnet_prot_buffer * buff, uint8_t * dat, uint8_t length, const void * ctx) ;
+int telnet_prot_push_char(struct telnet_prot_buffer * buff, uint8_t byte, const void * ctx) ;
+void telnet_prot_push_bytes(struct telnet_prot_buffer * buff, uint8_t * dat, size_t length, const void * ctx) ;
 uint8_t telnet_prot_pack(uint8_t * pkg, uint8_t pkgId, uint8_t remain, uint8_t cmd, uint8_t * dat, uint8_t datalen) ;
 
 void telnet_proto_send_one_pkg(char pkgid, char remain, char cmd, char * data, uint8_t datalen) ;
 void telnet_proto_send_pkg(char pkgid, char cmd, char * data, uint16_t datalen) ;
 
-void on_pkg_receive (uint8_t pkgid, uint8_t remain, uint8_t cmd, uint8_t * data, uint8_t datalen, void * ctx) ;
+void telnet_proto_free_pkg(telnet_pkg_t * pkg) ;
+void telnet_proto_process_pkg (telnet_pkg_t * pkg, void * ctx) ;
+
+
+void be_telnet_proto_init() ;
+void be_telnet_proto_loop(void * ctx) ;
+void telnet_prot0519_receive(uint8_t * bytes, size_t * length) ;

@@ -63,11 +63,11 @@ void telnet_output(uint8_t cmd, int pkgid, const char * data, size_t datalen) {
 #endif
 }
 
-void telnet_run(JSContext * ctx, uint8_t pkgid, uint8_t remain, uint8_t cmd, uint8_t * data, uint8_t datalen) {
+void telnet_run(JSContext * ctx, uint8_t pkgid, uint8_t cmd, uint8_t * data, size_t datalen) {
 	if(!JS_IsNull(_func_repl_input) && JS_IsFunction(ctx, _func_repl_input)) {
 		JSValueConst * argv = malloc(sizeof(JSValue)*4) ;
 		argv[0] = JS_NewInt32(ctx, pkgid) ;
-		argv[1] = JS_NewInt32(ctx, remain) ;
+		argv[1] = JS_NewInt32(ctx, 0) ;
 		argv[2] = JS_NewInt32(ctx, cmd) ;
 		argv[3] = JS_NewStringLen(ctx, (char *)data, datalen) ;
 
@@ -196,7 +196,7 @@ void be_telnet_require(JSContext *ctx) {
 #endif
 
 }
-void be_telnet_loop(JSContext *ctx) {
+inline void be_telnet_loop(JSContext *ctx) {
 	// printf("be_telnet_loop()\n") ;
 
 #ifdef PLATFORM_LINUX

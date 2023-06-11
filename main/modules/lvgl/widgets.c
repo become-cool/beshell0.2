@@ -570,7 +570,6 @@ JSValue js_lv_label_set_font(JSContext *ctx, JSValueConst this_val, int argc, JS
     }
     else if( strcmp("msyh", fontname)==0 ) {
         font = font_msyh_3500() ;
-        
     }
     // else if( strcmp("source-han-sans", fontname)==0 ) {
     //     font = font_source_han_sans() ;

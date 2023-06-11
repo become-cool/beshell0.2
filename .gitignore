@@ -12,3 +12,4 @@ sdkconfig
 sdkconfig.old
 dependencies.lock
 node_modules
+tmp

@@ -327,8 +327,18 @@ void st7789v_init(st77xx_dev_t * dev,  st77xx_conf_t conf) {
 	st77xx_data_byte(dev, 0x10);
 	st77xx_command(dev, 0xc4);
 	st77xx_data_byte(dev, 0x20);
+	
+	// 帧率
 	st77xx_command(dev, 0xc6);
 	st77xx_data_byte(dev, 0x0f);
+	// st77xx_data_byte(dev, 0x0B);
+
+	// 电流
+	// st77xx_command(dev , 0xE9);     
+	// st77xx_data_byte(dev , 0x11);   
+	// st77xx_data_byte(dev , 0x11);   
+	// st77xx_data_byte(dev , 0x03);
+
 	st77xx_command(dev, 0xd0);
 	st77xx_data_byte(dev, 0xa4);
 	st77xx_data_byte(dev, 0xa1);

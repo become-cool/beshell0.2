@@ -237,6 +237,7 @@ char * mallocf(char * format, ...) ;
 void * mallocDMA(size_t size) ;
 
 void freeArrayBuffer(JSRuntime *rt, void *opaque, void *ptr) ;
+void nofreeArrayBuffer(JSRuntime *rt, void *opaque, void *ptr) ;
 
 // SRAM优先于PSRAM
 #ifdef PLATFORM_ESP32
@@ -290,7 +291,7 @@ void freeArrayBuffer(JSRuntime *rt, void *opaque, void *ptr) ;
         }                                                                               \
     }
 
-#define _ASSIGN_INT_PROP_DEFAULT(obj, propName, cvar, getter, default)                  \
+#define _ASSIGN_INT_PROP_DEFAULT(obj, propName, cvar, getter, default, tmptype)         \
     if(obj==JS_UNDEFINED||obj==JS_NULL) {                                               \
         cvar = default ;                                                                \
     } else {                                                                            \
@@ -303,14 +304,16 @@ void freeArrayBuffer(JSRuntime *rt, void *opaque, void *ptr) ;
                 JS_FreeValue(ctx, jsvar) ;                                              \
                 THROW_EXCEPTION(ctx, "property %s is not a number", propName) ;         \
             }                                                                           \
-            getter(ctx, &cvar, jsvar) ;                                                 \
+            tmptype tmp = 0 ;                                                           \
+            getter(ctx, &tmp, jsvar) ;                                                  \
+            cvar = tmp ;                                                                \
         }                                                                               \
     }
 #define ASSIGN_INT_PROP_DEFAULT(obj, propName, cvar, default) \
-        _ASSIGN_INT_PROP_DEFAULT(obj, propName, cvar, JS_ToInt32, default)
+        _ASSIGN_INT_PROP_DEFAULT(obj, propName, cvar, JS_ToInt32, default, int32_t)
 
 #define ASSIGN_UINT_PROP_DEFAULT(obj, propName, cvar, default) \
-        _ASSIGN_INT_PROP_DEFAULT(obj, propName, cvar, JS_ToUint32, default)
+        _ASSIGN_INT_PROP_DEFAULT(obj, propName, cvar, JS_ToUint32, default, uint32_t)
 
 #define _ASSIGN_INT_PROP(obj, propName, ctype, cvar, getter)                            \
     {                                                                                   \
@@ -342,7 +345,7 @@ void freeArrayBuffer(JSRuntime *rt, void *opaque, void *ptr) ;
     }
 
 // 对象属性值 -> cvar
-// 需要要手动 JS_FreeString(ctx, cvar)
+// 需要要手动 JS_FreeCString(ctx, cvar)
 #define ASSIGN_STR_PROP(obj, propName, cvar)                                            \
     cvar = NULL ;                                                                       \
     if(!JS_IsUndefined(obj)&&!JS_IsNull(obj)) {                                               \
@@ -411,3 +414,19 @@ bool qjs_instanceof(JSContext *ctx, JSValue obj, JSClassID clz_id) ;
     qjs_def_class(ctx, clzName, js_##typeName##_class_id, &js_##typeName##_class     \
                 , fullClzName, js_##typeName##_constructor, js_##typeName##_proto_funcs, countof(js_##typeName##_proto_funcs), parentProto, pkgVar) ;
 
+
+
+#define JS_ForeachArray(jsobj,item,code)    \
+    {                                       \
+        if( JS_IsArray(ctx,jsobj) ) {       \
+            JSValue jslen = JS_GetPropertyStr(ctx, jsobj, "length") ; \
+            uint32_t len = 0 ;              \
+            JS_ToUint32(ctx, &len, jslen) ; \
+            for(int i=0;i<len;i++){         \
+                JSValue item = JS_GetPropertyUint32(ctx, jsobj, i) ; \
+                code \
+                JS_FreeValue(ctx,item) ; \
+            } \
+            JS_FreeValue(ctx,jslen) ; \
+        }\
+    }

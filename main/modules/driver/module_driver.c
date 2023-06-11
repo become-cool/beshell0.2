@@ -2,6 +2,8 @@
 #include "driver_camera.h"
 #include "driver_stepper_mcpwm.h"
 #include "driver_stepper_timer.h"
+#include "driver_rmt.h"
+#include "driver_rainbow.h"
 #include "driver_common.h"
 
 #include "module_fs.h"
@@ -238,6 +240,7 @@ void be_module_driver_init() {
     be_module_driver_camera_init() ;
     be_module_driver_stepper_mcpwm_init() ;
     be_module_driver_stepper_timer_init() ;
+    be_module_driver_rainbow_init() ;
 }
 
 void be_module_driver_require(JSContext *ctx) {
@@ -255,6 +258,9 @@ void be_module_driver_require(JSContext *ctx) {
 
     be_module_driver_stepper_mcpwm_require(ctx, driver) ;
     be_module_driver_stepper_timer_require(ctx, driver) ;
+    be_module_driver_rmt_require(ctx, driver) ;
+    be_module_driver_rainbow_require(ctx, driver) ;
+
     be_module_driver_common_require(ctx, driver) ;
 
     JS_FreeValue(ctx, beapi);

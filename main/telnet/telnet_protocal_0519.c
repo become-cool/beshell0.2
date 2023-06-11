@@ -15,32 +15,6 @@ uint8_t telnet_prot0519_checksum(uint8_t * data, uint32_t len) {
 }
 
 
-uint8_t telnet_prot0519_pack_header(uint8_t * pkg, uint8_t pkgId, uint8_t remain, uint8_t cmd, uint8_t * dat, uint8_t datalen) {
-
-    pkg[0] = PKG_HEAD1 ;
-    pkg[1] = PKG_HEAD2 ;
-    pkg[2] = pkgId ;
-    pkg[3] = cmd ;
-
-
-    pkg[4] = datalen ;
-
-    
-    uint8_t i ;
-    for(i=0;i<datalen;i++) {
-        pkg[5+i] = *(dat+i) ;
-    }
-    uint16_t pkglen = PKGLEN_WITHOUT_DATA + datalen ;
-    // 算校验和
-    uint8_t sum = 0 ;
-    for(i=0; i<=pkglen-2; i++) {
-        sum^= pkg[i] ;
-    }
-    pkg[pkglen-1] = sum ;
-
-    return pkglen ;
-}
-
 
 uint8_t telnet_prot0519_pack_data_len(uint32_t len, uint8_t * len_bytes) {
     *(len_bytes+0) = (len>>(7*0)) & 0x7F ;

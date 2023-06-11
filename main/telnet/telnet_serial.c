@@ -18,9 +18,6 @@
 
 LOG_TAG("telnet")
 
-// uint8_t recv_buff[128];
-
-struct telnet_prot_buffer uart_pkg_buff ;
 
 
 void be_telnet_serial_reset(JSContext *ctx) {
@@ -109,8 +106,6 @@ void be_telnet_serial_init() {
 	be_telnet_proto_init(send_pkg_func) ;
 
 	telnet_prot_func_reset = task_reset ;
-
-	uart_pkg_buff.writepos = 0 ;
 
 	// uart telnet ----------
     uart_driver_install(UART_NUM_0, 2*1024, 0, 0, NULL, 0);

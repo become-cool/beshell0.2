@@ -12,160 +12,69 @@ TelnetProtFuncSend  telnet_prot_func_pkg_send = NULL ;
 TelnetProtFuncReset telnet_prot_func_reset = NULL ;
 
 static uint8_t send_buff [270] ;
-static int protocal_version = 518 ;
 
 static be_list_t * lst_pendings = NULL ;
 
-static uint8_t checksum(struct telnet_prot_buffer * buff) {
+static uint8_t checksum(uint8_t * data, size_t len) {
     uint8_t sum = 0 ;
-    for(uint16_t i=0; i<PKG_HEADER_LEN + buff->bytes[PKGPOS_DATALEN]; i++) {
-        sum^= buff->bytes[i] ;
+    for(uint16_t i=0; i<len; i++) {
+        sum^= data[i] ;
     }
     return sum ;
 }
 
-int telnet_prot_push_char(struct telnet_prot_buffer * buff, uint8_t byte, const void * ctx) {
-    // 包头
-    if(buff->writepos == PKGPOS_HEAD1) {
-        // printf("writepos=%d,byte=%d\n",buff->writepos, byte) ; 
-        if(byte==PKG_HEAD1) {
-            buff->bytes[buff->writepos ++] = byte ;
-        }
-        return 0 ;
-    }
-    else if(buff->writepos == PKGPOS_HEAD2) {
-        // printf("writepos=%d,byte=%d\n",buff->writepos, byte) ; 
-        if(byte==PKG_HEAD2) {
-            buff->bytes[buff->writepos ++] = byte ;
-        	return 0 ;
-        }
-		// 升级协议到  0519
-		else if(byte == 19) {
-			buff->writepos = 0 ;
-			return 519;
-		}
-		// 无效内容
-		else {
-			buff->writepos = 0 ;
-			return 0;
-		}
-    }
-    else if( buff->writepos< PKGPOS_DATALEN) {
-        buff->bytes[buff->writepos ++] = byte ;
-        return 0 ;
-    }
 
-    // 数据长度
-    else if( buff->writepos == PKGPOS_DATALEN){
-        // printf("datalen=%d\n",byte) ;
-        // 大于最大data长度, 丢弃
-        if(byte>PKGLEN_MAX_DATA) {
-            buff->writepos = 0 ;
-            return 0;
-        }
-        buff->bytes[buff->writepos ++] = byte ;
-        // dn(buff->bytes[PKGPOS_DATALEN])
-        return 0;
-    }
+static uint8_t telnet_prot_pack_data_len(uint32_t len, uint8_t * len_bytes) {
+    *(len_bytes+0) = (len>>(7*0)) & 0x7F ;
+    *(len_bytes+1) = (len>>(7*1)) & 0x7F ;
+    *(len_bytes+2) = (len>>(7*2)) & 0x7F ;
+    *(len_bytes+3) = (len>>(7*3)) & 0xFF ;  // 最高位字节可以用满8位
 
-    // 数据区
-    else if( buff->writepos < (PKG_HEADER_LEN + buff->bytes[PKGPOS_DATALEN]) ) {
-        // printf("%d->%d\n",buff->writepos,byte) ;
-        buff->bytes[buff->writepos ++] = byte ;
-        return 0;
+    if( *(len_bytes+3)>0 ) {
+        *(len_bytes+0) |= 0x80 ;
+        *(len_bytes+1) |= 0x80 ;
+        *(len_bytes+2) |= 0x80 ;
+        return 4 ;
     }
-
-    // 校验位
-    else if( buff->writepos == (PKG_HEADER_LEN + buff->bytes[PKGPOS_DATALEN]) ) {
-        // 重置
-        buff->writepos = 0 ;
-        // 完成
-        if( checksum(buff)==byte ) {
-            buff->bytes[ PKG_HEADER_LEN + buff->bytes[PKGPOS_DATALEN] ] = 0 ;
-            // on_pkg_receive(
-            //     buff->bytes[PKGPOS_ID] ,
-            //     buff->bytes[PKGPOS_REMAIN] ,
-            //     buff->bytes[PKGPOS_CMD] ,
-            //     buff->bytes + PKG_HEADER_LEN ,
-            //     buff->bytes[PKGPOS_DATALEN] ,
-            //     ctx
-            // ) ;
-        }
-        else {
-        }
+    else if( *(len_bytes+2)>0 ) {
+        *(len_bytes+0) |= 0x80 ;
+        *(len_bytes+1) |= 0x80 ;
+        return 3 ;
     }
-
-    // 异常,丢弃数据
-    else {
-        // printf("invalid writepos=%d\n", buff->writepos) ;
-        buff->writepos = 0 ;
+    else if( *(len_bytes+1)>0 ) {
+        *(len_bytes+0) |= 0x80 ;
+        return 2 ;
     }
-
-	return 0 ;
+    return 1 ;
 }
 
-void telnet_prot_push_bytes(struct telnet_prot_buffer * buff, uint8_t * dat, size_t length, const void * ctx) {
+uint8_t * telnet_prot_pack(uint8_t pkgId, uint8_t cmd, uint8_t * dat, size_t datalen, size_t * pkglen) {
 
-	for(uint8_t i=0; i<length; i++) {
-		telnet_prot_push_char( buff, dat[i], ctx ) ;
+	uint8_t buff_datalen[4] ;
+	uint8_t datalen_bytes = telnet_prot_pack_data_len(datalen, buff_datalen) ;
+
+	*pkglen = 4+datalen_bytes+datalen+1 ;
+
+	uint8_t * pkg = malloc(*pkglen) ;
+	if(!pkg) {
+		printf("output of memory?\n") ;
+		return NULL ;
 	}
 
-	// if(protocal_version == 519) {
-	// 	size_t remain = length ;
-	// 	if( telnet_prot0519_push_bytes(buff, dat, &remain, ctx) ) {
-	// 		// 完成，降级到 0518
-	// 		protocal_version = 518 ;
-	// 		// 剩余数据重入处理
-	// 		if(remain) {
-	// 			telnet_prot_push_bytes(buff,dat + (length-remain),remain,ctx) ;
-	// 		}
-	// 		return ;
-	// 	}
-	// }
-
-	// else {
-	// 	for(uint8_t i=0; i<length; i++) {
-	// 		if(telnet_prot_push_char( buff, dat[i], ctx )==519) {
-	// 			protocal_version=519 ;
-	// 			telnet_prot_push_bytes(buff, dat+i+1, length-i, ctx) ;
-	// 			return ;
-	// 		}
-	// 	}
-	// }
-}
-
-
-uint8_t telnet_prot_pack(uint8_t * pkg, uint8_t pkgId, uint8_t remain, uint8_t cmd, uint8_t * dat, uint8_t datalen) {
     pkg[0] = PKG_HEAD1 ;
     pkg[1] = PKG_HEAD2 ;
     pkg[2] = pkgId ;
-    pkg[3] = remain ;
-    pkg[4] = cmd ;
+    pkg[3] = cmd ;
 
+	memcpy(pkg+4, buff_datalen, datalen_bytes) ;
 
-    pkg[5] = datalen ;
+	memcpy(pkg+4+datalen_bytes, dat, datalen) ;
 
-    
-    uint8_t i ;
-    for(i=0;i<datalen;i++) {
-        pkg[6+i] = *(dat+i) ;
-    }
-    uint16_t pkglen = PKGLEN_WITHOUT_DATA + datalen ;
-    // 算校验和
-    uint8_t sum = 0 ;
-    for(i=0; i<=pkglen-2; i++) {
-        sum^= pkg[i] ;
-    }
-    pkg[pkglen-1] = sum ;
+	// 校验和
+	pkg[(*pkglen)-1] = checksum(pkg, (*pkglen)-1) ;
 
-    return pkglen ;
+    return pkg ;
 }
-
-
-
-
-// static int _file_pushing_pkgid = -1 ;
-// static char * _file_pushing_path = NULL ;
 
 void telnet_prot_reset() {
 	// _file_pushing_pkgid = -1 ;
@@ -178,40 +87,19 @@ void telnet_prot_reset() {
 
 
 
-void telnet_proto_send_one_pkg(char pkgid, char remain, char cmd, char * data, uint8_t datalen) {
-
-	uint16_t pkglen = PKGLEN_WITHOUT_DATA + datalen ;
-	
-	// printf("datalen=%d, pkglen=%d\n", datalen, pkglen) ;
-
-	telnet_prot_pack((uint8_t*)send_buff, pkgid, remain, cmd, (uint8_t*)data, datalen) ;
-
+void telnet_proto_send_pkg(uint8_t pkgid, uint8_t cmd, uint8_t * data, size_t datalen) {
+	size_t pkglen = 0 ;
+	uint8_t * pkg = telnet_prot_pack(pkgid, cmd, (uint8_t*)data, datalen, &pkglen) ;
 	// 输出
-	telnet_prot_func_pkg_send(send_buff, pkglen);
-	// uart_wait_tx_done(0, 10000);
-}
-
-void telnet_proto_send_pkg(char pkgid, char cmd, char * data, uint16_t datalen) {
-	
-	int pkgcnt = (int) ceil( (float)datalen/(float)PKGLEN_MAX_DATA ) ;
-
-	// printf("send>datalen=%d, max=%d, pkgcnt=%d\n", datalen, PKGLEN_MAX_DATA, pkgcnt) ;
-	// printf("%s\n",data) ;
-
-	for(int i=pkgcnt-1; i>=1; i--) {
-		// printf("%d, len=%d\n", i, PKGLEN_MAX_DATA) ;
-		telnet_proto_send_one_pkg(pkgid, i, cmd, data, PKGLEN_MAX_DATA) ;
-		data+= PKGLEN_MAX_DATA ;
+	if(pkg) {
+		telnet_prot_func_pkg_send(pkg, pkglen);
+		free(pkg) ;
 	}
-
-	// 最后一个包
-	telnet_proto_send_one_pkg(pkgid, 0, cmd, data, datalen%PKGLEN_MAX_DATA) ;
 }
 
 
-
-void telnet_proto_send_pkg_str(char pkgid, char cmd, char * data) {
-	telnet_proto_send_pkg(pkgid, cmd, data, strlen(data)) ;
+static void telnet_proto_send_pkg_str(uint8_t pkgid, uint8_t cmd, char * data) {
+	telnet_proto_send_pkg(pkgid, cmd, (uint8_t *)data, strlen(data)) ;
 }
 
 
@@ -338,10 +226,6 @@ void telnet_proto_process_pkg (telnet_pkg_t * pkg, void * ctx){
 		if( bytelen==0 || bytelen+offset>statbuf.st_size ) {
 			bytelen = statbuf.st_size - offset ;
 		}
-
-		if((bytelen) > PKGLEN_MAX_DATA*255) {
-			bytelen = PKGLEN_MAX_DATA*255 ;
-		}
 		
 		int fd = fopen(realpath, "r");
 		free(realpath) ;
@@ -351,8 +235,9 @@ void telnet_proto_process_pkg (telnet_pkg_t * pkg, void * ctx){
 			return ;
 		}
 
-		char * bytes = malloc(PKGLEN_MAX_DATA) ;
+		uint8_t * bytes = malloc(bytelen) ;
 		if(!bytes) {
+			fclose(fd) ;
 			telnet_proto_send_pkg_str(pkg->pkgid, CMD_EXCEPTION, "failed to malloc, memory low?") ;
 			return ;
 		}
@@ -361,30 +246,9 @@ void telnet_proto_process_pkg (telnet_pkg_t * pkg, void * ctx){
         	fseek(fd, offset, SEEK_SET) ;
 		}
 
+		size_t readed = fread(bytes, 1, bytelen, fd) ;
 
-		int pkgcnt = (int) ceil( (float)bytelen/(float)PKGLEN_MAX_DATA ) ;
-		size_t readed = 0 ;
-		size_t remain = bytelen ;
-
-		// printf("send file>total len=%d, pkgcnt=%d\n", datalen, pkgcnt) ;
-
-		for(int i=pkgcnt-1; i>=1; i--) {
-#ifdef PLATFORM_ESP32
-    		vTaskDelay(1) ;
-#endif
-			readed = fread(bytes, 1, PKGLEN_MAX_DATA, fd) ;
-			telnet_proto_send_one_pkg(pkg->pkgid, i, CMD_DATA, bytes, readed) ;
-			remain-= readed ;
-			// printf("[%d] sended data %d, remain: %d\n", i, readed, remain) ;
-		}
-
-		// 最后一个包
-#ifdef PLATFORM_ESP32
-		vTaskDelay(1) ;
-#endif
-		readed = fread(bytes, 1, remain, fd) ;
-		telnet_proto_send_one_pkg(pkg->pkgid, 0, CMD_DATA, bytes, readed) ;
-		// printf("[0] sended data %d\n", readed) ;
+		telnet_proto_send_pkg(pkg->pkgid, CMD_DATA, bytes, readed) ;
 
 		fclose(fd) ;
 		free(bytes) ;
@@ -426,11 +290,12 @@ inline static int detect_header(uint8_t * bytes, size_t length) {
 }
 
 
+
 inline static int read_data_length(uint8_t * bytes, size_t length, size_t * datalen) {
 
 	(*datalen) = 0;
 
-	// 第3个字节
+	// 第1个字节
     (*datalen)|= bytes[4] & 0x7F ;
     if(bytes[4]<0x80) {
 		return 1 ;
@@ -439,7 +304,7 @@ inline static int read_data_length(uint8_t * bytes, size_t length, size_t * data
 		return -1 ;
 	}
 
-	// 第3个字节
+	// 第2个字节
     (*datalen)|= (bytes[5] & 0x7F) << 7 ;
     if(bytes[5]<0x80) {
 		return 2 ;

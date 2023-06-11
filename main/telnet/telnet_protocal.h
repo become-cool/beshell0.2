@@ -6,25 +6,18 @@
 #include "be_list.h"
 
 
-// 0518 协议数据包长度限制在255以内
-// 这是为了接收时，通过包的 数据校验和 来分包
-// 以便允许包和包之间“夹杂”自由数据
+/**
+ * 0518
+ * | H1 | H2 | PkgID | CMD | DATA LEN(1-4) | DATA ... |
+ * 
+ * 0519
+ * | H1 | H2 | PkgID | REMAIN | CMD | DATA LEN(1) | DATA ... | VerifyBit |
+ */
 
-#define PKGLEN_WITHOUT_DATA         7
-#define PKG_HEADER_LEN              6
-#define PKGLEN_MAX_DATA             248
-#define BUFFLEN_RECEIVE             260     // > PKGLEN_MAX_DATA + PKGLEN_WITHOUT_DATA
 
 // 05 18
 #define PKG_HEAD1                   5
 #define PKG_HEAD2                   18
-
-#define PKGPOS_HEAD1                0
-#define PKGPOS_HEAD2                1
-#define PKGPOS_ID                   2
-#define PKGPOS_REMAIN               3
-#define PKGPOS_CMD                  4
-#define PKGPOS_DATALEN              5
 
 #define CMD_RUN	                	1		// 执行js代码，无返回值
 #define CMD_CALL	                2		// 执行js代码，有返回值
@@ -60,18 +53,10 @@ typedef struct{
 
 extern TelnetProtFuncReset telnet_prot_func_reset ;
 
-struct telnet_prot_buffer {
-    uint8_t bytes[BUFFLEN_RECEIVE] ;
-    uint16_t writepos ;
-} ;
-
 void telnet_prot_reset() ;
-int telnet_prot_push_char(struct telnet_prot_buffer * buff, uint8_t byte, const void * ctx) ;
-void telnet_prot_push_bytes(struct telnet_prot_buffer * buff, uint8_t * dat, size_t length, const void * ctx) ;
-uint8_t telnet_prot_pack(uint8_t * pkg, uint8_t pkgId, uint8_t remain, uint8_t cmd, uint8_t * dat, uint8_t datalen) ;
+uint8_t * telnet_prot_pack(uint8_t pkgId, uint8_t cmd, uint8_t * dat, size_t datalen, size_t * pkglen) ;
 
-void telnet_proto_send_one_pkg(char pkgid, char remain, char cmd, char * data, uint8_t datalen) ;
-void telnet_proto_send_pkg(char pkgid, char cmd, char * data, uint16_t datalen) ;
+void telnet_proto_send_pkg(uint8_t pkgid, uint8_t cmd, uint8_t * data, size_t datalen) ;
 
 void telnet_proto_free_pkg(telnet_pkg_t * pkg) ;
 void telnet_proto_process_pkg (telnet_pkg_t * pkg, void * ctx) ;

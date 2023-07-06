@@ -16,7 +16,7 @@ try{
     // console.log(e)
 }
 
-appsize = 0x320000
+// appsize = 0x320000
 
 align = 32
 let rootstat = fs.statSync(__dirname + "/img/fs-root.img")

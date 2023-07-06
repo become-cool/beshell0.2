@@ -67,11 +67,13 @@ function dist(firmware, targetDir) {
     if(dispenseBootloader) {
         cp("img/bootloader-4MB.bin", path+"/bootloader-4MB.bin")
         cp("img/bootloader-16MB.bin", path+"/bootloader-16MB.bin")
+        cp("img/bootloader-s3-8MB.bin", path+"/bootloader-s3-8MB.bin")
         cp("img/bootloader-s3-16MB.bin", path+"/bootloader-s3-16MB.bin")
     }
     
     if(dispensePartition) {
         cp("img/partitions-4MB.bin", path+"/")
+        cp("img/partitions-8MB.bin", path+"/")
         cp("img/partitions-16MB.bin", path+"/")
     }
 

@@ -37,6 +37,12 @@ function mkMetaJson() {
             },
             {
                 "address": "0x0",
+                "path": "bootloader-s3-8MB.bin",
+                "chiptype": "esp32s3" ,
+                "flashsize": "8"
+            },
+            {
+                "address": "0x0",
                 "path": "bootloader-s3-16MB.bin",
                 "chiptype": "esp32s3" ,
                 "flashsize": "16"
@@ -49,10 +55,14 @@ function mkMetaJson() {
             },
             {
                 "address": "0x8000",
+                "path": "partitions-8MB.bin",
+                "flashsize": "8"
+            },
+            {
+                "address": "0x8000",
                 "path": "partitions-16MB.bin",
                 "flashsize": "16"
             },
-    
             {
                 "address": "0x10000",
                 "path": "beshell.bin",
@@ -73,6 +83,15 @@ function mkMetaJson() {
                 "path": "fs-home.img"
             }
         ]
+    }
+
+    for(let file of meta.bin) {
+        try{
+            let stats = fs.statSync(__dirname+'/img/'+file.path)
+            file.size = stats.size
+        }catch(e){
+            console.log("file can not stats", __dirname+'/img/'+file.path)
+        }
     }
 
     return JSON.stringify(meta,null,4)

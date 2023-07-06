@@ -44,6 +44,40 @@ let parttables4MB = [
     } ,
 ]
 
+let parttables8MB = [
+    {
+        name: "nvs",
+        type: "data",
+        subtype: "nvs",
+        offset: 0x9000,
+        size: 24*1024,
+    } ,
+    {
+        name: "phy_init",
+        type: "data",
+        subtype: "phy",
+        size: 4*1024,
+    } ,
+    {
+        name: "factory",
+        type: "app",
+        addr: 0x10000 ,
+        subtype: "factory",
+        size: appsize,
+    } ,
+    {
+        name: "fsroot",
+        type: "data",
+        subtype: "fat",
+        size: rootsize,
+    } ,
+    {
+        name: "fshome",
+        type: "data",
+        subtype: "fat",
+    } ,
+]
+
 let parttables16MB = [
     {
         name: "nvs",
@@ -113,12 +147,15 @@ function generatePartitionsTable(parts, flashSize) {
 
 
 let csv4MB = generatePartitionsTable(parttables4MB, 4*1024*1024)
+let csv8MB = generatePartitionsTable(parttables16MB, 8*1024*1024)
 let csv16MB = generatePartitionsTable(parttables16MB, 16*1024*1024)
 
 console.log(csv4MB)
+console.log(csv8MB)
 console.log(csv16MB)
 
 fs.writeFileSync(__dirname+'/partitions-4MB.csv',csv4MB)
+fs.writeFileSync(__dirname+'/partitions-8MB.csv',csv8MB)
 fs.writeFileSync(__dirname+'/partitions-16MB.csv',csv16MB)
 
 

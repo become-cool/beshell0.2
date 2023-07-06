@@ -174,28 +174,36 @@ void eval_code_len(JSContext *ctx, const char * str,size_t len,const char * file
     }                                                                               \
     JS_FreeValue(ctx, ret) ;                                                        \
     }
-
-#define MAKE_ARGV1(argv, arg1)                                                      \
-    JSValueConst * argv = malloc(sizeof(JSValue)) ;                                 \
+#define MALLOC_ARGV1(argv, arg1)                                                    \
+    argv = malloc(sizeof(JSValue)) ;                                                \
     argv[0] = arg1 ;
+#define MAKE_ARGV1(argv, arg1)                                                      \
+    JSValueConst * MALLOC_ARGV1(argv, arg1)
 
-#define MAKE_ARGV2(argv, arg1, arg2)                                                \
-    JSValueConst * argv = malloc(sizeof(JSValue)*2) ;                               \
+#define MALLOC_ARGV2(argv, arg1, arg2)                                              \
+    argv = malloc(sizeof(JSValue)*2) ;                                              \
     argv[0] = arg1 ;                                                                \
     argv[1] = arg2 ;
+#define MAKE_ARGV2(argv, arg1, arg2)                                                \
+    JSValueConst * MALLOC_ARGV2(argv, arg1, arg2)
 
-#define MAKE_ARGV3(argv, arg1, arg2, arg3)                                          \
-    JSValueConst * argv = malloc(sizeof(JSValue)*3) ;                               \
+#define MALLOC_ARGV3(argv, arg1, arg2, arg3)                                        \
+    argv = malloc(sizeof(JSValue)*3) ;                                              \
     argv[0] = arg1 ;                                                                \
     argv[1] = arg2 ;                                                                \
     argv[2] = arg3 ;
+#define MAKE_ARGV3(argv, arg1, arg2, arg3)                                          \
+    JSValueConst * MALLOC_ARGV3(argv, arg1, arg2, arg3)
 
-#define MAKE_ARGV4(argv, arg1, arg2, arg3, arg4)                                    \
-    JSValueConst * argv = malloc(sizeof(JSValue)*4) ;                               \
+#define MALLOC_ARGV4(argv, arg1, arg2, arg3, arg4)                                  \
+    argv = malloc(sizeof(JSValue)*4) ;                                              \
     argv[0] = arg1 ;                                                                \
     argv[1] = arg2 ;                                                                \
     argv[2] = arg3 ;                                                                \
     argv[3] = arg4 ;
+#define MAKE_ARGV4(argv, arg1, arg2, arg3, arg4)                                    \
+    JSValueConst * MALLOC_ARGV4(argv, arg1, arg2, arg3, arg4)
+
 
 #define JS_CALL_ARG1(ctx, func, arg1)                           \
     {                                                           \

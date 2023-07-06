@@ -51,8 +51,10 @@ static be_list_t * lst_devs = NULL ;
 typedef struct {
     be_list_item_t base ;
     indev_driver_spec_t * spec ;
-    uint8_t last_value ;
+    uint32_t last_value ;     // 最高字节表示是否 i2c 设备是否存在
 } indev_item_t ;
+
+#define InDevIsConnected(value) (value&0x80000000)
 
 #ifdef PLATFORM_ESP32
 
@@ -60,7 +62,8 @@ TaskHandle_t task_nav_read_handle = NULL ;
 
 static void task_nav_read(void * argv) {
 
-    uint8_t value = 0 ;
+    uint32_t value = 0 ;
+    bool found = false ;
 
     while(1) {
 
@@ -72,10 +75,13 @@ static void task_nav_read(void * argv) {
         FOREACH_TYPE_LIST(lst_devs, indev_item_t, item, {
 
             value = 0 ;
-            indev_nav_read_i2c(item->spec, &value) ;
+            found = indev_nav_read_i2c(item->spec, (uint8_t*) &value) ;
+
+            if(found) {
+                value|= 0x80000000 ;
+            }
 
             if(value!=item->last_value) {
-
                 xQueueSend( item->spec->data.buttons.queue, &value, 0 );
 
                 // printf(BYTE_TO_BINARY_PATTERN "->" BYTE_TO_BINARY_PATTERN "\r\n"
@@ -84,6 +90,7 @@ static void task_nav_read(void * argv) {
 
                 item->last_value = value ;
             }
+
         }) 
 
         vTaskDelay(1) ;
@@ -106,7 +113,7 @@ static void i2c_indev_init(indev_driver_spec_t * spec) {
     be_list_append(lst_devs, &item->base) ;
 
 #ifdef PLATFORM_ESP32
-    spec->data.buttons.queue = xQueueCreate(1, sizeof(uint8_t));
+    spec->data.buttons.queue = xQueueCreate(1, sizeof(uint32_t));
     i2c_indev_create_task() ;
 #endif
 }
@@ -148,9 +155,7 @@ inline bool indev_nav_read_i2c(indev_driver_spec_t* spec, uint8_t * byte) {
     I2C_RECV(byte,1) ;
     I2C_COMMIT(spec->conf.i2c.bus) ;
 
-    spec->found = ESP_OK==res ;
-
-    return spec->found ;
+    return ESP_OK==res ;
 }
 
 #endif
@@ -164,7 +169,7 @@ inline static void lvgl_proc_btn(indev_driver_spec_t * spec, uint32_t * unread, 
     (*unread) &= ~btn ;
     data->continue_reading = (*unread)? true: false ;
 
-    printf("btn:%d, key:%d ,state:%d, continue:%d\n", btn, key, state, data->continue_reading) ;
+    // printf("btn:%d, key:%d ,state:%d, continue:%d\n", btn, key, state, data->continue_reading) ;
     return ;
 }
 
@@ -257,7 +262,7 @@ static JSValue js_lv_indev_nav_constructor(JSContext *ctx, JSValueConst new_targ
     return jsobj ;
 }
 static void js_lv_indev_nav_finalizer(JSRuntime *rt, JSValue this_val){
-    printf("js_lv_indev_nav_finalizer()\n") ;
+    // printf("js_lv_indev_nav_finalizer()\n") ;
 
     lv_indev_t * indev = (lv_indev_t *)JS_GetOpaque(this_val, js_lv_indev_nav_class_id) ;
     if(indev && indev->driver) {
@@ -303,6 +308,8 @@ static JSClassDef js_lv_indev_nav_class = {
 static void send_btns(indev_driver_spec_t * spec, uint32_t value) {
 
     lv_indev_data_t lvdata ;
+
+    bool found = InDevIsConnected(value) ;
     
     uint32_t changes = spec->data.buttons.state ^ value ;
 
@@ -337,6 +344,16 @@ static void send_btns(indev_driver_spec_t * spec, uint32_t value) {
     }
 
     spec->data.buttons.state = value ;
+
+    if( spec->found!=found ){
+
+        // printf("indev found: %d==%d? %d\n", spec->found, found, value) ;
+
+        // js 事件
+        indev_emit_js_event(spec, found? "ipt.connected": "ipt.disconnected", NULL ) ;
+
+        spec->found = found ;
+    }
 }
 
 
@@ -417,8 +434,8 @@ void be_indev_i2c_require(JSContext *ctx, JSValue lvgl, JSValue baseProto) {
 }
 
 #ifdef PLATFORM_ESP32
-inline uint8_t indev_nav_take_value(indev_driver_spec_t * spec) {
-    uint8_t value = 0 ;
+inline uint32_t indev_nav_take_value(indev_driver_spec_t * spec) {
+    uint32_t value = 0 ;
     if( xQueueReceive(spec->data.buttons.queue, &value, 0) == pdTRUE ) {
         spec->data.buttons.state = value ;
         return value ;
@@ -429,7 +446,7 @@ inline uint8_t indev_nav_take_value(indev_driver_spec_t * spec) {
 }
 
 inline void be_indev_i2c_loop(JSContext *ctx) {
-    uint8_t value = 0 ;
+    uint32_t value = 0 ;
     FOREACH_TYPE_LIST(lst_devs, indev_item_t, item, {
         if( xQueueReceive(item->spec->data.buttons.queue, &value, 0) == pdTRUE ) {
             send_btns(item->spec,value) ;

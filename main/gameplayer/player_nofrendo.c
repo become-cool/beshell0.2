@@ -608,8 +608,8 @@ static void task_video(void *arg) {
 
 void osd_getinput(void) {
 
-    uint8_t btns_1 = 0 ;
-    uint8_t btns_2 = 0 ;
+    uint32_t btns_1 = 0 ;
+    uint32_t btns_2 = 0 ;
 
     lv_indev_t * indev=NULL ;
     indev_driver_spec_t * spec = NULL ;

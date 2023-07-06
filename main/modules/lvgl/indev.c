@@ -64,10 +64,21 @@ static JSValue js_all_indev(JSContext *ctx, JSValueConst this_val, int argc, JSV
 
 inline void indev_emit_js_event(indev_driver_spec_t * indev_spec, const char * event_name, const char * key) {
     
-    MAKE_ARGV2(argv
-        , JS_NewString(indev_spec->ctx, event_name)
-        , JS_NewString(indev_spec->ctx, key)
-    )
+    JSValueConst * argv ;
+    int argc = 0 ;
+    if(key) {
+        argc = 2 ;
+        MALLOC_ARGV2(argv
+            , JS_NewString(indev_spec->ctx, event_name)
+            , JS_NewString(indev_spec->ctx, key)
+        )
+    }
+    else {
+        argc = 1 ;
+        MALLOC_ARGV1(argv
+            , JS_NewString(indev_spec->ctx, event_name)
+        )
+    }
 
     // 在 lvgl 屏幕对象上触发事件
     if ( indev_spec->lv_indev
@@ -82,7 +93,7 @@ inline void indev_emit_js_event(indev_driver_spec_t * indev_spec, const char * e
             JSValue jsobj = JS_MKPTR(JS_TAG_OBJECT, disp_spec->jsobj) ;
             JSValue emit = JS_GetPropertyStr(disp_spec->ctx,jsobj,"emit") ;
             if( JS_IsFunction(indev_spec->ctx, emit) ) {
-                JSValue ret = JS_Call(indev_spec->ctx, emit, jsobj, 2, argv ) ;
+                JSValue ret = JS_Call(indev_spec->ctx, emit, jsobj, argc, argv ) ;
                 if (JS_IsException(ret)) {
                     js_std_dump_error(indev_spec->ctx);
                 }
@@ -101,7 +112,7 @@ inline void indev_emit_js_event(indev_driver_spec_t * indev_spec, const char * e
 #endif
         JSValue emit = JS_GetPropertyStr(indev_spec->ctx,jsobj,"emit") ;
         if( JS_IsFunction(indev_spec->ctx, emit) ) {
-            JSValue ret = JS_Call(indev_spec->ctx, emit, jsobj, 2, argv ) ;
+            JSValue ret = JS_Call(indev_spec->ctx, emit, jsobj, argc, argv ) ;
             if (JS_IsException(ret)) {
                 js_std_dump_error(indev_spec->ctx);
             }

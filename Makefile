@@ -44,6 +44,7 @@ mk-firmwarejson:
 partition:
 	node filesystem/mk-partitions.js
 	python3 /mnt/d/lib/esp-idf-v4.4/components/partition_table/gen_esp32part.py filesystem/partitions-4MB.csv filesystem/img/partitions-4MB.bin
+	python3 /mnt/d/lib/esp-idf-v4.4/components/partition_table/gen_esp32part.py filesystem/partitions-8MB.csv filesystem/img/partitions-8MB.bin
 	python3 /mnt/d/lib/esp-idf-v4.4/components/partition_table/gen_esp32part.py filesystem/partitions-16MB.csv filesystem/img/partitions-16MB.bin
 	
 dist: mk-firmwarejson partition
@@ -131,6 +132,8 @@ help:
 	@echo "make tree-shaking	# 将 filesystem/root 和 filesystem/home 目录整体拷贝到 filesystem/tmp 目录下，剔除不需要打包的文件和子目录，为制作镜像做准备"
 	@echo "make mkfs-root		# 用 filesystem/tmp/root 内的文件制作 root 分区镜像 (rawfs) , 镜像文件保存到 filesystem/img/fs-root.bin"
 	@echo "make mkfs-home		# 用 filesystem/tmp/home 内的文件制作 home 分区镜像 (littlefs) , 镜像文件保存到 filesystem/img/fs-home.bin"
+	@echo "make mkfs-home <dir>"
+	@echo "make mkfs-home <dir> <img size>"
 	@echo "make partition		# 生产分区表 csv 文件, 并进进一步生产 分区表二进制文件"
 	@echo "make pack-fs		# tree-shaking + mkfs-root + mkfs-home + partition + dist-fs"
 	@echo "make pack-all		# tree-shaking + mkfs-root + mkfs-home + partition + dist"

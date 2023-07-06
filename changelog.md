@@ -9,6 +9,12 @@
 
 * fixed: repl 下 require 错误不显示 stack
 
+* 增加了 WS2812 驱动
+
+* cron
+
+* fixed: uart telnet 协议发送数据快的时候会出错的问题
+
 ## 0.2.14 2023-104-28
 
 * fixed: beapi.fs.info() 效率很低的问题

@@ -2,6 +2,11 @@ const fs = require("fs")
 const {execSync} = require("child_process")
 
 const extFilters = ['.md']
+const globalIgnores = [
+    '.git' ,
+    '.gitignore' ,
+    '.gitmodules' ,
+]
 
 function packdir(from, to, packpath, ignores) {
     let bytes = 0
@@ -10,6 +15,11 @@ function packdir(from, to, packpath, ignores) {
     }
 
     for(let item of fs.readdirSync(from)) {
+
+        if(globalIgnores.includes(item)) {
+            continue
+        }
+
         let itemFull = from +"/"+ item
         let vfspath = packpath+"/"+item
         if(item=='.' || item=='..' || (ignores&&ignores.includes(vfspath))){

@@ -161,6 +161,12 @@ static JSValue js_process_stat_nop(JSContext *ctx, JSValueConst this_val, int ar
 
 
 #ifdef PLATFORM_ESP32
+
+extern volatile uint32_t CPU_RunTime; 
+
+#define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS() (CPU_RunTime = 0ul) 
+#define portGET_RUN_TIME_COUNTER_VALUE() CPU_RunTime
+
 static JSValue js_process_print_tasks(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
 
     size_t taskCnt = uxTaskGetNumberOfTasks() ;
@@ -171,6 +177,11 @@ static JSValue js_process_print_tasks(JSContext *ctx, JSValueConst this_val, int
     }
 
     vTaskList(buff) ;
+    printf("TaskName      Stat Priority   Stack Number\r\n");
+    printf(buff) ;
+
+    vTaskGetRunTimeStats(buff) ;
+    printf("\r\nTaskName       RTCounter         Usage\r\n");
     printf(buff) ;
 
     free(buff) ;

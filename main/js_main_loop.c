@@ -34,6 +34,7 @@
 #include "freertos/task.h"
 #include <nvs_flash.h>
 #include "esp_vfs_fat.h"
+#include "module_media.h"
 
 #else
 
@@ -46,7 +47,6 @@
 #include "module_process.h"
 #include "module_metadata.h"
 #include "module_nvs.h"
-#include "module_media.h"
 
 JSRuntime *rt;
 JSContext *ctx;

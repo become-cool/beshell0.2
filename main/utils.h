@@ -275,7 +275,7 @@ void nofreeArrayBuffer(JSRuntime *rt, void *opaque, void *ptr) ;
     int32_t cvar = 0 ;                                                                  \
     {                                                                                   \
         JSValue jsvar = JS_GetPropertyStr(ctx, obj, propName) ;                         \
-        if( jsvar==JS_UNDEFINED ) {                                                     \
+        if( JS_IsUndefined(jsvar) ) {                                                     \
             cvar = default ;                                                            \
         }                                                                               \
         else {                                                                          \

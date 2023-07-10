@@ -34,7 +34,7 @@ static JSValue js_find_indev_by_id(JSContext *ctx, JSValueConst this_val, int ar
     if(!spec || /*!spec->jsobj ||*/ JS_IsUndefined(spec->jsobj) || JS_IsNull(spec->jsobj)) {
         return JS_NULL ;
     }
-    return JS_DupValue(ctx,JS_MKPTR(JS_TAG_OBJECT,spec->jsobj)) ;
+    return JS_DupValue(ctx,JS_MKPTR(JS_TAG_OBJECT,JS_VALUE_GET_PTR(spec->jsobj))) ;
 
 }
 
@@ -241,7 +241,7 @@ static JSClassDef js_indev_base_class = {
 } ;
 
 
-
+#ifdef PLATFORM_ESP32
 static JSValue js_lv_indev_tick(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     THIS_INDEV(thisobj)
     lv_indev_read_timer_cb(thisobj->driver->read_timer) ;
@@ -263,6 +263,7 @@ static JSValue js_lv_indev_set_group(JSContext *ctx, JSValueConst this_val, int 
     lv_indev_set_group(thisobj, group) ;
     return JS_UNDEFINED ;
 }
+#endif
 
 static JSValue js_lv_indev_unregister(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     THROW_EXCEPTION("not implements yet") ;
@@ -272,10 +273,12 @@ static JSValue js_lv_indev_unregister(JSContext *ctx, JSValueConst this_val, int
 
 
 static const JSCFunctionListEntry js_indev_base_proto_funcs[] = {
+#ifdef PLATFORM_ESP32
     JS_CFUNC_DEF("tick", 0, js_lv_indev_tick),
-    JS_CFUNC_DEF("setGroup", 0, js_lv_indev_set_group),
-    JS_CFUNC_DEF("unregister", 0, js_lv_indev_unregister),
     JS_CFUNC_DEF("id", 0, js_lv_indev_id),
+    JS_CFUNC_DEF("setGroup", 0, js_lv_indev_set_group),
+#endif
+    JS_CFUNC_DEF("unregister", 0, js_lv_indev_unregister),
 } ;
 
 
@@ -302,8 +305,12 @@ void be_lv_indev_init() {
     // JS_NewClassID(&js_indev_fake_key_class_id);
 
     be_indev_pointer_init() ;
+
+#ifdef PLATFORM_ESP32
     be_indev_i2c_init() ;
+#endif
 }
+
 
 void be_lv_indev_require(JSContext *ctx, JSValue lvgl) {
     
@@ -324,6 +331,7 @@ void be_lv_indev_require(JSContext *ctx, JSValue lvgl) {
     // QJS_DEF_CLASS(indev_fake_key, "IndevFakeKey", "lv.IndevFakeKey", baseProto, lvgl)
 
     be_indev_pointer_require(ctx, lvgl, baseProto) ;
+#ifdef PLATFORM_ESP32
     be_indev_i2c_require(ctx, lvgl, baseProto) ;
-
+#endif
 }

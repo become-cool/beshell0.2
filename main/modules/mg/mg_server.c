@@ -169,7 +169,7 @@ static void http_server_event_handler(struct mg_connection * conn, int ev, void 
                 if(conn->userdata) {
                     response_t * rspn = (response_t *)conn->userdata ;
 
-                    MAKE_ARGV3(cbargv, JS_NewString(SERVER->ctx, "close"), JS_NULL, rspn->jsrspn)
+                    JSValueConst * MALLOC_ARGV3(cbargv, JS_NewString(SERVER->ctx, "close"), JS_NULL, rspn->jsrspn)
                     JSValue ret = JS_Call(SERVER->ctx, SERVER->callback, JS_UNDEFINED, 3, cbargv) ;
                     free(cbargv) ;
                     if(JS_IsException(ret)) {

@@ -222,9 +222,7 @@ void be_telnet_reset(JSContext *ctx) {
 
 #ifdef PLATFORM_ESP32
 	be_telnet_serial_reset(ctx) ;
-#endif
-	
-#ifdef PLATFORM_LINUX
 	be_telnet_ble_reset(ctx) ;
 #endif
+	
 }

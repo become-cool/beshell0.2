@@ -105,5 +105,5 @@ let fd = fs.openSync(__dirname+"/img/fs-root.img", 'w')
 write_node(root, fd)
 fs.writeSync(fd, tar)
 
-fs.close(fd)
+fs.close(fd,console.log)
 // 

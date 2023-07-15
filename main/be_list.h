@@ -4,8 +4,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#define dd printf("@%d\n",__LINE__);
-
 typedef struct list_item {
     struct list_item * prev ;
     struct list_item * next ;

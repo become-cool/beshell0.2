@@ -23,8 +23,8 @@ typedef struct _response {
 } response_t ;
 
 
-JSClassID js_mg_http_message_class_id ;
-JSClassID js_mg_http_rspn_class_id ;
+extern JSClassID js_mg_http_message_class_id ;
+extern JSClassID js_mg_http_rspn_class_id ;
 
 // JSValue be_http_server_new(JSContext *ctx, struct mg_connection * conn, JSValue callback) ;
 

@@ -721,7 +721,6 @@ static JSValue js_partition_read(JSContext *ctx, JSValueConst this_val, int argc
     // DP(partition)
     if(!partition) {
         THROW_EXCEPTION("partition not found:%s", name)
-        return ;
     }
     char * buffer = malloc(size) ;
     if(!buffer) {

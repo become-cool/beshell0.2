@@ -218,7 +218,7 @@ static JSValue js_camera_start_http_stream(JSContext *ctx, JSValueConst this_val
     ARGV_TO_INT32(0, port)
     
     if(!wifi_has_inited() || stream_httpd) {
-        return ;
+        return JS_FALSE ;
     }
     
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
@@ -235,7 +235,7 @@ static JSValue js_camera_start_http_stream(JSContext *ctx, JSValueConst this_val
 
     if (httpd_start(&stream_httpd, &config) != ESP_OK) {
         printf("start camera stream server faild\n") ;
-        return ;
+        return JS_FALSE ;
     }
     
     httpd_register_uri_handler(stream_httpd, &stream_uri);

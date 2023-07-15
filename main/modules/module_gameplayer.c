@@ -10,9 +10,7 @@
 #include "esp_system.h"
 #include "indev.h"
 #include "indev_i2c.h"
-
 #include "player_nofrendo.h"
-#include "player_gnuboy.h"
 
 
 
@@ -126,9 +124,9 @@ static JSValue js_gameplayer_play(JSContext *ctx, JSValueConst this_val, int arg
             int retcode = player_nofrendo_main(showcase);
             break ;
 #if CONFIG_IDF_TARGET_ESP32S3
-        case EMULATOR_GUNBOY :
-            player_gnuboy_main(rompath);
-            break ;
+        // case EMULATOR_GUNBOY :
+        //     player_gnuboy_main(rompath);
+        //     break ;
 #endif
         default :
             free(rompath) ;

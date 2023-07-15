@@ -9,5 +9,7 @@ else ()
     idf_component_register(
         SRCS ${SOURCES}
         INCLUDE_DIRS src include
-        REQUIRES spi_flash)
+        REQUIRES spi_flash esp_partition vfs)
 endif (NOT DEFINED PROJECT_NAME)
+
+component_compile_options(-Wno-error=format= -Wno-format)

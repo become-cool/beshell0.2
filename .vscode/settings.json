@@ -28,5 +28,6 @@
         "el_src": "c",
         "math.h": "c"
     },
-    "cmake.configureOnOpen": false
+    "cmake.configureOnOpen": false,
+    "idf.adapterTargetName": "esp32s3"
 }

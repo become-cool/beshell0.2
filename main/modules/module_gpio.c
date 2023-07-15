@@ -88,7 +88,6 @@ JSValue js_gpio_pin_mode(JSContext *ctx, JSValueConst this_val, int argc, JSValu
 	if(gpio_config(&conf) != ESP_OK)
     {
         THROW_EXCEPTION("set pin mode failed, arg invalid?")
-        return;
     }
 
     JS_FreeCString(ctx, mode) ;

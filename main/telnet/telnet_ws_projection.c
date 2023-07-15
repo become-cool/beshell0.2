@@ -327,7 +327,7 @@ bool telnet_ws_projection_sessn_init() {
     }
     if(drvspec->is_virtual){
         printf("default disp is virtual\n");
-        return ;
+        return false ;
     }
 
     if(!sess) {

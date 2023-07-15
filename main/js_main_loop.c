@@ -48,8 +48,8 @@
 #include "module_metadata.h"
 #include "module_nvs.h"
 
-JSRuntime *rt;
-JSContext *ctx;
+static JSRuntime *rt;
+static JSContext *ctx;
 static uint8_t boot_level = 5 ;
 static bool requst_reset = false ;
 static bool nowifi = false ;

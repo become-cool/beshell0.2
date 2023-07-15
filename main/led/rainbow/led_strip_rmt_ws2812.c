@@ -81,7 +81,7 @@ static void IRAM_ATTR ws2812_rmt_adapter(const void *src, rmt_item32_t *dest, si
 static esp_err_t ws2812_fill(led_strip_t *strip, int index, int length, int h, int s, int v, int dh, int ds, int dv){
 
     if(length==0) {
-        return ;
+        return ESP_OK ;
     }
 
     ws2812_t *ws2812 = __containerof(strip, ws2812_t, parent);

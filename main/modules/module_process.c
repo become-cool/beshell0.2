@@ -26,7 +26,7 @@ static void idle_task(int *parm)
     while(1==1)
     {
         int64_t now = esp_timer_get_time();     // time anchor
-        vTaskDelay(0 / portTICK_RATE_MS);
+        vTaskDelay(0 / portTICK_PERIOD_MS);
         int64_t now2 = esp_timer_get_time();
         (*parm) += (now2 - now) / 1000;        // diff
     }
@@ -44,7 +44,7 @@ static void mon_task(int *parm)
         // float cpu_percent = ((99.9 / 90.) * new_cnt) / 10;
         // printf("%.0f%%  ", 100 - cpu_percent); fflush(stdout);
         (*parm) = 0;                        // Reset variable
-        vTaskDelay(1000 / portTICK_RATE_MS);
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 }
 

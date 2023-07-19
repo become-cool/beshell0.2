@@ -15,6 +15,7 @@
 #include "module_fs.h"
 
 #ifdef PLATFORM_ESP32
+#include "esp_system.h"
 #include "malloc_funcs.h"
 #include "psram.h"
 #include "sniffer.h"
@@ -280,6 +281,9 @@ static int64_t __tt1,__tt2 ;
 #define monitor(label, code) code
 #endif
 
+
+static uint8_t loop_reset_cnt = 0 ;
+
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 EMSCRIPTEN_KEEPALIVE
@@ -360,7 +364,13 @@ void js_main_loop_tick() {
 // #endif
 
 #ifdef PLATFORM_ESP32
-        vTaskDelay(0) ;
+
+    // 每 10 次 loop 触发 reset watchdog (vTaskDelay(1))
+    loop_reset_cnt ++ ;
+    if(loop_reset_cnt>10) {
+        loop_reset_cnt = 0 ;
+        vTaskDelay(1) ;
+    }
 #endif
 }
 

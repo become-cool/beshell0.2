@@ -382,8 +382,8 @@ void be_rawfs_mount(const char * mntPoint) {
     // }
 
     romdata = NULL ;
-	esp_partition_mmap_handle_t hrom ;
-    esp_err_t ret = esp_partition_mmap(part, 0, part->size, ESP_PARTITION_MMAP_DATA, (const void**)&romdata, &hrom) ;
+	spi_flash_mmap_handle_t hrom ;
+    esp_err_t ret = esp_partition_mmap(part, 0, part->size, SPI_FLASH_MMAP_DATA, (const void**)&romdata, &hrom) ;
 	if(ret!= ESP_OK || !romdata) {
         printf("mmap failed: %d\n", ret) ;
         return ;
@@ -396,6 +396,10 @@ void be_rawfs_mount(const char * mntPoint) {
     fs_root->size = 0 ;
     fs_root->raw = romdata ;
     fs_root->root = parse_tree(romdata, NULL, &fs_root->raw_data, &fs_root->size) ;
+    if(!fs_root->root) {
+        printf("load rawfs failed\n") ;
+        return ;
+    }
     fs_root->size+= (fs_root->raw_data-(void*)romdata) ; // raw header size
 
     memset(fs_root->fds, 0, sizeof(vfs_rawfs_fd_t)*MAX_OPEN_FD) ;
@@ -465,6 +469,10 @@ void be_rawfs_mount(const char * mntPoint) {
     free(tarpath) ;
 
     vfs_node_t * root = parse_tree(romdata, NULL, NULL, NULL) ;
+    if(!root) {
+        printf("load rawfs failed\n") ;
+        return ;
+    }
 
     vfs_node_printf(root, "") ;
 

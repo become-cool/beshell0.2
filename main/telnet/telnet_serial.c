@@ -19,7 +19,6 @@
 LOG_TAG("telnet")
 
 
-
 void be_telnet_serial_reset(JSContext *ctx) {
 	telnet_prot_reset() ;
 }
@@ -47,7 +46,7 @@ static struct timeval telnet_tv = {
 };
 static fd_set telnet_rfds;
 static uint8_t telnet_buffer[127] ;
-static size_t telnet_received = 0 ;
+// static size_t telnet_received = 0 ;
 
 SemaphoreHandle_t sema ;
 
@@ -80,22 +79,13 @@ static void task_uart_receive(void * data) {
 			// UART 接收
 			if (FD_ISSET(uart_fd, &telnet_rfds)) {
 
-				size_t len = uart_read_bytes(0, telnet_buffer+telnet_received, sizeof(telnet_buffer)-telnet_received, 0) ;
-				telnet_received+= len ;
-				// dn2(len, telnet_received)
-
-				size_t remain =  telnet_received ;
+				size_t chunklen = uart_read_bytes(0, telnet_buffer, sizeof(telnet_buffer), 0) ;
 
 				xSemaphoreTake( sema, portMAX_DELAY ) ;
-				telnet_prot_receive(telnet_buffer, &remain) ;
-				xSemaphoreGive( sema ) ;
 
-				// 处理剩余数据
-				// printf("read:%d, received:%d, remain:%d, pending:%d\n",len,telnet_received,remain, lst_pendings->count) ;
-				if(remain && remain!=telnet_received) {
-					memcpy(telnet_buffer, telnet_buffer+(telnet_received-remain), remain) ;
-				}
-				telnet_received = remain ;
+				be_telnet_proto_receive(telnet_buffer, chunklen) ;
+
+				xSemaphoreGive( sema ) ;
 			}
 		}
 	}
@@ -115,7 +105,7 @@ void be_telnet_serial_init() {
 	}
 
 	sema = xSemaphoreCreateMutex() ;
-	xTaskCreatePinnedToCore(task_uart_receive, "telnet-uart", 1024*2, NULL,10, NULL, 1) ;
+	xTaskCreatePinnedToCore(task_uart_receive, "telnet-uart", 1024*3, NULL,10, NULL, 1) ;
 }
 
 

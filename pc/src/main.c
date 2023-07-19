@@ -2,11 +2,17 @@
 #include "module_fs.h"
 #include "js_main_loop.h"
 #include "anchor9.h"
+#include <unistd.h>
 
 void main( int argc, char *argv[] ){
 
-    char * rootpath = "../filesystem/root/" ;
-    char * scriptpath = NULL ;
+    char cwd[1024];
+    if (getcwd(cwd, sizeof(cwd)) != NULL) {
+        printf("cwd: %s\n", cwd);
+    }
+
+    char * rootpath = mallocf("%s%s",cwd,"/../filesystem/root") ;
+    char * scriptpath = "test.js" ;
 
     for(int i=0;i<argc;i++) {
         if(strcmp(argv[i],"--root")==0 && argc>=i+2) {

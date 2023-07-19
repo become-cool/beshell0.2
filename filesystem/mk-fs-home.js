@@ -41,7 +41,7 @@ async function main() {
         }
 
         let size = parseInt(res[1])
-        imgsize = size + 20480
+        imgsize = size + 2048 * 20
 
         if(imgsize<align) {
             imgsize = align

@@ -16,7 +16,7 @@ add_definitions(-DPLATFORM_LINUX)
 add_definitions(-DMG_ENABLE_OPENSSL)
 # add_definitions(-DWIN32)
 # add_definitions(-DMG_ENABLE_LINES)
-add_definitions(-DLV_THEME_DEFAULT_DARK)
+# add_definitions(-DLV_THEME_DEFAULT_DARK)
 add_definitions(-DLV_CONF_INCLUDE_SIMPLE)
 
 
@@ -63,11 +63,13 @@ include_directories(../main/modules/mg)
 include_directories(../main/modules/lvgl)
 include_directories(../main/modules/lvgl/font)
 
+list(APPEND SRC_LIST ../main/be_list.c)
 list(APPEND SRC_LIST ../main/utils.c)
 list(APPEND SRC_LIST ../main/eventloop.c)
 list(APPEND SRC_LIST ../main/telnet/module_telnet.c)
 list(APPEND SRC_LIST ../main/telnet/telnet_ws.c)
 list(APPEND SRC_LIST ../main/telnet/telnet_stdio.c)
+list(APPEND SRC_LIST ../main/telnet/telnet_protocal.c)
 list(APPEND SRC_LIST ../main/js_main_loop.c)
 list(APPEND SRC_LIST ../main/mallocf.c)
 list(APPEND SRC_LIST ../main/stack.c)
@@ -139,3 +141,25 @@ add_custom_command(OUTPUT beapi.simulate.c
     DEPENDS ../src/beapi.simulate.js
     VERBATIM
 )
+
+
+add_definitions(-Wno-error=format=)
+add_definitions(-Wno-format)
+add_definitions(-Wno-incompatible-pointer-types)
+add_definitions(-Wno-unused-function)
+add_definitions(-Wno-unused-variable)
+add_definitions(-Wno-unused-but-set-variable)
+# add_definitions(-Wno-cast-function-type)
+add_definitions(-Wno-implicit-fallthrough)
+add_definitions(-Wno-discarded-qualifiers)
+add_definitions(-Wno-int-conversion)
+add_definitions(-Wno-cpp)
+add_definitions(-Wno-type-limits)
+add_definitions(-Wno-int-to-pointer-cast)
+add_definitions(-Wno-implicit-function-declaration)
+add_definitions(-Wno-error=char-subscripts)
+add_definitions(-Wno-error=misleading-indentation)
+add_definitions(-Wno-attributes)
+add_definitions(-Wno-char-subscripts)
+add_definitions(-Wno-pointer-to-int-cast)
+

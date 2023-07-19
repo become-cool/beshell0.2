@@ -420,15 +420,15 @@ void be_module_lvgl_init() {
     ESP_ERROR_CHECK(esp_timer_start_periodic(periodic_timer, LV_TICK_PERIOD_MS * 1000));
 #elif defined(PLATFORM_LINUX)
     // lvgl 时钟
-    tact.sa_handler = sig_alm_handler;
-    tact.sa_flags = SA_RESTART ;  // SA_RESTART 在 select() 时遇到中断发生，在中断完成后自动恢复
-    sigemptyset(&tact.sa_mask);
-    sigaction(SIGALRM, &tact, NULL);
+    // tact.sa_handler = sig_alm_handler;
+    // tact.sa_flags = SA_RESTART ;  // SA_RESTART 在 select() 时遇到中断发生，在中断完成后自动恢复
+    // sigemptyset(&tact.sa_mask);
+    // sigaction(SIGALRM, &tact, NULL);
     
-    value.it_value.tv_sec = 0;
-    value.it_value.tv_usec = 1000 * LV_TICK_PERIOD_MS;
-    value.it_interval = value.it_value;
-    setitimer(ITIMER_REAL, &value, NULL);
+    // value.it_value.tv_sec = 0;
+    // value.it_value.tv_usec = 1000 * LV_TICK_PERIOD_MS;
+    // value.it_interval = value.it_value;
+    // setitimer(ITIMER_REAL, &value, NULL);
 
 #elif defined(PLATFORM_WASM)
     // emscripten_set_main_loop(be_lv_tick, 1000, 1);

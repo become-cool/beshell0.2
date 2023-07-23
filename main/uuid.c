@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-void esp_fill_random(uint8_t * data, size_t len) {
+void esp_fill_random(void * data, size_t len) {
     struct timeval tv;
     gettimeofday(&tv, NULL);
     srand((unsigned) tv.tv_usec);

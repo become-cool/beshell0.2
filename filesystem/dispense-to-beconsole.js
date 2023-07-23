@@ -13,7 +13,7 @@ function mkdir(path) {
     }
 }
 function cp(from, to) {
-    let cmd = `cp ${__dirname}/${from} ${to}`
+    let cmd = `cp ${from} ${to}`
     console.log(cmd)
     exec(cmd)
 }
@@ -61,32 +61,32 @@ function dist(firmware, targetDir) {
     }
 
     if(dispenseJson) {
-        cp('img/firmware.json', path+'/firmware.json')
+        cp(__dirname+'/img/firmware.json', path+'/firmware.json')
     }
 
     if(dispenseBootloader) {
-        cp("img/bootloader-4MB.bin", path+"/bootloader-4MB.bin")
-        cp("img/bootloader-16MB.bin", path+"/bootloader-16MB.bin")
-        cp("img/bootloader-s3-8MB.bin", path+"/bootloader-s3-8MB.bin")
-        cp("img/bootloader-s3-16MB.bin", path+"/bootloader-s3-16MB.bin")
+        cp(__dirname+"/img/bootloader-4MB.bin", path+"/bootloader-4MB.bin")
+        cp(__dirname+"/img/img/bootloader-16MB.bin", path+"/bootloader-16MB.bin")
+        cp(__dirname+"/img/img/bootloader-s3-8MB.bin", path+"/bootloader-s3-8MB.bin")
+        cp(__dirname+"/img/img/bootloader-s3-16MB.bin", path+"/bootloader-s3-16MB.bin")
     }
     
     if(dispensePartition) {
-        cp("img/partitions-4MB.bin", path+"/")
-        cp("img/partitions-8MB.bin", path+"/")
-        cp("img/partitions-16MB.bin", path+"/")
+        cp(__dirname+"/img/img/partitions-4MB.bin", path+"/")
+        cp(__dirname+"/img/img/partitions-8MB.bin", path+"/")
+        cp(__dirname+"/img/img/partitions-16MB.bin", path+"/")
     }
 
     if(dispenseBeshell) {
-        cp("../build/beshell.bin", path+"/beshell"+postfix+".bin")
+        cp("build/beshell.bin", path+"/beshell"+postfix+".bin")
     }
 
     if(dispenseFSRoot) {
-        cp("img/fs-root.img", path+"/")
+        cp(__dirname+"/img/img/fs-root.img", path+"/")
     }
 
     if(dispenseFSHome) {
-        cp("img/fs-home.img", path+"/")
+        cp(__dirname+"/img/img/fs-home.img", path+"/")
     }
 }
 

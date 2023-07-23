@@ -66,15 +66,15 @@ function dist(firmware, targetDir) {
 
     if(dispenseBootloader) {
         cp(__dirname+"/img/bootloader-4MB.bin", path+"/bootloader-4MB.bin")
-        cp(__dirname+"/img/img/bootloader-16MB.bin", path+"/bootloader-16MB.bin")
-        cp(__dirname+"/img/img/bootloader-s3-8MB.bin", path+"/bootloader-s3-8MB.bin")
-        cp(__dirname+"/img/img/bootloader-s3-16MB.bin", path+"/bootloader-s3-16MB.bin")
+        cp(__dirname+"/img/bootloader-16MB.bin", path+"/bootloader-16MB.bin")
+        cp(__dirname+"/img/bootloader-s3-8MB.bin", path+"/bootloader-s3-8MB.bin")
+        cp(__dirname+"/img/bootloader-s3-16MB.bin", path+"/bootloader-s3-16MB.bin")
     }
     
     if(dispensePartition) {
-        cp(__dirname+"/img/img/partitions-4MB.bin", path+"/")
-        cp(__dirname+"/img/img/partitions-8MB.bin", path+"/")
-        cp(__dirname+"/img/img/partitions-16MB.bin", path+"/")
+        cp(__dirname+"/img/partitions-4MB.bin", path+"/")
+        cp(__dirname+"/img/partitions-8MB.bin", path+"/")
+        cp(__dirname+"/img/partitions-16MB.bin", path+"/")
     }
 
     if(dispenseBeshell) {
@@ -82,11 +82,11 @@ function dist(firmware, targetDir) {
     }
 
     if(dispenseFSRoot) {
-        cp(__dirname+"/img/img/fs-root.img", path+"/")
+        cp(__dirname+"/img/fs-root.img", path+"/")
     }
 
     if(dispenseFSHome) {
-        cp(__dirname+"/img/img/fs-home.img", path+"/")
+        cp(__dirname+"/img/fs-home.img", path+"/")
     }
 }
 

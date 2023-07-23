@@ -382,8 +382,14 @@ void be_rawfs_mount(const char * mntPoint) {
     // }
 
     romdata = NULL ;
+#if ESP_IDF_VERSION_MAJOR >= 5
+	esp_partition_mmap_handle_t hrom ;
+    esp_err_t ret = esp_partition_mmap(part, 0, part->size, ESP_PARTITION_MMAP_DATA, (const void**)&romdata, &hrom) ;
+#else
 	spi_flash_mmap_handle_t hrom ;
     esp_err_t ret = esp_partition_mmap(part, 0, part->size, SPI_FLASH_MMAP_DATA, (const void**)&romdata, &hrom) ;
+#endif
+
 	if(ret!= ESP_OK || !romdata) {
         printf("mmap failed: %d\n", ret) ;
         return ;
